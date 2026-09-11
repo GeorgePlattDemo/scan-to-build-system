@@ -25,7 +25,7 @@ If the claim needs a patent relationship, open [`PATENTS.md`](PATENTS.md) first.
 
 1. Keep the accepted Board vertical intact. Do not edit it to make the new part look better.
 2. Put the new part through the same path a user would use: enter → define → Store question → review → result.
-3. Also run the automated suites that already exist once the app tree is present:
+3. Also run the automated suites that already exist from `apps/stb/`:
    - `npm run test:unit`
    - `npm run test:browser`
    - `npm run test:boundaries`

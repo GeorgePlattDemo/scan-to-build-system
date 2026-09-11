@@ -42,4 +42,4 @@ Give Store 1 two reference capabilities it can name, describe, and turn into mac
 | [SHEET-MODEL-0.1.md](SHEET-MODEL-0.1.md) | beginning-stage sheet model |
 | [STORE-SURFACE-0.1.md](STORE-SURFACE-0.1.md) | Store publication map |
 
-App source load plan: [`../../apps/README.md`](../../apps/README.md).
+Accepted application and launch: [`../../apps/README.md`](../../apps/README.md).

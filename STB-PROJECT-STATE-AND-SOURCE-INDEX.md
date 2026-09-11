@@ -10,9 +10,9 @@ This repository is the current working surface for Scan-to-Build.
 
 The accepted application build is the starting datum for post-app work. Earlier demonstrations, prototypes, research packages, staging repositories, and planning branches are not automatically current. They are reviewed for useful content and admitted only when their language, ownership, flow, authority, and capability claims are compatible with the current system.
 
-The current application has not yet been transferred into this repository. Until that transfer is completed, the accepted application remains pinned externally at the source identity below.
+The accepted application is present in [`apps/stb/`](apps/stb/). Use [`apps/README.md`](apps/README.md) for launch instructions and [`provenance/APP-TRANSFER.md`](provenance/APP-TRANSFER.md) for the transfer record. The source pin below identifies its accepted lineage.
 
-For active post-app work, use [`work/README.md`](work/README.md).
+For active post-app work, start at the daily [`capability-bridge bench`](work/capability-bridge/README.md); [`work/README.md`](work/README.md) indexes the wider workbench.
 
 For physical machine research, the controlling current program is [`work/machines/MACHINE-BUILD-PROGRAM-0.1.md`](work/machines/MACHINE-BUILD-PROGRAM-0.1.md).
 
@@ -163,6 +163,7 @@ No early Sarah assumption should be used to fill a missing current definition me
 
 | Work surface | Role |
 | --- | --- |
+| `work/capability-bridge/` | current daily capability-bridge bench; trial protocol gates amendments |
 | `work/user-intake/` | User 1 entry, retained evidence, observations and candidate project definition |
 | `work/store/` | Store 1 expansion, SKU/inventory/special-order/economic/fulfillment work |
 | `work/machines/MACHINE-BUILD-PROGRAM-0.1.md` | controlling physical research sequence and current manual control case |
@@ -199,11 +200,11 @@ Completed foundation work:
 2. current governance documentary spine;
 3. post-app Application / User Intake / Store / Machine / Cell work-surface structure;
 4. current Store boundary/stage sources;
-5. full issued patent PDFs, patent-alignment gate and current Machine Build 1–4 program.
+5. full issued patent PDFs, patent-alignment gate and current Machine Build 1–4 program;
+6. accepted application tree transferred into `apps/stb/`, with launch instructions in `apps/README.md`.
 
 Next bounded work:
 
-6. transfer the accepted application without semantic redesign and provide the simple launch path;
 7. define User 1 and Store 1 expansion from current terms;
 8. write the detailed **Machine Build 1 — Digital Bridge** engineering plan from the manual radial-arm-saw control case;
 9. select and test only the minimum physical mechanism needed to answer the Build-1 question under a separately resolved safety boundary;

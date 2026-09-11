@@ -73,7 +73,7 @@ See `docs/governance/CONTROLLING-SOURCE-POINTERS.md`.
 - pin: `4595b4785a2686486e477ce2e70fb3f476285a8d`
 - disposition: `KEEP-CURRENT` / current implementation datum
 
-The application code itself has not yet been transferred. `docs/application/` and `work/user-intake/` provide current navigation and reconciled working guidance.
+The accepted application tree is present in [`apps/stb/`](../apps/stb/). See [`APP-TRANSFER.md`](APP-TRANSFER.md) for the transfer record and [`apps/README.md`](../apps/README.md) for launch instructions. `docs/application/` and `work/user-intake/` provide current navigation and reconciled working guidance.
 
 ### Frozen application roadmap
 
@@ -94,7 +94,7 @@ Reason: the locked intake/evidence principles remain useful, but the source docu
 - source: accepted app pin, `docs/architecture/STB-SEMANTIC-BOUNDARIES-0.1.md`
 - disposition: `KEEP-CURRENT`
 
-Current meaning is summarized in `docs/application/SEMANTIC-GUARDRAILS.md`; byte-exact transfer may occur with the accepted app/doc tree.
+Current meaning is summarized in `docs/application/SEMANTIC-GUARDRAILS.md`; the source document is preserved at [`source-library/application-current/STB-SEMANTIC-BOUNDARIES-0.1.md`](../source-library/application-current/STB-SEMANTIC-BOUNDARIES-0.1.md). Relocation does not change its authority.
 
 ### Stabilization / source-map / structure guidance
 
@@ -187,7 +187,7 @@ The early Sarah chain was intentionally a toy/research demonstration and crosses
 
 **Disposition:** pending item-level review or archive placement.
 
-No wholesale admission. Public mechanical ontology has the donor disposition above.
+Public review and demo snapshots are preserved in `source-library/public-technical/` and `source-library/journey-donors/`. Preservation is not wholesale admission as current. Public mechanical ontology has the donor disposition above.
 
 ### Transfer Staging / rejected candidates
 

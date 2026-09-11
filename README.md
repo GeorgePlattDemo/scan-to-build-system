@@ -225,7 +225,10 @@ The intended working structure is approximately:
 │   ├── cell/
 │   └── patents/
 │
+├── source-library/
+│
 ├── work/
+│   ├── capability-bridge/
 │   ├── user-intake/
 │   ├── store/
 │   ├── machines/
@@ -251,7 +254,7 @@ The immediate work is:
 
 1. preserve the clean post-application documentation and provenance baseline;
 2. retain the issued patents as direct primary sources;
-3. transfer the accepted application into this working surface without semantic redesign;
+3. use and preserve the accepted application in `apps/stb/`, following `apps/README.md` and the trial protocol;
 4. define User 1 and expand Store 1 deliberately;
 5. build and test Machine Build 1 as the smallest digital physical bridge;
 6. connect earned machine capability to the Store boundary in Machine Build 2;

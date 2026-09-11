@@ -20,8 +20,8 @@ The purpose of this library is **transfer and retrieval**, not redesign.
 - `machine-cell/` — post-app Cell and machine/cell references. Candidate engineering remains candidate.
 - `journey-donors/` — useful entry/journey material that is not current authority.
 - `public-technical/` — useful public review documents preserved as technical/donor sources, not current contracts.
-- `research-institutional/` — demand, workforce, institutional, and research framing that should remain distinct from implementation authority.
-- `oversize-pointers/` — exact source identities for useful files not yet copied byte-for-byte through this interface.
+- `research-institutional/` — **PLANNED; directory not yet created.** demand, workforce, institutional, and research framing that should remain distinct from implementation authority.
+- `oversize-pointers/` — **PLANNED; directory not yet created.** exact source identities for useful files not yet copied byte-for-byte through this interface.
 
 ## Already transferred outside this directory
 
