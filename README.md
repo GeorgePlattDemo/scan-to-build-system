@@ -7,6 +7,8 @@ U.S. Patents 9,720,401 B2 and 10,768,609 B2
 
 **Private working repository**
 
+**Start each session at [`START-HERE.md`](START-HERE.md).** Agent/session instructions: [`AGENTS.md`](AGENTS.md). Accepted application: [`apps/stb/`](apps/stb/). Daily bench: [`work/capability-bridge/`](work/capability-bridge/).
+
 ---
 
 ## Purpose

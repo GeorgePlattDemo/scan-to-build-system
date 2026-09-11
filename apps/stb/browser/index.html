@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Scan-to-Build</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div id="app"></div>
+    <footer class="app-footer">
+      <p class="invariant" id="invariant">NO BLOOD ON WOOD</p>
+      <details class="foundation-status">
+        <summary>Local foundation</summary>
+        <dl>
+          <dt>Origin</dt>
+          <dd id="origin-status">checking</dd>
+          <dt>IndexedDB</dt>
+          <dd id="indexeddb-status">checking</dd>
+          <dt>Blob</dt>
+          <dd id="blob-status">checking</dd>
+          <dt>SHA-256</dt>
+          <dd id="sha256-status">checking</dd>
+          <dt>Storage origin</dt>
+          <dd id="storage-origin-status">checking</dd>
+          <dt>Save</dt>
+          <dd id="save-status">idle</dd>
+          <dt>Source</dt>
+          <dd id="source-status">idle</dd>
+          <dt>Attempt</dt>
+          <dd id="attempt-status">idle</dd>
+          <dt>Unapplied</dt>
+          <dd id="unapplied-status">none</dd>
+        </dl>
+      </details>
+    </footer>
+    <script type="module" src="/app.mjs"></script>
+  </body>
+</html>
