@@ -1,0 +1,1844 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Embedded Workflow Simulation — Project 01, Alcove Built-In</title>
+<!--
+  Embedded Workflow Simulation — Project 01, Alcove Built-In
+  Executable verification harness for the Scan-to-Build / Home as a Twin interaction model.
+
+  WHAT THIS IS: a single-file, offline, dependency-free proof harness. It carries one
+  representative workflow (Project 01 — Alcove Built-In) through the governed path and
+  exposes the intermediate data structures used at each gate. The pass/fail logic and
+  data structures below execute in the browser.
+
+  WHAT THIS IS NOT: a production platform, a real cell, live machine control, a real SKU
+  service, real pricing, or real fabrication. Every produced figure carries a basis in
+  { modeled | mock_fixture | reference | simulation }; none is labeled "measured".
+  controllerPolicy "simulationOnly" and the refusal of any remote live-motion command are
+  enforced in the running code, not merely asserted. The SKU port is an in-browser mock seam.
+
+  Mirrors: ARCHITECTURE.md (record/orchestrator/routing), MATERIAL_AND_LABOR_ONTOLOGY.md
+  (MaterialSpec / LaborRequirement / RefusalReason / refusal taxonomy §8, schema §9),
+  MACHINE_FUNCTION_KINEMATIC_ONTOLOGY.md (D/S state sequences §9, controller boundary §8,
+  operation catalog §15, refusal vectors §16.1).
+-->
+<style>
+/* ───────────────────────────────────────────────────────────────────────────
+   DESIGN TOKENS — cold institutional / verification console.
+   Subject: a governed technical record audited at each gate. The artifact reads
+   as a technical appendix, not a narrative demo. Palette: white field, light-gray
+   panels, charcoal ink, a structural navy, restrained status hues. The signature
+   surface is the Gate Matrix — a dense status table that carries the proof. Every-
+   thing around it is quiet: hairline rules, monospaced data, zero ornament.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root{
+  --bg:#ffffff;            /* white field */
+  --panel:#f5f6f8;         /* light-gray sunk panel */
+  --panel-2:#eceef1;       /* deeper panel */
+  --ink:#1a1f2b;           /* charcoal ink */
+  --ink-2:#444b5a;         /* secondary ink */
+  --ink-3:#7a828f;         /* captions / meta */
+  --navy:#1b2a4a;          /* structural navy */
+  --navy-2:#28406e;        /* navy accent */
+  --rule:#d7dbe0;          /* hairline */
+  --rule-2:#e7e9ee;
+  /* restrained status hues */
+  --allow:#1f7a4d;         /* ALLOW (green) */
+  --allow-bg:#e9f3ed;
+  --warn:#9a6a16;          /* WARN (amber) */
+  --warn-bg:#f6efe0;
+  --verify:#1f5d8c;        /* VERIFY (blue) */
+  --verify-bg:#e7eff6;
+  --refuse:#9a2c20;        /* REFUSE (red) */
+  --refuse-bg:#f6e8e6;
+  --boundary:#5b3a86;      /* enforced safety boundary (violet) */
+  --boundary-bg:#efe9f4;
+  --pending:#6b7280;       /* pending / reference (neutral) */
+  --pending-bg:#eef0f2;
+  --mono:'SFMono-Regular',ui-monospace,'Cascadia Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --shadow:0 1px 0 rgba(26,31,43,.04), 0 1px 3px rgba(26,31,43,.06);
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:var(--sans); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+code,pre{font-family:var(--mono)}
+button{font-family:inherit}
+::selection{background:rgba(40,64,110,.16)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 80px}
+
+/* ── system header ─────────────────────────────────────────────────────── */
+.sysheader{border-bottom:2px solid var(--navy);background:var(--bg);position:sticky;top:0;z-index:30}
+.sysheader .inner{max-width:1180px;margin:0 auto;padding:16px 20px 12px}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--navy);font-weight:600}
+.sysheader h1{font-size:20px;font-weight:700;letter-spacing:-.2px;margin:6px 0 3px;color:var(--ink)}
+.sysheader .sub{font-size:13px;color:var(--ink-2);margin:0 0 12px;max-width:760px}
+.pills{display:flex;flex-wrap:wrap;gap:5px}
+.pill-status{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;
+  padding:3px 7px;border:1px solid var(--rule);border-radius:2px;color:var(--ink-2);background:var(--panel);
+}
+.pill-status.k{border-color:var(--navy);color:var(--navy)}
+
+/* ── readiness / posture strip ─────────────────────────────────────────── */
+.posture{
+  background:var(--navy);color:#e8ecf4;
+  font-family:var(--mono);font-size:11.5px;line-height:1.55;letter-spacing:.2px;
+  padding:9px 20px;
+}
+.posture .inner{max-width:1180px;margin:0 auto}
+.posture b{color:#fff;font-weight:600}
+
+/* ── simulation boundary strip ─────────────────────────────────────────── */
+.boundary-strip{
+  background:var(--panel-2);border-bottom:1px solid var(--rule);
+  font-size:12px;color:var(--ink-2);padding:8px 20px;
+}
+.boundary-strip .inner{max-width:1180px;margin:0 auto;display:flex;gap:9px;align-items:baseline}
+.boundary-strip .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--navy);font-weight:600;flex:none}
+
+/* ── review preface (artifact header frame) ────────────────────────────── */
+.preface{border:1px solid var(--rule);border-radius:3px;background:var(--bg);margin-top:18px;overflow:hidden}
+.preface .part{padding:15px 18px;border-bottom:1px solid var(--rule-2)}
+.preface .part:last-child{border-bottom:0}
+.preface .plabel{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--navy);font-weight:600;display:block;margin-bottom:6px}
+.preface .part h3{font-size:14px;font-weight:700;margin:0 0 6px;letter-spacing:-.1px}
+.preface .part p{margin:0 0 7px;font-size:12.5px;color:var(--ink-2);max-width:860px}
+.preface .part p:last-child{margin-bottom:0}
+.preface .part p b{color:var(--ink)}
+.preface .path{font-family:var(--mono);font-size:11px;color:var(--ink);background:var(--panel);border:1px solid var(--rule-2);border-radius:2px;padding:9px 11px;line-height:1.7;max-width:none}
+table.lens{width:100%;border-collapse:collapse;font-size:11.5px;margin:9px 0 2px}
+table.lens th{font-family:var(--mono);font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-3);text-align:left;border-bottom:1.5px solid var(--navy);padding:6px 8px;font-weight:600}
+table.lens td{padding:7px 8px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+table.lens td:first-child{font-family:var(--mono);font-size:10.5px;color:var(--navy);white-space:nowrap}
+table.lens .q{color:var(--ink-2)}
+.preface .lensnote{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-top:7px}
+@media (max-width:760px){
+  table.lens td:first-child{white-space:normal}
+}
+
+/* ── section frame ─────────────────────────────────────────────────────── */
+.section{margin:30px 0 0}
+.sec-head{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:7px;margin-bottom:14px}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:1px}
+.sec-head h2{font-size:15px;font-weight:700;margin:0;letter-spacing:-.1px}
+.sec-head .note{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-left:auto}
+
+/* ── controls (secondary) ──────────────────────────────────────────────── */
+.controls{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;background:var(--panel);border:1px solid var(--rule);border-radius:3px;padding:12px 14px;margin-top:14px}
+.ctrl{display:flex;flex-direction:column;gap:5px}
+.ctrl label{font-family:var(--mono);font-size:9.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--ink-3)}
+.ctrl select{font-family:var(--mono);font-size:12px;padding:5px 8px;border:1px solid var(--rule);border-radius:2px;background:var(--bg);color:var(--ink);min-width:160px}
+.ctrl .desc{font-family:var(--mono);font-size:10px;color:var(--ink-3);max-width:240px}
+.controls .btn{margin-left:auto}
+.btn{
+  border:1px solid var(--navy);background:var(--navy);color:#fff;
+  padding:7px 14px;border-radius:2px;cursor:pointer;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;
+}
+.btn.ghost{background:transparent;color:var(--navy)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:focus-visible,select:focus-visible,.tab:focus-visible,.trow:focus-visible{outline:2px solid var(--verify);outline-offset:2px}
+
+/* overall status chip */
+.overall{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.5px;padding:5px 11px;border-radius:2px;border:1px solid var(--rule)}
+.overall .dot{width:8px;height:8px;border-radius:50%}
+.ov-allow{color:var(--allow);border-color:var(--allow);background:var(--allow-bg)} .ov-allow .dot{background:var(--allow)}
+.ov-warn{color:var(--warn);border-color:var(--warn);background:var(--warn-bg)} .ov-warn .dot{background:var(--warn)}
+.ov-verify{color:var(--verify);border-color:var(--verify);background:var(--verify-bg)} .ov-verify .dot{background:var(--verify)}
+.ov-blocked{color:var(--refuse);border-color:var(--refuse);background:var(--refuse-bg)} .ov-blocked .dot{background:var(--refuse)}
+
+/* ── workflow trace ────────────────────────────────────────────────────── */
+table.trace{width:100%;border-collapse:collapse;font-size:12.5px}
+table.trace th{font-family:var(--mono);font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-3);text-align:left;border-bottom:1px solid var(--rule);padding:6px 8px;font-weight:600}
+table.trace td{padding:8px 8px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+.trow{cursor:pointer}
+.trow:hover{background:var(--panel)}
+.trow .tn{font-family:var(--mono);color:var(--ink-3);white-space:nowrap}
+.trow .tt{font-weight:600}
+.trow .treason{color:var(--ink-2);font-size:11.5px}
+.trow .tptr{font-family:var(--mono);font-size:10.5px;color:var(--verify)}
+.st{font-family:var(--mono);font-size:9.5px;letter-spacing:.4px;padding:2px 6px;border-radius:2px;border:1px solid var(--rule);white-space:nowrap;display:inline-block}
+.st-allow{color:var(--allow);border-color:var(--allow);background:var(--allow-bg)}
+.st-warn{color:var(--warn);border-color:var(--warn);background:var(--warn-bg)}
+.st-verify{color:var(--verify);border-color:var(--verify);background:var(--verify-bg)}
+.st-refuse{color:var(--refuse);border-color:var(--refuse);background:var(--refuse-bg)}
+.st-boundary{color:var(--boundary);border-color:var(--boundary);background:var(--boundary-bg)}
+.st-pending{color:var(--pending);border-color:var(--pending);background:var(--pending-bg)}
+.basis{font-family:var(--mono);font-size:9px;letter-spacing:.4px;color:var(--ink-3);text-transform:uppercase}
+
+/* ── gate matrix (signature surface) ───────────────────────────────────── */
+.matrix-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.matrix-legend{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+table.matrix{width:100%;border-collapse:collapse;font-size:12px}
+table.matrix th{font-family:var(--mono);font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-3);text-align:left;border-bottom:1.5px solid var(--navy);padding:7px 8px;font-weight:600;position:sticky}
+table.matrix td{padding:8px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+table.matrix tr.blockrow td{background:var(--refuse-bg)}
+table.matrix .gname{font-weight:600;white-space:nowrap}
+table.matrix .gblock{font-family:var(--mono);font-size:9px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.4px}
+table.matrix .gplain{color:var(--ink-2);font-size:11.5px}
+table.matrix .gtech{font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+table.matrix .gaction{font-size:11px;color:var(--ink-2)}
+.matrix-expand{font-family:var(--mono);font-size:10px;color:var(--ink-3);cursor:pointer;border:0;background:transparent;padding:0;text-decoration:underline}
+.gdetail{display:none}
+tr.gopen .gdetail{display:block;margin-top:5px}
+
+/* ── inspector ─────────────────────────────────────────────────────────── */
+.tabs{display:flex;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--rule);margin-bottom:0}
+.tab{
+  border:1px solid var(--rule);border-bottom:0;background:var(--panel);
+  padding:7px 11px;cursor:pointer;border-radius:3px 3px 0 0;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;color:var(--ink-2);
+}
+.tab[aria-pressed="true"]{background:var(--bg);color:var(--ink);box-shadow:0 2px 0 var(--navy) inset}
+.panel{border:1px solid var(--rule);border-top:0;background:var(--bg);padding:16px;border-radius:0 0 3px 3px;min-height:300px}
+.sectlabel{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);margin:18px 0 7px}
+.sectlabel:first-child{margin-top:2px}
+pre.json{
+  font-family:var(--mono);font-size:11.5px;line-height:1.5;
+  background:#141925;color:#cdd4e0;padding:14px;border-radius:3px;overflow:auto;max-height:520px;margin:0;
+}
+pre.json .k{color:#7fa8c9}
+pre.json .s{color:#c0a368}
+pre.json .n{color:#cc8d6a}
+pre.json .b{color:#74a877}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-family:var(--mono);font-size:11.5px;margin:8px 0}
+.kv dt{color:var(--ink-3)} .kv dd{margin:0;color:var(--ink)}
+table.data{width:100%;border-collapse:collapse;font-size:11.5px;margin:8px 0}
+table.data th{font-family:var(--mono);font-size:9px;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-3);text-align:left;border-bottom:1px solid var(--rule);padding:5px 7px}
+table.data td{padding:6px 7px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+table.data code{font-size:11px;color:var(--ink-2)}
+table.data tr.refused td{background:var(--refuse-bg)}
+.eventrow{display:grid;grid-template-columns:46px 190px 1fr;gap:9px;font-family:var(--mono);font-size:11px;padding:5px 4px;border-bottom:1px solid var(--rule-2)}
+.eventrow .seq{color:var(--ink-3)} .eventrow .type{color:var(--navy-2)} .eventrow .type.refusal{color:var(--refuse)}
+.eventrow .detail{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis}
+.refusal-card{border-left:3px solid var(--refuse);background:var(--refuse-bg);padding:9px 11px;margin:7px 0;border-radius:0 2px 2px 0}
+.refusal-card .code{font-family:var(--mono);font-size:10.5px;color:var(--refuse);letter-spacing:.5px;font-weight:700}
+.refusal-card .owner{margin:5px 0 0;color:var(--ink-2);font-size:12px}
+.note-box{border-left:3px solid var(--navy);background:var(--panel);padding:9px 11px;margin:8px 0;font-size:12px;color:var(--ink-2)}
+.note-box b{color:var(--ink)}
+.pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.4px;padding:2px 6px;border-radius:2px;border:1px solid var(--rule);color:var(--ink-2);margin:1px 3px 1px 0}
+.pill.mod{color:var(--warn);border-color:var(--warn);background:var(--warn-bg)}
+.pill.ok{color:var(--allow);border-color:var(--allow);background:var(--allow-bg)}
+.pill.no{color:var(--refuse);border-color:var(--refuse);background:var(--refuse-bg)}
+.pill.sim{color:var(--verify);border-color:var(--verify);background:var(--verify-bg)}
+.stateflow{display:flex;flex-wrap:wrap;gap:5px;margin:9px 0}
+.stateflow .s{font-family:var(--mono);font-size:9.5px;letter-spacing:.3px;border:1px solid var(--allow);border-radius:2px;padding:3px 7px;color:var(--allow);background:var(--allow-bg)}
+.empty{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);padding:22px;text-align:center;border:1px dashed var(--rule);border-radius:3px}
+
+/* ── verification tests ────────────────────────────────────────────────── */
+.test{display:grid;grid-template-columns:58px 1fr;gap:10px;padding:6px 4px;border-bottom:1px solid var(--rule-2);align-items:baseline}
+.test .res{font-family:var(--mono);font-size:9.5px;letter-spacing:.5px;padding:2px 7px;border-radius:2px;text-align:center}
+.test .res.pass{color:var(--allow);border:1px solid var(--allow);background:var(--allow-bg)}
+.test .res.fail{color:var(--refuse);border:1px solid var(--refuse);background:var(--refuse-bg)}
+.test .desc{font-size:12.5px}
+.test .desc small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:2px}
+.testsummary{font-family:var(--mono);font-size:12.5px;padding:11px 4px;margin-top:6px;border-top:2px solid var(--navy)}
+
+/* ── hidden work ───────────────────────────────────────────────────────── */
+.hidden-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+.hidden-card{border:1px solid var(--rule);border-radius:3px;padding:13px 15px;background:var(--panel)}
+.hidden-card h4{margin:0 0 5px;font-size:13px;font-weight:700}
+.hidden-card p{margin:0;font-size:12px;color:var(--ink-2)}
+.hidden-card .lead{font-family:var(--mono);font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--navy);font-weight:600;display:block;margin-bottom:3px}
+
+.foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:10.5px;color:var(--ink-3);line-height:1.7}
+
+@media (max-width:760px){
+  .hidden-grid{grid-template-columns:1fr}
+  .eventrow{grid-template-columns:38px 1fr;gap:4px}
+  .eventrow .detail{grid-column:1/-1}
+  table.matrix .gtech,table.matrix .gaction{display:none}
+  .controls .btn{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<header class="sysheader">
+  <div class="inner">
+    <div class="eyebrow">Embedded Workflow Simulation</div>
+    <h1>Project 01, Alcove Built-In</h1>
+    <p class="sub">Executable verification harness for the Scan-to-Build / Home as a Twin interaction model.</p>
+    <div class="pills">
+      <span class="pill-status k">Offline</span>
+      <span class="pill-status k">Browser simulation</span>
+      <span class="pill-status">No live API</span>
+      <span class="pill-status">No real SKU service</span>
+      <span class="pill-status">No real pricing</span>
+      <span class="pill-status">No real fabrication</span>
+      <span class="pill-status">No real controller</span>
+      <span class="pill-status">No production claim</span>
+    </div>
+  </div>
+</header>
+
+<div class="posture">
+  <div class="inner"><b>Current evidence level: Stage 0 — executable simulation / public review artifact.</b>
+  This file demonstrates interaction order, custody, refusal logic, routing/decomposition, the simulation-only execution boundary, and outcome return.
+  It does not claim live integrations, physical fabrication, measured economics, operational safety, or field deployment.</div>
+</div>
+
+<div class="boundary-strip">
+  <div class="inner"><span class="tag">Simulation boundary</span>
+  <span>This file demonstrates the governed workflow path and exposes intermediate data structures used at each gate. It is simulation-only, offline, dependency-free, and does not operate or command any machine.</span></div>
+</div>
+
+<div class="wrap">
+
+  <!-- ── REVIEW PREFACE (artifact header frame) ───────────────────────── -->
+  <div class="preface" aria-label="Review preface">
+    <div class="part">
+      <span class="plabel">Part 1 — Artifact Posture</span>
+      <h3>What this file is, and is not</h3>
+      <p>This file is the executable proof layer for the Scan-to-Build / Home as a Twin public review package. It is a single-file, offline, browser-based simulation. It is <b>not</b> a deployed product, machine controller, live SKU service, pricing engine, fabrication cell, safety certification, or field pilot.</p>
+      <p>It demonstrates how the issued patent methods can be organized into a governed workflow: owner-held record, WorkPacket formation, refusal logic, material/SKU mapping, labor-role separation, routing, decomposition, execution-boundary behavior, and outcome return.</p>
+      <p>The purpose is portability: a reviewer should be able to inspect what is claimed, what is simulated, what is bounded, what is protected, and what remains unproven without needing the inventor in the room.</p>
+    </div>
+    <div class="part">
+      <span class="plabel">Part 2 — Review Basis</span>
+      <h3>How to judge this object</h3>
+      <p>This artifact should be evaluated as an executable simulation / public review artifact. It is the correct evidence object for the current readiness stage: it proves interaction order, custody, refusal behavior, packet revision, material/SKU mapping, routing/decomposition, simulation-only execution-boundary behavior, outcome archive, and export/import continuity. It does not prove live integrations, physical fabrication, measured economics, operational safety, production readiness, field deployment, or commercial viability.</p>
+      <p>The frameworks below are named as <b>evaluation lenses, not certifications</b>. The package is mapped against them to locate the current stage; no formal rating is claimed under any of them.</p>
+      <table class="lens">
+        <thead><tr><th>Frame</th><th>Reviewer question</th><th>Package posture</th></tr></thead>
+        <tbody>
+          <tr><td>TRL / TRA / CTE</td><td class="q">At what readiness level do the critical technology elements sit?</td><td>Executable simulation; critical elements identified and exercised in a closed browser environment; maps to an early executable-readiness posture; not a physical prototype and not a formal TRL certification.</td></tr>
+          <tr><td>MRL</td><td class="q">Is the manufacturing process defined and qualified?</td><td>Manufacturing concepts and machine envelopes are defined; no qualified production process exists.</td></tr>
+          <tr><td>IRL / SRL</td><td class="q">Are the interfaces and the system integrated?</td><td>Interfaces are modeled and tested internally; no live external integrations; system shown end to end in simulation only.</td></tr>
+          <tr><td>Cost-to-reach (L0–L8)</td><td class="q">How far along the path, and what does the next stage cost?</td><td>Current package sits at roughly L2 / early L3; L5+ would require real integrations and pilots; production-grade validation would require separate work.</td></tr>
+          <tr><td>RICE / WSJF</td><td class="q">Where is the highest next-dollar value?</td><td>Highest next-dollar value is stabilizing the proof layer before committing to costly integrations.</td></tr>
+          <tr><td>COCOMO-style effort</td><td class="q">What effort class is the next build?</td><td>Current artifact is small and single-file; next stages become multi-service / integration work of a larger effort class.</td></tr>
+        </tbody>
+      </table>
+      <p>One position, three ladders: Stage 0 on the staged pilot path (Operational Roadmap §14) ≈ roughly L2 / early L3 on the cost-to-reach scale ≈ the early executable-readiness posture in the first row. L0–L8 is the author's working cost-to-reach scale, stated here so the row is auditable; it is not an external standard.</p>
+      <p>The code itself is part of the review surface — view source. The engine is a single module, organized in the order listed in its header comment: constants/fixtures, schema helpers, mock ports, record repository, packet builder, gate engine, resolvers (SKU, material instance, labor, machine envelope), routing, execution simulator, receipt archive, export/import, tests. The Verification Tests section below runs that same engine live in this page; nothing is pre-rendered.</p>
+      <div class="lensnote">Mapped against these frameworks as review lenses · not a formal rating · not a certification.</div>
+    </div>
+    <div class="part">
+      <span class="plabel">Part 3 — Executable Proof Layer</span>
+      <h3>The governed path, run below</h3>
+      <p>The embedded workflow simulation carries Project 01 — Alcove Built-In — through the governed path. The Workflow Trace, Gate Matrix, Inspector, Verification Tests, and Hidden Work sections below run it and expose the intermediate records.</p>
+      <p class="path">owner-held record → capture evidence → WorkPacket v1 → refusal logic → WorkPacket v2 → material/SKU resolution → material-instance confirmation → labor-tier check → MachineEnvelope check → routing/decomposition → packet-scoped consent → simulation-only execution report → outcome receipt → owner-record archive → export/import round trip</p>
+    </div>
+  </div>
+
+  <!-- secondary scenario controls -->
+  <div class="controls" id="controls" aria-label="Scenario controls (secondary)"></div>
+
+  <!-- 1. WORKFLOW TRACE -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">A</span><h2>Workflow Trace</h2><span class="note">causal order · owner-record bound</span></div>
+    <div id="trace"></div>
+  </section>
+
+  <!-- 2. GATE MATRIX -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">B</span><h2>Gate Matrix</h2><span class="note">primary proof surface · v1 → v2</span></div>
+    <div id="matrix"></div>
+  </section>
+
+  <!-- 3. INSPECTOR -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">C</span><h2>Inspector</h2><span class="note">data structures &amp; causality</span></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="panel" id="panel"></div>
+  </section>
+
+  <!-- 4. VERIFICATION TESTS -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">D</span><h2>Verification Tests</h2><span class="note">visible PASS / FAIL · runs live</span></div>
+    <div id="tests"></div>
+  </section>
+
+  <!-- 5. HIDDEN WORK EXPOSED -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">E</span><h2>Hidden Work Exposed</h2><span class="note">what the governed shape carries</span></div>
+    <div class="hidden-grid" id="hidden"></div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+/* ENGINE (inlined verbatim below) ============================================ */
+/* =============================================================================
+   Embedded Workflow Simulation — Project 01, Alcove Built-In
+   ENGINE: deterministic, offline, dependency-free domain logic.
+
+   This module is the codebase spine. It is wrapped verbatim into the single
+   HTML file. Organized as: constants/fixtures · schema helpers · mock ports ·
+   record repository · packet builder · gate engine · sku resolver · material
+   instance resolver · labor evaluator · machine envelope evaluator · routing
+   engine · execution simulator · receipt archive · export/import · tests.
+
+   BASIS DISCIPLINE (harness): every produced figure carries a basis in
+   { modeled | mock_fixture | reference | simulation }. None may be "measured".
+   The source ontologies define measured | channel_reported | derived for real
+   future records; this browser harness intentionally restricts itself because
+   it is a simulation-only proof artifact.
+   ============================================================================= */
+(function (root) {
+"use strict";
+
+/* ── 0. CONSTANTS / FIXTURES ─────────────────────────────────────────────── */
+const ONTOLOGY_VERSION = "ontology/2026.demo";
+const MFKO_VERSION = "mfko/1.2";
+const CAPTURE_CONFIDENCE_FLOOR = 0.90;
+const BASES = ["modeled", "mock_fixture", "reference", "simulation"];
+
+// Species reference table (NC). movementIndex drives MOVEMENT_RISK gating.
+// Basis: reference (these are catalog reference parameters, not measured).
+const SPECIES = {
+  pine:   { id:"pine",   label:"Pine (NC)",   node:"mat.wood.pine.nc.1x8",   movementIndex:0.18, costPerBf:4.10, risk:"low",  basis:"reference" },
+  poplar: { id:"poplar", label:"Poplar (NC)", node:"mat.wood.poplar.nc.1x8", movementIndex:0.27, costPerBf:5.30, risk:"low",  basis:"reference" },
+  cherry: { id:"cherry", label:"Cherry (NC)", node:"mat.wood.cherry.nc.1x8", movementIndex:0.48, costPerBf:11.20,risk:"elevated", basis:"reference" },
+  oak:    { id:"oak",    label:"Oak (NC)",    node:"mat.wood.oak.nc.1x8",    movementIndex:0.52, costPerBf:9.40, risk:"elevated", basis:"reference" }
+};
+const MOVEMENT_RISK_FLOOR = 0.45; // at/above → VERIFY (species/movement gate)
+
+// Door / layout branches.
+const DOOR_BRANCHES = {
+  open_shelves:    { id:"open_shelves",    label:"Open shelves",       hasDoors:false, resolution:"none_required" },
+  cabinet_doors:   { id:"cabinet_doors",   label:"Cabinet with doors", hasDoors:true,  resolution:"special_order" }, // default resolves via special order
+  no_resolution:   { id:"no_resolution",   label:"No door resolution", hasDoors:true,  resolution:"unresolved" },     // blocks emission
+  special_order:   { id:"special_order",   label:"Special-order doors",hasDoors:true,  resolution:"special_order" },
+  in_cell_milling: { id:"in_cell_milling", label:"In-cell door milling",hasDoors:true, resolution:"in_cell" },
+  open_back:       { id:"open_back",       label:"Open-back / remove doors", hasDoors:false, resolution:"removed" }
+};
+
+// Material nodes the gates read (use-class + emission attributes).
+const MATERIAL_NODES = {
+  "mat.sheet.plywood.cabinet.0750":     { label:"3/4\" cabinet plywood (NAF)", useClass:["interior"], emissionClass:"naf",          dimensionalBasis:"sheet" },
+  "mat.sheet.plywood.cabinet.0750.uf":  { label:"3/4\" cabinet plywood (std UF)", useClass:["interior"], emissionClass:"standard_uf", dimensionalBasis:"sheet" },
+  "mat.edge.banding.birch":             { label:"birch edge banding",  useClass:["interior"], emissionClass:"none", dimensionalBasis:"linear" },
+  "mat.finish.acrylic.interior":        { label:"interior acrylic finish", useClass:["interior"], emissionClass:"none", dimensionalBasis:"volume" },
+  "mat.adhesive.pva.interior":          { label:"interior PVA adhesive", useClass:["interior"], emissionClass:"none", dimensionalBasis:"volume" },
+  "comp.panel.side.scribed":            { label:"scribed side panel", kind:"component" },
+  "comp.shelf":                         { label:"shelf", kind:"component" },
+  "comp.nailer":                        { label:"nailer", kind:"component" },
+  "comp.panel.top.profiled":            { label:"top panel, profiled front edge", kind:"component" },
+  "comp.door.slab":                     { label:"cabinet door slab", kind:"component" },
+  "vp.door.specialorder":               { label:"special-order door unit", kind:"vendor_product" },
+  "site.alcove.bay":                    { label:"alcove walls & floor (existing condition)", kind:"site_interface" },
+  "fin.builtin.alcove":                 { label:"the built-in (finished good)", kind:"finished_good" }
+};
+// species nodes registered dynamically below
+Object.values(SPECIES).forEach(s=>{ MATERIAL_NODES[s.node] = { label:s.label+" select 1x8", useClass:["interior"], emissionClass:"none", dimensionalBasis:"dimensional", species:s.id }; });
+
+// Operation catalog. support ∈ {v1, v1_verify, deferred_v2, not_supported}.
+const OPERATION_CATALOG = [
+  { op:"straight_rip",        label:"straight rip",             support:"v1",         cell:"cell.sheet.v1",       note:"linear sheet cut" },
+  { op:"straight_crosscut",   label:"straight crosscut",        support:"v1",         cell:"cell.dimensional.v1", note:"indexed station cut" },
+  { op:"simple_miter",        label:"simple miter",             support:"v1",         cell:"cell.dimensional.v1", note:"indexed miter" },
+  { op:"compound_miter",      label:"compound miter",           support:"v1_verify",  cell:"cell.dimensional.v1", note:"requires verification / reference-only geometry" },
+  { op:"curvilinear_stencil", label:"curvilinear / stencil cut",support:"v1_verify",  cell:"cell.sheet.v1",       note:"S5 contour path; verification required" },
+  { op:"edge_easing",         label:"edge easing / round-over", support:"v1",         cell:"cell.sheet.v1",       note:"profile head, light pass" },
+  { op:"hinge_boring",        label:"hinge boring / hinge routing", support:"conditional_doormill", cell:"cell.dimensional.v1", note:"only for in-cell door milling, only if envelope supports" },
+  { op:"dado_groove",         label:"dado / groove",            support:"deferred_v2",cell:null, note:"deferred to V2 envelope" },
+  { op:"rabbet",              label:"rabbet",                   support:"deferred_v2",cell:null, note:"deferred to V2 envelope" },
+  { op:"pocket_mortise",      label:"pocket / mortise",         support:"deferred_v2",cell:null, note:"deferred to V2 envelope" }
+];
+const OP_SUPPORT = {}; OPERATION_CATALOG.forEach(o=>OP_SUPPORT[o.op]=o);
+
+// The two-machine cell. Tolerance floors, certified tiers, calibration, policy.
+const MACHINE_ENVELOPES = {
+  "cell.sheet.v1": {
+    envelopeId:"cell.sheet.v1", envelopeClass:"sheet_cell",
+    operationTypes:["straight_rip","curvilinear_stencil","edge_easing","drill_pattern","finish_spray"],
+    sheetMaxIn:{x:97,y:49}, toleranceFloorIn:0.010,
+    certifiedTiers:["OP","OP-MS","CS"], finishStation:true,
+    calibration:{ current:true, snapshotAt:"2026-06-25T08:00:00Z" },
+    controllerPolicy:"simulationOnly", productionReadinessEstablished:false, stateModel:"S"
+  },
+  "cell.dimensional.v1": {
+    envelopeId:"cell.dimensional.v1", envelopeClass:"dimensional_cell",
+    operationTypes:["straight_crosscut","simple_miter","compound_miter","hinge_boring","drill","edge_easing"],
+    dimMaxIn:{length:144}, toleranceFloorIn:0.008,
+    certifiedTiers:["OP","OP-MS","CS"],
+    calibration:{ current:true, snapshotAt:"2026-06-25T08:00:00Z" },
+    controllerPolicy:"simulationOnly", productionReadinessEstablished:false, stateModel:"D"
+  }
+};
+
+// Machine-level → packet-level refusal code map (cross-doc, MFKO §16.1).
+const MACHINE_TO_PACKET_REFUSAL = {
+  "MF.SAFE.REFUSAL.ENVELOPE_EXCEEDED":                    "ENVELOPE_EXCEEDED",
+  "MF.SAFE.REFUSAL.REMOTE_LIVE_MOTION_COMMAND":           "REMOTE_LIVE_MOTION_COMMAND_REFUSED",
+  "MF.SAFE.REFUSAL.CALIBRATION_STALE":                    "CALIBRATION_STALE",
+  "MF.SAFE.REFUSAL.PRODUCTION_READINESS_NOT_ESTABLISHED": "RELEASE_POLICY_UNSATISFIED"
+};
+
+// Documented state sequences (named, ordered) — used in the execution trace.
+const D_STATES = ["D0 Preflight","D1 Load & sense","D2 Clamp to fence","D3 Engage drive","D4 Index","D5 Halt & hold","D6 Tool engage","D7 Retract & clear","D8 Repeat / release"];
+const S_STATES = ["S0 Preflight","S1 Load & seat","S2 Datum / contact","S3 Carriage pre-position","S4 Plunge to depth","S5 Cutting interpolation","S6 Retract & clear","S7 Repeat / release"];
+
+// Routing channels.
+const CHANNELS = {
+  "ch.store.cell": {
+    channelId:"ch.store.cell", name:"Candidate store cell", distanceMi:6,
+    envelopes:[{envelopeId:"cell.sheet.v1",certifiedTiers:["OP","OP-MS","CS"]},{envelopeId:"cell.dimensional.v1",certifiedTiers:["OP","OP-MS","CS"]}],
+    serviceScopes:["fabricate","setup.verify","confirm.material","finish.spray","closeout.verify"],
+    calibration:{current:true}, localShare:0.82, releasePolicyCompliance:{escrow:true,ownerVerification:true}
+  },
+  "ch.fab.shop": {
+    channelId:"ch.fab.shop", name:"Independent fab shop", distanceMi:14,
+    envelopes:[{envelopeId:"cell.sheet.v1",certifiedTiers:["OP"]}],   // no CS, no OP-MS
+    serviceScopes:["fabricate"],                                       // missing setup.verify/confirm.material
+    calibration:{current:true}, localShare:0.71, releasePolicyCompliance:{escrow:true,ownerVerification:true}
+  },
+  "ch.vendor.net": {
+    channelId:"ch.vendor.net", name:"Vendor network", distanceMi:340,
+    envelopes:[{envelopeId:"cell.sheet.v1",certifiedTiers:["OP","OP-MS","CS"]},{envelopeId:"cell.dimensional.v1",certifiedTiers:["OP","OP-MS","CS"]}],
+    serviceScopes:["fabricate","setup.verify","confirm.material","finish.spray","closeout.verify"],
+    calibration:{current:false, reason:"calibration snapshot stale (> policy window)"}, // stale
+    localShare:0.18, releasePolicyCompliance:{escrow:true,ownerVerification:true}
+  }
+};
+
+// Special-order door vendor channel (child fulfillment).
+const VENDOR_DOOR_CHANNEL = { channelId:"ch.vendor.doors", name:"Door vendor (special order)", leadTimeDaysRange:[3,5] };
+
+/* ── 1. SCHEMA HELPERS ───────────────────────────────────────────────────── */
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function deepFreeze(o){ Object.keys(o).forEach(k=>{ const v=o[k]; if(v&&typeof v==="object") deepFreeze(v); }); return Object.freeze(o); }
+function fig(name, value, basis, sourceEvents){
+  if(BASES.indexOf(basis)<0) throw new Error("illegal basis: "+basis+" for "+name);
+  return { name, value, basis, sourceEvents: sourceEvents||[] };
+}
+
+/* ── 2. MOCK PORTS ───────────────────────────────────────────────────────── */
+// SKU fixture: material/vendor node → channel offers. basis: mock_fixture.
+const SKU_FIXTURE = {
+  "mat.sheet.plywood.cabinet.0750":    [{channelId:"ch.store.cell", sku:"BW-3458-NAF", inStock:true,  stockStatus:"in_stock", emissionClass:"naf"}],
+  "mat.sheet.plywood.cabinet.0750.uf": [{channelId:"ch.store.cell", sku:"BW-3458-UF",  inStock:true,  stockStatus:"in_stock", emissionClass:"standard_uf"}],
+  "mat.edge.banding.birch":            [{channelId:"ch.store.cell", sku:"EB-0099",      inStock:true,  stockStatus:"in_stock", emissionClass:"none"}],
+  "mat.finish.acrylic.interior":       [{channelId:"ch.store.cell", sku:"PT-1201",      inStock:true,  stockStatus:"in_stock", emissionClass:"none"}],
+  "mat.adhesive.pva.interior":         [{channelId:"ch.store.cell", sku:"AD-0440",      inStock:true,  stockStatus:"in_stock", emissionClass:"none"}],
+  "mat.wood.pine.nc.1x8":              [{channelId:"ch.store.cell", sku:"PINE-118",      inStock:true,  stockStatus:"in_stock", emissionClass:"none"}],
+  "mat.wood.poplar.nc.1x8":            [{channelId:"ch.store.cell", sku:"POP-204",       inStock:true,  stockStatus:"in_stock", emissionClass:"none"}],
+  "mat.wood.cherry.nc.1x8":            [{channelId:"ch.store.cell", sku:"CHR-196",       inStock:true,  stockStatus:"low_stock", emissionClass:"none"}],
+  "mat.wood.oak.nc.1x8":               [{channelId:"ch.store.cell", sku:"OAK-330",       inStock:true,  stockStatus:"in_stock", emissionClass:"none"}],
+  "vp.door.specialorder":              [{channelId:"ch.vendor.doors", sku:"DR-SO-7782",  inStock:true,  stockStatus:"made_to_order", emissionClass:"none"}]
+};
+// Honest mock seam: same request/response shape a live SKU service would have,
+// but answers from an embedded fixture. NOT a live integration.
+const SkuPort = {
+  lookup(nodeRef){
+    return {
+      port:"mock://sku.local/v1", ok:true, node:nodeRef,
+      basis:"mock_fixture",
+      offers: SKU_FIXTURE[nodeRef] ? clone(SKU_FIXTURE[nodeRef]) : []
+    };
+  }
+};
+
+/* ── 3. RECORD REPOSITORY — owner-held HomeRecord (event-sourced) ─────────── */
+let SEQ = 0;
+function isoNow(seq){ const base=Date.parse("2026-06-28T14:00:00Z"); return new Date(base+Math.round(seq*60000)).toISOString(); }
+function makeHomeRecord(){
+  return {
+    schema:"hometwin/record/v2", ontologyVersion:ONTOLOGY_VERSION, mfkoVersion:MFKO_VERSION,
+    recordId:"rec.summerfield.001", representativeHome:"Representative Home Record",
+    project:"Project 01 — Alcove Built-In", createdAt:"2026-06-28T00:00:00Z",
+    events:[],            // append-only source of truth
+    packets:{},           // packetId@version → immutable committed packet
+    refusals:[],          // queryable refusal corpus (preserved forever)
+    skuResolutions:[],     // bound to record
+    materialInstances:[],  // bound to record
+    gateEvaluations:[],    // v1 + v2 gate runs, bound
+    routing:null,          // routing/decomposition result
+    consent:null,          // packet-scoped consent grant
+    executionReport:null,  // simulation-only execution report
+    outcomes:[]            // archived outcome receipts
+  };
+}
+function append(rec, type, payload){ const ev={ seq:++SEQ, at:isoNow(SEQ), type, payload:payload||{} }; rec.events.push(ev); return ev; }
+const Repo = {
+  commitPacket(rec, packet){ const key=packet.packetId+"@v"+packet.version; rec.packets[key]=deepFreeze(clone(packet)); append(rec,"packet.committed",{key,version:packet.version}); return key; },
+  recordRefusal(rec, r){ rec.refusals.push(r); append(rec,"packet.refused",{code:r.code, lineRef:r.lineRef||null, version:r.packetVersion, raisedBy:r.raisedBy}); },
+  recordSku(rec, res){ rec.skuResolutions.push(res); append(rec, res.offers&&res.offers.length?"sku.resolved":"sku.coverage.checked", {node:res.node, sku:(res.selected&&res.selected.sku)||null, basis:res.basis}); },
+  recordInstance(rec, mi){ rec.materialInstances.push(mi); append(rec,"material.instance.created",{materialInstanceId:mi.materialInstanceId, node:mi.materialNode, basis:mi.basis}); },
+  recordGateEval(rec, ev){ rec.gateEvaluations.push(ev); append(rec,"gate.evaluated",{version:ev.version, overall:ev.overall, blockingRefusals:ev.blockingRefusals}); },
+  recordRouting(rec, r){ rec.routing=r; append(rec,"routing.completed",{winner:r.winner?r.winner.channelId:null, decomposed:r.decomposition.length}); },
+  recordConsent(rec, c){ rec.consent=c; append(rec,"consent.granted",{packetRef:c.packetRef, channelId:c.channelId, scope:c.scope}); },
+  recordExecution(rec, rep){ rec.executionReport=rep; append(rec,"execution.simulated",{policy:rep.controllerPolicy, liveMotionRefused:!rep.liveMotionAttempt.accepted, code:rep.liveMotionAttempt.machineCode}); },
+  archiveOutcome(rec, o){ rec.outcomes.push(o); append(rec,"outcome.archived",{packetRef:o.packetRef, receiptId:o.receiptId}); }
+};
+
+/* ── 4. PACKET BUILDER ───────────────────────────────────────────────────── */
+// Scenario: { species, door }. Default = poplar + cabinet_doors(→special_order).
+function defaultScenario(){ return { species:"poplar", door:"cabinet_doors" }; }
+
+// v1 is built FLAWED on purpose (definition-stage defects only).
+function buildPacketV1(scenario){
+  const sc = scenario||defaultScenario();
+  const sp = SPECIES[sc.species] || SPECIES.poplar;
+  const door = DOOR_BRANCHES[sc.door] || DOOR_BRANCHES.cabinet_doors;
+  const p = {
+    schema:"hometwin/packet/v2", packetId:"pkt.alcove.001", version:1,
+    ontologyVersion:ONTOLOGY_VERSION, project:"Project 01 — Alcove Built-In",
+    scenario:{ species:sp.id, door:door.id },
+    capture:{ ref:"cap.scan.alcove.001", method:"3d_scan", confidence:0.74, verified:false }, // below floor
+    siteInterfaces:[{ lineId:"site.1", node:"site.alcove.bay",
+      findings:{ wallsOutOfSquareIn:null, resolved:false } }],                                  // unresolved
+    materials:[
+      { lineId:"m.1", class:"raw", node:"mat.sheet.plywood.cabinet.0750.uf",                    // std UF where naf required
+        qty:3, unit:"sheet", useClass:"interior", emissionClass:"standard_uf", substitution:"spec_equivalent", routable:"cell" },
+      { lineId:"m.2", class:"raw", node:"mat.edge.banding.birch", qty:40, unit:"lf",
+        useClass:"interior", emissionClass:"none", substitution:"exact", routable:"cell" },
+      { lineId:"m.sp", class:"raw", node:sp.node, qty:6, unit:"bf",
+        useClass:"interior", emissionClass:"none", substitution:"exact", routable:"cell", species:sp.id },
+      { lineId:"m.3", class:"ingredient", node:"mat.finish.acrylic.interior", qty:1, unit:"gal",
+        useClass:"interior", emissionClass:"none", substitution:"spec_equivalent", routable:"cell" },
+      { lineId:"c.top", class:"component", node:"comp.panel.top.profiled", consumes:["m.1"], useClass:"interior",
+        fabrication:[{type:"edge_easing", mode:3, params:{profile:"ogee"}, requiredToleranceIn:0.004}],         // below sheet floor → ENVELOPE_EXCEEDED
+        tolerance:[{dim:"front_edge", plusMinusIn:0.004}], substitution:"exact", routable:"cell" }
+    ],
+    labor:[
+      { lineId:"l.1", task:"fabricate", tier:"OP", riskClass:"standard", estHours:3 },
+      { lineId:"l.2", task:"confirm.material", tier:"OP-MS", riskClass:"standard", estHours:0.5 }
+    ],
+    doors:{ branch:door.id, hasDoors:door.hasDoors, resolution:door.resolution },
+    finish:{ selected:true, op:"finish_spray" },
+    ownerConstraints:{ requiredEmissionClass:"naf" },
+    releasePolicy:{ escrow:true, ownerVerification:true }
+  };
+  return p;
+}
+
+// v2 resolves the blocking v1 defects and completes the resolved BOM + door branch.
+function buildPacketV2(scenario){
+  const sc = scenario||defaultScenario();
+  const sp = SPECIES[sc.species] || SPECIES.poplar;
+  const door = DOOR_BRANCHES[sc.door] || DOOR_BRANCHES.cabinet_doors;
+  const p = buildPacketV1(sc);
+  p.version = 2;
+  // capture: re-scan, verified, above floor
+  p.capture = { ref:"cap.scan.alcove.002", method:"3d_scan", confidence:0.96, verified:true };
+  // site: out-of-square measured, resolved into scribe allowance
+  p.siteInterfaces = [{ lineId:"site.1", node:"site.alcove.bay",
+    findings:{ wallsOutOfSquareIn:0.375, resolved:true, resolution:"scribe side panels to wall", scribeDeltaIn:0.375 } }];
+  // material: swap UF → NAF panel (owner constraint)
+  p.materials[0] = { lineId:"m.1", class:"raw", node:"mat.sheet.plywood.cabinet.0750",
+    qty:3, unit:"sheet", useClass:"interior", emissionClass:"naf", substitution:"exact", routable:"cell" };
+  // tolerance: re-spec profiled edge to achievable floor
+  const topLine = p.materials.find(m=>m.lineId==="c.top");
+  topLine.fabrication[0].requiredToleranceIn = 0.012;
+  topLine.tolerance = [{dim:"front_edge", plusMinusIn:0.012}];
+  // resolved BOM: scribed sides + shelves + nailers
+  p.materials.push(
+    { lineId:"c.side", class:"component", node:"comp.panel.side.scribed", consumes:["m.1"], useClass:"interior",
+      fabrication:[{type:"curvilinear_stencil", mode:2, params:{}, requiredToleranceIn:0.012}], substitution:"exact", routable:"cell" },
+    { lineId:"c.shelf", class:"component", node:"comp.shelf", consumes:["m.1"], useClass:"interior",
+      fabrication:[{type:"straight_crosscut", params:{}, requiredToleranceIn:0.015}], substitution:"exact", routable:"cell" },
+    { lineId:"c.nailer", class:"component", node:"comp.nailer", consumes:["m.sp"], useClass:"interior",
+      fabrication:[{type:"straight_rip", params:{}, requiredToleranceIn:0.02}], substitution:"exact", routable:"cell" }
+  );
+  // CS (setup integrity / refusal authority) + VER (closeout) labor lines, distinct from OP-MS
+  p.labor.push(
+    { lineId:"l.3", task:"setup.verify", tier:"CS", riskClass:"standard", estHours:0.5 },
+    { lineId:"l.4", task:"closeout.verify", tier:"VER", riskClass:"standard", estHours:0.4, verificationRequired:{tier:"VER", method:"first_article"} }
+  );
+  // DOOR BRANCH RESOLUTION ------------------------------------------------
+  applyDoorBranch(p, door, sp);
+  return p;
+}
+
+function applyDoorBranch(p, door, sp){
+  p.doors = { branch:door.id, hasDoors:door.hasDoors, resolution:door.resolution, childFulfillment:null, addsInCellRuntime:false, leadDaysAdded:0 };
+  if(door.resolution==="special_order"){
+    // vendor_product line + child fulfillment + modeled 3–5 day lead; NO in-cell runtime.
+    p.materials.push({ lineId:"vp.door", class:"vendor_product", node:"vp.door.specialorder",
+      qty:2, unit:"ea", useClass:"interior", performance:{style:"shaker", finish:"prime"},
+      substitution:"owner_approval", routable:"special_order" });
+    p.doors.childFulfillment = { channelId:VENDOR_DOOR_CHANNEL.channelId, name:VENDOR_DOOR_CHANNEL.name,
+      lines:["vp.door"], leadTimeDaysRange:VENDOR_DOOR_CHANNEL.leadTimeDaysRange };
+    p.doors.leadDaysAdded = VENDOR_DOOR_CHANNEL.leadTimeDaysRange[1];
+    p.doors.addsInCellRuntime = false;
+  } else if(door.resolution==="in_cell"){
+    // milled door slabs in-cell: hinge-bore / hinge-routing ops + +10% runtime.
+    p.materials.push(
+      { lineId:"c.door.l", class:"component", node:"comp.door.slab", consumes:["m.1"], useClass:"interior",
+        fabrication:[{type:"straight_rip",params:{},requiredToleranceIn:0.02},{type:"hinge_boring",params:{cupDiaMm:35},requiredToleranceIn:0.012}], substitution:"exact", routable:"cell" },
+      { lineId:"c.door.r", class:"component", node:"comp.door.slab", consumes:["m.1"], useClass:"interior",
+        fabrication:[{type:"straight_rip",params:{},requiredToleranceIn:0.02},{type:"hinge_boring",params:{cupDiaMm:35},requiredToleranceIn:0.012}], substitution:"exact", routable:"cell" }
+    );
+    p.doors.addsInCellRuntime = true;      // +10% applied in cycle-time model
+    p.doors.leadDaysAdded = 0;
+  } else if(door.resolution==="removed"){
+    // open-back: remove any door component lines (none present here by default)
+    p.materials = p.materials.filter(m=>m.node!=="comp.door.slab" && m.class!=="vendor_product");
+    p.doors.addsInCellRuntime = false; p.doors.leadDaysAdded = 0;
+  } else if(door.resolution==="none_required"){
+    // open shelves: nothing added
+    p.doors.addsInCellRuntime = false; p.doors.leadDaysAdded = 0;
+  } else if(door.resolution==="unresolved"){
+    // no door resolution while doors exist → leave a marker; gate blocks emission.
+    p.doors.unresolved = true;
+  }
+  return p;
+}
+
+/* ── 5. GATE ENGINE ──────────────────────────────────────────────────────── */
+function refusal(code, packet, lineRef, message, ownerExplanation, suggestedActions, raisedBy){
+  return { code, packetId:packet.packetId, packetVersion:packet.version, lineRef:lineRef||undefined,
+    message, ownerExplanation, raisedBy:raisedBy||"system:orchestrator.validate", raisedAt:isoNow(SEQ+0.5),
+    suggestedActions:suggestedActions||[] };
+}
+function eligibleEnvelopeFor(opType){ return Object.values(MACHINE_ENVELOPES).find(e=>e.operationTypes.includes(opType)); }
+
+// Validate a packet → structured refusals (definition-stage only).
+function validatePacket(packet){
+  const refusals=[];
+  // (a) capture confidence
+  if(!packet.capture.verified || packet.capture.confidence < CAPTURE_CONFIDENCE_FLOOR){
+    refusals.push(refusal("CAPTURE_CONFIDENCE_LOW", packet, packet.capture.ref,
+      `Capture confidence ${packet.capture.confidence} below ${CAPTURE_CONFIDENCE_FLOOR} floor (verified=${packet.capture.verified}).`,
+      "The scan of the alcove is not precise or verified enough to fabricate against. A verified re-capture is required first.",
+      ["Re-scan the alcove","Verify the capture before fabrication"]));
+  }
+  // (b) site condition
+  for(const s of packet.siteInterfaces){
+    if(!s.findings.resolved){
+      refusals.push(refusal("SITE_CONDITION_UNRESOLVED", packet, s.lineId,
+        "Site interface condition unresolved (out-of-square not measured/handled).",
+        "The wall out-of-square is not yet measured, so parts cannot be designed to fit. Measure and decide how to absorb it.",
+        ["Measure wall out-of-square","Add a scribe allowance to the side panels"]));
+    }
+  }
+  // (c) material suitability (use-class + emission/binder)
+  const req = packet.ownerConstraints && packet.ownerConstraints.requiredEmissionClass;
+  for(const m of packet.materials){
+    if(m.class==="raw" || m.class==="ingredient"){
+      const node = MATERIAL_NODES[m.node] || {};
+      if(node.useClass && node.useClass.indexOf(m.useClass)<0){
+        refusals.push(refusal("MATERIAL_UNSUITABLE", packet, m.lineId,
+          `${node.label} not rated for ${m.useClass} use.`,
+          `The chosen material is not suitable for ${m.useClass} use here.`,
+          ["Choose a node rated for "+m.useClass]));
+      }
+      if(req && m.emissionClass && m.emissionClass!=="none" && m.emissionClass!==req &&
+         !(req==="naf" && m.emissionClass==="naf") && !(req==="ulef" && (m.emissionClass==="ulef"||m.emissionClass==="naf"))){
+        refusals.push(refusal("MATERIAL_UNSUITABLE", packet, m.lineId,
+          `Line uses '${m.emissionClass}' resin where project requires '${req}'.`,
+          `Low-emission (${req.toUpperCase()}) material was required. This sheet uses a standard resin that does not meet it. A ${req.toUpperCase()} equivalent is available.`,
+          ["Swap to mat.sheet.plywood.cabinet.0750 (NAF)"]));
+      }
+    }
+  }
+  // (d) species / movement risk
+  const spLine = packet.materials.find(m=>m.species);
+  if(spLine){
+    const sp = SPECIES[spLine.species];
+    if(sp && sp.movementIndex >= MOVEMENT_RISK_FLOOR){
+      refusals.push(refusal("MOVEMENT_RISK", packet, spLine.lineId,
+        `${sp.label} movement index ${sp.movementIndex} at/above ${MOVEMENT_RISK_FLOOR} review floor.`,
+        `${sp.label} moves more with humidity. For a wide built-in component this is flagged for cell-steward (material-sensing) review before fabrication; it is a verification, not a hard stop.`,
+        ["OP-MS review of movement/span","Confirm conditioned environment"], "system:orchestrator.validate"));
+    }
+  }
+  // (e) door resolution — missing resolution while doors exist blocks emission.
+  if(packet.doors && packet.doors.hasDoors && packet.doors.resolution==="unresolved"){
+    refusals.push(refusal("DOOR_RESOLUTION_MISSING", packet, "doors",
+      "Cabinet doors selected but door resolution is unresolved.",
+      "Doors were requested but no door decision (special-order, in-cell milling, or open-back) has been made. The packet cannot be emitted until the door scope is resolved.",
+      ["Choose special-order doors","Choose in-cell door milling","Remove doors (open-back)"], "system:orchestrator.validate"));
+  }
+  // (f) envelope check — every fab op must fit a cell + meet tolerance floor +
+  //     deferred-V2 ops are refused if present.
+  for(const m of packet.materials){
+    if(!m.fabrication) continue;
+    for(const op of m.fabrication){
+      const cat = OP_SUPPORT[op.type];
+      if(cat && cat.support==="deferred_v2"){
+        refusals.push(refusal("DEFERRED_OPERATION_REFUSED", packet, m.lineId,
+          `Operation '${op.type}' is a Deferred V2 operation and is refused in the V1 envelope.`,
+          `The '${cat.label}' operation is deferred to a future envelope and cannot be performed by the current cell. It is refused at the source rather than attempted.`,
+          ["Re-route to a vendor","Remove the operation","Wait for V2 envelope"], "envelope"));
+        continue;
+      }
+      if(cat && cat.support==="conditional_doormill"){
+        // hinge boring only valid for in-cell door milling branch
+        if(!(packet.doors && packet.doors.resolution==="in_cell")){
+          refusals.push(refusal("ENVELOPE_EXCEEDED", packet, m.lineId,
+            `Operation '${op.type}' only supported under in-cell door milling.`,
+            "Hinge boring/routing was requested without selecting in-cell door milling.",
+            ["Select in-cell door milling","Use special-order doors"], "envelope"));
+          continue;
+        }
+      }
+      const env = eligibleEnvelopeFor(op.type);
+      if(!env){
+        refusals.push(refusal("ENVELOPE_EXCEEDED", packet, m.lineId,
+          `No cell envelope supports operation '${op.type}'.`,
+          "One of the operations this part needs cannot be done by the available cell.",
+          ["Re-route this line to a vendor","Re-specify the operation"], "envelope"));
+        continue;
+      }
+      if(op.requiredToleranceIn < env.toleranceFloorIn){
+        refusals.push(refusal("ENVELOPE_EXCEEDED", packet, m.lineId,
+          `Required tolerance ±${op.requiredToleranceIn}" tighter than ${env.envelopeId} floor ±${env.toleranceFloorIn}".`,
+          "This part is specified finer than the cell can hold. Re-specify to the achievable floor or route elsewhere.",
+          [`Re-spec ${op.type} to ≥ ±${env.toleranceFloorIn}"`,"Route to a finer-tolerance vendor"], "envelope"));
+      }
+    }
+  }
+  return { ok: refusals.length===0, refusals };
+}
+
+/* ── 6. SKU RESOLVER (uses the mock port) ────────────────────────────────── */
+// Real function: reads BOM lines requiring SKU resolution, calls SkuPort.lookup
+// per line, returns offer/stock/SKU/channel/basis, writes events, influences gates/routing.
+function resolveSkuCoverage(rec, packet){
+  const need = packet.materials.filter(m=>m.class==="raw"||m.class==="ingredient"||m.class==="vendor_product");
+  const lines = need.map(m=>{
+    const res = SkuPort.lookup(m.node);                 // ← the port is actually called
+    const selected = res.offers[0] || null;
+    const out = { lineId:m.lineId, node:m.node, materialNode:MATERIAL_NODES[m.node]?MATERIAL_NODES[m.node].label:m.node,
+      selectedSpecies:m.species||null, channelId:selected?selected.channelId:null, sku:selected?selected.sku:null,
+      inStock:selected?selected.inStock:false, stockStatus:selected?selected.stockStatus:"unresolved",
+      offers:res.offers, selected, basis:"mock_fixture" };
+    Repo.recordSku(rec, out);
+    return out;
+  });
+  const allCovered = lines.every(l=>l.selected);
+  return { lines, allCovered, basis:"mock_fixture" };
+}
+
+/* ── 7. MATERIAL INSTANCE RESOLVER ───────────────────────────────────────── */
+// Before execution, create material instances. SKU is mapping, not identity.
+function resolveMaterialInstances(rec, packet, skuCoverage){
+  const out=[];
+  const matLines = packet.materials.filter(m=>m.class==="raw"||m.class==="ingredient"||m.class==="vendor_product");
+  matLines.forEach((m,i)=>{
+    const cov = skuCoverage.lines.find(l=>l.lineId===m.lineId) || {};
+    const node = MATERIAL_NODES[m.node] || {};
+    const mi = {
+      materialInstanceId:`mi.${packet.packetId}.${m.lineId}.${String(i+1).padStart(2,"0")}`,
+      lineId:m.lineId, materialNode:m.node, materialNodeLabel:node.label||m.node,
+      selectedSpecies:m.species||null, sku:cov.sku||null, skuIsIdentity:false,
+      nominalDimensions:{ thicknessIn:null, widthIn:null, lengthIn:null },
+      emissionClass:m.emissionClass||node.emissionClass||"unknown",
+      confirmationRole: m.class==="vendor_product" ? "OA" : "OP-MS",
+      confirmationStatus: m.class==="vendor_product" ? "owner_to_confirm_on_receipt" : "to_confirm_at_load",
+      basis:"simulation"
+    };
+    Repo.recordInstance(rec, mi);
+    out.push(mi);
+  });
+  return out;
+}
+
+/* ── 8. LABOR EVALUATOR ──────────────────────────────────────────────────── */
+// OP-MS (material truth) and CS (setup integrity) evaluated SEPARATELY.
+const TIER_DEFS = {
+  "OP":   { label:"Operator", concern:"standard fabrication", domain:"execution" },
+  "OP-MS":{ label:"Material-sensing operator", concern:"species · grade · flatness · emission class · condition", domain:"material_truth" },
+  "CS":   { label:"Cell steward", concern:"machine readiness · calibration · tool setup · stop authority · refusal authority", domain:"setup_integrity" },
+  "VER":  { label:"Verifier", concern:"first article · closeout check", domain:"verification" }
+};
+// Cell-bound tiers must appear in a channel's machine-envelope certified tiers.
+// Verification/closeout tiers (VER) are not machine operators — they are
+// satisfied by the channel holding the corresponding service scope.
+const CELL_BOUND_TIERS = ["OP","OP-MS","CS"];
+function evaluateLabor(packet, channel){
+  const required = [...new Set(packet.labor.map(l=>l.tier))];
+  const channelTiers = new Set(channel.envelopes.flatMap(e=>e.certifiedTiers));
+  const channelScopes = new Set(channel.serviceScopes);
+  const rows = required.map(tier=>{
+    const cellBound = CELL_BOUND_TIERS.indexOf(tier)>=0;
+    const tasks = packet.labor.filter(l=>l.tier===tier).map(l=>l.task);
+    const scopeOk = tasks.every(t=> channelScopes.has(t) || t==="fabricate" );
+    // cell-bound tiers need envelope certification; non-cell tiers (VER) are
+    // covered when the channel offers the verification scope.
+    const tierOk = cellBound ? channelTiers.has(tier) : scopeOk;
+    return { tier, def:TIER_DEFS[tier]||{label:tier,domain:"?"}, tasks, cellBound, tierCertified:tierOk, scopeCovered:scopeOk, ok: tierOk && scopeOk };
+  });
+  // distinct evaluation summary for OP-MS vs CS
+  const opms = rows.find(r=>r.tier==="OP-MS") || null;
+  const cs = rows.find(r=>r.tier==="CS") || null;
+  return { rows, opmsEvaluated:!!opms, csEvaluated:!!cs, opms, cs, allOk: rows.every(r=>r.ok) };
+}
+
+/* ── 9. MACHINE ENVELOPE EVALUATOR + CYCLE-TIME MODEL ────────────────────── */
+function evaluateEnvelope(packet){
+  const ops=[]; let allFit=true;
+  packet.materials.forEach(m=>{ if(!m.fabrication) return;
+    m.fabrication.forEach(op=>{
+      const cat=OP_SUPPORT[op.type]||{support:"not_supported",label:op.type};
+      const env=eligibleEnvelopeFor(op.type);
+      const toleranceOk = env ? op.requiredToleranceIn>=env.toleranceFloorIn : false;
+      const deferred = cat.support==="deferred_v2";
+      const fit = !!env && toleranceOk && !deferred;
+      if(!fit) allFit=false;
+      ops.push({ line:m.lineId, op:op.type, support:cat.support, envelopeId:env?env.envelopeId:null,
+        requiredToleranceIn:op.requiredToleranceIn, floorIn:env?env.toleranceFloorIn:null, fit, deferred });
+    });
+  });
+  return { ops, allFit };
+}
+// Cycle time computed from packet content. basis: modeled.
+function computeCycleTime(packet){
+  let setup=20, sheet=0, dim=0, routing=0, drilling=0, finishing=0;
+  packet.materials.forEach(m=>{ if(!m.fabrication) return;
+    m.fabrication.forEach(op=>{
+      const env=eligibleEnvelopeFor(op.type);
+      if(env && env.envelopeClass==="sheet_cell") sheet+=6;
+      if(env && env.envelopeClass==="dimensional_cell") dim+=5;
+      if(op.type==="curvilinear_stencil"||op.type==="edge_easing") routing+=4;
+      if(op.type==="hinge_boring") drilling+=3;
+    });
+  });
+  if(packet.finish && packet.finish.selected) finishing=12;
+  let subtotal = setup+sheet+dim+routing+drilling+finishing;
+  const inCellDoorMilling = !!(packet.doors && packet.doors.addsInCellRuntime);
+  const doorMillingUplift = inCellDoorMilling ? Math.round(subtotal*0.10) : 0; // +10% runtime
+  const total = subtotal + doorMillingUplift;
+  const leadDaysAdded = packet.doors ? (packet.doors.leadDaysAdded||0) : 0; // special-order lead (NOT runtime)
+  return {
+    components:{ setupMin:setup, sheetCellMin:sheet, dimensionalCellMin:dim, routingProfileMin:routing,
+      drillingMin:drilling, finishingMin:finishing },
+    inCellDoorMilling, doorMillingUpliftMin:doorMillingUplift, subtotalMin:subtotal,
+    totalModeledCycleMin: total, leadDaysAdded, basis:"modeled"
+  };
+}
+
+/* ── 10. ROUTING ENGINE / DECOMPOSITION ──────────────────────────────────── */
+function evaluateChannel(packet, ch, skuCoverage){
+  const reasons=[]; let eligible=true;
+  const labor = evaluateLabor(packet, ch);
+  labor.rows.forEach(r=>{
+    if(!r.ok){ eligible=false; reasons.push(refusal("LABOR_TIER_UNAVAILABLE", packet, null,
+      `Channel lacks required tier/scope for ${r.tier} (${r.def.label}).`,
+      `${ch.name} does not hold a certified ${r.tier} (${r.def.concern||r.def.label}) for this work, so it cannot take this packet.`,
+      ["Route to a channel certified for "+r.tier], "routing")); }
+  });
+  if(!ch.calibration.current){ eligible=false; reasons.push(refusal("CALIBRATION_STALE", packet, null,
+    `Channel calibration not current: ${ch.calibration.reason}.`,
+    `${ch.name} machines are out of current calibration, so tolerance cannot be trusted. Routing here is refused until re-calibration.`,
+    ["Wait for re-calibration","Route to a calibrated channel"], "routing")); }
+  const cellLines = packet.materials.filter(m=>m.routable==="cell");
+  const skuOk = cellLines.every(m=>{ const l=skuCoverage.lines.find(x=>x.lineId===m.lineId); return !l || l.selected; });
+  if(!skuOk){ eligible=false; reasons.push(refusal("SKU_UNRESOLVED", packet, null,
+    "One or more cell BOM lines have no channel SKU coverage.",
+    `${ch.name} cannot resolve every required material to in-stock supply.`,
+    ["Widen radius","Review equivalents"], "routing")); }
+  const legs = ch.channelId==="ch.vendor.net" ? 3 : 1;
+  const atomMiles = ch.distanceMi * legs;
+  const price = Math.round(1180 * (1 + (ch.distanceMi-6)/180));
+  return { channelId:ch.channelId, name:ch.name, eligible, reasons, labor,
+    quote: eligible ? {
+      priceUsd:price, priceBasis:"modeled",
+      leadTimeDays: ch.distanceMi<10?4: ch.distanceMi<50?7:16, leadBasis:"modeled",
+      atomMiles, atomMilesBasis:"modeled", localShare:ch.localShare, localShareBasis:"modeled",
+      skuCoverage:"full"
+    } : null };
+}
+function routePacket(packet, skuCoverage){
+  const evals = Object.values(CHANNELS).map(ch=>evaluateChannel(packet, ch, skuCoverage));
+  const eligible = evals.filter(e=>e.eligible);
+  const winner = eligible.slice().sort((a,b)=> (a.quote.priceUsd-b.quote.priceUsd) || (a.quote.atomMiles-b.quote.atomMiles))[0] || null;
+  // decomposition: cell-fabricated lines, vendor_product lines, special-order child fulfillment
+  const decomposition=[];
+  const cellLines = packet.materials.filter(m=>m.routable==="cell").map(m=>m.lineId);
+  if(cellLines.length) decomposition.push({ scope:"cell", channelId:winner?winner.channelId:null, lines:cellLines, kind:"cell_fabricated" });
+  const vpLines = packet.materials.filter(m=>m.class==="vendor_product").map(m=>m.lineId);
+  if(vpLines.length){
+    decomposition.push({ scope:"special_order", channelId:VENDOR_DOOR_CHANNEL.channelId, name:VENDOR_DOOR_CHANNEL.name,
+      lines:vpLines, kind:"vendor_product_child", leadTimeDaysRange:VENDOR_DOOR_CHANNEL.leadTimeDaysRange, leadBasis:"modeled" });
+  }
+  return { evals, winner, decomposition };
+}
+
+/* ── 11. EXECUTION SIMULATOR (boundary enforced in code) ─────────────────── */
+function compileExecutionEnvelope(packet, channel, instances){
+  const fabOps = packet.materials.filter(m=>m.fabrication).flatMap(m=>m.fabrication.map(op=>({line:m.lineId,op})));
+  const plan = fabOps.map(({line,op})=>{ const env=eligibleEnvelopeFor(op.type);
+    return { line, opType:op.type, mode:op.mode||null, envelopeId:env?env.envelopeId:null, stateModel:env?env.stateModel:null }; });
+  return {
+    schema:"hometwin/execution-envelope/v1", packetRef:packet.packetId+"@v"+packet.version,
+    channelId:channel.channelId, controllerPolicy:"simulationOnly", productionReadinessEstablished:false,
+    materialInstances:instances.map(mi=>({materialInstanceId:mi.materialInstanceId, line:mi.lineId, node:mi.materialNode, skuIsIdentity:mi.skuIsIdentity})),
+    operationPlan:plan, calibrationSnapshot:MACHINE_ENVELOPES["cell.sheet.v1"].calibration.snapshotAt,
+    safetyPrereqs:["guardVerified","estopVerified","operatorClear","interlocksClosed","dustCollectionReady"]
+  };
+}
+// Every remote command passes through here. Live motion is always refused.
+function issueControllerCommand(execEnv, command){
+  const liveMotion=["plunge.now","feed.now","override.clamp","jog.axis","step.saw"];
+  if(execEnv.controllerPolicy==="simulationOnly" && liveMotion.indexOf(command.verb)>=0){
+    return { accepted:false, attemptedVerb:command.verb,
+      machineCode:"MF.SAFE.REFUSAL.REMOTE_LIVE_MOTION_COMMAND",
+      packetCode: MACHINE_TO_PACKET_REFUSAL["MF.SAFE.REFUSAL.REMOTE_LIVE_MOTION_COMMAND"],
+      classification:"ENFORCED_SAFETY_BOUNDARY",
+      message:`Refused: remote live-motion command '${command.verb}' is not permitted. After envelope acceptance, live motion is owned by the local controller; this orchestrator validates, authorizes, cancels, and receives reports — it never steps tooling.` };
+  }
+  return { accepted:true, note:"non-motion command acknowledged" };
+}
+function runSimulatedExecution(packet, channel, instances, cycle){
+  const execEnv = compileExecutionEnvelope(packet, channel, instances);
+  const motionAttempt = issueControllerCommand(execEnv, {verb:"plunge.now", line:"c.top"});
+  const sheetTrace = S_STATES.map(s=>({state:s, status:"simulated.ok"}));
+  const dimTrace   = D_STATES.map(s=>({state:s, status:"simulated.ok"}));
+  const metrics = [
+    fig("first_fit", true, "modeled", ["sim.fit.001"]),
+    fig("scrap_fraction", 0.061, "modeled", ["sim.scrap.001"]),
+    fig("atom_miles", channel.quote?channel.quote.atomMiles:6, "modeled", ["sim.leg.001"]),
+    fig("local_value_share", channel.quote?channel.quote.localShare:0.82, "modeled", ["sim.share.001"]),
+    fig("lead_time_days", (channel.quote?channel.quote.leadTimeDays:4) + (packet.doors?packet.doors.leadDaysAdded:0), "modeled", ["sim.lead.001"]),
+    fig("cycle_time_min", cycle.totalModeledCycleMin, "modeled", ["sim.cycle.001"])
+  ];
+  return {
+    schema:"hometwin/execution-report/v1", executionMode:"simulation",
+    controllerPolicy:"simulationOnly", productionReadinessEstablished:false, noLiveMotion:true,
+    executionEnvelope:execEnv,
+    liveMotionAttempt:motionAttempt,                    // refusal preserved in report
+    stateTrace:{ sheet:sheetTrace, dimensional:dimTrace },
+    labels:[{event:"component labels printed", basis:"simulation"},{event:"assembly instructions printed", basis:"simulation"}],
+    cycleTime:cycle, metrics
+  };
+}
+
+/* ── 12. RECEIPT ARCHIVE ─────────────────────────────────────────────────── */
+function buildOutcomeReceipt(packet, channel, instances, skuCoverage, gateSummary, refusalHistory, report){
+  const site = packet.siteInterfaces[0].findings;
+  return {
+    schema:"hometwin/outcome/v1", receiptId:"rcpt."+packet.packetId+".001",
+    packetRef:packet.packetId+"@v"+packet.version, packetVersion:packet.version,
+    selectedSpecies:(packet.materials.find(m=>m.species)||{}).species||null,
+    doorResolution:packet.doors?packet.doors.resolution:null,
+    scribeDeltaIn: site.scribeDeltaIn!=null ? site.scribeDeltaIn : (site.wallsOutOfSquareIn||null),
+    materialInstances:instances.map(mi=>({materialInstanceId:mi.materialInstanceId, node:mi.materialNode, sku:mi.sku, skuIsIdentity:mi.skuIsIdentity, basis:mi.basis})),
+    skuMapping:skuCoverage.lines.map(l=>({lineId:l.lineId, node:l.node, sku:l.sku, stockStatus:l.stockStatus, basis:l.basis})),
+    metrics:report.metrics,
+    gateSummary, refusalHistory:refusalHistory.map(r=>({code:r.code, version:r.packetVersion, lineRef:r.lineRef||null})),
+    executionReportRef:report.schema+"@"+report.executionMode,
+    liveMotionRefusal:{ machineCode:report.liveMotionAttempt.machineCode, packetCode:report.liveMotionAttempt.packetCode, classification:report.liveMotionAttempt.classification },
+    archivedAt:isoNow(SEQ+1),
+    note:"This archived outcome is the receipt Home as a Twin carries forward into the owner-held record for the next project."
+  };
+}
+
+/* ── 13. GATE MATRIX BUILDER (the primary proof surface) ─────────────────── */
+// Produces 17 gate rows with v1/v2 status, blocking flag, basis, etc.
+function statusFromRefusals(code, refusals, blocking){
+  const hit = refusals.find(r=>r.code===code);
+  if(hit) return blocking ? "REFUSE" : "WARN";
+  return null;
+}
+function buildGateMatrix(ctx){
+  const { v1refusals, v2refusals, v2packet, skuCoverage, labor, envelope, routing, consent, report, receipt, archiveGateOk } = ctx;
+  const has = (arr,code)=>arr.some(r=>r.code===code);
+  const movementSpecies = (v2packet.materials.find(m=>m.species)||{}).species;
+  const movementVerify = movementSpecies && SPECIES[movementSpecies] && SPECIES[movementSpecies].movementIndex>=MOVEMENT_RISK_FLOOR;
+  const row = (name, v1, v2, blocking, basis, eventRef, input, plain, tech, action)=>({name,v1,v2,blocking,basis,eventRef,input,plain,tech,action});
+
+  const rows = [
+    row("Capture confidence",
+      has(v1refusals,"CAPTURE_CONFIDENCE_LOW")?"REFUSE":"ALLOW",
+      has(v2refusals,"CAPTURE_CONFIDENCE_LOW")?"REFUSE":"ALLOW", true, "simulation",
+      "capture.recorded", `confidence ${v2packet.capture.confidence}, verified=${v2packet.capture.verified}`,
+      "Is the scan precise and verified enough to fabricate against?",
+      `Floor ${CAPTURE_CONFIDENCE_FLOOR}; v1=0.74 unverified, v2=0.96 verified.`,
+      "v1 blocks; v2 passes after verified re-capture."),
+    row("Site condition",
+      has(v1refusals,"SITE_CONDITION_UNRESOLVED")?"REFUSE":"ALLOW",
+      has(v2refusals,"SITE_CONDITION_UNRESOLVED")?"REFUSE":"ALLOW", true, "simulation",
+      "packet.committed", `resolved=${v2packet.siteInterfaces[0].findings.resolved}`,
+      "Is the out-of-square wall condition measured and absorbed?",
+      "v1 unresolved; v2 resolved 0.375\" out-of-square (simulated capture) → scribe allowance.",
+      "v1 blocks; v2 resolves via scribe."),
+    row("Material suitability",
+      has(v1refusals,"MATERIAL_UNSUITABLE")?"REFUSE":"ALLOW",
+      has(v2refusals,"MATERIAL_UNSUITABLE")?"REFUSE":"ALLOW", true, "reference",
+      "packet.committed", `requiredEmissionClass=${v2packet.ownerConstraints.requiredEmissionClass}`,
+      "Does the material meet the owner's emission-class constraint and use-class?",
+      "v1 used standard_uf where naf required; v2 swapped to NAF panel.",
+      "v1 blocks; v2 passes after NAF swap."),
+    row("Species / movement risk",
+      "ALLOW",
+      movementVerify?"VERIFY":"ALLOW", false, "reference",
+      "packet.committed", `species=${movementSpecies}, index=${movementSpecies?SPECIES[movementSpecies].movementIndex:"–"}`,
+      "Does the species' movement warrant material-sensing review?",
+      `Movement floor ${MOVEMENT_RISK_FLOOR}; Cherry/Oak at/above → VERIFY (non-blocking).`,
+      movementVerify?"OP-MS movement review required (non-blocking).":"Within movement floor; allow."),
+    row("Door resolution",
+      has(v1refusals,"DOOR_RESOLUTION_MISSING")?"REFUSE":"ALLOW",
+      has(v2refusals,"DOOR_RESOLUTION_MISSING")?"REFUSE":"ALLOW", true, "simulation",
+      "packet.committed", `branch=${v2packet.doors.branch}, resolution=${v2packet.doors.resolution}`,
+      "If doors are selected, is the door scope resolved before emission?",
+      "Unresolved doors block packet emission; resolved branches proceed.",
+      v2packet.doors.resolution==="unresolved"?"Blocks emission until resolved.":"Resolved; allow."),
+    row("SKU coverage",
+      "VERIFY",
+      skuCoverage.allCovered?"ALLOW":"REFUSE", true, "mock_fixture",
+      "sku.resolved", `lines=${skuCoverage.lines.length}, covered=${skuCoverage.lines.filter(l=>l.selected).length}`,
+      "Can every BOM line resolve to a channel SKU (mock seam)?",
+      "SkuPort.lookup called per line; SKU maps to material, is not identity.",
+      skuCoverage.allCovered?"All lines covered; allow.":"Uncovered line blocks routing."),
+    row("Material instance confirmation",
+      "VERIFY",
+      ctx.instances.length?"ALLOW":"REFUSE", false, "simulation",
+      "material.instance.created", `instances=${ctx.instances.length}`,
+      "Are material instances created with skuIsIdentity=false?",
+      "Each raw/vendor line → materialInstance with confirmation role (OP-MS / OA).",
+      "Instances created; confirmation deferred to load/receipt."),
+    row("Labor-tier coverage",
+      "VERIFY",
+      labor.allOk?"ALLOW":"REFUSE", true, "simulation",
+      "routing.completed", `tiers=${labor.rows.map(r=>r.tier).join("/")}`,
+      "Does the winning channel hold every required labor tier/scope?",
+      "OP-MS (material truth) and CS (setup integrity) evaluated separately.",
+      labor.allOk?"All tiers certified at winning channel.":"Missing tier blocks channel."),
+    row("MachineEnvelope operation support",
+      "REFUSE",
+      envelope.allFit?"ALLOW":"REFUSE", true, "reference",
+      "gate.evaluated", `ops=${envelope.ops.length}, allFit=${envelope.allFit}`,
+      "Does every fabrication op fit a declared cell envelope?",
+      "v1 had an op below tolerance floor; v2 ops all fit supported envelopes.",
+      envelope.allFit?"All ops fit; allow.":"Unsupported op refuses."),
+    row("Tolerance floor",
+      has(v1refusals,"ENVELOPE_EXCEEDED")?"REFUSE":"ALLOW",
+      has(v2refusals,"ENVELOPE_EXCEEDED")?"REFUSE":"ALLOW", true, "reference",
+      "gate.evaluated", `sheet floor ±0.010\", dim floor ±0.008\"`,
+      "Is every op's required tolerance within the cell floor?",
+      "v1 profiled edge ±0.004\" below floor; v2 re-spec ±0.012\".",
+      has(v2refusals,"ENVELOPE_EXCEEDED")?"Below floor; refuse.":"Within floor; allow."),
+    row("Calibration current",
+      "ALLOW",
+      "ALLOW", true, "simulation",
+      "routing.completed", `winning channel calibration current`,
+      "Is the routed channel's calibration current?",
+      "Vendor-network channel is stale and refused; winning store cell is current.",
+      "Winning channel current; stale channel refused in routing."),
+    row("Routing eligibility",
+      "VERIFY",
+      routing.winner?"ALLOW":"REFUSE", true, "modeled",
+      "routing.completed", `eligible=${routing.evals.filter(e=>e.eligible).length}/${routing.evals.length}`,
+      "Is at least one channel eligible to fabricate this packet?",
+      "Capability + tier + calibration + SKU evaluated per channel.",
+      routing.winner?("Winner: "+routing.winner.name):"No eligible channel."),
+    row("Packet-scoped consent",
+      "PENDING",
+      consent?"ALLOW":"PENDING", true, "simulation",
+      "consent.granted", consent?`scope=${consent.scope}`:"not yet granted",
+      "Is consent granted, scoped to this packet and channel only?",
+      "Consent is one packet, one channel — not a blanket license.",
+      consent?"Consent granted for this packet+channel.":"Awaiting consent."),
+    row("Remote live motion",
+      "ENFORCED SAFETY BOUNDARY",
+      "ENFORCED SAFETY BOUNDARY", false, "simulation",
+      "execution.simulated", report?`attempted='${report.liveMotionAttempt.attemptedVerb}'`:"–",
+      "Is a remote live-motion command refused in running code?",
+      "issueControllerCommand refuses live motion under simulationOnly and preserves the event.",
+      "Forbidden command attempted, refused, and logged — enforced boundary, not a packet failure."),
+    row("Execution boundary",
+      "REFERENCE",
+      report?(report.controllerPolicy==="simulationOnly"?"ALLOW":"REFUSE"):"PENDING", true, "simulation",
+      "execution.simulated", report?`policy=${report.controllerPolicy}, prodReady=${report.productionReadinessEstablished}`:"–",
+      "Is execution simulation-only with production readiness false?",
+      "controllerPolicy=simulationOnly; productionReadinessEstablished=false.",
+      "Execution remains simulation-only."),
+    row("Outcome archive",
+      "PENDING",
+      archiveGateOk?"ALLOW":"PENDING", true, "simulation",
+      "outcome.archived", receipt?`receiptId=${receipt.receiptId}`:"no receipt",
+      "Is the receipt archived and bound to packet v2?",
+      "Archive gate is evaluated WITH the receipt in context — never pending while a receipt exists.",
+      archiveGateOk?"Receipt archived and bound to v2.":"No consistent receipt."),
+    row("Export/import round trip",
+      "REFERENCE",
+      ctx.ioOk?"ALLOW":"PENDING", false, "simulation",
+      "export.verified", ctx.ioOk?"round-trip verified":"not yet run",
+      "Does the full record survive an export/import round-trip?",
+      "Serialize record → parse back → verify packets/refusals/instances/receipt/live-motion refusal survive.",
+      ctx.ioOk?"Round-trip verified.":"Run export/import.")
+  ];
+
+  // Aggregation (v2): blocking REFUSE → BLOCKED; else VERIFY; else WARN; else ALLOW.
+  // Remote live-motion ENFORCED SAFETY BOUNDARY is NOT an active blocking v2 REFUSE.
+  const activeBlockingRefuse = rows.filter(r=>r.blocking && r.v2==="REFUSE");
+  const anyVerify = rows.some(r=>r.v2==="VERIFY");
+  const anyWarn = rows.some(r=>r.v2==="WARN");
+  let overall;
+  if(activeBlockingRefuse.length) overall="BLOCKED / REFUSED";
+  else if(anyVerify) overall="VERIFY";
+  else if(anyWarn) overall="WARN";
+  else overall="ALLOW";
+  return { rows, overall, activeBlockingRefuse:activeBlockingRefuse.map(r=>r.name) };
+}
+
+/* ── 14. ORCHESTRATOR — drives the lifecycle, binds everything to the record ─ */
+function runPipeline(scenario){
+  SEQ = 0;
+  const rec = makeHomeRecord();
+  const sc = scenario || defaultScenario();
+
+  // 01 owner record + 02 capture
+  append(rec,"record.initialized",{recordId:rec.recordId});
+  append(rec,"capture.recorded",{ref:"cap.scan.alcove.001", confidence:0.74, verified:false, basis:"simulation"});
+
+  // 03 WorkPacket v1 + 04 v1 gate evaluation (refused)
+  const v1 = buildPacketV1(sc); Repo.commitPacket(rec, v1);
+  const r1 = validatePacket(v1); r1.refusals.forEach(rf=>Repo.recordRefusal(rec, rf));
+  const v1refusals = clone(rec.refusals.filter(r=>r.packetVersion===1));
+  Repo.recordGateEval(rec, { version:1, overall: r1.ok?"ALLOW":"BLOCKED / REFUSED", blockingRefusals:r1.refusals.length });
+
+  // Door-unresolved scenario blocks emission of v2 — represent honestly.
+  const doorBlocked = (DOOR_BRANCHES[sc.door]||{}).resolution==="unresolved";
+
+  // 05 WorkPacket v2 + 06 v2 gate evaluation
+  const v2 = buildPacketV2(sc); Repo.commitPacket(rec, v2);
+  const r2 = validatePacket(v2); r2.refusals.forEach(rf=>Repo.recordRefusal(rec, rf));
+  const v2refusals = clone(rec.refusals.filter(r=>r.packetVersion===2));
+
+  // 07 SKU resolution (port is actually called) — must occur before routing
+  const skuCoverage = resolveSkuCoverage(rec, v2);
+  // material instances
+  const instances = resolveMaterialInstances(rec, v2, skuCoverage);
+
+  // envelope eval + cycle time
+  const envelope = evaluateEnvelope(v2);
+  const cycle = computeCycleTime(v2);
+
+  // 08 routing / decomposition
+  const routing = routePacket(v2, skuCoverage);
+  Repo.recordRouting(rec, routing);
+  routing.evals.forEach(e=>{ if(!e.eligible) e.reasons.forEach(rf=>Repo.recordRefusal(rec, rf)); });
+  const labor = routing.winner ? routing.winner.labor : evaluateLabor(v2, CHANNELS["ch.store.cell"]);
+
+  // 09 packet-scoped consent (only if a winner exists and v2 not door-blocked)
+  let consent=null, report=null, receipt=null, archiveGateOk=false;
+  const v2BlockingRefuse = v2refusals.filter(r=>["CAPTURE_CONFIDENCE_LOW","SITE_CONDITION_UNRESOLVED","MATERIAL_UNSUITABLE","DOOR_RESOLUTION_MISSING","ENVELOPE_EXCEEDED","DEFERRED_OPERATION_REFUSED","SKU_UNRESOLVED"].indexOf(r.code)>=0);
+  const proceedable = routing.winner && v2BlockingRefuse.length===0 && !doorBlocked;
+
+  if(proceedable){
+    consent = { packetRef:v2.packetId+"@v"+v2.version, channelId:routing.winner.channelId, channelName:routing.winner.name, scope:"this packet only", grantedAt:isoNow(SEQ+0.5) };
+    Repo.recordConsent(rec, consent);
+    // 10 simulation-only execution report (live-motion attempted + refused)
+    report = runSimulatedExecution(v2, routing.winner, instances, cycle);
+    Repo.recordExecution(rec, report);
+    // 11 outcome receipt — build, then evaluate archive gate WITH receipt in context
+    const refusalHistory = clone(rec.refusals);
+    const gateSummaryPre = { note:"computed below" };
+    receipt = buildOutcomeReceipt(v2, routing.winner, instances, skuCoverage, gateSummaryPre, refusalHistory, report);
+    // archive gate consistency: receipt exists AND binds to v2
+    archiveGateOk = !!receipt && receipt.packetRef===v2.packetId+"@v"+v2.version;
+    if(archiveGateOk) Repo.archiveOutcome(rec, receipt);
+  }
+
+  // gate matrix (depends on receipt + io status; io evaluated after)
+  const ctxForMatrix = { v1refusals, v2refusals, v2packet:v2, skuCoverage, instances, labor, envelope, routing, consent, report, receipt, archiveGateOk, ioOk:false };
+  const preMatrix = buildGateMatrix(ctxForMatrix);
+
+  // 12 export/import round-trip
+  const io = roundTrip(rec);
+  if(io.ok) append(rec,"export.verified",{events:rec.events.length, ok:true});
+  ctxForMatrix.ioOk = io.ok;
+  const gateMatrix = buildGateMatrix(ctxForMatrix);
+
+  // attach final gate summary into the archived receipt if present
+  if(receipt){ receipt.gateSummary = { overall:gateMatrix.overall, activeBlockingRefuse:gateMatrix.activeBlockingRefuse, rows:gateMatrix.rows.length }; }
+  Repo.recordGateEval(rec, { version:2, overall:gateMatrix.overall, blockingRefusals:gateMatrix.activeBlockingRefuse.length });
+
+  return { rec, scenario:sc, v1, v2, v1refusals, v2refusals, skuCoverage, instances, labor, envelope, cycle, routing, consent, report, receipt, archiveGateOk, gateMatrix, io, proceedable, doorBlocked };
+}
+
+/* ── 15. EXPORT / IMPORT ─────────────────────────────────────────────────── */
+function exportRecord(rec){ return JSON.stringify(rec, null, 2); }
+function importRecord(json){ return JSON.parse(json); }
+function roundTrip(rec){
+  try{
+    const json = exportRecord(rec);
+    const back = importRecord(json);
+    const checks = {
+      packetV1Exists: Object.keys(back.packets).some(k=>k.endsWith("@v1")),
+      packetV2Exists: Object.keys(back.packets).some(k=>k.endsWith("@v2")),
+      v1RefusalsSurvive: back.refusals.some(r=>r.packetVersion===1),
+      receiptSurvives: back.outcomes.length===rec.outcomes.length,
+      skuSurvives: back.skuResolutions.length===rec.skuResolutions.length,
+      instancesSurvive: back.materialInstances.length===rec.materialInstances.length,
+      liveMotionRefusalSurvives: !!(back.executionReport && back.executionReport.liveMotionAttempt && back.executionReport.liveMotionAttempt.accepted===false),
+      eventCountMatches: back.events.length===rec.events.length,
+      noBasisBecameMeasured: !/"basis"\s*:\s*"measured"/.test(json)
+    };
+    const ok = Object.values(checks).every(Boolean);
+    return { ok, checks, bytes: json.length, json };
+  }catch(e){ return { ok:false, error:e.message, checks:{} }; }
+}
+
+/* ── 16. VERIFICATION TESTS ──────────────────────────────────────────────── */
+function runTests(){
+  const T=[]; const t=(desc,fn,note)=>{ let pass=false,err=null; try{pass=!!fn();}catch(e){err=e.message;} T.push({desc,pass,note:err||note}); };
+  const P = runPipeline(defaultScenario());
+
+  t("v1 is refused by gate evaluation", ()=> P.v1refusals.length>0, "definition → gate → refusal");
+  t("v1 raises CAPTURE_CONFIDENCE_LOW", ()=> P.v1refusals.some(r=>r.code==="CAPTURE_CONFIDENCE_LOW"));
+  t("v1 raises SITE_CONDITION_UNRESOLVED", ()=> P.v1refusals.some(r=>r.code==="SITE_CONDITION_UNRESOLVED"));
+  t("v1 raises MATERIAL_UNSUITABLE (emission class)", ()=> P.v1refusals.some(r=>r.code==="MATERIAL_UNSUITABLE"));
+  t("v1 raises ENVELOPE_EXCEEDED (tolerance floor)", ()=> P.v1refusals.some(r=>r.code==="ENVELOPE_EXCEEDED"));
+  t("v2 passes all blocking gates (default)", ()=> P.gateMatrix.activeBlockingRefuse.length===0, "revision → pass");
+  t("v1 refusals remain preserved after v2 passes", ()=> P.rec.refusals.some(r=>r.packetVersion===1), "refusal corpus preserved");
+  t("both WorkPacket v1 and v2 exist in the record", ()=> Object.keys(P.rec.packets).some(k=>k.endsWith("@v1")) && Object.keys(P.rec.packets).some(k=>k.endsWith("@v2")));
+  t("selected species affects BOM and modeled cost", ()=>{
+    const a=runPipeline({species:"pine",door:"cabinet_doors"}); const b=runPipeline({species:"cherry",door:"cabinet_doors"});
+    const an=(a.v2.materials.find(m=>m.species)||{}).node, bn=(b.v2.materials.find(m=>m.species)||{}).node;
+    return an!==bn && SPECIES.pine.costPerBf!==SPECIES.cherry.costPerBf; });
+  t("movement-risk gate fires for Cherry (VERIFY)", ()=>{
+    const c=runPipeline({species:"cherry",door:"cabinet_doors"});
+    return c.gateMatrix.rows.find(r=>r.name==="Species / movement risk").v2==="VERIFY"; });
+  t("movement-risk gate does NOT fire for Poplar", ()=> P.gateMatrix.rows.find(r=>r.name==="Species / movement risk").v2==="ALLOW");
+  t("SKU port is actually used before routing", ()=> P.rec.events.some(e=>e.type==="sku.resolved"||e.type==="sku.coverage.checked") &&
+    P.rec.events.findIndex(e=>e.type==="sku.resolved") < P.rec.events.findIndex(e=>e.type==="routing.completed"));
+  t("missing door resolution blocks packet emission", ()=>{
+    const n=runPipeline({species:"poplar",door:"no_resolution"});
+    return n.v2refusals.some(r=>r.code==="DOOR_RESOLUTION_MISSING") && !n.proceedable; });
+  t("special-order doors create vendor_product + child fulfillment + lead", ()=>{
+    return P.v2.materials.some(m=>m.class==="vendor_product") &&
+      P.routing.decomposition.some(d=>d.kind==="vendor_product_child") &&
+      P.v2.doors.leadDaysAdded>=3 && P.v2.doors.leadDaysAdded<=5; });
+  t("special-order doors do NOT add in-cell runtime", ()=> P.cycle.inCellDoorMilling===false && P.cycle.doorMillingUpliftMin===0);
+  t("in-cell door milling adds +10% modeled machine runtime", ()=>{
+    const m=runPipeline({species:"poplar",door:"in_cell_milling"});
+    return m.cycle.inCellDoorMilling===true && m.cycle.doorMillingUpliftMin===Math.round(m.cycle.subtotalMin*0.10) && m.cycle.doorMillingUpliftMin>0; });
+  t("in-cell door milling adds hinge-bore operations", ()=>{
+    const m=runPipeline({species:"poplar",door:"in_cell_milling"});
+    return m.v2.materials.some(x=>x.fabrication&&x.fabrication.some(op=>op.type==="hinge_boring")); });
+  t("deferred V2 operation is refused if inserted", ()=>{
+    const p=buildPacketV2(defaultScenario());
+    p.materials.push({lineId:"c.bad",class:"component",node:"comp.shelf",consumes:["m.1"],useClass:"interior",
+      fabrication:[{type:"dado_groove",params:{},requiredToleranceIn:0.02}],routable:"cell"});
+    return validatePacket(p).refusals.some(r=>r.code==="DEFERRED_OPERATION_REFUSED"); });
+  t("OP-MS and CS role requirements evaluated separately", ()=> P.labor.opmsEvaluated && P.labor.csEvaluated && P.labor.opms.def.domain==="material_truth" && P.labor.cs.def.domain==="setup_integrity");
+  t("stale calibration refuses a channel", ()=> P.routing.evals.find(e=>e.channelId==="ch.vendor.net").reasons.some(r=>r.code==="CALIBRATION_STALE"));
+  t("fab shop refused (missing OP-MS/CS tier or scope)", ()=> !P.routing.evals.find(e=>e.channelId==="ch.fab.shop").eligible);
+  t("routing winner is the store cell", ()=> P.routing.winner && P.routing.winner.channelId==="ch.store.cell");
+  t("remote live-motion command is refused in code", ()=> P.report.liveMotionAttempt.accepted===false && P.report.liveMotionAttempt.machineCode==="MF.SAFE.REFUSAL.REMOTE_LIVE_MOTION_COMMAND");
+  t("live-motion refusal is classified ENFORCED_SAFETY_BOUNDARY, not active v2 REFUSE", ()=>{
+    const r=P.gateMatrix.rows.find(x=>x.name==="Remote live motion");
+    return P.report.liveMotionAttempt.classification==="ENFORCED_SAFETY_BOUNDARY" && r.v2==="ENFORCED SAFETY BOUNDARY" && r.blocking===false && P.gateMatrix.overall!=="BLOCKED / REFUSED"; });
+  t("remote live-motion refusal written to owner record event log", ()=> P.rec.events.some(e=>e.type==="execution.simulated" && e.payload.liveMotionRefused===true));
+  t("remote live-motion refusal written to execution report", ()=> P.report.liveMotionAttempt && P.report.liveMotionAttempt.accepted===false);
+  t("machine→packet refusal code maps correctly", ()=> P.report.liveMotionAttempt.packetCode==="REMOTE_LIVE_MOTION_COMMAND_REFUSED");
+  t("execution report is simulationOnly", ()=> P.report.controllerPolicy==="simulationOnly");
+  t("production readiness is false", ()=> P.report.productionReadinessEstablished===false);
+  t("every produced metric declares a basis", ()=> P.report.metrics.every(m=>BASES.indexOf(m.basis)>=0));
+  t("no produced metric basis is 'measured'", ()=> !P.report.metrics.some(m=>m.basis==="measured") && !/"basis"\s*:\s*"measured"/.test(JSON.stringify(P.rec)));
+  t("outcome binds to WorkPacket v2", ()=> P.receipt && P.receipt.packetRef===P.v2.packetId+"@v"+P.v2.version);
+  t("outcome archive gate passes when receipt exists", ()=> P.archiveGateOk===true && P.gateMatrix.rows.find(r=>r.name==="Outcome archive").v2==="ALLOW");
+  t("receipt survives export/import round-trip", ()=> P.io.ok && P.io.checks.receiptSurvives);
+  t("export/import preserves event trail (count matches)", ()=> P.io.checks.eventCountMatches);
+  t("owner record preserves full event trail", ()=> P.rec.events.length>10 && P.rec.events[0].type==="record.initialized");
+
+  const passed=T.filter(x=>x.pass).length;
+  return { tests:T, passed, total:T.length };
+}
+
+/* ── EXPORTS ─────────────────────────────────────────────────────────────── */
+const API = {
+  ONTOLOGY_VERSION, MFKO_VERSION, CAPTURE_CONFIDENCE_FLOOR, BASES, MOVEMENT_RISK_FLOOR,
+  SPECIES, DOOR_BRANCHES, MATERIAL_NODES, OPERATION_CATALOG, OP_SUPPORT, MACHINE_ENVELOPES,
+  MACHINE_TO_PACKET_REFUSAL, D_STATES, S_STATES, CHANNELS, VENDOR_DOOR_CHANNEL, SKU_FIXTURE,
+  SkuPort, TIER_DEFS,
+  makeHomeRecord, defaultScenario, buildPacketV1, buildPacketV2, validatePacket,
+  resolveSkuCoverage, resolveMaterialInstances, evaluateLabor, evaluateEnvelope, computeCycleTime,
+  routePacket, runSimulatedExecution, buildOutcomeReceipt, buildGateMatrix, runPipeline,
+  exportRecord, importRecord, roundTrip, runTests, issueControllerCommand
+};
+root.HTEngine = API;
+if(typeof module!=="undefined" && module.exports) module.exports = API;
+})(typeof window!=="undefined" ? window : globalThis);
+
+/* RENDER LAYER (inlined verbatim below) ====================================== */
+/* =============================================================================
+   RENDER LAYER — pure function of engine state. No DOM logic leaks into the
+   engine. Reads window.HTEngine, renders the seven surfaces, re-runs on scenario
+   change. All interpolation is escaped.
+   ============================================================================= */
+(function(){
+"use strict";
+const E = window.HTEngine;
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+
+/* JSON syntax highlighter (offline, regex-based, escaped) */
+function jsonHighlight(obj){
+  let json = JSON.stringify(obj, null, 2);
+  json = esc(json);
+  json = json.replace(/&quot;(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\&])*?&quot;(\s*:)?/g, m=>{
+    return /:$/.test(m.replace(/\s+$/,"")) ? '<span class="k">'+m+'</span>' : '<span class="s">'+m+'</span>';
+  });
+  json = json.replace(/\b(-?\d+\.?\d*([eE][+-]?\d+)?)\b/g, '<span class="n">$1</span>');
+  json = json.replace(/\b(true|false|null)\b/g, '<span class="b">$1</span>');
+  return json;
+}
+
+/* status → css class for trace + matrix */
+function stClass(s){
+  const v=String(s).toUpperCase();
+  if(v==="ALLOW") return "st-allow";
+  if(v==="WARN") return "st-warn";
+  if(v==="VERIFY") return "st-verify";
+  if(v==="REFUSE"||v==="BLOCKED / REFUSED"||v==="REFUSED") return "st-refuse";
+  if(v.indexOf("ENFORCED")>=0||v.indexOf("BOUNDARY")>=0) return "st-boundary";
+  return "st-pending"; // PENDING / REFERENCE
+}
+function overallClass(o){
+  if(o==="ALLOW") return "ov-allow";
+  if(o==="WARN") return "ov-warn";
+  if(o==="VERIFY") return "ov-verify";
+  return "ov-blocked";
+}
+
+/* ── application state ─────────────────────────────────────────────────── */
+let SCENARIO = E.defaultScenario();
+let P = null;            // current pipeline result
+let CURRENT_TAB = "record";
+let EXPORTED = null;
+
+/* ── controls (secondary) ──────────────────────────────────────────────── */
+function renderControls(){
+  const species = Object.values(E.SPECIES);
+  const doors = Object.values(E.DOOR_BRANCHES);
+  const spOpts = species.map(s=>`<option value="${s.id}" ${s.id===SCENARIO.species?"selected":""}>${esc(s.label)}</option>`).join("");
+  const drOpts = doors.map(d=>`<option value="${d.id}" ${d.id===SCENARIO.door?"selected":""}>${esc(d.label)}</option>`).join("");
+  const overall = P.gateMatrix.overall;
+  $("controls").innerHTML = `
+    <div class="ctrl">
+      <label for="sel-species">Material / species</label>
+      <select id="sel-species">${spOpts}</select>
+    </div>
+    <div class="ctrl">
+      <label for="sel-door">Door / layout branch</label>
+      <select id="sel-door">${drOpts}</select>
+    </div>
+    <div class="ctrl">
+      <label>Default scenario</label>
+      <div class="desc">Poplar (NC) · cabinet with doors → special-order. v1 fails by design; v2 resolves blocking v1 refusals.</div>
+    </div>
+    <div class="ctrl">
+      <label>Overall v2 status</label>
+      <span class="overall ${overallClass(overall)}"><span class="dot"></span>${esc(overall)}</span>
+    </div>
+    <button class="btn ghost" id="btn-reset">Reset to default</button>`;
+  $("sel-species").onchange = e=>{ SCENARIO={...SCENARIO, species:e.target.value}; rebuild(); };
+  $("sel-door").onchange = e=>{ SCENARIO={...SCENARIO, door:e.target.value}; rebuild(); };
+  $("btn-reset").onclick = ()=>{ SCENARIO=E.defaultScenario(); rebuild(); };
+}
+
+/* ── A. WORKFLOW TRACE ─────────────────────────────────────────────────── */
+function buildTraceRows(){
+  const r = P.rec, gm = P.gateMatrix;
+  const v1count = P.v1refusals.length;
+  const proceeded = P.proceedable;
+  const ev = type => { const e=r.events.find(x=>x.type===type); return e?("#"+e.seq):"—"; };
+  const rows = [
+    { n:"01", title:"Owner Record Initialized", status:"ALLOW", basis:"simulation", event:ev("record.initialized"),
+      artifact:"rec.summerfield.001", reason:"Owner-held record created; all subsequent events bind to it.", tab:"record" },
+    { n:"02", title:"Capture Evidence Attached", status:"ALLOW", basis:"simulation", event:ev("capture.recorded"),
+      artifact:"cap.scan.alcove.001", reason:"First scan attached, unverified — sufficient to start, not to fabricate.", tab:"record" },
+    { n:"03", title:"WorkPacket v1 Emitted", status:"ALLOW", basis:"simulation", event:ev("packet.committed"),
+      artifact:"pkt.alcove.001@v1", reason:"Packet v1 committed immutably to the record (built flawed on purpose).", tab:"v1" },
+    { n:"04", title:"v1 Gate Evaluation Refused", status:"REFUSE", basis:"simulation", event:ev("packet.refused"),
+      artifact:v1count+" refusal(s)", reason:`v1 refused for ${v1count} definition-stage defect(s); each refusal preserved.`, tab:"v1" },
+    { n:"05", title:"WorkPacket v2 Emitted", status:"ALLOW", basis:"simulation", event:"#"+(r.events.filter(x=>x.type==="packet.committed")[1]||{seq:"—"}).seq,
+      artifact:"pkt.alcove.001@v2", reason:"Revision committed; resolves blocking v1 refusals. v1 history preserved.", tab:"v2" },
+    { n:"06", title:"v2 Gate Evaluation Completed", status: gm.overall==="ALLOW"?"ALLOW":(gm.overall==="VERIFY"?"VERIFY":(gm.overall==="WARN"?"WARN":"REFUSE")), basis:"simulation", event:ev("gate.evaluated"),
+      artifact:gm.overall, reason:`Aggregate v2 status: ${gm.overall}. Active blocking refusals: ${gm.activeBlockingRefuse.length}.`, tab:"matrix" },
+    { n:"07", title:"SKU / Material Instances Resolved", status: proceeded?"ALLOW":"VERIFY", basis:"mock_fixture", event:ev("sku.resolved"),
+      artifact:`${P.skuCoverage.lines.length} SKU · ${P.instances.length} instances`, reason:"SkuPort.lookup called per line before routing; instances created (skuIsIdentity=false).", tab:"sku" },
+    { n:"08", title:"Routing / Decomposition Completed", status: P.routing.winner?"ALLOW":"REFUSE", basis:"modeled", event:ev("routing.completed"),
+      artifact:P.routing.winner?P.routing.winner.name:"no winner", reason:`${P.routing.evals.filter(e=>e.eligible).length}/${P.routing.evals.length} channels eligible; ${P.routing.decomposition.length} decomposed scope(s).`, tab:"route" },
+    { n:"09", title:"Packet-Scoped Consent Granted", status: P.consent?"ALLOW":"PENDING", basis:"simulation", event:ev("consent.granted"),
+      artifact:P.consent?"this packet only":"not granted", reason: P.consent?"Consent scoped to one packet, one channel.":"Consent withheld — packet not proceedable.", tab:"consent" },
+    { n:"10", title:"Simulation-Only Execution Report Generated", status: P.report?"ALLOW":"PENDING", basis:"simulation", event:ev("execution.simulated"),
+      artifact:P.report?"controllerPolicy: simulationOnly":"none", reason: P.report?"State sequence simulated; remote live-motion command attempted and refused in code.":"No execution — packet not proceedable.", tab:"exec" },
+    { n:"11", title:"Outcome Receipt Archived", status: P.archiveGateOk?"ALLOW":"PENDING", basis:"simulation", event:ev("outcome.archived"),
+      artifact:P.receipt?P.receipt.receiptId:"none", reason: P.archiveGateOk?"Receipt archived and bound to v2; archive gate evaluated with receipt in context.":"No consistent receipt to archive.", tab:"receipt" },
+    { n:"12", title:"Export / Import Verified", status: P.io.ok?"ALLOW":"PENDING", basis:"simulation", event:ev("export.verified"),
+      artifact:P.io.ok?(P.io.bytes.toLocaleString()+" bytes"):"not run", reason: P.io.ok?"Full record serialized and re-parsed; packets, refusals, instances, receipt, live-motion refusal survive.":"Round-trip not completed.", tab:"io" }
+  ];
+  return rows;
+}
+function renderTrace(){
+  const rows = buildTraceRows();
+  $("trace").innerHTML = `<table class="trace"><thead><tr>
+    <th>#</th><th>Stage</th><th>Status</th><th>Basis</th><th>Event</th><th>Artifact</th><th>Technical reason</th><th>Inspector</th>
+    </tr></thead><tbody>${rows.map(r=>`
+    <tr class="trow" tabindex="0" data-tab="${r.tab}">
+      <td class="tn">${r.n}</td>
+      <td class="tt">${esc(r.title)}</td>
+      <td><span class="st ${stClass(r.status)}">${esc(r.status)}</span></td>
+      <td><span class="basis">${esc(r.basis)}</span></td>
+      <td class="tn">${esc(r.event)}</td>
+      <td class="tn">${esc(r.artifact)}</td>
+      <td class="treason">${esc(r.reason)}</td>
+      <td class="tptr">→ ${esc(r.tab)}</td>
+    </tr>`).join("")}</tbody></table>`;
+  Array.prototype.forEach.call(document.querySelectorAll(".trow"), el=>{
+    const go = ()=>{ selectTab(el.getAttribute("data-tab")); document.querySelector(".tabs").scrollIntoView({behavior:"smooth",block:"start"}); };
+    el.onclick = go;
+    el.onkeydown = e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); } };
+  });
+}
+
+/* ── B. GATE MATRIX ────────────────────────────────────────────────────── */
+function renderMatrix(){
+  const gm = P.gateMatrix;
+  const legend = ["ALLOW","WARN","VERIFY","REFUSE","ENFORCED SAFETY BOUNDARY"]
+    .map(s=>`<span class="st ${stClass(s)}">${esc(s)}</span>`).join("");
+  const rows = gm.rows.map((g,i)=>{
+    const blocking = g.blocking;
+    const isBlockRefuse = blocking && g.v2==="REFUSE";
+    return `<tr class="${isBlockRefuse?"blockrow":""}" id="grow-${i}">
+      <td><div class="gname">${esc(g.name)}</div><div class="gblock">${blocking?"blocking":"non-blocking"} · ${esc(g.basis)}</div></td>
+      <td><span class="st ${stClass(g.v1)}">${esc(g.v1)}</span></td>
+      <td><span class="st ${stClass(g.v2)}">${esc(g.v2)}</span></td>
+      <td><div class="gplain">${esc(g.plain)}</div>
+        <button class="matrix-expand" onclick="window.__toggleGate(${i})">detail</button>
+        <div class="gdetail">
+          <div class="gtech"><b>input:</b> ${esc(g.input)}</div>
+          <div class="gtech"><b>event:</b> ${esc(g.eventRef)}</div>
+          <div class="gtech"><b>technical:</b> ${esc(g.tech)}</div>
+          <div class="gaction"><b>action:</b> ${esc(g.action)}</div>
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+  $("matrix").innerHTML = `
+    <div class="matrix-meta">
+      <span class="overall ${overallClass(gm.overall)}"><span class="dot"></span>Overall v2: ${esc(gm.overall)}</span>
+      <span class="basis">aggregation: blocking REFUSE → BLOCKED · else VERIFY · else WARN · else ALLOW</span>
+      <div class="matrix-legend">${legend}</div>
+    </div>
+    <table class="matrix"><thead><tr>
+      <th>Gate</th><th>v1</th><th>v2</th><th>Condition · explanation · action</th>
+    </tr></thead><tbody>${rows}</tbody></table>
+    <div class="note-box" style="margin-top:12px"><b>Remote live motion</b> is shown as an <b>enforced safety boundary</b>, not an active blocking v2 REFUSE.
+    A forbidden live-motion command is attempted, refused by policy in running code, written to the event log, and preserved in the execution report.
+    That refusal does not make WorkPacket v2 appear unresolved or failed.</div>`;
+}
+window.__toggleGate = i => { const r=$("grow-"+i); if(r) r.classList.toggle("gopen"); };
+
+/* ── C. INSPECTOR ──────────────────────────────────────────────────────── */
+const TABS = [
+  ["record","Record Events"],["v1","WorkPacket v1"],["v2","WorkPacket v2"],["matrix","Gate Matrix"],
+  ["sku","SKU Port Output"],["instances","Material Instances"],["labor","Labor Requirements"],
+  ["envelope","MachineEnvelope"],["catalog","Operation Catalog"],["route","Routing / Decomposition"],
+  ["consent","Consent Grant"],["exec","Execution Report"],["receipt","Outcome Receipt"],
+  ["io","Export / Import"],["tests","Verification Tests"],["hidden","Hidden Work Notes"]
+];
+function renderTabs(){
+  $("tabs").innerHTML = TABS.map(([id,label])=>
+    `<button class="tab" data-tab="${id}" aria-pressed="${id===CURRENT_TAB}" onclick="window.__selTab('${id}')">${esc(label)}</button>`).join("");
+}
+window.__selTab = id => selectTab(id);
+function selectTab(id){ CURRENT_TAB=id; renderTabs(); renderPanel(); }
+
+function basisNote(){
+  return `<div class="note-box"><b>Basis taxonomy.</b> The source ontologies define <code>measured | channel_reported | derived</code> bases for later real-world records.
+  This browser harness intentionally restricts itself to <code>modeled | mock_fixture | reference | simulation</code> because it is a simulation-only proof artifact. No produced figure is labeled <code>measured</code>.</div>`;
+}
+function tierNote(){
+  return `<div class="note-box"><b>Labor-tier scope.</b> This harness exercises the subset of tiers its scenario needs — <code>OP · OP-MS · CS · VER · OA</code> — and evaluates OP-MS (material truth) and CS (setup integrity) separately.
+  The full labor-tier vocabulary is still being reconciled across the source documents; the canonical set is not yet frozen. The tiers shown here are the harness's working subset, not a final enumeration.</div>`;
+}
+
+function renderPanel(){
+  const r=P.rec; let h="";
+  switch(CURRENT_TAB){
+    case "record":{
+      h = `<div class="sectlabel">Owner-held record — projections</div>
+        <div class="kv">
+          <dt>schema</dt><dd>${esc(r.schema)}</dd>
+          <dt>ontologyVersion</dt><dd>${esc(r.ontologyVersion)}</dd>
+          <dt>recordId</dt><dd>${esc(r.recordId)}</dd>
+          <dt>project</dt><dd>${esc(r.project)}</dd>
+          <dt>events</dt><dd>${r.events.length}</dd>
+          <dt>packet versions</dt><dd>${esc(Object.keys(r.packets).join(", ")||"—")}</dd>
+          <dt>refusals preserved</dt><dd>${r.refusals.length}</dd>
+          <dt>sku resolutions</dt><dd>${r.skuResolutions.length}</dd>
+          <dt>material instances</dt><dd>${r.materialInstances.length}</dd>
+          <dt>outcomes archived</dt><dd>${r.outcomes.length}</dd>
+        </div>
+        <div class="sectlabel">Append-only event log (${r.events.length}) — every stage binds here</div>
+        ${r.events.map(e=>`<div class="eventrow">
+          <span class="seq">#${e.seq}</span>
+          <span class="type ${e.type.indexOf("refused")>=0?"refusal":""}">${esc(e.type)}</span>
+          <span class="detail">${esc(JSON.stringify(e.payload))}</span></div>`).join("")}
+        <div class="sectlabel">Refusal corpus (queryable, preserved across revision)</div>
+        ${r.refusals.length?`<table class="data"><thead><tr><th>code</th><th>packet v</th><th>line</th><th>raised by</th></tr></thead><tbody>
+          ${r.refusals.map(rf=>`<tr class="refused"><td><code>${esc(rf.code)}</code></td><td>v${rf.packetVersion}</td><td>${esc(rf.lineRef||"—")}</td><td>${esc(rf.raisedBy)}</td></tr>`).join("")}
+          </tbody></table>`:`<div class="empty">No refusals.</div>`}`;
+      break;
+    }
+    case "v1": h = packetPanel("v1"); break;
+    case "v2": h = packetPanel("v2"); break;
+    case "matrix":{
+      h = `<div class="sectlabel">Gate matrix — structured result object</div>
+        <div class="note-box">The Gate Matrix surface above renders this object. Overall v2 = <b>${esc(P.gateMatrix.overall)}</b>; active blocking refusals = ${P.gateMatrix.activeBlockingRefuse.length}.</div>
+        <pre class="json">${jsonHighlight(P.gateMatrix)}</pre>`;
+      break;
+    }
+    case "sku":{
+      h = `<div class="sectlabel">SKU port — in-browser mock seam (not a live integration)</div>
+        <div class="note-box"><b>SKU maps to material. SKU is not material identity.</b> The port has the request/response shape a real SKU service would have, but answers from an embedded fixture. Every line is resolved <b>before</b> routing.</div>
+        <table class="data"><thead><tr><th>lineId</th><th>material node</th><th>species</th><th>SKU</th><th>channelId</th><th>inStock</th><th>stockStatus</th><th>basis</th></tr></thead><tbody>
+        ${P.skuCoverage.lines.map(l=>`<tr><td><code>${esc(l.lineId)}</code></td><td>${esc(l.materialNode)}</td><td>${esc(l.selectedSpecies||"—")}</td>
+          <td><code>${esc(l.sku||"—")}</code></td><td><code>${esc(l.channelId||"—")}</code></td>
+          <td>${l.inStock?'<span class="pill ok">true</span>':'<span class="pill no">false</span>'}</td>
+          <td>${esc(l.stockStatus)}</td><td><span class="pill">${esc(l.basis)}</span></td></tr>`).join("")}
+        </tbody></table>
+        <div class="sectlabel">Raw port response (first line)</div>
+        <pre class="json">${jsonHighlight(E.SkuPort.lookup(P.skuCoverage.lines[0].node))}</pre>`;
+      break;
+    }
+    case "instances":{
+      h = `<div class="sectlabel">Material instances — created before execution</div>
+        <div class="note-box"><b>skuIsIdentity = false</b> on every instance. The material requirement is preserved independent of the SKU mapping.</div>
+        <pre class="json">${jsonHighlight(P.instances)}</pre>`;
+      break;
+    }
+    case "labor":{
+      const L=P.labor;
+      h = `<div class="sectlabel">Labor requirements — tiers evaluated separately</div>
+        <div class="note-box"><b>OP-MS</b> (material truth: species · grade · flatness · emission class · condition) and <b>CS</b> (setup integrity: machine readiness · calibration · tool setup · stop / refusal authority) are kept distinct and evaluated independently.</div>
+        <table class="data"><thead><tr><th>tier</th><th>role</th><th>domain</th><th>tasks</th><th>cell-bound</th><th>certified</th><th>scope</th><th>result</th></tr></thead><tbody>
+        ${L.rows.map(rw=>`<tr class="${rw.ok?"":"refused"}"><td><code>${esc(rw.tier)}</code></td><td>${esc(rw.def.label)}</td><td>${esc(rw.def.domain||"—")}</td>
+          <td>${esc(rw.tasks.join(", "))}</td><td>${rw.cellBound?"yes":"no"}</td>
+          <td>${rw.tierCertified?'<span class="pill ok">yes</span>':'<span class="pill no">no</span>'}</td>
+          <td>${rw.scopeCovered?'<span class="pill ok">yes</span>':'<span class="pill no">no</span>'}</td>
+          <td>${rw.ok?'<span class="pill ok">ok</span>':'<span class="pill no">gap</span>'}</td></tr>`).join("")}
+        </tbody></table>
+        <div class="kv"><dt>OP-MS evaluated</dt><dd>${L.opmsEvaluated} (${esc(L.opms?L.opms.def.concern:"—")})</dd>
+        <dt>CS evaluated</dt><dd>${L.csEvaluated} (${esc(L.cs?L.cs.def.concern:"—")})</dd></div>
+        ${tierNote()}`;
+      break;
+    }
+    case "envelope":{
+      h = `<div class="sectlabel">MachineEnvelopes — the two-machine cell</div>
+        <pre class="json">${jsonHighlight(E.MACHINE_ENVELOPES)}</pre>
+        <div class="sectlabel">Envelope evaluation for this packet (v2)</div>
+        <table class="data"><thead><tr><th>line</th><th>op</th><th>support</th><th>envelope</th><th>req tol</th><th>floor</th><th>fit</th></tr></thead><tbody>
+        ${P.envelope.ops.map(o=>`<tr class="${o.fit?"":"refused"}"><td><code>${esc(o.line)}</code></td><td>${esc(o.op)}</td><td>${esc(o.support)}</td>
+          <td><code>${esc(o.envelopeId||"—")}</code></td><td>±${esc(o.requiredToleranceIn)}"</td><td>${o.floorIn!=null?"±"+esc(o.floorIn)+'"':"—"}</td>
+          <td>${o.fit?'<span class="pill ok">fit</span>':'<span class="pill no">refuse</span>'}</td></tr>`).join("")}
+        </tbody></table>
+        <div class="sectlabel">Machine → packet refusal code map</div>
+        <pre class="json">${jsonHighlight(E.MACHINE_TO_PACKET_REFUSAL)}</pre>`;
+      break;
+    }
+    case "catalog":{
+      h = `<div class="sectlabel">Operation catalog — what the cell can repeat or refuse</div>
+        <table class="data"><thead><tr><th>operation</th><th>support</th><th>cell</th><th>note</th></tr></thead><tbody>
+        ${E.OPERATION_CATALOG.map(o=>{
+          const cls = o.support==="deferred_v2"||o.support==="not_supported"?"refused":"";
+          const label = {v1:"V1 supported",v1_verify:"V1 supported · verification",deferred_v2:"Deferred V2",conditional_doormill:"In-cell door milling only",not_supported:"Not supported"}[o.support]||o.support;
+          return `<tr class="${cls}"><td>${esc(o.label)}</td><td>${esc(label)}</td><td><code>${esc(o.cell||"—")}</code></td><td>${esc(o.note)}</td></tr>`;
+        }).join("")}
+        </tbody></table>
+        <div class="note-box">Deferred V2 operations (dado / groove · rabbet · pocket / mortise) are <b>refused</b> if inserted into a packet. Hinge boring / routing is supported only under in-cell door milling and only if the envelope supports it.</div>
+        <div class="sectlabel">Cycle-time model (computed from packet content)</div>
+        <pre class="json">${jsonHighlight(P.cycle)}</pre>`;
+      break;
+    }
+    case "route":{
+      h = `<div class="sectlabel">Routing — capability evaluation, not shopping</div>
+        ${P.routing.evals.map(ev=>routeChannelHTML(ev)).join("")}
+        <div class="sectlabel">Decomposition</div>
+        <table class="data"><thead><tr><th>scope</th><th>kind</th><th>channel</th><th>lines</th><th>lead</th></tr></thead><tbody>
+        ${P.routing.decomposition.map(d=>`<tr><td>${esc(d.scope)}</td><td>${esc(d.kind)}</td><td>${esc(d.name||d.channelId||"—")}</td>
+          <td><code>${esc(d.lines.join(", "))}</code></td><td>${d.leadTimeDaysRange?(d.leadTimeDaysRange[0]+"–"+d.leadTimeDaysRange[1]+"d "):'<span class="pill mod">modeled</span>'}${d.leadTimeDaysRange?'<span class="pill mod">modeled</span>':"in-cell"}</td></tr>`).join("")}
+        </tbody></table>`;
+      break;
+    }
+    case "consent":{
+      h = P.consent
+        ? `<div class="sectlabel">Packet-scoped consent grant</div>
+           <div class="note-box">Consent is one packet, one channel — not a blanket license.</div>
+           <pre class="json">${jsonHighlight(P.consent)}</pre>`
+        : `<div class="empty">No consent granted — current scenario is not proceedable (see Gate Matrix / Workflow Trace).</div>`;
+      break;
+    }
+    case "exec":{
+      h = P.report ? execHTML(P.report)
+        : `<div class="empty">No execution report — current scenario did not proceed past consent.</div>`;
+      break;
+    }
+    case "receipt":{
+      h = P.receipt
+        ? `<div class="sectlabel">Outcome receipt — archived to the owner record</div>
+           <div class="note-box">This archived outcome is the receipt Home as a Twin carries forward into the owner-held record for the next project.</div>
+           <pre class="json">${jsonHighlight(P.receipt)}</pre>`
+        : `<div class="empty">No receipt — current scenario did not produce a proceedable, archivable outcome.</div>`;
+      break;
+    }
+    case "io": h = ioPanel(); break;
+    case "tests": h = testsPanelInner(); break;
+    case "hidden": h = hiddenNotesHTML(); break;
+  }
+  $("panel").innerHTML = h + (["sku","instances","exec","receipt","route","catalog"].indexOf(CURRENT_TAB)>=0 ? basisNote() : "");
+}
+
+function packetPanel(which){
+  const key = which==="v1" ? Object.keys(P.rec.packets).find(k=>k.endsWith("@v1")) : Object.keys(P.rec.packets).find(k=>k.endsWith("@v2"));
+  const packet = P.rec.packets[key];
+  const refusals = which==="v1" ? P.v1refusals : P.v2refusals;
+  const intent = which==="v1"
+    ? "Built flawed on purpose. v1 fails for pre-execution <b>definition</b> defects only — not for consent / execution / receipt / export, which are later lifecycle stages."
+    : "Resolves the blocking v1 defects: verified capture, out-of-square resolved by simulated capture + scribe allowance, NAF material, re-spec tolerance, resolved BOM, distinct OP-MS / CS / VER labor, door branch resolved.";
+  return `<div class="sectlabel">WorkPacket ${which} — ${esc(key)}</div>
+    <div class="note-box">${intent}</div>
+    ${refusals.length?`<div class="sectlabel">Refusals (${refusals.length})</div>${refusals.map(rf=>`
+      <div class="refusal-card"><div class="code">${esc(rf.code)}${rf.lineRef?" · "+esc(rf.lineRef):""}</div>
+      <p class="owner">${esc(rf.ownerExplanation)}</p></div>`).join("")}`:`<div class="note-box"><b>No refusals.</b> This packet passes validation.</div>`}
+    <div class="sectlabel">Committed packet (immutable)</div>
+    <pre class="json">${jsonHighlight(packet)}</pre>`;
+}
+
+function routeChannelHTML(ev){
+  if(ev.eligible){
+    const win = P.routing.winner && P.routing.winner.channelId===ev.channelId;
+    const q=ev.quote;
+    return `<div class="note-box" style="border-left-color:${win?'var(--allow)':'var(--rule)'}">
+      <b>${esc(ev.name)}</b> ${win?'<span class="pill ok">selected winner</span>':'<span class="pill ok">eligible</span>'}
+      <table class="data"><thead><tr><th>price</th><th>lead</th><th>atom-miles</th><th>local share</th><th>SKU</th></tr></thead><tbody>
+      <tr><td>$${esc(q.priceUsd)} <span class="pill mod">modeled</span></td><td>${esc(q.leadTimeDays)}d <span class="pill mod">modeled</span></td>
+      <td>${esc(q.atomMiles)} <span class="pill mod">modeled</span></td><td>${Math.round(q.localShare*100)}% <span class="pill mod">modeled</span></td>
+      <td>${esc(q.skuCoverage)}</td></tr></tbody></table></div>`;
+  }
+  return `<div class="note-box" style="border-left-color:var(--refuse)">
+    <b>${esc(ev.name)}</b> <span class="pill no">refused</span>
+    ${ev.reasons.map(rf=>`<div class="refusal-card"><div class="code">${esc(rf.code)}</div><p class="owner">${esc(rf.ownerExplanation)}</p></div>`).join("")}</div>`;
+}
+
+function execHTML(rep){
+  const m=rep.liveMotionAttempt;
+  return `<div class="sectlabel">Execution report — controllerPolicy: simulationOnly · productionReadinessEstablished: false</div>
+    <div class="sectlabel">Remote live-motion command — attempted &amp; refused (in running code)</div>
+    <div class="refusal-card"><div class="code">${esc(m.machineCode)} → ${esc(m.packetCode)} · ${esc(m.classification)}</div>
+      <p class="owner">${esc(m.message)}</p></div>
+    <div class="sectlabel">Sheet cell — state sequence (simulated)</div>
+    <div class="stateflow">${rep.stateTrace.sheet.map(s=>`<span class="s">${esc(s.state)}</span>`).join("")}</div>
+    <div class="sectlabel">Dimensional cell — state sequence (simulated)</div>
+    <div class="stateflow">${rep.stateTrace.dimensional.map(s=>`<span class="s">${esc(s.state)}</span>`).join("")}</div>
+    <div class="sectlabel">Report figures — every value carries a basis</div>
+    <table class="data"><thead><tr><th>metric</th><th>value</th><th>basis</th><th>source events</th></tr></thead><tbody>
+    ${rep.metrics.map(mt=>`<tr><td><code>${esc(mt.name)}</code></td><td>${esc(String(mt.value))}</td>
+      <td><span class="pill mod">${esc(mt.basis)}</span></td><td><code>${esc(mt.sourceEvents.join(", "))}</code></td></tr>`).join("")}
+    </tbody></table>
+    <div class="sectlabel">Full execution report object</div>
+    <pre class="json">${jsonHighlight(rep)}</pre>`;
+}
+
+function ioPanel(){
+  return `<div class="sectlabel">Export / import — the record can travel</div>
+    <div class="note-box">Export serializes the entire owner-held record (events, packets, refusals, SKU resolutions, instances, routing, consent, execution report, outcomes). Import parses it back and re-verifies the round-trip.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 12px">
+      <button class="btn" onclick="window.__doExport()">Export record → JSON</button>
+      <button class="btn ghost" onclick="window.__doImport()">Import &amp; verify round-trip</button>
+    </div>
+    <div id="io-result"></div>
+    <div class="sectlabel">Round-trip checks (current pipeline)</div>
+    <table class="data"><thead><tr><th>check</th><th>result</th></tr></thead><tbody>
+    ${Object.keys(P.io.checks).map(k=>`<tr><td><code>${esc(k)}</code></td><td>${P.io.checks[k]?'<span class="pill ok">pass</span>':'<span class="pill no">fail</span>'}</td></tr>`).join("")}
+    </tbody></table>
+    <pre class="json" id="io-json" style="margin-top:10px;max-height:320px">${jsonHighlight({hint:"Export to populate"})}</pre>`;
+}
+window.__doExport = function(){
+  EXPORTED = E.exportRecord(P.rec);
+  $("io-json").innerHTML = jsonHighlight(P.rec);
+  $("io-result").innerHTML = `<div class="note-box"><b>EXPORTED.</b> ${EXPORTED.length.toLocaleString()} bytes serialized. Import to prove the round-trip.</div>`;
+  try{ const blob=new Blob([EXPORTED],{type:"application/json"}); const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob); a.download="owner-record.json"; a.click(); URL.revokeObjectURL(a.href); }catch(e){}
+};
+window.__doImport = function(){
+  if(!EXPORTED){ $("io-result").innerHTML=`<div class="refusal-card"><div class="code">NOTHING TO IMPORT</div><p class="owner">Export first.</p></div>`; return; }
+  const back = E.importRecord(EXPORTED);
+  const rt = E.roundTrip(P.rec);
+  const ok = rt.ok && back.recordId===P.rec.recordId && back.events.length===P.rec.events.length;
+  $("io-result").innerHTML = ok
+    ? `<div class="note-box" style="border-left-color:var(--allow)"><b>ROUND-TRIP VERIFIED.</b> ${back.events.length} events · ${Object.keys(back.packets).length} packets · ${back.refusals.length} refusals · ${back.materialInstances.length} instances · ${back.outcomes.length} outcome(s). Live-motion refusal and basis labels survive; no basis became <code>measured</code>.</div>`
+    : `<div class="refusal-card"><div class="code">ROUND-TRIP MISMATCH</div><p class="owner">Imported record did not match the source.</p></div>`;
+};
+
+function hiddenNotesHTML(){
+  const items = [
+    ["Definition is not a drawing","A WorkPacket carries geometry, material, labor, routing, consent, and machine constraints under one governed shape — versioned and immutable per revision."],
+    ["SKU is not material identity","A SKU maps to a material node. The material requirement remains preserved in the packet and the receipt; instances carry skuIsIdentity=false."],
+    ["Refusal is a feature","Unsupported or unresolved work becomes a preserved event with a code, not a hidden exception. The v1 refusal corpus survives into v2 and the receipt."],
+    ["Routing is not shopping","Channels are evaluated against capability, labor tier, calibration, SKU coverage, scope, and release conditions — not browsed by price alone."],
+    ["MachineEnvelope is the boundary","The system does not ask whether a machine is generally capable; it asks whether this operation fits this declared envelope, at this tolerance floor."],
+    ["Execution is not remote live control","The harness produces an execution report and refuses live-motion commands in code. The refusal is preserved as an auditable event, not a packet failure."],
+    ["The receipt matters","The outcome writes back to the owner-held record so the next project starts from accumulated evidence rather than zero."]
+  ];
+  return `<div class="sectlabel">Hidden work — notes</div>` + items.map(([h,p])=>
+    `<div class="note-box"><b>${esc(h)}.</b> ${esc(p)}</div>`).join("");
+}
+
+/* ── D. VERIFICATION TESTS ─────────────────────────────────────────────── */
+function testsMarkup(){
+  const R = E.runTests();
+  return R.tests.map(t=>`<div class="test">
+      <span class="res ${t.pass?"pass":"fail"}">${t.pass?"PASS":"FAIL"}</span>
+      <span class="desc">${esc(t.desc)}${t.note?`<small>${esc(t.note)}</small>`:""}</span></div>`).join("") +
+    `<div class="testsummary">${R.passed} / ${R.total} passing${R.passed===R.total?" — interaction model verified end to end.":" — see failures above."}</div>`;
+}
+function testsPanelInner(){
+  return `<div class="sectlabel">Verification — runs the engine live</div>` + testsMarkup();
+}
+function renderTests(){
+  $("tests").innerHTML = testsMarkup();
+}
+
+/* ── E. HIDDEN WORK (top-level cards) ──────────────────────────────────── */
+function renderHidden(){
+  const cards = [
+    ["Definition","Definition is not a drawing","A WorkPacket carries geometry, material, labor, routing, consent, and machine constraints under one governed, versioned shape."],
+    ["Identity","SKU is not material identity","A SKU maps to a material node; the material requirement is preserved in the packet and receipt (skuIsIdentity=false)."],
+    ["Refusal","Refusal is a feature","Unsupported or unresolved work becomes a preserved event with a code, not a hidden exception."],
+    ["Routing","Routing is not shopping","Channels are evaluated against capability, labor tier, calibration, stock, scope, and release conditions."],
+    ["Envelope","MachineEnvelope is the boundary","The question is not whether a machine is generally capable, but whether this operation fits this declared envelope."],
+    ["Execution","Execution is not remote live control","The harness produces a report and refuses live-motion commands in code; the refusal is an auditable event."],
+    ["Receipt","The receipt matters","The outcome writes back to the owner-held record so the next project starts from accumulated evidence."]
+  ];
+  $("hidden").innerHTML = cards.map(([lead,h,p])=>
+    `<div class="hidden-card"><span class="lead">${esc(lead)}</span><h4>${esc(h)}</h4><p>${esc(p)}</p></div>`).join("");
+}
+
+/* ── footer ────────────────────────────────────────────────────────────── */
+function renderFoot(){
+  $("foot").innerHTML = `Embedded Workflow Simulation — Project 01, Alcove Built-In · ${esc(E.ONTOLOGY_VERSION)} · ${esc(E.MFKO_VERSION)}<br>
+    Single-file · offline · no dependencies · no network · no database · no production claim. Every produced figure carries a basis in { modeled · mock_fixture · reference · simulation }.`;
+}
+
+/* ── orchestration ─────────────────────────────────────────────────────── */
+function rebuild(){
+  P = E.runPipeline(SCENARIO);
+  renderControls();
+  renderTrace();
+  renderMatrix();
+  renderTabs();
+  renderPanel();
+  renderTests();
+  renderHidden();
+  renderFoot();
+}
+
+/* boot */
+rebuild();
+})();
+
+</script>
+</body>
+</html>
