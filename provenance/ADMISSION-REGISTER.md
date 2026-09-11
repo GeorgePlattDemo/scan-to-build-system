@@ -4,8 +4,6 @@ This register records what has crossed the line into the post-app working baseli
 
 ## Foundation-created documents
 
-The following documents were created directly for `scan-to-build-system` from the accepted post-app state and verified source identities. They are not legacy documents copied wholesale:
-
 | Path | Status | Basis |
 | --- | --- | --- |
 | `README.md` | CURRENT REPOSITORY BASELINE | Created for the new working repository before Foundation Commit 1 |
@@ -16,30 +14,47 @@ The following documents were created directly for `scan-to-build-system` from th
 | `provenance/README.md` | CURRENT REPOSITORY BASELINE | Admission/provenance policy |
 | `provenance/SOURCE-PINS.md` | CURRENT REPOSITORY BASELINE | Exact source identities |
 | `provenance/ADMISSION-REGISTER.md` | CURRENT REPOSITORY BASELINE | This register |
+| `docs/governance/README.md` | CURRENT REPOSITORY BASELINE | Navigation and authority explanation for admitted governance sources |
+| `docs/governance/CONTROLLING-SOURCE-POINTERS.md` | CURRENT REPOSITORY BASELINE | Exact pin/path register for large current governed documents awaiting byte-exact transfer |
 
-## Legacy documents admitted as-is
+## Legacy documents admitted as-is — Governed Reference
 
-None yet.
+All entries below are copied from `GeorgePlattDemo/scan-to-build-governed-reference` at exact pin `18949f163718a937f072f4be3a654bb303e53160`. Copying them here does not broaden their source-defined authority.
 
-Foundation Commit 1 deliberately establishes the gate before importing legacy documents.
+| Local path | Source path | Admission |
+| --- | --- | --- |
+| `docs/governance/source/README-GOVERNED-REFERENCE.md` | `README.md` | ADMIT AS-IS |
+| `docs/governance/source/STB-BUILD-M1.md` | `STB-BUILD-M1.md` | ADMIT AS-IS |
+| `docs/governance/source/GOVERNANCE.md` | `GOVERNANCE.md` | ADMIT AS-IS |
+| `docs/governance/source/REVIEWING.md` | `REVIEWING.md` | ADMIT AS-IS |
+| `docs/governance/source/SECURITY.md` | `SECURITY.md` | ADMIT AS-IS |
+| `docs/governance/source/THREAT_MODEL.md` | `THREAT_MODEL.md` | ADMIT AS-IS |
+| `docs/governance/architecture/architecture-boundary.md` | `docs/architecture-boundary.md` | ADMIT AS-IS |
+| `docs/governance/architecture/current-simulation-authority.md` | `docs/architecture/current-simulation-authority.md` | ADMIT AS-IS |
+| `docs/governance/reference-node/README.md` | `docs/reference-node/README.md` | ADMIT AS-IS |
+| `docs/governance/corrections/G-I0-COMPOSITION-0.1.md` | `docs/corrections/G-I0-COMPOSITION-0.1.md` | ADMIT AS-IS |
 
-## Legacy documents admitted after rewrite
+## Large governed documents pending exact transfer
 
-None yet.
+The following are current and important but are not reconstructed from partial reads. Their exact source identities are preserved in `docs/governance/CONTROLLING-SOURCE-POINTERS.md`.
 
-## Explicitly not admitted in Foundation Commit 1
+- `specs/STB-REF-0.2.5.md`
+- `plans/STB-PLAN-0.2.5.md`
+- `docs/architecture/common-entry-contexts.md`
+- `docs/architecture/demand-architecture-traceability.md`
+- `foundations/NC_Wood_Demand_as_Architecture_ss1-12_0.3.md` — research/foundation admission deferred
+
+## Explicitly not admitted
 
 ### Sarah / early demo material
 
 **Disposition:** pending later review; not current baseline.
 
-Reason: the early Sarah chain was intentionally a toy/research demonstration and crosses periods of terminology, Store, governance, and authority evolution. Useful content may later be recovered, but early wording and flows are not trusted by default.
+The early Sarah chain was intentionally a toy/research demonstration and crosses periods of terminology, Store, governance, and authority evolution. Useful content may later be recovered, but early wording and flows are not trusted by default.
 
 ### Public review and public demo material
 
 **Disposition:** pending later review or archive placement.
-
-Reason: substantial useful architecture, research, diagrams, and explanations exist, but they require item-level reconciliation against current language and ownership before admission.
 
 ### Transfer Staging / rejected candidates
 
@@ -47,12 +62,8 @@ Reason: substantial useful architecture, research, diagrams, and explanations ex
 
 ### Historical machine/cell material
 
-**Disposition:** pending later review.
-
-Reason: current physical machine direction remains under development; old descriptions must not create unearned present-tense capability.
+**Disposition:** pending later review. Current physical machine direction remains under development.
 
 ### Patent PDFs
 
 **Disposition:** primary archival sources; full ingestion deferred.
-
-Existing mappings may be reviewed later. Full issued patent files are intended for final archival packaging.
