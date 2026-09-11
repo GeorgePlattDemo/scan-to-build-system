@@ -1,0 +1,83 @@
+name: Import public source-library snapshots
+
+on:
+  push:
+    paths:
+      - '.github/workflows/import-public-source-library.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Import pinned public repositories
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          REVIEW_SHA='ab3e35e54d022928d0dd64aae58679fd893f65d2'
+          DEMO_SHA='ea17feeac299fc359c6776f85019b242ffffc085'
+
+          rm -rf /tmp/stb-review /tmp/stb-demo
+          git clone --quiet https://github.com/GeorgePlattDemo/scan-to-build-review.git /tmp/stb-review
+          git -C /tmp/stb-review checkout --quiet --detach "$REVIEW_SHA"
+          git clone --quiet https://github.com/GeorgePlattDemo/Scan-to-Build.git /tmp/stb-demo
+          git -C /tmp/stb-demo checkout --quiet --detach "$DEMO_SHA"
+
+          rm -rf source-library/public-technical/scan-to-build-review
+          rm -rf source-library/journey-donors/public-demo-snapshot
+          mkdir -p source-library/public-technical/scan-to-build-review
+          mkdir -p source-library/journey-donors/public-demo-snapshot
+
+          rsync -a --exclude='.git' /tmp/stb-review/ source-library/public-technical/scan-to-build-review/
+          rsync -a --exclude='.git' /tmp/stb-demo/ source-library/journey-donors/public-demo-snapshot/
+
+          cat > source-library/public-technical/README.md <<'EOF'
+          # Public technical source library
+
+          This bucket contains a complete pinned snapshot of the public `scan-to-build-review` repository.
+
+          - source: `GeorgePlattDemo/scan-to-build-review`
+          - pin: `ab3e35e54d022928d0dd64aae58679fd893f65d2`
+          - disposition: **REFERENCE / DONOR — NOT CURRENT AUTHORITY AS A WHOLE**
+
+          The snapshot is preserved because it contains substantial useful prior work: architecture, continuous engineering, patent-to-architecture mapping, machine/kinematic ontology, material/labor ontology, WorkPacket examples, operational roadmap, institutional/research material, public demonstrations, and review artifacts.
+
+          Current owner-layer documents in the system repository control where language, authority, capability, or workflow evolved later. In particular, machine/control claims, packet semantics, Store semantics, and old stage language must be reconciled before reuse.
+
+          Preservation here is not admission as current architecture.
+          EOF
+
+          cat > source-library/journey-donors/PUBLIC-DEMO-SNAPSHOT.md <<'EOF'
+          # Original public demonstration snapshot
+
+          Complete pinned snapshot:
+
+          - source: `GeorgePlattDemo/Scan-to-Build`
+          - pin: `ea17feeac299fc359c6776f85019b242ffffc085`
+          - destination: `public-demo-snapshot/`
+          - disposition: **EXPERIENCE / STORY / PROVENANCE DONOR**
+
+          This snapshot preserves the original public demonstration, including useful interaction/story structure and historical PDFs. Its older execution, packet, patent, price, stock, or controller implications do not control the post-app system.
+
+          Sarah-era or early-demo behavior is never promoted merely because it is preserved here.
+          EOF
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add source-library/public-technical source-library/journey-donors
+
+          if git diff --cached --quiet; then
+            echo 'Public source-library snapshots already match the pins.'
+            exit 0
+          fi
+
+          git commit -m 'Foundation 6D: preserve public technical and demo sources'
+          git push origin HEAD:main
