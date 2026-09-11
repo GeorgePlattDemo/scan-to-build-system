@@ -1,0 +1,87 @@
+name: Import issued patent PDFs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/import-issued-patents.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  import-patents:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve and download issued patent PDFs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          from urllib.request import Request, urlopen
+          import hashlib
+
+          publications = {
+              'US9720401B2': 'https://patents.google.com/patent/US9720401B2/en',
+              'US10768609B2': 'https://patents.google.com/patent/US10768609B2/en',
+          }
+
+          class CitationPDFParser(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.pdf_url = None
+
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() != 'meta':
+                      return
+                  values = {k.lower(): v for k, v in attrs if k and v is not None}
+                  if values.get('name', '').lower() == 'citation_pdf_url':
+                      self.pdf_url = values.get('content')
+
+          out = Path('docs/patents/source')
+          out.mkdir(parents=True, exist_ok=True)
+          sums = []
+
+          for publication, page_url in publications.items():
+              request = Request(page_url, headers={'User-Agent': 'scan-to-build-source-import/1.0'})
+              page = urlopen(request, timeout=60).read().decode('utf-8', 'replace')
+              parser = CitationPDFParser()
+              parser.feed(page)
+              if not parser.pdf_url:
+                  raise RuntimeError(f'No citation_pdf_url found for {publication}')
+
+              pdf_request = Request(parser.pdf_url, headers={'User-Agent': 'scan-to-build-source-import/1.0'})
+              data = urlopen(pdf_request, timeout=120).read()
+              if not data.startswith(b'%PDF-'):
+                  raise RuntimeError(f'{publication} download is not a PDF')
+              if len(data) < 500_000:
+                  raise RuntimeError(f'{publication} PDF is unexpectedly small: {len(data)} bytes')
+
+              target = out / f'{publication}.pdf'
+              target.write_bytes(data)
+              sums.append(f"{hashlib.sha256(data).hexdigest()}  {target.as_posix()}")
+
+          (out / 'SHA256SUMS.txt').write_text('\n'.join(sums) + '\n', encoding='utf-8')
+          PY
+
+      - name: Commit issued patent sources
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/patents/source/US9720401B2.pdf \
+                  docs/patents/source/US10768609B2.pdf \
+                  docs/patents/source/SHA256SUMS.txt
+          if git diff --cached --quiet; then
+            echo 'Patent PDFs already match repository copies.'
+            exit 0
+          fi
+          git commit -m 'Add issued patent PDFs as primary sources'
+          git push
