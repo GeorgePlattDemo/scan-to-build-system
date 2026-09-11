@@ -17,22 +17,58 @@ This register records what has crossed the line into the post-app working baseli
 | `docs/governance/README.md` | CURRENT REPOSITORY BASELINE | Navigation and authority explanation for admitted governance sources |
 | `docs/governance/CONTROLLING-SOURCE-POINTERS.md` | CURRENT REPOSITORY BASELINE | Exact pin/path register for large current governed documents awaiting byte-exact transfer |
 
-## Legacy documents admitted as-is — Governed Reference
+## Governed Reference source identity
 
-All entries below are copied from `GeorgePlattDemo/scan-to-build-governed-reference` at exact pin `18949f163718a937f072f4be3a654bb303e53160`. Copying them here does not broaden their source-defined authority.
+All admitted governance source documents below come from:
 
-| Local path | Source path | Admission |
-| --- | --- | --- |
-| `docs/governance/source/README-GOVERNED-REFERENCE.md` | `README.md` | ADMIT AS-IS |
-| `docs/governance/source/STB-BUILD-M1.md` | `STB-BUILD-M1.md` | ADMIT AS-IS |
-| `docs/governance/source/GOVERNANCE.md` | `GOVERNANCE.md` | ADMIT AS-IS |
-| `docs/governance/source/REVIEWING.md` | `REVIEWING.md` | ADMIT AS-IS |
-| `docs/governance/source/SECURITY.md` | `SECURITY.md` | ADMIT AS-IS |
-| `docs/governance/source/THREAT_MODEL.md` | `THREAT_MODEL.md` | ADMIT AS-IS |
-| `docs/governance/architecture/architecture-boundary.md` | `docs/architecture-boundary.md` | ADMIT AS-IS |
-| `docs/governance/architecture/current-simulation-authority.md` | `docs/architecture/current-simulation-authority.md` | ADMIT AS-IS |
-| `docs/governance/reference-node/README.md` | `docs/reference-node/README.md` | ADMIT AS-IS |
-| `docs/governance/corrections/G-I0-COMPOSITION-0.1.md` | `docs/corrections/G-I0-COMPOSITION-0.1.md` | ADMIT AS-IS |
+- repository: `GeorgePlattDemo/scan-to-build-governed-reference`
+- source pin: `18949f163718a937f072f4be3a654bb303e53160`
+- admission: `ADMIT AS-IS`
+
+Copying a source snapshot here does not broaden its original authority or convert informative/planned text into an active requirement.
+
+### Core source and implementation guidance
+
+- `docs/governance/source/README-GOVERNED-REFERENCE.md` ← `README.md`
+- `docs/governance/source/STB-BUILD-M1.md` ← `STB-BUILD-M1.md`
+- `docs/governance/source/GOVERNANCE.md` ← `GOVERNANCE.md`
+- `docs/governance/source/REVIEWING.md` ← `REVIEWING.md`
+- `docs/governance/source/SECURITY.md` ← `SECURITY.md`
+- `docs/governance/source/THREAT_MODEL.md` ← `THREAT_MODEL.md`
+- `docs/governance/source/CHANGE-REGISTER.md` ← `CHANGE-REGISTER.md`
+- `docs/governance/source/CHANGELOG.md` ← `CHANGELOG.md`
+- `docs/governance/source/MODULE-INVENTORY.md` ← `MODULE-INVENTORY.md`
+- `docs/governance/source/FINAL-VALIDATION-REPORT.md` ← `FINAL-VALIDATION-REPORT.md`
+- `docs/governance/source/FREEZE-REPORT.md` ← `FREEZE-REPORT.md`
+- `docs/governance/source/NOTICE.md` ← `NOTICE.md`
+- `docs/governance/source/LICENSE-STATUS.md` ← `LICENSE-STATUS.md`
+
+### Current architecture and boundary guidance
+
+- `docs/governance/architecture/architecture-boundary.md` ← `docs/architecture-boundary.md`
+- `docs/governance/architecture/current-simulation-authority.md` ← `docs/architecture/current-simulation-authority.md`
+- `docs/governance/architecture/information-custody-0.1.md` ← same source path
+- `docs/governance/architecture/disclosure-traversal-0.1.md` ← same source path
+- `docs/governance/architecture/external-processing-0.1.md` ← same source path
+- `docs/governance/architecture/participant-contribution-0.1.md` ← same source path
+- `docs/governance/architecture/planned-custody-mechanisms-0.1.md` ← same source path
+- `docs/governance/architecture/aggregate-stewardship-unresolved-0.1.md` ← same source path
+- `docs/governance/architecture/fixture-revision.md` ← same source path
+- `docs/governance/architecture/metric-limitation-m1.md` ← same source path
+- `docs/governance/identifier-policy.md` ← `docs/identifier-policy.md`
+- `docs/governance/reference-node/README.md` ← `docs/reference-node/README.md`
+- `docs/governance/corrections/G-I0-COMPOSITION-0.1.md` ← same source path
+
+### Accepted architecture decisions
+
+Exact source snapshots of ADR-0008 through ADR-0020 are admitted under `docs/governance/adrs/`.
+
+### Legal/provenance guidance
+
+- `docs/governance/legal/ownership-questions.md` ← `legal/ownership-questions.md`
+- `docs/governance/legal/patent-bibliography.md` ← `legal/patents/README.md`
+
+These legal-source documents retain their own disclaimers and do not become legal opinions by being copied here.
 
 ## Large governed documents pending exact transfer
 

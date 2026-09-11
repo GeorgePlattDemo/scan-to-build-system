@@ -143,5 +143,7 @@ Safety, refusal, unresolved conditions, human responsibility, and physical opera
 - [`docs/project/CURRENT-STATE.md`](docs/project/CURRENT-STATE.md) — concise capability baseline
 - [`docs/project/SOURCE-AUTHORITY.md`](docs/project/SOURCE-AUTHORITY.md) — layer ownership and precedence
 - [`docs/definitions/README.md`](docs/definitions/README.md) — protected terminology/admission discipline
+- [`docs/governance/README.md`](docs/governance/README.md) — admitted governed guidance and builder reading order
+- [`docs/governance/CONTROLLING-SOURCE-POINTERS.md`](docs/governance/CONTROLLING-SOURCE-POINTERS.md) — large current governed sources pinned pending exact transfer
 - [`provenance/SOURCE-PINS.md`](provenance/SOURCE-PINS.md) — exact source identities
 - [`provenance/ADMISSION-REGISTER.md`](provenance/ADMISSION-REGISTER.md) — what has and has not crossed into this baseline
