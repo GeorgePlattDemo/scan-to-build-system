@@ -1,96 +1,108 @@
-# Sheet Model 0.1 — beginning stage
+# Sheet Model 0.1 — Mode-2 2D stencil routing
 
-**Status:** first load  
-**Evidence class:** REFERENCE beginning-stage model  
-**Not:** commissioned sheet machine, tandem cell, or production
+**Status:** evolved from beginning-stage rectangular blank  
+**Evidence class:** REFERENCE  
+**Physical status:** NOT CLAIMED  
+**Capability id:** `SHEET_MODE2_STENCIL_V1`
 
-Same document shape as the dimensional model. Thinner envelope on purpose.
+The beginning-stage `RECTANGULAR_BLANK` family remains the ancestor of `STRAIGHT_RECT`. It is not erased. Contour work now has a second declared family, `CURVILINEAR_OUTLINE`, still without a CAD kernel.
 
 ## 1. What this model is
 
-A Store-callable **beginning-stage** sheet offering:
+A Store-callable Mode-2 REFERENCE offering:
 
 - one sheet parent;
-- one rectangular blank / straight registered cut family;
+- a straight-sided component or a component with a curvilinear outline;
+- retained stencil tabs / attachment points;
+- later secondary separation, not claimed automated;
 - label;
 - record the chain.
 
-It exists so Store 1 can name a second capability without pretending a full panel cell is installed.
-
-S-001 Cell-spine description and patent sheet figures stay donors. They do not fill missing cells in this model.
+S-001 cell-spine description and patent sheet figures stay donors. They do not fill missing cells in this model.
 
 ## 2. Stock class
 
 | Item | Value | Class |
 | --- | --- | --- |
 | Form | sheet goods | REFERENCE |
-| First published family | rectangular blank from a supported sheet offering | PLANNED / REFERENCE |
-| First useful task | UNRESOLVED as physical build; RECTANGULAR_BLANK as published evaluation family | — |
-| Size envelope | unpublished pending Store 1 sheet SKU list | UNRESOLVED |
+| First published families | `STRAIGHT_RECT`, `CURVILINEAR_OUTLINE` | REFERENCE |
+| Parent envelope | 48 in × 96 in first; smaller parent from offering fields | REFERENCE |
+| Minimum blank | 6 in on each side | REFERENCE TEST ENVELOPE |
+| Max route depth | 0.75 in, and not thicker than stock | REFERENCE TEST ENVELOPE |
+| Size / accuracy / cycle time as production facts | unpublished | UNRESOLVED / NOT CLAIMED |
 
-Sheet species, thickness, and on-hand count are Store-owned.
+Sheet species, thickness, and fixture on-hand count are Store-owned.
 
 ## 3. Finished-part facts consumed
 
-Required when the family is used:
+Required:
 
 - parent sheet offering;
+- `profileKind`;
 - finished blank length and width with units;
+- integer tab count ≥ 1;
+- bounded route depth;
 - quantity;
 - part identity;
-- operation family `RECTANGULAR_BLANK`.
+- operation family `ROUTE_PROFILE` + `RETAIN_TABS`.
 
-Not consumed: room geometry, cabinet software files as approved toolpaths, contour splines.
+Not consumed: room geometry, cabinet software files as approved toolpaths, spline editors, G-code.
+
+`STRAIGHT_RECT` versus `CURVILINEAR_OUTLINE` is the smallest geometry distinction that proves straight versus curvilinear demand. It is not a toolpath.
 
 ## 4. Refuse list
 
 - dimensional stock sent to this offering;
-- contour / nested irregular outline;
-- depth-controlled profiling;
+- offering without Mode-2 ops;
+- unsupported profile kind;
+- depth-controlled Mode-3 surface machining;
 - unpublished drill patterns;
-- missing units;
-- size outside a later published envelope;
+- missing units or missing tab count;
+- size outside the published parent;
+- machine-local language (spline, toolpath, G-code, controller);
 - treating a governed simulation fixture as a commissioned machine.
 
 ## 5. Machine-neutral sequence
 
-Beginning stage only:
-
 ```text
 LOAD          parent sheet offering
 SEAT          reference edge / plane
-REGISTER      blank rectangle on the sheet
-CUT           rectangular outline / registered straight cuts
+REGISTER      blank on the sheet
+ROUTE_PROFILE straight or curvilinear two-dimensional outline
+RETAIN_TABS   selected attachment points remain
 RELEASE
+SECONDARY_SEPARATION   later; not claimed automated
 LABEL         job + part identity
 ```
 
-What moves (sheet, gantry, or both) is machine-local and unpublished.
+What moves (sheet in X, tool in Y, bounded Z) is declared in the Mode-2 relationship. Axis translation remains machine-local and unpublished as controller code.
 
 ## 6. Donor seed
 
-Governed Reference pin `18949f16` contains one bounded **sheet-stock simulation** path. That path is the seed for evaluation language. It is not physical evidence.
+Governed Reference pin `18949f16` contains one bounded sheet-stock simulation path. That path remains a seed for evaluation language. It is not physical evidence.
 
-Atlas 05 treating sheet as its own envelope is accepted as a comparison note only.
+Beginning-stage file history: this document previously published only `RECTANGULAR_BLANK`. That family is now `STRAIGHT_RECT`.
 
 ## 7. What Store may publish
 
-See [`STORE-SURFACE-0.1.md`](STORE-SURFACE-0.1.md) offering `SHEET-RECT-BLANK-V0`.
+See [`STORE-SURFACE-0.1.md`](STORE-SURFACE-0.1.md) offering `SHEET_MODE2_STENCIL_V1`.
 
-Evidence status must stay REFERENCE / UNRESOLVED on physical commissioning.
+Evidence status must stay REFERENCE / NOT CLAIMED on physical commissioning.
 
 ## 8. Patent alignment
 
-Sheet-support, feed, and tooling-platform relationships exist in the issued grants. This beginning stage **does not** implement them.
+Sheet-support, feed, tooling-platform, curvilinear, and stencil-attachment relationships exist in the issued grants. This model declares them as REFERENCE. It does not implement them in iron.
 
 Classify any later physical sheet build with the alignment gate. Do not copy a figure into a BOM from this file.
 
 ## 9. Relationship to a later cell
 
-A cell claim may mention this offering only after Store 1 actually lists it and the dimensional offering without collapsing them into one invented machine.
+A cell claim may mention this offering only after Store actually lists it and the dimensional offering without collapsing them into one invented machine.
 
 ## 10. Sources used
 
 - `work/machines/staging/SHEET-MACHINE-STAGING-0.1.md`
 - Governed Reference sheet simulation pin `18949f16`
 - Atlas Bridge §4 (neutral ops only)
+- issued patents `US9720401B2` and `US10768609B2`
+- [`MODE-2-SHEET-INTEGRATION-0.1.md`](MODE-2-SHEET-INTEGRATION-0.1.md)

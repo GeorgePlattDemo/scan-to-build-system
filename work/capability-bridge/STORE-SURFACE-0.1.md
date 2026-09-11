@@ -1,10 +1,11 @@
 # Store Surface 0.1
 
-**Status:** first load  
+**Status:** Mode-2 sheet offering added; Board path unchanged  
 **Evidence class:** DOCUMENTED publication map over REFERENCE models  
-**Store consumed by the app today:** Stage-2 pin `b40cdc60` (`BOARD_SQUARE_V1` / offering lookup)
+**Store consumed by the app for Board + Mode-2 sheet:** pin `49d22ce40482a7c2e0169ac1e6df48e0f8384a6d`  
+**Prior Board-only pin:** `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
 
-This file is what Store 1 may say. It is not a new Store implementation.
+This file is what Store 1 may say. It is not a new Store implementation beyond the pinned evaluator.
 
 ## 1. Rules of speech
 
@@ -35,40 +36,32 @@ The Store may not publish:
 | Operation | square CROSSCUT to finished kept length |
 | Envelope | 24 in–60 in inclusive |
 | Neutral packet | LOAD → SEAT → CLEANUP → INDEX → CROSSCUT → LABEL |
-| App fact today | accepted Board vertical asks Stage-2 Store with `BOARD_SQUARE_V1` |
+| App fact today | accepted Board vertical asks Store with `BOARD_SQUARE_V1` |
 | Machine fact today | REFERENCE (D-001 is a Store-declared reference capability) |
 | Physical fact today | NOT CLAIMED |
 
-Example instruction packet the Store may attach after a supported evaluation:
+## 3. Offering `SHEET_MODE2_STENCIL_V1`
 
-```text
-LOAD <offering>
-SEAT fence+support
-CLEANUP origin face
-INDEX finished kept length <L> in
-CROSSCUT square
-LABEL <partId>
-```
-
-## 3. Offering `SHEET-RECT-BLANK-V0`
+Replaces the unpublished beginning-stage row `SHEET-RECT-BLANK-V0` as the callable sheet vertical. Rectangular demand remains as `STRAIGHT_RECT`.
 
 | Field | Publication |
 | --- | --- |
 | Stock form | sheet goods |
-| Operation | RECTANGULAR_BLANK |
-| Envelope | unpublished numeric size; refuse contour |
-| Neutral packet | LOAD → SEAT → REGISTER → CUT → LABEL |
-| App fact today | not an implemented first-vertical path |
-| Machine fact today | REFERENCE beginning-stage model only |
+| Operation | `ROUTE_PROFILE` + `RETAIN_TABS` |
+| Profile kinds | `STRAIGHT_RECT`, `CURVILINEAR_OUTLINE` |
+| Envelope | parent 48×96 in first; min blank 6 in; max route depth 0.75 in |
+| Neutral packet | LOAD → SEAT → REGISTER → ROUTE_PROFILE → RETAIN_TABS → RELEASE → SECONDARY_SEPARATION → LABEL |
+| App fact | `sheet.mode2.stencil.v1` / request type `SHEET_MODE2_STENCIL_V1` |
+| First published SKU | `STB-ZERO-PLY-075-48X96-001` |
+| Machine fact today | REFERENCE Mode-2 relationship |
 | Physical fact today | NOT CLAIMED |
+| Q | material fixture only; process Q UNRESOLVED |
 
 Do not answer `SUPPORTABLE` for sheet from dimensional logic.
 
 ## 4. How the application should call this
 
-Current implemented call remains the Stage-2 pin.
-
-Future Store 1 calls should keep the same split already earned:
+Keep the same split already earned:
 
 - offering lookup;
 - job evaluation;
@@ -80,13 +73,13 @@ Review in the application still does not place an order.
 
 ## 5. Two offerings are not a cell
 
-Store 1 listing both rows above is two callable capabilities.
+Store listing both rows above is two callable capabilities.
 
 A later cell document may cite both rows. It may not invent tandem execution, shared Cycle Start, or dual-stream fabrication from this page.
 
 ## 6. Sources used
 
 - accepted app Store protocol notes @ `4595b478`
-- Stage-2 Store pin `b40cdc60`
+- Stage-2 Store pins `b40cdc60` (Board ancestor) and `49d22ce4` (Mode-2 added)
 - dimensional and sheet model files in this folder
 - Atlas Bridge §3–4

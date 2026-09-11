@@ -17,7 +17,7 @@ Do not restate that protocol in chat. Use it.
 Give Store 1 two reference capabilities it can name, describe, and turn into machine-neutral instructions:
 
 1. **Dimensional model** — finished-length work on dimensional stock.
-2. **Sheet model (beginning stage)** — rectangular blank family on sheet stock.
+2. **Sheet model** — Mode-2 2D stencil routing (`SHEET_MODE2_STENCIL_V1`) on sheet stock.
 
 ## Language gate
 
@@ -39,7 +39,8 @@ Give Store 1 two reference capabilities it can name, describe, and turn into mac
 | [PATENTS.md](PATENTS.md) | issued grants |
 | [ATLAS-BRIDGE.md](ATLAS-BRIDGE.md) | rewritten Atlas 01–04 |
 | [DIMENSIONAL-MODEL-0.1.md](DIMENSIONAL-MODEL-0.1.md) | dimensional reference model |
-| [SHEET-MODEL-0.1.md](SHEET-MODEL-0.1.md) | beginning-stage sheet model |
+| [SHEET-MODEL-0.1.md](SHEET-MODEL-0.1.md) | Mode-2 sheet reference model |
 | [STORE-SURFACE-0.1.md](STORE-SURFACE-0.1.md) | Store publication map |
+| [MODE-2-SHEET-INTEGRATION-0.1.md](MODE-2-SHEET-INTEGRATION-0.1.md) | app → Store Mode-2 chain |
 
 Accepted application and launch: [`../../apps/README.md`](../../apps/README.md).
