@@ -1,80 +1,98 @@
 # Machine / Cell Staging
 
 **Status:** current navigation and planning surface  
-**Controlling Stage 1–4 source:** `GeorgePlattDemo/scan-to-build-store`, `stage-2-store-zero-reference`, commit `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`, `STB-STORE-CELL-STAGES-0.1.md`
+**Store/Cell evidence source:** `GeorgePlattDemo/scan-to-build-store@b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`, `STB-STORE-CELL-STAGES-0.1.md`  
+**Physical research program:** `../MACHINE-BUILD-PROGRAM-0.1.md`
 
-This folder preserves the existing Scan-to-Build **Store / cell evidence Stage 1–4** meanings.
+This folder preserves the existing Store/Cell **evidence Stage 1–4** language while separating it from the newer **Machine Build 1–4** physical research program.
 
-Do not reuse the words Stage 1, Stage 2, Stage 3, or Stage 4 for a different physical-machine sequence without a qualifier. Machine fabrication may have its own build phases, but those phases are not the Store/cell evidence stages below.
+Those are related views, not interchangeable numbering systems.
 
-## Existing evidence stages
+## Present physical control case
 
-| Evidence stage | Existing meaning | Dimensional track | Sheet track | Cell meaning |
-| --- | --- | --- | --- | --- |
-| **Stage 1 — CUT-001** | One board, one finished requirement, one auditable information chain | Square finished-length reference path | Not established as a Stage-1 machine | No tandem cell claim |
-| **Stage 2 — Store Zero + D-001 reference cell** | Callable fictional Store, bounded declared reference capability, deterministic budgetary estimate/refusal | D-001 reference capability exists in Store fixture/model | A separate physical S-001 capability is **not** Store-callable merely because sheet concepts exist elsewhere | Reference/model layer only; not a commissioned physical two-machine cell |
-| **Stage 3 — Pilot Store + pilot cell** | Real Store adapter plus physical support/workholding, guarding, access control, safety-rated controls, interlocks, commissioning, validation and measured behavior | Physical dimensional machine may contribute only what is actually commissioned | Physical sheet machine may contribute only what is actually commissioned | This is where a real two-machine pilot/research cell begins to earn evidence |
-| **Stage 4 — Evidence-informed system** | Demand, refusals, outcomes, measured cycles, material behavior, operator observations and economics determine mature architecture | Evidence may retain, narrow, expand, or reject earlier assumptions | Same | Cell architecture follows evidence rather than a predetermined final machine |
+Today the local physical comparison condition is conventional manual yard practice:
 
-## Current truth
+```text
+board
+  ↓
+radial-arm saw
+  ↓
+eyes + tape measure + pencil + operator judgment
+  ↓
+manual positioning and cut
+```
 
-The current application consumes **Stage-2 Store Zero capability**.
+There is no present commissioned Scan-to-Build dimensional or sheet machine.
 
-That does not mean a physical Stage-2 machine exists. Current Stage 2 includes modeled/reference D-001 capability and fixture-backed Store behavior.
+## Store / Cell evidence stages
 
-The current governed reference also contains a tightly bounded sheet simulation fixture. That is reference/simulation evidence. It does not make an S-001 physical machine commissioned or Store-callable.
+| Evidence stage | Existing meaning | Current truth |
+| --- | --- | --- |
+| **Stage 1 — CUT-001** | one board, one finished requirement, one auditable information chain | documentary/reference chain; not a commissioned machine |
+| **Stage 2 — Store Zero + D-001 reference capability** | callable fictional Store, bounded declared reference capability, deterministic budgetary estimate/refusal | current application environment; modeled/reference capability only |
+| **Stage 3 — Pilot Store + pilot cell** | real Store adapter plus physical support/workholding, guarding, safety controls, interlocks, commissioning, validation and measured behavior | not yet established |
+| **Stage 4 — Evidence-informed system** | demand, refusals, outcomes, measured cycles, material behavior, operator observations and economics determine mature architecture | future evidence state; intentionally not predetermined |
 
-## Planned physical machine work
+The governed reference also contains a tightly bounded sheet simulation path. That remains simulation/reference evidence, not a physical sheet machine.
 
-Two separate engineering tracks are intended:
+## Machine Build 1–4
 
-### Dimensional machine
+The physical research program now uses `Machine Build` explicitly:
 
-Current direction:
+| Machine Build | Question |
+| --- | --- |
+| **Build 1 — Digital Bridge Proof** | Can one digital finished-length requirement produce one bounded physical dimensional cut without manual pencil layout? |
+| **Build 2 — Store Integration Proof** | Can that earned bounded capability plug into Store Zero / Store 1 without Store owning machine-local controls? |
+| **Build 3 — Research Cell / Deployment Question** | What local dimensional/sheet capability should actually be deployed, if any, based on measured evidence? |
+| **Build 4 — Frontier** | What larger capability is worth retaining as possibility space and later promoting only when evidence justifies it? |
 
-- retain the useful bounded dimensional path;
-- add more physical capability deliberately;
-- keep actual operations limited to what the installed machine can demonstrate;
-- use measured results to determine whether proposed additions deserve Store capability declarations.
+Directional relationship:
 
-### Sheet machine
+- Build 1 physically tests the smallest CUT-001-style chain;
+- Build 2 exercises the Stage-2 Store membrane;
+- Build 3 is where commissioned physical work begins to generate Stage-3 evidence;
+- Build 4 remains constrained by Stage-4 evidence-informed discipline.
 
-Current direction:
+## Dimensional track
 
-- establish an initial sheet-processing machine;
-- use limited automation rather than pretending to build the final universal sheet cell;
-- choose enough useful capability to make the second machine meaningful in a research cell;
-- leave the exact bounded task unresolved until engineering and project evidence justify it.
+The next dimensional task is not to “add more capability” to a machine already proven to exist.
 
-### Research cell
+It is to establish the first digital physical bridge from the manual radial-arm-saw control case.
 
-The intended research cell consists of the dimensional and sheet tracks operating under a common bounded information/capability architecture.
+See `DIMENSIONAL-MACHINE-STAGING-0.1.md`.
 
-The fact that two machines exist does not by itself establish a useful cell. A later build package must name:
+## Sheet track
 
-- the bounded task or work family;
-- the material forms involved;
-- each machine's declared role;
-- the handoff between them, if any;
-- local operator roles;
-- the Store-visible capability declaration;
-- physical safety/commissioning evidence;
-- what measured outcome demonstrates that the cell is useful.
+The sheet machine remains a later bounded research build.
 
-## Important numbering note
+Its first useful task is unresolved and should not be chosen merely to reproduce every disclosed patent mode. The full issued patents are now direct sources for correspondence when that build is selected.
 
-If the physical machine program informally uses phrases such as “machine build phase 1” or “machine build phase 2,” write **Machine Build Phase** in full.
+See `SHEET-MACHINE-STAGING-0.1.md`.
 
-Under the existing Store/cell evidence definition, a physically supported, guarded, controlled, commissioned pilot belongs to **Stage 3 evidence** even if it happens during an internal “Machine Build Phase 2.”
+## Research cell
 
-This distinction prevents one number from describing two different truths.
+The eventual cell is a research apparatus, not a predetermined factory.
+
+The fact that two machines can exist does not prove that both should be deployed. The first research-cell hypothesis must identify the demand, material forms, each machine’s role, Store-visible capability, operator burden, safety/commissioning evidence, success evidence, and useful refusal/negative evidence.
+
+See `../../cell/RESEARCH-CELL-STAGING-0.1.md`.
+
+## Patent-source rule
+
+Full issued patents:
+
+- `../../../docs/patents/source/US9720401B2.pdf`
+- `../../../docs/patents/source/US10768609B2.pdf`
+
+Current machine/cell engineering uses `../../../docs/patents/PATENT-ALIGNMENT-GATE.md`.
+
+Patent correspondence remains distinct from candidate engineering, installed hardware, commissioned capability, Store-visible capability and safety evidence.
 
 ## Promotion rule
 
-Engineering work becomes Store-visible capability only after its owner can state a bounded, testable declaration supported by evidence.
-
 ```text
-candidate mechanical feature
+patent correspondence
+    ≠ candidate mechanical feature
     ≠ installed feature
     ≠ commissioned feature
     ≠ declared Store capability
@@ -82,12 +100,4 @@ candidate mechanical feature
     ≠ production authority
 ```
 
-## Next staging deliverables
-
-The next mechanical planning pass should produce three current documents here, without claiming completion:
-
-1. `DIMENSIONAL-MACHINE-STAGING-0.1.md`
-2. `SHEET-MACHINE-STAGING-0.1.md`
-3. `RESEARCH-CELL-STAGING-0.1.md`
-
-Each should show current evidence, planned next increment, acceptance evidence, refusal/stopping conditions, and the exact information that may be exposed upstream to Store 1.
+**NO BLOOD ON WOOD.**

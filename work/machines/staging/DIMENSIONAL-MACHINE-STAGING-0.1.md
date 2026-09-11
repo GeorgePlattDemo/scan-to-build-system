@@ -1,17 +1,33 @@
 # Dimensional Machine Staging 0.1
 
 **Status:** current post-app planning surface  
-**Physical commissioning status:** not established by the admitted repository evidence  
-**Owner direction:** increase the useful bounded capability of the dimensional machine before the research-cell build  
-**Store/cell evidence-stage vocabulary:** preserved from `STB-STORE-CELL-STAGES-0.1.md`
+**Present physical control case:** manual radial-arm-saw workflow  
+**Current Scan-to-Build physical machine:** not yet established  
+**Current program:** `../MACHINE-BUILD-PROGRAM-0.1.md`  
+**Patent check:** `../../../docs/patents/PATENT-ALIGNMENT-GATE.md`
 
-This file tracks what the dimensional workstream may truthfully claim, what is only reference material, and what evidence is required before Store 1 can expose a capability as current.
+This file tracks the dimensional path truthfully from the present manual practice through the first digital physical bridge.
 
-## 1. Current evidence
+## 1. Physical starting point
 
-### Stage 1 reference
+The actual local physical comparison condition today is:
 
-CUT-001 proves the information chain for one dimensional board and one square finished requirement:
+- radial-arm saw;
+- eyes;
+- tape measure;
+- pencil;
+- operator judgment;
+- manual positioning and cutting.
+
+That is not a defect to disguise and not a Scan-to-Build machine claim. It is the control case against which the first digital bridge should be compared.
+
+The open research question is whether a practical middle exists between this manual workflow and high-capability factory/robotic fabrication.
+
+## 2. Existing digital/reference evidence
+
+### CUT-001 reference
+
+CUT-001 provides the smallest documented information chain for one dimensional board and one square finished requirement:
 
 - nominal 2×4×6 SPF parent stock;
 - 60.000 in finished kept length;
@@ -19,124 +35,104 @@ CUT-001 proves the information chain for one dimensional board and one square fi
 - label;
 - staged pickup.
 
-This remains the regression/reference chain. It does not establish a commissioned production machine.
+It is a reference/regression chain. It does not establish a commissioned physical machine.
 
-### Stage 2 reference
+### Stage-2 Store reference
 
-The current Stage-2 Store source declares D-001 reference capability beyond the Stage-1 square-cut path, including bounded `MILL_LONGITUDINAL_PROFILE` and `MILL_END_PROFILE` behavior for Store evaluation/economic modeling.
+The current Stage-2 Store source declares D-001 reference capability for Store evaluation/economic modeling, including bounded operation families beyond the square-cut reference.
 
-This is declared reference capability. Mill station geometry, cycle time and related values remain model/fixture facts unless separately measured.
+Those fixture/model values do not describe the present physical machine.
 
-### Cell-spine correspondence
+### Patent primary source
 
-The post-app Cell spine describes a richer dimensional machine family corresponding to the issued patent disclosure, including:
+The full issued patents are now in `docs/patents/source/`.
 
-- base/support table;
-- fixed fence/reference face;
-- manipulating/feed rollers;
-- idler support rollers;
-- clamping/hold-down;
-- end sawing stations;
-- vertical and horizontal ways;
-- drill/router tool heads;
-- local panel / jog / automatic modes;
-- local workpiece-reference chain;
-- lowering from part-relative neutral operations to local machine actions.
+The dimensional disclosure includes direct relationships among a support surface/frame, fence/reference, clamping, servo-controlled manipulating roller(s), longitudinal stock movement and sawing, with additional disclosed tooling-way functions in the specification/dependent material.
 
-That description is a mechanical/reference spine, not evidence that those functions are installed or commissioned.
+Those are direct sources for engineering correspondence. They are not evidence that any corresponding hardware is installed today.
 
-## 2. Owner-stated next direction
+### Cell / Atlas sources
 
-The next dimensional build is intended to add **some bounded useful capability** to the dimensional machine.
+The post-app Cell spine and Atlas sources remain useful reference/donor material for machine-neutral lowering, controller boundaries, off-the-shelf/open-source candidates and broader disclosed machine functions.
 
-The exact increment should be selected from a real research/use need rather than by trying to implement every disclosed patent function.
+They do not override the patents or create installed capability.
 
-Candidate function families already present in current source material include:
+## 3. Machine Build 1 — Digital Bridge Proof
 
-- square crosscut;
-- bounded milling/profile work;
-- drilling;
-- routing;
-- bounded angle/miter work where later justified;
-- indexing while preserving a workpiece reference;
-- labeling/part identity.
+The next dimensional task is **not** to expand an already-built D-001 machine.
 
-No item in this list is a present physical claim merely because it appears here.
+It is to test the smallest credible digital physical bridge:
 
-## 3. First required baseline capture
+> Can one digital finished-length requirement position dimensional stock and produce one bounded cut-to-length result without the operator recreating the location with eyes, tape and pencil at the saw?
 
-Before selecting the next build increment, record the **actual dimensional machine as it exists now**.
+Minimum intended research scope:
 
-Minimum baseline record:
+- one bounded dimensional stock class, initially a 2 × 4 class board;
+- one controlled stock-reference / positioning path;
+- one powered/manipulating roller set or equivalent bounded positioning mechanism selected through engineering;
+- one bounded cut-to-length operation;
+- off-the-shelf components where practical;
+- open-source or openly inspectable control software/language where practical;
+- local control and local Cycle Start;
+- one measured observed result and retained outcome record.
 
-| Area | Record |
-| --- | --- |
-| Structure | frame/base/table/support geometry actually present |
-| Reference | actual fence/support/origin method |
-| Material handling | how stock is loaded, supported, advanced and removed |
-| Workholding | actual clamps/hold-down currently present |
-| Cutting | actual saw/tool capability currently present |
-| Secondary tools | drill/router/mill capability currently present, if any |
-| Motion | axes or actuators actually present |
-| Control | current controller/panel/manual controls |
-| Sensors | actual installed sensors/feedback |
-| Safety | actual guards, E-stop, isolation and other current controls |
-| Evidence | photos, drawings, part numbers, measurements, tests |
-| Known limits | stock size, travel, repeatability, operations, unresolved faults |
+This is not a general CNC, furniture machine, Store production service, or production-readiness claim.
 
-Until that baseline is captured, unsupported physical detail remains `UNKNOWN`.
+## 4. Build-1 engineering questions
 
-## 4. Candidate next increment test
+Before any capability is promoted, the detailed Build-1 document should answer:
 
-For every proposed added function, answer:
-
-1. What project/part requirement needs it?
-2. What machine-neutral operation represents that requirement?
-3. What mechanical function performs it?
-4. What reference/workholding must remain valid?
-5. What off-the-shelf or fabricated components are candidates?
-6. What local controller action is required?
-7. What safety function is required before powered testing?
-8. What measurable test proves the function works?
-9. What failure/refusal cases must stop the path?
-10. What **small Store-visible capability declaration** can be made if the test passes?
-
-Do not expand Store capability before item 8 is supported by evidence.
+1. What exact digital finished-length object crosses into the machine boundary?
+2. What neutral operation represents the required cut?
+3. How is the stock referenced without pencil layout?
+4. What mechanical function advances/positions the stock?
+5. How is position established and invalidated?
+6. What off-the-shelf mechanical and electrical components are candidates?
+7. What controller/open-source stack is a candidate, and what remains machine-local?
+8. What local operator actions remain necessary?
+9. What guarding, restraint, stopping, isolation and other safety work is required before powered testing?
+10. What test and measurement show that the digital requirement produced the intended physical result?
+11. What negative/refusal cases must stop the path?
+12. What smallest capability statement could later be exposed to Store if the evidence supports it?
 
 ## 5. Store-visible surface
 
-Store 1 should eventually need only bounded facts such as:
+Store should eventually see only bounded capability facts such as:
 
 - supported dimensional stock form/range;
-- supported operation families;
-- dimensional/feature limits relevant to routing;
-- tooling prerequisite where consequential;
+- supported operation class;
+- relevant length/feature limits;
 - capability/envelope version;
 - explicit unsupported/refusal conditions;
 - evidence status.
 
-The Store does not need controller coordinates, servo tuning, postprocessor code, I/O wiring or internal machine mechanics to answer normal capability questions.
+Store does not need station coordinates, servo tuning, postprocessor/controller code, I/O wiring, work offsets or detailed internal mechanics to answer the normal capability question.
 
-## 6. Evidence-stage progression
+## 6. Patent correspondence rule
 
-### Existing Stage 1
-Information-chain reference only.
+The detailed Build-1 document must use `docs/patents/PATENT-ALIGNMENT-GATE.md`.
 
-### Existing Stage 2
-Store Zero + D-001 reference/model capability. Current application environment.
+At minimum, compare the selected physical functions against the actual issued dimensional-machine claim/specification/figure material and label the relationship accurately.
 
-### Toward Stage 3
-The dimensional workstream begins to contribute Stage-3 evidence only when actual physical support/workholding, controls, guarding/interlocks, commissioning and measured machine behavior exist and are recorded.
+A Build-1 implementation may be intentionally narrower than the disclosed exemplary dimensional machine. Record that narrowing rather than silently treating the patent figure as a mandatory BOM.
 
-### Stage 4
-Measured demand, refusals, cycle behavior, material behavior, operator burden, cost/yield and outcomes may change the machine architecture. Stage 4 is not predetermined feature accumulation.
+Patent correspondence does not establish safety or commissioning.
 
-## 7. Next deliverable
+## 7. Relationship to Store/Cell evidence stages
+
+- **Stage 1** remains the CUT-001 information-chain reference.
+- **Stage 2** remains Store Zero + D-001 reference/model capability.
+- **Machine Build 1** is a new physical experiment that tries to earn the first real digital-bridge evidence.
+- physical commissioning/measured behavior contributes **Stage-3 evidence** only after the required physical/safety/validation boundary is actually established.
+
+## 8. Next deliverable
 
 Create:
 
-`../engineering/dimensional/DIMENSIONAL-MACHINE-BUILD-0.1.md`
+`../engineering/dimensional/DIGITAL-BRIDGE-BUILD-1-0.1.md`
 
-That file may be highly detailed. This staging file should remain the short evidence/status surface.
+That file may become excruciatingly detailed about candidate mechanics, off-the-shelf components, open-source control, lowering and patent correspondence.
+
+This staging page should remain the short truth/status surface.
 
 **NO BLOOD ON WOOD.**

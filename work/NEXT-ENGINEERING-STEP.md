@@ -1,79 +1,103 @@
 # Next Engineering Step
 
-The next physical-engineering task is **not** to buy a controller or finish a machine BOM.
+The next physical-engineering task is **not** to buy a controller, finish a universal machine BOM, or design the final two-machine cell.
 
-It is to turn the strongest existing post-app mechanical sources into two bounded current machine-build plans and one research-cell staging plan.
+It is to define **Machine Build 1 — Digital Bridge Proof** from the real manual control case.
+
+## Current starting point
+
+Physical comparison case:
+
+- radial-arm saw;
+- eyes;
+- tape measure;
+- pencil;
+- operator judgment;
+- manual positioning/cutting.
+
+No commissioned Scan-to-Build physical machine is claimed today.
 
 ## Read first
 
-1. `docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md`
-2. `work/machines/staging/README.md`
-3. `work/machines/engineering/README.md`
-4. source `docs/cell/STB-CELL-0.1.md`
-5. source Atlas 04, 05 and 06
-6. current Store Stage 1–4 document
+1. `work/machines/MACHINE-BUILD-PROGRAM-0.1.md`
+2. `docs/patents/README.md`
+3. `docs/patents/PATENT-ALIGNMENT-GATE.md`
+4. full `docs/patents/source/US9720401B2.pdf`
+5. full `docs/patents/source/US10768609B2.pdf`
+6. `work/machines/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md`
+7. `docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md`
+8. source `docs/cell/STB-CELL-0.1.md`
+9. Atlas 04, 05 and 06 as donor/reference material
+10. current Store Stage 1–4 document
+
+The patents are the direct source for patent wording/correspondence. The Cell and Atlas documents are engineering aids and do not override them.
 
 ## Produce next
 
-### A. Dimensional machine
+Create:
 
-`work/machines/engineering/dimensional/DIMENSIONAL-MACHINE-BUILD-0.1.md`
+`work/machines/engineering/dimensional/DIGITAL-BRIDGE-BUILD-1-0.1.md`
+
+Its job is to answer one bounded question:
+
+> Can one digital finished-length requirement become one physical cut-to-length result on a 2 × 4 class board without recreating the cut location with eyes, tape and pencil at the saw?
 
 Minimum contents:
 
-- present physical state: `UNKNOWN` until explicitly recorded from current evidence;
-- desired next bounded functions;
-- station/function map;
-- mechanics and reference chain;
-- workholding and material handling;
-- tooling;
-- candidate sensors/actuators;
-- candidate open/off-the-shelf control stack;
-- safety functions that require competent engineering/commissioning;
-- machine-neutral op → local lowering examples;
-- Store-visible capability surface;
-- patent correspondence by function;
-- unresolved questions;
-- tests/evidence required before a capability may be declared.
+- manual control case and comparison method;
+- exact bounded Build-1 requirement;
+- machine-neutral operation passed downstream;
+- proposed stock reference / positioning chain;
+- candidate roller/feed mechanics or equivalent bounded positioning mechanism;
+- candidate off-the-shelf mechanical/electrical components;
+- candidate open-source/openly inspectable control stack;
+- machine-local lowering/controller boundary;
+- local operator role and Cycle Start boundary;
+- workholding/restraint concept requiring engineering resolution;
+- guarding, stopping, isolation and other safety requirements that must be resolved before powered testing;
+- measurement method for the resulting cut;
+- positive test evidence;
+- negative/refusal cases;
+- Store-visible capability surface if and only if the evidence is later earned;
+- **Patent correspondence** using `docs/patents/PATENT-ALIGNMENT-GATE.md`;
+- explicit intentional differences from exemplary patent embodiments;
+- unresolved questions.
 
-### B. Sheet machine
+## Build-1 patent check
 
-`work/machines/engineering/sheet/SHEET-MACHINE-BUILD-0.1.md`
+At minimum, compare the intended physical functions directly against the issued dimensional-machine material concerning:
 
-Use the same structure, adjusted for sheet handling, platform/sheet motion, tooling receiver, workholding, depth datum and the intentionally limited first automation target.
+- support surface/frame;
+- fence/reference;
+- clamping/restraint;
+- servo-controlled manipulating roller(s) / controlled stock movement;
+- sawing;
+- the larger disclosed tooling functions only to the extent needed to explain what Build 1 intentionally does **not** implement.
 
-Do not assume all patent modes must be built. Select only what the research objective requires.
+Do not infer that every patent-disclosed station or tool must be built into the MVP.
 
-### C. Research cell
+Do not infer safety from patent correspondence.
 
-`work/cell/RESEARCH-CELL-STAGING-0.1.md`
+## What comes after Build 1
 
-Do not choose the cell task by aesthetics. Name one bounded hypothesis and show:
+Only after Build 1 has a physically evidenced bounded capability should **Machine Build 2** connect that capability to Store Zero / Store 1.
 
-- what User/Application supplies;
-- what Store 1 resolves;
-- what neutral work reaches the cell;
-- what the dimensional machine does;
-- what the sheet machine does;
-- where parts/material converge;
-- what remains operator work;
-- what evidence proves or disproves usefulness;
-- what the Store must know and what stays machine-local.
+Machine Build 3 then asks the larger empirical question of what dimensional/sheet capability should actually be deployed locally, if any.
 
-## Branch discipline when build work begins
+The sheet machine and tandem research cell should not be allowed to pull Build 1 into unnecessary scope.
 
-Use folders for durable subject ownership. Use branches for bounded change sets.
+## Branch discipline
 
-Recommended future branches when actual work starts:
+Use folders for durable subject ownership and branches for bounded change sets.
 
-- `plan/dimensional-machine-0.1`
-- `plan/sheet-machine-0.1`
-- `plan/research-cell-0.1`
+Recommended branch for the first detailed plan:
 
-Do not create long-lived branches merely to store a category of documents; the canonical reviewed documents should return to `main` when accepted.
+`plan/digital-bridge-build-1-0.1`
+
+Return the reviewed canonical build document to `main` when accepted.
 
 ## Stop condition
 
-The first machine-planning pass stops before purchasing, wiring, motor sizing, safety-category selection, controller programming or Store capability promotion unless supported by a later explicit engineering instruction and evidence.
+The first Build-1 planning pass stops before powered construction/testing unless the required mechanical, guarding, control and safety work has been separately resolved and explicitly authorized.
 
 **NO BLOOD ON WOOD.**

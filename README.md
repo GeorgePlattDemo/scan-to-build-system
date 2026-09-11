@@ -78,19 +78,22 @@ A Store answer does not by itself authorize physical fabrication.
 
 ### Machine and cell development
 
-Physical machine development remains a separate engineering track.
+The current physical comparison case is conventional manual yard practice: a radial-arm saw operated with eyes, tape measure, pencil, and operator judgment.
 
-The present direction is to establish:
+Scan-to-Build does **not** assume that the useful middle between that practice and high-capability factory/robotic fabrication already exists. The machine program exists to test that question.
 
-- a dimensional-processing machine with additional bounded capability;
-- a sheet-processing machine with limited automated capability;
-- a two-machine research cell capable of performing a defined useful task.
+The current machine-build sequence is:
 
-The final task, process envelope, and machine architecture are not being assumed in advance.
+1. **Machine Build 1 — Digital Bridge Proof.** One bounded dimensional stock class, one controlled reference/positioning path, one bounded cut-to-length operation, and one observable physical result from a digital requirement.
+2. **Machine Build 2 — Store Integration Proof.** Connect that bounded physical capability to Store Zero / Store 1 through the existing Store membrane without importing machine-local controls into Store.
+3. **Machine Build 3 — Research Cell / Deployment Question.** Expand dimensional capability only where justified, establish the smallest useful sheet capability, and measure what should actually be deployed locally — if anything.
+4. **Machine Build 4 — Frontier.** Preserve the larger technical possibility space without making it a present implementation obligation.
 
-The purpose of the research cell is to create enough real capability to begin learning from measured operation, constraints, refusals, material behavior, workflow, labor, and economics.
+The final task, process envelope, and mature machine architecture are not being assumed in advance.
 
 Physical capability must be demonstrated before it is claimed.
+
+See [`work/machines/MACHINE-BUILD-PROGRAM-0.1.md`](work/machines/MACHINE-BUILD-PROGRAM-0.1.md).
 
 ### Governed boundaries
 
@@ -151,6 +154,7 @@ The working model is:
 - **Governed core** — governed meaning, unresolved conditions, refusal, authorization boundaries, provenance, and protected transitions.
 - **Machine / cell** — demonstrated physical process capability, local machine limits, controls, and measured operation.
 - **Research** — questions, observations, comparisons, evidence, and future possibilities.
+- **Issued patents** — primary technical/patent-lineage sources for the disclosed integrated system and machine relationships; not a substitute for current implementation, safety, commissioning, or legal analysis.
 
 These boundaries may become more precise as the system develops.
 
@@ -185,16 +189,18 @@ A favorable Store evaluation is not physical execution.
 
 ## Patent foundation
 
-Scan-to-Build develops from the technical foundation described in:
+The full issued grants are now retained directly in this repository as primary sources:
 
-- U.S. Patent 9,720,401 B2
-- U.S. Patent 10,768,609 B2
+- [`U.S. Patent 9,720,401 B2`](docs/patents/source/US9720401B2.pdf)
+- [`U.S. Patent 10,768,609 B2`](docs/patents/source/US10768609B2.pdf)
 
-Existing project mappings connect the issued patent material to the developing architecture.
+Their repository copies are checksum-verified against the source PDFs supplied for this consolidation.
 
-The full issued patents will be retained as primary archival sources.
+Use [`docs/patents/PATENT-ALIGNMENT-GATE.md`](docs/patents/PATENT-ALIGNMENT-GATE.md) for current build work.
 
-This repository does not use informal summaries as substitutes for the issued patent documents themselves.
+Claims, specification, and figures should be checked directly. Existing mappings are navigation aids, not substitutes for the issued grants.
+
+Patent correspondence does not by itself establish installed capability, commissioning, safety, production readiness, or a legal conclusion.
 
 ---
 
@@ -209,23 +215,22 @@ The intended working structure is approximately:
 │
 ├── docs/
 │   ├── project/
-│   ├── architecture/
 │   ├── definitions/
+│   ├── governance/
 │   ├── application/
 │   ├── store/
 │   ├── machine/
 │   ├── cell/
-│   ├── research/
-│   └── future/
+│   └── patents/
+│
+├── work/
+│   ├── user-intake/
+│   ├── store/
+│   ├── machines/
+│   └── cell/
 │
 ├── apps/
 │   └── stb/
-│
-├── store/
-│
-├── machine/
-│
-├── scenarios/
 │
 └── provenance/
 ```
@@ -242,16 +247,14 @@ This repository is being established after completion of the first accepted appl
 
 The immediate work is:
 
-1. establish the clean post-application documentation baseline;
-2. reconcile useful legacy material into current language and definitions;
-3. establish the complete project source index;
-4. bring the accepted application into this working surface;
-5. define and expand Store 1;
-6. define the first post-baseline user/project path;
-7. continue dimensional-machine development;
-8. develop the initial sheet-machine capability;
-9. establish a bounded two-machine research cell;
-10. use evidence from the working system to determine what should come next.
+1. preserve the clean post-application documentation and provenance baseline;
+2. retain the issued patents as direct primary sources;
+3. transfer the accepted application into this working surface without semantic redesign;
+4. define User 1 and expand Store 1 deliberately;
+5. build and test Machine Build 1 as the smallest digital physical bridge;
+6. connect earned machine capability to the Store boundary in Machine Build 2;
+7. use Machine Build 3 to investigate what local dimensional/sheet capability should actually exist;
+8. let measured evidence determine what, if anything, moves into the frontier architecture.
 
 The repository should evolve from evidence, not from the need to make the project appear complete.
 
@@ -265,7 +268,7 @@ Safety, refusal, unresolved conditions, human responsibility, and physical opera
 
 They are not presentation language to be removed when inconvenient.
 
-No software result, project status, Store answer, or research objective overrides demonstrated physical safety requirements.
+No software result, patent correspondence, project status, Store answer, or research objective overrides demonstrated physical safety requirements.
 
 ---
 

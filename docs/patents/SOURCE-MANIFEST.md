@@ -1,28 +1,29 @@
 # Patent Source Manifest
 
-This file records the identities of the issued patent PDFs being made primary sources in this repository.
+This file records the identities of the issued patent PDFs admitted as primary sources in this repository.
 
-## User-supplied reference copies
+## Verified repository copies
 
-These are the exact PDFs supplied by George for this consolidation session.
-
-| Patent | Uploaded file | SHA-256 |
-| --- | --- | --- |
-| U.S. 9,720,401 B2 | `US9720401(20260911-175950).pdf` | `d6ff401ee0a60720c0d8b9819a0f828e15036deee1882da06dab7282da0311a4` |
-| U.S. 10,768,609 B2 | `US10768609(1).pdf` | `3fd23f9dab7419098162836af25257d2736771bf27196824ad972b479a02b092` |
-
-These hashes identify the exact conversation reference copies. They are retained here so any later repository copy can be compared rather than assumed identical.
-
-## Intended repository paths
+The repository now contains the full issued PDFs at:
 
 - `docs/patents/source/US9720401B2.pdf`
 - `docs/patents/source/US10768609B2.pdf`
 
-The repository-side import workflow resolves the full issued PDFs from the public Google Patents publication pages and writes repository SHA-256 values to:
+The repository import produced these SHA-256 values:
 
-- `docs/patents/source/SHA256SUMS.txt`
+| Patent | Repository SHA-256 |
+| --- | --- |
+| U.S. 9,720,401 B2 | `d6ff401ee0a60720c0d8b9819a0f828e15036deee1882da06dab7282da0311a4` |
+| U.S. 10,768,609 B2 | `3fd23f9dab7419098162836af25257d2736771bf27196824ad972b479a02b092` |
 
-If the repository PDF bytes differ from the user-supplied reference hashes, do not treat that alone as a substantive patent difference. Confirm publication number, issued document content and pages. Different hosting/production copies of the same issued grant may have different binary hashes.
+These values **exactly match the PDFs George supplied for the September 11, 2026 consolidation session**:
+
+| Patent | Uploaded reference file | Uploaded SHA-256 |
+| --- | --- | --- |
+| U.S. 9,720,401 B2 | `US9720401(20260911-175950).pdf` | `d6ff401ee0a60720c0d8b9819a0f828e15036deee1882da06dab7282da0311a4` |
+| U.S. 10,768,609 B2 | `US10768609(1).pdf` | `3fd23f9dab7419098162836af25257d2736771bf27196824ad972b479a02b092` |
+
+Repository-generated verification is also retained in `source/SHA256SUMS.txt`.
 
 ## Issued-source identity
 

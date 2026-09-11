@@ -11,14 +11,37 @@ The following are current repository-created navigation/working documents, not c
 - `docs/project/*`;
 - `docs/definitions/README.md`;
 - `provenance/*`;
-- `docs/governance/README.md` and source-pointer/navigation material;
-- `docs/application/*` — current application navigation, semantic guardrails and exact source pointers;
-- `docs/store/*` — Store source/navigation surface;
-- `docs/machine/*` — post-app machine source map/navigation;
-- `docs/cell/*` — current Cell/stage source pointers;
-- `work/*` — stable post-app working surfaces for intake, Store, machines and Cell.
+- `docs/governance/*` navigation and admitted source snapshots;
+- `docs/application/*` current application navigation, semantic guardrails and exact source pointers;
+- `docs/store/*` Store source/navigation surface;
+- `docs/machine/*` post-app machine source map/navigation;
+- `docs/cell/*` current Cell/stage source pointers;
+- `docs/patents/*` patent-source navigation, exact issued PDFs and alignment gate;
+- `work/*` stable post-app working surfaces for intake, Store, machines and Cell.
 
 Repository-created summaries do not replace owner documents. Where a source owns a term or runtime meaning, that source still controls.
+
+## Issued patents admitted as primary sources
+
+The full issued grants are now present in the working repository and are primary sources for patent wording and technical patent correspondence.
+
+### U.S. Patent 9,720,401 B2
+
+- path: `docs/patents/source/US9720401B2.pdf`
+- SHA-256: `d6ff401ee0a60720c0d8b9819a0f828e15036deee1882da06dab7282da0311a4`
+- disposition: `ADMIT AS-IS / PRIMARY SOURCE`
+
+### U.S. Patent 10,768,609 B2
+
+- path: `docs/patents/source/US10768609B2.pdf`
+- SHA-256: `3fd23f9dab7419098162836af25257d2736771bf27196824ad972b479a02b092`
+- disposition: `ADMIT AS-IS / PRIMARY SOURCE`
+
+Both repository hashes exactly match the PDFs supplied by George for the September 11, 2026 consolidation session.
+
+Current build work touching patented subject matter uses `docs/patents/PATENT-ALIGNMENT-GATE.md`.
+
+The patents are not a substitute for current capability, commissioning, safety evidence, production authorization, or legal analysis.
 
 ## Governed Reference admitted as-is
 
@@ -64,7 +87,7 @@ Pending mechanical transfer of the complete roadmap file.
 - source pin: `2d80b5a7b0e7687c425e100bfa0ff3a833166d42`
 - disposition: `ADMIT AFTER REWRITE`
 
-Reason: the locked intake/evidence principles are useful and remain consistent with the accepted app, but the source document embeds a Stage-2 Store pin that predates the Store pin consumed by the accepted app. Its useful current meaning is reconciled into `work/user-intake/README.md`. The source remains preserved by exact pin/path.
+Reason: the locked intake/evidence principles remain useful, but the source document embeds a Stage-2 Store pin that predates the Store pin consumed by the accepted app. Current meaning is reconciled into `work/user-intake/README.md`.
 
 ### Application semantic boundaries
 
@@ -81,6 +104,21 @@ Current meaning is summarized in `docs/application/SEMANTIC-GUARDRAILS.md`; byte
 Use for reconciliation history, owner boundaries, keep/discard decisions, unresolved machine issues and build doctrine. Accepted Build-8 implementation plus later semantic boundaries control where older planning language differs.
 
 ## Machine / Cell source dispositions
+
+### Machine Build Program 0.1
+
+- path: `work/machines/MACHINE-BUILD-PROGRAM-0.1.md`
+- disposition: `CURRENT POST-APP PROGRAM`
+
+This document now controls the physical machine/research sequence:
+
+- control case — manual radial-arm saw, eyes, tape measure, pencil and operator judgment;
+- Machine Build 1 — Digital Bridge Proof;
+- Machine Build 2 — Store Integration Proof;
+- Machine Build 3 — Research Cell / Deployment Question;
+- Machine Build 4 — Frontier.
+
+It does not overwrite Store/Cell evidence Stage 1–4 vocabulary; it gives the physical research program its own explicit numbering.
 
 ### Post-app Cell spine
 
@@ -106,7 +144,7 @@ Use for reconciliation history, owner boundaries, keep/discard decisions, unreso
 - disposition: `KEEP-DONOR`
 - source status retained: not adopted; field survey only.
 
-These four sources are indexed from `docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md` and drive the current machine-engineering work surface without being silently promoted to commissioned specifications.
+These sources are indexed from `docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md` and may inform current machine engineering only through the current Machine Build Program and patent-alignment gate.
 
 ### Public Machine Function & Kinematic Ontology
 
@@ -122,19 +160,20 @@ Reason: substantial useful mechanical/patent/safety detail, but it predates the 
 - file: `STB-STORE-CELL-STAGES-0.1.md`
 - disposition: `KEEP-CURRENT`
 
-Its Stage 1–4 meanings are preserved in `work/machines/staging/README.md` and `docs/cell/STAGE-SOURCE-POINTER.md`.
+Its Stage 1–4 meanings remain an evidence vocabulary. They are not the same numbering as Machine Build 1–4.
 
-Important: internal physical machine-build phases must not be confused with Store/cell evidence stages. Under the current stage source, physical pilot/commissioning/measured behavior is Stage-3 evidence.
+Directional relationship is documented in `work/machines/MACHINE-BUILD-PROGRAM-0.1.md`.
 
 ## New post-app working documents
 
-The following staging files are repository-created current work surfaces. They synthesize only current/pinned evidence plus explicit owner direction and label unknown physical facts as unknown:
+The following are repository-created current work surfaces:
 
 - `work/machines/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md`
 - `work/machines/staging/SHEET-MACHINE-STAGING-0.1.md`
 - `work/cell/RESEARCH-CELL-STAGING-0.1.md`
+- `work/machines/MACHINE-BUILD-PROGRAM-0.1.md`
 
-They are planning/status surfaces, not machine specifications or capability declarations.
+They are planning/status surfaces, not automatic capability declarations.
 
 ## Explicitly not admitted as current
 
@@ -142,7 +181,7 @@ They are planning/status surfaces, not machine specifications or capability decl
 
 **Disposition:** donor/provenance only; not current baseline.
 
-The early Sarah chain was intentionally a toy/research demonstration and crosses periods of terminology, Store, governance, and authority evolution. Useful behavior may later be recovered only through current owners and language.
+The early Sarah chain was intentionally a toy/research demonstration and crosses periods of terminology, Store, governance, and authority evolution. Useful behavior may later be recovered only through current owners, language and primary sources.
 
 ### Public review and public demo wholesale
 
@@ -157,9 +196,3 @@ No wholesale admission. Public mechanical ontology has the donor disposition abo
 ### Historical machine/cell claims not reconciled above
 
 **Disposition:** pending later review.
-
-### Patent PDFs
-
-**Disposition:** primary archival sources; full ingestion deferred.
-
-Existing current mappings/correspondence are sufficient for the present planning stage. Full grants will be included during final archival packaging.
