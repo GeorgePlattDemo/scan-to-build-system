@@ -4,102 +4,162 @@ This register records what has crossed the line into the post-app working baseli
 
 ## Foundation-created documents
 
-| Path | Status | Basis |
-| --- | --- | --- |
-| `README.md` | CURRENT REPOSITORY BASELINE | Created for the new working repository before Foundation Commit 1 |
-| `STB-PROJECT-STATE-AND-SOURCE-INDEX.md` | CURRENT REPOSITORY BASELINE | Post-app state, current pins, admission rules |
-| `docs/project/CURRENT-STATE.md` | CURRENT REPOSITORY BASELINE | Accepted app state plus current Store/governed boundaries |
-| `docs/project/SOURCE-AUTHORITY.md` | CURRENT REPOSITORY BASELINE | Current layer ownership and precedence |
-| `docs/definitions/README.md` | CURRENT REPOSITORY BASELINE | Recent language cleanup and protected distinctions |
-| `provenance/README.md` | CURRENT REPOSITORY BASELINE | Admission/provenance policy |
-| `provenance/SOURCE-PINS.md` | CURRENT REPOSITORY BASELINE | Exact source identities |
-| `provenance/ADMISSION-REGISTER.md` | CURRENT REPOSITORY BASELINE | This register |
-| `docs/governance/README.md` | CURRENT REPOSITORY BASELINE | Navigation and authority explanation for admitted governance sources |
-| `docs/governance/CONTROLLING-SOURCE-POINTERS.md` | CURRENT REPOSITORY BASELINE | Exact pin/path register for large current governed documents awaiting byte-exact transfer |
+The following are current repository-created navigation/working documents, not copied legacy authority:
 
-## Governed Reference source identity
+- root `README.md`;
+- `STB-PROJECT-STATE-AND-SOURCE-INDEX.md`;
+- `docs/project/*`;
+- `docs/definitions/README.md`;
+- `provenance/*`;
+- `docs/governance/README.md` and source-pointer/navigation material;
+- `docs/application/*` — current application navigation, semantic guardrails and exact source pointers;
+- `docs/store/*` — Store source/navigation surface;
+- `docs/machine/*` — post-app machine source map/navigation;
+- `docs/cell/*` — current Cell/stage source pointers;
+- `work/*` — stable post-app working surfaces for intake, Store, machines and Cell.
 
-All admitted governance source documents below come from:
+Repository-created summaries do not replace owner documents. Where a source owns a term or runtime meaning, that source still controls.
+
+## Governed Reference admitted as-is
+
+Source identity:
 
 - repository: `GeorgePlattDemo/scan-to-build-governed-reference`
-- source pin: `18949f163718a937f072f4be3a654bb303e53160`
+- pin: `18949f163718a937f072f4be3a654bb303e53160`
 - admission: `ADMIT AS-IS`
 
-Copying a source snapshot here does not broaden its original authority or convert informative/planned text into an active requirement.
+Current source snapshots admitted under `docs/governance/` include the governed README, M1 build guidance, governance/review/security/threat-model material, architecture and authority notes, custody/disclosure/external-processing guidance, fixture/identifier guidance, reference-node explanation, I0 correction, ADR-0008 through ADR-0020, change/validation history, module inventory and selected legal/provenance guidance.
 
-### Core source and implementation guidance
+Copying them here does not broaden their original status. Informative/planned source text remains informative/planned.
 
-- `docs/governance/source/README-GOVERNED-REFERENCE.md` ← `README.md`
-- `docs/governance/source/STB-BUILD-M1.md` ← `STB-BUILD-M1.md`
-- `docs/governance/source/GOVERNANCE.md` ← `GOVERNANCE.md`
-- `docs/governance/source/REVIEWING.md` ← `REVIEWING.md`
-- `docs/governance/source/SECURITY.md` ← `SECURITY.md`
-- `docs/governance/source/THREAT_MODEL.md` ← `THREAT_MODEL.md`
-- `docs/governance/source/CHANGE-REGISTER.md` ← `CHANGE-REGISTER.md`
-- `docs/governance/source/CHANGELOG.md` ← `CHANGELOG.md`
-- `docs/governance/source/MODULE-INVENTORY.md` ← `MODULE-INVENTORY.md`
-- `docs/governance/source/FINAL-VALIDATION-REPORT.md` ← `FINAL-VALIDATION-REPORT.md`
-- `docs/governance/source/FREEZE-REPORT.md` ← `FREEZE-REPORT.md`
-- `docs/governance/source/NOTICE.md` ← `NOTICE.md`
-- `docs/governance/source/LICENSE-STATUS.md` ← `LICENSE-STATUS.md`
-
-### Current architecture and boundary guidance
-
-- `docs/governance/architecture/architecture-boundary.md` ← `docs/architecture-boundary.md`
-- `docs/governance/architecture/current-simulation-authority.md` ← `docs/architecture/current-simulation-authority.md`
-- `docs/governance/architecture/information-custody-0.1.md` ← same source path
-- `docs/governance/architecture/disclosure-traversal-0.1.md` ← same source path
-- `docs/governance/architecture/external-processing-0.1.md` ← same source path
-- `docs/governance/architecture/participant-contribution-0.1.md` ← same source path
-- `docs/governance/architecture/planned-custody-mechanisms-0.1.md` ← same source path
-- `docs/governance/architecture/aggregate-stewardship-unresolved-0.1.md` ← same source path
-- `docs/governance/architecture/fixture-revision.md` ← same source path
-- `docs/governance/architecture/metric-limitation-m1.md` ← same source path
-- `docs/governance/identifier-policy.md` ← `docs/identifier-policy.md`
-- `docs/governance/reference-node/README.md` ← `docs/reference-node/README.md`
-- `docs/governance/corrections/G-I0-COMPOSITION-0.1.md` ← same source path
-
-### Accepted architecture decisions
-
-Exact source snapshots of ADR-0008 through ADR-0020 are admitted under `docs/governance/adrs/`.
-
-### Legal/provenance guidance
-
-- `docs/governance/legal/ownership-questions.md` ← `legal/ownership-questions.md`
-- `docs/governance/legal/patent-bibliography.md` ← `legal/patents/README.md`
-
-These legal-source documents retain their own disclaimers and do not become legal opinions by being copied here.
-
-## Large governed documents pending exact transfer
-
-The following are current and important but are not reconstructed from partial reads. Their exact source identities are preserved in `docs/governance/CONTROLLING-SOURCE-POINTERS.md`.
+### Large governed documents still pinned, pending byte-exact transfer
 
 - `specs/STB-REF-0.2.5.md`
 - `plans/STB-PLAN-0.2.5.md`
 - `docs/architecture/common-entry-contexts.md`
 - `docs/architecture/demand-architecture-traceability.md`
-- `foundations/NC_Wood_Demand_as_Architecture_ss1-12_0.3.md` — research/foundation admission deferred
+- `foundations/NC_Wood_Demand_as_Architecture_ss1-12_0.3.md` — research/foundation admission still deferred
 
-## Explicitly not admitted
+See `docs/governance/CONTROLLING-SOURCE-POINTERS.md`.
+
+## Application source dispositions
+
+### Accepted application
+
+- source: `GeorgePlattDemo/grok-file`, `build/app-foundation-0.1`
+- pin: `4595b4785a2686486e477ce2e70fb3f476285a8d`
+- disposition: `KEEP-CURRENT` / current implementation datum
+
+The application code itself has not yet been transferred. `docs/application/` and `work/user-intake/` provide current navigation and reconciled working guidance.
+
+### Frozen application roadmap
+
+- source pin: `985db87a707bd454d7c58419e2cf4d884f00cded`
+- disposition: `KEEP-CURRENT`
+
+Pending mechanical transfer of the complete roadmap file.
+
+### Entry/intake contract
+
+- source pin: `2d80b5a7b0e7687c425e100bfa0ff3a833166d42`
+- disposition: `ADMIT AFTER REWRITE`
+
+Reason: the locked intake/evidence principles are useful and remain consistent with the accepted app, but the source document embeds a Stage-2 Store pin that predates the Store pin consumed by the accepted app. Its useful current meaning is reconciled into `work/user-intake/README.md`. The source remains preserved by exact pin/path.
+
+### Application semantic boundaries
+
+- source: accepted app pin, `docs/architecture/STB-SEMANTIC-BOUNDARIES-0.1.md`
+- disposition: `KEEP-CURRENT`
+
+Current meaning is summarized in `docs/application/SEMANTIC-GUARDRAILS.md`; byte-exact transfer may occur with the accepted app/doc tree.
+
+### Stabilization / source-map / structure guidance
+
+- source: accepted app pin
+- disposition: `KEEP-REFERENCE`
+
+Use for reconciliation history, owner boundaries, keep/discard decisions, unresolved machine issues and build doctrine. Accepted Build-8 implementation plus later semantic boundaries control where older planning language differs.
+
+## Machine / Cell source dispositions
+
+### Post-app Cell spine
+
+- source: `GeorgePlattDemo/grok-file@4595b4785a2686486e477ce2e70fb3f476285a8d/docs/cell/STB-CELL-0.1.md`
+- disposition: `KEEP-REFERENCE`
+- source status retained: descriptive working artifact; candidate objects remain candidate; production path closed.
+
+### Atlas 04 — Neutral Ops to Machine
+
+- same accepted app pin
+- disposition: `KEEP-DONOR`
+- source status retained: not adopted; field survey only.
+
+### Atlas 05 — Envelope Ladder
+
+- same accepted app pin
+- disposition: `KEEP-DONOR`
+- source status retained: not adopted; field survey only.
+
+### Atlas 06 — Iron
+
+- same accepted app pin
+- disposition: `KEEP-DONOR`
+- source status retained: not adopted; field survey only.
+
+These four sources are indexed from `docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md` and drive the current machine-engineering work surface without being silently promoted to commissioned specifications.
+
+### Public Machine Function & Kinematic Ontology
+
+- source: `GeorgePlattDemo/scan-to-build-review@ab3e35e54d022928d0dd64aae58679fd893f65d2/docs/MACHINE_FUNCTION_KINEMATIC_ONTOLOGY.md`
+- disposition: `KEEP-DONOR / RECONCILE BEFORE ADMISSION`
+
+Reason: substantial useful mechanical/patent/safety detail, but it predates the current layer and terminology cleanup. Mine item-by-item later; do not adopt wholesale.
+
+## Current Store/cell stage vocabulary
+
+- source: `GeorgePlattDemo/scan-to-build-store`, `stage-2-store-zero-reference`
+- pin: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
+- file: `STB-STORE-CELL-STAGES-0.1.md`
+- disposition: `KEEP-CURRENT`
+
+Its Stage 1–4 meanings are preserved in `work/machines/staging/README.md` and `docs/cell/STAGE-SOURCE-POINTER.md`.
+
+Important: internal physical machine-build phases must not be confused with Store/cell evidence stages. Under the current stage source, physical pilot/commissioning/measured behavior is Stage-3 evidence.
+
+## New post-app working documents
+
+The following staging files are repository-created current work surfaces. They synthesize only current/pinned evidence plus explicit owner direction and label unknown physical facts as unknown:
+
+- `work/machines/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md`
+- `work/machines/staging/SHEET-MACHINE-STAGING-0.1.md`
+- `work/cell/RESEARCH-CELL-STAGING-0.1.md`
+
+They are planning/status surfaces, not machine specifications or capability declarations.
+
+## Explicitly not admitted as current
 
 ### Sarah / early demo material
 
-**Disposition:** pending later review; not current baseline.
+**Disposition:** donor/provenance only; not current baseline.
 
-The early Sarah chain was intentionally a toy/research demonstration and crosses periods of terminology, Store, governance, and authority evolution. Useful content may later be recovered, but early wording and flows are not trusted by default.
+The early Sarah chain was intentionally a toy/research demonstration and crosses periods of terminology, Store, governance, and authority evolution. Useful behavior may later be recovered only through current owners and language.
 
-### Public review and public demo material
+### Public review and public demo wholesale
 
-**Disposition:** pending later review or archive placement.
+**Disposition:** pending item-level review or archive placement.
+
+No wholesale admission. Public mechanical ontology has the donor disposition above.
 
 ### Transfer Staging / rejected candidates
 
 **Disposition:** archive/provenance candidate; not current baseline.
 
-### Historical machine/cell material
+### Historical machine/cell claims not reconciled above
 
-**Disposition:** pending later review. Current physical machine direction remains under development.
+**Disposition:** pending later review.
 
 ### Patent PDFs
 
 **Disposition:** primary archival sources; full ingestion deferred.
+
+Existing current mappings/correspondence are sufficient for the present planning stage. Full grants will be included during final archival packaging.

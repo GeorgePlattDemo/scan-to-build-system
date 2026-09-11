@@ -12,17 +12,20 @@ The accepted application build is the starting datum for post-app work. Earlier 
 
 The current application has not yet been transferred into this repository. Until that transfer is completed, the accepted application remains pinned externally at the source identity below.
 
+For active post-app work, use [`work/README.md`](work/README.md).
+
 ## 2. Exact baseline identities
 
 | Subject | Source | Pin | Current role |
 | --- | --- | --- | --- |
 | Accepted application | `GeorgePlattDemo/grok-file`, `build/app-foundation-0.1` | `4595b4785a2686486e477ce2e70fb3f476285a8d` | Implemented first bounded application vertical |
 | Frozen app roadmap | `GeorgePlattDemo/grok-file`, `plan/app-master-roadmap-0.1` | `985db87a707bd454d7c58419e2cf4d884f00cded` | Application build sequence and page-contract source |
-| Entry/intake contract | `GeorgePlattDemo/grok-file`, `plan/app-entry-intake-contract-0.1` | `2d80b5a7b0e7687c425e100bfa0ff3a833166d42` | Current front-door and intake contract |
+| Entry/intake contract | `GeorgePlattDemo/grok-file`, `plan/app-entry-intake-contract-0.1` | `2d80b5a7b0e7687c425e100bfa0ff3a833166d42` | Intake source; current disposition `ADMIT AFTER REWRITE` due stale embedded Store pin |
 | Application semantic boundaries | `GeorgePlattDemo/grok-file`, accepted app branch | contained in `4595b4785a2686486e477ce2e70fb3f476285a8d` | Application-level cross-layer terminology |
 | Governed Reference | `GeorgePlattDemo/scan-to-build-governed-reference`, `main` | `18949f163718a937f072f4be3a654bb303e53160` | Governed semantics and bounded simulation/reference authority |
 | Stage-2 Store Zero | `GeorgePlattDemo/scan-to-build-store`, `stage-2-store-zero-reference` | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | Current Store reference consumed by the app |
 | Store documentary foundation | `GeorgePlattDemo/scan-to-build-store`, `main` | `3620b35369d70cf49733bbb0b62c0f3d9969b738` | Store ownership and boundary reference |
+| Post-app Cell spine | `GeorgePlattDemo/grok-file`, accepted app pin | `4595b4785a2686486e477ce2e70fb3f476285a8d` | Descriptive machine/cell engineering reference; candidate objects remain candidate |
 
 Pins are identities, not blanket endorsements of every sentence elsewhere in the source repository.
 
@@ -44,13 +47,16 @@ Pins are identities, not blanket endorsements of every sentence elsewhere in the
 ### REFERENCE / SIMULATION
 
 - callable Stage-2 Store Zero with fixture offerings, fixture stock, bounded capability evaluation, and budgetary economics;
-- bounded Governed Reference simulation/reference path.
+- bounded Governed Reference simulation/reference path;
+- D-001 reference capability at Store Stage 2;
+- one exact bounded sheet simulation path in the governed reference.
 
 ### DOCUMENTED
 
 - broader governed architecture beyond the implemented slice;
 - Store/cell development stages;
-- machine/cell boundaries and earlier technical references that still require later admission review.
+- post-app Cell spine and Atlas machine/control research;
+- dimensional and sheet patent correspondence that remains descriptive until implemented/commissioned.
 
 ### PLANNED
 
@@ -69,6 +75,7 @@ Pins are identities, not blanket endorsements of every sentence elsewhere in the
 - production authorization;
 - commissioned physical fabrication capability;
 - measured production performance where only modeled behavior exists;
+- a commissioned physical two-machine cell;
 - cloud custody or durable hosted synchronization.
 
 ## 4. Authority by layer
@@ -96,7 +103,9 @@ The post-app baseline preserves at least these distinctions:
 - modeled cycle time ≠ measured production time;
 - current/applicable ≠ live or commercially fresh;
 - simulation ≠ physical execution;
-- network presence ≠ Cycle Start authority.
+- network presence ≠ Cycle Start authority;
+- patent correspondence ≠ installed capability;
+- candidate component ≠ commissioned machine fact.
 
 ## 6. Legacy admission rule
 
@@ -117,33 +126,67 @@ It was a useful toy/prototype used to demonstrate a chain and expose requirement
 
 No early Sarah assumption should be used to fill a missing current definition merely because it once appeared in a demo.
 
-## 7. Working sequence from here
+## 7. Current stable work surfaces
 
-1. establish the post-app documentation and provenance foundation;
-2. admit the current governance documentary stack;
-3. admit current application contracts;
+| Work surface | Role |
+| --- | --- |
+| `work/user-intake/` | User 1 entry, retained evidence, observations and candidate project definition |
+| `work/store/` | Store 1 expansion, SKU/inventory/special-order/economic/fulfillment work |
+| `work/machines/staging/` | truthful Stage 1–4 evidence navigation and dimensional/sheet status |
+| `work/machines/engineering/` | detailed mechanics, components, controls, lowering and patent correspondence |
+| `work/cell/` | bounded future two-machine research-cell convergence |
+
+Folders are durable subject ownership. Branches are for bounded change sets, not permanent filing cabinets.
+
+## 8. Stage numbering discipline
+
+The current Store/Cell Stage 1–4 document controls unqualified Stage language:
+
+1. Stage 1 — CUT-001;
+2. Stage 2 — Store Zero + D-001 reference cell;
+3. Stage 3 — Pilot Store + pilot cell with physical support/workholding/safety controls/commissioning/measured behavior;
+4. Stage 4 — evidence-informed architecture.
+
+An internal “Machine Build Phase 2” is not the same thing as Store/Cell Stage 2. If physical machines become guarded, controlled, commissioned and measured, they are producing Stage-3 evidence under the existing vocabulary.
+
+## 9. Working sequence from here
+
+Completed foundation work:
+
+1. post-app documentation/provenance foundation;
+2. current governance documentary spine;
+3. post-app Application / User Intake / Store / Machine / Cell work-surface structure.
+
+Next bounded work:
+
 4. admit current Store boundary/stage documents;
 5. transfer the accepted application without semantic redesign;
-6. define User 1 and Store 1 from current terms and definitions;
-7. expand Store capability deliberately;
-8. continue dimensional-machine work;
-9. develop the initial sheet-machine capability;
-10. establish a bounded research cell from demonstrated physical evidence;
+6. record the actual dimensional-machine physical baseline;
+7. select the next bounded dimensional capability;
+8. select the first bounded sheet-machine capability;
+9. define User 1 and Store 1 expansion from current terms;
+10. choose a research-cell hypothesis only after both machine tracks have enough evidence;
 11. recover additional legacy/research material only through the admission gate.
 
-## 8. Safety
+## 10. Safety
 
 **NO BLOOD ON WOOD.**
 
 Safety, refusal, unresolved conditions, human responsibility, and physical operating limits remain part of the architecture. A cleaner repository must not create a stronger capability claim than the evidence supports.
 
-## 9. Navigation
+## 11. Navigation
 
 - [`README.md`](README.md) — repository purpose and working rules
+- [`work/README.md`](work/README.md) — active post-app work surfaces
+- [`work/NEXT-ENGINEERING-STEP.md`](work/NEXT-ENGINEERING-STEP.md) — immediate machine-planning handoff
 - [`docs/project/CURRENT-STATE.md`](docs/project/CURRENT-STATE.md) — concise capability baseline
 - [`docs/project/SOURCE-AUTHORITY.md`](docs/project/SOURCE-AUTHORITY.md) — layer ownership and precedence
 - [`docs/definitions/README.md`](docs/definitions/README.md) — protected terminology/admission discipline
 - [`docs/governance/README.md`](docs/governance/README.md) — admitted governed guidance and builder reading order
-- [`docs/governance/CONTROLLING-SOURCE-POINTERS.md`](docs/governance/CONTROLLING-SOURCE-POINTERS.md) — large current governed sources pinned pending exact transfer
+- [`docs/application/README.md`](docs/application/README.md) — accepted application guidance and current terminology
+- [`docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md`](docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md) — Cell + Atlas engineering source family
+- [`work/machines/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md`](work/machines/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md) — dimensional evidence/build staging
+- [`work/machines/staging/SHEET-MACHINE-STAGING-0.1.md`](work/machines/staging/SHEET-MACHINE-STAGING-0.1.md) — sheet evidence/build staging
+- [`work/cell/RESEARCH-CELL-STAGING-0.1.md`](work/cell/RESEARCH-CELL-STAGING-0.1.md) — two-machine research-cell staging
 - [`provenance/SOURCE-PINS.md`](provenance/SOURCE-PINS.md) — exact source identities
 - [`provenance/ADMISSION-REGISTER.md`](provenance/ADMISSION-REGISTER.md) — what has and has not crossed into this baseline
