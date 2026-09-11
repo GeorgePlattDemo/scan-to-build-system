@@ -4,6 +4,8 @@ import {
   BOARD_OFFERING_QUERY,
   MAX_STORE_RESPONSE_BYTES,
   PUBLISHED_BOARD_SKU,
+  PUBLISHED_SHEET_SKU,
+  SHEET_DEFINITION,
   STORE_CLIENT_TIMEOUT_MS,
   STORE_JOB_STATUSES,
   STORE_PATHS,
@@ -118,10 +120,10 @@ function validateOfferingPayload(payload) {
     if (skuError) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, skuError);
     }
-    if (payload.requestedStoreSku !== PUBLISHED_BOARD_SKU) {
+    if (payload.requestedStoreSku !== PUBLISHED_BOARD_SKU && payload.requestedStoreSku !== PUBLISHED_SHEET_SKU) {
       return fail(
         ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-        'offering lookup accepts only the published Board SKU or its frozen equivalent query',
+        'offering lookup accepts only the published Board SKU, published sheet SKU, or the frozen Board query',
       );
     }
     const extra = keys.filter((key) => key !== 'requestedStoreSku');
@@ -230,6 +232,128 @@ function validateJobPayload(payload) {
   };
 }
 
+function validateSheetJobPayload(payload) {
+  if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'sheet job payload must be an object');
+  }
+  const extra = Object.keys(payload).filter(
+    (key) => key !== 'line' && key !== 'definitionKind' && key !== 'ruleVersion',
+  );
+  if (extra.length > 0) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected sheet job payload fields');
+  }
+  if (payload.definitionKind !== SHEET_DEFINITION.kind) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'definitionKind must be sheet.mode2.stencil.v1');
+  }
+  if (payload.ruleVersion !== SHEET_DEFINITION.ruleVersion) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'ruleVersion must match the sheet slice');
+  }
+  const line = payload.line;
+  if (line === null || typeof line !== 'object' || Array.isArray(line)) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'sheet job payload requires one line');
+  }
+  const allowedLine = new Set([
+    'lineId',
+    'storeSku',
+    'quantity',
+    'unit',
+    'requiredOps',
+    'profileKind',
+    'blankLength',
+    'blankWidth',
+    'tabCount',
+    'routeDepth',
+  ]);
+  if (Object.keys(line).some((key) => !allowedLine.has(key))) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected sheet job line fields');
+  }
+  const lineIdError = requireNonemptyString('lineId', line.lineId);
+  if (lineIdError) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, lineIdError);
+  }
+  const skuError = requireNonemptyString('storeSku', line.storeSku);
+  if (skuError) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, skuError);
+  }
+  if (line.storeSku !== PUBLISHED_SHEET_SKU) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'sheet job accepts only the published sheet SKU');
+  }
+  if (line.quantity !== 1 || line.unit !== 'ea') {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'sheet job quantity must be 1 ea');
+  }
+  if (
+    !Array.isArray(line.requiredOps) ||
+    line.requiredOps.length !== 2 ||
+    line.requiredOps[0] !== 'ROUTE_PROFILE' ||
+    line.requiredOps[1] !== 'RETAIN_TABS'
+  ) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'sheet job requiredOps must be exactly ["ROUTE_PROFILE","RETAIN_TABS"]',
+    );
+  }
+  if (!SHEET_DEFINITION.profileKinds.includes(line.profileKind)) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'profileKind must be STRAIGHT_RECT or CURVILINEAR_OUTLINE');
+  }
+  if (!Number.isInteger(line.tabCount) || line.tabCount < SHEET_DEFINITION.minTabCount) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'tabCount must be an integer ≥ 1');
+  }
+  function parseDim(field, object) {
+    if (object === null || typeof object !== 'object' || Array.isArray(object)) {
+      return { ok: false, reason: `${field} must be an object` };
+    }
+    if (object.unit !== SHEET_DEFINITION.unit) {
+      return { ok: false, reason: `${field}.unit must be in` };
+    }
+    const parsed = parseCanonicalInch(object.value);
+    if (!parsed.ok) {
+      return { ok: false, reason: parsed.reason.replace('keptLength', field) };
+    }
+    return parsed;
+  }
+  const length = parseDim('blankLength', line.blankLength);
+  if (!length.ok) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, length.reason);
+  }
+  const width = parseDim('blankWidth', line.blankWidth);
+  if (!width.ok) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, width.reason);
+  }
+  const depth = parseDim('routeDepth', line.routeDepth);
+  if (!depth.ok) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, depth.reason);
+  }
+  if (length.value < SHEET_DEFINITION.minInches || width.value < SHEET_DEFINITION.minInches) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'sheet blank must be at least 6 in');
+  }
+  if (length.value > SHEET_DEFINITION.maxLengthInches || width.value > SHEET_DEFINITION.maxWidthInches) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'sheet blank exceeds published parent');
+  }
+  if (depth.value <= 0 || depth.value > SHEET_DEFINITION.maxRouteDepthInches) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'route depth must be within the REFERENCE envelope');
+  }
+  return {
+    ok: true,
+    line: {
+      lineId: line.lineId,
+      storeSku: line.storeSku,
+      quantity: 1,
+      unit: 'ea',
+      requiredOps: ['ROUTE_PROFILE', 'RETAIN_TABS'],
+      profileKind: line.profileKind,
+      blankLength: { value: length.canonical, unit: 'in' },
+      blankWidth: { value: width.canonical, unit: 'in' },
+      tabCount: line.tabCount,
+      routeDepth: { value: depth.canonical, unit: 'in' },
+      blankL_in: length.value,
+      blankW_in: width.value,
+      routeDepthIn: depth.value,
+    },
+    definitionKind: SHEET_DEFINITION.kind,
+    ruleVersion: SHEET_DEFINITION.ruleVersion,
+  };
+}
+
 export async function validateWireRequest(body) {
   if (body === null || typeof body !== 'object' || Array.isArray(body)) {
     return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'request body must be a JSON object');
@@ -305,6 +429,23 @@ export async function validateWireRequest(body) {
       return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'job querySignature must be null');
     }
     const payload = validateJobPayload(body.payload);
+    if (!payload.ok) {
+      return payload;
+    }
+    return { ok: true, requestType: body.requestType, payload, envelope: body };
+  }
+  if (body.requestType === STORE_REQUEST_TYPES.SHEET_MODE2_STENCIL_V1) {
+    if (body.scope !== STORE_SCOPES.SHEET_MODE2_STENCIL_V1) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'sheet job scope mismatch');
+    }
+    const demandError = requireNonemptyString('demandSignature', body.demandSignature);
+    if (demandError) {
+      return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, demandError);
+    }
+    if (body.querySignature !== null) {
+      return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'job querySignature must be null');
+    }
+    const payload = validateSheetJobPayload(body.payload);
     if (!payload.ok) {
       return payload;
     }
@@ -458,6 +599,81 @@ export async function boardDemandSignature(payload) {
   });
 }
 
+export function sheetJobPayload({
+  lineId,
+  storeSku = PUBLISHED_SHEET_SKU,
+  profileKind,
+  blankLengthCanonical,
+  blankWidthCanonical,
+  tabCount,
+  routeDepthCanonical,
+}) {
+  return {
+    line: {
+      lineId,
+      storeSku,
+      quantity: 1,
+      unit: 'ea',
+      requiredOps: ['ROUTE_PROFILE', 'RETAIN_TABS'],
+      profileKind,
+      blankLength: { value: blankLengthCanonical, unit: 'in' },
+      blankWidth: { value: blankWidthCanonical, unit: 'in' },
+      tabCount,
+      routeDepth: { value: routeDepthCanonical, unit: 'in' },
+    },
+    definitionKind: SHEET_DEFINITION.kind,
+    ruleVersion: SHEET_DEFINITION.ruleVersion,
+  };
+}
+
+export async function sheetDemandSignature(payload) {
+  return digestCanonical({
+    definitionKind: payload.definitionKind,
+    ruleVersion: payload.ruleVersion,
+    requestType: STORE_REQUEST_TYPES.SHEET_MODE2_STENCIL_V1,
+    scope: STORE_SCOPES.SHEET_MODE2_STENCIL_V1,
+    lineId: payload.line.lineId,
+    storeSku: payload.line.storeSku,
+    quantity: payload.line.quantity,
+    unit: payload.line.unit,
+    requiredOps: payload.line.requiredOps,
+    profileKind: payload.line.profileKind,
+    blankLength: payload.line.blankLength,
+    blankWidth: payload.line.blankWidth,
+    tabCount: payload.line.tabCount,
+    routeDepth: payload.line.routeDepth,
+  });
+}
+
+export async function buildSheetJobRequest({
+  requestId,
+  projectId,
+  candidateRevisionId,
+  attemptId,
+  attemptNumber,
+  sentAt,
+  demandSignature,
+  payload,
+}) {
+  const payloadHash = await payloadDigest(payload);
+  return {
+    protocolVersion: STORE_PROTOCOL_VERSION,
+    requestId,
+    projectId,
+    candidateRevisionId,
+    requestType: STORE_REQUEST_TYPES.SHEET_MODE2_STENCIL_V1,
+    scope: STORE_SCOPES.SHEET_MODE2_STENCIL_V1,
+    demandSignature,
+    querySignature: null,
+    payloadDigest: payloadHash,
+    expectedStorePin: STORE_PIN,
+    attemptId,
+    attemptNumber,
+    sentAt,
+    payload,
+  };
+}
+
 export const STORE_CLIENT_LIMITS = Object.freeze({
   timeoutMs: STORE_CLIENT_TIMEOUT_MS,
   paths: STORE_PATHS,
@@ -545,7 +761,10 @@ export function inspectStoreResponse(request, parsed, { httpStatus, byteLength }
   if (parsed.attemptNumber !== request.attemptNumber) {
     return mismatch('attemptNumber', parsed.attemptNumber ?? null);
   }
-  if (request.requestType === STORE_REQUEST_TYPES.BOARD_SQUARE_V1) {
+  if (
+    request.requestType === STORE_REQUEST_TYPES.BOARD_SQUARE_V1 ||
+    request.requestType === STORE_REQUEST_TYPES.SHEET_MODE2_STENCIL_V1
+  ) {
     const status = parsed.rawEvaluation?.status;
     if (!isKnownJobStatus(status)) {
       return {

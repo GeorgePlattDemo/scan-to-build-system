@@ -76,7 +76,10 @@ function copyCapability(line) {
   const envelopeReasons = Array.isArray(capability.envelope?.reasons)
     ? capability.envelope.reasons.filter((item) => typeof item === 'string')
     : [];
-  const reasons = missing.length > 0 ? missing : envelopeReasons;
+  const ownReasons = Array.isArray(capability.reasons)
+    ? capability.reasons.filter((item) => typeof item === 'string')
+    : [];
+  const reasons = missing.length > 0 ? missing : ownReasons.length > 0 ? ownReasons : envelopeReasons;
   return {
     status: displayOrMissing(capability.status),
     reason: displayOrMissing(capability.reason),
@@ -143,8 +146,12 @@ function copyEstimate(envelope) {
     };
   }
   const totals = rawEstimate.totals && typeof rawEstimate.totals === 'object' ? rawEstimate.totals : {};
-  const q = typeof totals.Q === 'number' && Number.isFinite(totals.Q) ? totals.Q : null;
-  const material = typeof totals.material === 'number' && Number.isFinite(totals.material) ? totals.material : null;
+  const topQ = typeof rawEstimate.Q === 'number' && Number.isFinite(rawEstimate.Q) ? rawEstimate.Q : null;
+  const q = typeof totals.Q === 'number' && Number.isFinite(totals.Q) ? totals.Q : topQ;
+  const topMaterial =
+    typeof rawEstimate.material === 'number' && Number.isFinite(rawEstimate.material) ? rawEstimate.material : null;
+  const material =
+    typeof totals.material === 'number' && Number.isFinite(totals.material) ? totals.material : topMaterial;
   const recovery =
     typeof totals.cell_recovery === 'number' && Number.isFinite(totals.cell_recovery)
       ? totals.cell_recovery
@@ -155,7 +162,9 @@ function copyEstimate(envelope) {
       ? rawEstimate.cycle.T_job_min
       : null;
   return {
-    available: rawEstimate.status === 'BUDGETARY_ESTIMATE' && q !== null,
+    available:
+      (rawEstimate.status === 'BUDGETARY_ESTIMATE' || rawEstimate.status === 'BUDGETARY_MATERIAL_ONLY') &&
+      q !== null,
     reason: displayOrMissing(rawEstimate.reason) ?? (q === null ? 'missing-q' : null),
     status: displayOrMissing(rawEstimate.status),
     q,
@@ -343,7 +352,11 @@ export function presentStoreAnswer(applicability, options = {}) {
 
   const evaluation = envelope?.rawEvaluation ?? null;
   const jobStatus = isKnownJobStatus(evaluation?.status) ? evaluation.status : null;
-  const line = Array.isArray(evaluation?.lines) ? evaluation.lines[0] ?? null : null;
+  const line = Array.isArray(evaluation?.lines)
+    ? evaluation.lines[0] ?? null
+    : evaluation?.line && typeof evaluation.line === 'object'
+      ? evaluation.line
+      : null;
   const offering = copyOffering(envelope?.rawOffering);
   const stock = copyStock(line);
   const capability = copyCapability(line);

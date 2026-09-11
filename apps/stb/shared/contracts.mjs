@@ -153,6 +153,23 @@ export const COPY = Object.freeze({
     'This app slice accepts finite inch lengths from 24 through 60 inclusive. Other lengths stay as demand and are not clamped.',
   boardBlank: 'Finished length is blank. No valid part has been created.',
   boardUnresolved: 'This length is retained. It is not an accepted Board definition in this slice.',
+  sheetCardName: 'SHEET STENCIL',
+  sheetStatus: 'Available. Define a Mode-2 sheet stencil. Not a toolpath.',
+  sheetSlice:
+    'This slice accepts a straight rectangle or a curvilinear outline on one published sheet SKU. Tabs stay with the parent sheet. Secondary separation is not automated here.',
+  sheetApply: 'Apply sheet definition',
+  sheetBlank: 'Sheet definition is incomplete. No valid part has been created.',
+  sheetUnresolved: 'This sheet requirement is retained. It is not an accepted Mode-2 definition in this slice.',
+  sheetProfileLabel: 'Profile kind',
+  sheetLengthLabel: 'Blank length',
+  sheetWidthLabel: 'Blank width',
+  sheetTabsLabel: 'Stencil tabs',
+  sheetDepthLabel: 'Route depth',
+  sheetUnitLabel: 'Unit',
+  sheetStraight: 'STRAIGHT_RECT',
+  sheetCurvilinear: 'CURVILINEAR_OUTLINE',
+  sheetNotToScale:
+    'Plan-view schematic only. Not a toolpath, G-code, or machine instruction.',
   boardSquareCut: 'square cut',
   boardCrosscut: 'CROSSCUT',
   boardQuantity: '1 ea',
@@ -276,6 +293,12 @@ export const INTAKE_CARDS = Object.freeze([
     availability: 'Available. Enter a finished length in inches.',
   }),
   Object.freeze({
+    id: 'sheet',
+    name: 'SHEET STENCIL',
+    status: 'active',
+    availability: 'Available. Define a Mode-2 sheet stencil. Not a toolpath.',
+  }),
+  Object.freeze({
     id: 'measurements',
     name: 'MEASUREMENTS',
     status: 'active',
@@ -314,9 +337,9 @@ export const INTAKE_CARDS = Object.freeze([
 ]);
 
 export const ACTOR_CARD_ORDER = Object.freeze({
-  new: Object.freeze(['board', 'measurements', 'scan', 'sketch', 'drawing', 'takeoff', 'cad']),
-  returning: Object.freeze(['board', 'measurements', 'scan', 'sketch', 'drawing', 'takeoff', 'cad']),
-  professional: Object.freeze(['drawing', 'takeoff', 'cad', 'measurements', 'board', 'scan', 'sketch']),
+  new: Object.freeze(['board', 'sheet', 'measurements', 'scan', 'sketch', 'drawing', 'takeoff', 'cad']),
+  returning: Object.freeze(['board', 'sheet', 'measurements', 'scan', 'sketch', 'drawing', 'takeoff', 'cad']),
+  professional: Object.freeze(['drawing', 'takeoff', 'cad', 'measurements', 'board', 'sheet', 'scan', 'sketch']),
 });
 
 export const PRIMARY_PAGES = Object.freeze([
@@ -386,6 +409,37 @@ export const BOARD_DEFINITION = Object.freeze({
   occurrenceRole: 'desired-finished-board',
 });
 
+export const SHEET_INPUT_KEY = 'sheet-mode2-stencil';
+
+export const SHEET_DEFINITION = Object.freeze({
+  kind: 'sheet.mode2.stencil.v1',
+  ruleVersion: '0.1',
+  derivationVersion: 'sheet.mode2.stencil.v1/0.1',
+  inputKey: SHEET_INPUT_KEY,
+  unit: 'in',
+  minInches: 6,
+  maxLengthInches: 96,
+  maxWidthInches: 48,
+  quantity: 1,
+  quantityUnit: 'ea',
+  requiredOps: Object.freeze(['ROUTE_PROFILE', 'RETAIN_TABS']),
+  profileKinds: Object.freeze(['STRAIGHT_RECT', 'CURVILINEAR_OUTLINE']),
+  minTabCount: 1,
+  maxRouteDepthInches: 0.75,
+  occurrenceRole: 'desired-sheet-stencil',
+  evidenceClass: 'REFERENCE',
+  physicalStatus: 'NOT_CLAIMED',
+});
+
+export const PUBLISHED_SHEET_SKU = 'STB-ZERO-PLY-075-48X96-001';
+export const SHEET_OFFERING_QUERY = Object.freeze({
+  species: 'fir',
+  form: 'sheet',
+  actualT: 0.75,
+  sheetW_in: 48,
+  sheetL_in: 96,
+});
+
 export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
   id: 'CUT-001',
   repository: 'GeorgePlattDemo/scan-to-build-store',
@@ -403,7 +457,7 @@ export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
 
 export const STORE_PROTOCOL_VERSION = 'stb-store-zero-http/1';
 export const STORE_REPOSITORY = 'GeorgePlattDemo/scan-to-build-store';
-export const STORE_PIN = 'b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d';
+export const STORE_PIN = '49d22ce40482a7c2e0169ac1e6df48e0f8384a6d';
 export const WRAPPER_BUILD_ID = 'stb-app-build-5';
 export const APP_BUILD_ID = 'stb-app-build-7';
 export const PUBLISHED_BOARD_SKU = 'STB-ZERO-SPF-2X4-72-001';
@@ -417,10 +471,12 @@ export const BOARD_OFFERING_QUERY = Object.freeze({
 export const STORE_REQUEST_TYPES = Object.freeze({
   OFFERING_LOOKUP: 'OFFERING_LOOKUP',
   BOARD_SQUARE_V1: 'BOARD_SQUARE_V1',
+  SHEET_MODE2_STENCIL_V1: 'SHEET_MODE2_STENCIL_V1',
 });
 export const STORE_SCOPES = Object.freeze({
   OFFERING_LOOKUP: 'OFFERING_LOOKUP',
   BOARD_SQUARE_V1: 'BOARD_SQUARE_V1',
+  SHEET_MODE2_STENCIL_V1: 'SHEET_MODE2_STENCIL_V1',
 });
 export const STORE_JOB_STATUSES = Object.freeze([
   'SUPPORTABLE',
@@ -499,6 +555,8 @@ export const STATIC_ASSETS = Object.freeze({
   '/domain/candidate.mjs': JS('browser/domain/candidate.mjs'),
   '/domain/derive.mjs': JS('browser/domain/derive.mjs'),
   '/domain/board.mjs': JS('browser/domain/board.mjs'),
+  '/domain/sheet.mjs': JS('browser/domain/sheet.mjs'),
+  '/domain/sheet-derive.mjs': JS('browser/domain/sheet-derive.mjs'),
   '/domain/evidence.mjs': JS('browser/domain/evidence.mjs'),
   '/domain/observation.mjs': JS('browser/domain/observation.mjs'),
   '/domain/review.mjs': JS('browser/domain/review.mjs'),
@@ -512,6 +570,7 @@ export const STATIC_ASSETS = Object.freeze({
   '/shared/contracts.mjs': JS('shared/contracts.mjs'),
   '/shared/canonical.mjs': JS('shared/canonical.mjs'),
   '/shared/board-rule.mjs': JS('shared/board-rule.mjs'),
+  '/shared/sheet-rule.mjs': JS('shared/sheet-rule.mjs'),
   '/shared/store-wire.mjs': JS('shared/store-wire.mjs'),
   '/shared/store-present.mjs': JS('shared/store-present.mjs'),
   '/shared/review-digest.mjs': JS('shared/review-digest.mjs'),

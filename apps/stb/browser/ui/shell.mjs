@@ -25,6 +25,7 @@ import {
   applyBoardFinishedLength,
   applyCut001DocumentaryReference,
 } from '/domain/board.mjs';
+import { applySheetDefinition } from '/domain/sheet.mjs';
 import {
   blobCustody,
   currentCandidate,
@@ -45,6 +46,7 @@ import {
   recoverStoreOnOpen,
   retryCurrentStore,
   scheduleBoardStoreQuestion,
+  scheduleSheetStoreQuestion,
 } from '/integration/store-coordinator.mjs';
 import {
   acknowledgeUnresolvedDefinition,
@@ -262,6 +264,15 @@ let measurementBuffer = { raw: '', unit: '', role: '' };
 let takeoffBuffer = { label: '', quantity: '', unit: '', dimensions: '', material: '' };
 let boardBuffer = { raw: '', unit: 'in' };
 let boardDirty = false;
+let sheetBuffer = {
+  profileKind: 'STRAIGHT_RECT',
+  length: '24',
+  width: '18',
+  tabs: '4',
+  depth: '0.5',
+  unit: 'in',
+};
+let sheetDirty = false;
 let lastBoardCommitSignature = null;
 let selectedOccurrenceId = null;
 let pendingReviewActionId = null;
@@ -336,10 +347,12 @@ async function renderInto(root) {
         return;
       }
       let scheduled = { status: 'skipped' };
+      const unapplied = boardDirty || sheetDirty;
       try {
-        scheduled = await scheduleBoardStoreQuestion(project.localRecordId, {
-          unapplied: boardDirty,
-        });
+        scheduled = await scheduleSheetStoreQuestion(project.localRecordId, { unapplied });
+        if (scheduled.status === 'not-sheet') {
+          scheduled = await scheduleBoardStoreQuestion(project.localRecordId, { unapplied });
+        }
       } catch (error) {
         pageStatus = `Save failed: ${error.message}`;
         scheduled = { status: 'error', error };
@@ -349,7 +362,7 @@ async function renderInto(root) {
       }
       followStoreWork(root, scheduled);
       const storeView = await loadStorePresentation(project.localRecordId, {
-        unapplied: boardDirty,
+        unapplied: boardDirty || sheetDirty,
         candidateRevisionId: project.currentHead,
       });
       const storeHistory =
@@ -361,7 +374,7 @@ async function renderInto(root) {
       const candidate = await currentCandidate(project.localRecordId);
       const projection = await currentProjection(project.localRecordId);
       const reviewPresentation = await loadReviewPresentation(project.localRecordId, {
-        unapplied: boardDirty,
+        unapplied: boardDirty || sheetDirty,
       });
       if (seq !== renderSeq) {
         return;
@@ -401,7 +414,7 @@ async function renderInto(root) {
         );
       } else if (screen.view === 'record') {
         const recordPresentation = await loadRecordPresentation(project.localRecordId, {
-          unapplied: boardDirty,
+          unapplied: boardDirty || sheetDirty,
         });
         if (seq !== renderSeq) {
           return;
@@ -435,6 +448,7 @@ async function renderInto(root) {
             measurementBuffer,
             takeoffBuffer,
             boardBuffer,
+            sheetBuffer,
             correctingId,
             selectedOccurrenceId,
             storeView,
@@ -658,6 +672,15 @@ function discardBuffers() {
   takeoffBuffer = { label: '', quantity: '', unit: '', dimensions: '', material: '' };
   boardBuffer = { raw: '', unit: 'in' };
   boardDirty = false;
+  sheetBuffer = {
+    profileKind: 'STRAIGHT_RECT',
+    length: '24',
+    width: '18',
+    tabs: '4',
+    depth: '0.5',
+    unit: 'in',
+  };
+  sheetDirty = false;
   typedText = '';
   takeoffText = '';
   correctingId = null;
@@ -839,6 +862,49 @@ async function commitBoardLength(root, { fromBlur = false } = {}) {
     boardDirty = false;
     selectedOccurrenceId = result.occurrenceId ?? selectedOccurrenceId;
     pageStatus = boardStatusFromProjection(result.projection);
+    renderInto(root);
+  } catch (error) {
+    pageStatus = `Save failed: ${error.message}`;
+    renderInto(root);
+  } finally {
+    observationInFlight = null;
+  }
+}
+
+async function commitSheetDefinition(root) {
+  const screen = screenFromLocation(window.location);
+  if (!screen.localRecordId || observationInFlight) {
+    return;
+  }
+  sheetBuffer = {
+    profileKind: root.querySelector('[data-field="sheet-profile"]')?.value ?? sheetBuffer.profileKind,
+    length: root.querySelector('[data-field="sheet-length"]')?.value ?? sheetBuffer.length,
+    width: root.querySelector('[data-field="sheet-width"]')?.value ?? sheetBuffer.width,
+    tabs: root.querySelector('[data-field="sheet-tabs"]')?.value ?? sheetBuffer.tabs,
+    depth: root.querySelector('[data-field="sheet-depth"]')?.value ?? sheetBuffer.depth,
+    unit: 'in',
+  };
+  const project = await projectIndex(screen.localRecordId);
+  if (!project) {
+    return;
+  }
+  observationInFlight = applySheetDefinition({
+    localRecordId: project.localRecordId,
+    expectedHead: project.currentHead,
+    actionId: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    profileKind: sheetBuffer.profileKind,
+    blankL: Number(sheetBuffer.length),
+    blankW: Number(sheetBuffer.width),
+    tabCount: Number(sheetBuffer.tabs),
+    routeDepthIn: Number(sheetBuffer.depth),
+    unit: 'in',
+  });
+  try {
+    const result = await observationInFlight;
+    sheetDirty = false;
+    selectedOccurrenceId = result.occurrenceId ?? selectedOccurrenceId;
+    pageStatus = result.projection?.payload?.valid ? COPY.mappedAccepted : COPY.sheetUnresolved;
     renderInto(root);
   } catch (error) {
     pageStatus = `Save failed: ${error.message}`;
@@ -1174,7 +1240,7 @@ export function startShell(root) {
         localRecordId: screen.localRecordId,
         actionId,
         createdAt: new Date().toISOString(),
-        unapplied: boardDirty,
+        unapplied: boardDirty || sheetDirty,
       });
       observationInFlight
         .then(() => {
@@ -1250,6 +1316,10 @@ export function startShell(root) {
     }
     if (action === 'apply-cut001') {
       commitCut001(root);
+      return;
+    }
+    if (action === 'apply-sheet-definition') {
+      commitSheetDefinition(root);
       return;
     }
     if (action === 'select-occurrence') {
@@ -1365,6 +1435,8 @@ export function startShell(root) {
       commitTakeoffRow(root);
     } else if (form.matches('[data-board-form]')) {
       commitBoardLength(root);
+    } else if (form.matches('[data-sheet-form]')) {
+      commitSheetDefinition(root);
     }
   });
 
@@ -1412,6 +1484,36 @@ export function startShell(root) {
       boardBuffer.unit = value;
       boardDirty = true;
       markUnapplied(root, 'board', true);
+      markUnapplied(root, 'store', true);
+      applyUnappliedReviewLock(root);
+    } else if (field === 'sheet-profile') {
+      sheetBuffer.profileKind = value;
+      sheetDirty = true;
+      markUnapplied(root, 'sheet', true);
+      markUnapplied(root, 'store', true);
+      applyUnappliedReviewLock(root);
+    } else if (field === 'sheet-length') {
+      sheetBuffer.length = value;
+      sheetDirty = true;
+      markUnapplied(root, 'sheet', true);
+      markUnapplied(root, 'store', true);
+      applyUnappliedReviewLock(root);
+    } else if (field === 'sheet-width') {
+      sheetBuffer.width = value;
+      sheetDirty = true;
+      markUnapplied(root, 'sheet', true);
+      markUnapplied(root, 'store', true);
+      applyUnappliedReviewLock(root);
+    } else if (field === 'sheet-tabs') {
+      sheetBuffer.tabs = value;
+      sheetDirty = true;
+      markUnapplied(root, 'sheet', true);
+      markUnapplied(root, 'store', true);
+      applyUnappliedReviewLock(root);
+    } else if (field === 'sheet-depth') {
+      sheetBuffer.depth = value;
+      sheetDirty = true;
+      markUnapplied(root, 'sheet', true);
       markUnapplied(root, 'store', true);
       applyUnappliedReviewLock(root);
     }

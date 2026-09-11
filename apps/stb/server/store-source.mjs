@@ -13,6 +13,7 @@ export const REQUIRED_STORE_FILES = Object.freeze([
   'store-zero-stage2-store.mjs',
   'store-zero-pricing-engine.mjs',
   'd001-stage2-envelope.mjs',
+  's001-mode2-envelope.mjs',
   'store-zero-catalog.json',
   'store-zero-observations.json',
 ]);
@@ -145,16 +146,20 @@ export async function loadPinnedStoreModules(root) {
     const storeUrl = pathToFileURL(path.join(root, 'store-zero-stage2-store.mjs')).href;
     const pricingUrl = pathToFileURL(path.join(root, 'store-zero-pricing-engine.mjs')).href;
     const envelopeUrl = pathToFileURL(path.join(root, 'd001-stage2-envelope.mjs')).href;
-    const [store, pricing, envelope] = await Promise.all([
+    const sheetUrl = pathToFileURL(path.join(root, 's001-mode2-envelope.mjs')).href;
+    const [store, pricing, envelope, sheet] = await Promise.all([
       import(storeUrl),
       import(pricingUrl),
       import(envelopeUrl),
+      import(sheetUrl),
     ]);
 
     const required = [
       [store, 'findSku'],
       [store, 'offerMaterial'],
       [store, 'evaluateJob'],
+      [store, 'evaluateSheetMode2Job'],
+      [store, 'estimateSheetMode2Job'],
       [store, 'loadCatalog'],
       [store, 'loadObservations'],
       [pricing, 'estimateJob'],
@@ -162,6 +167,8 @@ export async function loadPinnedStoreModules(root) {
       [pricing, 'CYCLE_MODEL'],
       [envelope, 'envelopeCheck'],
       [envelope, 'D001_STAGE2_ENVELOPE'],
+      [sheet, 'evaluateSheetMode2'],
+      [sheet, 'S001_MODE2_ENVELOPE'],
     ];
     const missing = required
       .filter(([mod, name]) => typeof mod[name] === 'undefined')
@@ -187,6 +194,8 @@ export async function loadPinnedStoreModules(root) {
         findSku: store.findSku,
         offerMaterial: store.offerMaterial,
         evaluateJob: store.evaluateJob,
+        evaluateSheetMode2Job: store.evaluateSheetMode2Job,
+        estimateSheetMode2Job: store.estimateSheetMode2Job,
         loadCatalog: store.loadCatalog,
         loadObservations: store.loadObservations,
         estimateJob: pricing.estimateJob,
@@ -194,6 +203,8 @@ export async function loadPinnedStoreModules(root) {
         CYCLE_MODEL: pricing.CYCLE_MODEL,
         envelopeCheck: envelope.envelopeCheck,
         D001_STAGE2_ENVELOPE: envelope.D001_STAGE2_ENVELOPE,
+        evaluateSheetMode2: sheet.evaluateSheetMode2,
+        S001_MODE2_ENVELOPE: sheet.S001_MODE2_ENVELOPE,
       },
     };
   } catch (error) {

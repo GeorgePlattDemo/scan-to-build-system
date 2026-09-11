@@ -25,7 +25,7 @@ For physical machine research, the controlling current program is [`work/machine
 | Entry/intake contract | `GeorgePlattDemo/grok-file`, `plan/app-entry-intake-contract-0.1` | `2d80b5a7b0e7687c425e100bfa0ff3a833166d42` | Intake source; `ADMIT AFTER REWRITE` due stale embedded Store pin |
 | Application semantic boundaries | `GeorgePlattDemo/grok-file`, accepted app branch | contained in `4595b4785a2686486e477ce2e70fb3f476285a8d` | Application-level cross-layer terminology |
 | Governed Reference | `GeorgePlattDemo/scan-to-build-governed-reference`, `main` | `18949f163718a937f072f4be3a654bb303e53160` | Governed semantics and bounded simulation/reference authority |
-| Stage-2 Store Zero | `GeorgePlattDemo/scan-to-build-store`, `stage-2-store-zero-reference` | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | Current Store reference consumed by the app |
+| Stage-2 Store Zero | `GeorgePlattDemo/scan-to-build-store`, `build/sheet-mode2-storezero-0.1` | `49d22ce40482a7c2e0169ac1e6df48e0f8384a6d` | Current Store reference consumed by the app (Board + Mode-2 sheet) |
 | Store documentary foundation | `GeorgePlattDemo/scan-to-build-store`, `main` | `3620b35369d70cf49733bbb0b62c0f3d9969b738` | Store ownership and boundary reference |
 | Post-app Cell spine | `GeorgePlattDemo/grok-file`, accepted app pin | `4595b4785a2686486e477ce2e70fb3f476285a8d` | Descriptive machine/cell engineering reference; candidate objects remain candidate |
 | U.S. Patent 9,720,401 B2 | `docs/patents/source/US9720401B2.pdf` | SHA-256 `d6ff401ee0a60720c0d8b9819a0f828e15036deee1882da06dab7282da0311a4` | Primary issued patent source |

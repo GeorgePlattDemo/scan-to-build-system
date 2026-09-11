@@ -14,7 +14,8 @@ Use this file instead of walking other repositories by memory.
 | App roadmap (frozen) | `GeorgePlattDemo/grok-file` `plan/app-master-roadmap-0.1` | `985db87a707bd454d7c58419e2cf4d884f00cded` | DOCUMENTED sequence |
 | Entry/intake contract | `GeorgePlattDemo/grok-file` `plan/app-entry-intake-contract-0.1` | `2d80b5a7b0e7687c425e100bfa0ff3a833166d42` | ADMIT AFTER REWRITE |
 | Governed Reference | `GeorgePlattDemo/scan-to-build-governed-reference` `main` | `18949f163718a937f072f4be3a654bb303e53160` | governed meaning; simulation/reference |
-| Stage-2 Store consumed by app | `GeorgePlattDemo/scan-to-build-store` `stage-2-store-zero-reference` | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | REFERENCE Store Zero |
+| Stage-2 Store consumed by app | `GeorgePlattDemo/scan-to-build-store` `build/sheet-mode2-storezero-0.1` | `49d22ce40482a7c2e0169ac1e6df48e0f8384a6d` | REFERENCE Store Zero + Mode-2 sheet |
+| Stage-2 Store Board ancestor | `GeorgePlattDemo/scan-to-build-store` `stage-2-store-zero-reference` | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | Board-only ancestor pin |
 | Store documentary main | `GeorgePlattDemo/scan-to-build-store` `main` | `3620b35369d70cf49733bbb0b62c0f3d9969b738` | Store ownership / Job-001 pattern |
 | Atlas donor copies | `source-library/atlas-research/` | same app pin `4595b478…` | KEEP-DONOR / not adopted |
 | U.S. Patent 9,720,401 B2 | `docs/patents/source/US9720401B2.pdf` | SHA-256 `d6ff401ee0a60720c0d8b9819a0f828e15036deee1882da06dab7282da0311a4` | PRIMARY SOURCE |

@@ -339,6 +339,7 @@ function childBody(child, {
   takeoffBuffer,
   correctingId,
   boardBuffer,
+  sheetBuffer,
   projection,
   selectedOccurrenceId,
   storeView,
@@ -409,6 +410,126 @@ function childBody(child, {
             attrs: {
               'data-board-unresolved': reason ?? 'missing-finished-length',
             },
+            text: unresolvedText,
+          })
+        : null,
+      renderStorePanel(
+        storeView
+          ?? presentStoreAnswer(
+            { status: 'none' },
+            { projectionValid: projection?.payload?.valid === true },
+          ),
+        { mode: 'compact' },
+      ),
+      reviewPresentation ? renderInlineReview(reviewPresentation) : null,
+      renderSharedCandidateView(projection, { selectedOccurrenceId }),
+    ];
+  }
+  if (child === 'sheet') {
+    const buffer = sheetBuffer ?? {
+      profileKind: 'STRAIGHT_RECT',
+      length: '24',
+      width: '18',
+      tabs: '4',
+      depth: '0.5',
+      unit: 'in',
+    };
+    const reason = projection?.payload?.unresolvedReason ?? null;
+    const unresolvedText =
+      projection && projection.payload.definitionKind === 'sheet.mode2.stencil.v1' && !projection.payload.valid
+        ? COPY.sheetUnresolved
+        : null;
+    return [
+      el('p', {
+        className: 'hint',
+        attrs: { 'data-child-status': 'sheet', id: 'sheet-slice-help' },
+        text: COPY.sheetSlice,
+      }),
+      el('form', {
+        className: 'sheet-form',
+        attrs: { 'data-sheet-form': 'true' },
+      }, [
+        el('label', { attrs: { for: 'sheet-profile' }, text: COPY.sheetProfileLabel }),
+        el('select', {
+          attrs: {
+            id: 'sheet-profile',
+            name: 'sheet-profile',
+            'data-field': 'sheet-profile',
+          },
+        }, [
+          el('option', {
+            attrs: { value: 'STRAIGHT_RECT', selected: buffer.profileKind !== 'CURVILINEAR_OUTLINE' ? 'selected' : null },
+            text: COPY.sheetStraight,
+          }),
+          el('option', {
+            attrs: { value: 'CURVILINEAR_OUTLINE', selected: buffer.profileKind === 'CURVILINEAR_OUTLINE' ? 'selected' : null },
+            text: COPY.sheetCurvilinear,
+          }),
+        ]),
+        el('label', { attrs: { for: 'sheet-length' }, text: COPY.sheetLengthLabel }),
+        el('input', {
+          attrs: {
+            id: 'sheet-length',
+            name: 'sheet-length',
+            type: 'text',
+            inputmode: 'decimal',
+            'data-field': 'sheet-length',
+            value: buffer.length ?? '',
+            autocomplete: 'off',
+          },
+        }),
+        el('label', { attrs: { for: 'sheet-width' }, text: COPY.sheetWidthLabel }),
+        el('input', {
+          attrs: {
+            id: 'sheet-width',
+            name: 'sheet-width',
+            type: 'text',
+            inputmode: 'decimal',
+            'data-field': 'sheet-width',
+            value: buffer.width ?? '',
+            autocomplete: 'off',
+          },
+        }),
+        el('label', { attrs: { for: 'sheet-tabs' }, text: COPY.sheetTabsLabel }),
+        el('input', {
+          attrs: {
+            id: 'sheet-tabs',
+            name: 'sheet-tabs',
+            type: 'text',
+            inputmode: 'numeric',
+            'data-field': 'sheet-tabs',
+            value: buffer.tabs ?? '',
+            autocomplete: 'off',
+          },
+        }),
+        el('label', { attrs: { for: 'sheet-depth' }, text: COPY.sheetDepthLabel }),
+        el('input', {
+          attrs: {
+            id: 'sheet-depth',
+            name: 'sheet-depth',
+            type: 'text',
+            inputmode: 'decimal',
+            'data-field': 'sheet-depth',
+            value: buffer.depth ?? '',
+            autocomplete: 'off',
+          },
+        }),
+        el('p', {
+          className: 'hint',
+          attrs: { 'data-unapplied': 'sheet', hidden: 'true' },
+          text: COPY.unappliedChanges,
+        }),
+        el('div', { className: 'actions' }, [
+          el('button', {
+            attrs: { type: 'button', 'data-action': 'apply-sheet-definition' },
+            text: COPY.sheetApply,
+          }),
+        ]),
+      ]),
+      unresolvedText
+        ? el('p', {
+            className: 'unresolved',
+            attrs: { 'data-sheet-unresolved': reason ?? 'missing-sheet-definition' },
             text: unresolvedText,
           })
         : null,
@@ -769,6 +890,7 @@ export function page2Main({
   takeoffBuffer,
   correctingId,
   boardBuffer,
+  sheetBuffer,
   projection,
   selectedOccurrenceId,
   storeView,
@@ -828,6 +950,7 @@ export function page2Main({
               takeoffBuffer,
               correctingId,
               boardBuffer,
+              sheetBuffer,
               projection,
               selectedOccurrenceId,
               storeView,

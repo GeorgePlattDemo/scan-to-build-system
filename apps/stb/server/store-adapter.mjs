@@ -1,8 +1,10 @@
 import {
   BOARD_DEFINITION,
   PUBLISHED_BOARD_SKU,
+  PUBLISHED_SHEET_SKU,
   STORE_PIN,
   STORE_PROTOCOL_VERSION,
+  STORE_REQUEST_TYPES,
   WRAPPER_BUILD_ID,
 } from '../shared/contracts.mjs';
 import {
@@ -26,6 +28,27 @@ function opaqueId() {
 function offeringAttributesComplete(item) {
   if (!item || item.offered !== true) {
     return false;
+  }
+  if (item.form === 'sheet') {
+    if (typeof item.actualT !== 'number' || !Number.isFinite(item.actualT)) {
+      return false;
+    }
+    if (typeof item.sheetW_in !== 'number' || !Number.isFinite(item.sheetW_in)) {
+      return false;
+    }
+    if (typeof item.sheetL_in !== 'number' || !Number.isFinite(item.sheetL_in)) {
+      return false;
+    }
+    if (typeof item.uom !== 'string' || item.uom.length === 0) {
+      return false;
+    }
+    if (!Array.isArray(item.supportedOps)) {
+      return false;
+    }
+    if (!Array.isArray(item.cellFamily) || !item.cellFamily.includes('S-001')) {
+      return false;
+    }
+    return true;
   }
   if (item.form !== 'board') {
     return false;
@@ -82,6 +105,8 @@ function attributedOffering(item, catalog, observations) {
     actualT: item.actualT ?? null,
     actualW: item.actualW ?? null,
     stockL_in: item.stockL_in ?? null,
+    sheetW_in: item.sheetW_in ?? null,
+    sheetL_in: item.sheetL_in ?? null,
     uom: item.uom ?? null,
     offered: item.offered === true,
     supportedOps: item.supportedOps ?? null,
@@ -129,6 +154,16 @@ function storeBasis({ modules, offering, evaluation, estimate }) {
       : envelope
         ? { id: envelope.envelope ?? envelope.id ?? null }
         : null,
+    sheetEnvelope: modules?.S001_MODE2_ENVELOPE
+      ? {
+          id: modules.S001_MODE2_ENVELOPE.id,
+          capabilityId: modules.S001_MODE2_ENVELOPE.capabilityId,
+          evidenceClass: modules.S001_MODE2_ENVELOPE.evidenceClass,
+          measured: modules.S001_MODE2_ENVELOPE.measured === true,
+          commissioned: modules.S001_MODE2_ENVELOPE.commissioned === true,
+          physicalStatus: modules.S001_MODE2_ENVELOPE.physicalStatus,
+        }
+      : null,
     assertionBasis: offering?.assertions ?? line?.stock?.assertions ?? null,
     observationId: offering?.observationId ?? line?.price?.observationId ?? null,
     sourceClock:
@@ -203,15 +238,17 @@ export async function createStoreAdapter({
   async function handleOffering(envelope, offeringPayload, runtimeCatalog = catalog) {
     const item = lookupItem(loaded.modules, runtimeCatalog, offeringPayload);
     const offered = item && item.offered === true ? item : null;
-    if (offered && offered.storeSku !== PUBLISHED_BOARD_SKU && offeringPayload.kind === 'sku') {
-      return {
-        status: 422,
-        body: adapterErrorBody(
-          ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-          'offering lookup accepts only the published Board SKU',
-          envelope,
-        ),
-      };
+    if (offered && offeringPayload.kind === 'sku') {
+      if (offered.storeSku !== PUBLISHED_BOARD_SKU && offered.storeSku !== PUBLISHED_SHEET_SKU) {
+        return {
+          status: 422,
+          body: adapterErrorBody(
+            ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+            'offering lookup accepts only the published Board SKU or published sheet SKU',
+            envelope,
+          ),
+        };
+      }
     }
     const rawOffering = attributedOffering(offered, runtimeCatalog, observations);
     return {
@@ -344,6 +381,96 @@ export async function createStoreAdapter({
     };
   }
 
+  async function handleSheetJob(envelope, jobPayload, options = {}) {
+    const runtimeCatalog = options.catalogOverride ?? catalog;
+    const storeSku = jobPayload.line.storeSku;
+    const item = loaded.modules.findSku(runtimeCatalog, storeSku);
+
+    if (item && storeSku !== PUBLISHED_SHEET_SKU) {
+      return {
+        status: 422,
+        body: adapterErrorBody(
+          ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+          'a known different offering is outside the published sheet endpoint',
+          envelope,
+        ),
+      };
+    }
+
+    if (item && !offeringAttributesComplete(item)) {
+      return {
+        status: 422,
+        body: adapterErrorBody(
+          ADAPTER_ERROR_CODES.OFFERING_INCOMPLETE,
+          'selected offering is missing required Store attributes',
+          envelope,
+        ),
+      };
+    }
+
+    const title = `Sheet Mode-2 ${jobPayload.line.profileKind}`;
+    const evaluateInput = {
+      title,
+      line: {
+        storeSku,
+        qty: 1,
+        profileKind: jobPayload.line.profileKind,
+        blankL_in: jobPayload.line.blankL_in,
+        blankW_in: jobPayload.line.blankW_in,
+        tabCount: jobPayload.line.tabCount,
+        routeDepthIn: jobPayload.line.routeDepthIn,
+      },
+    };
+    instrumentation.evaluationCalls += 1;
+    const rawEvaluation = loaded.modules.evaluateSheetMode2Job(runtimeCatalog, evaluateInput);
+    const evaluateDigest = await digestCanonical(evaluateInput);
+    const offering = attributedOffering(item, runtimeCatalog, observations);
+
+    let rawEstimate = null;
+    let estimateInput = null;
+    let estimateDigest = null;
+    let estimateAssociationId = null;
+    let estimateError = null;
+    if (rawEvaluation.status === 'SUPPORTABLE' && item) {
+      estimateInput = { title, line: evaluateInput.line };
+      try {
+        instrumentation.estimateCalls += 1;
+        rawEstimate = loaded.modules.estimateSheetMode2Job(runtimeCatalog, estimateInput);
+        estimateDigest = await digestCanonical(estimateInput);
+        estimateAssociationId = opaqueId();
+      } catch (error) {
+        rawEstimate = null;
+        estimateError = {
+          code: ADAPTER_ERROR_CODES.ESTIMATE_FAILED,
+          details: error instanceof Error ? error.message : String(error),
+        };
+      }
+    }
+
+    return {
+      status: 200,
+      body: await successEnvelope(envelope, {
+        rawOffering: offering,
+        rawEvaluation,
+        rawEstimate,
+        estimateAssociationId,
+        estimateError,
+        mappedCallInputs: {
+          evaluation: evaluateInput,
+          evaluationDigest: evaluateDigest,
+          estimate: estimateInput,
+          estimateDigest,
+        },
+        attributedBasis: storeBasis({
+          modules: loaded.modules,
+          offering,
+          evaluation: rawEvaluation,
+          estimate: rawEstimate,
+        }),
+      }),
+    };
+  }
+
   async function dispatch(body) {
     const validated = await validateWireRequest(body);
     if (!validated.ok) {
@@ -355,6 +482,9 @@ export async function createStoreAdapter({
     }
     if (validated.requestType === 'OFFERING_LOOKUP') {
       return handleOffering(validated.envelope, validated.payload);
+    }
+    if (validated.requestType === STORE_REQUEST_TYPES.SHEET_MODE2_STENCIL_V1) {
+      return handleSheetJob(validated.envelope, validated.payload);
     }
     return handleJob(validated.envelope, validated.payload);
   }

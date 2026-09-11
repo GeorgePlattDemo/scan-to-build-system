@@ -8,6 +8,7 @@ import {
   listRecords,
 } from '/data/repository.mjs';
 import { planBoardDerivation } from '/domain/derive.mjs';
+import { lastSheetMapping, planSheetDerivation } from '/domain/sheet-derive.mjs';
 
 function requireString(name, value) {
   if (typeof value !== 'string' || value.length === 0) {
@@ -270,7 +271,10 @@ export async function commitCandidateChange(input) {
   const previousDefinition = previousDefinitionId
     ? await getRecord(localRecordId, 'definition', previousDefinitionId)
     : null;
-  const planned = planBoardDerivation({
+  const useSheet =
+    lastSheetMapping(payload.mappings)
+    || previous.payload?.definitionKind === 'sheet.mode2.stencil.v1';
+  const planned = (useSheet ? planSheetDerivation : planBoardDerivation)({
     candidateRevisionId: nextHead,
     createdAt,
     projectId: project.projectId,

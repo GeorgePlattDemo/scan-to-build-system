@@ -173,6 +173,7 @@ test('page 2 intake cards keep locked names and planned versus active status', (
     INTAKE_CARDS.map((card) => card.name),
     [
       'PICK A BOARD',
+      'SHEET STENCIL',
       'MEASUREMENTS',
       'SCAN A SPACE',
       'SKETCH / PHOTO',

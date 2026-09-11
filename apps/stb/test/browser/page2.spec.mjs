@@ -51,6 +51,7 @@ test('P2 actor order changes only card priority', async ({ page }) => {
   await openOwnHub(page, 'new');
   expect(await cardNames(page)).toEqual([
     'PICK A BOARD',
+    'SHEET STENCIL',
     'MEASUREMENTS',
     'SCAN A SPACE',
     'SKETCH / PHOTO',
@@ -71,6 +72,7 @@ test('P2 actor order changes only card priority', async ({ page }) => {
     'CAD / BIM / STRUCTURED FILE',
     'MEASUREMENTS',
     'PICK A BOARD',
+    'SHEET STENCIL',
     'SCAN A SPACE',
     'SKETCH / PHOTO',
   ]);
