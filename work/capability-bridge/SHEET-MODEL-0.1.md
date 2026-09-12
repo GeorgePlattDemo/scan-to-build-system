@@ -20,6 +20,9 @@ A Store-callable Mode-2 REFERENCE offering:
 
 S-001 cell-spine description and patent sheet figures stay donors. They do not fill missing cells in this model.
 
+Machine backing: [`S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md`](S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md). An arched interior opening is the next family, not a silent widening of `CURVILINEAR_OUTLINE`.
+
+
 ## 2. Stock class
 
 | Item | Value | Class |

@@ -3,7 +3,8 @@
 **Status:** REFERENCE capability integration  
 **Evidence class:** REFERENCE Store capacity; IMPLEMENTED demand path in `apps/stb/`  
 **Physical status:** NOT CLAIMED  
-**Capability id:** `SHEET_MODE2_STENCIL_V1`
+Live Store offering remains `SHEET_MODE2_STENCIL_V1`. The next documented family is `SHEET_MODE2_ARCHED_APERTURE_V0`. Machine backing: [`S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md`](S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md).
+
 
 This document is the durable record of how a bounded sheet component travels from user definition to Store Zero and back. It is not a machine commissioning record.
 

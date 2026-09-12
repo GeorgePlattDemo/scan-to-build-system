@@ -3,7 +3,10 @@
 **Status:** current post-app planning surface  
 **Physical commissioning status:** not established  
 **Owner direction:** build an initial sheet-processing machine with limited automation, sufficient to become a meaningful second machine in a research cell  
-**Exact first useful task:** unresolved
+**Reference architecture (Store-backing, not commissioned):** [`../../capability-bridge/S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md`](../../capability-bridge/S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md)
+
+Exact first useful *published* research family is now Mode-2 stencil, with arched aperture next. Physical commissioning remains unestablished.
+
 
 This file prevents the planned sheet machine from inheriting capability merely from patent figures, the old public demo, the governed M1 sheet fixture, or the descriptive S-001 Cell spine.
 

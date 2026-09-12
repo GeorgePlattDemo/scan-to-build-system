@@ -14,10 +14,13 @@ Do not restate that protocol in chat. Use it.
 
 ## Objective
 
-Give Store 1 two reference capabilities it can name, describe, and turn into machine-neutral instructions:
+Give Store 1 two reference capacities, each backed by a declared reference machine:
 
-1. **Dimensional model** — finished-length work on dimensional stock.
-2. **Sheet model** — Mode-2 2D stencil routing (`SHEET_MODE2_STENCIL_V1`) on sheet stock.
+1. **Dimensional model** — finished-length work on dimensional stock. Architecture: [`D-001-REFERENCE-ARCHITECTURE-0.1.md`](D-001-REFERENCE-ARCHITECTURE-0.1.md)
+2. **Sheet Mode-2** — stencil profiles on sheet stock, including a next arched-aperture family. Architecture: [`S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md`](S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md)
+
+Spine: [`REFERENCE-MACHINE-ARCHITECTURE-0.1.md`](REFERENCE-MACHINE-ARCHITECTURE-0.1.md)
+
 
 ## Language gate
 
@@ -40,7 +43,9 @@ Give Store 1 two reference capabilities it can name, describe, and turn into mac
 | [ATLAS-BRIDGE.md](ATLAS-BRIDGE.md) | rewritten Atlas 01–04 |
 | [DIMENSIONAL-MODEL-0.1.md](DIMENSIONAL-MODEL-0.1.md) | dimensional reference model |
 | [SHEET-MODEL-0.1.md](SHEET-MODEL-0.1.md) | Mode-2 sheet reference model |
+| [REFERENCE-MACHINE-ARCHITECTURE-0.1.md](REFERENCE-MACHINE-ARCHITECTURE-0.1.md) | five-layer spine behind Store capacity |
+| [D-001-REFERENCE-ARCHITECTURE-0.1.md](D-001-REFERENCE-ARCHITECTURE-0.1.md) | dimensional kinematic contract + candidate stack |
+| [S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md](S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md) | Mode-2 kinematic contract + candidate stack |
 | [STORE-SURFACE-0.1.md](STORE-SURFACE-0.1.md) | Store publication map |
-| [MODE-2-SHEET-INTEGRATION-0.1.md](MODE-2-SHEET-INTEGRATION-0.1.md) | app → Store Mode-2 chain |
 
 Accepted application and launch: [`../../apps/README.md`](../../apps/README.md).

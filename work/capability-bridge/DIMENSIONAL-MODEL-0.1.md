@@ -122,6 +122,9 @@ Machine Build 1 asks whether this digital finished-length object can become one 
 
 Until that evidence exists, this file remains REFERENCE.
 
+Machine backing: [`D-001-REFERENCE-ARCHITECTURE-0.1.md`](D-001-REFERENCE-ARCHITECTURE-0.1.md).
+
+
 ## 10. Sources used
 
 - `work/machines/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md`

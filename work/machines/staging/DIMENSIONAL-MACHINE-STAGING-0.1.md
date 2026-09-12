@@ -4,7 +4,8 @@
 **Present physical control case:** manual radial-arm-saw workflow  
 **Current Scan-to-Build physical machine:** not yet established  
 **Current program:** `../MACHINE-BUILD-PROGRAM-0.1.md`  
-**Patent check:** `../../../docs/patents/PATENT-ALIGNMENT-GATE.md`
+**Reference architecture (Store-backing, not commissioned):** [`../../capability-bridge/D-001-REFERENCE-ARCHITECTURE-0.1.md`](../../capability-bridge/D-001-REFERENCE-ARCHITECTURE-0.1.md)
+
 
 This file tracks the dimensional path truthfully from the present manual practice through the first digital physical bridge.
 

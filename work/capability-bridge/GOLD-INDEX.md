@@ -19,7 +19,7 @@ Use this file instead of walking other repositories by memory.
 | Store documentary main | `GeorgePlattDemo/scan-to-build-store` `main` | `3620b35369d70cf49733bbb0b62c0f3d9969b738` | Store ownership / Job-001 pattern |
 | Atlas donor copies | `source-library/atlas-research/` | same app pin `4595b478…` | KEEP-DONOR / not adopted |
 | U.S. Patent 9,720,401 B2 | `docs/patents/source/US9720401B2.pdf` | SHA-256 `d6ff401ee0a60720c0d8b9819a0f828e15036deee1882da06dab7282da0311a4` | PRIMARY SOURCE |
-| U.S. Patent 10,768,609 B2 | `docs/patents/source/US10768609B2.pdf` | SHA-256 `3fd23f9dab7419098162836af25257d2736771bf27196824ad972b479a02b092` | PRIMARY SOURCE |
+| Mode-2 / D-001 reference machines | this bench | `REFERENCE-MACHINE-ARCHITECTURE-0.1.md` and siblings | REFERENCE kinematics + candidate stacks; not commissioned |
 
 Exact admission notes live in [`../../provenance/ADMISSION-REGISTER.md`](../../provenance/ADMISSION-REGISTER.md).
 

@@ -57,7 +57,25 @@ Replaces the unpublished beginning-stage row `SHEET-RECT-BLANK-V0` as the callab
 | Physical fact today | NOT CLAIMED |
 | Q | material fixture only; process Q UNRESOLVED |
 
-Do not answer `SUPPORTABLE` for sheet from dimensional logic.
+## 3a. Next family `SHEET_MODE2_ARCHED_APERTURE_V0`
+
+**Status:** DOCUMENTED REFERENCE family. Not a second live request type yet.
+
+This is how “curvilinear” becomes a number Store can refuse.
+
+| Field | Publication |
+| --- | --- |
+| Stock form | sheet goods |
+| Outer | `STRAIGHT_RECT` inside parent |
+| Aperture | `CIRCULAR_SEGMENT` (chord, rise, radius, units) |
+| Ops | `ROUTE_PROFILE`, `RETAIN_TABS` |
+| Machine relationship | sheet = X; centerline platform = Y; router = bounded Z; yokes/rollers seat and feed |
+| App fact today | not on the wire |
+| Machine fact | REFERENCE — see [`S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md`](S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md) |
+| Physical fact | NOT CLAIMED |
+
+Do not mark live `CURVILINEAR_OUTLINE` jobs as this family. The flag is not the segment.
+
 
 ## 4. How the application should call this
 
