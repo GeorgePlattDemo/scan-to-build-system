@@ -1,10 +1,11 @@
 import {
   PUBLISHED_BOARD_SKU,
   PUBLISHED_SHEET_SKU,
+  PUBLISHED_ARCHED_SHEET_SKU,
   STORE_REQUEST_TYPES,
   STORE_SCOPES,
 } from '/shared/contracts.mjs';
-import { boardJobPayload, sheetJobPayload } from '/shared/store-wire.mjs';
+import { boardJobPayload, sheetJobPayload, archedJobPayload } from '/shared/store-wire.mjs';
 import {
   issueStoreQuestion,
   recoverInterruptedAttempts,
@@ -119,7 +120,10 @@ export async function scheduleSheetStoreQuestion(localRecordId, { unapplied = fa
 
   const existing = await currentStoreAnswer(localRecordId, {
     candidateRevisionId,
-    scope: STORE_SCOPES.SHEET_MODE2_STENCIL_V1,
+    scope:
+      geometry.profileKind === 'ARCHED_APERTURE'
+        ? STORE_SCOPES.SHEET_MODE2_ARCHED_APERTURE_V0
+        : STORE_SCOPES.SHEET_MODE2_STENCIL_V1,
   });
   if (existing?.request && existing.imported !== true && existing.request.imported !== true) {
     return {
@@ -138,16 +142,34 @@ export async function scheduleSheetStoreQuestion(localRecordId, { unapplied = fa
     localRecordId,
     projectId: project.projectId,
     candidateRevisionId,
-    requestType: STORE_REQUEST_TYPES.SHEET_MODE2_STENCIL_V1,
-    payload: sheetJobPayload({
-      lineId: occurrenceId,
-      storeSku: PUBLISHED_SHEET_SKU,
-      profileKind: geometry.profileKind,
-      blankLengthCanonical: geometry.lengthCanonical,
-      blankWidthCanonical: geometry.widthCanonical,
-      tabCount: geometry.tabCount,
-      routeDepthCanonical: geometry.routeDepthCanonical,
-    }),
+    requestType:
+      geometry.profileKind === 'ARCHED_APERTURE'
+        ? STORE_REQUEST_TYPES.SHEET_MODE2_ARCHED_APERTURE_V0
+        : STORE_REQUEST_TYPES.SHEET_MODE2_STENCIL_V1,
+    payload:
+      geometry.profileKind === 'ARCHED_APERTURE'
+        ? archedJobPayload({
+            lineId: occurrenceId,
+            storeSku: PUBLISHED_ARCHED_SHEET_SKU,
+            outerLengthCanonical: geometry.lengthCanonical,
+            outerWidthCanonical: geometry.widthCanonical,
+            apertureWidthCanonical: geometry.apertureWidthCanonical,
+            apertureStraightHeightCanonical: geometry.apertureStraightHeightCanonical,
+            arcChordCanonical: geometry.arcChordCanonical,
+            arcRiseCanonical: geometry.arcRiseCanonical,
+            arcRadiusCanonical: geometry.arcRadiusCanonical,
+            tabCount: geometry.tabCount,
+            routeDepthCanonical: geometry.routeDepthCanonical,
+          })
+        : sheetJobPayload({
+            lineId: occurrenceId,
+            storeSku: PUBLISHED_SHEET_SKU,
+            profileKind: geometry.profileKind,
+            blankLengthCanonical: geometry.lengthCanonical,
+            blankWidthCanonical: geometry.widthCanonical,
+            tabCount: geometry.tabCount,
+            routeDepthCanonical: geometry.routeDepthCanonical,
+          }),
     background: true,
   }).then((result) => {
     inFlight.delete(key);

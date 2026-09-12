@@ -1,9 +1,9 @@
 # S-001 Mode-2 Reference Architecture 0.1
 
 **Status:** REFERENCE architecture for the callable Mode-2 Store offering, plus the next published curve family  
-**Store offering now:** `SHEET_MODE2_STENCIL_V1`  
-**Next envelope family:** `SHEET_MODE2_ARCHED_APERTURE_V0` (documented here; not yet a second Store request type)  
-**App definition now:** `sheet.mode2.stencil.v1`  
+**Store offering now:** `SHEET_MODE2_STENCIL_V1` plus live family `SHEET_MODE2_ARCHED_APERTURE_V0`  
+**App definition now:** `sheet.mode2.stencil.v1` with profile `ARCHED_APERTURE` carrying reconstructable curve numbers  
+**Controls reference:** [`S-001-MODE2-CONTROLS-REFERENCE-0.1.md`](S-001-MODE2-CONTROLS-REFERENCE-0.1.md)  
 **Physical status:** NOT CLAIMED
 
 This ties Mode-2 Store capacity to the disclosed moving-sheet architecture so “curvilinear” can be true of a machine, not only of a flag.
@@ -22,7 +22,7 @@ User may require:
 
 No G-code, spline file, or controller field is accepted.
 
-### Next definition (not yet in the app wire)
+### Next definition (now on the wire as the first published curvilinear family)
 
 The motivating want — 48×72 in blank, 36×36 in square opening, 12 in rise above the square cutline — needs an explicit curve, not the word “curvilinear” on an outer rectangle.
 
@@ -38,7 +38,7 @@ tabs       integer ≥ 1 on the aperture
 depth      through stock, ≤ published max
 ```
 
-Until the app carries chord / rise / radius, Store must not pretend the arched hole was evaluated.
+Until chord / rise / radius are present, Store must not pretend the arched hole was evaluated. The live family now carries those numbers.
 
 ## 2. Store envelope
 
@@ -54,7 +54,7 @@ Until the app carries chord / rise / radius, Store must not pretend the arched h
 
 `CURVILINEAR_OUTLINE` today is a kind flag plus outer L×W. That is weaker than a true segment. Keep the flag. Do not claim it already contains the 19.5 in radius.
 
-### Next family to publish (`SHEET_MODE2_ARCHED_APERTURE_V0`)
+### Live family (`SHEET_MODE2_ARCHED_APERTURE_V0`)
 
 Store should later accept or refuse:
 

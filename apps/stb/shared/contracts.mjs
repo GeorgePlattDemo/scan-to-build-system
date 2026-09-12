@@ -156,7 +156,7 @@ export const COPY = Object.freeze({
   sheetCardName: 'SHEET STENCIL',
   sheetStatus: 'Available. Define a Mode-2 sheet stencil. Not a toolpath.',
   sheetSlice:
-    'This slice accepts a straight rectangle or a curvilinear outline on one published sheet SKU. Tabs stay with the parent sheet. Secondary separation is not automated here.',
+    'This slice accepts a straight rectangle, a curvilinear-outline flag, or one reconstructable arched aperture on a published sheet SKU. Tabs stay with the parent sheet. Secondary separation is not automated here.',
   sheetApply: 'Apply sheet definition',
   sheetBlank: 'Sheet definition is incomplete. No valid part has been created.',
   sheetUnresolved: 'This sheet requirement is retained. It is not an accepted Mode-2 definition in this slice.',
@@ -168,6 +168,12 @@ export const COPY = Object.freeze({
   sheetUnitLabel: 'Unit',
   sheetStraight: 'STRAIGHT_RECT',
   sheetCurvilinear: 'CURVILINEAR_OUTLINE',
+  sheetArched: 'ARCHED_APERTURE',
+  sheetApertureWidthLabel: 'Aperture width',
+  sheetApertureStraightLabel: 'Aperture straight height',
+  sheetChordLabel: 'Arc chord',
+  sheetRiseLabel: 'Arc rise',
+  sheetRadiusLabel: 'Arc radius (derived or supplied)',
   sheetNotToScale:
     'Plan-view schematic only. Not a toolpath, G-code, or machine instruction.',
   boardSquareCut: 'square cut',
@@ -423,15 +429,17 @@ export const SHEET_DEFINITION = Object.freeze({
   quantity: 1,
   quantityUnit: 'ea',
   requiredOps: Object.freeze(['ROUTE_PROFILE', 'RETAIN_TABS']),
-  profileKinds: Object.freeze(['STRAIGHT_RECT', 'CURVILINEAR_OUTLINE']),
+  profileKinds: Object.freeze(['STRAIGHT_RECT', 'CURVILINEAR_OUTLINE', 'ARCHED_APERTURE']),
   minTabCount: 1,
   maxRouteDepthInches: 0.75,
   occurrenceRole: 'desired-sheet-stencil',
   evidenceClass: 'REFERENCE',
   physicalStatus: 'NOT_CLAIMED',
+  minApertureMarginInches: 3,
 });
 
 export const PUBLISHED_SHEET_SKU = 'STB-ZERO-PLY-075-48X96-001';
+export const PUBLISHED_ARCHED_SHEET_SKU = 'STB-ZERO-PLY-050-48X96-001';
 export const SHEET_OFFERING_QUERY = Object.freeze({
   species: 'fir',
   form: 'sheet',
@@ -457,9 +465,9 @@ export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
 
 export const STORE_PROTOCOL_VERSION = 'stb-store-zero-http/1';
 export const STORE_REPOSITORY = 'GeorgePlattDemo/scan-to-build-store';
-export const STORE_PIN = '49d22ce40482a7c2e0169ac1e6df48e0f8384a6d';
+export const STORE_PIN = '732f6b7a98362871d8ee6c94f87ba90fb37b6f76';
 export const WRAPPER_BUILD_ID = 'stb-app-build-5';
-export const APP_BUILD_ID = 'stb-app-build-7';
+export const APP_BUILD_ID = 'stb-app-build-8';
 export const PUBLISHED_BOARD_SKU = 'STB-ZERO-SPF-2X4-72-001';
 export const BOARD_OFFERING_QUERY = Object.freeze({
   species: 'spf',
@@ -472,11 +480,13 @@ export const STORE_REQUEST_TYPES = Object.freeze({
   OFFERING_LOOKUP: 'OFFERING_LOOKUP',
   BOARD_SQUARE_V1: 'BOARD_SQUARE_V1',
   SHEET_MODE2_STENCIL_V1: 'SHEET_MODE2_STENCIL_V1',
+  SHEET_MODE2_ARCHED_APERTURE_V0: 'SHEET_MODE2_ARCHED_APERTURE_V0',
 });
 export const STORE_SCOPES = Object.freeze({
   OFFERING_LOOKUP: 'OFFERING_LOOKUP',
   BOARD_SQUARE_V1: 'BOARD_SQUARE_V1',
   SHEET_MODE2_STENCIL_V1: 'SHEET_MODE2_STENCIL_V1',
+  SHEET_MODE2_ARCHED_APERTURE_V0: 'SHEET_MODE2_ARCHED_APERTURE_V0',
 });
 export const STORE_JOB_STATUSES = Object.freeze([
   'SUPPORTABLE',
@@ -570,6 +580,8 @@ export const STATIC_ASSETS = Object.freeze({
   '/shared/contracts.mjs': JS('shared/contracts.mjs'),
   '/shared/canonical.mjs': JS('shared/canonical.mjs'),
   '/shared/board-rule.mjs': JS('shared/board-rule.mjs'),
+  '/shared/circular-segment.mjs': JS('shared/circular-segment.mjs'),
+  '/shared/mode2-reference-path.mjs': JS('shared/mode2-reference-path.mjs'),
   '/shared/sheet-rule.mjs': JS('shared/sheet-rule.mjs'),
   '/shared/store-wire.mjs': JS('shared/store-wire.mjs'),
   '/shared/store-present.mjs': JS('shared/store-present.mjs'),

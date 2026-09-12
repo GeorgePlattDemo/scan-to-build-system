@@ -2,8 +2,8 @@
 
 **Status:** Mode-2 sheet offering added; Board path unchanged  
 **Evidence class:** DOCUMENTED publication map over REFERENCE models  
-**Store consumed by the app for Board + Mode-2 sheet:** pin `49d22ce40482a7c2e0169ac1e6df48e0f8384a6d`  
-**Prior Board-only pin:** `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
+**Store consumed by the app for Board + Mode-2 sheet:** pin `732f6b7a98362871d8ee6c94f87ba90fb37b6f76`  
+**Prior Mode-2 stencil pin:** `49d22ce40482a7c2e0169ac1e6df48e0f8384a6d`
 
 This file is what Store 1 may say. It is not a new Store implementation beyond the pinned evaluator.
 
@@ -57,24 +57,26 @@ Replaces the unpublished beginning-stage row `SHEET-RECT-BLANK-V0` as the callab
 | Physical fact today | NOT CLAIMED |
 | Q | material fixture only; process Q UNRESOLVED |
 
-## 3a. Next family `SHEET_MODE2_ARCHED_APERTURE_V0`
+## 3a. Live family `SHEET_MODE2_ARCHED_APERTURE_V0`
 
-**Status:** DOCUMENTED REFERENCE family. Not a second live request type yet.
+**Status:** live REFERENCE Store request type. First published curvilinear family. Not the entire Mode-2 disclosure.
 
 This is how “curvilinear” becomes a number Store can refuse.
 
 | Field | Publication |
 | --- | --- |
 | Stock form | sheet goods |
+| First study SKU | `STB-ZERO-PLY-050-48X96-001` (OBS-017; list $25.29; fixture $26.55) |
 | Outer | `STRAIGHT_RECT` inside parent |
-| Aperture | `CIRCULAR_SEGMENT` (chord, rise, radius, units) |
+| Aperture | `ARCHED_RECT` + `CIRCULAR_SEGMENT` (canonical chord + rise; derived radius) |
 | Ops | `ROUTE_PROFILE`, `RETAIN_TABS` |
 | Machine relationship | sheet = X; centerline platform = Y; router = bounded Z; yokes/rollers seat and feed |
-| App fact today | not on the wire |
-| Machine fact | REFERENCE — see [`S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md`](S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md) |
+| Controls basis | [`S-001-MODE2-CONTROLS-REFERENCE-0.1.md`](S-001-MODE2-CONTROLS-REFERENCE-0.1.md) |
+| App fact | `ARCHED_APERTURE` on the existing sheet slice |
+| Machine fact | REFERENCE |
 | Physical fact | NOT CLAIMED |
 
-Do not mark live `CURVILINEAR_OUTLINE` jobs as this family. The flag is not the segment.
+Do not mark live `CURVILINEAR_OUTLINE` flag jobs as this family. The flag is not the segment.
 
 
 ## 4. How the application should call this

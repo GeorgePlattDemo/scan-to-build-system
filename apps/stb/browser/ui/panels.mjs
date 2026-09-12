@@ -458,12 +458,16 @@ function childBody(child, {
           },
         }, [
           el('option', {
-            attrs: { value: 'STRAIGHT_RECT', selected: buffer.profileKind !== 'CURVILINEAR_OUTLINE' ? 'selected' : null },
+            attrs: { value: 'STRAIGHT_RECT', selected: buffer.profileKind === 'STRAIGHT_RECT' || !buffer.profileKind ? 'selected' : null },
             text: COPY.sheetStraight,
           }),
           el('option', {
             attrs: { value: 'CURVILINEAR_OUTLINE', selected: buffer.profileKind === 'CURVILINEAR_OUTLINE' ? 'selected' : null },
             text: COPY.sheetCurvilinear,
+          }),
+          el('option', {
+            attrs: { value: 'ARCHED_APERTURE', selected: buffer.profileKind === 'ARCHED_APERTURE' ? 'selected' : null },
+            text: COPY.sheetArched,
           }),
         ]),
         el('label', { attrs: { for: 'sheet-length' }, text: COPY.sheetLengthLabel }),
@@ -514,6 +518,20 @@ function childBody(child, {
             autocomplete: 'off',
           },
         }),
+        buffer.profileKind === 'ARCHED_APERTURE'
+          ? el('fieldset', { attrs: { 'data-arched-fields': 'true' } }, [
+              el('label', { attrs: { for: 'sheet-aperture-w' }, text: COPY.sheetApertureWidthLabel }),
+              el('input', { attrs: { id: 'sheet-aperture-w', 'data-field': 'sheet-aperture-w', type: 'text', inputmode: 'decimal', value: buffer.apertureW ?? '36', autocomplete: 'off' } }),
+              el('label', { attrs: { for: 'sheet-aperture-h' }, text: COPY.sheetApertureStraightLabel }),
+              el('input', { attrs: { id: 'sheet-aperture-h', 'data-field': 'sheet-aperture-h', type: 'text', inputmode: 'decimal', value: buffer.apertureStraightH ?? '36', autocomplete: 'off' } }),
+              el('label', { attrs: { for: 'sheet-chord' }, text: COPY.sheetChordLabel }),
+              el('input', { attrs: { id: 'sheet-chord', 'data-field': 'sheet-chord', type: 'text', inputmode: 'decimal', value: buffer.arcChord ?? '36', autocomplete: 'off' } }),
+              el('label', { attrs: { for: 'sheet-rise' }, text: COPY.sheetRiseLabel }),
+              el('input', { attrs: { id: 'sheet-rise', 'data-field': 'sheet-rise', type: 'text', inputmode: 'decimal', value: buffer.arcRise ?? '12', autocomplete: 'off' } }),
+              el('label', { attrs: { for: 'sheet-radius' }, text: COPY.sheetRadiusLabel }),
+              el('input', { attrs: { id: 'sheet-radius', 'data-field': 'sheet-radius', type: 'text', inputmode: 'decimal', value: buffer.arcRadius ?? '19.5', autocomplete: 'off' } }),
+            ])
+          : null,
         el('p', {
           className: 'hint',
           attrs: { 'data-unapplied': 'sheet', hidden: 'true' },

@@ -2,6 +2,7 @@ import {
   BOARD_DEFINITION,
   PUBLISHED_BOARD_SKU,
   PUBLISHED_SHEET_SKU,
+  PUBLISHED_ARCHED_SHEET_SKU,
   STORE_PIN,
   STORE_PROTOCOL_VERSION,
   STORE_REQUEST_TYPES,
@@ -239,7 +240,11 @@ export async function createStoreAdapter({
     const item = lookupItem(loaded.modules, runtimeCatalog, offeringPayload);
     const offered = item && item.offered === true ? item : null;
     if (offered && offeringPayload.kind === 'sku') {
-      if (offered.storeSku !== PUBLISHED_BOARD_SKU && offered.storeSku !== PUBLISHED_SHEET_SKU) {
+      if (
+        offered.storeSku !== PUBLISHED_BOARD_SKU &&
+        offered.storeSku !== PUBLISHED_SHEET_SKU &&
+        offered.storeSku !== PUBLISHED_ARCHED_SHEET_SKU
+      ) {
         return {
           status: 422,
           body: adapterErrorBody(
@@ -471,6 +476,101 @@ export async function createStoreAdapter({
     };
   }
 
+  async function handleArchedJob(envelope, jobPayload, options = {}) {
+    const runtimeCatalog = options.catalogOverride ?? catalog;
+    const storeSku = jobPayload.line.storeSku;
+    const item = loaded.modules.findSku(runtimeCatalog, storeSku);
+
+    if (item && storeSku !== PUBLISHED_ARCHED_SHEET_SKU) {
+      return {
+        status: 422,
+        body: adapterErrorBody(
+          ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+          'a known different offering is outside the published arched-aperture endpoint',
+          envelope,
+        ),
+      };
+    }
+
+    if (item && !offeringAttributesComplete(item)) {
+      return {
+        status: 422,
+        body: adapterErrorBody(
+          ADAPTER_ERROR_CODES.OFFERING_INCOMPLETE,
+          'selected offering is missing required Store attributes',
+          envelope,
+        ),
+      };
+    }
+
+    const title = 'Sheet Mode-2 arched aperture';
+    const evaluateInput = {
+      title,
+      line: {
+        storeSku,
+        qty: 1,
+        geometryClass: jobPayload.line.geometryClass,
+        outerL_in: jobPayload.line.outerL_in,
+        outerW_in: jobPayload.line.outerW_in,
+        apertureW_in: jobPayload.line.apertureW_in,
+        apertureStraightH_in: jobPayload.line.apertureStraightH_in,
+        arcChord_in: jobPayload.line.arcChord_in,
+        arcRise_in: jobPayload.line.arcRise_in,
+        arcRadius_in: jobPayload.line.arcRadius_in,
+        tabCount: jobPayload.line.tabCount,
+        routeDepthIn: jobPayload.line.routeDepthIn,
+      },
+    };
+    instrumentation.evaluationCalls += 1;
+    const rawEvaluation = loaded.modules.evaluateSheetMode2ArchedJob(runtimeCatalog, evaluateInput);
+    const evaluateDigest = await digestCanonical(evaluateInput);
+    const offering = attributedOffering(item, runtimeCatalog, observations);
+
+    let rawEstimate = null;
+    let estimateInput = null;
+    let estimateDigest = null;
+    let estimateAssociationId = null;
+    let estimateError = null;
+    if (rawEvaluation.status === 'SUPPORTABLE' && item) {
+      estimateInput = { title, line: evaluateInput.line };
+      try {
+        instrumentation.estimateCalls += 1;
+        rawEstimate = loaded.modules.estimateSheetMode2ArchedJob(runtimeCatalog, estimateInput);
+        estimateDigest = await digestCanonical(estimateInput);
+        estimateAssociationId = opaqueId();
+      } catch (error) {
+        rawEstimate = null;
+        estimateError = {
+          code: ADAPTER_ERROR_CODES.ESTIMATE_FAILED,
+          details: error instanceof Error ? error.message : String(error),
+        };
+      }
+    }
+
+    return {
+      status: 200,
+      body: await successEnvelope(envelope, {
+        rawOffering: offering,
+        rawEvaluation,
+        rawEstimate,
+        estimateAssociationId,
+        estimateError,
+        mappedCallInputs: {
+          evaluation: evaluateInput,
+          evaluationDigest: evaluateDigest,
+          estimate: estimateInput,
+          estimateDigest,
+        },
+        attributedBasis: storeBasis({
+          modules: loaded.modules,
+          offering,
+          evaluation: rawEvaluation,
+          estimate: rawEstimate,
+        }),
+      }),
+    };
+  }
+
   async function dispatch(body) {
     const validated = await validateWireRequest(body);
     if (!validated.ok) {
@@ -485,6 +585,9 @@ export async function createStoreAdapter({
     }
     if (validated.requestType === STORE_REQUEST_TYPES.SHEET_MODE2_STENCIL_V1) {
       return handleSheetJob(validated.envelope, validated.payload);
+    }
+    if (validated.requestType === STORE_REQUEST_TYPES.SHEET_MODE2_ARCHED_APERTURE_V0) {
+      return handleArchedJob(validated.envelope, validated.payload);
     }
     return handleJob(validated.envelope, validated.payload);
   }

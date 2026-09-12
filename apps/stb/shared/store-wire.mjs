@@ -5,6 +5,7 @@ import {
   MAX_STORE_RESPONSE_BYTES,
   PUBLISHED_BOARD_SKU,
   PUBLISHED_SHEET_SKU,
+  PUBLISHED_ARCHED_SHEET_SKU,
   SHEET_DEFINITION,
   STORE_CLIENT_TIMEOUT_MS,
   STORE_JOB_STATUSES,
@@ -120,7 +121,11 @@ function validateOfferingPayload(payload) {
     if (skuError) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, skuError);
     }
-    if (payload.requestedStoreSku !== PUBLISHED_BOARD_SKU && payload.requestedStoreSku !== PUBLISHED_SHEET_SKU) {
+    if (
+      payload.requestedStoreSku !== PUBLISHED_BOARD_SKU &&
+      payload.requestedStoreSku !== PUBLISHED_SHEET_SKU &&
+      payload.requestedStoreSku !== PUBLISHED_ARCHED_SHEET_SKU
+    ) {
       return fail(
         ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
         'offering lookup accepts only the published Board SKU, published sheet SKU, or the frozen Board query',
@@ -292,7 +297,7 @@ function validateSheetJobPayload(payload) {
       'sheet job requiredOps must be exactly ["ROUTE_PROFILE","RETAIN_TABS"]',
     );
   }
-  if (!SHEET_DEFINITION.profileKinds.includes(line.profileKind)) {
+  if (!SHEET_DEFINITION.profileKinds.includes(line.profileKind) || line.profileKind === 'ARCHED_APERTURE') {
     return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'profileKind must be STRAIGHT_RECT or CURVILINEAR_OUTLINE');
   }
   if (!Number.isInteger(line.tabCount) || line.tabCount < SHEET_DEFINITION.minTabCount) {
@@ -347,6 +352,153 @@ function validateSheetJobPayload(payload) {
       routeDepth: { value: depth.canonical, unit: 'in' },
       blankL_in: length.value,
       blankW_in: width.value,
+      routeDepthIn: depth.value,
+    },
+    definitionKind: SHEET_DEFINITION.kind,
+    ruleVersion: SHEET_DEFINITION.ruleVersion,
+  };
+}
+
+function validateArchedJobPayload(payload) {
+  if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'arched job payload must be an object');
+  }
+  const extra = Object.keys(payload).filter(
+    (key) => key !== 'line' && key !== 'definitionKind' && key !== 'ruleVersion',
+  );
+  if (extra.length > 0) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected arched job payload fields');
+  }
+  if (payload.definitionKind !== SHEET_DEFINITION.kind) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'definitionKind must be sheet.mode2.stencil.v1');
+  }
+  if (payload.ruleVersion !== SHEET_DEFINITION.ruleVersion) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'ruleVersion must match the sheet slice');
+  }
+  const line = payload.line;
+  if (line === null || typeof line !== 'object' || Array.isArray(line)) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'arched job payload requires one line');
+  }
+  const allowedLine = new Set([
+    'lineId',
+    'storeSku',
+    'quantity',
+    'unit',
+    'requiredOps',
+    'geometryClass',
+    'processClass',
+    'outerLength',
+    'outerWidth',
+    'apertureWidth',
+    'apertureStraightHeight',
+    'arcChord',
+    'arcRise',
+    'arcRadius',
+    'tabCount',
+    'routeDepth',
+    'retentionClass',
+  ]);
+  if (Object.keys(line).some((key) => !allowedLine.has(key))) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected arched job line fields');
+  }
+  const lineIdError = requireNonemptyString('lineId', line.lineId);
+  if (lineIdError) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, lineIdError);
+  }
+  if (line.storeSku !== PUBLISHED_ARCHED_SHEET_SKU) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'arched job accepts only the published 1/2 in sheet SKU');
+  }
+  if (line.quantity !== 1 || line.unit !== 'ea') {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'arched job quantity must be 1 ea');
+  }
+  if (
+    !Array.isArray(line.requiredOps) ||
+    line.requiredOps.length !== 2 ||
+    line.requiredOps[0] !== 'ROUTE_PROFILE' ||
+    line.requiredOps[1] !== 'RETAIN_TABS'
+  ) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'arched job requiredOps must be exactly ["ROUTE_PROFILE","RETAIN_TABS"]',
+    );
+  }
+  if (line.geometryClass !== 'CURVILINEAR') {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'arched job geometryClass must be CURVILINEAR');
+  }
+  if (line.processClass !== 'MODE2_STENCIL_ROUTE') {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'arched job processClass must be MODE2_STENCIL_ROUTE');
+  }
+  if (line.retentionClass !== 'STENCIL_TABS') {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'arched job retentionClass must be STENCIL_TABS');
+  }
+  if (!Number.isInteger(line.tabCount) || line.tabCount < SHEET_DEFINITION.minTabCount) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'tabCount must be an integer ≥ 1');
+  }
+  function parseDim(field, object) {
+    if (object === null || typeof object !== 'object' || Array.isArray(object)) {
+      return { ok: false, reason: `${field} must be an object` };
+    }
+    if (object.unit !== SHEET_DEFINITION.unit) {
+      return { ok: false, reason: `${field}.unit must be in` };
+    }
+    const parsed = parseCanonicalInch(object.value);
+    if (!parsed.ok) {
+      return { ok: false, reason: parsed.reason.replace('keptLength', field) };
+    }
+    return parsed;
+  }
+  const outerL = parseDim('outerLength', line.outerLength);
+  if (!outerL.ok) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, outerL.reason);
+  const outerW = parseDim('outerWidth', line.outerWidth);
+  if (!outerW.ok) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, outerW.reason);
+  const apertureW = parseDim('apertureWidth', line.apertureWidth);
+  if (!apertureW.ok) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, apertureW.reason);
+  const apertureH = parseDim('apertureStraightHeight', line.apertureStraightHeight);
+  if (!apertureH.ok) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, apertureH.reason);
+  const chord = parseDim('arcChord', line.arcChord);
+  if (!chord.ok) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, chord.reason);
+  const rise = parseDim('arcRise', line.arcRise);
+  if (!rise.ok) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, rise.reason);
+  const radius = parseDim('arcRadius', line.arcRadius);
+  if (!radius.ok) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, radius.reason);
+  const depth = parseDim('routeDepth', line.routeDepth);
+  if (!depth.ok) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, depth.reason);
+  if (outerL.value < SHEET_DEFINITION.minInches || outerW.value < SHEET_DEFINITION.minInches) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'sheet blank must be at least 6 in');
+  }
+  if (outerL.value > SHEET_DEFINITION.maxLengthInches || outerW.value > SHEET_DEFINITION.maxWidthInches) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'sheet blank exceeds published parent');
+  }
+  if (depth.value <= 0 || depth.value > SHEET_DEFINITION.maxRouteDepthInches) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'route depth must be within the REFERENCE envelope');
+  }
+  return {
+    ok: true,
+    line: {
+      lineId: line.lineId,
+      storeSku: line.storeSku,
+      quantity: 1,
+      unit: 'ea',
+      requiredOps: ['ROUTE_PROFILE', 'RETAIN_TABS'],
+      geometryClass: 'CURVILINEAR',
+      processClass: 'MODE2_STENCIL_ROUTE',
+      retentionClass: 'STENCIL_TABS',
+      outerLength: { value: outerL.canonical, unit: 'in' },
+      outerWidth: { value: outerW.canonical, unit: 'in' },
+      apertureWidth: { value: apertureW.canonical, unit: 'in' },
+      apertureStraightHeight: { value: apertureH.canonical, unit: 'in' },
+      arcChord: { value: chord.canonical, unit: 'in' },
+      arcRise: { value: rise.canonical, unit: 'in' },
+      arcRadius: { value: radius.canonical, unit: 'in' },
+      tabCount: line.tabCount,
+      routeDepth: { value: depth.canonical, unit: 'in' },
+      outerL_in: outerL.value,
+      outerW_in: outerW.value,
+      apertureW_in: apertureW.value,
+      apertureStraightH_in: apertureH.value,
+      arcChord_in: chord.value,
+      arcRise_in: rise.value,
+      arcRadius_in: radius.value,
       routeDepthIn: depth.value,
     },
     definitionKind: SHEET_DEFINITION.kind,
@@ -446,6 +598,23 @@ export async function validateWireRequest(body) {
       return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'job querySignature must be null');
     }
     const payload = validateSheetJobPayload(body.payload);
+    if (!payload.ok) {
+      return payload;
+    }
+  return { ok: true, requestType: body.requestType, payload, envelope: body };
+  }
+  if (body.requestType === STORE_REQUEST_TYPES.SHEET_MODE2_ARCHED_APERTURE_V0) {
+    if (body.scope !== STORE_SCOPES.SHEET_MODE2_ARCHED_APERTURE_V0) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'arched sheet job scope mismatch');
+    }
+    const demandError = requireNonemptyString('demandSignature', body.demandSignature);
+    if (demandError) {
+      return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, demandError);
+    }
+    if (body.querySignature !== null) {
+      return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'job querySignature must be null');
+    }
+    const payload = validateArchedJobPayload(body.payload);
     if (!payload.ok) {
       return payload;
     }
@@ -674,6 +843,99 @@ export async function buildSheetJobRequest({
   };
 }
 
+export function archedJobPayload({
+  lineId,
+  storeSku = PUBLISHED_ARCHED_SHEET_SKU,
+  outerLengthCanonical,
+  outerWidthCanonical,
+  apertureWidthCanonical,
+  apertureStraightHeightCanonical,
+  arcChordCanonical,
+  arcRiseCanonical,
+  arcRadiusCanonical,
+  tabCount,
+  routeDepthCanonical,
+}) {
+  return {
+    line: {
+      lineId,
+      storeSku,
+      quantity: 1,
+      unit: 'ea',
+      requiredOps: ['ROUTE_PROFILE', 'RETAIN_TABS'],
+      geometryClass: 'CURVILINEAR',
+      processClass: 'MODE2_STENCIL_ROUTE',
+      retentionClass: 'STENCIL_TABS',
+      outerLength: { value: outerLengthCanonical, unit: 'in' },
+      outerWidth: { value: outerWidthCanonical, unit: 'in' },
+      apertureWidth: { value: apertureWidthCanonical, unit: 'in' },
+      apertureStraightHeight: { value: apertureStraightHeightCanonical, unit: 'in' },
+      arcChord: { value: arcChordCanonical, unit: 'in' },
+      arcRise: { value: arcRiseCanonical, unit: 'in' },
+      arcRadius: { value: arcRadiusCanonical, unit: 'in' },
+      tabCount,
+      routeDepth: { value: routeDepthCanonical, unit: 'in' },
+    },
+    definitionKind: SHEET_DEFINITION.kind,
+    ruleVersion: SHEET_DEFINITION.ruleVersion,
+  };
+}
+
+export async function archedDemandSignature(payload) {
+  return digestCanonical({
+    definitionKind: payload.definitionKind,
+    ruleVersion: payload.ruleVersion,
+    requestType: STORE_REQUEST_TYPES.SHEET_MODE2_ARCHED_APERTURE_V0,
+    scope: STORE_SCOPES.SHEET_MODE2_ARCHED_APERTURE_V0,
+    lineId: payload.line.lineId,
+    storeSku: payload.line.storeSku,
+    quantity: payload.line.quantity,
+    unit: payload.line.unit,
+    requiredOps: payload.line.requiredOps,
+    geometryClass: payload.line.geometryClass,
+    processClass: payload.line.processClass,
+    retentionClass: payload.line.retentionClass,
+    outerLength: payload.line.outerLength,
+    outerWidth: payload.line.outerWidth,
+    apertureWidth: payload.line.apertureWidth,
+    apertureStraightHeight: payload.line.apertureStraightHeight,
+    arcChord: payload.line.arcChord,
+    arcRise: payload.line.arcRise,
+    arcRadius: payload.line.arcRadius,
+    tabCount: payload.line.tabCount,
+    routeDepth: payload.line.routeDepth,
+  });
+}
+
+export async function buildArchedJobRequest({
+  requestId,
+  projectId,
+  candidateRevisionId,
+  attemptId,
+  attemptNumber,
+  sentAt,
+  demandSignature,
+  payload,
+}) {
+  const payloadHash = await payloadDigest(payload);
+  return {
+    protocolVersion: STORE_PROTOCOL_VERSION,
+    requestId,
+    projectId,
+    candidateRevisionId,
+    requestType: STORE_REQUEST_TYPES.SHEET_MODE2_ARCHED_APERTURE_V0,
+    scope: STORE_SCOPES.SHEET_MODE2_ARCHED_APERTURE_V0,
+    demandSignature,
+    querySignature: null,
+    payloadDigest: payloadHash,
+    expectedStorePin: STORE_PIN,
+    attemptId,
+    attemptNumber,
+    sentAt,
+    payload,
+  };
+}
+
 export const STORE_CLIENT_LIMITS = Object.freeze({
   timeoutMs: STORE_CLIENT_TIMEOUT_MS,
   paths: STORE_PATHS,
@@ -763,7 +1025,8 @@ export function inspectStoreResponse(request, parsed, { httpStatus, byteLength }
   }
   if (
     request.requestType === STORE_REQUEST_TYPES.BOARD_SQUARE_V1 ||
-    request.requestType === STORE_REQUEST_TYPES.SHEET_MODE2_STENCIL_V1
+    request.requestType === STORE_REQUEST_TYPES.SHEET_MODE2_STENCIL_V1 ||
+    request.requestType === STORE_REQUEST_TYPES.SHEET_MODE2_ARCHED_APERTURE_V0
   ) {
     const status = parsed.rawEvaluation?.status;
     if (!isKnownJobStatus(status)) {

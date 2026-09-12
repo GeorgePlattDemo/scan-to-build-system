@@ -3,7 +3,7 @@
 **Status:** current course correction  
 **Evidence class:** REFERENCE architecture behind already-published Store capacities  
 **Physical status:** NOT CLAIMED  
-**Does not replace:** Store pin `49d22ce4`, Board / Mode-2 app paths, D-001 Stage-2 envelope, `SHEET_MODE2_STENCIL_V1`
+**Does not replace:** Store pin `732f6b7a`, Board / Mode-2 app paths, D-001 Stage-2 envelope, `SHEET_MODE2_STENCIL_V1`, `SHEET_MODE2_ARCHED_APERTURE_V0`
 
 Store semantics stay in Store. Machine-control semantics stay at the machine. This file is the missing middle: a **declared reference machine** so each Store envelope is mechanically plausible.
 
@@ -22,6 +22,8 @@ Both published capacities therefore carry five layers in parallel:
 3. Reference kinematic contract — what must move and stay true.  
 4. Candidate implementation stack — commercially available classes that could implement that contract on a research fixture.  
 5. Unresolved physical parameters — later measurement, engineering, or safety validation.
+
+Controls are documented under the candidate stack, not inside Store. See [`S-001-MODE2-CONTROLS-REFERENCE-0.1.md`](S-001-MODE2-CONTROLS-REFERENCE-0.1.md).
 
 Two machines. Two envelopes. Not one cell.
 

@@ -270,6 +270,11 @@ let sheetBuffer = {
   width: '18',
   tabs: '4',
   depth: '0.5',
+  apertureW: '36',
+  apertureStraightH: '36',
+  arcChord: '36',
+  arcRise: '12',
+  arcRadius: '19.5',
   unit: 'in',
 };
 let sheetDirty = false;
@@ -678,6 +683,11 @@ function discardBuffers() {
     width: '18',
     tabs: '4',
     depth: '0.5',
+    apertureW: '36',
+    apertureStraightH: '36',
+    arcChord: '36',
+    arcRise: '12',
+    arcRadius: '19.5',
     unit: 'in',
   };
   sheetDirty = false;
@@ -882,6 +892,11 @@ async function commitSheetDefinition(root) {
     width: root.querySelector('[data-field="sheet-width"]')?.value ?? sheetBuffer.width,
     tabs: root.querySelector('[data-field="sheet-tabs"]')?.value ?? sheetBuffer.tabs,
     depth: root.querySelector('[data-field="sheet-depth"]')?.value ?? sheetBuffer.depth,
+    apertureW: root.querySelector('[data-field="sheet-aperture-w"]')?.value ?? sheetBuffer.apertureW,
+    apertureStraightH: root.querySelector('[data-field="sheet-aperture-h"]')?.value ?? sheetBuffer.apertureStraightH,
+    arcChord: root.querySelector('[data-field="sheet-chord"]')?.value ?? sheetBuffer.arcChord,
+    arcRise: root.querySelector('[data-field="sheet-rise"]')?.value ?? sheetBuffer.arcRise,
+    arcRadius: root.querySelector('[data-field="sheet-radius"]')?.value ?? sheetBuffer.arcRadius,
     unit: 'in',
   };
   const project = await projectIndex(screen.localRecordId);
@@ -899,6 +914,11 @@ async function commitSheetDefinition(root) {
     tabCount: Number(sheetBuffer.tabs),
     routeDepthIn: Number(sheetBuffer.depth),
     unit: 'in',
+    apertureW: sheetBuffer.profileKind === 'ARCHED_APERTURE' ? Number(sheetBuffer.apertureW) : undefined,
+    apertureStraightH: sheetBuffer.profileKind === 'ARCHED_APERTURE' ? Number(sheetBuffer.apertureStraightH) : undefined,
+    arcChord: sheetBuffer.profileKind === 'ARCHED_APERTURE' ? Number(sheetBuffer.arcChord) : undefined,
+    arcRise: sheetBuffer.profileKind === 'ARCHED_APERTURE' ? Number(sheetBuffer.arcRise) : undefined,
+    arcRadius: sheetBuffer.profileKind === 'ARCHED_APERTURE' ? Number(sheetBuffer.arcRadius) : undefined,
   });
   try {
     const result = await observationInFlight;
@@ -1512,6 +1532,25 @@ export function startShell(root) {
       applyUnappliedReviewLock(root);
     } else if (field === 'sheet-depth') {
       sheetBuffer.depth = value;
+      sheetDirty = true;
+      markUnapplied(root, 'sheet', true);
+      markUnapplied(root, 'store', true);
+      applyUnappliedReviewLock(root);
+    } else if (
+      field === 'sheet-aperture-w' ||
+      field === 'sheet-aperture-h' ||
+      field === 'sheet-chord' ||
+      field === 'sheet-rise' ||
+      field === 'sheet-radius'
+    ) {
+      const map = {
+        'sheet-aperture-w': 'apertureW',
+        'sheet-aperture-h': 'apertureStraightH',
+        'sheet-chord': 'arcChord',
+        'sheet-rise': 'arcRise',
+        'sheet-radius': 'arcRadius',
+      };
+      sheetBuffer[map[field]] = value;
       sheetDirty = true;
       markUnapplied(root, 'sheet', true);
       markUnapplied(root, 'store', true);

@@ -68,6 +68,11 @@ function sameSheet(observation, input) {
     && sheet.tabCount === input.tabCount
     && sheet.routeDepthIn === input.routeDepthIn
     && (sheet.unit ?? 'in') === (input.unit ?? 'in')
+    && (sheet.apertureW ?? null) === (input.apertureW ?? null)
+    && (sheet.apertureStraightH ?? null) === (input.apertureStraightH ?? null)
+    && (sheet.arcChord ?? null) === (input.arcChord ?? null)
+    && (sheet.arcRise ?? null) === (input.arcRise ?? null)
+    && (sheet.arcRadius ?? null) === (input.arcRadius ?? null)
   );
 }
 
@@ -88,6 +93,11 @@ export async function applySheetDefinition(input) {
     tabCount: Number(input.tabCount),
     routeDepthIn: Number(input.routeDepthIn),
     unit: input.unit ?? SHEET_DEFINITION.unit,
+    apertureW: input.apertureW == null ? null : Number(input.apertureW),
+    apertureStraightH: input.apertureStraightH == null ? null : Number(input.apertureStraightH),
+    arcChord: input.arcChord == null ? null : Number(input.arcChord),
+    arcRise: input.arcRise == null ? null : Number(input.arcRise),
+    arcRadius: input.arcRadius == null ? null : Number(input.arcRadius),
   };
   const evaluation = evaluateSheetRequirement(sheet);
   const current = await getRecord(localRecordId, 'candidate', expectedHead);

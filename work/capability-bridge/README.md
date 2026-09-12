@@ -17,7 +17,7 @@ Do not restate that protocol in chat. Use it.
 Give Store 1 two reference capacities, each backed by a declared reference machine:
 
 1. **Dimensional model** — finished-length work on dimensional stock. Architecture: [`D-001-REFERENCE-ARCHITECTURE-0.1.md`](D-001-REFERENCE-ARCHITECTURE-0.1.md)
-2. **Sheet Mode-2** — stencil profiles on sheet stock, including a next arched-aperture family. Architecture: [`S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md`](S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md)
+2. **Sheet Mode-2** — stencil profiles on sheet stock, including live arched-aperture family `SHEET_MODE2_ARCHED_APERTURE_V0`. Architecture: [`S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md`](S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md). Controls: [`S-001-MODE2-CONTROLS-REFERENCE-0.1.md`](S-001-MODE2-CONTROLS-REFERENCE-0.1.md)
 
 Spine: [`REFERENCE-MACHINE-ARCHITECTURE-0.1.md`](REFERENCE-MACHINE-ARCHITECTURE-0.1.md)
 

@@ -163,6 +163,13 @@ export function planSheetDerivation({
         unit: SHEET_DEFINITION.unit,
         tabCount: evaluation.tabCount,
         routeDepthCanonical: evaluation.routeDepthCanonical ?? null,
+        geometryClass: evaluation.geometryClass,
+        apertureWidthCanonical: evaluation.aperture?.widthCanonical ?? null,
+        apertureStraightHeightCanonical: evaluation.aperture?.straightHeightCanonical ?? null,
+        arcChordCanonical: evaluation.aperture?.chordCanonical ?? null,
+        arcRiseCanonical: evaluation.aperture?.riseCanonical ?? null,
+        arcRadiusCanonical: evaluation.aperture?.radiusCanonical ?? null,
+        retentionClass: evaluation.retentionClass ?? 'STENCIL_TABS',
         toolpath: false,
       },
       parts: evaluation.valid && occurrenceId && definitionRevisionId
