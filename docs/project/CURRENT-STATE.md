@@ -25,11 +25,13 @@ The accepted app remains a local/reference application build. It is not a live c
 
 ## Store — REFERENCE / SIMULATION
 
-The application consumes Stage-2 Store Zero at `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`.
+The application currently consumes `GeorgePlattDemo/scan-to-build-store` branch `build/sheet-mode2-storezero-0.1` at `ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee`. The exact consumed identity is owned by `STORE_PIN` in `apps/stb/shared/contracts.mjs`.
 
 Store Zero provides fixture-backed offerings, fixture stock facts, bounded capability evaluation, and modeled budgetary economics. Those facts are reference behavior, not live yard inventory, reservation, commercial quotation, or measured production evidence.
 
-The next Store development horizon is **Store 1**: a deliberate expansion of current Store concepts to broader SKU/inventory coverage and a special-order path. That work has not yet been implemented in this repository.
+A newer Store-only candidate does not become a current application dependency merely because it exists. Cross-repository Store/application checks must pass against that exact candidate before `STORE_PIN` is deliberately advanced.
+
+The next Store development horizon is **Store 1**: a deliberate expansion of current Store concepts to broader SKU/inventory coverage and a special-order path. That work is developed through the Store work surfaces and the separately versioned Store repository; it is not implied by the application pin.
 
 ## Governed Reference — REFERENCE / SIMULATION
 

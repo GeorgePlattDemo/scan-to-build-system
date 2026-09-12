@@ -64,7 +64,9 @@ Additional project classes and capabilities will be added through this architect
 
 The Store resolves project requirements against available material, inventory, capability, economics, and fulfillment paths.
 
-The first working Store environment will be developed here as **Store 1**.
+The accepted application currently consumes the separately versioned `GeorgePlattDemo/scan-to-build-store` Store Zero at the exact commit declared by `STORE_PIN` in `apps/stb/shared/contracts.mjs`. A newer Store-only commit does not become current here merely because it exists; the cross-repository Store/application checks must pass against that exact candidate before the pin is deliberately advanced.
+
+Store 1 expansion is developed through [`work/store/`](work/store/) and related current documents while callable Store Zero remains separately versioned and pinned.
 
 Store 1 will grow beyond the existing reference fixtures to include:
 

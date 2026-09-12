@@ -465,6 +465,9 @@ export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
 
 export const STORE_PROTOCOL_VERSION = 'stb-store-zero-http/1';
 export const STORE_REPOSITORY = 'GeorgePlattDemo/scan-to-build-store';
+// Last Store commit accepted by this application. A newer Store-only candidate does not
+// become current here until the cross-repository Store/application suites pass against
+// that exact commit and this pin is deliberately advanced.
 export const STORE_PIN = 'ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee';
 export const WRAPPER_BUILD_ID = 'stb-app-build-5';
 export const APP_BUILD_ID = 'stb-app-build-8';
