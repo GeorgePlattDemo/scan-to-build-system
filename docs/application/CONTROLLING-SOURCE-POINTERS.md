@@ -33,7 +33,7 @@ A pointer preserves source identity. It does not automatically admit every histo
 
 **Disposition:** `ADMIT AFTER REWRITE`.
 
-The locked evidence/intake principles remain useful. The document contains an embedded Stage-2 Store pin (`8713b76a...`) that predates the Store pin consumed by the accepted app (`b40cdc60...`). Do not copy the stale dependency into new current work. The reconciled working intake surface is `../../work/user-intake/README.md`.
+The locked evidence/intake principles remain useful. The document contains an embedded Stage-2 Store pin (`8713b76a...`) that predates the Store pin consumed by the accepted app (`ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee`). Do not copy the stale dependency into new current work. The reconciled working intake surface is `../../work/user-intake/README.md`.
 
 ## Application build contract
 

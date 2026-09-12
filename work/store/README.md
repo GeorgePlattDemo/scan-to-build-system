@@ -2,7 +2,7 @@
 
 **Status:** post-app working boundary  
 **Current reference Store:** Stage-2 Store Zero  
-**Current app Store pin:** `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
+**Current app Store pin:** `ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee`
 
 This folder is the working surface for **Store 1** and future Store expansion.
 

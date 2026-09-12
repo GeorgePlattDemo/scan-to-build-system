@@ -3,7 +3,7 @@
 **Status:** candidate integration; not promoted into the accepted app HTTP/UI path  
 **System branch:** `build/d001-five-tool-0.1`  
 **Store candidate branch:** `build/d001-five-tool-0.1`  
-**Store candidate commit:** `0afe6eab5dc3a09351b5ad374f3d41642a6ee403`
+**Store candidate commit:** `3e1f9f2c18668de86d92c6ccae7e79d3cadd35a1`
 
 This is the candidate zipper for the broader dimensional-machine wall.
 
@@ -67,7 +67,7 @@ The Store candidate owns the five-tool capability declaration and its reasons.
 
 It returns neutral operations only. New five-tool process Q remains unresolved; budgetary material may still be reported where grounded.
 
-The Store records capability gaps rather than silently widening itself.
+The evaluator returns capability-gap summaries rather than silently widening itself. Persistent gap history, requested-dimension retention beyond the evaluation result, recurrence counts and alternate-fulfillment history belong to the surrounding request/result record or later work.
 
 ## Machine boundary
 
@@ -92,7 +92,7 @@ The provisional T1/T2 offsets of `-3 in` / `+3 in` are packaging assumptions onl
 `apps/stb/test/store/d001-five-tool-candidate.test.mjs` is an explicit cross-repository candidate zipper. It requires:
 
 ```text
-STB_D001_STORE_CANDIDATE_ROOT=<clean checkout at exactly 0afe6eab...>
+STB_D001_STORE_CANDIDATE_ROOT=<clean checkout at exactly 3e1f9f2c...>
 ```
 
 and checks:

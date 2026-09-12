@@ -2,11 +2,11 @@
 
 This directory is the navigation surface for the accepted Scan-to-Build application and the post-app language/build guidance that controls future application work.
 
-The application code has not yet been transferred into this repository. Until that mechanical transfer is completed, the accepted implementation remains:
+The application code is present in this repository at `apps/stb/`. Its transfer lineage remains:
 
-- repository: `GeorgePlattDemo/grok-file`
-- branch: `build/app-foundation-0.1`
-- commit: `4595b4785a2686486e477ce2e70fb3f476285a8d`
+- source repository: `GeorgePlattDemo/grok-file`
+- source branch: `build/app-foundation-0.1`
+- source commit: `4595b4785a2686486e477ce2e70fb3f476285a8d`
 - application subtree: `apps/stb/`
 
 ## Current application truth

@@ -2,7 +2,7 @@
 
 **Status:** stable post-app working surface  
 **Owner:** Application  
-**Current downstream Store pin:** `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
+**Current downstream Store pin:** `ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee`
 
 This folder is the working bucket for the demand side of Scan-to-Build: how a person brings what they know into the application and reaches an attributable project definition.
 

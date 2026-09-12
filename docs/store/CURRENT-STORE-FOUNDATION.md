@@ -1,7 +1,7 @@
 # Current Store Foundation
 
 **Current Store owner source:** `GeorgePlattDemo/scan-to-build-store`  
-**Current Stage-2 pin consumed by the accepted app:** `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
+**Current Stage-2 pin consumed by the accepted app:** `ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee`
 
 This page records the Store boundary used by current post-app work. It does not replace the Store source documents.
 

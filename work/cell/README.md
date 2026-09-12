@@ -68,10 +68,8 @@ Correspondence is not a construction drawing or runtime authority.
 
 The engineering surface owns the detailed correspondence. This cell surface should carry only enough of it to explain the selected research task and the unbroken information-to-physical chain.
 
-## First future file
+## Current staging file
 
-Create `RESEARCH-CELL-STAGING-0.1.md` only after the dimensional and sheet workstreams have enough current definition to state a bounded research hypothesis.
-
-Until then, **UNRESOLVED** is the correct cell task.
+[`RESEARCH-CELL-STAGING-0.1.md`](RESEARCH-CELL-STAGING-0.1.md) is the current convergence/planning surface. It intentionally retains the bounded research task and several dependent fields as `UNRESOLVED` until the dimensional and sheet workstreams provide enough evidence to state a testable research hypothesis.
 
 **NO BLOOD ON WOOD.**

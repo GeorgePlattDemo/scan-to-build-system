@@ -9,6 +9,6 @@ The working intake rules have been reconciled into `../../work/user-intake/READM
 - the locked evidence/intake principles from the source contract;
 - the accepted app at `4595b4785a2686486e477ce2e70fb3f476285a8d`;
 - the current app semantic-boundary cleanup;
-- the accepted app Store pin `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`.
+- the accepted app Store pin `ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee`.
 
 Do not replace the source file or erase its provenance. Do not propagate its older Store pin into new runtime or planning work.

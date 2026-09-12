@@ -26,7 +26,7 @@ Checkpoints complete here:
 
 The bounded first application vertical is implemented and accepted against the pinned Stage-2 Store reference. It remains a reference/local application build, not a live commercial or physical fabrication service. Browsing does not create a project. There is no cloud custody, governed authority, or physical execution. A complete committed Board revision automatically asks Store Zero once as an evaluation, not an order. Board compact and Page 5 present the returned answer and budgetary Q. Missing Q is never shown as zero. “Current” means the answer applies to this exact revision; it is not a live refresh or commercial commitment. Definition review records `DefinitionReviewRecorded` or `UnresolvedDefinitionAcknowledged`. Neither is commercial submission, Store commercial acceptance, reservation, payment, governed authorization, or physical execution. Owner archive export/import preserves history as an inert snapshot. Imported Store answers and reviews remain historical. A new local Store question and a new local review are required before anything is current. Order, payment, fulfillment, and physical execution paths remain absent. Support is not fabrication authorization.
 
-Cross-layer application terminology is controlled by [`../../docs/architecture/STB-SEMANTIC-BOUNDARIES-0.1.md`](../../docs/architecture/STB-SEMANTIC-BOUNDARIES-0.1.md).
+Cross-layer application terminology is summarized by [`../../docs/application/SEMANTIC-GUARDRAILS.md`](../../docs/application/SEMANTIC-GUARDRAILS.md); that page preserves the exact controlling source identity.
 
 ## Runtime
 
@@ -55,21 +55,21 @@ From `apps/stb/`:
 npm ci --no-audit --no-fund
 npx playwright install chromium
 npm start
-STB_STORE_ZERO_ROOT=<exact-clean-s2.2-checkout> npm start
+STB_STORE_ZERO_ROOT=<exact-clean-store-pin-checkout> npm start
 npm run test:unit
 npm run test:browser
 npm run test:boundaries
-STB_STORE_ZERO_ROOT=<exact-clean-s2.2-checkout> npm run test:store
-STB_STORE_ZERO_ROOT=<exact-clean-s2.2-checkout> npm run test:vertical
+STB_STORE_ZERO_ROOT=<exact-clean-store-pin-checkout> npm run test:store
+STB_STORE_ZERO_ROOT=<exact-clean-store-pin-checkout> npm run test:vertical
 ```
 
 `npx playwright install chromium` is required only when the Playwright 1.63 Chromium headless shell is not already provisioned for this environment.
 
-`npm run test:store` exercises the exact S2.2 Store pin through the bounded wrapper. It fails closed if `STB_STORE_ZERO_ROOT` is absent, dirty, at the wrong commit, or missing required modules. It does not skip.
+`npm run test:store` exercises the exact Store commit declared by `STORE_PIN` through the bounded wrapper. It fails closed if `STB_STORE_ZERO_ROOT` is absent, dirty, at the wrong commit, or missing required modules. It does not skip.
 
 `npm run test:vertical` is the Build 8 whole-path suite. It drives the actual local host, IndexedDB, browser, bounded Store wrapper, and pinned Store evaluation. It fails closed if `STB_STORE_ZERO_ROOT` is absent. It does not use mock Store transport on the success path.
 
-Build 8 acceptance counts at this closeout:
+Historical Build 8 acceptance counts at that closeout:
 
 - `npm run test:unit` — 58 pass, 0 fail
 - `npm run test:browser` — 137 pass, 0 fail
@@ -79,7 +79,7 @@ Build 8 acceptance counts at this closeout:
 
 `test:vertical` proves NEW USER, RETURNING USER, and PROFESSIONAL converge on one Board architecture; 45 in then 46 in against the real pinned Store; review binding; truthful Result; close/reopen versus inert import; keyboard and narrow-viewport operation; and the absence of commercial or physical authority.
 
-Exact Store pin: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` (`GeorgePlattDemo/scan-to-build-store`).
+Historical Build 8 Store pin: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` (`GeorgePlattDemo/scan-to-build-store`). The current callable dependency is the exact `STORE_PIN` declared in `shared/contracts.mjs`.
 
 Build 8 application commits on `build/app-foundation-0.1`:
 
@@ -129,15 +129,15 @@ Store presentation reads durable Store records; it does not calculate Store pric
 
 ## Store
 
-Exact S2.2 pin: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` (`GeorgePlattDemo/scan-to-build-store`).
+Current callable Stage-2 pin: `ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee` (`GeorgePlattDemo/scan-to-build-store`). The runtime source of truth is `STORE_PIN` in `shared/contracts.mjs`.
 
-Supply a clean checkout of that pin through `STB_STORE_ZERO_ROOT`. The path is not hardcoded. At startup the wrapper verifies:
+Supply a clean checkout of that exact pin through `STB_STORE_ZERO_ROOT`. The path is not hardcoded. At startup the wrapper verifies:
 
 - the checkout exists
-- `HEAD` is exactly `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
+- `HEAD` is exactly `ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee`
 - required modules and catalog/observation files exist
 - the checkout is clean
-- `findSku`, `offerMaterial`, `evaluateJob`, and `estimateJob` can be loaded from that checkout
+- required Store exports can be loaded from that checkout
 
 A failed source gate leaves the local browser/evidence host usable. Store endpoints return an adapter/service diagnostic. The wrapper does not copy Store source into the app, does not substitute another commit, and does not fabricate fallback catalog data.
 

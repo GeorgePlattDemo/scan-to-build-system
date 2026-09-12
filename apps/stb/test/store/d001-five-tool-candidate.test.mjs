@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url';
 import { d001FeaturedBoardStoreSpec } from '../../shared/d001-featured-board.mjs';
 
 const execFileAsync = promisify(execFile);
-const STORE_CANDIDATE_PIN = '0afe6eab5dc3a09351b5ad374f3d41642a6ee403';
+const STORE_CANDIDATE_PIN = '3e1f9f2c18668de86d92c6ccae7e79d3cadd35a1';
 const root = process.env.STB_D001_STORE_CANDIDATE_ROOT ?? null;
 
 async function loadCandidate() {

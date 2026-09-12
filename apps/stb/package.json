@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Scan-to-Build local application subtree. Build 1 locked entry over the Build 0 foundation.",
+  "description": "Scan-to-Build local application subtree.",
   "engines": {
     "node": "22.23.2"
   },

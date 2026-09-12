@@ -112,7 +112,7 @@ Future detailed sheet work belongs under a `sheet/` subfolder and may include:
 - failure/refusal cases;
 - patent correspondence by feature.
 
-The current Cell spine describes S-001 as patent correspondence/reference-cell material only. S-001 does not become Store-callable capability until an owning Store/cell source adopts actual evidence.
+The current Store path already exposes S-001 Mode-2 **reference evaluation** as callable Stage-2 capability. That callable reference status does not establish installed or commissioned S-001 machinery; physical capability still requires its own machine/cell evidence, commissioning and measured results.
 
 ## Off-the-shelf and open-source research rule
 

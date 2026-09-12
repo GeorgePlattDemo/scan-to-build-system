@@ -16,7 +16,7 @@ Do not restate that protocol in chat. Use it.
 
 Give Store 1 two reference capacities, each backed by a declared reference machine:
 
-1. **Dimensional model** — finished-length work on dimensional stock. Architecture: [`D-001-REFERENCE-ARCHITECTURE-0.1.md`](D-001-REFERENCE-ARCHITECTURE-0.1.md)
+1. **Dimensional model** — accepted finished-length work on dimensional stock, with the broader five-tool dimensional expansion held as a branch candidate. Architecture: [`D-001-REFERENCE-ARCHITECTURE-0.1.md`](D-001-REFERENCE-ARCHITECTURE-0.1.md). Candidate zipper: [`D-001-FIVE-TOOL-INTEGRATION-0.1.md`](D-001-FIVE-TOOL-INTEGRATION-0.1.md)
 2. **Sheet Mode-2** — stencil profiles on sheet stock, including live arched-aperture family `SHEET_MODE2_ARCHED_APERTURE_V0`. Architecture: [`S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md`](S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md). Controls: [`S-001-MODE2-CONTROLS-REFERENCE-0.1.md`](S-001-MODE2-CONTROLS-REFERENCE-0.1.md)
 
 Spine: [`REFERENCE-MACHINE-ARCHITECTURE-0.1.md`](REFERENCE-MACHINE-ARCHITECTURE-0.1.md)
@@ -42,6 +42,7 @@ Spine: [`REFERENCE-MACHINE-ARCHITECTURE-0.1.md`](REFERENCE-MACHINE-ARCHITECTURE-
 | [PATENTS.md](PATENTS.md) | issued grants |
 | [ATLAS-BRIDGE.md](ATLAS-BRIDGE.md) | rewritten Atlas 01–04 |
 | [DIMENSIONAL-MODEL-0.1.md](DIMENSIONAL-MODEL-0.1.md) | dimensional reference model |
+| [D-001-FIVE-TOOL-INTEGRATION-0.1.md](D-001-FIVE-TOOL-INTEGRATION-0.1.md) | candidate-only five-tool dimensional zipper; does not replace accepted square-length path |
 | [SHEET-MODEL-0.1.md](SHEET-MODEL-0.1.md) | Mode-2 sheet reference model |
 | [REFERENCE-MACHINE-ARCHITECTURE-0.1.md](REFERENCE-MACHINE-ARCHITECTURE-0.1.md) | five-layer spine behind Store capacity |
 | [D-001-REFERENCE-ARCHITECTURE-0.1.md](D-001-REFERENCE-ARCHITECTURE-0.1.md) | dimensional kinematic contract + candidate stack |
