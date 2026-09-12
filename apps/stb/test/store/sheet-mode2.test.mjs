@@ -79,8 +79,11 @@ test('sheet Mode-2 job evaluates independently of BOARD_SQUARE_V1', async (t) =>
   assert.equal(body.rawEstimate.status, 'BUDGETARY_MATERIAL_ONLY');
   assert.equal(body.rawEstimate.processQ_status, 'UNRESOLVED');
 
-  const curve = parseJson(await postJob(await sheetJobBody({ profileKind: 'CURVILINEAR_OUTLINE' })));
-  assert.equal(curve.rawEvaluation.line.capability.profileKind, 'CURVILINEAR_OUTLINE');
+  const curveResponse = await postJob(await sheetJobBody({ profileKind: 'CURVILINEAR_OUTLINE' }));
+  assert.equal(curveResponse.status, 200);
+  const curve = parseJson(curveResponse);
+  assert.equal(curve.rawEvaluation.status, 'UNRESOLVED');
+  assert.ok(curve.rawEvaluation.line.capability.unresolved.includes('CURVILINEAR_GEOMETRY_REQUIRED'));
 
   const board = parseJson(await postJob(await boardJobBody({ keptLengthIn: 45 })));
   assert.equal(board.rawEvaluation.status, 'SUPPORTABLE');

@@ -28,7 +28,7 @@ Open `http://localhost:4317` only. That origin is the storage origin.
 Store evaluation against the Stage-2 pin:
 
 ```text
-STB_STORE_ZERO_ROOT=<clean scan-to-build-store at 49d22ce4> npm start
+STB_STORE_ZERO_ROOT=<clean scan-to-build-store at ca6a6e01> npm start
 ```
 
 Exact pin and copy notes: [`apps/README.md`](apps/README.md).

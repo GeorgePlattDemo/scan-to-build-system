@@ -156,7 +156,7 @@ export const COPY = Object.freeze({
   sheetCardName: 'SHEET STENCIL',
   sheetStatus: 'Available. Define a Mode-2 sheet stencil. Not a toolpath.',
   sheetSlice:
-    'This slice accepts a straight rectangle, a curvilinear-outline flag, or one reconstructable arched aperture on a published sheet SKU. Tabs stay with the parent sheet. Secondary separation is not automated here.',
+    'This slice accepts a straight rectangle, a curvilinear-outline flag, or one reconstructable arched aperture on a published sheet SKU. The generic curvilinear flag stays unresolved until reconstructable curve geometry exists. Tabs stay with the parent sheet. Secondary separation is not automated here.',
   sheetApply: 'Apply sheet definition',
   sheetBlank: 'Sheet definition is incomplete. No valid part has been created.',
   sheetUnresolved: 'This sheet requirement is retained. It is not an accepted Mode-2 definition in this slice.',
@@ -465,7 +465,7 @@ export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
 
 export const STORE_PROTOCOL_VERSION = 'stb-store-zero-http/1';
 export const STORE_REPOSITORY = 'GeorgePlattDemo/scan-to-build-store';
-export const STORE_PIN = '732f6b7a98362871d8ee6c94f87ba90fb37b6f76';
+export const STORE_PIN = 'ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee';
 export const WRAPPER_BUILD_ID = 'stb-app-build-5';
 export const APP_BUILD_ID = 'stb-app-build-8';
 export const PUBLISHED_BOARD_SKU = 'STB-ZERO-SPF-2X4-72-001';

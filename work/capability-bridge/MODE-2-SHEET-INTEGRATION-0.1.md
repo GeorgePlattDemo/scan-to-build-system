@@ -3,14 +3,13 @@
 **Status:** REFERENCE capability integration  
 **Evidence class:** REFERENCE Store capacity; IMPLEMENTED demand path in `apps/stb/`  
 **Physical status:** NOT CLAIMED  
-Live Store offering remains `SHEET_MODE2_STENCIL_V1`. The next documented family is `SHEET_MODE2_ARCHED_APERTURE_V0`. Machine backing: [`S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md`](S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md).
-
+Live Store families are `SHEET_MODE2_STENCIL_V1` and bounded child `SHEET_MODE2_ARCHED_APERTURE_V0`. The generic `CURVILINEAR_OUTLINE` flag is retained demand but remains unresolved until reconstructable curve geometry exists. Machine backing: [`S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md`](S-001-MODE2-REFERENCE-ARCHITECTURE-0.1.md). Controls backing: [`S-001-MODE2-CONTROLS-REFERENCE-0.1.md`](S-001-MODE2-CONTROLS-REFERENCE-0.1.md).
 
 This document is the durable record of how a bounded sheet component travels from user definition to Store Zero and back. It is not a machine commissioning record.
 
 ## Purpose
 
-Prove the Scan-to-Build chain for one sheet family:
+Prove the Scan-to-Build chain for bounded sheet families:
 
 USER REQUIREMENT → APPLICATION → STORE ZERO → CAPABILITY EVALUATION → SUPPORTABLE / REFUSE / UNRESOLVED → BUDGETARY Q WHERE GROUNDED → REVIEW / RESULT → OWNER RECORD
 
@@ -79,11 +78,17 @@ That delta is REFERENCE. It is not commissioned.
 Store Zero pin for this integration:
 
 `GeorgePlattDemo/scan-to-build-store` branch `build/sheet-mode2-storezero-0.1`  
-commit `49d22ce40482a7c2e0169ac1e6df48e0f8384a6d`
+commit `ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee`
 
-Evaluator: `evaluateSheetMode2Job`  
-Envelope: `S001-MODE2-STENCIL-V1`  
-Published SKU used by the app: `STB-ZERO-PLY-075-48X96-001`
+Parent evaluator: `evaluateSheetMode2Job`  
+Parent envelope: `S001-MODE2-STENCIL-V1`  
+Bounded curvilinear evaluator: `evaluateSheetMode2ArchedJob`  
+Bounded curvilinear envelope: `S001-MODE2-ARCHED-APERTURE-V0`
+
+Published parent sheet SKU: `STB-ZERO-PLY-075-48X96-001`  
+First arched-aperture study SKU: `STB-ZERO-PLY-050-48X96-001`
+
+`CURVILINEAR_OUTLINE` without reconstructable curve geometry evaluates `UNRESOLVED`; `SHEET_MODE2_ARCHED_APERTURE_V0` is the first live family where CURVILINEAR is reconstructable from chord + rise with radius derived/checked.
 
 Dimensional `BOARD_SQUARE_V1` / `evaluateJob` remains intact. Sheet stock sent through D-001 is refused (`SHEET_NOT_D001`).
 
@@ -91,35 +96,33 @@ Budgetary Q is material fixture only. Process Q is UNRESOLVED.
 
 ## Application definition
 
-Kind: `sheet.mode2.stencil.v1`  
-Request type / scope: `SHEET_MODE2_STENCIL_V1`
+Kind: `sheet.mode2.stencil.v1`
 
-The application defines:
+The application can retain:
 
-- profile kind `STRAIGHT_RECT` or `CURVILINEAR_OUTLINE`
-- blank length and width in inches
-- tab count ≥ 1
-- bounded route depth
-- one published sheet SKU
+- `STRAIGHT_RECT`
+- generic `CURVILINEAR_OUTLINE` demand, which does not earn Store support by itself
+- `ARCHED_APERTURE`, carrying aperture width, straight height, chord, rise, derived/checked radius, stencil tabs, and bounded route depth
+- one published sheet SKU per bounded Store request
 - one Store question per committed revision
 
 It does not calculate supportability and does not emit toolpaths.
 
 ## Fixtures / tests
 
-Store: `s001-mode2-envelope.test.mjs` plus existing Stage-2 suites.
+Store: `s001-mode2-envelope.test.mjs`, `s001-mode2-arched.test.mjs`, plus existing Stage-2 suites.
 
-Application: unit wire tests for the sheet contract; Store wrapper tests against the exact pin when `STB_STORE_ZERO_ROOT` is that checkout.
+Application: unit wire/geometry tests plus Store wrapper tests against the exact pin when `STB_STORE_ZERO_ROOT` is that checkout. The non-executable Mode-2 reference path must reproduce the 36 in chord / 12 in rise / 19.5 in radius segment at its endpoints and crown; it is not controller output.
 
-## Refusals
+## Refusals / unresolved
 
-Unsupported profile, missing tabs, dimensional stock, offerings without `ROUTE_PROFILE`/`RETAIN_TABS`, oversized blanks, machine-local language, and missing required fields.
+Refuse unsupported form/ops, missing tabs where required, dimensional stock, oversized geometry, contradictory curve data, and machine-local language. Keep generic curvilinear demand unresolved until reconstructable curve geometry exists.
 
 ## Safety / authority
 
 **NO BLOOD ON WOOD.**
 
-No retrofit procedure. No defeated guards. No remote Cycle Start. Support never becomes fabrication authority.
+No retrofit procedure. No defeated guards. No remote Cycle Start. Support never becomes fabrication authority. Open-source process control does not become the safety case.
 
 ## Later physical research questions
 

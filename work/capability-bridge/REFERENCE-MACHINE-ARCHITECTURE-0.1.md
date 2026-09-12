@@ -3,7 +3,7 @@
 **Status:** current course correction  
 **Evidence class:** REFERENCE architecture behind already-published Store capacities  
 **Physical status:** NOT CLAIMED  
-**Does not replace:** Store pin `732f6b7a`, Board / Mode-2 app paths, D-001 Stage-2 envelope, `SHEET_MODE2_STENCIL_V1`, `SHEET_MODE2_ARCHED_APERTURE_V0`
+**Does not replace:** Store pin `ca6a6e01`, Board / Mode-2 app paths, D-001 Stage-2 envelope, `SHEET_MODE2_STENCIL_V1`, `SHEET_MODE2_ARCHED_APERTURE_V0`
 
 Store semantics stay in Store. Machine-control semantics stay at the machine. This file is the missing middle: a **declared reference machine** so each Store envelope is mechanically plausible.
 
@@ -60,6 +60,7 @@ Safety Speed and other vertical-panel / chop-saw products establish that adjacen
 
 - Board vertical and `BOARD_SQUARE_V1` stay intact.  
 - Mode-2 Store evaluator and app path stay intact.  
+- Generic `CURVILINEAR_OUTLINE` demand does not earn Store support without reconstructable curve geometry.  
 - Process Q stays unresolved.  
 - Secondary separation stays operator or later.  
 - Two offerings are not a tandem cell.

@@ -71,7 +71,7 @@ test('contradictory or missing curve data is not accepted as CURVILINEAR', () =>
   assert.equal(outside.unresolvedReason, 'aperture-outside-outer');
 });
 
-test('reference path object is not executable machine language', () => {
+test('reference path object reproduces the 36/12/19.5 circular segment without executable machine language', () => {
   const path = representMode2CircularSegment();
   assert.equal(path.ok, true);
   assert.equal(path.executable, false);
@@ -82,4 +82,20 @@ test('reference path object is not executable machine language', () => {
   assert.equal(path.samples.every((p) => p.geometryAxisZ === false), true);
   assert.equal(path.retention.fullSeverance, false);
   assert.ok(path.not_emitted.includes('G-code'));
+
+  const first = path.samples[0];
+  const crown = path.samples[Math.floor(path.samples.length / 2)];
+  const last = path.samples[path.samples.length - 1];
+  assert.deepEqual(
+    { x: first.sheetX_in, y: first.toolY_in },
+    { x: -18, y: 0 },
+  );
+  assert.deepEqual(
+    { x: crown.sheetX_in, y: crown.toolY_in },
+    { x: 0, y: 12 },
+  );
+  assert.deepEqual(
+    { x: last.sheetX_in, y: last.toolY_in },
+    { x: 18, y: 0 },
+  );
 });

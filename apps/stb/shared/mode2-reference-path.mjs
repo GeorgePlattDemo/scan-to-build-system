@@ -19,17 +19,16 @@ export function representMode2CircularSegment({
   }
   const R = curve.radius_in;
   const half = chord_in / 2;
-  const cx = 0;
-  const cy = R - rise_in;
-  const startAngle = Math.atan2(-cy, -half);
-  const endAngle = Math.atan2(-cy, half);
+  const centerY = rise_in - R;
   const points = [];
   for (let i = 0; i < samples; i += 1) {
     const t = i / (samples - 1);
-    const angle = startAngle + (endAngle - startAngle) * t;
+    const sheetX = -half + chord_in * t;
+    const radial = Math.max(0, R * R - sheetX * sheetX);
+    const toolY = centerY + Math.sqrt(radial);
     points.push({
-      sheetX_in: Number((cx + R * Math.sin(angle)).toFixed(6)),
-      toolY_in: Number((cy + R * Math.cos(angle)).toFixed(6)),
+      sheetX_in: Number(sheetX.toFixed(6)),
+      toolY_in: Number(toolY.toFixed(6)),
       depthZ_in: routeDepthIn,
       geometryAxisZ: false,
     });

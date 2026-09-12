@@ -19,7 +19,7 @@ npm start
 Fixed origin: `http://localhost:4317`
 
 ```text
-STB_STORE_ZERO_ROOT=<clean scan-to-build-store at 49d22ce40482a7c2e0169ac1e6df48e0f8384a6d> npm start
+STB_STORE_ZERO_ROOT=<clean scan-to-build-store at ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee> npm start
 ```
 
 Suites: `test:unit`, `test:browser`, `test:boundaries`, and with the Store pin `test:store` / `test:vertical`.

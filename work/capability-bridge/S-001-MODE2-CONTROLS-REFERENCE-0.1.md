@@ -3,7 +3,7 @@
 **Status:** REFERENCE controls stack under the already-declared Mode-2 kinematic contract  
 **Evidence class:** REFERENCE  
 **Physical status:** NOT CLAIMED  
-**Does not replace:** Store pin `732f6b7a`, `SHEET_MODE2_STENCIL_V1`, `SHEET_MODE2_ARCHED_APERTURE_V0`, or the kinematic pages
+**Does not replace:** Store pin `ca6a6e01`, `SHEET_MODE2_STENCIL_V1`, `SHEET_MODE2_ARCHED_APERTURE_V0`, or the kinematic pages
 
 The Mode-2 REFERENCE machine can be implemented with commercially obtainable closed-loop servo hardware, deterministic local motion-control hardware, and an inspectable open-source control environment capable of coordinated X/Y interpolation; application and Store remain upstream and machine-neutral, while safety functions remain independently engineered.
 

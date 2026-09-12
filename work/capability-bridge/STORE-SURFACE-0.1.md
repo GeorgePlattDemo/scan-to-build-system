@@ -2,7 +2,8 @@
 
 **Status:** Mode-2 sheet offering added; Board path unchanged  
 **Evidence class:** DOCUMENTED publication map over REFERENCE models  
-**Store consumed by the app for Board + Mode-2 sheet:** pin `732f6b7a98362871d8ee6c94f87ba90fb37b6f76`  
+**Store consumed by the app for Board + Mode-2 sheet:** pin `ca6a6e01179f1e099d57d819ffdaccc0ee8a5aee`  
+**Prior arched-family pin:** `732f6b7a98362871d8ee6c94f87ba90fb37b6f76`  
 **Prior Mode-2 stencil pin:** `49d22ce40482a7c2e0169ac1e6df48e0f8384a6d`
 
 This file is what Store 1 may say. It is not a new Store implementation beyond the pinned evaluator.
@@ -48,7 +49,7 @@ Replaces the unpublished beginning-stage row `SHEET-RECT-BLANK-V0` as the callab
 | --- | --- |
 | Stock form | sheet goods |
 | Operation | `ROUTE_PROFILE` + `RETAIN_TABS` |
-| Profile kinds | `STRAIGHT_RECT`, `CURVILINEAR_OUTLINE` |
+| Profile kinds | `STRAIGHT_RECT`; generic `CURVILINEAR_OUTLINE` is retained demand but remains `UNRESOLVED` without reconstructable curve geometry |
 | Envelope | parent 48×96 in first; min blank 6 in; max route depth 0.75 in |
 | Neutral packet | LOAD → SEAT → REGISTER → ROUTE_PROFILE → RETAIN_TABS → RELEASE → SECONDARY_SEPARATION → LABEL |
 | App fact | `sheet.mode2.stencil.v1` / request type `SHEET_MODE2_STENCIL_V1` |
@@ -59,7 +60,7 @@ Replaces the unpublished beginning-stage row `SHEET-RECT-BLANK-V0` as the callab
 
 ## 3a. Live family `SHEET_MODE2_ARCHED_APERTURE_V0`
 
-**Status:** live REFERENCE Store request type. First published curvilinear family. Not the entire Mode-2 disclosure.
+**Status:** live REFERENCE Store request type. First published reconstructable curvilinear family. Not the entire Mode-2 disclosure.
 
 This is how “curvilinear” becomes a number Store can refuse.
 
@@ -76,8 +77,7 @@ This is how “curvilinear” becomes a number Store can refuse.
 | Machine fact | REFERENCE |
 | Physical fact | NOT CLAIMED |
 
-Do not mark live `CURVILINEAR_OUTLINE` flag jobs as this family. The flag is not the segment.
-
+Do not mark generic `CURVILINEAR_OUTLINE` flag jobs as this family. The flag is not the segment and does not earn `SUPPORTABLE` by itself.
 
 ## 4. How the application should call this
 
@@ -100,6 +100,6 @@ A later cell document may cite both rows. It may not invent tandem execution, sh
 ## 6. Sources used
 
 - accepted app Store protocol notes @ `4595b478`
-- Stage-2 Store pins `b40cdc60` (Board ancestor) and `49d22ce4` (Mode-2 added)
+- Stage-2 Store pins `b40cdc60` (Board ancestor), `49d22ce4` (Mode-2 stencil added), `732f6b7a` (arched family added), and `ca6a6e01` (generic curvilinear support tightened)
 - dimensional and sheet model files in this folder
 - Atlas Bridge §3–4
