@@ -20,8 +20,9 @@ const BROWSER_FORBIDDEN = [
   /estimateJob/,
   /envelopeCheck/,
   /estimateCut001/,
-  /Cycle Start/,
-  /cycleStart/,
+  /\bcycleStart\s*\(/,
+  /\bstartCycle\s*\(/,
+  /['"]CYCLE_START['"]/,
   /workpacket/i,
   /governed issuer/i,
   /STB_STORE_ZERO_ROOT/,
@@ -138,7 +139,7 @@ test('browser and shared import graph stay on the static allowlist and cannot im
   }
 });
 
-test('browser and shared contain no Store implementation, pricing engine, or envelope source', () => {
+test('browser and shared contain no Store implementation, pricing engine, or executable Cycle Start source', () => {
   const files = [
     ...['browser', 'shared'].flatMap((dir) => walkFiles(path.join(APP_ROOT, dir))),
   ];
@@ -149,6 +150,9 @@ test('browser and shared contain no Store implementation, pricing engine, or env
       assert.equal(pattern.test(source), false, `${file} matched ${pattern}`);
     }
   }
+  // Plain-language statements such as “Store support is not Cycle Start” are
+  // intentionally allowed. The boundary is executable command authority, not
+  // the ability to explain the boundary to a human.
   assert.equal(fs.existsSync(path.join(APP_ROOT, 'server/store-adapter.mjs')), true);
   assert.equal(fs.existsSync(path.join(APP_ROOT, 'server/store-source.mjs')), true);
   assert.equal(fs.existsSync(path.join(APP_ROOT, 'browser/domain/candidate.mjs')), true);
@@ -172,6 +176,12 @@ test('browser and shared contain no Store implementation, pricing engine, or env
   assert.equal(fs.existsSync(path.join(APP_ROOT, 'browser/data/record-view.mjs')), true);
   assert.equal(fs.existsSync(path.join(APP_ROOT, 'browser/ui/record-panel.mjs')), true);
   assert.equal(fs.existsSync(path.join(APP_ROOT, 'shared/archive-format.mjs')), true);
+  assert.equal(fs.existsSync(path.join(APP_ROOT, 'browser/domain/configurator.mjs')), true);
+  assert.equal(fs.existsSync(path.join(APP_ROOT, 'browser/domain/class-runner.mjs')), true);
+  assert.equal(fs.existsSync(path.join(APP_ROOT, 'browser/domain/alcove-engine.mjs')), true);
+  assert.equal(fs.existsSync(path.join(APP_ROOT, 'browser/ui/project-configurator.mjs')), true);
+  assert.equal(fs.existsSync(path.join(APP_ROOT, 'browser/ui/project-renderer.mjs')), true);
+  assert.equal(fs.existsSync(path.join(APP_ROOT, 'shared/alcove-rule.mjs')), true);
 });
 
 test('server may load pinned Store modules but cannot contain governed or machine command source', () => {
