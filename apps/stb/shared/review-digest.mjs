@@ -2,7 +2,7 @@ import { REVIEW_DIGEST_VERSION } from './contracts.mjs';
 import { digestCanonical } from './store-wire.mjs';
 
 function sortedCopy(values) {
-  return [...values].sort();
+  return [...new Set(values)].sort();
 }
 
 function sortedObjects(values) {
@@ -76,6 +76,9 @@ export function collectUnresolvedConditions({
   if (imported) {
     conditions.push('imported-inert');
   }
+  for (const item of projection?.payload?.unresolvedConditions ?? []) {
+    if (item) conditions.push(item);
+  }
   if (!projection || projection.payload?.valid !== true) {
     conditions.push(projection?.payload?.unresolvedReason ?? 'incomplete-requirement');
   }
@@ -105,12 +108,23 @@ export function collectUnresolvedConditions({
 
 export function collectDisclosures({ projection, storeView, documentaryReference } = {}) {
   const disclosures = [
-    'Recording this review affirms the intended definition and acknowledges the displayed Store basis.',
+    'Recording this review affirms the intended definition and displayed evidence basis.',
     'This review does not place an order, reserve inventory, authorize fabrication, or start a machine.',
-    'Stage-2 SUPPORTABLE is not machine approval, production readiness, or fabrication authorization.',
-    'Budgetary Q is not a quote, sale price, or reservation.',
-    'Fixture stock is declared reference information, not a live inventory count.',
   ];
+  const definitionKind = projection?.payload?.definitionKind ?? null;
+  if (definitionKind === 'board.square.v1') {
+    disclosures.push(
+      'Stage-2 SUPPORTABLE is not machine approval, production readiness, or fabrication authorization.',
+      'Budgetary Q is not a quote, sale price, or reservation.',
+      'Fixture stock is declared reference information, not a live inventory count.',
+    );
+  }
+  if (projection?.payload?.classId === 'alcove-shelf-blanks') {
+    disclosures.push(
+      'Alcove arithmetic does not establish structural adequacy, shelf elevations, installation design, Store support, or production eligibility.',
+      'The displayed simulate_crosscut → simulate_shelf_blank sequence is reference context only, not an application-issued process plan or machine instruction.',
+    );
+  }
   if (documentaryReference?.id === 'CUT-001' || projection?.payload?.source?.method === 'documentary-reference') {
     disclosures.push(
       'CUT-001 documentary reference is not Store support, machine commissioning, or fabrication authorization.',
