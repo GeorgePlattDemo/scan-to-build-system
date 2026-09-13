@@ -3,6 +3,8 @@
 
 # Scan-to-Build (`apps/stb`)
 
+<a href="http://localhost:4317/"><kbd>← BACK TO WORKING APP</kbd></a>
+
 Local application subtree.
 
 Checkpoints complete here:
