@@ -21,19 +21,21 @@ PRIMARY MACHINE OPERATIONS
         ↓
 MACHINE OUTCOME
         ↓
-SECONDARY OPERATIONS / ASSIGNMENTS
+SELECTIVE SECONDARY OPERATIONS / ASSIGNMENTS
         ↓
 INSPECTION / COMPLETION CHECK
         ↓
-LABEL
+MANDATORY IDENTIFICATION / LABEL
         ↓
 STAGE
         ↓
-PICKUP or DELIVERY
+PICKUP READY or DELIVERY ARRANGED
+        ↓
+CLOSEOUT PACKET PREPARED
         ↓
 CUSTODY TRANSFER
         ↓
-PROJECT CLOSEOUT RECORD
+PROJECT CLOSED
 ```
 
 This path does not broaden Store support, machine envelopes, controller authority, or physical execution authority.
@@ -59,7 +61,40 @@ The residual operation must then receive an explicit completion disposition.
 
 No machine limitation may disappear by wording.
 
-## 3. Two decisions are required for a residual operation
+## 3. Secondary operations are selective
+
+A secondary operation appears only when the actual project/result creates a real residual operation.
+
+It is not a generic finishing checklist.
+
+Current admitted residual classes are intentionally limited to:
+
+- `FINAL_DRILL_TO_DIAMETER` — D-001 only;
+- `REMOVE_RETAINED_TABS` — S-001 only.
+
+No sanding, countersink, edge treatment, finishing, assembly, or other secondary service is implied by the existence of the completion layer.
+
+No secondary option is auto-selected.
+
+## 4. Current machine-family boundary
+
+### D-001
+
+Drilling/pilot work belongs to the dimensional-machine family in this round.
+
+A D-001 result may explicitly say that a smaller pilot/spot was produced while a larger finished hole remains.
+
+### S-001
+
+S-001 drilling is **not admitted this round**.
+
+The current S-001 residual operation is retained-tab separation only.
+
+A tabbed part may be handed off with tab removal assigned to the customer or a third party, or the customer may select yard removal when an actual yard service is offered and the cell steward accepts it.
+
+The completion layer must not reinterpret a future sheet-drilling idea as current S-001 capability.
+
+## 5. Two decisions are required for a residual operation
 
 A secondary operation is not resolved merely because the customer clicks an option.
 
@@ -97,15 +132,15 @@ or:
 
 For yard-performed secondary work, an actual declared secondary-service reference is required. The completion layer may not invent one.
 
-## 4. Authority model
+## 6. Authority model
 
 The current application contract uses three roles.
 
 | Role | Positive authority | Explicitly not allowed |
 | --- | --- | --- |
 | **CUSTOMER** | choose or decline an offered secondary-completion option | Store override, machine override, yard acceptance, closeout promotion, physical execution authority |
-| **CELL_STEWARD** | accept/reject completion plan; accept/reject declared yard secondary service; confirm secondary completion; confirm labels; stage; record custody transfer; close project | Store override, envelope widening, unsafe bypass, controller-program invention |
-| **OPERATOR** | **STOP WORK** and **REPORT CONDITION** only | reinterpret job, substitute operation, change tool requirement, accept customer choice, accept/reject completion plan, change Store answer, change price, waive gate, mark final completion, stage, transfer custody, close project, authorize machine capability |
+| **CELL_STEWARD** | accept/reject completion plan; accept/reject declared yard secondary service; confirm secondary completion; record inspection; confirm label applied; stage; mark pickup ready or delivery arranged; prepare closeout record; record custody transfer; close project | Store override, envelope widening, unsafe bypass, controller-program invention |
+| **OPERATOR** | **STOP WORK** and **REPORT CONDITION** only | reinterpret job, substitute operation, change tool requirement, accept customer choice, accept/reject completion plan, change Store answer, change price, waive gate, promote inspection/label/staging/fulfillment/closeout state, transfer custody, authorize machine capability |
 
 A yard owner may hold or delegate the `CELL_STEWARD` role.
 
@@ -117,9 +152,9 @@ The operator boundary is intentionally firm:
 
 > **An operator may stop or report. An operator may not promote state.**
 
-If an operator performs physical work under an already accepted and released local process, that fact may be observed/reported. The authoritative transition to `secondary complete`, `staged`, `ready`, `custody transferred`, or `closed` belongs to the cell steward or to a separately approved self-verifying system rule. No such automatic promotion rule is activated by this document.
+An operator may physically perform prescribed work under an already accepted and released local process, including attaching a prescribed identification label. That does not grant the operator authority to mark the authoritative project state as inspected, labeled, staged, ready, transferred, or closed.
 
-## 5. Store firewall
+## 7. Store firewall
 
 The completion path is downstream of the Store decision.
 
@@ -137,10 +172,10 @@ that split must be explicit in the project/completion definition. It must not be
 
 Examples:
 
-- permitted: Store supports the declared `3/16 in PILOT_DRILL`; completion plan separately carries `FINAL_DRILL_TO_3/8`;
+- permitted: Store supports the declared `3/16 in PILOT_DRILL`; completion plan separately carries `FINAL_DRILL_TO_DIAMETER`;
 - not permitted: Store refuses `DRILL_3/8`, then the application silently calls the refused job `SUPPORTABLE` because a person could drill it later.
 
-## 6. Completion line
+## 8. Completion line
 
 Each required feature or operation that reaches completion planning should retain at least:
 
@@ -169,7 +204,7 @@ Expected final line dispositions are:
 
 `ASSIGNED_TO_CUSTOMER` does not mean the physical feature is complete. It means the yard and customer have explicitly accepted that the remaining work transfers with custody.
 
-## 7. Completion gate
+## 9. Completion gate
 
 A project is not ready for handoff until all required lines have a permitted, accepted disposition and the non-machining closeout work is complete.
 
@@ -188,7 +223,11 @@ Required yard secondary work complete?
 NO → BLOCK
 YES ↓
 
-Labels applied?
+Inspection recorded?
+NO → BLOCK
+YES ↓
+
+Required identity label applied?
 NO → BLOCK
 YES ↓
 
@@ -209,9 +248,15 @@ READY FOR HANDOFF
 
 Custody transfer changes the project from `READY_FOR_HANDOFF` to `CLOSED`.
 
-## 8. Labels
+`STAGED`, `PICKUP_READY`, `DELIVERY_ARRANGED`, and `CLOSEOUT_RECORD_PREPARED` are distinct steward transitions. None silently implies another.
 
-Physical parts should use the custom-paint-can model: every physical object or package carries enough identity to bind the atoms back to the durable project record.
+## 10. Labels are operationally required
+
+Labeling is not a selectable secondary operation.
+
+Every physical part or package leaving the primary cell stream must carry enough identity to bind the atoms back to the durable project record.
+
+This follows the custom-paint-can model: the physical object should not become anonymous once it leaves the machine.
 
 Minimum useful label fields:
 
@@ -237,7 +282,7 @@ Those belong in the commercial/custody record, not on every part.
 
 A QR code or equivalent reference should resolve to the owner/project record. It should not be treated as the record itself.
 
-## 9. Staging and fulfillment
+## 11. Staging and fulfillment
 
 A completed part is not automatically a completed handoff.
 
@@ -246,13 +291,14 @@ The closeout path distinguishes:
 - `STAGED`;
 - `PICKUP_READY`;
 - `DELIVERY_ARRANGED`;
+- `CLOSEOUT_RECORD_PREPARED`;
 - `TRANSFERRED`.
 
 Pickup and delivery are fulfillment states, not machine states.
 
 If delivery is arranged, the delivery method/provider, grouping/package identity, and custody handoff should be recorded at the appropriate layer. This document does not invent a carrier integration or live delivery service.
 
-## 10. One closeout truth, two receipt depths
+## 12. One closeout truth, two receipt depths
 
 There should be one canonical project closeout record.
 
@@ -286,7 +332,7 @@ Recommended additional depth:
 
 The contractor profile does not create different manufacturing truth. It exposes more of the same record.
 
-## 11. Audit level
+## 13. Audit level
 
 The closeout audit should capture decisions and consequences, not machine microtelemetry.
 
@@ -313,23 +359,24 @@ closeout record identity
 
 Do not duplicate every sawblade rotation, servo sample, or controller event into the owner receipt. Machine execution evidence may remain in a downstream machine/outcome record and be bound by identity/digest when required.
 
-## 12. Implementation contract
+## 14. Implementation contract
 
-The executable application contract is:
+Executable application contracts:
 
-`apps/stb/shared/completion-contract.mjs`
+- `apps/stb/shared/completion-contract.mjs`
+- `apps/stb/shared/secondary-operation-library.mjs`
+- `apps/stb/shared/completion-from-result.mjs`
 
-It currently establishes:
+The published-job Store adapter now carries a bounded `completionPreview` derived from the actual Store answer.
 
-- role/action authority matrix;
-- explicit partial-operation handling;
-- customer then steward decision sequence;
-- yard-secondary service reference requirement;
-- Store-refusal firewall;
-- handoff and closeout gates;
-- part-label data contract;
-- individual/contractor receipt profiles;
-- operator `STOP/REPORT ONLY` rule.
+Current behavior:
+
+- S-001 retained tabs produce a selectable `REMOVE_RETAINED_TABS` residual line;
+- S-001 drilling is refused at the completion-family boundary for this round;
+- D-001 square cutting does not invent a secondary operation;
+- a future actual D-001 pilot result can produce `FINAL_DRILL_TO_DIAMETER` only when the finished diameter is larger than the pilot;
+- all physical parts/packages require identification labeling;
+- no completion record creates Store, machine, controller, or physical execution authority.
 
 This does not yet create controller authority, order/payment capability, a live yard service catalog, carrier integration, or physical commissioning.
 
