@@ -7,6 +7,12 @@
 
 **This document is not structural approval, code approval, a commercial offer, production release, machine commissioning, or evidence that a physical cell ran this job.**
 
+## Current implementation boundary
+
+The current candidate application does **not** yet register a live window-seat project class, execute the Project B gate set, route qualified human review, or issue a dual-stream production packet. This document is the ordered experience/architecture bridge that a later implementation may test against.
+
+The current app may demonstrate the common intake pieces that such a project would use — retained source evidence, entered observations, versioned candidate work, mapped project configuration, Review, and owner-record concepts — but it shall not present the historical window-seat outcome as something this build can presently execute.
+
 ## Why this example belongs near the front
 
 The simple Board example proves that one bounded requirement can stay attached to its basis. The picnic-table candidate proves that a second project class can reuse a configurator without inventing Store, structural, or machine authority.
