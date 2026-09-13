@@ -24,9 +24,9 @@ async function git(root, args) {
 }
 
 async function requirePinnedStore(root) {
-  if (!root) throw new Error('STB_STORE_ZERO_ROOT is required');
+  if (!root) throw new Error('STB_STORE_PUBLISHED_JOBS_ROOT is required');
   const stat = await fs.stat(root).catch(() => null);
-  if (!stat?.isDirectory()) throw new Error('STB_STORE_ZERO_ROOT is not a directory');
+  if (!stat?.isDirectory()) throw new Error('STB_STORE_PUBLISHED_JOBS_ROOT is not a directory');
   const head = await git(root, ['rev-parse', 'HEAD']).catch(() => null);
   if (!head) throw new Error('Store checkout is not a git repository');
   if (head !== PUBLISHED_JOB_STORE_PIN) {
@@ -95,7 +95,7 @@ function selectedJobs(argv) {
 }
 
 async function main() {
-  const modulePath = await requirePinnedStore(process.env.STB_STORE_ZERO_ROOT);
+  const modulePath = await requirePinnedStore(process.env.STB_STORE_PUBLISHED_JOBS_ROOT);
   const store = await import(pathToFileURL(modulePath).href);
   requireStoreExports(store);
   const catalog = store.loadCatalog();
