@@ -15,8 +15,10 @@ test('open-door launcher routes broad starting material into existing bounded in
 
   const door = page.locator('[data-open-door="true"]');
   await expect(door).toBeVisible();
-  await expect(door.locator('[data-open-door-child]')).toHaveCount(8);
+  await expect(door.locator('[data-open-door-child]')).toHaveCount(9);
   await expect(door).toContainText('Bring more than one');
+  await expect(door).toContainText('Use the least that works');
+  await expect(door.locator('[data-open-door-child="board"]')).toBeVisible();
 
   await door.getByRole('button', { name: /Attach a drawing or PDF/ }).click();
   await expect(page.locator('[data-child-panel="drawing"]')).toBeVisible();
