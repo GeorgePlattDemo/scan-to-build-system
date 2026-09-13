@@ -3,7 +3,7 @@ import {
   S001_CENTERED_ARCH_DEFAULTS,
   S001_CENTERED_ARCH_FIXED,
   deriveS001CenteredArchGeometry,
-} from '../shared/s001-centered-arch.mjs';
+} from '../shared/class-config.mjs';
 
 export const PUBLISHED_JOB_STORE_PIN = '4402abeb6b0299a5b6db2eec85ed04c3b0236bcc';
 export const PUBLISHED_JOB_STORE_REPOSITORY = 'GeorgePlattDemo/scan-to-build-store';
