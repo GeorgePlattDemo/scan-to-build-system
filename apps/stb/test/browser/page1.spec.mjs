@@ -46,7 +46,7 @@ test('P1-02 mapped start creates one project and opens bounded-question context'
   await openBegin(page);
   await page.getByRole('button', { name: COPY.chooseMapped }).click();
   await expect(page.getByRole('button', { name: CLASS_REFERENCES[0].label })).toBeVisible();
-  await expect(page.getByText(COPY.mappedStatus, { exact: true })).toBeVisible();
+  await expect(page.getByText(COPY.mappedStatus, { exact: true })).toHaveCount(CLASS_REFERENCES.length);
   const before = requireOk(await repoCall(page, 'listSaved'), 'before');
   expect(before).toHaveLength(0);
   await page.getByRole('button', { name: CLASS_REFERENCES[0].label }).click();
