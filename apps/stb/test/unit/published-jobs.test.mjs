@@ -5,6 +5,7 @@ import {
   PUBLISHED_JOBS,
   PUBLISHED_JOB_STORE_PIN,
   buildPublishedJobSpec,
+  deriveCenteredArchedProjectGeometry,
   normalizePublishedJobInputs,
   publishedJob,
 } from '../../ops/published-jobs.mjs';
@@ -35,15 +36,18 @@ test('published defaults are human numbers, with fixed Store policy kept separat
   });
   assert.deepEqual(publishedJob('arched-opening').defaults, {
     openingWidthIn: 36,
-    straightHeightIn: 36,
+    straightHeightIn: 24,
     riseIn: 12,
   });
   assert.deepEqual(publishedJob('arched-opening').fixed, {
-    outerL_in: 72,
+    outerL_in: 96,
     outerW_in: 48,
+    placement: 'CENTERED_ON_PARENT',
     tabCount: 4,
     routeDepthIn: 0.5,
   });
+  assert.equal(publishedJob('arched-opening').projectClassId, 'S001_CENTERED_ARCHED_SHEET_V0');
+  assert.equal(publishedJob('arched-opening').projectRole, 'CANONICAL_S001_BOUNDED_PROJECT');
 });
 
 test('rect human inputs map only to Store blank dimensions', () => {
@@ -61,7 +65,41 @@ test('rect human inputs map only to Store blank dimensions', () => {
   });
 });
 
-test('arch sends opening width as chord and does not derive or transmit radius', () => {
+test('canonical arch centers a 36 x 36 overall opening on the full 48 x 96 sheet', () => {
+  const job = publishedJob('arched-opening');
+  const geometry = deriveCenteredArchedProjectGeometry(job);
+  assert.deepEqual(geometry.parent, { lengthIn: 96, widthIn: 48 });
+  assert.deepEqual(geometry.opening, {
+    widthIn: 36,
+    straightHeightIn: 24,
+    riseIn: 12,
+    totalHeightIn: 36,
+  });
+  assert.deepEqual(geometry.offsets, {
+    leftIn: 6,
+    rightIn: 6,
+    bottomIn: 30,
+    topIn: 30,
+  });
+  assert.equal(geometry.placement, 'CENTERED_ON_PARENT');
+  assert.equal(geometry.basis, 'PROJECT_CLASS_DERIVATION');
+  assert.equal(geometry.storeCapabilityClaim, false);
+});
+
+test('centered geometry does not clamp a bad demand before Store evaluates it', () => {
+  const job = publishedJob('arched-opening');
+  const geometry = deriveCenteredArchedProjectGeometry(job, {
+    openingWidthIn: 60,
+    straightHeightIn: 90,
+    riseIn: 20,
+  });
+  assert.equal(geometry.offsets.leftIn, -6);
+  assert.equal(geometry.offsets.rightIn, -6);
+  assert.equal(geometry.offsets.topIn, -7);
+  assert.equal(geometry.offsets.bottomIn, -7);
+});
+
+test('arch sends full-sheet bounds and opening width as chord and does not derive or transmit radius', () => {
   const job = publishedJob('arched-opening');
   const spec = buildPublishedJobSpec(job, {
     openingWidthIn: 40,
@@ -72,7 +110,7 @@ test('arch sends opening width as chord and does not derive or transmit radius',
   assert.deepEqual(spec.evaluation.line, {
     storeSku: 'STB-ZERO-PLY-050-48X96-001',
     qty: 1,
-    outerL_in: 72,
+    outerL_in: 96,
     outerW_in: 48,
     apertureW_in: 40,
     apertureStraightH_in: 30,
@@ -81,8 +119,15 @@ test('arch sends opening width as chord and does not derive or transmit radius',
     tabCount: 4,
     routeDepthIn: 0.5,
   });
+  assert.deepEqual(spec.projectGeometry.offsets, {
+    leftIn: 4,
+    rightIn: 4,
+    bottomIn: 28,
+    topIn: 28,
+  });
   assert.equal('arcRadius_in' in spec.evaluation.line, false);
   assert.equal('geometryClass' in spec.evaluation.line, false);
+  assert.equal('placement' in spec.evaluation.line, false);
 });
 
 test('published input schema rejects missing, extra, and non-finite values without Store range clamping', () => {
