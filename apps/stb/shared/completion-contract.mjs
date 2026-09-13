@@ -44,6 +44,12 @@ export const COMPLETION_PLAN_STATUS = Object.freeze({
   CLOSED: 'CLOSED',
 });
 
+export const COMPLETION_RECORD_TYPES = Object.freeze({
+  PLAN: 'CompletionPlanRecorded',
+  DECISION: 'CompletionDecisionRecorded',
+  CLOSEOUT: 'ProjectCloseoutRecorded',
+});
+
 export const RECEIPT_PROFILES = Object.freeze({
   INDIVIDUAL: 'INDIVIDUAL',
   CONTRACTOR: 'CONTRACTOR',
@@ -87,6 +93,12 @@ function finitePositive(value) {
 
 function uniqueStrings(values) {
   return [...new Set((Array.isArray(values) ? values : []).filter((value) => string(value)))];
+}
+
+function requiredString(name, value) {
+  const normalized = string(value);
+  if (!normalized) throw new TypeError(`${name} is required`);
+  return normalized;
 }
 
 export function pilotToFinalHoleExample() {
@@ -212,7 +224,10 @@ export function evaluateCompletionPlan(plan) {
   const lines = (Array.isArray(plan.lines) ? plan.lines : []).map(evaluateCompletionLine);
   if (lines.length === 0) reasons.push('COMPLETION_LINES_MISSING');
 
-  const customerDecisionPending = lines.some((line) => line.reasons.includes('CUSTOMER_DECISION_REQUIRED'));
+  const customerDecisionPending = lines.some((line) =>
+    line.reasons.includes('SECONDARY_OPTION_NOT_SELECTED')
+    || line.reasons.includes('CUSTOMER_DECISION_REQUIRED'),
+  );
   const stewardDecisionPending = lines.some((line) => line.reasons.includes('STEWARD_DECISION_REQUIRED'));
   const yardWorkPending = lines.some((line) => line.reasons.includes('YARD_SECONDARY_WORK_PENDING'));
   const lineBlocked = lines.some((line) =>
@@ -246,6 +261,97 @@ export function evaluateCompletionPlan(plan) {
   };
 }
 
+export function buildCompletionDecision(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new TypeError('completion decision input must be an object');
+  }
+  const role = requiredString('role', input.role);
+  const action = requiredString('action', input.action);
+  if (!roleCan(role, action)) {
+    throw new TypeError(`${role} is not permitted to perform ${action}`);
+  }
+  return Object.freeze({
+    recordType: COMPLETION_RECORD_TYPES.DECISION,
+    decisionId: requiredString('decisionId', input.decisionId),
+    projectId: requiredString('projectId', input.projectId),
+    candidateRevisionId: requiredString('candidateRevisionId', input.candidateRevisionId),
+    completionPlanId: requiredString('completionPlanId', input.completionPlanId),
+    lineId: string(input.lineId),
+    role,
+    actorRef: string(input.actorRef),
+    action,
+    selectedOption: string(input.selectedOption),
+    secondaryServiceRef: string(input.secondaryServiceRef),
+    reason: string(input.reason),
+    createdAt: requiredString('createdAt', input.createdAt),
+    changesStoreDisposition: false,
+    changesMachineEnvelope: false,
+    physicalExecutionAuthority: false,
+  });
+}
+
+export function buildCompletionPlanRecord(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new TypeError('completion plan input must be an object');
+  }
+  const lines = Array.isArray(input.lines) ? input.lines.map((line) => ({ ...line })) : [];
+  return Object.freeze({
+    recordType: COMPLETION_RECORD_TYPES.PLAN,
+    completionPlanVersion: 'STB-COMPLETION-PLAN-0.1',
+    completionPlanId: requiredString('completionPlanId', input.completionPlanId),
+    projectId: requiredString('projectId', input.projectId),
+    candidateRevisionId: requiredString('candidateRevisionId', input.candidateRevisionId),
+    reviewId: string(input.reviewId),
+    storeRequestId: string(input.storeRequestId),
+    storeResponseId: string(input.storeResponseId),
+    storeDisposition: requiredString('storeDisposition', input.storeDisposition),
+    lines,
+    labelingStatus: string(input.labelingStatus) ?? 'NOT_STARTED',
+    stagingStatus: string(input.stagingStatus) ?? 'NOT_STARTED',
+    fulfillmentStatus: string(input.fulfillmentStatus) ?? 'NOT_READY',
+    closeoutRecordStatus: string(input.closeoutRecordStatus) ?? 'NOT_PREPARED',
+    custodyStatus: string(input.custodyStatus) ?? 'NOT_TRANSFERRED',
+    createdAt: requiredString('createdAt', input.createdAt),
+    authority: false,
+    commercialAuthority: false,
+    physicalExecutionAuthority: false,
+    operatorMayPromote: false,
+  });
+}
+
+export function buildCloseoutRecord(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new TypeError('closeout input must be an object');
+  }
+  const evaluation = evaluateCompletionPlan(input.plan);
+  if (!evaluation.closeoutReady) {
+    throw new TypeError('closeout requires a completion plan with transferred custody');
+  }
+  return Object.freeze({
+    recordType: COMPLETION_RECORD_TYPES.CLOSEOUT,
+    closeoutVersion: 'STB-PROJECT-CLOSEOUT-0.1',
+    closeoutId: requiredString('closeoutId', input.closeoutId),
+    projectId: requiredString('projectId', input.projectId),
+    candidateRevisionId: requiredString('candidateRevisionId', input.candidateRevisionId),
+    completionPlanId: requiredString('completionPlanId', input.completionPlanId),
+    labelIds: uniqueStrings(input.labelIds),
+    packageIds: uniqueStrings(input.packageIds),
+    receiptProfiles: uniqueStrings(input.receiptProfiles),
+    custody: Object.freeze({
+      status: 'TRANSFERRED',
+      method: requiredString('custody.method', input.custody?.method),
+      transferredAt: requiredString('custody.transferredAt', input.custody?.transferredAt),
+      handoffRef: string(input.custody?.handoffRef),
+    }),
+    exceptions: uniqueStrings(input.exceptions),
+    recordRef: requiredString('recordRef', input.recordRef),
+    createdAt: requiredString('createdAt', input.createdAt),
+    authority: false,
+    physicalExecutionAuthority: false,
+    operatorMayPromote: false,
+  });
+}
+
 export function buildPartLabel(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
     throw new TypeError('label input must be an object');
@@ -265,7 +371,6 @@ export function buildPartLabel(input) {
     secondaryStatus: string(input.secondaryStatus),
     handoffStatus: string(input.handoffStatus),
     recordRef: input.recordRef,
-    // Deliberately excluded from the physical part label by default:
     customerName: null,
     customerAddress: null,
     price: null,
