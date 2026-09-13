@@ -52,7 +52,7 @@ test('P1-02 mapped start creates one project and opens bounded-question context'
   await page.getByRole('button', { name: CLASS_REFERENCES[0].label }).click();
   await expect(page.locator('[data-screen="questions"]')).toBeVisible();
   await expect(page.getByRole('heading', { name: COPY.questionsHeading })).toBeVisible();
-  await expect(page.getByText(COPY.questionsStatus, { exact: true })).toBeVisible();
+  await expect(page.locator('[data-project-configurator="alcove-shelf-blanks"]')).toBeVisible();
   expect(page.url()).toContain('view=questions');
   const saved = requireOk(await repoCall(page, 'listSaved'), 'after');
   expect(saved).toHaveLength(1);
