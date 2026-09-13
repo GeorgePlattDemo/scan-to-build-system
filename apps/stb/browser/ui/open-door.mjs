@@ -28,20 +28,29 @@ const PUBLISHED_STARTS = Object.freeze([
   Object.freeze({
     id: 'rect-stencil',
     label: 'Rectangular sheet stencil',
-    detail: '3/4 in ACX-sanded sheet reference. Published reference blank: 24 × 18 in.',
+    detail: '3/4 in ACX-sanded sheet reference. Change only the blank length and width.',
     basis: 'STB-ZERO-PLY-075-48X96-001 · SHEET_MODE2_STENCIL_V1',
-    defaults: 'Reference implementation uses 4 retained tabs and 0.5 in route depth.',
+    defaults: 'Starts at 24 × 18 in. Store checks minimum blank size and parent-sheet bounds. Four retained tabs and 0.5 in route depth stay fixed.',
     state: 'candidate',
-    button: 'ASK STORE ABOUT THIS SHAPE',
+    button: 'ASK STORE',
+    fields: Object.freeze([
+      Object.freeze({ key: 'lengthIn', label: 'Length (in)', value: 24 }),
+      Object.freeze({ key: 'widthIn', label: 'Width (in)', value: 18 }),
+    ]),
   }),
   Object.freeze({
     id: 'arched-opening',
     label: 'Arched opening in 1/2 in plywood',
-    detail: 'Reference outer panel 48 × 72 in. Opening 36 in wide, 36 in straight height, 12 in rise.',
+    detail: 'Reference outer panel stays 48 × 72 in. Change only the opening width, straight height, and rise.',
     basis: 'STB-ZERO-PLY-050-48X96-001 · SHEET_MODE2_ARCHED_APERTURE_V0',
-    defaults: '36 in chord + 12 in rise → 19.5 in radius.',
+    defaults: 'Starts at 36 in wide, 36 in straight height, 12 in rise. Store derives radius and checks margins and tab planning.',
     state: 'candidate',
-    button: 'ASK STORE ABOUT THIS SHAPE',
+    button: 'ASK STORE',
+    fields: Object.freeze([
+      Object.freeze({ key: 'openingWidthIn', label: 'Opening width (in)', value: 36 }),
+      Object.freeze({ key: 'straightHeightIn', label: 'Straight height (in)', value: 36 }),
+      Object.freeze({ key: 'riseIn', label: 'Rise (in)', value: 12 }),
+    ]),
   }),
 ]);
 
@@ -76,6 +85,10 @@ function installStyle() {
     .open-door-action span,.published-card p{display:block;font-size:11.5px;line-height:1.4;color:#625c55;margin:3px 0}
     .published-card code{display:block;font-size:10px;line-height:1.35;white-space:normal;overflow-wrap:anywhere;margin:7px 0;color:#57534e}
     .published-card button{margin-top:8px;border:1px solid #cfc7bc;border-radius:999px;padding:6px 10px;background:#fff;color:inherit;font-size:10px;font-weight:700;letter-spacing:.04em}
+    .published-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:7px;margin:9px 0 4px}
+    .published-fields label{display:block;font-size:10px;color:#625c55}
+    .published-fields input{box-sizing:border-box;width:100%;margin-top:3px;padding:6px 7px;border:1px solid #cfc7bc;border-radius:7px;background:#fff;color:inherit;font:inherit}
+    .published-derived{font-size:10.5px!important;font-style:italic}
     .published-state,.open-door-status{display:inline-block;margin-top:6px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#7a7168}
     .published-state.connected{color:#416b46}
     .published-state.candidate,.open-door-status.planned{color:#8b6a3f}
@@ -87,9 +100,9 @@ function installStyle() {
     .open-door-minimum{margin:7px 0 0!important;font-size:11.5px!important}
     @media (prefers-color-scheme: dark){
       .published-starts,.open-door{background:#181613;border-color:#3c352c}
-      .published-starts>p,.open-door>p,.open-door-action span,.published-card p,.published-card code,.published-active span{color:#c8c0b5}
+      .published-starts>p,.open-door>p,.open-door-action span,.published-card p,.published-card code,.published-active span,.published-fields label{color:#c8c0b5}
       .published-card,.open-door-action,.published-boundary,.published-active{background:#201d18;border-color:#3c352c}
-      .published-card button{background:#181613;border-color:#5b5146}
+      .published-card button,.published-fields input{background:#181613;border-color:#5b5146}
     }
   `;
   document.head.append(style);
@@ -99,15 +112,42 @@ function cardStatus(child) {
   return INTAKE_CARDS.find((card) => card.id === child)?.status ?? 'active';
 }
 
+function buildPublishedFields(job) {
+  if (!job.fields) return null;
+  return node('div', { className: 'published-fields', attrs: { 'data-published-fields': job.id } }, job.fields.map((field) =>
+    node('label', { text: field.label }, [
+      node('input', {
+        attrs: {
+          type: 'number',
+          step: 'any',
+          value: field.value,
+          'data-published-input': field.key,
+          'aria-label': field.label,
+        },
+      }),
+    ]),
+  ));
+}
+
 function buildPublishedStarts() {
   return node('section', { className: 'published-starts', attrs: { 'data-published-starts': 'true' } }, [
     node('h2', { text: 'MAKE A SIMPLE SHAPE' }),
-    node('p', { text: 'Pick a named shape instead of starting with evaluator language. Square 2×4 uses the current app Store pin. The two sheet references can ask the exact isolated Store candidate when that checkout is deliberately mounted.' }),
-    node('div', { className: 'published-grid' }, PUBLISHED_STARTS.map((job) =>
-      node('article', { className: 'published-card', attrs: { 'data-published-job': job.id, 'data-published-state': job.state } }, [
+    node('p', { text: 'Pick a named shape instead of starting with evaluator language. Square 2×4 uses the current app Store pin. The two sheet shapes ask the exact isolated Store candidate when that checkout is deliberately mounted.' }),
+    node('div', { className: 'published-grid' }, PUBLISHED_STARTS.map((job) => {
+      const children = [
         node('h3', { text: job.label }),
         node('p', { text: job.detail }),
         node('p', { text: job.defaults }),
+      ];
+      const fields = buildPublishedFields(job);
+      if (fields) children.push(fields);
+      if (job.id === 'arched-opening') {
+        children.push(node('p', {
+          className: 'published-derived',
+          text: 'Radius is not calculated by the app. Store uses opening width as the chord, combines it with rise, and returns the derived radius.',
+        }));
+      }
+      children.push(
         node('code', { text: job.basis }),
         node('small', {
           className: `published-state ${job.state}`,
@@ -117,8 +157,12 @@ function buildPublishedStarts() {
           text: job.button,
           attrs: { type: 'button', 'data-published-start': job.id },
         }),
-      ]),
-    )),
+      );
+      return node('article', {
+        className: 'published-card',
+        attrs: { 'data-published-job': job.id, 'data-published-state': job.state },
+      }, children);
+    })),
     node('p', {
       className: 'published-boundary',
       attrs: { 'data-published-message': 'true' },
@@ -166,9 +210,9 @@ function showCandidateBoundary(root, id) {
   const message = root.querySelector('[data-published-message="true"]');
   if (!message) return;
   if (id === 'rect-stencil') {
-    message.textContent = `Rectangular sheet stencil is published on Store candidate ${STORE_CANDIDATE_BASIS}. The app will use only the isolated candidate trial endpoint; the current app Store pin remains ${STORE_PIN}.`;
+    message.textContent = `Rectangular sheet stencil is published on Store candidate ${STORE_CANDIDATE_BASIS}. Store—not the app—checks minimum blank size, parent-sheet bounds, tabs, and route depth. The current app Store pin remains ${STORE_PIN}.`;
   } else if (id === 'arched-opening') {
-    message.textContent = `Arched opening is published on Store candidate ${STORE_CANDIDATE_BASIS}; 36 in chord + 12 in rise derives 19.5 in radius. The current app Store pin remains ${STORE_PIN}.`;
+    message.textContent = `Arched opening is published on Store candidate ${STORE_CANDIDATE_BASIS}. Store derives the circular-segment radius and checks aperture margins and tab planning. The current app Store pin remains ${STORE_PIN}.`;
   }
 }
 
@@ -180,10 +224,29 @@ function publishedJobAnswerText(body) {
   const materialText = estimate?.Q != null
     ? ` Material-only reference: $${Number(estimate.Q).toFixed(2)}; process cost remains ${estimate.processQ_status ?? 'unresolved'}.`
     : '';
-  return `${body.label}: Store ${body.status}.${materialText} This is a Store answer only — no order, machine program, Cycle Start, or physical fabrication is authorized.`;
+  const issues = [...(body.reasons ?? []), ...(body.unresolved ?? [])];
+  const issueText = issues.length ? ` Store basis: ${issues.join(', ')}.` : '';
+  const envelopeText = body.envelope ? ` Envelope: ${body.envelope}.` : '';
+  const curveText = body.curve?.derivedRadius_in != null
+    ? ` ${body.curve.chord_in} in chord + ${body.curve.rise_in} in rise → Store-derived ${Number(body.curve.derivedRadius_in).toFixed(3).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1')} in radius.`
+    : '';
+  const tabText = body.retention?.plannedTabCount != null
+    ? ` Store tab plan: ${body.retention.plannedTabCount} retained tabs (${body.retention.tabPlanStatus ?? 'status not stated'}).`
+    : '';
+  return `${body.label}: Store ${body.status}.${envelopeText}${issueText}${curveText}${tabText}${materialText} This is a Store answer only — no order, machine program, Cycle Start, or physical fabrication is authorized.`;
 }
 
-async function runPublishedJobTrial(root, id) {
+function readPublishedInputs(card) {
+  const inputs = {};
+  for (const field of card.querySelectorAll('[data-published-input]')) {
+    const value = Number(field.value);
+    if (!Number.isFinite(value)) return null;
+    inputs[field.getAttribute('data-published-input')] = value;
+  }
+  return inputs;
+}
+
+async function runPublishedJobTrial(root, id, inputs) {
   const message = root.querySelector('[data-published-message="true"]');
   if (!message) return;
   message.textContent = 'Asking the exact published Store candidate…';
@@ -191,7 +254,7 @@ async function runPublishedJobTrial(root, id) {
     const response = await fetch(PUBLISHED_JOB_TRIAL_PATH, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jobId: id }),
+      body: JSON.stringify({ jobId: id, inputs }),
     });
     const body = await response.json().catch(() => null);
     message.textContent = publishedJobAnswerText(body);
@@ -255,7 +318,14 @@ export function startOpenDoorLayer(root) {
     }
     if (PUBLISHED_JOB_TRIAL_IDS.has(id)) {
       showCandidateBoundary(root, id);
-      runPublishedJobTrial(root, id);
+      const card = button.closest('[data-published-job]');
+      const inputs = card ? readPublishedInputs(card) : null;
+      if (!inputs) {
+        const message = root.querySelector('[data-published-message="true"]');
+        if (message) message.textContent = 'Enter a number in each field. No Store request was sent.';
+        return;
+      }
+      runPublishedJobTrial(root, id, inputs);
     }
   });
 

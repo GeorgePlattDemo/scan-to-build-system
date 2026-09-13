@@ -10,19 +10,48 @@ async function startOwnProject(page) {
   await expect(page.locator('[data-screen="hub"]')).toBeVisible();
 }
 
-test('published sheet jobs ask the isolated Store trial and invent nothing when it is not mounted', async ({ page }) => {
+test('published sheet jobs expose only human dimensions and fail closed when candidate Store is absent', async ({ page }) => {
   await startOwnProject(page);
 
-  const rect = page.locator('[data-published-start="rect-stencil"]');
-  const arch = page.locator('[data-published-start="arched-opening"]');
-  await expect(rect).toHaveText('ASK STORE ABOUT THIS SHAPE');
-  await expect(arch).toHaveText('ASK STORE ABOUT THIS SHAPE');
+  const rectCard = page.locator('[data-published-job="rect-stencil"]');
+  const archCard = page.locator('[data-published-job="arched-opening"]');
+  await expect(rectCard.getByRole('button', { name: 'ASK STORE' })).toBeVisible();
+  await expect(archCard.getByRole('button', { name: 'ASK STORE' })).toBeVisible();
 
-  await rect.click();
+  await expect(rectCard.getByLabel('Length (in)')).toHaveValue('24');
+  await expect(rectCard.getByLabel('Width (in)')).toHaveValue('18');
+  await rectCard.getByLabel('Length (in)').fill('30');
+  await rectCard.getByLabel('Width (in)').fill('20');
+  const rectRequestPromise = page.waitForRequest((request) => request.url().endsWith('/api/published-job'));
+  await rectCard.getByRole('button', { name: 'ASK STORE' }).click();
+  const rectRequest = await rectRequestPromise;
+  assertBoundedRequest(rectRequest.postDataJSON(), {
+    jobId: 'rect-stencil',
+    inputs: { lengthIn: 30, widthIn: 20 },
+  });
   await expect(page.locator('[data-published-message="true"]')).toContainText('not mounted here');
   await expect(page.locator('[data-published-message="true"]')).toContainText('No Store answer was invented');
 
-  await arch.click();
+  await expect(archCard.getByLabel('Opening width (in)')).toHaveValue('36');
+  await expect(archCard.getByLabel('Straight height (in)')).toHaveValue('36');
+  await expect(archCard.getByLabel('Rise (in)')).toHaveValue('12');
+  await expect(archCard).toContainText('Radius is not calculated by the app');
+  await archCard.getByLabel('Opening width (in)').fill('40');
+  await archCard.getByLabel('Straight height (in)').fill('30');
+  await archCard.getByLabel('Rise (in)').fill('10');
+  const archRequestPromise = page.waitForRequest((request) => request.url().endsWith('/api/published-job'));
+  await archCard.getByRole('button', { name: 'ASK STORE' }).click();
+  const archRequest = await archRequestPromise;
+  assertBoundedRequest(archRequest.postDataJSON(), {
+    jobId: 'arched-opening',
+    inputs: { openingWidthIn: 40, straightHeightIn: 30, riseIn: 10 },
+  });
   await expect(page.locator('[data-published-message="true"]')).toContainText('not mounted here');
   await expect(page.locator('[data-published-message="true"]')).toContainText('No Store answer was invented');
 });
+
+function assertBoundedRequest(actual, expected) {
+  expect(actual).toEqual(expected);
+  const serialized = JSON.stringify(actual);
+  expect(serialized).not.toMatch(/arcRadius|geometryClass|gcode|controller|toolpath|cycleStart|feedRate|spindle/i);
+}

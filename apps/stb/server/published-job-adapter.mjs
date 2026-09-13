@@ -60,8 +60,8 @@ function requireExports(store) {
   return required.filter((name) => typeof store?.[name] !== 'function');
 }
 
-function runJob(store, catalog, job) {
-  const spec = buildPublishedJobSpec(job);
+function runJob(store, catalog, job, inputs) {
+  const spec = buildPublishedJobSpec(job, inputs);
   let evaluation;
   let estimate = null;
   if (job.requestType === 'BOARD_SQUARE_V1') {
@@ -76,7 +76,7 @@ function runJob(store, catalog, job) {
   } else {
     throw new Error(`unsupported published job type: ${job.requestType}`);
   }
-  return { evaluation, estimate };
+  return { evaluation, estimate, inputs: spec.inputs };
 }
 
 function unavailable(inspection) {
@@ -96,6 +96,41 @@ function unavailable(inspection) {
         },
       };
     },
+  };
+}
+
+function boundedEvaluation(evaluation) {
+  const curve = evaluation?.curve && typeof evaluation.curve === 'object'
+    ? {
+        kind: evaluation.curve.kind ?? null,
+        chord_in: evaluation.curve.chord_in ?? null,
+        rise_in: evaluation.curve.rise_in ?? null,
+        radius_in: evaluation.curve.radius_in ?? null,
+        derivedRadius_in: evaluation.curve.derivedRadius_in ?? null,
+      }
+    : null;
+  const retention = evaluation?.retention && typeof evaluation.retention === 'object'
+    ? {
+        class: evaluation.retention.class ?? null,
+        requestedTabCount: evaluation.retention.requestedTabCount ?? null,
+        plannedTabCount: evaluation.retention.plannedTabCount ?? null,
+        tabPolicyId: evaluation.retention.tabPolicyId ?? null,
+        tabPlanStatus: evaluation.retention.tabPlanStatus ?? null,
+        tabWidth_in: evaluation.retention.tabWidth_in ?? null,
+        maxAllowedGap_in: evaluation.retention.maxAllowedGap_in ?? null,
+        placement: evaluation.retention.placement ?? null,
+        fullSeverance: evaluation.retention.fullSeverance ?? null,
+        physicalRetentionStatus: evaluation.retention.physicalRetentionStatus ?? null,
+        secondarySeparation: evaluation.retention.secondarySeparation ?? null,
+      }
+    : null;
+  return {
+    envelope: evaluation?.envelope ?? null,
+    reasons: Array.isArray(evaluation?.reasons) ? [...evaluation.reasons] : [],
+    unresolved: Array.isArray(evaluation?.unresolved) ? [...evaluation.unresolved] : [],
+    curve,
+    retention,
+    secondarySeparation: evaluation?.secondarySeparation ?? null,
   };
 }
 
@@ -126,14 +161,28 @@ export async function createPublishedJobAdapter({
       if (!body || typeof body !== 'object' || Array.isArray(body)) {
         return { status: 400, body: { ready: true, code: 'MALFORMED_REQUEST' } };
       }
-      const keys = Object.keys(body);
-      if (keys.length !== 1 || keys[0] !== 'jobId' || typeof body.jobId !== 'string') {
+      const keys = Object.keys(body).sort();
+      const allowedKeys = body.inputs === undefined ? ['jobId'] : ['inputs', 'jobId'];
+      if (
+        keys.length !== allowedKeys.length
+        || keys.some((key, index) => key !== allowedKeys[index])
+        || typeof body.jobId !== 'string'
+      ) {
         return { status: 422, body: { ready: true, code: 'INVALID_BOUNDED_SCOPE' } };
       }
       const job = publishedJob(body.jobId);
       if (!job) return { status: 422, body: { ready: true, code: 'UNKNOWN_PUBLISHED_JOB' } };
 
-      const { evaluation, estimate } = runJob(store, catalog, job);
+      let result;
+      try {
+        result = runJob(store, catalog, job, body.inputs ?? null);
+      } catch (error) {
+        if (error instanceof TypeError) {
+          return { status: 422, body: { ready: true, code: 'INVALID_BOUNDED_INPUTS', message: error.message } };
+        }
+        throw error;
+      }
+      const { evaluation, estimate, inputs } = result;
       if (!ALLOWED_STORE_STATUSES.has(evaluation?.status)) {
         return {
           status: 502,
@@ -157,10 +206,12 @@ export async function createPublishedJobAdapter({
           requestType: job.requestType,
           storeSku: job.storeSku,
           storePin: PUBLISHED_JOB_STORE_PIN,
+          inputs,
           status: evaluation.status,
           evidenceClass: evaluation?.evidenceClass ?? null,
           physicalStatus: evaluation?.physicalStatus ?? null,
           commissioned: evaluation?.commissioned ?? null,
+          ...boundedEvaluation(evaluation),
           estimate: estimate
             ? {
                 status: estimate.status ?? null,
