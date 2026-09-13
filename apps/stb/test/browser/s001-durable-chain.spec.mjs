@@ -355,3 +355,24 @@ for (const [name, patch, reason] of [
     expect(review.predicate.completeSupportedReviewAvailable).toBe(false);
   });
 }
+
+test('S-001 stalled transport terminates at its declared timeout', async ({ page }) => {
+  const { localRecordId } = await createS001Project(page);
+  const result = await page.evaluate(async (id) => {
+    const client = await import('/integration/published-project-client.mjs');
+    const repository = await import('/data/repository.mjs');
+    client.setPublishedProjectTransport(async (_url, init) => new Promise((_resolve, reject) => {
+      init.signal?.addEventListener('abort', () => reject(init.signal.reason), { once: true });
+    }));
+    const issued = await client.issuePublishedProjectQuestion({ localRecordId: id });
+    const events = await repository.listRecords(id, 'event');
+    return {
+      issued,
+      terminal: events.find((record) => record.attemptId === issued.attemptId && record.payload?.terminal),
+      current: await client.currentPublishedProjectAnswer(id),
+    };
+  }, localRecordId);
+  expect(result.issued.status).toBe('transport');
+  expect(result.terminal.payload.diagnostic).toBe('PUBLISHED_PROJECT_TRANSPORT_ERROR');
+  expect(result.current.current).toBe(false);
+});

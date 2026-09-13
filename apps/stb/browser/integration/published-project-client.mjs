@@ -244,6 +244,7 @@ async function dispatchPublishedProject({ localRecordId, project, contract, requ
   try {
     const response = await transport()(PUBLISHED_PROJECT_PATH, {
       method: 'POST',
+      signal: AbortSignal.timeout(10_000),
       headers: { 'Content-Type': 'application/json' },
       body: canonicalJson(payload),
     });
