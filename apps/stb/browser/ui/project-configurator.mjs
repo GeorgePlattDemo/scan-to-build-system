@@ -186,6 +186,10 @@ async function renderIntoScreen(root) {
   const candidate = await currentCandidate(localRecordId);
   const projection = await currentProjection(localRecordId);
   if (token !== renderToken || !root.contains(screen)) return;
+  const staleStatus = screen.querySelector('.handoff-status');
+  if (staleStatus) {
+    staleStatus.textContent = 'Registered class configurator is running as candidate application code. Store sheet-material and production paths remain unresolved.';
+  }
   const panel = buildPanel(candidate, projection, statusMessage);
   const firstPane = screen.querySelector('.source-pane');
   (firstPane ?? screen.querySelector('.screen-heading'))?.before(panel);
