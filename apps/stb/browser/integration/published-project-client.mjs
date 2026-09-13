@@ -18,6 +18,7 @@ const S001_CONTRACT = Object.freeze({
   requestType: 'SHEET_MODE2_ARCHED_APERTURE_V0',
   scope: 'SHEET_MODE2_ARCHED_APERTURE_V0',
   machineFamily: 'S001',
+  storeSku: 'STB-ZERO-PLY-050-48X96-001',
   expectedStorePin: '4402abeb6b0299a5b6db2eec85ed04c3b0236bcc',
 });
 
@@ -85,9 +86,27 @@ function projectInputs(projection) {
   return result;
 }
 
+function containsMachinePayload(value) {
+  if (!value || typeof value !== 'object') return false;
+  const prohibited = new Set(['gcode', 'machinecode', 'controllercode', 'controllerprogram', 'toolpath', 'toolpaths', 'cyclestart']);
+  const pending = [value];
+  while (pending.length) {
+    for (const [key, child] of Object.entries(pending.pop())) {
+      if (prohibited.has(key.replace(/[_-]/g, '').toLowerCase())) return true;
+      if (child && typeof child === 'object') pending.push(child);
+    }
+  }
+  return false;
+}
+
 function validateAnswer(answer, contract, inputs) {
   const reasons = [];
   if (!answer || typeof answer !== 'object' || Array.isArray(answer)) reasons.push('answer-not-object');
+  if (answer?.kind !== 'published-job-store-answer') reasons.push('answer-kind-mismatch');
+  if (answer?.storeSku !== contract.storeSku) reasons.push('store-sku-mismatch');
+  if (containsMachinePayload(answer)) reasons.push('machine-payload-present');
+  if (answer?.estimate?.status === 'BUDGETARY_ESTIMATE') reasons.push('s001-fabrication-economics-not-admitted');
+  if (answer?.operationalRequirements?.labeling?.required === false) reasons.push('mandatory-labeling-disabled');
   if (answer?.ready !== true) reasons.push('answer-not-ready');
   if (answer?.jobId !== contract.jobId) reasons.push('job-id-mismatch');
   if (answer?.requestType !== contract.requestType) reasons.push('request-type-mismatch');

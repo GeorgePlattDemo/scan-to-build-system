@@ -32,8 +32,8 @@ async function createS001Project(page) {
   return { localRecordId: created.localRecordId, configured };
 }
 
-async function installPublishedProjectTransport(page) {
-  await page.evaluate(async (storePin) => {
+async function installPublishedProjectTransport(page, patch = {}) {
+  await page.evaluate(async ({ storePin, patch }) => {
     const client = await import('/integration/published-project-client.mjs');
     client.setPublishedProjectTransport(async (_url, init) => {
       const request = JSON.parse(init.body);
@@ -112,12 +112,12 @@ async function installPublishedProjectTransport(page) {
         physicalExecutionAuthorized: false,
         controllerOutputProduced: false,
       };
-      return new Response(JSON.stringify(body), {
+      return new Response(JSON.stringify({ ...body, ...patch }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
     });
-  }, STORE_PIN);
+  }, { storePin: STORE_PIN, patch });
 }
 
 test('canonical S-001 project carries exact Store identity through unresolved Review and owner archive', async ({ page }) => {
@@ -221,6 +221,14 @@ test('canonical S-001 project carries exact Store identity through unresolved Re
   expect(restoredReviews[0].id).toBe(acknowledged.review.id);
   expect(restoredResponses[0].imported).toBe(true);
   expect(restoredReviews[0].imported).toBe(true);
+  await page.reload();
+  const restoredReview = requireOk(await repoCall(page, 'assembleReview', {
+    localRecordId: imported.localRecordId,
+  }));
+  expect(restoredReview.store.current).toBe(false);
+  expect(restoredReview.store.historical).toBe(true);
+  expect(restoredReview.store.imported).toBe(true);
+  expect(restoredReview.predicate.completeSupportedReviewAvailable).toBe(false);
 });
 
 test('S-001 durable Store client quarantines a response that tries to add sheet drilling or physical authority', async ({ page }) => {
@@ -314,5 +322,36 @@ for (const outcome of ['answer', 'transport-error']) {
       expect(result.dispatched.status).toBe('transport');
       expect(result.terminal.payload.diagnostic).toBe('PUBLISHED_PROJECT_TRANSPORT_ERROR');
     }
+  });
+}
+
+for (const [name, patch, reason] of [
+  ['wrong pin', { storePin: 'WRONG' }, 'store-pin-mismatch'],
+  ['wrong job', { jobId: 'square-stick' }, 'job-id-mismatch'],
+  ['wrong scope', { requestType: 'BOARD_SQUARE_V1' }, 'request-type-mismatch'],
+  ['wrong inputs', { inputs: { openingWidthIn: 35, straightHeightIn: 24, riseIn: 12 } }, 'inputs-mismatch'],
+  ['wrong SKU', { storeSku: 'OTHER-SHEET' }, 'store-sku-mismatch'],
+  ['wrong kind', { kind: 'OTHER-ANSWER' }, 'answer-kind-mismatch'],
+  ['unknown disposition', { status: 'AUTHORIZED' }, 'invalid-disposition'],
+  ['machine payload', { gcode: 'FORBIDDEN_PAYLOAD' }, 'machine-payload-present'],
+  ['nested controller payload', { retention: { controllerProgram: 'FORBIDDEN_PAYLOAD' } }, 'machine-payload-present'],
+  ['fabrication Q promotion', { estimate: { status: 'BUDGETARY_ESTIMATE', Q: 26.55, processQ: null } }, 's001-fabrication-economics-not-admitted'],
+  ['optional labels', { operationalRequirements: { labeling: { required: false } } }, 'mandatory-labeling-disabled'],
+]) {
+  test(`S-001 rejects ${name} without successful Review promotion`, async ({ page }) => {
+    const { localRecordId } = await createS001Project(page);
+    await installPublishedProjectTransport(page, patch);
+    const issued = await page.evaluate(async (id) => {
+      const client = await import('/integration/published-project-client.mjs');
+      return client.issuePublishedProjectQuestion({ localRecordId: id });
+    }, localRecordId);
+    expect(issued.status).toBe('diagnostic');
+    expect(issued.inspection.reasons).toContain(reason);
+    const responses = requireOk(await repoCall(page, 'listRecords', { localRecordId, kind: 'response' }));
+    expect(responses).toHaveLength(1);
+    expect(responses[0].payload.quarantined).toBe(true);
+    const review = requireOk(await repoCall(page, 'assembleReview', { localRecordId }));
+    expect(review.store.current).toBe(false);
+    expect(review.predicate.completeSupportedReviewAvailable).toBe(false);
   });
 }
