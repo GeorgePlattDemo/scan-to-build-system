@@ -27,19 +27,43 @@ export const CLASS_CONFIGURATORS = Object.freeze({
   }),
   [PICNIC_CLASS_ID]: Object.freeze({
     classId: PICNIC_CLASS_ID,
-    title: 'CLASSIC PICNIC TABLE — SOFTWARE FIXTURE',
-    kicker: 'Second bounded class · shared runner proof',
-    lead: 'Only product length is editable in this slice. Every other dimension, count, offset, profile and leg coordinate is a named software-fixture assumption used to prove shared application reuse. It is not an approved furniture design.',
+    title: 'CLASSIC PICNIC TABLE — CANDIDATE FIXTURE',
+    kicker: 'Second bounded class · shared runner proof + donor extension',
+    lead: 'Product length drives candidate geometry. Requested scope and material are holder inputs only: they do not create Store availability, price, structural adequacy, machine support, production release, or fabrication authority.',
     fields: Object.freeze([
-      Object.freeze({ key: 'productLength', label: 'Product length', unit: 'in', inputMode: 'decimal', help: 'This fixture accepts only the two declared software-test lengths: 72 in and 84 in.' }),
+      Object.freeze({
+        key: 'productLength',
+        label: 'Overall product length',
+        unit: 'in',
+        inputMode: 'decimal',
+        help: 'Candidate input range 60–216 in. This range is only an application/demo bound, not a structural rule, Store stock limit, or machine envelope.',
+      }),
+      Object.freeze({
+        key: 'requestedScope',
+        label: 'Requested scope',
+        unit: 'complete-part-set | frame-kit',
+        inputMode: 'text',
+        help: 'Holder request only. “frame-kit” does not mean a Store or machine can fulfill it.',
+      }),
+      Object.freeze({
+        key: 'materialPreference',
+        label: 'Material preference',
+        unit: 'plain words',
+        inputMode: 'text',
+        help: 'Preference only. Store material identity, treatment/use category, SKU, availability and price remain unresolved.',
+      }),
     ]),
     examples: Object.freeze(PICNIC_REFERENCE_EXAMPLES.map((example) => Object.freeze({
       id: example.id,
       label: example.label,
       basis: example.basis,
-      configuration: Object.freeze({ productLength: example.productLength }),
+      configuration: Object.freeze({
+        productLength: example.productLength,
+        requestedScope: example.requestedScope,
+        materialPreference: example.materialPreference,
+      }),
     }))),
-    exampleNote: 'Changing 72 → 84 in is the declared software proof. Longitudinal members change by ΔL while fixed leg geometry remains unchanged. Engineering, hardware suitability, Store support and any governed make path remain unresolved.',
+    exampleNote: 'This pass admits the donor’s broader length and frame-kit request vocabulary without admitting its structural, price, Store, shipping, or machine claims. Separate-benches geometry and adjustable-height geometry remain donor research, not implemented class behavior.',
   }),
 });
 
