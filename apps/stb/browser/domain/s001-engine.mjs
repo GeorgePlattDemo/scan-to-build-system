@@ -217,7 +217,8 @@ export function planS001CenteredArchDerivation({
       definitionRevisionId,
       definitionKind: S001_CENTERED_ARCH_DEFINITION_KIND,
       ruleVersion: S001_CENTERED_ARCH_RULE_VERSION,
-      unresolved: !evaluation.valid || evaluation.unresolvedConditions.length > 0 || true,
+      // Remains unresolved until the mapped project owns durable Store request/response custody.
+      unresolved: true,
       parts: definitionRevisionId
         ? [{ occurrenceId, definitionRevisionId, label: 'Centered arched sheet project' }]
         : [],
