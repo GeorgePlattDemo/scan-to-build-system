@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { ACTORS, COPY } from '../../shared/contracts.mjs';
+import { repoCall, requireOk } from '../helpers/browser-repo.mjs';
 
 async function openAlcove(page) {
   await page.goto('/');
@@ -45,8 +46,16 @@ test('changing shelf count revises demand while review remains unresolved rather
   await expect(page.locator('[data-render-occurrence]')).toHaveCount(4);
   await expect(page.locator('[data-config-engine="valid"]')).toContainText('4 ea sheet-form blanks');
 
+  const localRecordId = await page.locator('[data-screen="questions"]').getAttribute('data-local-record-id');
+  const assembled = requireOk(
+    await repoCall(page, 'assembleReview', { localRecordId }),
+    'mapped review snapshot',
+  );
+  expect(assembled.snapshot.occurrenceIds).toHaveLength(4);
+  expect(assembled.snapshot.definitionRevisionIds).toHaveLength(4);
+
   await page.locator('[data-nav-page="confirm"]').click();
-  await expect(page.locator('[data-screen="confirm"]')).toBeVisible();
+  await expect(page.locator('main[data-screen="confirm"]')).toBeVisible();
   await expect(page.locator('[data-review-parts] [data-review-item]')).toHaveCount(4);
   await expect(page.locator('[data-review-unresolved]')).toContainText('STRUCTURAL_SPAN_NOT_EVALUATED');
   await expect(page.locator('[data-review-unresolved]')).toContainText('store-request-absent');
