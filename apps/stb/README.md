@@ -86,7 +86,7 @@ Exact Store pin: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` (`GeorgePlattDemo/sc
 Build 8 application commits on `build/app-foundation-0.1`:
 
 - `7cd786944e81cd44d1ec8a90701e35454f7f822d` Record import collision dialog
-- `cab7d7e6140db0350c3ea8efcaadfc7eebf3ec6` integrated first-vertical acceptance
+- `cab7d7e6140db0b350c3ea8efcaadfc7eebf3ec6` integrated first-vertical acceptance
 - this closeout commit (HEAD after `Build 8 close first bounded vertical`)
 
 ## Entry
