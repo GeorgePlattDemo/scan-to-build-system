@@ -11,43 +11,67 @@ const LANDING_DETAILS = Object.freeze({
 const AUTHORITY_STAGES = Object.freeze([
   {
     name: 'YOU',
-    owns: 'Your space, measurements, choices, and which version you confirm.',
-    mayNot: 'No downstream actor may silently change your project on your behalf.',
+    subtitle: 'the person with the space or the project',
+    owns: 'Your space, measurements, choices, source material, and which project version you confirm.',
+    receives: 'Nothing is required before you begin. You start the record with whatever you already have.',
+    mayDo: 'Confirm a version, correct it, change it, walk away, or ask for something the current system does not offer.',
+    mayNot: 'There is no downstream authority over what you want. Safety, Store capability, commercial, and machine gates still keep their own separate boundaries.',
   },
   {
     name: 'STORE',
-    owns: 'Material identity, current offering, quantity, supportability, and Store basis.',
-    mayNot: 'Redraw, retype, substitute, round, or alter the confirmed requirement to make it supportable.',
+    subtitle: 'material, offering, capability, and Store basis',
+    owns: 'Material identity, quantity, current offering, supportability, availability basis, and Store economics.',
+    receives: 'The project requirement for one identified revision. It does not receive permission to rewrite it.',
+    mayDo: 'Resolve Store items and quantity, answer supportable / unresolved / refused / unavailable, and return its basis.',
+    mayNot: 'Redraw, retype, substitute, round, or alter the requirement to make the job supportable.',
   },
   {
     name: 'COMMERCIAL',
-    owns: 'Offer, acceptance evidence, and commercial condition.',
-    mayNot: 'Treat acceptance as payment, payment as allocation, or silence as agreement.',
+    subtitle: 'future offer and agreement boundary',
+    owns: 'The future offer, acceptance evidence, validity window, and required commercial condition.',
+    receives: 'One identified project revision and the Store answer that the offer relies on.',
+    mayDo: 'Make an offer with a validity window, record acceptance, let it lapse, or withdraw it according to later reviewed terms.',
+    mayNot: 'Accept on the holder’s behalf, revive a lapsed offer silently, treat acceptance as payment, or treat payment as allocation.',
   },
   {
     name: 'PRODUCTION RELEASE',
-    owns: 'The decision that eligible commercial work may enter production.',
-    mayNot: 'Release on assumption or confer machine readiness.',
+    subtitle: 'permission for eligible work to enter production',
+    owns: 'The decision that commercial work with its required conditions met may become production work.',
+    receives: 'An accepted version with the commercial conditions required for release actually satisfied.',
+    mayDo: 'Release that version or hold it and name the blocking condition.',
+    mayNot: 'Release on assumption, release an unaccepted version, or confer machine readiness or Cycle Start.',
   },
   {
     name: 'LOCAL CELL',
-    owns: 'Machine-specific translation, setup, tooling, calibration, readiness, and local Cycle Start.',
-    mayNot: 'Alter the definition or treat Store support as permission to move a machine.',
+    subtitle: 'machine-local translation and operation',
+    owns: 'Machine-specific translation, local setup, tooling, calibration, readiness, and local Cycle Start.',
+    receives: 'Bounded machine-neutral work tied to an identified project/release context.',
+    mayDo: 'Translate within its declared configuration, refuse work outside it, establish local readiness, and make the local Cycle Start decision.',
+    mayNot: 'Alter the project definition, treat Store support as motion authority, or proceed through an unresolved local condition.',
   },
   {
     name: 'QUALITY',
-    owns: 'Comparison of the made part against the confirmed requirement and recorded exceptions.',
-    mayNot: 'Change the requirement to match the output.',
+    subtitle: 'compare what was made with what was required',
+    owns: 'Inspection against the confirmed requirement, exceptions, nonconformance, and disposition records.',
+    receives: 'Made parts plus the exact requirement they are to be checked against.',
+    mayDo: 'Accept, reject, record an exception, or route a part for bounded rework/disposition.',
+    mayNot: 'Change the requirement to match the output or relabel a nonconforming part as conforming.',
   },
   {
     name: 'FULFILLMENT',
-    owns: 'Identity, labeling, staging, ready notice, and custody handoff.',
-    mayNot: 'Treat staged as picked up or incomplete as complete.',
+    subtitle: 'identity, staging, notice, and custody',
+    owns: 'Labels, staging identity, ready notice, package/custody record, and later pickup or delivery handoff.',
+    receives: 'Parts that have reached the required quality/disposition state for fulfillment.',
+    mayDo: 'Label, stage, notify, and record the eventual custody handoff.',
+    mayNot: 'Treat incomplete as complete, staged as picked up, or a ready notice as custody transfer.',
   },
   {
     name: 'OWNER RECORD',
-    owns: 'Reconciliation of what was asked, confirmed, answered, reviewed, and later fulfilled.',
-    mayNot: 'Rewrite history or create authority that did not exist at the time.',
+    subtitle: 'reconciliation, not a new authority',
+    owns: 'The chronology linking what was brought, observed, confirmed, answered, agreed, released, made, inspected, staged, and received when those events actually exist.',
+    receives: 'Records from the other stages, including unresolved, refused, missing, superseded, and historical states.',
+    mayDo: 'Show provenance and chronology, preserve revisions, and export the owner-controlled record.',
+    mayNot: 'Rewrite history, invent a missing event, turn a software result into physical outcome truth, or create authority that did not exist.',
   },
 ]);
 
@@ -56,6 +80,7 @@ const COLLAPSES = Object.freeze([
   ['An order', 'payment'],
   ['Payment', 'material allocation'],
   ['Material allocation', 'production release'],
+  ['Qualified resolution', 'production release'],
   ['Production release', 'machine readiness'],
   ['Machine readiness', 'Cycle Start'],
   ['Store support', 'Cycle Start'],
@@ -98,14 +123,16 @@ function addStyle() {
     .narrative-next p{margin:3px 0}
     .authority-chain{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:10px 0 14px}
     .authority-chain span{border:1px solid #d9c3a2;border-radius:999px;padding:5px 9px;font-size:11px;background:#f6efe4}
-    .authority-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:10px 0 16px}
+    .authority-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:8px;margin:10px 0 16px}
     .authority-stage{border:1px solid #e3ded7;border-radius:10px;padding:11px 12px;background:#fff}
-    .authority-stage h3{font-size:13px;margin:0 0 5px}
-    .authority-stage p{font-size:12px;margin:3px 0;color:#57534e;line-height:1.45}
+    .authority-stage h3{font-size:13px;margin:0 0 2px}
+    .authority-stage .stage-subtitle{font-size:10.5px;color:#7a7168;margin:0 0 7px}
+    .authority-stage p{font-size:12px;margin:5px 0;color:#57534e;line-height:1.45}
     .collapse-list{margin:8px 0 0;padding-left:20px}
     .collapse-list li{margin:4px 0;font-size:13px}
     .qualified-loop{border:1px solid #d9c3a2;background:#f6efe4;border-radius:12px;padding:14px 16px;margin:14px 0}
     .qualified-loop .route{font-weight:650;margin:7px 0}
+    .qualified-loop .holder-options{font-size:12px;font-weight:650;letter-spacing:.03em;margin:10px 0 3px}
     .qualified-loop ul{margin:8px 0 0;padding-left:20px}
     .qualified-loop li{margin:4px 0;font-size:13px}
     .narrative-owner-record{border-top:1px solid #e3ded7;padding-top:14px;margin-top:18px}
@@ -268,13 +295,15 @@ function qualifiedLoop({ unresolvedCount = 0 } = {}) {
     node('p', { className: 'narrative-kicker', text: 'Human-in-the-loop — bounded, named, on the record' }),
     node('p', { text: lead }),
     node('p', { className: 'route', text: 'HOLDER  |  RULE  |  QUALIFIED PERSON' }),
+    node('p', { className: 'holder-options', text: 'ASK THE QUALIFIED PERSON  ·  CHANGE THE PROJECT  ·  LEAVE IT UNRESOLVED' }),
     node('ul', {}, [
       node('li', { text: 'A qualified answer resolves one bounded question. It does not edit the project.' }),
-      node('li', { text: 'The answer needs an author, declared standing, scope, and conditions that void it.' }),
+      node('li', { text: 'The answer needs an author, declared standing, exact question/answer, scope, and conditions that void it.' }),
+      node('li', { text: 'The holder sees the question, who it went to, and the scoped answer when it returns.' }),
       node('li', { text: 'Qualified resolution is a loop, not a ninth stage.' }),
       node('li', { text: 'Resolution is not release. Release is not readiness. Readiness is not Cycle Start.' }),
     ]),
-    node('p', { className: 'narrative-copy', text: 'Routing and persistence for qualified resolution are not implemented in this build.' }),
+    node('p', { className: 'narrative-copy', text: 'Routing, standing validation, expiry, blocking behavior, and persistence for qualified resolution are not implemented in this build.' }),
   ]);
 }
 
@@ -315,12 +344,15 @@ function authorityMap() {
   });
   return node('section', { className: 'narrative-card' }, [
     node('p', { className: 'narrative-kicker', text: 'Who is responsible for what' }),
-    node('p', { className: 'narrative-copy', text: 'The project originates with you. Downstream authority gets narrower, not broader.' }),
+    node('p', { className: 'narrative-copy', text: 'The project originates with you. Every handoff should pass the same identified version. Downstream authority gets narrower, not broader.' }),
     chain,
     node('div', { className: 'authority-grid' }, AUTHORITY_STAGES.map((stage) =>
-      node('article', { className: 'authority-stage' }, [
+      node('article', { className: 'authority-stage', attrs: { 'data-authority-stage': stage.name } }, [
         node('h3', { text: stage.name }),
+        node('p', { className: 'stage-subtitle', text: stage.subtitle }),
         node('p', {}, [node('strong', { text: 'OWNS — ' }), document.createTextNode(stage.owns)]),
+        node('p', {}, [node('strong', { text: 'RECEIVES — ' }), document.createTextNode(stage.receives)]),
+        node('p', {}, [node('strong', { text: 'MAY DO — ' }), document.createTextNode(stage.mayDo)]),
         node('p', {}, [node('strong', { text: 'MAY NOT — ' }), document.createTextNode(stage.mayNot)]),
       ]),
     )),
