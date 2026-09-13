@@ -1,4 +1,5 @@
 import { ALCOVE_CLASS_ID, normalizeAlcoveConfiguration } from '/shared/alcove-rule.mjs';
+import { PICNIC_CLASS_ID, normalizePicnicConfiguration } from '/shared/picnic-rule.mjs';
 import { RepositoryError, getProject } from '/data/repository.mjs';
 import { commitCandidateChange, successorCandidatePayload } from '/domain/candidate.mjs';
 
@@ -7,6 +8,16 @@ function requireString(name, value) {
     throw new RepositoryError('invalid-argument', `${name} is required`);
   }
   return value;
+}
+
+function normalizeForClass(classId, configuration, basis) {
+  if (classId === ALCOVE_CLASS_ID) {
+    return normalizeAlcoveConfiguration(configuration, { basis });
+  }
+  if (classId === PICNIC_CLASS_ID) {
+    return normalizePicnicConfiguration(configuration, { basis });
+  }
+  throw new RepositoryError('invalid-argument', `No registered configurator for class ${String(classId)}`);
 }
 
 export async function applyMappedConfiguration(input) {
@@ -18,11 +29,11 @@ export async function applyMappedConfiguration(input) {
   if (!project) {
     throw new RepositoryError('not-found', 'Project does not exist');
   }
-  if (project.entryMode !== 'mapped' || project.classId !== ALCOVE_CLASS_ID) {
-    throw new RepositoryError('invalid-argument', 'This configurator applies only to the mapped alcove shelf-blank class');
+  if (project.entryMode !== 'mapped') {
+    throw new RepositoryError('invalid-argument', 'Mapped configuration requires a registered mapped project class');
   }
   const basis = input.basis ?? 'manual-entry';
-  const configuration = normalizeAlcoveConfiguration(input.configuration ?? {}, { basis });
+  const configuration = normalizeForClass(project.classId, input.configuration ?? {}, basis);
   return commitCandidateChange({
     localRecordId,
     expectedHead,
