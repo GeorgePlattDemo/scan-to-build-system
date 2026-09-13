@@ -32,10 +32,15 @@ test('published sheet jobs expose only human dimensions and fail closed when can
   await expect(page.locator('[data-published-message="true"]')).toContainText('not mounted here');
   await expect(page.locator('[data-published-message="true"]')).toContainText('No Store answer was invented');
 
+  await expect(archCard).toContainText('Centered arched cutout');
+  await expect(archCard).toContainText('48 × 96');
+  await expect(archCard).toContainText('6 in at each side');
+  await expect(archCard).toContainText('30 in at each end');
   await expect(archCard.getByLabel('Opening width (in)')).toHaveValue('36');
-  await expect(archCard.getByLabel('Straight height (in)')).toHaveValue('36');
+  await expect(archCard.getByLabel('Straight height (in)')).toHaveValue('24');
   await expect(archCard.getByLabel('Rise (in)')).toHaveValue('12');
-  await expect(archCard).toContainText('Radius is not calculated by the app');
+  await expect(archCard).toContainText('Centering is project geometry');
+  await expect(archCard).toContainText('Store—not the app—derives');
   await archCard.getByLabel('Opening width (in)').fill('40');
   await archCard.getByLabel('Straight height (in)').fill('30');
   await archCard.getByLabel('Rise (in)').fill('10');
