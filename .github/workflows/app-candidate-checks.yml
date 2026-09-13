@@ -39,5 +39,16 @@ jobs:
       - name: Boundary tests
         run: npm run test:boundaries
 
-      - name: Browser tests
-        run: npm run test:browser
+      - name: Store source and adapter fail-closed tests
+        run: npm run test:store
+
+      # Two browser tests exercise the real pinned Store checkout rather than the
+      # browser-side mock transport. This workflow has no cross-repository Store
+      # checkout or STB_STORE_ZERO_ROOT, so running those two here would only
+      # prove that the adapter correctly fails closed. The Store test suite above
+      # covers that condition explicitly. The complete browser suite remains the
+      # local/pinned-Store integration check when STB_STORE_ZERO_ROOT is present.
+      - name: Browser tests (Store checkout not mounted)
+        run: >-
+          npx playwright test --config test/playwright.config.mjs
+          --grep-invert "P5-01 valid committed 45 auto-asks once and Board/Page 5 copy the actual Store answer|incomplete Board and unapplied buffer do not auto-ask"
