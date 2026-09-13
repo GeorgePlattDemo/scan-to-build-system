@@ -236,7 +236,10 @@ export function planBoardDerivation({
   const resolution = finishedLengthResolution(payload.mappings, observationById);
   const { mapping, observation, evaluation, conflict } = resolution;
 
-  let occurrenceId = (previousPayload.activeOccurrenceIds ?? [])[0] ?? null;
+  // Use the successor payload as the active-identity source. A deliberate retirement
+  // clears activeOccurrenceIds on that payload; falling back to the previous payload
+  // would silently resurrect the retired occurrence during the same derivation pass.
+  let occurrenceId = (payload.activeOccurrenceIds ?? [])[0] ?? null;
   const records = [];
 
   if (!occurrenceId && evaluation.valid) {
