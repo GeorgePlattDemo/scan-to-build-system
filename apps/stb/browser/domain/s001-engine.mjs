@@ -42,7 +42,6 @@ function projectionPayload({ candidateRevisionId, configuration, evaluation, occ
   const unresolvedConditions = [
     ...(evaluation.unresolvedInputs ?? []),
     ...(evaluation.unresolvedConditions ?? []),
-    ...(valid ? ['DURABLE_S001_STORE_CUSTODY_NOT_CONNECTED'] : []),
   ];
   return {
     derivationVersion: S001_CENTERED_ARCH_RULE_VERSION,
@@ -105,12 +104,11 @@ function projectionPayload({ candidateRevisionId, configuration, evaluation, occ
       complete: valid,
       publishedJobId: valid ? 'arched-opening' : null,
       reason: valid
-        ? 'Bounded S-001 demand is defined, but durable Store request/response custody is not connected to this mapped class yet.'
+        ? 'Bounded S-001 demand is ready for its durable published-project Store question.'
         : 'Class definition is incomplete.',
     },
     store: {
-      connected: false,
-      reason: 'Exact published-job Store proof exists separately; durable mapped-project Store custody is not connected in this build.',
+      connectedBy: 'durable-request-response-records',
       offering: null,
       price: null,
       availability: null,
@@ -217,7 +215,7 @@ export function planS001CenteredArchDerivation({
       definitionRevisionId,
       definitionKind: S001_CENTERED_ARCH_DEFINITION_KIND,
       ruleVersion: S001_CENTERED_ARCH_RULE_VERSION,
-      // Remains unresolved until the mapped project owns durable Store request/response custody.
+      // Sheet process/fabrication economics remain unresolved even after a SUPPORTABLE Store answer.
       unresolved: true,
       parts: definitionRevisionId
         ? [{ occurrenceId, definitionRevisionId, label: 'Centered arched sheet project' }]
