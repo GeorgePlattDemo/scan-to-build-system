@@ -20,6 +20,53 @@ export function lastFinishedLengthMapping(mappings) {
   return matches.length > 0 ? matches[matches.length - 1] : null;
 }
 
+function finishedLengthResolution(mappings, observationById) {
+  const matches = (mappings ?? []).filter(
+    (entry) => entry.inputKey === BOARD_INPUT_KEY && entry.status === 'accepted',
+  );
+  if (matches.length === 0) {
+    return { mapping: null, observation: null, evaluation: evaluateBoardRequirement(null), conflict: null };
+  }
+  const evaluated = matches.map((mapping) => {
+    const observation = observationById.get(mapping.observationId) ?? null;
+    const evaluation = evaluateBoardRequirement(observation);
+    const signature = evaluation.valid
+      ? `valid:${evaluation.canonical}`
+      : `unresolved:${evaluation.unresolvedReason ?? 'unknown'}:${evaluation.rawText ?? ''}:${evaluation.declaredUnit ?? ''}`;
+    return { mapping, observation, evaluation, signature };
+  });
+  const signatures = new Set(evaluated.map((entry) => entry.signature));
+  if (signatures.size > 1) {
+    return {
+      mapping: null,
+      observation: null,
+      evaluation: {
+        valid: false,
+        unresolvedReason: 'conflicting-finished-length',
+        value: null,
+        unit: null,
+        canonical: null,
+        rawText: null,
+        declaredUnit: null,
+      },
+      conflict: {
+        inputKey: BOARD_INPUT_KEY,
+        observationIds: matches.map((entry) => entry.observationId),
+        values: evaluated.map((entry) => ({
+          observationId: entry.mapping.observationId,
+          valid: entry.evaluation.valid,
+          canonical: entry.evaluation.canonical,
+          rawText: entry.evaluation.rawText,
+          declaredUnit: entry.evaluation.declaredUnit,
+          unresolvedReason: entry.evaluation.unresolvedReason,
+        })),
+      },
+    };
+  }
+  const selected = evaluated[evaluated.length - 1];
+  return { ...selected, conflict: null };
+}
+
 export function definitionBasis(content) {
   return {
     occurrenceId: content.occurrenceId,
@@ -69,7 +116,10 @@ function finishedLengthPayload(evaluation) {
   };
 }
 
-function provenanceLabel(source) {
+function provenanceLabel(source, conflict) {
+  if (conflict) {
+    return 'Conflicting finished-length observations are retained. No winner was selected.';
+  }
   if (!source) {
     return 'No finished-length mapping is in use.';
   }
@@ -88,6 +138,7 @@ function buildProjectionPayload({
   definitionRevisionId,
   evaluation,
   source,
+  conflict,
 }) {
   const length = finishedLengthPayload(evaluation);
   const part =
@@ -113,6 +164,8 @@ function buildProjectionPayload({
     candidateRevisionId,
     valid: evaluation.valid,
     unresolvedReason: evaluation.valid ? null : evaluation.unresolvedReason,
+    unresolvedConditions: conflict ? ['conflicting-finished-length'] : [],
+    conflicts: conflict ? [conflict] : [],
     occurrenceId,
     definitionRevisionId,
     finishedLength: length,
@@ -141,7 +194,7 @@ function buildProjectionPayload({
       cut: 'square cut',
       schematicNote: COPY.boardNotToScale,
       store: STORE_UNAVAILABLE.reason,
-      provenance: provenanceLabel(source),
+      provenance: provenanceLabel(source, conflict),
       unresolvedReason: evaluation.valid ? null : evaluation.unresolvedReason,
       valid: evaluation.valid,
     },
@@ -156,7 +209,7 @@ function buildProjectionPayload({
     },
     request: {
       complete: false,
-      reason: STORE_UNAVAILABLE.reason,
+      reason: evaluation.valid ? STORE_UNAVAILABLE.reason : evaluation.unresolvedReason,
       intended: evaluation.valid
         ? {
             definitionKind: BOARD_DEFINITION.kind,
@@ -180,14 +233,10 @@ export function planBoardDerivation({
   previousPayload,
   previousDefinition,
 }) {
-  const mapping = lastFinishedLengthMapping(payload.mappings);
-  const observation = mapping ? observationById.get(mapping.observationId) ?? null : null;
-  const evaluation =
-    mapping && observation
-      ? evaluateBoardRequirement(observation)
-      : evaluateBoardRequirement(null);
+  const resolution = finishedLengthResolution(payload.mappings, observationById);
+  const { mapping, observation, evaluation, conflict } = resolution;
 
-  let occurrenceId = (payload.activeOccurrenceIds ?? [])[0] ?? null;
+  let occurrenceId = (previousPayload.activeOccurrenceIds ?? [])[0] ?? null;
   const records = [];
 
   if (!occurrenceId && evaluation.valid) {
@@ -268,6 +317,7 @@ export function planBoardDerivation({
       definitionRevisionId,
       evaluation,
       source,
+      conflict,
     }),
   });
 
@@ -277,6 +327,7 @@ export function planBoardDerivation({
       activeOccurrenceIds: occurrenceId ? [occurrenceId] : [],
       projectionId,
       definitionRevisionId,
+      definitionRevisionIds: definitionRevisionId ? [definitionRevisionId] : [],
       definitionKind: BOARD_DEFINITION.kind,
       ruleVersion: BOARD_DEFINITION.ruleVersion,
       unresolved: !evaluation.valid,
