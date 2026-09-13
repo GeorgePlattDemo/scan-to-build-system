@@ -7,6 +7,7 @@ import { pathToFileURL } from 'node:url';
 import {
   PUBLISHED_JOB_STORE_PIN,
   buildPublishedJobSpec,
+  normalizePublishedJobInputs,
   publishedJob,
 } from '../ops/published-jobs.mjs';
 
@@ -14,6 +15,39 @@ const execFileAsync = promisify(execFile);
 const ALLOWED_STORE_STATUSES = new Set(['SUPPORTABLE', 'UNRESOLVED', 'REFUSED', 'UNAVAILABLE']);
 
 export const PUBLISHED_JOB_PATH = '/api/published-job';
+
+export function isDeclaredPublishedJobStoreStatus(status) {
+  return ALLOWED_STORE_STATUSES.has(status);
+}
+
+export function inspectPublishedJobRequest(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return { ok: false, status: 400, code: 'MALFORMED_REQUEST' };
+  }
+  const keys = Object.keys(body).sort();
+  const allowedKeys = body.inputs === undefined ? ['jobId'] : ['inputs', 'jobId'];
+  if (
+    keys.length !== allowedKeys.length
+    || keys.some((key, index) => key !== allowedKeys[index])
+    || typeof body.jobId !== 'string'
+  ) {
+    return { ok: false, status: 422, code: 'INVALID_BOUNDED_SCOPE' };
+  }
+  const job = publishedJob(body.jobId);
+  if (!job) return { ok: false, status: 422, code: 'UNKNOWN_PUBLISHED_JOB' };
+  try {
+    return {
+      ok: true,
+      job,
+      inputs: normalizePublishedJobInputs(job, body.inputs ?? null),
+    };
+  } catch (error) {
+    if (error instanceof TypeError) {
+      return { ok: false, status: 422, code: 'INVALID_BOUNDED_INPUTS', message: error.message };
+    }
+    throw error;
+  }
+}
 
 async function git(root, args) {
   const { stdout } = await execFileAsync('git', args, {
@@ -136,17 +170,10 @@ function boundedEvaluation(evaluation) {
 
 export async function createPublishedJobAdapter({
   storeRoot = process.env.STB_STORE_PUBLISHED_JOBS_ROOT ?? null,
-  storeModule = null,
 } = {}) {
-  let inspection;
-  let store = storeModule;
-  if (!store) {
-    inspection = await inspectStoreRoot(storeRoot);
-    if (!inspection.ok) return unavailable(inspection);
-    store = await import(pathToFileURL(inspection.modulePath).href);
-  } else {
-    inspection = { ok: true, code: 'INJECTED_TEST_MODULE', head: PUBLISHED_JOB_STORE_PIN };
-  }
+  const inspection = await inspectStoreRoot(storeRoot);
+  if (!inspection.ok) return unavailable(inspection);
+  const store = await import(pathToFileURL(inspection.modulePath).href);
 
   const missing = requireExports(store);
   if (missing.length > 0) {
@@ -158,32 +185,20 @@ export async function createPublishedJobAdapter({
     ready: true,
     inspection,
     async dispatch(body) {
-      if (!body || typeof body !== 'object' || Array.isArray(body)) {
-        return { status: 400, body: { ready: true, code: 'MALFORMED_REQUEST' } };
+      const request = inspectPublishedJobRequest(body);
+      if (!request.ok) {
+        return {
+          status: request.status,
+          body: {
+            ready: true,
+            code: request.code,
+            ...(request.message ? { message: request.message } : {}),
+          },
+        };
       }
-      const keys = Object.keys(body).sort();
-      const allowedKeys = body.inputs === undefined ? ['jobId'] : ['inputs', 'jobId'];
-      if (
-        keys.length !== allowedKeys.length
-        || keys.some((key, index) => key !== allowedKeys[index])
-        || typeof body.jobId !== 'string'
-      ) {
-        return { status: 422, body: { ready: true, code: 'INVALID_BOUNDED_SCOPE' } };
-      }
-      const job = publishedJob(body.jobId);
-      if (!job) return { status: 422, body: { ready: true, code: 'UNKNOWN_PUBLISHED_JOB' } };
 
-      let result;
-      try {
-        result = runJob(store, catalog, job, body.inputs ?? null);
-      } catch (error) {
-        if (error instanceof TypeError) {
-          return { status: 422, body: { ready: true, code: 'INVALID_BOUNDED_INPUTS', message: error.message } };
-        }
-        throw error;
-      }
-      const { evaluation, estimate, inputs } = result;
-      if (!ALLOWED_STORE_STATUSES.has(evaluation?.status)) {
+      const { evaluation, estimate, inputs } = runJob(store, catalog, request.job, request.inputs);
+      if (!isDeclaredPublishedJobStoreStatus(evaluation?.status)) {
         return {
           status: 502,
           body: {
@@ -201,10 +216,10 @@ export async function createPublishedJobAdapter({
         body: {
           kind: 'published-job-store-answer',
           ready: true,
-          jobId: job.id,
-          label: job.label,
-          requestType: job.requestType,
-          storeSku: job.storeSku,
+          jobId: request.job.id,
+          label: request.job.label,
+          requestType: request.job.requestType,
+          storeSku: request.job.storeSku,
           storePin: PUBLISHED_JOB_STORE_PIN,
           inputs,
           status: evaluation.status,
@@ -221,8 +236,8 @@ export async function createPublishedJobAdapter({
                 note: estimate.note ?? null,
               }
             : null,
-          boundary: job.boundary,
-          notClaimed: job.notClaimed,
+          boundary: request.job.boundary,
+          notClaimed: request.job.notClaimed,
           physicalExecutionAuthorized: false,
           controllerOutputProduced: false,
         },
