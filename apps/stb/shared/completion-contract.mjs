@@ -347,6 +347,11 @@ export function buildCloseoutRecord(input) {
   if (!evaluation.closeoutReady) {
     throw new TypeError('closeout requires a completion plan with transferred custody');
   }
+  for (const key of ['projectId', 'candidateRevisionId', 'completionPlanId']) {
+    if (requiredString(key, input[key]) !== requiredString(`plan.${key}`, input.plan[key])) {
+      throw new TypeError(`${key} must match the evaluated completion plan`);
+    }
+  }
   return Object.freeze({
     recordType: COMPLETION_RECORD_TYPES.CLOSEOUT,
     closeoutVersion: 'STB-PROJECT-CLOSEOUT-0.1',

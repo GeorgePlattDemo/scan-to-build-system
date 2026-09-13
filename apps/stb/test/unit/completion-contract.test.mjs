@@ -333,3 +333,26 @@ test('individual and contractor receipts are presentations over the same record'
   assert.ok(individual.includes('RECORD_REFERENCE'));
   assert.ok(contractor.includes('RECORD_REFERENCE'));
 });
+
+test('closeout identity must match the plan whose custody was evaluated', () => {
+  const plan = buildCompletionPlanRecord({
+    projectId: 'P-1', candidateRevisionId: 'R-1', completionPlanId: 'CP-1',
+    storeDisposition: 'SUPPORTABLE',
+    lines: [{ lineId: 'CUT-001', primaryContribution: { status: 'COMPLETE' } }],
+    inspectionStatus: 'RECORDED', labelingStatus: 'APPLIED',
+    stagingStatus: 'STAGED', fulfillmentStatus: 'PICKUP_READY',
+    closeoutRecordStatus: 'PREPARED', custodyStatus: 'TRANSFERRED',
+    createdAt: '2026-09-13T21:00:00Z',
+  });
+  const input = {
+    closeoutId: 'CO-1', projectId: 'P-1', candidateRevisionId: 'R-1',
+    completionPlanId: 'CP-1', plan,
+    custody: { method: 'PICKUP', transferredAt: '2026-09-13T21:00:00Z' },
+    recordRef: 'stb://P-1/R-1', createdAt: '2026-09-13T21:00:00Z',
+  };
+  assert.equal(buildCloseoutRecord(input).completionPlanId, plan.completionPlanId);
+  for (const key of ['projectId', 'candidateRevisionId', 'completionPlanId']) {
+    assert.throws(() => buildCloseoutRecord({ ...input, [key]: 'UNRELATED' }), /must match/);
+    assert.throws(() => buildCloseoutRecord({ ...input, plan: { ...plan, [key]: undefined } }), /required/);
+  }
+});

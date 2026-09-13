@@ -15,3 +15,5 @@ Newest row at the top. One trial per row.
 | 2026-09-11 | protocol itself | standing instruction exists and is the default pre-step | PASS | BRIDGE-GAP closed for process | none | App tree not yet in this repository |
 
 | 2026-09-13 | completion preview labeling invariant | published answers cannot disable mandatory labeling | FAIL (source inspection) | APP-CONSTRAINT | app | `labelRequirement` accepted required=false. Correction fixes required=true; regression covers D-001/S-001 and support/refusal. Validation delegated to the commit's App candidate checks; no local tests run. |
+
+| 2026-09-13 | closeout identity binding | closeout project/revision/plan must match the evaluated plan | FAIL (source inspection) | APP-CONSTRAINT | app | Closeout accepted unrelated IDs after evaluating another plan's custody. Add exact identity guards and mismatched/missing-ID regressions; validation through App candidate checks, not local tests. |
