@@ -1,7 +1,9 @@
 # Astra Language / Consistency Pass Handoff 0.1
 
-**Status:** prepared handoff; do not run until the broad app-intake branch has had a normal local verification pass  
-**Target branch:** `build/app-intake-authority-0.1`
+> **SUPERSEDED FOR EXECUTION.** This file is retained as the earlier intake-language handoff. The controlling sanitizing instruction is now `work/capability-bridge/ASTRA-SANITIZE-HANDOFF-0.2.md` on `build/app-configurator-engine-0.1`. Do not execute this older branch target literally.
+
+**Historical status:** prepared handoff for the earlier broad app-intake branch  
+**Historical target branch:** `build/app-intake-authority-0.1`
 
 ## Purpose
 
