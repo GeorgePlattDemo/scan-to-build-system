@@ -83,6 +83,15 @@ function estimateIdentity(storeView, store) {
   };
 }
 
+function candidateDefinitionRevisionIds(candidate) {
+  const ids = candidate?.payload?.definitionRevisionIds;
+  if (Array.isArray(ids)) {
+    return [...ids];
+  }
+  const first = candidate?.payload?.definitionRevisionId ?? null;
+  return first ? [first] : [];
+}
+
 export async function assembleReviewSnapshot(localRecordId, { unapplied = false } = {}) {
   const project = await getProject(localRecordId);
   if (!project) {
@@ -125,9 +134,7 @@ export async function assembleReviewSnapshot(localRecordId, { unapplied = false 
     candidateRevisionId: project.currentHead,
     projectionId: candidate?.payload?.projectionId ?? null,
     occurrenceIds: [...(candidate?.payload?.activeOccurrenceIds ?? [])],
-    definitionRevisionIds: candidate?.payload?.definitionRevisionId
-      ? [candidate.payload.definitionRevisionId]
-      : [],
+    definitionRevisionIds: candidateDefinitionRevisionIds(candidate),
     definitionKind: candidate?.payload?.definitionKind ?? projection?.payload?.definitionKind ?? null,
     ruleVersion: candidate?.payload?.ruleVersion ?? projection?.payload?.ruleVersion ?? null,
     classReference: classReferenceSlice(candidate),
