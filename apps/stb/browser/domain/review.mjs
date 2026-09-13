@@ -6,6 +6,7 @@ import {
   REVIEW_RECORD_TYPES,
   STORE_SCOPES,
 } from '/shared/contracts.mjs';
+import { storeScopeForClass } from '/shared/published-project-contract.mjs';
 import { presentStoreAnswer } from '/shared/store-present.mjs';
 import {
   collectDisclosures,
@@ -101,9 +102,10 @@ export async function assembleReviewSnapshot(localRecordId, { unapplied = false 
   const projection = await currentProjection(localRecordId);
   const evidence = await listProjectEvidence(localRecordId);
   const observations = await listProjectObservations(localRecordId);
+  const scope = storeScopeForClass(project.classId, STORE_SCOPES.BOARD_SQUARE_V1);
   const store = await currentStoreAnswer(localRecordId, {
     candidateRevisionId: project.currentHead,
-    scope: STORE_SCOPES.BOARD_SQUARE_V1,
+    scope,
   });
   const storeView = presentStoreAnswer(store, {
     unapplied,
@@ -120,7 +122,7 @@ export async function assembleReviewSnapshot(localRecordId, { unapplied = false 
     .map((entry) => {
       const observation = observations.find((record) => record.id === entry.observationId);
       return {
-        observationId: entry.observationId,
+        observationId: entry.id,
         inputKey: entry.inputKey,
         status: entry.status,
         method: observation?.payload?.method ?? null,
