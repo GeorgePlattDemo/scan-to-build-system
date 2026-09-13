@@ -36,11 +36,7 @@ export function inspectPublishedJobRequest(body) {
   const job = publishedJob(body.jobId);
   if (!job) return { ok: false, status: 422, code: 'UNKNOWN_PUBLISHED_JOB' };
   try {
-    return {
-      ok: true,
-      job,
-      inputs: normalizePublishedJobInputs(job, body.inputs ?? null),
-    };
+    return { ok: true, job, inputs: normalizePublishedJobInputs(job, body.inputs ?? null) };
   } catch (error) {
     if (error instanceof TypeError) {
       return { ok: false, status: 422, code: 'INVALID_BOUNDED_INPUTS', message: error.message };
@@ -50,11 +46,7 @@ export function inspectPublishedJobRequest(body) {
 }
 
 async function git(root, args) {
-  const { stdout } = await execFileAsync('git', args, {
-    cwd: root,
-    encoding: 'utf8',
-    maxBuffer: 1024 * 1024,
-  });
+  const { stdout } = await execFileAsync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 1024 * 1024 });
   return stdout.trim();
 }
 
@@ -65,12 +57,7 @@ async function inspectStoreRoot(root) {
   const head = await git(root, ['rev-parse', 'HEAD']).catch(() => null);
   if (!head) return { ok: false, code: 'PUBLISHED_JOB_STORE_NOT_GIT' };
   if (head !== PUBLISHED_JOB_STORE_PIN) {
-    return {
-      ok: false,
-      code: 'PUBLISHED_JOB_STORE_PIN_MISMATCH',
-      expected: PUBLISHED_JOB_STORE_PIN,
-      actual: head,
-    };
+    return { ok: false, code: 'PUBLISHED_JOB_STORE_PIN_MISMATCH', expected: PUBLISHED_JOB_STORE_PIN, actual: head };
   }
   const dirty = await git(root, ['status', '--porcelain']).catch(() => '__git_error__');
   if (dirty === '__git_error__') return { ok: false, code: 'PUBLISHED_JOB_STORE_GIT_ERROR' };
@@ -134,22 +121,16 @@ function unavailable(inspection) {
 }
 
 function firstCapability(evaluation) {
-  if (evaluation?.line?.capability && typeof evaluation.line.capability === 'object') {
-    return evaluation.line.capability;
-  }
+  if (evaluation?.line?.capability && typeof evaluation.line.capability === 'object') return evaluation.line.capability;
   const firstLine = Array.isArray(evaluation?.lines) ? evaluation.lines[0] : null;
-  if (firstLine?.capability && typeof firstLine.capability === 'object') {
-    return firstLine.capability;
-  }
+  if (firstLine?.capability && typeof firstLine.capability === 'object') return firstLine.capability;
   return null;
 }
 
 function capabilityEnvelopeId(capability) {
   const envelope = capability?.envelope;
   if (typeof envelope === 'string') return envelope;
-  if (envelope && typeof envelope === 'object') {
-    return envelope.envelope ?? envelope.id ?? null;
-  }
+  if (envelope && typeof envelope === 'object') return envelope.envelope ?? envelope.id ?? null;
   return null;
 }
 
@@ -161,6 +142,33 @@ function boundedCurve(curve) {
     rise_in: curve.rise_in ?? null,
     radius_in: curve.radius_in ?? null,
     derivedRadius_in: curve.derivedRadius_in ?? null,
+  };
+}
+
+function fourMargins(value) {
+  if (!value || typeof value !== 'object') return null;
+  return {
+    left: value.left ?? null,
+    right: value.right ?? null,
+    bottom: value.bottom ?? null,
+    top: value.top ?? null,
+  };
+}
+
+function boundedWorkField(workField) {
+  if (!workField || typeof workField !== 'object') return null;
+  return {
+    id: workField.id ?? null,
+    placement: workField.placement ?? null,
+    horizontalAxis: workField.horizontalAxis ?? null,
+    verticalAxis: workField.verticalAxis ?? null,
+    horizontalSpan_in: workField.horizontalSpan_in ?? null,
+    verticalSpan_in: workField.verticalSpan_in ?? null,
+    containment: workField.containment ?? null,
+    parentContainsField: workField.parentContainsField ?? null,
+    profileInsideField: workField.profileInsideField ?? null,
+    parentMargins_in: fourMargins(workField.parentMargins_in),
+    profileMarginsWithinField_in: fourMargins(workField.profileMarginsWithinField_in),
   };
 }
 
@@ -181,8 +189,7 @@ function boundedRetention(retention) {
     nominalSpacing_in: plan?.nominalSpacing_in ?? null,
     placement: retention.placement ?? plan?.placementMethod ?? null,
     fullSeverance: retention.fullSeverance ?? null,
-    physicalRetentionStatus:
-      retention.physicalRetentionStatus ?? plan?.physicalRetentionStatus ?? null,
+    physicalRetentionStatus: retention.physicalRetentionStatus ?? plan?.physicalRetentionStatus ?? null,
     secondarySeparation: retention.secondarySeparation ?? null,
     physicalNote: plan?.physicalNote ?? null,
   };
@@ -191,9 +198,9 @@ function boundedRetention(retention) {
 export function boundedPublishedEvaluation(evaluation) {
   const capability = firstCapability(evaluation);
   const basis = evaluation?.basis && typeof evaluation.basis === 'object' ? evaluation.basis : null;
-
   const curve = evaluation?.curve ?? basis?.curve ?? capability?.curve ?? null;
   const retention = evaluation?.retention ?? basis?.retention ?? capability?.retention ?? null;
+  const workField = evaluation?.workField ?? basis?.workField ?? capability?.workField ?? null;
 
   const reasons = Array.isArray(evaluation?.reasons)
     ? evaluation.reasons
@@ -204,7 +211,6 @@ export function boundedPublishedEvaluation(evaluation) {
         : Array.isArray(capability?.envelope?.reasons)
           ? capability.envelope.reasons
           : [];
-
   const unresolved = Array.isArray(evaluation?.unresolved)
     ? evaluation.unresolved
     : Array.isArray(capability?.unresolved)
@@ -212,19 +218,13 @@ export function boundedPublishedEvaluation(evaluation) {
       : [];
 
   return {
-    envelope:
-      evaluation?.envelope
-      ?? basis?.envelope
-      ?? capabilityEnvelopeId(capability)
-      ?? null,
+    envelope: evaluation?.envelope ?? basis?.envelope ?? capabilityEnvelopeId(capability) ?? null,
     reasons: [...reasons],
     unresolved: [...unresolved],
+    workField: boundedWorkField(workField),
     curve: boundedCurve(curve),
     retention: boundedRetention(retention),
-    secondarySeparation:
-      evaluation?.secondarySeparation
-      ?? capability?.secondarySeparation
-      ?? null,
+    secondarySeparation: evaluation?.secondarySeparation ?? capability?.secondarySeparation ?? null,
   };
 }
 
@@ -249,17 +249,12 @@ export function boundedPublishedEstimate(estimate) {
   };
 }
 
-export async function createPublishedJobAdapter({
-  storeRoot = process.env.STB_STORE_PUBLISHED_JOBS_ROOT ?? null,
-} = {}) {
+export async function createPublishedJobAdapter({ storeRoot = process.env.STB_STORE_PUBLISHED_JOBS_ROOT ?? null } = {}) {
   const inspection = await inspectStoreRoot(storeRoot);
   if (!inspection.ok) return unavailable(inspection);
   const store = await import(pathToFileURL(inspection.modulePath).href);
-
   const missing = requireExports(store);
-  if (missing.length > 0) {
-    return unavailable({ ok: false, code: 'PUBLISHED_JOB_STORE_EXPORT_MISSING', missing });
-  }
+  if (missing.length > 0) return unavailable({ ok: false, code: 'PUBLISHED_JOB_STORE_EXPORT_MISSING', missing });
   const catalog = store.loadCatalog();
 
   return {
@@ -268,27 +263,15 @@ export async function createPublishedJobAdapter({
     async dispatch(body) {
       const request = inspectPublishedJobRequest(body);
       if (!request.ok) {
-        return {
-          status: request.status,
-          body: {
-            ready: true,
-            code: request.code,
-            ...(request.message ? { message: request.message } : {}),
-          },
-        };
+        return { status: request.status, body: { ready: true, code: request.code, ...(request.message ? { message: request.message } : {}) } };
       }
-
       const { evaluation, estimate, inputs } = runJob(store, catalog, request.job, request.inputs);
       if (!isDeclaredPublishedJobStoreStatus(evaluation?.status)) {
         return {
           status: 502,
           body: {
-            kind: 'published-job-store-answer',
-            ready: false,
-            storePin: PUBLISHED_JOB_STORE_PIN,
-            code: 'PUBLISHED_JOB_STORE_RESPONSE_INVALID',
-            physicalExecutionAuthorized: false,
-            controllerOutputProduced: false,
+            kind: 'published-job-store-answer', ready: false, storePin: PUBLISHED_JOB_STORE_PIN,
+            code: 'PUBLISHED_JOB_STORE_RESPONSE_INVALID', physicalExecutionAuthorized: false, controllerOutputProduced: false,
           },
         };
       }
