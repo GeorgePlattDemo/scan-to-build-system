@@ -1,6 +1,7 @@
 import { INTAKE_CARDS } from '/shared/contracts.mjs';
 
 const ACTIONS = Object.freeze([
+  { label: 'Pick a board', detail: 'Start with one bounded part and a finished length.', child: 'board' },
   { label: 'Tell us what you want', detail: 'A sentence is enough to start.', child: 'measurements' },
   { label: 'Enter measurements', detail: 'Type what you took. Keep the units you used.', child: 'measurements' },
   { label: 'Add photos or a sketch', detail: 'JPEG or PNG can be kept and displayed.', child: 'sketch' },
@@ -40,6 +41,7 @@ function installStyle() {
     .open-door-status{display:inline-block;margin-top:6px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#7a7168}
     .open-door-status.planned{color:#8b6a3f}
     .open-door-multi{margin:12px 0 0!important;padding-top:10px;border-top:1px solid #ece7e0}
+    .open-door-minimum{margin:7px 0 0!important;font-size:11.5px!important}
     @media (prefers-color-scheme: dark){
       .open-door{background:#181613;border-color:#3c352c}
       .open-door>p,.open-door-action span{color:#c8c0b5}
@@ -80,6 +82,10 @@ function buildOpenDoor() {
     node('p', {
       className: 'open-door-multi',
       text: 'Bring more than one. A photo, tape measurements, and a drawing can stay together in one project record.',
+    }),
+    node('p', {
+      className: 'open-door-minimum',
+      text: 'Use the least that works. Do not send client lists, pricing, workforce data, or other information that is not needed to define this project.',
     }),
   ]);
 }
