@@ -89,3 +89,17 @@ test('Store refusal blocks completion rather than converting it to secondary wor
   assert.deepEqual(preview.lines, []);
   assert.equal(preview.secondarySelectionRequired, false);
 });
+
+test('published answers cannot make mandatory labeling optional', () => {
+  for (const machineFamily of [MACHINE_FAMILIES.D001, MACHINE_FAMILIES.S001]) {
+    for (const status of ['SUPPORTABLE', 'REFUSED']) {
+      const preview = derivePublishedJobCompletionPreview({
+        status,
+        machineFamily,
+        operationalRequirements: { labeling: { required: false } },
+      });
+      assert.equal(preview.labeling.required, true);
+      assert.equal(preview.labeling.selective, false);
+    }
+  }
+});
