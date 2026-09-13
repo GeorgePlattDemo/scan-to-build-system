@@ -10,6 +10,8 @@ In addition to the accepted application facts, this candidate branch now present
 - an explicit open-door intake contract: broad receipt, source preservation, visible unresolved conditions, no authority promotion from reading;
 - the three actor orientations as different starting contexts, not different truth models;
 - Page 1 as two paths into one application: mapped project or Start Your Own;
+- an interactive **BRING WHAT YOU HAVE** launcher that routes ordinary-language starts into the existing bounded intake children rather than creating a second intake engine;
+- clear current-versus-planned status on the launcher for measurements, photos/sketches, drawing/PDF, takeoff/cut list, scan, and CAD/BIM/structured-file paths;
 - Page 2 with visible source / observation-candidate / unresolved seams;
 - a two-axis explanation separating provenance from authority;
 - a working next-question prompt based on currently visible gaps;
@@ -23,7 +25,7 @@ In addition to the accepted application facts, this candidate branch now present
 
 The qualified-person UI is explanatory only. It does not route a question, validate standing, write a `QualifiedResolution`, block confirmation by class, start an expiry clock, or release work.
 
-The new narrative layer changes presentation only. Existing domain records, Store integration, candidate revisions, review records, and owner archives remain the underlying implemented mechanisms.
+The new narrative/open-door layers change presentation and navigation into existing intake children only. Existing domain records, Store integration, candidate revisions, review records, and owner archives remain the underlying implemented mechanisms.
 
 Full application suites are still **NOT RUN** for this branch.
 
