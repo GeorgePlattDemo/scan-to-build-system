@@ -50,6 +50,10 @@ const CANDIDATE_STATIC_ASSETS = Object.freeze({
     relativePath: 'browser/domain/s001-engine.mjs',
     contentType: 'text/javascript; charset=utf-8',
   }),
+  '/integration/published-project-client.mjs': Object.freeze({
+    relativePath: 'browser/integration/published-project-client.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
   '/shared/alcove-rule.mjs': Object.freeze({
     relativePath: 'shared/alcove-rule.mjs',
     contentType: 'text/javascript; charset=utf-8',
