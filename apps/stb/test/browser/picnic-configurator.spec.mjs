@@ -27,7 +27,7 @@ test('picnic candidate carries broad length, scope and material preference witho
   await expect(page.locator('[data-render-occurrence]').first()).toBeVisible();
 
   await page.locator('[data-nav-page="confirm"]').click();
-  await expect(page.locator('[data-screen="confirm"]')).toBeVisible();
+  await expect(page.locator('main[data-screen="confirm"]')).toBeVisible();
   await expect(page.locator('[data-review-unresolved]')).toContainText('STRUCTURAL_SPAN_NOT_EVALUATED');
   await expect(page.getByRole('button', { name: COPY.reviewUnresolved })).toBeVisible();
   await expect(page.getByRole('button', { name: COPY.reviewConfirm })).toHaveCount(0);
