@@ -1,15 +1,15 @@
 import { INTAKE_CARDS } from '/shared/contracts.mjs';
 
 const ACTIONS = Object.freeze([
-  { label: 'Pick a board', detail: 'Start with one bounded part and a finished length.', child: 'board' },
-  { label: 'Tell us what you want', detail: 'A sentence is enough to start.', child: 'measurements' },
-  { label: 'Enter measurements', detail: 'Type what you took. Keep the units you used.', child: 'measurements' },
-  { label: 'Add photos or a sketch', detail: 'JPEG or PNG can be kept and displayed.', child: 'sketch' },
-  { label: 'Scan a space', detail: 'Keep an existing scan; native interpretation is still planned.', child: 'scan' },
-  { label: 'Attach a drawing or PDF', detail: 'Keep and display the PDF; no OCR or scale extraction is claimed.', child: 'drawing' },
-  { label: 'Add a takeoff or cut list', detail: 'Keep raw text and enter bounded rows without retyping unrelated job data.', child: 'takeoff' },
-  { label: 'CAD / BIM / structured file', detail: 'Keep the source even when this build cannot interpret it.', child: 'cad' },
-  { label: 'I’m not sure', detail: 'Start with the need. Unknown is a valid state.', child: 'measurements' },
+  { id: 'board', label: 'Pick a board', detail: 'Start with one bounded part and a finished length.', child: 'board' },
+  { id: 'need', label: 'Tell us what you want', detail: 'A sentence is enough to start.', child: 'measurements' },
+  { id: 'measurements', label: 'Enter measurements', detail: 'Type what you took. Keep the units you used.', child: 'measurements' },
+  { id: 'sketch', label: 'Add photos or a sketch', detail: 'JPEG or PNG can be kept and displayed.', child: 'sketch' },
+  { id: 'scan', label: 'Scan a space', detail: 'Keep an existing scan; native interpretation is still planned.', child: 'scan' },
+  { id: 'drawing', label: 'Attach a drawing or PDF', detail: 'Keep and display the PDF; no OCR or scale extraction is claimed.', child: 'drawing' },
+  { id: 'takeoff', label: 'Add a takeoff or cut list', detail: 'Keep raw text and enter bounded rows without retyping unrelated job data.', child: 'takeoff' },
+  { id: 'cad', label: 'CAD / BIM / structured file', detail: 'Keep the source even when this build cannot interpret it.', child: 'cad' },
+  { id: 'unsure', label: 'I’m not sure', detail: 'Start with the need. Unknown is a valid state.', child: 'measurements' },
 ]);
 
 function node(tag, { className, text, attrs } = {}, children = []) {
@@ -57,7 +57,7 @@ function cardStatus(child) {
 
 function buildOpenDoor() {
   return node('section', { className: 'open-door', attrs: { 'data-open-door': 'true' } }, [
-    node('h2', { text: 'BRING WHAT YOU HAVE' }),
+    node('h2', { text: 'WAYS TO START' }),
     node('p', { text: 'You do not have to put it in our format first. Start with the information you already have.' }),
     node('div', { className: 'open-door-grid' }, ACTIONS.map((action) => {
       const status = cardStatus(action.child);
@@ -67,7 +67,7 @@ function buildOpenDoor() {
           type: 'button',
           'data-action': 'open-child',
           'data-child': action.child,
-          'data-open-door-child': action.child,
+          'data-open-door-child': action.id,
           'data-open-door-status': status,
         },
       }, [
