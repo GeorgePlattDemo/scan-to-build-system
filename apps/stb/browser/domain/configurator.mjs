@@ -1,4 +1,8 @@
 import { ALCOVE_CLASS_ID, normalizeAlcoveConfiguration } from '/shared/alcove-rule.mjs';
+import {
+  S001_CENTERED_ARCH_CLASS_ID,
+  normalizeS001CenteredArchConfiguration,
+} from '/shared/class-config.mjs';
 import { PICNIC_CLASS_ID, normalizePicnicConfiguration } from '/shared/picnic-rule.mjs';
 import { RepositoryError, getProject } from '/data/repository.mjs';
 import { commitCandidateChange, successorCandidatePayload } from '/domain/candidate.mjs';
@@ -16,6 +20,9 @@ function normalizeForClass(classId, configuration, basis) {
   }
   if (classId === PICNIC_CLASS_ID) {
     return normalizePicnicConfiguration(configuration, { basis });
+  }
+  if (classId === S001_CENTERED_ARCH_CLASS_ID) {
+    return normalizeS001CenteredArchConfiguration(configuration, { basis });
   }
   throw new RepositoryError('invalid-argument', `No registered configurator for class ${String(classId)}`);
 }
