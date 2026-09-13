@@ -58,3 +58,13 @@ jobs:
         run: >-
           npx playwright test --config test/playwright.config.mjs
           --grep-invert "P5-01 valid committed 45 auto-asks once and Board/Page 5 copy the actual Store answer|incomplete Board and unapplied buffer do not auto-ask"
+
+      - name: Upload bounded app source for integration proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: stb-app-source
+          path: |
+            apps/stb/ops
+            apps/stb/shared
+          if-no-files-found: error
+          retention-days: 7
