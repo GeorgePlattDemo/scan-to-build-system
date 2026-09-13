@@ -7,6 +7,7 @@ import {
   COMPLETION_PLAN_STATUS,
   COMPLETION_RECORD_TYPES,
   COMPLETION_ROLES,
+  LABELING_REQUIREMENT,
   RECEIPT_PROFILES,
   SECONDARY_OPTIONS,
   buildCloseoutRecord,
@@ -31,11 +32,35 @@ test('operator authority is stop/report only', () => {
     COMPLETION_ACTIONS.RECORD_INSPECTION,
     COMPLETION_ACTIONS.MARK_LABEL_APPLIED,
     COMPLETION_ACTIONS.MARK_STAGED,
+    COMPLETION_ACTIONS.MARK_PICKUP_READY,
+    COMPLETION_ACTIONS.MARK_DELIVERY_ARRANGED,
+    COMPLETION_ACTIONS.PREPARE_CLOSEOUT_RECORD,
     COMPLETION_ACTIONS.RECORD_CUSTODY_TRANSFER,
     COMPLETION_ACTIONS.CLOSE_PROJECT,
   ]) {
     assert.equal(roleCan(COMPLETION_ROLES.OPERATOR, action), false, action);
   }
+});
+
+test('cell steward owns explicit post-production state transitions', () => {
+  for (const action of [
+    COMPLETION_ACTIONS.RECORD_INSPECTION,
+    COMPLETION_ACTIONS.MARK_LABEL_APPLIED,
+    COMPLETION_ACTIONS.MARK_STAGED,
+    COMPLETION_ACTIONS.MARK_PICKUP_READY,
+    COMPLETION_ACTIONS.MARK_DELIVERY_ARRANGED,
+    COMPLETION_ACTIONS.PREPARE_CLOSEOUT_RECORD,
+    COMPLETION_ACTIONS.RECORD_CUSTODY_TRANSFER,
+    COMPLETION_ACTIONS.CLOSE_PROJECT,
+  ]) {
+    assert.equal(roleCan(COMPLETION_ROLES.CELL_STEWARD, action), true, action);
+  }
+});
+
+test('labeling is a nonselective operational requirement', () => {
+  assert.equal(LABELING_REQUIREMENT.required, true);
+  assert.equal(LABELING_REQUIREMENT.selective, false);
+  assert.equal(LABELING_REQUIREMENT.authorityEffect, false);
 });
 
 test('customer chooses but cannot accept the yard plan', () => {
@@ -67,6 +92,20 @@ test('3/8 finished hole with 3/16 pilot remains an explicit residual operation',
 
   const plan = evaluateCompletionPlan({ storeDisposition: 'SUPPORTABLE', lines: [line] });
   assert.equal(plan.status, COMPLETION_PLAN_STATUS.NEEDS_CUSTOMER_DECISION);
+});
+
+test('completion line can read allowed options from its residual-operation record', () => {
+  const line = {
+    lineId: 'TAB-001',
+    primaryContribution: { status: 'PARTIAL' },
+    residualOperation: {
+      allowedSecondaryOptions: [SECONDARY_OPTIONS.CUSTOMER_COMPLETES],
+    },
+    selectedOption: SECONDARY_OPTIONS.CUSTOMER_COMPLETES,
+    customerDecision: 'ACCEPTED',
+    stewardDecision: 'ACCEPTED',
+  };
+  assert.equal(evaluateCompletionLine(line).status, COMPLETION_LINE_STATUS.ASSIGNED_TO_CUSTOMER);
 });
 
 test('customer acceptance alone does not bind the yard', () => {
@@ -130,18 +169,29 @@ test('customer-completes path can be handed off only after customer and steward 
   assert.equal(result.operatorMayPromote, false);
 });
 
-test('inspection is a hard pre-handoff record gate', () => {
-  const result = evaluateCompletionPlan({
+test('inspection, labeling, staging, fulfillment and closeout preparation are distinct hard gates', () => {
+  const base = {
     storeDisposition: 'SUPPORTABLE',
     lines: [{ lineId: 'CUT-001', primaryContribution: { status: 'COMPLETE' } }],
+    inspectionStatus: 'RECORDED',
     labelingStatus: 'APPLIED',
     stagingStatus: 'STAGED',
     fulfillmentStatus: 'PICKUP_READY',
     closeoutRecordStatus: 'PREPARED',
     custodyStatus: 'NOT_TRANSFERRED',
-  });
-  assert.equal(result.handoffReady, false);
-  assert.ok(result.reasons.includes('INSPECTION_NOT_RECORDED'));
+  };
+  const cases = [
+    ['inspectionStatus', 'NOT_RECORDED', 'INSPECTION_NOT_RECORDED'],
+    ['labelingStatus', 'NOT_STARTED', 'LABELING_NOT_COMPLETE'],
+    ['stagingStatus', 'NOT_STARTED', 'STAGING_NOT_COMPLETE'],
+    ['fulfillmentStatus', 'NOT_READY', 'FULFILLMENT_NOT_READY'],
+    ['closeoutRecordStatus', 'NOT_PREPARED', 'CLOSEOUT_RECORD_NOT_PREPARED'],
+  ];
+  for (const [field, value, reason] of cases) {
+    const result = evaluateCompletionPlan({ ...base, [field]: value });
+    assert.equal(result.handoffReady, false, field);
+    assert.ok(result.reasons.includes(reason), reason);
+  }
 });
 
 test('Store refusal cannot be converted into a completion plan', () => {
@@ -205,7 +255,7 @@ test('completion decisions enforce role authority at record construction time', 
   );
 });
 
-test('completion plan record carries project/Store identity without authority', () => {
+test('completion plan record carries project/Store identity and mandatory labeling without authority', () => {
   const plan = buildCompletionPlanRecord({
     completionPlanId: 'CP-1',
     projectId: 'P-1',
@@ -218,8 +268,10 @@ test('completion plan record carries project/Store identity without authority', 
     createdAt: '2026-09-13T20:00:00Z',
   });
   assert.equal(plan.recordType, COMPLETION_RECORD_TYPES.PLAN);
+  assert.equal(plan.completionPlanVersion, 'STB-COMPLETION-PLAN-0.2');
   assert.equal(plan.storeDisposition, 'SUPPORTABLE');
   assert.equal(plan.inspectionStatus, 'NOT_RECORDED');
+  assert.equal(plan.labelingRequired, true);
   assert.equal(plan.physicalExecutionAuthority, false);
   assert.equal(plan.operatorMayPromote, false);
 });
