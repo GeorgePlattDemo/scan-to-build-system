@@ -24,6 +24,33 @@ import { createStoreAdapter } from './store-adapter.mjs';
 
 export const APP_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
+const CANDIDATE_STATIC_ASSETS = Object.freeze({
+  '/ui/project-configurator.mjs': Object.freeze({
+    relativePath: 'browser/ui/project-configurator.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+  '/ui/project-renderer.mjs': Object.freeze({
+    relativePath: 'browser/ui/project-renderer.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+  '/domain/configurator.mjs': Object.freeze({
+    relativePath: 'browser/domain/configurator.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+  '/domain/class-runner.mjs': Object.freeze({
+    relativePath: 'browser/domain/class-runner.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+  '/domain/alcove-engine.mjs': Object.freeze({
+    relativePath: 'browser/domain/alcove-engine.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+  '/shared/alcove-rule.mjs': Object.freeze({
+    relativePath: 'shared/alcove-rule.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+});
+
 export { isAllowedHost, isAllowedOrigin };
 
 export function resolveStaticAsset(requestUrl) {
@@ -53,7 +80,7 @@ export function resolveStaticAsset(requestUrl) {
     return null;
   }
 
-  return STATIC_ASSETS[collapsed] ?? null;
+  return STATIC_ASSETS[collapsed] ?? CANDIDATE_STATIC_ASSETS[collapsed] ?? null;
 }
 
 function extractRawPath(requestUrl) {
@@ -70,7 +97,6 @@ function extractRawPath(requestUrl) {
   }
   return withoutQuery;
 }
-
 
 function sendText(res, status, body, extraHeaders = {}) {
   const payload = Buffer.from(body, 'utf8');
