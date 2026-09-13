@@ -34,10 +34,6 @@ const CANDIDATE_STATIC_ASSETS = Object.freeze({
     relativePath: 'browser/ui/project-renderer.mjs',
     contentType: 'text/javascript; charset=utf-8',
   }),
-  '/ui/published-job-trial.mjs': Object.freeze({
-    relativePath: 'browser/ui/published-job-trial.mjs',
-    contentType: 'text/javascript; charset=utf-8',
-  }),
   '/domain/configurator.mjs': Object.freeze({
     relativePath: 'browser/domain/configurator.mjs',
     contentType: 'text/javascript; charset=utf-8',
