@@ -4,6 +4,11 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { pathToFileURL } from 'node:url';
 
+import { derivePublishedJobCompletionPreview } from '../shared/completion-from-result.mjs';
+import {
+  boundedPublishedEstimate,
+  boundedPublishedEvaluation,
+} from '../server/published-job-adapter.mjs';
 import {
   PUBLISHED_JOBS,
   PUBLISHED_JOB_STORE_PIN,
@@ -72,17 +77,24 @@ function executePublishedJob(store, catalog, job) {
   if (!ALLOWED_STATUSES.has(evaluation?.status)) {
     throw new Error(`Store returned an undeclared disposition for ${job.id}`);
   }
-  return {
+  const boundedEvaluation = boundedPublishedEvaluation(evaluation);
+  const result = {
     id: job.id,
     label: job.label,
+    machineFamily: job.machineFamily,
     requestType: job.requestType,
     storeSku: job.storeSku,
     status: evaluation.status,
-    evaluation,
-    estimate,
+    ...boundedEvaluation,
+    estimate: boundedPublishedEstimate(estimate),
+    operationalRequirements: job.operationalRequirements,
     boundary: job.boundary,
     notClaimed: job.notClaimed,
+    physicalExecutionAuthorized: false,
+    controllerOutputProduced: false,
   };
+  result.completionPreview = derivePublishedJobCompletionPreview(result);
+  return result;
 }
 
 function selectedJobs(argv) {
