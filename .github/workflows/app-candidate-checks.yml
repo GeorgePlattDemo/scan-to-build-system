@@ -67,5 +67,6 @@ jobs:
           path: |
             apps/stb/ops
             apps/stb/shared
+            apps/stb/server
           if-no-files-found: error
           retention-days: 7
