@@ -39,15 +39,18 @@ jobs:
       - name: Boundary tests
         run: npm run test:boundaries
 
-      - name: Store source and adapter fail-closed tests
-        run: npm run test:store
+      # This workflow intentionally has no cross-repository Store checkout.
+      # Exercise the source gate in the state CI actually has instead of pretending
+      # the pinned integration suite can run without STB_STORE_ZERO_ROOT.
+      - name: Store fail-closed tests (no external checkout)
+        run: >-
+          node --test --test-concurrency=1
+          --test-name-pattern="missing STB_STORE_ZERO_ROOT|nonexistent Store root|wrong Store pin|unavailable Store source"
+          test/store/source-gate.test.mjs
 
-      # Two browser tests exercise the real pinned Store checkout rather than the
-      # browser-side mock transport. This workflow has no cross-repository Store
-      # checkout or STB_STORE_ZERO_ROOT, so running those two here would only
-      # prove that the adapter correctly fails closed. The Store test suite above
-      # covers that condition explicitly. The complete browser suite remains the
-      # local/pinned-Store integration check when STB_STORE_ZERO_ROOT is present.
+      # These two browser cases exercise the real pinned Store checkout rather than
+      # the browser-side mock transport. They remain part of npm run test:browser
+      # for a workspace that has the exact clean Store checkout mounted.
       - name: Browser tests (Store checkout not mounted)
         run: >-
           npx playwright test --config test/playwright.config.mjs
