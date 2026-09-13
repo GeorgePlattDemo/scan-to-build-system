@@ -24,6 +24,22 @@ test('published job menu is exactly the bounded three-offering trial', () => {
     'SHEET_MODE2_STENCIL_V1',
     'SHEET_MODE2_ARCHED_APERTURE_V0',
   ]);
+  assert.deepEqual(PUBLISHED_JOBS.map((job) => job.machineFamily), ['D001', 'S001', 'S001']);
+});
+
+test('published completion boundary requires labels and keeps sheet drilling out of S-001 this round', () => {
+  const square = publishedJob('square-stick');
+  const rect = publishedJob('rect-stencil');
+  const arch = publishedJob('arched-opening');
+  assert.equal(square.operationalRequirements.labeling.required, true);
+  assert.equal(rect.operationalRequirements.labeling.required, true);
+  assert.equal(arch.operationalRequirements.labeling.required, true);
+  assert.equal(rect.operationalRequirements.sheetDrillingThisRound, false);
+  assert.equal(arch.operationalRequirements.sheetDrillingThisRound, false);
+  assert.equal(rect.operationalRequirements.tabRemovalSelective, true);
+  assert.equal(arch.operationalRequirements.tabRemovalSelective, true);
+  assert.ok(rect.notClaimed.includes('sheet drilling'));
+  assert.ok(arch.notClaimed.includes('sheet drilling'));
 });
 
 test('published defaults are human numbers, with fixed Store policy kept separate', () => {
