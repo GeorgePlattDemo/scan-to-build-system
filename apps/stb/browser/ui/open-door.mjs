@@ -40,15 +40,15 @@ const PUBLISHED_STARTS = Object.freeze([
   }),
   Object.freeze({
     id: 'arched-opening',
-    label: 'Arched opening in 1/2 in plywood',
-    detail: 'Reference outer panel stays 48 × 72 in. Change only the opening width, straight height, and rise.',
-    basis: 'STB-ZERO-PLY-050-48X96-001 · SHEET_MODE2_ARCHED_APERTURE_V0',
-    defaults: 'Starts at 36 in wide, 36 in straight height, 12 in rise. Store derives radius and checks margins and tab planning.',
+    label: 'Centered arched cutout in 1/2 in plywood',
+    detail: 'One full 48 × 96 in reference sheet. The complete opening stays centered while you change opening width, straight height, and arch rise.',
+    basis: 'S001_CENTERED_ARCHED_SHEET_V0 · STB-ZERO-PLY-050-48X96-001 · SHEET_MODE2_ARCHED_APERTURE_V0',
+    defaults: 'Starts at 36 in wide, 24 in straight height, 12 in rise. The 36 in total opening height leaves 6 in at each side and 30 in at each end of the full sheet.',
     state: 'candidate',
     button: 'ASK STORE',
     fields: Object.freeze([
       Object.freeze({ key: 'openingWidthIn', label: 'Opening width (in)', value: 36 }),
-      Object.freeze({ key: 'straightHeightIn', label: 'Straight height (in)', value: 36 }),
+      Object.freeze({ key: 'straightHeightIn', label: 'Straight height (in)', value: 24 }),
       Object.freeze({ key: 'riseIn', label: 'Rise (in)', value: 12 }),
     ]),
   }),
@@ -144,7 +144,7 @@ function buildPublishedStarts() {
       if (job.id === 'arched-opening') {
         children.push(node('p', {
           className: 'published-derived',
-          text: 'Radius is not calculated by the app. Store uses opening width as the chord, combines it with rise, and returns the derived radius.',
+          text: 'Centering is project geometry. Store—not the app—derives the circular-segment radius and separately checks the current S-001 envelope, route depth, margins, and tab plan.',
         }));
       }
       children.push(
@@ -212,8 +212,20 @@ function showCandidateBoundary(root, id) {
   if (id === 'rect-stencil') {
     message.textContent = `Rectangular sheet stencil is published on Store candidate ${STORE_CANDIDATE_BASIS}. Store—not the app—checks minimum blank size, parent-sheet bounds, tabs, and route depth. The current app Store pin remains ${STORE_PIN}.`;
   } else if (id === 'arched-opening') {
-    message.textContent = `Arched opening is published on Store candidate ${STORE_CANDIDATE_BASIS}. Store derives the circular-segment radius and checks aperture margins and tab planning. The current app Store pin remains ${STORE_PIN}.`;
+    message.textContent = `Centered arched sheet is published on Store candidate ${STORE_CANDIDATE_BASIS}. The app derives centered placement on the 48 × 96 sheet; Store derives the circular-segment radius and checks the current aperture envelope and tab plan. The current app Store pin remains ${STORE_PIN}.`;
   }
+}
+
+function centeredArchPlacementText(inputs) {
+  if (!inputs) return '';
+  const width = Number(inputs.openingWidthIn);
+  const straight = Number(inputs.straightHeightIn);
+  const rise = Number(inputs.riseIn);
+  if (![width, straight, rise].every(Number.isFinite)) return '';
+  const openingHeight = straight + rise;
+  const side = (48 - width) / 2;
+  const end = (96 - openingHeight) / 2;
+  return ` Centered project geometry: ${openingHeight} in total opening height; ${side.toFixed(3).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1')} in left/right and ${end.toFixed(3).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1')} in top/bottom.`;
 }
 
 function publishedJobAnswerText(body) {
@@ -227,13 +239,14 @@ function publishedJobAnswerText(body) {
   const issues = [...(body.reasons ?? []), ...(body.unresolved ?? [])];
   const issueText = issues.length ? ` Store basis: ${issues.join(', ')}.` : '';
   const envelopeText = body.envelope ? ` Envelope: ${body.envelope}.` : '';
+  const placementText = body.jobId === 'arched-opening' ? centeredArchPlacementText(body.inputs) : '';
   const curveText = body.curve?.derivedRadius_in != null
     ? ` ${body.curve.chord_in} in chord + ${body.curve.rise_in} in rise → Store-derived ${Number(body.curve.derivedRadius_in).toFixed(3).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1')} in radius.`
     : '';
   const tabText = body.retention?.plannedTabCount != null
     ? ` Store tab plan: ${body.retention.plannedTabCount} retained tabs (${body.retention.tabPlanStatus ?? 'status not stated'}).`
     : '';
-  return `${body.label}: Store ${body.status}.${envelopeText}${issueText}${curveText}${tabText}${materialText} This is a Store answer only — no order, machine program, Cycle Start, or physical fabrication is authorized.`;
+  return `${body.label}: Store ${body.status}.${envelopeText}${issueText}${placementText}${curveText}${tabText}${materialText} This is a Store answer only — no order, machine program, Cycle Start, or physical fabrication is authorized.`;
 }
 
 function readPublishedInputs(card) {
