@@ -18,7 +18,8 @@ test('landing and orientation expose the broad intake contract without promoting
   await expect(page.locator('[data-narrative="landing-contract"]')).toContainText(
     'nothing becomes controlling merely because software read it',
   );
-  await expect(page.locator('.landing-sequence .narrative-detail')).toHaveCount(7);
+  await expect(page.locator('.landing-sequence .narrative-detail')).toHaveCount(0);
+  await expect(page.locator('#landing-sequence li')).toHaveText([...COPY.sequence]);
 
   await page.getByRole('button', { name: ACTORS.professional.label }).click();
   await expect(page.locator('[data-narrative="orientation-professional"]')).toContainText(
@@ -44,7 +45,7 @@ test('review, Store, result, and record pages expose authority boundaries withou
   await startOwnProject(page, 'new');
 
   await page.locator('[data-nav-page="confirm"]').click();
-  await expect(page.locator('[data-screen="confirm"]')).toBeVisible();
+  await expect(page.locator('main[data-screen="confirm"]')).toBeVisible();
   await expect(page.locator('[data-narrative="confirm-freeze"]')).toContainText(
     'does not by itself mean ordered, paid, material allocated, production released',
   );
