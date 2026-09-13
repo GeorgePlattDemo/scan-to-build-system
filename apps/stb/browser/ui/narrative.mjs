@@ -1,13 +1,3 @@
-const LANDING_DETAILS = Object.freeze({
-  'YOU SCAN': 'Capture the space with laser, AR, or tape. The measurements are yours.',
-  'YOU DEFINE': 'One part, several parts, or a need we do not offer yet.',
-  'YOU SELECT': 'Set the material, size, doors, and other available options.',
-  'YOU CONFIRM YOUR DEFINITION': 'Approve exactly what you want built—and nothing else.',
-  'YOUR DEFINITION REACHES THE CUT': 'Your confirmed dimensions guide the work without being redrawn, retyped, or reinterpreted along the way.',
-  'WE CUT · MILL · DRILL · LABEL': 'Within stated limits. Staged for pickup. We tell you when your parts are ready.',
-  'YOU BUILD.': 'Assembly and use stay on your side of the handoff. Installation is not offered in this build.',
-});
-
 const AUTHORITY_STAGES = Object.freeze([
   {
     name: 'YOU',
@@ -113,8 +103,6 @@ function addStyle() {
     .narrative-band strong,.narrative-card strong{font-weight:650}
     .narrative-kicker{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7a7168;margin:0 0 6px}
     .narrative-copy{margin:0;color:#4e4943;line-height:1.55}
-    .landing-sequence li[data-narrative-detail="true"]{margin-bottom:10px}
-    .landing-sequence .narrative-detail{display:block;font-size:13px;color:#6c655e;margin-top:2px;max-width:58rem}
     .narrative-axis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin:12px 0 16px}
     .narrative-axis>div{border:1px solid #e3ded7;border-radius:10px;padding:10px 12px;background:#fff}
     .narrative-axis b{display:block;font-size:12px;margin-bottom:3px}
@@ -154,16 +142,9 @@ function once(host, key, build) {
 }
 
 function decorateLanding(screen) {
+  // The landing sequence is locked proposition copy. Narrative belongs beside it,
+  // not inside the sequence items where it would mutate the public statement.
   const list = screen.querySelector('.landing-sequence');
-  if (list) {
-    for (const item of list.querySelectorAll('li')) {
-      if (item.dataset.narrativeDetail === 'true') continue;
-      const detail = LANDING_DETAILS[item.textContent.trim()];
-      if (!detail) continue;
-      item.dataset.narrativeDetail = 'true';
-      item.append(node('span', { className: 'narrative-detail', text: detail }));
-    }
-  }
   const band = once(screen, 'landing-contract', () =>
     node('section', { className: 'narrative-band' }, [
       node('p', { className: 'narrative-kicker', text: 'One definition, all the way through' }),
