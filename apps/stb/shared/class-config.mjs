@@ -2,6 +2,9 @@ import { ALCOVE_CLASS_ID, ALCOVE_REFERENCE_EXAMPLE } from './alcove-rule.mjs';
 import { PICNIC_CLASS_ID, PICNIC_REFERENCE_EXAMPLES } from './picnic-rule.mjs';
 
 export const S001_CENTERED_ARCH_CLASS_ID = 'S001_CENTERED_ARCHED_SHEET_V0';
+export const S001_CENTERED_ARCH_CLASS_VERSION = '0.1-canonical-bounded';
+export const S001_CENTERED_ARCH_RULE_VERSION = 's001.centered-arched-sheet/0.1';
+export const S001_CENTERED_ARCH_DEFINITION_KIND = 's001.centered-arched-sheet.v1';
 export const S001_CENTERED_WORK_FIELD_ID = 'S001-CENTER-WORK-FIELD-V0';
 
 export const S001_CENTERED_ARCH_FIXED = Object.freeze({
@@ -29,6 +32,32 @@ export const S001_CENTERED_ARCH_DEFAULTS = Object.freeze({
 function finiteNumber(name, value) {
   if (!Number.isFinite(value)) throw new TypeError(`${name} must be a finite number`);
   return value;
+}
+
+function raw(input, key) {
+  const value = input?.[key];
+  if (value && typeof value === 'object' && 'raw' in value) {
+    return String(value.raw ?? '').trim();
+  }
+  return String(value ?? '').trim();
+}
+
+function parsePositive(input, key, unresolved) {
+  const text = raw(input, key);
+  if (!text) {
+    unresolved.push(`missing-${key}`);
+    return null;
+  }
+  const value = Number(text);
+  if (!Number.isFinite(value)) {
+    unresolved.push(`invalid-${key}`);
+    return null;
+  }
+  if (!(value > 0)) {
+    unresolved.push(`nonpositive-${key}`);
+    return null;
+  }
+  return Object.freeze({ raw: text, value, unit: 'in', canonical: String(value) });
 }
 
 export function deriveS001CenteredArchGeometry(inputs = S001_CENTERED_ARCH_DEFAULTS) {
@@ -95,6 +124,50 @@ export function deriveS001CenteredArchGeometry(inputs = S001_CENTERED_ARCH_DEFAU
   });
 }
 
+export function normalizeS001CenteredArchConfiguration(input = {}, { basis = 'manual-entry' } = {}) {
+  const source = input.inputs ?? input;
+  return Object.freeze({
+    kind: 's001.centered-arched-sheet.config.v1',
+    basis,
+    inputs: Object.freeze({
+      openingWidthIn: Object.freeze({ raw: raw(source, 'openingWidthIn'), unit: 'in', method: basis }),
+      straightHeightIn: Object.freeze({ raw: raw(source, 'straightHeightIn'), unit: 'in', method: basis }),
+      riseIn: Object.freeze({ raw: raw(source, 'riseIn'), unit: 'in', method: basis }),
+    }),
+  });
+}
+
+export function evaluateS001CenteredArchConfiguration(configuration) {
+  const unresolvedInputs = [];
+  const inputs = configuration?.inputs ?? configuration ?? {};
+  const openingWidth = parsePositive(inputs, 'openingWidthIn', unresolvedInputs);
+  const straightHeight = parsePositive(inputs, 'straightHeightIn', unresolvedInputs);
+  const rise = parsePositive(inputs, 'riseIn', unresolvedInputs);
+  if (unresolvedInputs.length > 0) {
+    return Object.freeze({
+      valid: false,
+      unresolvedReason: unresolvedInputs[0],
+      unresolvedInputs,
+      unresolvedConditions: [],
+      inputs: Object.freeze({ openingWidthIn: openingWidth, straightHeightIn: straightHeight, riseIn: rise }),
+      geometry: null,
+    });
+  }
+  const geometry = deriveS001CenteredArchGeometry({
+    openingWidthIn: openingWidth.value,
+    straightHeightIn: straightHeight.value,
+    riseIn: rise.value,
+  });
+  return Object.freeze({
+    valid: true,
+    unresolvedReason: null,
+    unresolvedInputs: [],
+    unresolvedConditions: geometry.withinWorkField ? [] : ['PROJECT_GEOMETRY_OUTSIDE_CANONICAL_FIELD'],
+    inputs: Object.freeze({ openingWidthIn: openingWidth, straightHeightIn: straightHeight, riseIn: rise }),
+    geometry,
+  });
+}
+
 export const CLASS_CONFIGURATORS = Object.freeze({
   [ALCOVE_CLASS_ID]: Object.freeze({
     classId: ALCOVE_CLASS_ID,
@@ -110,12 +183,7 @@ export const CLASS_CONFIGURATORS = Object.freeze({
       Object.freeze({ key: 'shelfCount', label: 'Shelf count', unit: 'ea', inputMode: 'numeric', help: 'Number of separate candidate blank occurrences.' }),
     ]),
     examples: Object.freeze([
-      Object.freeze({
-        id: 'published-reference-example',
-        label: 'USE PUBLISHED EXAMPLE',
-        basis: 'published-reference-example',
-        configuration: ALCOVE_REFERENCE_EXAMPLE,
-      }),
+      Object.freeze({ id: 'published-reference-example', label: 'USE PUBLISHED EXAMPLE', basis: 'published-reference-example', configuration: ALCOVE_REFERENCE_EXAMPLE }),
     ]),
     exampleNote: 'Published example is an explicit reference choice: 46.25 − 0.75 − 0.75 = 44.75 in; 3 blanks at 44.75 × 11.00 × 0.75 in. Structural span is not evaluated.',
   }),
@@ -125,37 +193,15 @@ export const CLASS_CONFIGURATORS = Object.freeze({
     kicker: 'Second bounded class · shared runner proof + donor extension',
     lead: 'Product length drives candidate geometry. Requested scope and material are holder inputs only: they do not create Store availability, price, structural adequacy, machine support, production release, or fabrication authority.',
     fields: Object.freeze([
-      Object.freeze({
-        key: 'productLength',
-        label: 'Overall product length',
-        unit: 'in',
-        inputMode: 'decimal',
-        help: 'Candidate input range 60–216 in. This range is only an application/demo bound, not a structural rule, Store stock limit, or machine envelope.',
-      }),
-      Object.freeze({
-        key: 'requestedScope',
-        label: 'Requested scope',
-        unit: 'complete-part-set | frame-kit',
-        inputMode: 'text',
-        help: 'Holder request only. “frame-kit” does not mean a Store or machine can fulfill it.',
-      }),
-      Object.freeze({
-        key: 'materialPreference',
-        label: 'Material preference',
-        unit: 'plain words',
-        inputMode: 'text',
-        help: 'Preference only. Store material identity, treatment/use category, SKU, availability and price remain unresolved.',
-      }),
+      Object.freeze({ key: 'productLength', label: 'Overall product length', unit: 'in', inputMode: 'decimal', help: 'Candidate input range 60–216 in. This range is only an application/demo bound, not a structural rule, Store stock limit, or machine envelope.' }),
+      Object.freeze({ key: 'requestedScope', label: 'Requested scope', unit: 'complete-part-set | frame-kit', inputMode: 'text', help: 'Holder request only. “frame-kit” does not mean a Store or machine can fulfill it.' }),
+      Object.freeze({ key: 'materialPreference', label: 'Material preference', unit: 'plain words', inputMode: 'text', help: 'Preference only. Store material identity, treatment/use category, SKU, availability and price remain unresolved.' }),
     ]),
     examples: Object.freeze(PICNIC_REFERENCE_EXAMPLES.map((example) => Object.freeze({
       id: example.id,
       label: example.label,
       basis: example.basis,
-      configuration: Object.freeze({
-        productLength: example.productLength,
-        requestedScope: example.requestedScope,
-        materialPreference: example.materialPreference,
-      }),
+      configuration: Object.freeze({ productLength: example.productLength, requestedScope: example.requestedScope, materialPreference: example.materialPreference }),
     }))),
     exampleNote: 'This pass admits the donor’s broader length and frame-kit request vocabulary without admitting its structural, price, Store, shipping, or machine claims. Separate-benches geometry and adjustable-height geometry remain donor research, not implemented class behavior.',
   }),
@@ -170,12 +216,7 @@ export const CLASS_CONFIGURATORS = Object.freeze({
       Object.freeze({ key: 'riseIn', label: 'Arch rise', unit: 'in', inputMode: 'decimal', help: 'Added to straight height. Straight height + rise must remain within the centered 36 in vertical work field.' }),
     ]),
     examples: Object.freeze([
-      Object.freeze({
-        id: 'canonical-s001-reference',
-        label: 'USE CANONICAL 4 × 8 EXAMPLE',
-        basis: 'canonical-s001-centered-field-reference',
-        configuration: S001_CENTERED_ARCH_DEFAULTS,
-      }),
+      Object.freeze({ id: 'canonical-s001-reference', label: 'USE CANONICAL 4 × 8 EXAMPLE', basis: 'canonical-s001-centered-field-reference', configuration: S001_CENTERED_ARCH_DEFAULTS }),
     ]),
     exampleNote: 'Canonical project: 36 in opening width, 24 in straight height, 12 in rise. Total opening height is 36 in. The centered work field leaves 24 in of the full sheet at each long-axis end and 6 in at top/bottom outside the field.',
   }),
