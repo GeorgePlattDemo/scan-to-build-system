@@ -46,7 +46,7 @@ test('hidden S-001 mapped engine loads and preserves the canonical bounded geome
   expect(result.projection.operationRequirements.sheetDrillingThisRound).toBe(false);
   expect(result.projection.operationRequirements.tabRemovalSelective).toBe(true);
   expect(result.projection.operationRequirements.labelingRequired).toBe(true);
-  expect(result.projection.unresolvedConditions).toContain('DURABLE_S001_STORE_CUSTODY_NOT_CONNECTED');
+  expect(result.projection.unresolvedConditions).not.toContain('DURABLE_S001_STORE_CUSTODY_NOT_CONNECTED');
   expect(result.definition.sheetDrillingThisRound).toBe(false);
   expect(result.definition.labelingRequired).toBe(true);
   expect(result.candidatePatch.unresolved).toBe(true);
