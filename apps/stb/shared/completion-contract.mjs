@@ -15,6 +15,9 @@ export const COMPLETION_ACTIONS = Object.freeze({
   RECORD_INSPECTION: 'RECORD_INSPECTION',
   MARK_LABEL_APPLIED: 'MARK_LABEL_APPLIED',
   MARK_STAGED: 'MARK_STAGED',
+  MARK_PICKUP_READY: 'MARK_PICKUP_READY',
+  MARK_DELIVERY_ARRANGED: 'MARK_DELIVERY_ARRANGED',
+  PREPARE_CLOSEOUT_RECORD: 'PREPARE_CLOSEOUT_RECORD',
   RECORD_CUSTODY_TRANSFER: 'RECORD_CUSTODY_TRANSFER',
   CLOSE_PROJECT: 'CLOSE_PROJECT',
   STOP_WORK: 'STOP_WORK',
@@ -56,6 +59,13 @@ export const RECEIPT_PROFILES = Object.freeze({
   CONTRACTOR: 'CONTRACTOR',
 });
 
+export const LABELING_REQUIREMENT = Object.freeze({
+  required: true,
+  selective: false,
+  timing: 'WHEN_PART_OR_PACKAGE_LEAVES_PRIMARY_CELL_STREAM',
+  authorityEffect: false,
+});
+
 const ROLE_ACTIONS = Object.freeze({
   [COMPLETION_ROLES.CUSTOMER]: new Set([
     COMPLETION_ACTIONS.CHOOSE_SECONDARY_OPTION,
@@ -70,6 +80,9 @@ const ROLE_ACTIONS = Object.freeze({
     COMPLETION_ACTIONS.RECORD_INSPECTION,
     COMPLETION_ACTIONS.MARK_LABEL_APPLIED,
     COMPLETION_ACTIONS.MARK_STAGED,
+    COMPLETION_ACTIONS.MARK_PICKUP_READY,
+    COMPLETION_ACTIONS.MARK_DELIVERY_ARRANGED,
+    COMPLETION_ACTIONS.PREPARE_CLOSEOUT_RECORD,
     COMPLETION_ACTIONS.RECORD_CUSTODY_TRANSFER,
     COMPLETION_ACTIONS.CLOSE_PROJECT,
     COMPLETION_ACTIONS.STOP_WORK,
@@ -149,7 +162,9 @@ export function evaluateCompletionLine(line) {
     reasons.push('PRIMARY_CONTRIBUTION_STATUS_UNRESOLVED');
   }
 
-  const allowed = uniqueStrings(line.allowedSecondaryOptions);
+  const allowed = uniqueStrings(
+    line.allowedSecondaryOptions ?? line.residualOperation?.allowedSecondaryOptions,
+  );
   const selectedOption = string(line.selectedOption);
   if (!selectedOption) reasons.push('SECONDARY_OPTION_NOT_SELECTED');
   else if (!allowed.includes(selectedOption)) reasons.push('SECONDARY_OPTION_NOT_ALLOWED');
@@ -300,7 +315,7 @@ export function buildCompletionPlanRecord(input) {
   const lines = Array.isArray(input.lines) ? input.lines.map((line) => ({ ...line })) : [];
   return Object.freeze({
     recordType: COMPLETION_RECORD_TYPES.PLAN,
-    completionPlanVersion: 'STB-COMPLETION-PLAN-0.1',
+    completionPlanVersion: 'STB-COMPLETION-PLAN-0.2',
     completionPlanId: requiredString('completionPlanId', input.completionPlanId),
     projectId: requiredString('projectId', input.projectId),
     candidateRevisionId: requiredString('candidateRevisionId', input.candidateRevisionId),
@@ -310,6 +325,7 @@ export function buildCompletionPlanRecord(input) {
     storeDisposition: requiredString('storeDisposition', input.storeDisposition),
     lines,
     inspectionStatus: string(input.inspectionStatus) ?? 'NOT_RECORDED',
+    labelingRequired: true,
     labelingStatus: string(input.labelingStatus) ?? 'NOT_STARTED',
     stagingStatus: string(input.stagingStatus) ?? 'NOT_STARTED',
     fulfillmentStatus: string(input.fulfillmentStatus) ?? 'NOT_READY',
