@@ -11,6 +11,7 @@ import {
 } from '../ops/published-jobs.mjs';
 
 const execFileAsync = promisify(execFile);
+const ALLOWED_STORE_STATUSES = new Set(['SUPPORTABLE', 'UNRESOLVED', 'REFUSED', 'UNAVAILABLE']);
 
 export const PUBLISHED_JOB_PATH = '/api/published-job';
 
@@ -133,6 +134,19 @@ export async function createPublishedJobAdapter({
       if (!job) return { status: 422, body: { ready: true, code: 'UNKNOWN_PUBLISHED_JOB' } };
 
       const { evaluation, estimate } = runJob(store, catalog, job);
+      if (!ALLOWED_STORE_STATUSES.has(evaluation?.status)) {
+        return {
+          status: 502,
+          body: {
+            kind: 'published-job-store-answer',
+            ready: false,
+            storePin: PUBLISHED_JOB_STORE_PIN,
+            code: 'PUBLISHED_JOB_STORE_RESPONSE_INVALID',
+            physicalExecutionAuthorized: false,
+            controllerOutputProduced: false,
+          },
+        };
+      }
       return {
         status: 200,
         body: {
@@ -143,7 +157,7 @@ export async function createPublishedJobAdapter({
           requestType: job.requestType,
           storeSku: job.storeSku,
           storePin: PUBLISHED_JOB_STORE_PIN,
-          status: evaluation?.status ?? 'UNRESOLVED',
+          status: evaluation.status,
           evidenceClass: evaluation?.evidenceClass ?? null,
           physicalStatus: evaluation?.physicalStatus ?? null,
           commissioned: evaluation?.commissioned ?? null,
