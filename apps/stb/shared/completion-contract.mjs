@@ -12,6 +12,7 @@ export const COMPLETION_ACTIONS = Object.freeze({
   ACCEPT_YARD_SECONDARY: 'ACCEPT_YARD_SECONDARY',
   REJECT_YARD_SECONDARY: 'REJECT_YARD_SECONDARY',
   MARK_SECONDARY_COMPLETE: 'MARK_SECONDARY_COMPLETE',
+  RECORD_INSPECTION: 'RECORD_INSPECTION',
   MARK_LABEL_APPLIED: 'MARK_LABEL_APPLIED',
   MARK_STAGED: 'MARK_STAGED',
   RECORD_CUSTODY_TRANSFER: 'RECORD_CUSTODY_TRANSFER',
@@ -66,6 +67,7 @@ const ROLE_ACTIONS = Object.freeze({
     COMPLETION_ACTIONS.ACCEPT_YARD_SECONDARY,
     COMPLETION_ACTIONS.REJECT_YARD_SECONDARY,
     COMPLETION_ACTIONS.MARK_SECONDARY_COMPLETE,
+    COMPLETION_ACTIONS.RECORD_INSPECTION,
     COMPLETION_ACTIONS.MARK_LABEL_APPLIED,
     COMPLETION_ACTIONS.MARK_STAGED,
     COMPLETION_ACTIONS.RECORD_CUSTODY_TRANSFER,
@@ -234,6 +236,7 @@ export function evaluateCompletionPlan(plan) {
     [COMPLETION_LINE_STATUS.UNRESOLVED, COMPLETION_LINE_STATUS.REFUSED].includes(line.status),
   );
 
+  if (plan.inspectionStatus !== 'RECORDED') reasons.push('INSPECTION_NOT_RECORDED');
   if (plan.labelingStatus !== 'APPLIED') reasons.push('LABELING_NOT_COMPLETE');
   if (plan.stagingStatus !== 'STAGED') reasons.push('STAGING_NOT_COMPLETE');
   if (!['PICKUP_READY', 'DELIVERY_ARRANGED'].includes(plan.fulfillmentStatus)) {
@@ -306,6 +309,7 @@ export function buildCompletionPlanRecord(input) {
     storeResponseId: string(input.storeResponseId),
     storeDisposition: requiredString('storeDisposition', input.storeDisposition),
     lines,
+    inspectionStatus: string(input.inspectionStatus) ?? 'NOT_RECORDED',
     labelingStatus: string(input.labelingStatus) ?? 'NOT_STARTED',
     stagingStatus: string(input.stagingStatus) ?? 'NOT_STARTED',
     fulfillmentStatus: string(input.fulfillmentStatus) ?? 'NOT_READY',
