@@ -8,8 +8,8 @@ import { pathToFileURL } from 'node:url';
 import { d001FeaturedBoardStoreSpec } from '../../shared/d001-featured-board.mjs';
 
 const execFileAsync = promisify(execFile);
-const STORE_CANDIDATE_PIN = '3e1f9f2c18668de86d92c6ccae7e79d3cadd35a1';
-const root = process.env.STB_D001_STORE_CANDIDATE_ROOT ?? null;
+const STORE_CANDIDATE_PIN = '096e99d645d745b1670185f46c75de75f9e59661';
+const root = process.env.STB_COMBINED_STORE_CANDIDATE_ROOT ?? process.env.STB_D001_STORE_CANDIDATE_ROOT ?? null;
 
 async function loadCandidate() {
   if (!root) return null;
@@ -19,10 +19,11 @@ async function loadCandidate() {
   assert.equal(porcelain.stdout.trim(), '');
   const store = await import(pathToFileURL(path.join(root, 'store-zero-stage2-store.mjs')).href);
   const fiveTool = await import(pathToFileURL(path.join(root, 'd001-five-tool.mjs')).href);
-  return { store, fiveTool };
+  const sheetArched = await import(pathToFileURL(path.join(root, 's001-mode2-arched.mjs')).href);
+  return { store, fiveTool, sheetArched };
 }
 
-test('D-001 five-tool candidate zipper: app requirement -> Store candidate', { skip: !root }, async () => {
+test('D-001 five-tool candidate zipper: app requirement -> combined Store candidate', { skip: !root }, async () => {
   const modules = await loadCandidate();
   const catalog = modules.store.loadCatalog();
   const item = modules.store.findSku(catalog, 'STB-ZERO-SPF-2X4-72-001');
@@ -62,4 +63,43 @@ test('D-001 five-tool candidate zipper: app requirement -> Store candidate', { s
   const storePilot = modules.fiveTool.evaluateD001FeaturedBoard(item, appPilot.spec);
   assert.equal(storePilot.status, 'SUPPORTABLE');
   assert.equal(storePilot.featureResults[0].derived.diameterIn, 0.1875);
+});
+
+test('combined Store candidate exposes current S-001 arched-sheet capability without machine authority', { skip: !root }, async () => {
+  const modules = await loadCandidate();
+  const catalog = modules.store.loadCatalog();
+  const item = modules.store.findSku(catalog, 'STB-ZERO-PLY-050-48X96-001');
+
+  const result = modules.sheetArched.evaluateSheetMode2Arched(item, {
+    outerL_in: 72,
+    outerW_in: 48,
+    apertureW_in: 36,
+    apertureStraightH_in: 36,
+    arcChord_in: 36,
+    arcRise_in: 12,
+    arcRadius_in: 19.5,
+    tabCount: 4,
+    routeDepthIn: 0.5,
+  });
+
+  assert.equal(result.status, 'SUPPORTABLE');
+  assert.equal(result.capabilityId, 'SHEET_MODE2_ARCHED_APERTURE_V0');
+  assert.equal(result.retention.plannedTabCount, 5);
+  assert.equal(result.retention.physicalRetentionStatus, 'NOT_MEASURED');
+  assert.equal(result.commissioned, false);
+
+  const rejectedMachineLanguage = modules.sheetArched.evaluateSheetMode2Arched(item, {
+    outerL_in: 72,
+    outerW_in: 48,
+    apertureW_in: 36,
+    apertureStraightH_in: 36,
+    arcChord_in: 36,
+    arcRise_in: 12,
+    arcRadius_in: 19.5,
+    tabCount: 4,
+    routeDepthIn: 0.5,
+    gcode: 'G2 X36 Y12 R19.5',
+  });
+  assert.equal(rejectedMachineLanguage.status, 'REFUSED');
+  assert.ok(rejectedMachineLanguage.reasons.includes('MACHINE_LOCAL_LANGUAGE_NOT_ACCEPTED'));
 });
