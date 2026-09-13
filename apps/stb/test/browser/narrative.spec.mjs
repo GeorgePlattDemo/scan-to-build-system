@@ -54,13 +54,13 @@ test('review, Store, result, and record pages expose authority boundaries withou
   );
 
   await page.locator('[data-nav-page="store"]').click();
-  await expect(page.locator('[data-screen="store"]')).toBeVisible();
+  await expect(page.locator('main[data-screen="store"]')).toBeVisible();
   await expect(page.locator('[data-narrative="store-boundary"]')).toContainText(
     'Store support is not production release or Cycle Start',
   );
 
   await page.locator('[data-nav-page="result"]').click();
-  await expect(page.locator('[data-screen="result"]')).toBeVisible();
+  await expect(page.locator('main[data-screen="result"]')).toBeVisible();
   await expect(page.locator('[data-future-chain="true"]')).toContainText(
     'What happens next — architecture, not a live order',
   );
@@ -93,7 +93,7 @@ test('review, Store, result, and record pages expose authority boundaries withou
   );
 
   await page.locator('[data-nav-page="record"]').click();
-  await expect(page.locator('[data-screen="record"]')).toBeVisible();
+  await expect(page.locator('main[data-screen="record"]')).toBeVisible();
   await expect(page.locator('[data-narrative="owner-record"]')).toContainText(
     'Missing physical events stay missing',
   );
