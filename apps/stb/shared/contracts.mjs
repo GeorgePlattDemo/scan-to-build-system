@@ -355,6 +355,25 @@ export const CLASS_REFERENCES = Object.freeze([
       authority: false,
     }),
   }),
+  Object.freeze({
+    kind: 'mapped',
+    classId: 'classic-picnic-table-fixture',
+    classVersion: '0.1-software-fixture',
+    ruleVersion: 'classic.picnic-table.fixture/0.1',
+    label: 'Classic Picnic Table — synthetic class fixture',
+    status: 'candidate-software-fixture',
+    storePath: 'unresolved',
+    hint: 'Second-class reuse proof. Software fixture only; not an approved furniture design.',
+    source: Object.freeze({
+      repository: 'GeorgePlattDemo/scan-to-build-system',
+      pin: null,
+      basis: 'STB-APP-STRUCTURE-0.1 §6 synthetic geometry proof; numeric seeds are candidate software-fixture assumptions',
+      ruleVersion: 'classic.picnic-table.fixture/0.1',
+      sourceFile: 'source-library/application-current/STB-APP-STRUCTURE-0.1.md',
+      executable: false,
+      authority: false,
+    }),
+  }),
 ]);
 
 export const OWN_ENTRY = Object.freeze({
@@ -510,6 +529,7 @@ export const STATIC_ASSETS = Object.freeze({
   '/domain/configurator.mjs': JS('browser/domain/configurator.mjs'),
   '/domain/class-runner.mjs': JS('browser/domain/class-runner.mjs'),
   '/domain/alcove-engine.mjs': JS('browser/domain/alcove-engine.mjs'),
+  '/domain/picnic-engine.mjs': JS('browser/domain/picnic-engine.mjs'),
   '/data/repository.mjs': JS('browser/data/repository.mjs'),
   '/data/selectors.mjs': JS('browser/data/selectors.mjs'),
   '/data/store-view.mjs': JS('browser/data/store-view.mjs'),
@@ -521,6 +541,8 @@ export const STATIC_ASSETS = Object.freeze({
   '/shared/canonical.mjs': JS('shared/canonical.mjs'),
   '/shared/board-rule.mjs': JS('shared/board-rule.mjs'),
   '/shared/alcove-rule.mjs': JS('shared/alcove-rule.mjs'),
+  '/shared/picnic-rule.mjs': JS('shared/picnic-rule.mjs'),
+  '/shared/class-config.mjs': JS('shared/class-config.mjs'),
   '/shared/store-wire.mjs': JS('shared/store-wire.mjs'),
   '/shared/store-present.mjs': JS('shared/store-present.mjs'),
   '/shared/review-digest.mjs': JS('shared/review-digest.mjs'),
