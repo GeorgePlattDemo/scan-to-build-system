@@ -1,10 +1,5 @@
 import { canonicalEqual, canonicalJson } from '/shared/canonical.mjs';
-import {
-  PUBLISHED_PROJECT_CLIENT_ID,
-  PUBLISHED_PROJECT_PATH,
-  PUBLISHED_PROJECT_PROTOCOL_VERSION,
-  publishedProjectForClass,
-} from '/shared/published-project-contract.mjs';
+import { S001_CENTERED_ARCH_CLASS_ID } from '/shared/class-config.mjs';
 import { digestCanonical } from '/shared/store-wire.mjs';
 import {
   commitPreparedAppend,
@@ -13,6 +8,22 @@ import {
   listRecords,
 } from '/data/repository.mjs';
 import { currentCandidate, currentProjection, currentStoreAnswer } from '/data/selectors.mjs';
+
+const PUBLISHED_PROJECT_PROTOCOL_VERSION = 'stb-published-project-http/0.1';
+const PUBLISHED_PROJECT_PATH = '/api/published-job';
+const PUBLISHED_PROJECT_CLIENT_ID = 'stb-published-project-client-0.1';
+const S001_CONTRACT = Object.freeze({
+  classId: S001_CENTERED_ARCH_CLASS_ID,
+  jobId: 'arched-opening',
+  requestType: 'SHEET_MODE2_ARCHED_APERTURE_V0',
+  scope: 'SHEET_MODE2_ARCHED_APERTURE_V0',
+  machineFamily: 'S001',
+  expectedStorePin: '4402abeb6b0299a5b6db2eec85ed04c3b0236bcc',
+});
+
+function publishedProjectForClass(classId) {
+  return classId === S001_CONTRACT.classId ? S001_CONTRACT : null;
+}
 
 let activeTransport = null;
 
@@ -51,6 +62,13 @@ async function findDuplicate(localRecordId, candidateRevisionId, scope, payloadD
       && record.payload?.payloadDigest === payloadDigest)
     .sort((a, b) => (a.payload?.requestSequence ?? 0) - (b.payload?.requestSequence ?? 0))
     .at(-1) ?? null;
+}
+
+async function nextAttemptNumber(localRecordId, requestId) {
+  const attempts = (await listRecords(localRecordId, 'attempt')).filter(
+    (record) => record.requestId === requestId,
+  );
+  return attempts.reduce((max, record) => Math.max(max, record.payload?.attemptNumber ?? 0), 0) + 1;
 }
 
 function projectInputs(projection) {
@@ -109,7 +127,7 @@ function estimateEnvelope(estimate) {
   };
 }
 
-function wrapperEnvelope({ answer, contract, project, candidateRevisionId, requestId, attemptId, payloadDigest, sentAt, receivedAt }) {
+function wrapperEnvelope({ answer, contract, project, candidateRevisionId, requestId, attemptId, attemptNumber, payloadDigest, sentAt, receivedAt }) {
   const responseId = opaqueId();
   return {
     protocolVersion: PUBLISHED_PROJECT_PROTOCOL_VERSION,
@@ -124,7 +142,7 @@ function wrapperEnvelope({ answer, contract, project, candidateRevisionId, reque
     querySignature: null,
     payloadDigest,
     attemptId,
-    attemptNumber: 1,
+    attemptNumber,
     sentAt,
     wrapperRespondedAt: receivedAt,
     responseId,
@@ -159,13 +177,13 @@ async function persistPending({ localRecordId, project, requestRecord, attemptRe
     expectedHead: project.currentHead,
     createdAt,
     actionId,
-    records: [requestRecord, attemptRecord],
+    records: [requestRecord, attemptRecord].filter(Boolean),
     event: {
       localRecordId,
       projectId: project.projectId,
       kind: 'event',
       id: opaqueId(),
-      requestId: requestRecord.id,
+      requestId: requestRecord?.id ?? attemptRecord.requestId,
       attemptId: attemptRecord.id,
       createdAt,
       payload: { type: 'published-project-attempt-enqueued', terminal: false },
@@ -197,6 +215,125 @@ async function persistTerminal({ localRecordId, project, requestId, attemptId, c
       },
     },
   });
+}
+
+async function dispatchPublishedProject({ localRecordId, project, contract, requestId, attemptId, attemptNumber, candidateRevisionId, payload, payloadDigest, clock }) {
+  let httpStatus = null;
+  let answer = null;
+  const sentAt = nowIso(clock);
+  try {
+    const response = await transport()(PUBLISHED_PROJECT_PATH, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: canonicalJson(payload),
+    });
+    httpStatus = response.status;
+    answer = await response.json();
+  } catch {
+    const receivedAt = nowIso(clock);
+    await persistTerminal({
+      localRecordId,
+      project,
+      requestId,
+      attemptId,
+      createdAt: receivedAt,
+      actionId: `published-project-transport:${attemptId}:${receivedAt}`,
+      diagnostic: 'PUBLISHED_PROJECT_TRANSPORT_ERROR',
+    });
+    return { status: 'transport', requestId, attemptId, attemptNumber };
+  }
+
+  const receivedAt = nowIso(clock);
+  const inspection = validateAnswer(answer, contract, payload.inputs);
+  if (httpStatus !== 200 || !inspection.ok) {
+    const responseRecord = {
+      localRecordId,
+      projectId: project.projectId,
+      kind: 'response',
+      id: opaqueId(),
+      requestId,
+      attemptId,
+      createdAt: receivedAt,
+      payload: {
+        receivedAt,
+        diagnostic: 'PUBLISHED_PROJECT_RESPONSE_INVALID',
+        validation: inspection,
+        quarantined: true,
+        publishedJobAnswer: answer,
+      },
+    };
+    await persistTerminal({
+      localRecordId,
+      project,
+      requestId,
+      attemptId,
+      createdAt: receivedAt,
+      actionId: `published-project-invalid:${attemptId}:${receivedAt}`,
+      responseRecord,
+      diagnostic: 'PUBLISHED_PROJECT_RESPONSE_INVALID',
+      httpStatus,
+    });
+    return { status: 'diagnostic', requestId, attemptId, attemptNumber, inspection };
+  }
+
+  const envelope = wrapperEnvelope({
+    answer,
+    contract,
+    project,
+    candidateRevisionId,
+    requestId,
+    attemptId,
+    attemptNumber,
+    payloadDigest,
+    sentAt,
+    receivedAt,
+  });
+  const responseRecord = {
+    localRecordId,
+    projectId: project.projectId,
+    kind: 'response',
+    id: envelope.responseId,
+    requestId,
+    attemptId,
+    createdAt: receivedAt,
+    payload: {
+      receivedAt,
+      validation: { ok: true },
+      quarantined: false,
+      wrapperEnvelope: envelope,
+      rawOffering: null,
+      rawEvaluation: envelope.rawEvaluation,
+      rawEstimate: envelope.rawEstimate,
+      estimateAssociationId: null,
+      attributedBasis: envelope.attributedBasis,
+      storePin: envelope.storePin,
+      protocolVersion: envelope.protocolVersion,
+      publishedJobAnswer: answer,
+    },
+  };
+  await persistTerminal({
+    localRecordId,
+    project,
+    requestId,
+    attemptId,
+    createdAt: receivedAt,
+    actionId: `published-project-success:${responseRecord.id}`,
+    responseRecord,
+    httpStatus,
+  });
+
+  const applicability = await currentStoreAnswer(localRecordId, {
+    candidateRevisionId,
+    scope: contract.scope,
+  });
+  return {
+    status: applicability.current === true ? 'current' : 'historical',
+    requestId,
+    attemptId,
+    attemptNumber,
+    responseId: responseRecord.id,
+    applicability,
+  };
 }
 
 export async function issuePublishedProjectQuestion(input) {
@@ -266,119 +403,63 @@ export async function issuePublishedProjectQuestion(input) {
     actionId: input.actionId ?? `published-project-issue:${requestId}:${attemptId}`,
   });
 
-  let httpStatus = null;
-  let answer = null;
-  try {
-    const response = await transport()(PUBLISHED_PROJECT_PATH, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: canonicalJson(payload),
-    });
-    httpStatus = response.status;
-    answer = await response.json();
-  } catch {
-    const receivedAt = nowIso(input.clock);
-    await persistTerminal({
-      localRecordId,
-      project,
-      requestId,
-      attemptId,
-      createdAt: receivedAt,
-      actionId: `published-project-transport:${attemptId}:${receivedAt}`,
-      diagnostic: 'PUBLISHED_PROJECT_TRANSPORT_ERROR',
-    });
-    return { status: 'transport', requestId, attemptId };
-  }
-
-  const receivedAt = nowIso(input.clock);
-  const inspection = validateAnswer(answer, contract, inputs);
-  if (httpStatus !== 200 || !inspection.ok) {
-    const responseRecord = {
-      localRecordId,
-      projectId: project.projectId,
-      kind: 'response',
-      id: opaqueId(),
-      requestId,
-      attemptId,
-      createdAt: receivedAt,
-      payload: {
-        receivedAt,
-        diagnostic: 'PUBLISHED_PROJECT_RESPONSE_INVALID',
-        validation: inspection,
-        quarantined: true,
-        publishedJobAnswer: answer,
-      },
-    };
-    await persistTerminal({
-      localRecordId,
-      project,
-      requestId,
-      attemptId,
-      createdAt: receivedAt,
-      actionId: `published-project-invalid:${attemptId}:${receivedAt}`,
-      responseRecord,
-      diagnostic: 'PUBLISHED_PROJECT_RESPONSE_INVALID',
-      httpStatus,
-    });
-    return { status: 'diagnostic', requestId, attemptId, inspection };
-  }
-
-  const envelope = wrapperEnvelope({
-    answer,
-    contract,
+  return dispatchPublishedProject({
+    localRecordId,
     project,
-    candidateRevisionId,
+    contract,
     requestId,
     attemptId,
+    attemptNumber: 1,
+    candidateRevisionId,
+    payload,
     payloadDigest,
-    sentAt: createdAt,
-    receivedAt,
+    clock: input.clock,
   });
-  const responseRecord = {
+}
+
+export async function retryPublishedProjectQuestion({ localRecordId, requestId, actionId, clock } = {}) {
+  const project = await getProject(localRecordId);
+  if (!project) throw new Error('published project retry requires a committed project');
+  const request = await getRecord(localRecordId, 'request', requestId);
+  if (!request) throw new Error('published project retry requires the original request');
+  const contract = publishedProjectForClass(project.classId);
+  if (!contract || request.payload?.scope !== contract.scope) {
+    throw new Error('published project retry scope does not match the current project class');
+  }
+  const payload = request.payload.payload;
+  const attemptId = opaqueId();
+  const attemptNumber = await nextAttemptNumber(localRecordId, requestId);
+  const createdAt = nowIso(clock);
+  const attemptRecord = {
     localRecordId,
     projectId: project.projectId,
-    kind: 'response',
-    id: envelope.responseId,
+    kind: 'attempt',
+    id: attemptId,
     requestId,
     attemptId,
-    createdAt: receivedAt,
-    payload: {
-      receivedAt,
-      validation: { ok: true },
-      quarantined: false,
-      wrapperEnvelope: envelope,
-      rawOffering: null,
-      rawEvaluation: envelope.rawEvaluation,
-      rawEstimate: envelope.rawEstimate,
-      estimateAssociationId: null,
-      attributedBasis: envelope.attributedBasis,
-      storePin: envelope.storePin,
-      protocolVersion: envelope.protocolVersion,
-      publishedJobAnswer: answer,
-    },
+    createdAt,
+    payload: { attemptNumber, enqueuedAt: createdAt, sentAt: createdAt, timeoutMs: 10_000 },
   };
-  await persistTerminal({
+  await persistPending({
     localRecordId,
     project,
+    requestRecord: null,
+    attemptRecord,
+    createdAt,
+    actionId: actionId ?? `published-project-retry:${requestId}:${attemptId}`,
+  });
+  return dispatchPublishedProject({
+    localRecordId,
+    project,
+    contract,
     requestId,
     attemptId,
-    createdAt: receivedAt,
-    actionId: `published-project-success:${responseRecord.id}`,
-    responseRecord,
-    httpStatus,
+    attemptNumber,
+    candidateRevisionId: request.payload.candidateRevisionId,
+    payload,
+    payloadDigest: request.payload.payloadDigest,
+    clock,
   });
-
-  const applicability = await currentStoreAnswer(localRecordId, {
-    candidateRevisionId,
-    scope: contract.scope,
-  });
-  return {
-    status: applicability.current === true ? 'current' : 'historical',
-    requestId,
-    attemptId,
-    responseId: responseRecord.id,
-    applicability,
-  };
 }
 
 export async function currentPublishedProjectAnswer(localRecordId) {
