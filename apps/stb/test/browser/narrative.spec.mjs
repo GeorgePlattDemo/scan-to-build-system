@@ -60,6 +60,15 @@ test('review, Store, result, and record pages expose authority boundaries withou
 
   await page.locator('[data-nav-page="result"]').click();
   await expect(page.locator('[data-screen="result"]')).toBeVisible();
+  await expect(page.locator('[data-future-chain="true"]')).toContainText(
+    'What happens next — architecture, not a live order',
+  );
+  await expect(page.locator('[data-future-chain="true"]')).toContainText(
+    'Linked domains, not one giant status',
+  );
+  await expect(page.locator('[data-future-chain="true"]')).toContainText(
+    'Release is its own authority. It is not machine readiness',
+  );
   await expect(page.locator('[data-narrative="authority-map"]')).toContainText('YOU');
   await expect(page.locator('[data-narrative="authority-map"]')).toContainText('OWNER RECORD');
   await expect(page.locator('[data-narrative="qualified-loop-result"]')).toContainText(
