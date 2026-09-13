@@ -68,6 +68,7 @@ export function buildResidualOperation(operationClass, overrides = {}) {
     throw new TypeError(`${operationClass} is not admitted from machine family ${machineFamily}`);
   }
   return Object.freeze({
+    ...overrides,
     libraryVersion: SECONDARY_OPERATION_LIBRARY_VERSION,
     operationClass: entry.operationClass,
     label: entry.label,
@@ -76,7 +77,6 @@ export function buildResidualOperation(operationClass, overrides = {}) {
     allowedSecondaryOptions: entry.allowedOptions,
     selectionRequired: true,
     autoSelected: false,
-    ...overrides,
     createsStoreCapability: false,
     createsYardService: false,
     physicalExecutionAuthority: false,
