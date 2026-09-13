@@ -1,4 +1,4 @@
-export const PUBLISHED_JOB_STORE_PIN = '096e99d645d745b1670185f46c75de75f9e59661';
+export const PUBLISHED_JOB_STORE_PIN = '4402abeb6b0299a5b6db2eec85ed04c3b0236bcc';
 export const PUBLISHED_JOB_STORE_REPOSITORY = 'GeorgePlattDemo/scan-to-build-store';
 
 export const PUBLISHED_JOBS = Object.freeze([
@@ -34,14 +34,22 @@ export const PUBLISHED_JOBS = Object.freeze([
     storeSku: 'STB-ZERO-PLY-050-48X96-001',
     defaults: Object.freeze({ openingWidthIn: 36, straightHeightIn: 24, riseIn: 12 }),
     fixed: Object.freeze({
+      parentHorizontalIn: 96,
+      parentVerticalIn: 48,
       outerL_in: 96,
       outerW_in: 48,
       placement: 'CENTERED_ON_PARENT',
+      workField: Object.freeze({
+        id: 'S001-CENTER-WORK-FIELD-V0',
+        horizontalIn: 48,
+        verticalIn: 36,
+        containment: 'WHOLE_PROFILE',
+      }),
       tabCount: 4,
       routeDepthIn: 0.5,
     }),
-    boundary: 'One centered reconstructable arched aperture retained by tabs on the published full 48 x 96 in 1/2 in sheet offering.',
-    notClaimed: Object.freeze(['order', 'reservation', 'G-code', 'controller program', 'Cycle Start', 'automated secondary separation']),
+    boundary: 'One centered reconstructable arched aperture retained by tabs on the published full 48 x 96 in 1/2 in sheet offering. Whole profile must stay inside the centered 48 x 36 in work field.',
+    notClaimed: Object.freeze(['order', 'reservation', 'G-code', 'controller program', 'Cycle Start', 'automated secondary separation', 'edge routing outside the centered work field']),
   }),
 ]);
 
@@ -74,11 +82,35 @@ export function deriveCenteredArchedProjectGeometry(job, inputs = null) {
     throw new TypeError('centered arched project geometry requires the published arched job');
   }
   const values = normalizePublishedJobInputs(job, inputs);
-  const parentLengthIn = job.fixed.outerL_in;
-  const parentWidthIn = job.fixed.outerW_in;
+  const parentHorizontalIn = job.fixed.parentHorizontalIn;
+  const parentVerticalIn = job.fixed.parentVerticalIn;
+  const fieldHorizontalIn = job.fixed.workField.horizontalIn;
+  const fieldVerticalIn = job.fixed.workField.verticalIn;
   const openingHeightIn = values.straightHeightIn + values.riseIn;
-  const sideMarginIn = (parentWidthIn - values.openingWidthIn) / 2;
-  const endMarginIn = (parentLengthIn - openingHeightIn) / 2;
+
+  const sheetOffsets = Object.freeze({
+    leftIn: (parentHorizontalIn - values.openingWidthIn) / 2,
+    rightIn: (parentHorizontalIn - values.openingWidthIn) / 2,
+    bottomIn: (parentVerticalIn - openingHeightIn) / 2,
+    topIn: (parentVerticalIn - openingHeightIn) / 2,
+  });
+  const fieldOffsets = Object.freeze({
+    leftIn: (parentHorizontalIn - fieldHorizontalIn) / 2,
+    rightIn: (parentHorizontalIn - fieldHorizontalIn) / 2,
+    bottomIn: (parentVerticalIn - fieldVerticalIn) / 2,
+    topIn: (parentVerticalIn - fieldVerticalIn) / 2,
+  });
+  const openingMarginsWithinField = Object.freeze({
+    leftIn: (fieldHorizontalIn - values.openingWidthIn) / 2,
+    rightIn: (fieldHorizontalIn - values.openingWidthIn) / 2,
+    bottomIn: (fieldVerticalIn - openingHeightIn) / 2,
+    topIn: (fieldVerticalIn - openingHeightIn) / 2,
+  });
+  const withinWorkField = values.openingWidthIn > 0
+    && values.straightHeightIn > 0
+    && values.riseIn > 0
+    && values.openingWidthIn <= fieldHorizontalIn
+    && openingHeightIn <= fieldVerticalIn;
 
   return Object.freeze({
     classId: job.projectClassId,
@@ -86,23 +118,28 @@ export function deriveCenteredArchedProjectGeometry(job, inputs = null) {
     placement: job.fixed.placement,
     basis: 'PROJECT_CLASS_DERIVATION',
     parent: Object.freeze({
-      lengthIn: parentLengthIn,
-      widthIn: parentWidthIn,
+      horizontalIn: parentHorizontalIn,
+      verticalIn: parentVerticalIn,
+    }),
+    workField: Object.freeze({
+      id: job.fixed.workField.id,
+      horizontalIn: fieldHorizontalIn,
+      verticalIn: fieldVerticalIn,
+      containment: job.fixed.workField.containment,
+      sheetOffsets: fieldOffsets,
     }),
     opening: Object.freeze({
       widthIn: values.openingWidthIn,
       straightHeightIn: values.straightHeightIn,
       riseIn: values.riseIn,
       totalHeightIn: openingHeightIn,
+      sheetOffsets,
+      marginsWithinWorkField: openingMarginsWithinField,
     }),
-    offsets: Object.freeze({
-      leftIn: sideMarginIn,
-      rightIn: sideMarginIn,
-      bottomIn: endMarginIn,
-      topIn: endMarginIn,
-    }),
+    withinWorkField,
+    localGate: withinWorkField ? 'PROJECT_GEOMETRY_INSIDE_CANONICAL_FIELD' : 'PROJECT_GEOMETRY_OUTSIDE_CANONICAL_FIELD',
     storeCapabilityClaim: false,
-    note: 'Centering is project geometry. Store separately evaluates the published S-001 envelope, curve, route depth, and tab policy.',
+    note: 'This is a project/configurator preview only. Store independently evaluates the centered S-001 work field, curve, route depth, tab policy, and disposition.',
   });
 }
 
