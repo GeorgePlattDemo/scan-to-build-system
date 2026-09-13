@@ -7,7 +7,6 @@ import { startNarrativeLayer } from '/ui/narrative.mjs';
 import { startOpenDoorLayer } from '/ui/open-door.mjs';
 import { startFutureChainLayer } from '/ui/future-chain.mjs';
 import { startProjectConfigurator } from '/ui/project-configurator.mjs';
-import { startPublishedJobTrialLayer } from '/ui/published-job-trial.mjs';
 
 function setStatus(id, text) {
   const element = document.getElementById(id);
@@ -81,7 +80,6 @@ if (root) {
   startShell(root);
   startNarrativeLayer(root);
   startOpenDoorLayer(root);
-  startPublishedJobTrialLayer(root);
   startFutureChainLayer(root);
   startProjectConfigurator(root);
 }
