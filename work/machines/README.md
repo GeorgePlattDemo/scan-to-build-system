@@ -28,6 +28,22 @@ The engineering surface answers:
 
 The engineering surface may become extremely detailed. That detail must remain downstream of Store/project meaning.
 
+Current controller/safety engineering entry point:
+
+- [`engineering/CONTROLLER-IN-LOOP-SAFETY-0.1.md`](engineering/CONTROLLER-IN-LOOP-SAFETY-0.1.md) — controller-in-loop target, fail-closed virtual safety architecture, audit boundary, and physical-authority separation.
+
+## `simulator/`
+
+The simulator surface holds executable machine-site simulation code that must remain isolated from physical I/O unless a separately approved physical-machine build explicitly changes that boundary.
+
+Current implementation:
+
+- [`simulator/README.md`](simulator/README.md) — safety-kernel status and limits;
+- `simulator/safety-interlock.mjs` — D-001/S-001 fail-closed safety state machine;
+- `simulator/safety-interlock.test.mjs` — adversarial safety tests.
+
+The simulator may earn virtual evidence. It does not create Store capability, physical commissioning, or fabrication authority.
+
 ## Working split
 
 ```text
@@ -36,6 +52,9 @@ truthful evidence level
         ↓
 ENGINEERING
 candidate physical solution
+        ↓
+SIMULATOR
+controller/state feasibility evidence
         ↓
 COMMISSIONING / MEASUREMENT
 actual machine truth
