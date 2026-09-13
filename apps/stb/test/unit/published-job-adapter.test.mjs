@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  boundedPublishedEstimate,
+  boundedPublishedEvaluation,
   createPublishedJobAdapter,
   inspectPublishedJobRequest,
   isDeclaredPublishedJobStoreStatus,
@@ -74,4 +76,133 @@ test('published-job Store status allowlist is exact and fail-closed', () => {
   for (const status of [undefined, null, '', 'NEW_UNREVIEWED_STATUS', 'AUTHORIZED', 'CYCLE_START']) {
     assert.equal(isDeclaredPublishedJobStoreStatus(status), false, String(status));
   }
+});
+
+test('published-job estimate projection preserves dimensional modeled economics', () => {
+  const estimate = boundedPublishedEstimate({
+    status: 'BUDGETARY_ESTIMATE',
+    cycle: {
+      model: 'STB-D001-CYCLE-MODEL-S2-0.1',
+      basis: 'CALCULATED',
+      measured: false,
+      T_job_min: 9.486,
+    },
+    totals: {
+      material: 3.13,
+      cell_recovery: 50.81,
+      hardware: 0,
+      Q: 53.94,
+      Q_basis: 'CALCULATED',
+      note: 'Budgetary estimate. Not a commercial quote.',
+    },
+  });
+  assert.deepEqual(estimate, {
+    status: 'BUDGETARY_ESTIMATE',
+    material: 3.13,
+    processQ: null,
+    processQ_status: null,
+    cellRecovery: 50.81,
+    hardware: 0,
+    Q: 53.94,
+    Q_basis: 'CALCULATED',
+    modeledTimeMin: 9.486,
+    cycleModel: 'STB-D001-CYCLE-MODEL-S2-0.1',
+    cycleBasis: 'CALCULATED',
+    cycleMeasured: false,
+    note: 'Budgetary estimate. Not a commercial quote.',
+  });
+});
+
+test('published-job estimate projection preserves sheet material-only economics without inventing process Q', () => {
+  const estimate = boundedPublishedEstimate({
+    status: 'BUDGETARY_MATERIAL_ONLY',
+    material: 57.82,
+    processQ: null,
+    processQ_status: 'UNRESOLVED',
+    Q: 57.82,
+    Q_basis: 'MATERIAL_FIXTURE_ONLY',
+    note: 'Budgetary material fixture only.',
+  });
+  assert.deepEqual(estimate, {
+    status: 'BUDGETARY_MATERIAL_ONLY',
+    material: 57.82,
+    processQ: null,
+    processQ_status: 'UNRESOLVED',
+    cellRecovery: null,
+    hardware: null,
+    Q: 57.82,
+    Q_basis: 'MATERIAL_FIXTURE_ONLY',
+    modeledTimeMin: null,
+    cycleModel: null,
+    cycleBasis: null,
+    cycleMeasured: null,
+    note: 'Budgetary material fixture only.',
+  });
+});
+
+test('published-job evaluation projection follows nested Store capability and keeps tab audit summary bounded', () => {
+  const projected = boundedPublishedEvaluation({
+    status: 'SUPPORTABLE',
+    basis: {
+      envelope: 'S001-MODE2-ARCHED-APERTURE-V0',
+      curve: {
+        kind: 'CIRCULAR_SEGMENT',
+        chord_in: 36,
+        rise_in: 12,
+        radius_in: 19.5,
+        derivedRadius_in: 19.5,
+      },
+      retention: {
+        class: 'STENCIL_TABS',
+        requestedTabCount: 4,
+        plannedTabCount: 5,
+        tabPolicyId: 'S001-STENCIL-TAB-POLICY-V0',
+        tabPlanStatus: 'REFERENCE_PLAN_READY',
+        planningReserveTabs: 1,
+        physicalRetentionStatus: 'NOT_MEASURED',
+        plan: {
+          perimeter_in: 133.073439,
+          arcLength_in: 25.073439,
+          nominalSpacing_in: 26.614688,
+          physicalNote: 'Reference tab-plan geometry is complete.',
+          candidates: [{ index: 1, x_in: 1, y_in: 2 }],
+        },
+      },
+    },
+    line: {
+      capability: {
+        status: 'SUPPORTABLE',
+        reasons: [],
+        unresolved: [],
+      },
+    },
+  });
+
+  assert.equal(projected.envelope, 'S001-MODE2-ARCHED-APERTURE-V0');
+  assert.equal(projected.curve.derivedRadius_in, 19.5);
+  assert.equal(projected.retention.tabPolicyId, 'S001-STENCIL-TAB-POLICY-V0');
+  assert.equal(projected.retention.plannedTabCount, 5);
+  assert.equal(projected.retention.physicalRetentionStatus, 'NOT_MEASURED');
+  assert.equal(projected.retention.perimeter_in, 133.073439);
+  assert.equal('plan' in projected.retention, false);
+  assert.equal(JSON.stringify(projected).includes('candidates'), false);
+});
+
+test('published-job evaluation projection preserves D-001 envelope refusal reason from nested line', () => {
+  const projected = boundedPublishedEvaluation({
+    status: 'REFUSED',
+    lines: [{
+      capability: {
+        status: 'REFUSED',
+        missing: ['PARENT_LENGTH_REQUIRES_UNDECLARED_EXTERNAL_SUPPORT'],
+        envelope: {
+          status: 'REFUSED',
+          reasons: ['PARENT_LENGTH_REQUIRES_UNDECLARED_EXTERNAL_SUPPORT'],
+          envelope: 'D001-STAGE2-ENVELOPE-0.2',
+        },
+      },
+    }],
+  });
+  assert.equal(projected.envelope, 'D001-STAGE2-ENVELOPE-0.2');
+  assert.deepEqual(projected.reasons, ['PARENT_LENGTH_REQUIRES_UNDECLARED_EXTERNAL_SUPPORT']);
 });

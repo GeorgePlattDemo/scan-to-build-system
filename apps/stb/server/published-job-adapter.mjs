@@ -133,38 +133,119 @@ function unavailable(inspection) {
   };
 }
 
-function boundedEvaluation(evaluation) {
-  const curve = evaluation?.curve && typeof evaluation.curve === 'object'
-    ? {
-        kind: evaluation.curve.kind ?? null,
-        chord_in: evaluation.curve.chord_in ?? null,
-        rise_in: evaluation.curve.rise_in ?? null,
-        radius_in: evaluation.curve.radius_in ?? null,
-        derivedRadius_in: evaluation.curve.derivedRadius_in ?? null,
-      }
-    : null;
-  const retention = evaluation?.retention && typeof evaluation.retention === 'object'
-    ? {
-        class: evaluation.retention.class ?? null,
-        requestedTabCount: evaluation.retention.requestedTabCount ?? null,
-        plannedTabCount: evaluation.retention.plannedTabCount ?? null,
-        tabPolicyId: evaluation.retention.tabPolicyId ?? null,
-        tabPlanStatus: evaluation.retention.tabPlanStatus ?? null,
-        tabWidth_in: evaluation.retention.tabWidth_in ?? null,
-        maxAllowedGap_in: evaluation.retention.maxAllowedGap_in ?? null,
-        placement: evaluation.retention.placement ?? null,
-        fullSeverance: evaluation.retention.fullSeverance ?? null,
-        physicalRetentionStatus: evaluation.retention.physicalRetentionStatus ?? null,
-        secondarySeparation: evaluation.retention.secondarySeparation ?? null,
-      }
-    : null;
+function firstCapability(evaluation) {
+  if (evaluation?.line?.capability && typeof evaluation.line.capability === 'object') {
+    return evaluation.line.capability;
+  }
+  const firstLine = Array.isArray(evaluation?.lines) ? evaluation.lines[0] : null;
+  if (firstLine?.capability && typeof firstLine.capability === 'object') {
+    return firstLine.capability;
+  }
+  return null;
+}
+
+function capabilityEnvelopeId(capability) {
+  const envelope = capability?.envelope;
+  if (typeof envelope === 'string') return envelope;
+  if (envelope && typeof envelope === 'object') {
+    return envelope.envelope ?? envelope.id ?? null;
+  }
+  return null;
+}
+
+function boundedCurve(curve) {
+  if (!curve || typeof curve !== 'object') return null;
   return {
-    envelope: evaluation?.envelope ?? null,
-    reasons: Array.isArray(evaluation?.reasons) ? [...evaluation.reasons] : [],
-    unresolved: Array.isArray(evaluation?.unresolved) ? [...evaluation.unresolved] : [],
-    curve,
-    retention,
-    secondarySeparation: evaluation?.secondarySeparation ?? null,
+    kind: curve.kind ?? null,
+    chord_in: curve.chord_in ?? null,
+    rise_in: curve.rise_in ?? null,
+    radius_in: curve.radius_in ?? null,
+    derivedRadius_in: curve.derivedRadius_in ?? null,
+  };
+}
+
+function boundedRetention(retention) {
+  if (!retention || typeof retention !== 'object') return null;
+  const plan = retention.plan && typeof retention.plan === 'object' ? retention.plan : null;
+  return {
+    class: retention.class ?? null,
+    requestedTabCount: retention.requestedTabCount ?? plan?.requestedTabCount ?? null,
+    plannedTabCount: retention.plannedTabCount ?? plan?.plannedTabCount ?? null,
+    tabPolicyId: retention.tabPolicyId ?? plan?.policyId ?? null,
+    tabPlanStatus: retention.tabPlanStatus ?? plan?.status ?? null,
+    planningReserveTabs: retention.planningReserveTabs ?? plan?.planningReserveTabs ?? null,
+    tabWidth_in: retention.tabWidth_in ?? plan?.minBridgeWidth_in ?? null,
+    maxAllowedGap_in: retention.maxAllowedGap_in ?? plan?.maxAllowedGap_in ?? null,
+    perimeter_in: plan?.perimeter_in ?? null,
+    arcLength_in: plan?.arcLength_in ?? null,
+    nominalSpacing_in: plan?.nominalSpacing_in ?? null,
+    placement: retention.placement ?? plan?.placementMethod ?? null,
+    fullSeverance: retention.fullSeverance ?? null,
+    physicalRetentionStatus:
+      retention.physicalRetentionStatus ?? plan?.physicalRetentionStatus ?? null,
+    secondarySeparation: retention.secondarySeparation ?? null,
+    physicalNote: plan?.physicalNote ?? null,
+  };
+}
+
+export function boundedPublishedEvaluation(evaluation) {
+  const capability = firstCapability(evaluation);
+  const basis = evaluation?.basis && typeof evaluation.basis === 'object' ? evaluation.basis : null;
+
+  const curve = evaluation?.curve ?? basis?.curve ?? capability?.curve ?? null;
+  const retention = evaluation?.retention ?? basis?.retention ?? capability?.retention ?? null;
+
+  const reasons = Array.isArray(evaluation?.reasons)
+    ? evaluation.reasons
+    : Array.isArray(capability?.reasons)
+      ? capability.reasons
+      : Array.isArray(capability?.missing)
+        ? capability.missing
+        : Array.isArray(capability?.envelope?.reasons)
+          ? capability.envelope.reasons
+          : [];
+
+  const unresolved = Array.isArray(evaluation?.unresolved)
+    ? evaluation.unresolved
+    : Array.isArray(capability?.unresolved)
+      ? capability.unresolved
+      : [];
+
+  return {
+    envelope:
+      evaluation?.envelope
+      ?? basis?.envelope
+      ?? capabilityEnvelopeId(capability)
+      ?? null,
+    reasons: [...reasons],
+    unresolved: [...unresolved],
+    curve: boundedCurve(curve),
+    retention: boundedRetention(retention),
+    secondarySeparation:
+      evaluation?.secondarySeparation
+      ?? capability?.secondarySeparation
+      ?? null,
+  };
+}
+
+export function boundedPublishedEstimate(estimate) {
+  if (!estimate || typeof estimate !== 'object' || Array.isArray(estimate)) return null;
+  const totals = estimate.totals && typeof estimate.totals === 'object' ? estimate.totals : null;
+  const cycle = estimate.cycle && typeof estimate.cycle === 'object' ? estimate.cycle : null;
+  return {
+    status: estimate.status ?? null,
+    material: estimate.material ?? totals?.material ?? null,
+    processQ: estimate.processQ ?? null,
+    processQ_status: estimate.processQ_status ?? null,
+    cellRecovery: totals?.cell_recovery ?? null,
+    hardware: totals?.hardware ?? null,
+    Q: estimate.Q ?? totals?.Q ?? null,
+    Q_basis: estimate.Q_basis ?? totals?.Q_basis ?? null,
+    modeledTimeMin: cycle?.T_job_min ?? null,
+    cycleModel: cycle?.model ?? null,
+    cycleBasis: cycle?.basis ?? null,
+    cycleMeasured: cycle?.measured ?? null,
+    note: estimate.note ?? totals?.note ?? null,
   };
 }
 
@@ -226,16 +307,8 @@ export async function createPublishedJobAdapter({
           evidenceClass: evaluation?.evidenceClass ?? null,
           physicalStatus: evaluation?.physicalStatus ?? null,
           commissioned: evaluation?.commissioned ?? null,
-          ...boundedEvaluation(evaluation),
-          estimate: estimate
-            ? {
-                status: estimate.status ?? null,
-                material: estimate.material ?? null,
-                processQ_status: estimate.processQ_status ?? null,
-                Q: estimate.Q ?? null,
-                note: estimate.note ?? null,
-              }
-            : null,
+          ...boundedPublishedEvaluation(evaluation),
+          estimate: boundedPublishedEstimate(estimate),
           boundary: request.job.boundary,
           notClaimed: request.job.notClaimed,
           physicalExecutionAuthorized: false,
