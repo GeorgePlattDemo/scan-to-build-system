@@ -58,6 +58,18 @@ test('published-job adapter accepts only one named job id', async () => {
   assert.equal((await adapter.dispatch({ jobId: 'rect-stencil', gcode: 'G0 X0' })).status, 422);
 });
 
+test('published-job adapter refuses an undeclared Store disposition', async () => {
+  const store = fakeStore();
+  store.evaluateSheetMode2Job = () => ({ status: 'NEW_UNREVIEWED_STATUS' });
+  const adapter = await createPublishedJobAdapter({ storeModule: store });
+  const result = await adapter.dispatch({ jobId: 'rect-stencil' });
+  assert.equal(result.status, 502);
+  assert.equal(result.body.ready, false);
+  assert.equal(result.body.code, 'PUBLISHED_JOB_STORE_RESPONSE_INVALID');
+  assert.equal(result.body.physicalExecutionAuthorized, false);
+  assert.equal(result.body.controllerOutputProduced, false);
+});
+
 test('rectangular published job reaches the bounded Store evaluator without execution authority', async () => {
   const adapter = await createPublishedJobAdapter({ storeModule: fakeStore() });
   const result = await adapter.dispatch({ jobId: 'rect-stencil' });
