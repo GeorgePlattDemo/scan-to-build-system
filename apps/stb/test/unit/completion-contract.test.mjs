@@ -5,9 +5,13 @@ import {
   COMPLETION_ACTIONS,
   COMPLETION_LINE_STATUS,
   COMPLETION_PLAN_STATUS,
+  COMPLETION_RECORD_TYPES,
   COMPLETION_ROLES,
   RECEIPT_PROFILES,
   SECONDARY_OPTIONS,
+  buildCloseoutRecord,
+  buildCompletionDecision,
+  buildCompletionPlanRecord,
   buildPartLabel,
   evaluateCompletionLine,
   evaluateCompletionPlan,
@@ -59,6 +63,9 @@ test('3/8 finished hole with 3/16 pilot remains an explicit residual operation',
   const unresolved = evaluateCompletionLine(line);
   assert.equal(unresolved.status, COMPLETION_LINE_STATUS.UNRESOLVED);
   assert.ok(unresolved.reasons.includes('SECONDARY_OPTION_NOT_SELECTED'));
+
+  const plan = evaluateCompletionPlan({ storeDisposition: 'SUPPORTABLE', lines: [line] });
+  assert.equal(plan.status, COMPLETION_PLAN_STATUS.NEEDS_CUSTOMER_DECISION);
 });
 
 test('customer acceptance alone does not bind the yard', () => {
@@ -70,6 +77,10 @@ test('customer acceptance alone does not bind the yard', () => {
   const evaluated = evaluateCompletionLine(line);
   assert.equal(evaluated.status, COMPLETION_LINE_STATUS.UNRESOLVED);
   assert.ok(evaluated.reasons.includes('STEWARD_DECISION_REQUIRED'));
+  assert.equal(
+    evaluateCompletionPlan({ storeDisposition: 'SUPPORTABLE', lines: [line] }).status,
+    COMPLETION_PLAN_STATUS.NEEDS_STEWARD_DECISION,
+  );
 });
 
 test('yard secondary work requires a declared service reference and completion record', () => {
@@ -144,6 +155,79 @@ test('custody transfer closes an otherwise handoff-ready plan', () => {
   });
   assert.equal(result.status, COMPLETION_PLAN_STATUS.CLOSED);
   assert.equal(result.closeoutReady, true);
+});
+
+test('completion decisions enforce role authority at record construction time', () => {
+  const common = {
+    decisionId: 'D-1',
+    projectId: 'P-1',
+    candidateRevisionId: 'R-1',
+    completionPlanId: 'CP-1',
+    createdAt: '2026-09-13T20:00:00Z',
+  };
+  const customer = buildCompletionDecision({
+    ...common,
+    role: COMPLETION_ROLES.CUSTOMER,
+    action: COMPLETION_ACTIONS.CHOOSE_SECONDARY_OPTION,
+    lineId: 'HOLE-001',
+    selectedOption: SECONDARY_OPTIONS.CUSTOMER_COMPLETES,
+  });
+  assert.equal(customer.recordType, COMPLETION_RECORD_TYPES.DECISION);
+  assert.equal(customer.changesStoreDisposition, false);
+  assert.equal(customer.physicalExecutionAuthority, false);
+
+  assert.throws(
+    () => buildCompletionDecision({
+      ...common,
+      decisionId: 'D-2',
+      role: COMPLETION_ROLES.OPERATOR,
+      action: COMPLETION_ACTIONS.ACCEPT_COMPLETION_PLAN,
+    }),
+    /not permitted/,
+  );
+});
+
+test('completion plan record carries project/Store identity without authority', () => {
+  const plan = buildCompletionPlanRecord({
+    completionPlanId: 'CP-1',
+    projectId: 'P-1',
+    candidateRevisionId: 'R-1',
+    reviewId: 'REV-1',
+    storeRequestId: 'SQ-1',
+    storeResponseId: 'SA-1',
+    storeDisposition: 'SUPPORTABLE',
+    lines: [pilotToFinalHoleExample()],
+    createdAt: '2026-09-13T20:00:00Z',
+  });
+  assert.equal(plan.recordType, COMPLETION_RECORD_TYPES.PLAN);
+  assert.equal(plan.storeDisposition, 'SUPPORTABLE');
+  assert.equal(plan.physicalExecutionAuthority, false);
+  assert.equal(plan.operatorMayPromote, false);
+});
+
+test('closeout record cannot exist before custody transfer', () => {
+  const plan = {
+    storeDisposition: 'SUPPORTABLE',
+    lines: [{ lineId: 'CUT-001', primaryContribution: { status: 'COMPLETE' } }],
+    labelingStatus: 'APPLIED',
+    stagingStatus: 'STAGED',
+    fulfillmentStatus: 'PICKUP_READY',
+    closeoutRecordStatus: 'PREPARED',
+    custodyStatus: 'NOT_TRANSFERRED',
+  };
+  assert.throws(
+    () => buildCloseoutRecord({
+      closeoutId: 'CO-1',
+      projectId: 'P-1',
+      candidateRevisionId: 'R-1',
+      completionPlanId: 'CP-1',
+      plan,
+      custody: { method: 'PICKUP', transferredAt: '2026-09-13T21:00:00Z' },
+      recordRef: 'stb://P-1/R-1',
+      createdAt: '2026-09-13T21:00:00Z',
+    }),
+    /transferred custody/,
+  );
 });
 
 test('physical part label carries identity but excludes customer PII and price', () => {
