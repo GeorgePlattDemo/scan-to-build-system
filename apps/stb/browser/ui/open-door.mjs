@@ -91,7 +91,7 @@ function buildOpenDoor() {
 }
 
 function decorate(root) {
-  const screen = root.querySelector('[data-screen="hub"],[data-screen="questions"]');
+  const screen = root.querySelector('[data-screen="hub"]');
   if (!screen || screen.getAttribute('data-child')) return;
   if (screen.querySelector('[data-open-door="true"]')) return;
   const sourcePane = screen.querySelector('.source-pane');
