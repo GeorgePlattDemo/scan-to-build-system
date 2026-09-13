@@ -11,11 +11,10 @@ function positive(name, value) {
   return value;
 }
 
-function labelRequirement(answer) {
-  const declared = answer?.operationalRequirements?.labeling;
+function labelRequirement(_answer) {
   return Object.freeze({
     required: true,
-    timing: declared?.timing ?? 'WHEN_PART_OR_PACKAGE_LEAVES_PRIMARY_CELL_STREAM',
+    timing: 'WHEN_PART_OR_PACKAGE_LEAVES_PRIMARY_CELL_STREAM',
     status: 'NOT_RECORDED',
     selective: false,
     operatorMayPromote: false,
