@@ -13,6 +13,8 @@ const ACTIONS = Object.freeze([
 ]);
 
 const STORE_CANDIDATE_BASIS = '096e99d645d745b1670185f46c75de75f9e59661';
+const PUBLISHED_JOB_TRIAL_PATH = '/api/published-job';
+const PUBLISHED_JOB_TRIAL_IDS = new Set(['rect-stencil', 'arched-opening']);
 const PUBLISHED_STARTS = Object.freeze([
   Object.freeze({
     id: 'square-stick',
@@ -30,7 +32,7 @@ const PUBLISHED_STARTS = Object.freeze([
     basis: 'STB-ZERO-PLY-075-48X96-001 · SHEET_MODE2_STENCIL_V1',
     defaults: 'Reference implementation uses 4 retained tabs and 0.5 in route depth.',
     state: 'candidate',
-    button: 'SHOW CURRENT BOUNDARY',
+    button: 'ASK STORE ABOUT THIS SHAPE',
   }),
   Object.freeze({
     id: 'arched-opening',
@@ -39,7 +41,7 @@ const PUBLISHED_STARTS = Object.freeze([
     basis: 'STB-ZERO-PLY-050-48X96-001 · SHEET_MODE2_ARCHED_APERTURE_V0',
     defaults: '36 in chord + 12 in rise → 19.5 in radius.',
     state: 'candidate',
-    button: 'SHOW CURRENT BOUNDARY',
+    button: 'ASK STORE ABOUT THIS SHAPE',
   }),
 ]);
 
@@ -100,7 +102,7 @@ function cardStatus(child) {
 function buildPublishedStarts() {
   return node('section', { className: 'published-starts', attrs: { 'data-published-starts': 'true' } }, [
     node('h2', { text: 'MAKE A SIMPLE SHAPE' }),
-    node('p', { text: 'Pick a named shape instead of starting with evaluator language. One is connected to the current Store pin; two are visible Store candidates and stay blocked here until a deliberate pin trial.' }),
+    node('p', { text: 'Pick a named shape instead of starting with evaluator language. Square 2×4 uses the current app Store pin. The two sheet references can ask the exact isolated Store candidate when that checkout is deliberately mounted.' }),
     node('div', { className: 'published-grid' }, PUBLISHED_STARTS.map((job) =>
       node('article', { className: 'published-card', attrs: { 'data-published-job': job.id, 'data-published-state': job.state } }, [
         node('h3', { text: job.label }),
@@ -109,7 +111,7 @@ function buildPublishedStarts() {
         node('code', { text: job.basis }),
         node('small', {
           className: `published-state ${job.state}`,
-          text: job.state === 'connected' ? 'connected to current app pin' : 'Store candidate · not connected on current app pin',
+          text: job.state === 'connected' ? 'connected to current app pin' : 'isolated Store candidate trial',
         }),
         node('button', {
           text: job.button,
@@ -120,7 +122,7 @@ function buildPublishedStarts() {
     node('p', {
       className: 'published-boundary',
       attrs: { 'data-published-message': 'true' },
-      text: `Current app Store pin: ${STORE_PIN}. Naming a job does not advance that pin, create a quote, or authorize fabrication.`,
+      text: `Current app Store pin: ${STORE_PIN}. Candidate sheet trial: ${STORE_CANDIDATE_BASIS}. Naming or evaluating a job does not create an order or authorize fabrication.`,
     }),
   ]);
 }
@@ -164,9 +166,37 @@ function showCandidateBoundary(root, id) {
   const message = root.querySelector('[data-published-message="true"]');
   if (!message) return;
   if (id === 'rect-stencil') {
-    message.textContent = `Rectangular sheet stencil is real on Store candidate ${STORE_CANDIDATE_BASIS}, but Store ${STORE_PIN} does not contain that evaluator. It stays visible here instead of pretending to run.`;
+    message.textContent = `Rectangular sheet stencil is published on Store candidate ${STORE_CANDIDATE_BASIS}. The app will use only the isolated candidate trial endpoint; the current app Store pin remains ${STORE_PIN}.`;
   } else if (id === 'arched-opening') {
-    message.textContent = `Arched opening is real on Store candidate ${STORE_CANDIDATE_BASIS}; 36 in chord + 12 in rise derives 19.5 in radius. Store ${STORE_PIN} cannot answer it yet, so no Store result is fabricated here.`;
+    message.textContent = `Arched opening is published on Store candidate ${STORE_CANDIDATE_BASIS}; 36 in chord + 12 in rise derives 19.5 in radius. The current app Store pin remains ${STORE_PIN}.`;
+  }
+}
+
+function publishedJobAnswerText(body) {
+  if (!body?.ready) {
+    return `This Store trial is not mounted here (${body?.code ?? 'STORE_UNAVAILABLE'}). No Store answer was invented.`;
+  }
+  const estimate = body.estimate;
+  const materialText = estimate?.Q != null
+    ? ` Material-only reference: $${Number(estimate.Q).toFixed(2)}; process cost remains ${estimate.processQ_status ?? 'unresolved'}.`
+    : '';
+  return `${body.label}: Store ${body.status}.${materialText} This is a Store answer only — no order, machine program, Cycle Start, or physical fabrication is authorized.`;
+}
+
+async function runPublishedJobTrial(root, id) {
+  const message = root.querySelector('[data-published-message="true"]');
+  if (!message) return;
+  message.textContent = 'Asking the exact published Store candidate…';
+  try {
+    const response = await fetch(PUBLISHED_JOB_TRIAL_PATH, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jobId: id }),
+    });
+    const body = await response.json().catch(() => null);
+    message.textContent = publishedJobAnswerText(body);
+  } catch {
+    message.textContent = 'The published-job Store trial could not be reached. No Store answer was invented.';
   }
 }
 
@@ -223,7 +253,10 @@ export function startOpenDoorLayer(root) {
       root.querySelector('[data-open-door-child="board"]')?.click();
       return;
     }
-    showCandidateBoundary(root, id);
+    if (PUBLISHED_JOB_TRIAL_IDS.has(id)) {
+      showCandidateBoundary(root, id);
+      runPublishedJobTrial(root, id);
+    }
   });
 
   let queued = false;
