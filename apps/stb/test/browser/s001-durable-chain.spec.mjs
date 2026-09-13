@@ -258,3 +258,61 @@ test('S-001 durable Store client quarantines a response that tries to add sheet 
   expect(responses[0].payload.quarantined).toBe(true);
   expect(responses[0].payload.validation.ok).toBe(false);
 });
+
+for (const outcome of ['answer', 'transport-error']) {
+  test(`S-001 late ${outcome} retains terminal history after a candidate change`, async ({ page }) => {
+    const { localRecordId } = await createS001Project(page);
+    await installPublishedProjectTransport(page);
+    const result = await page.evaluate(async ({ id, outcome }) => {
+      const client = await import('/integration/published-project-client.mjs');
+      const repository = await import('/data/repository.mjs');
+      const selectors = await import('/data/selectors.mjs');
+      const configurator = await import('/domain/configurator.mjs');
+      const original = await repository.getProject(id);
+      const first = await client.issuePublishedProjectQuestion({ localRecordId: id });
+      const saved = await repository.getRecord(id, 'response', first.responseId);
+      let release;
+      const held = new Promise((resolve) => { release = resolve; });
+      client.setPublishedProjectTransport(async () => {
+        await held;
+        if (outcome === 'transport-error') throw new Error('transport failed');
+        return new Response(JSON.stringify(saved.payload.publishedJobAnswer), { status: 200 });
+      });
+      const pending = client.issuePublishedProjectQuestion({ localRecordId: id, refresh: true });
+      while ((await repository.listRecords(id, 'attempt')).length < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+      const changed = await configurator.applyMappedConfiguration({
+        localRecordId: id, expectedHead: original.currentHead,
+        actionId: crypto.randomUUID(), createdAt: new Date().toISOString(),
+        basis: 'canonical-test',
+        configuration: { openingWidthIn: '34', straightHeightIn: '24', riseIn: '12' },
+      });
+      release();
+      const dispatched = await pending;
+      const events = await repository.listRecords(id, 'event');
+      const terminal = events.find((record) => record.attemptId === dispatched.attemptId && record.payload?.terminal);
+      const response = dispatched.responseId
+        ? await repository.getRecord(id, 'response', dispatched.responseId) : null;
+      return {
+        dispatched, terminal, response,
+        oldHead: original.currentHead, newHead: changed.project.currentHead,
+        current: await client.currentPublishedProjectAnswer(id),
+        old: await selectors.currentStoreAnswer(id, {
+          candidateRevisionId: original.currentHead, scope: 'SHEET_MODE2_ARCHED_APERTURE_V0',
+        }),
+      };
+    }, { id: localRecordId, outcome });
+    expect(result.newHead).not.toBe(result.oldHead);
+    expect(result.terminal.payload.terminal).toBe(true);
+    expect(result.current.current).toBe(false);
+    expect(result.old.current).toBe(false);
+    if (outcome === 'answer') {
+      expect(result.dispatched.status).toBe('historical');
+      expect(result.response.payload.wrapperEnvelope.candidateRevisionId).toBe(result.oldHead);
+    } else {
+      expect(result.dispatched.status).toBe('transport');
+      expect(result.terminal.payload.diagnostic).toBe('PUBLISHED_PROJECT_TRANSPORT_ERROR');
+    }
+  });
+}

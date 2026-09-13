@@ -195,7 +195,8 @@ async function persistTerminal({ localRecordId, project, requestId, attemptId, c
   return commitPreparedAppend({
     localRecordId,
     projectId: project.projectId,
-    expectedHead: project.currentHead,
+    // A late answer remains bound to its original request and revision.
+    expectedHead: null,
     createdAt,
     actionId,
     records: responseRecord ? [responseRecord] : [],
