@@ -443,11 +443,33 @@ export async function retryPublishedProjectQuestion({ localRecordId, requestId, 
   if (!project) throw new Error('published project retry requires a committed project');
   const request = await getRecord(localRecordId, 'request', requestId);
   if (!request) throw new Error('published project retry requires the original request');
+  if (request.imported === true) {
+    throw new Error('published project retry refuses imported historical requests');
+  }
   const contract = publishedProjectForClass(project.classId);
   if (!contract || request.payload?.scope !== contract.scope) {
     throw new Error('published project retry scope does not match the current project class');
   }
+  if (request.payload?.candidateRevisionId !== project.currentHead) {
+    throw new Error('published project retry requires a request bound to the current candidate revision');
+  }
+  if (
+    request.payload?.requestType !== contract.requestType
+    || request.payload?.expectedStorePin !== contract.expectedStorePin
+    || request.payload?.protocolVersion !== PUBLISHED_PROJECT_PROTOCOL_VERSION
+    || request.payload?.path !== PUBLISHED_PROJECT_PATH
+    || request.payload?.payload?.jobId !== contract.jobId
+  ) {
+    throw new Error('published project retry request contract is invalid');
+  }
   const payload = request.payload.payload;
+  const payloadDigest = await digestCanonical(payload);
+  if (
+    request.payload?.payloadDigest !== payloadDigest
+    || request.payload?.demandSignature !== payloadDigest
+  ) {
+    throw new Error('published project retry request digest is invalid');
+  }
   const attemptId = opaqueId();
   const attemptNumber = await nextAttemptNumber(localRecordId, requestId);
   const createdAt = nowIso(clock);
@@ -478,7 +500,7 @@ export async function retryPublishedProjectQuestion({ localRecordId, requestId, 
     attemptNumber,
     candidateRevisionId: request.payload.candidateRevisionId,
     payload,
-    payloadDigest: request.payload.payloadDigest,
+    payloadDigest,
     clock,
   });
 }
