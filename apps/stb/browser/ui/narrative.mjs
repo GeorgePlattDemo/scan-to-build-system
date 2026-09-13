@@ -187,6 +187,29 @@ function decorateBegin(screen) {
     ]),
   );
   if (band) screen.querySelector('.screen-heading')?.after(band);
+  const examples = once(screen, 'demonstration-roles', () => node('section', { className: 'narrative-card' }, [
+    node('h2', { text: 'What the examples show' }),
+    node('p', { text: 'BOARD — One finished-length requirement stays tied to the number and source behind it.' }),
+    node('p', { text: 'PICNIC TABLE — Configure a broader project using example geometry. Structural suitability, material identity, Store support, and production remain unresolved where evidence is missing.' }),
+    node('h3', { text: 'WINDOW-SEAT EDGE CASE — a documented story' }),
+    node('p', { text: 'This is an illustrative journey, not a window-seat class running in this application. Human-review routing and a production-capable window-seat path are not implemented here.' }),
+    node('h4', { text: 'WHAT SHE WANTED' }),
+    node('p', { text: 'A seat with storage and shelving around a window. Her intent, sketch, and drawing with numbers remain separate sources. Observations taken from them retain their basis and uncertainty.' }),
+    node('h4', { text: 'WHY IT STOPPED' }),
+    node('p', { text: 'The use “seat” added questions about load, span, anchorage, and window access. In the governed STOP example, the seat overlapped the declared window access zone. The result was EGRESS_REVIEW_REQUIRED: an unresolved access/egress concern requiring review, not a finding of a code violation.' }),
+    node('h4', { text: 'WHAT CHANGED' }),
+    node('p', { text: 'A revised configuration used a new seat envelope that did not overlap that declared zone. The stopped version remained in history. Affected checks must run again; the documented PASS case is incomplete until the seat-load, span, and anchorage blocker BLK-U07 is closed. The absence of overlap establishes neither structural adequacy nor code compliance.' }),
+    node('p', { text: 'The first version stopped for a reason. The revised version did not erase the stop. It answered it.' }),
+    node('p', { text: 'A qualified person answers one stated question for one exact version, using recorded evidence and only that person’s authority. Human review is not a generic APPROVE button.' }),
+    node('h4', { text: 'WHAT THE RECORD KEPT' }),
+    node('p', { text: 'The intended record links sources, observations, exact versions, STOP, bounded human review, revised geometry, and repeated checks. Later material, capability, release, execution, and inspection evidence belongs there only if those events actually occurred.' }),
+    node('p', { text: 'Historical Sarah material illustrates separate dimensional-stock and sheet-stock work under one project identity. It does not establish that the current system physically ran that job. The governed reference remains simulation-only; production release, machine readiness, and local Cycle Start remain separate.' }),
+    node('details', {}, [
+      node('summary', { text: 'Story source and exact reference' }),
+      node('p', { text: 'work/capability-bridge/WINDOW-SEAT-EDGE-CASE-JOURNEY-0.1.md; governed reference 18949f163718a937f072f4be3a654bb303e53160; STOP fixture FIX.B-SEAT-STOP.v1.' }),
+    ]),
+  ]));
+  if (examples) screen.append(examples);
 }
 
 function page2NextQuestion(screen) {
@@ -363,6 +386,8 @@ function decorateRecord(screen) {
   const card = once(screen, 'owner-record', () =>
     node('section', { className: 'narrative-owner-record' }, [
       node('p', { className: 'narrative-kicker', text: 'Owner record' }),
+      node('p', { text: 'Years later, a damaged component can start from its preserved definition instead of being re-measured and guessed. Keep the exact component identity and revision, with material and outcome evidence where recorded.' }),
+      node('p', { text: 'Reproducible definition is not automatic authorization. Current material, capability, safety, and production gates still run.' }),
       node('p', {
         className: 'narrative-copy',
         text: 'The record brings together your sources, observations, exact versions, reviews, Store answers, and later events only when they are recorded. It preserves missing events and stopped versions; it creates no authority.',

@@ -34,8 +34,8 @@ test('start-your-own exposes source, candidate, gap, and working next-question s
   await expect(page.locator('[data-narrative="intake-two-axes"]')).toContainText('How we got it');
   await expect(page.locator('[data-narrative="intake-two-axes"]')).toContainText('What authority it has');
   await expect(page.locator('.source-pane h2')).toHaveText('WHAT YOU BROUGHT');
-  await expect(page.locator('.candidate-pane h2')).toHaveText('OBSERVATIONS / CANDIDATE INPUTS');
-  await expect(page.locator('.needs-pane h2')).toHaveText('WHAT STILL NEEDS RESOLUTION');
+  await expect(page.locator('.candidate-pane h2')).toHaveText('WHAT WE HAVE ESTABLISHED OR PROPOSED');
+  await expect(page.locator('.needs-pane h2')).toHaveText('WHAT IS STILL UNKNOWN');
   await expect(page.locator('[data-narrative="next-question"]')).toContainText(
     'What are you trying to make, replace, change, or fit?',
   );
@@ -80,7 +80,7 @@ test('review, Store, result, and record pages expose authority boundaries withou
   await expect(map.locator('[data-authority-stage="LOCAL CELL"]')).toContainText('local Cycle Start');
 
   await expect(page.locator('[data-narrative="qualified-loop-result"]')).toContainText(
-    'Qualified resolution is a loop, not a ninth stage',
+    'Human review answers only the stated question',
   );
   await expect(page.locator('[data-narrative="collapses"]')).toContainText(
     'Qualified resolution is not production release',
@@ -95,6 +95,7 @@ test('review, Store, result, and record pages expose authority boundaries withou
   await page.locator('[data-nav-page="record"]').click();
   await expect(page.locator('main[data-screen="record"]')).toBeVisible();
   await expect(page.locator('[data-narrative="owner-record"]')).toContainText(
-    'Missing physical events stay missing',
+    'It preserves missing events and stopped versions',
   );
 });
+

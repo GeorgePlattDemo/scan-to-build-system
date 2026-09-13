@@ -7,7 +7,7 @@ async function openPicnic(page) {
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.chooseMapped }).click();
-  await page.getByRole('button', { name: 'Classic Picnic Table — synthetic class fixture' }).click();
+  await page.getByRole('button', { name: 'Classic Picnic Table — configurable demonstration' }).click();
   await expect(page.locator('[data-screen="questions"]')).toBeVisible();
   await expect(page.locator('[data-project-configurator="classic-picnic-table-fixture"]')).toBeVisible();
 }
@@ -43,3 +43,4 @@ test('picnic candidate refuses out-of-range demo inputs without clamping them', 
   await expect(page.locator('[data-config-engine="unresolved"]')).toContainText('outside-candidate-productLength-range');
   await expect(panel.locator('[data-config-field="productLength"]')).toHaveValue('217');
 });
+
