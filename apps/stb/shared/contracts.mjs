@@ -42,7 +42,7 @@ export const ACTORS = Object.freeze({
     label: 'NEW USER',
     route: ROUTES.startNew,
     heading: 'Bring what you know.',
-    body: 'We keep your source and show what remains unresolved. A scan is one way in. Enter 45 in, and the parts begin with that number. Fit, load and code suitability still need your judgment.',
+    body: 'We keep what you provide and show what remains unknown. Measurements stay tied to their source. Fit, load, and code suitability need appropriate evidence and qualified review where required.',
   }),
   returning: Object.freeze({
     id: 'returning',
@@ -94,9 +94,9 @@ export const COPY = Object.freeze({
   keepAndStart: 'Keep this project and start another',
   cancel: 'Cancel',
   hubHeading: 'Bring what you have',
-  hubStatus: 'Open-door intake is available; source interpretation remains bounded by the active adapters.',
-  questionsHeading: 'Bounded questions',
-  questionsStatus: 'Registered bounded project configuration is available where a class engine exists; unresolved Store and production paths stay visible.',
+  hubStatus: 'Bring what you have. We keep the source and show what this build can read.',
+  questionsHeading: 'Project questions',
+  questionsStatus: 'Enter the project details below. Unanswered Store and production questions remain visible.',
   switchPrompt: 'This project will be kept. Start another, or cancel.',
   page2Prompt: 'What information do you already have?',
   sourcePane: 'What you gave us',
@@ -106,7 +106,7 @@ export const COPY = Object.freeze({
   noSourceYet: 'No source attached yet.',
   candidateEmpty: 'Nothing derived yet. Sources are not parts.',
   needsEmpty: 'Nothing required beyond what you choose to add.',
-  sourceNotCandidate: 'This is source evidence, not candidate geometry.',
+  sourceNotCandidate: 'This is the original source. It has not become a proposed part definition.',
   viewingCreatesNoObservation: 'Viewing or selecting a source does not create an observation.',
   originalRetained: 'Original retained',
   sourceUnavailable: 'Original source unavailable',
@@ -116,7 +116,7 @@ export const COPY = Object.freeze({
   boardStatus: 'Board definition is available for the bounded 24–60 in square-cut slice.',
   scanStatus: 'Capture not available in this build.',
   cadStatus: 'Structured extraction is not available.',
-  opaqueKept: 'Original file retained as an opaque attachment. Native interpretation is not available.',
+  opaqueKept: 'Original file kept. This build cannot interpret its contents.',
   pdfUnreadable: 'This PDF could not be displayed. Original bytes remain retained.',
   pdfPassword: 'This PDF is password-protected. Original bytes remain retained. It cannot be displayed.',
   imageUnreadable: 'This image could not be displayed. Original bytes remain retained.',
@@ -150,7 +150,7 @@ export const COPY = Object.freeze({
   boardApply: 'Apply finished length',
   boardCut001: 'Use CUT-001 reference: 60.000 in',
   boardSlice:
-    'This app slice accepts finite inch lengths from 24 through 60 inclusive. Other lengths stay as demand and are not clamped.',
+    'This Board example accepts lengths from 24 through 60 inches, inclusive. Other lengths are kept as requested; we do not shorten or lengthen them to fit.',
   boardBlank: 'Finished length is blank. No valid part has been created.',
   boardUnresolved: 'This length is retained. It is not an accepted Board definition in this slice.',
   boardSquareCut: 'square cut',
@@ -231,7 +231,7 @@ export const COPY = Object.freeze({
   resultFutureBody: 'Pickup, delivery, and contractor fulfillment are not offered in this build.',
   resultPhysicalAbsent: 'No physical fabrication recorded.',
   resultPickupAbsent: 'No pickup, staging, or reservation is recorded.',
-  resultNoProduction: 'No production, machine, or fulfillment status is inferred from Store support or Q.',
+  resultNoProduction: 'Store support or a budgetary estimate does not establish production, machine, or fulfillment status.',
   reviewOpenResult: 'Open result',
   reviewOpenPage: 'Review this definition',
   recordHeading: 'Keep your project record',
@@ -239,7 +239,7 @@ export const COPY = Object.freeze({
   recordImport: 'Open owner archive',
   recordResume: 'Resume project',
   recordLocalOnly:
-    'Saved on this device. Local IndexedDB is not cloud synchronization or permanent hosted custody.',
+    'Saved in this browser on this device. Export a copy to keep elsewhere; this record is not synchronized to cloud storage or held permanently for you.',
   recordCurrentVsHistorical: 'Current versus historical',
   recordSources: 'Original sources',
   recordHistory: 'Chronological history',
@@ -248,7 +248,7 @@ export const COPY = Object.freeze({
   recordExportReady: 'Archive ready. Download requested.',
   recordExportFailed: 'Save failed. The previous project record is unchanged.',
   recordImportFailed: 'Import failed. Existing local projects were not changed.',
-  recordImportOk: 'Owner archive imported as a separate local namespace.',
+  recordImportOk: 'Owner archive imported as a separate local copy.',
   recordIdempotent: 'This archive is already present. Opening the existing imported copy.',
   recordCollision: 'A project with this identity already exists on this device.',
   recordOpenExisting: 'Open existing',
@@ -360,10 +360,10 @@ export const CLASS_REFERENCES = Object.freeze([
     classId: 'classic-picnic-table-fixture',
     classVersion: '0.1-software-fixture',
     ruleVersion: 'classic.picnic-table.fixture/0.1',
-    label: 'Classic Picnic Table — synthetic class fixture',
+    label: 'Classic Picnic Table — configurable demonstration',
     status: 'candidate-software-fixture',
     storePath: 'unresolved',
-    hint: 'Second-class reuse proof. Software fixture only; not an approved furniture design.',
+    hint: 'Explore a broader project using example geometry. Structural suitability, material, Store support, and production remain unresolved. This is not an approved furniture design.',
     source: Object.freeze({
       repository: 'GeorgePlattDemo/scan-to-build-system',
       pin: null,
@@ -617,3 +617,4 @@ export function projectHref(localRecordId, view, child) {
   }
   return `${ROUTES.project}?${params.toString()}`;
 }
+

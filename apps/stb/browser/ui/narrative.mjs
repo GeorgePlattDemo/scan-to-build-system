@@ -182,7 +182,7 @@ function decorateBegin(screen) {
       node('p', { className: 'narrative-kicker', text: 'Two ways forward' }),
       node('p', {
         className: 'narrative-copy',
-        text: 'Use a mapped project when the construction logic is already bounded, or start your own and bring whatever information you already have. Both paths converge on the same evidence, definition, review, Store, and record boundaries.',
+        text: 'Choose a prepared example or start your own project. In either case, keep the source, review the proposed definition, and leave unanswered questions visible.',
       }),
     ]),
   );
@@ -228,11 +228,11 @@ function decoratePage2(screen) {
     node('div', { className: 'narrative-axis' }, [
       node('div', {}, [
         node('b', { text: 'How we got it' }),
-        node('span', { text: 'Source, entered observation, extracted candidate, or derived value describes provenance.' }),
+        node('span', { text: 'See the original source, what was entered or read from it, and any calculation.' }),
       ]),
       node('div', {}, [
         node('b', { text: 'What authority it has' }),
-        node('span', { text: 'Retained, unresolved, used in a candidate, and later confirmed are different conditions. Reading is not authority.' }),
+        node('span', { text: 'Keeping a source, recording an observation, proposing a definition, and confirming it are separate steps. Reading a file does not approve it.' }),
       ]),
       node('div', {}, [
         node('b', { text: 'Conflict rule' }),
@@ -250,17 +250,17 @@ function decoratePage2(screen) {
   const candidateHeading = screen.querySelector('.candidate-pane h2');
   if (candidateHeading && candidateHeading.dataset.narrativeLabel !== 'true') {
     candidateHeading.dataset.narrativeLabel = 'true';
-    candidateHeading.textContent = 'OBSERVATIONS / CANDIDATE INPUTS';
+    candidateHeading.textContent = 'WHAT WE HAVE ESTABLISHED OR PROPOSED';
   }
   const needsHeading = screen.querySelector('.needs-pane h2');
   if (needsHeading && needsHeading.dataset.narrativeLabel !== 'true') {
     needsHeading.dataset.narrativeLabel = 'true';
-    needsHeading.textContent = 'WHAT STILL NEEDS RESOLUTION';
+    needsHeading.textContent = 'WHAT IS STILL UNKNOWN';
   }
 
   const next = once(screen, 'next-question', () =>
     node('section', { className: 'narrative-next' }, [
-      node('p', { className: 'narrative-kicker', text: 'Working next question' }),
+      node('p', { className: 'narrative-kicker', text: 'Next question' }),
       node('p', { text: page2NextQuestion(screen) }),
       node('p', { className: 'narrative-copy', text: 'This prompt helps close the definition gap. It is not a Store answer, professional judgment, or production authority.' }),
     ]),
@@ -273,15 +273,15 @@ function qualifiedLoop({ unresolvedCount = 0 } = {}) {
     ? `${unresolvedCount} unresolved condition${unresolvedCount === 1 ? '' : 's'} remain. An unresolved condition should be classified before anyone guesses.`
     : 'If a future bounded condition requires professional judgment, the answer belongs in a scoped human-resolution loop rather than in a customer guess or a software default.';
   return node('section', { className: 'qualified-loop' }, [
-    node('p', { className: 'narrative-kicker', text: 'Human-in-the-loop — bounded, named, on the record' }),
+    node('p', { className: 'narrative-kicker', text: 'When a question needs a qualified person' }),
     node('p', { text: lead }),
-    node('p', { className: 'route', text: 'HOLDER  |  RULE  |  QUALIFIED PERSON' }),
+    node('p', { className: 'route', text: 'You identify the question. The applicable rule determines who can answer it.' }),
     node('p', { className: 'holder-options', text: 'ASK THE QUALIFIED PERSON  ·  CHANGE THE PROJECT  ·  LEAVE IT UNRESOLVED' }),
     node('ul', {}, [
       node('li', { text: 'A qualified answer resolves one bounded question. It does not edit the project.' }),
       node('li', { text: 'The answer needs an author, declared standing, exact question/answer, scope, and conditions that void it.' }),
       node('li', { text: 'The holder sees the question, who it went to, and the scoped answer when it returns.' }),
-      node('li', { text: 'Qualified resolution is a loop, not a ninth stage.' }),
+      node('li', { text: 'Human review answers only the stated question within that person’s authority; it is not a general approval.' }),
       node('li', { text: 'Resolution is not release. Release is not readiness. Readiness is not Cycle Start.' }),
     ]),
     node('p', { className: 'narrative-copy', text: 'Routing, standing validation, expiry, blocking behavior, and persistence for qualified resolution are not implemented in this build.' }),
@@ -365,7 +365,7 @@ function decorateRecord(screen) {
       node('p', { className: 'narrative-kicker', text: 'Owner record' }),
       node('p', {
         className: 'narrative-copy',
-        text: 'The record is the reconciliation layer: what you brought, what became observations, which revision you reviewed, what the Store answered, and what later outcomes are actually recorded. Missing physical events stay missing; the record does not infer them.',
+        text: 'The record brings together your sources, observations, exact versions, reviews, Store answers, and later events only when they are recorded. It preserves missing events and stopped versions; it creates no authority.',
       }),
     ]),
   );
@@ -403,3 +403,4 @@ export function startNarrativeLayer(root) {
   observer.observe(root, { childList: true, subtree: true });
   schedule();
 }
+

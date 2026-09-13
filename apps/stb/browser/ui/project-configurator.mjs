@@ -98,8 +98,9 @@ function alcoveSummary(payload) {
   const parts = payload.parts ?? [];
   return [
     node('article', { className: 'config-engine-card' }, [
-      node('h3', { text: 'DERIVATION' }),
-      node('p', { text: 'span = opening width − left support − right support' }),
+      node('h3', { text: 'HOW THE NUMBER WAS CALCULATED' }),
+      node('p', { text: 'Shelf span = opening width − left support − right support' }),
+      payload.valid ? node('p', { text: `${payload.inputs.openingWidth.canonical} − ${payload.inputs.leftSupport.canonical} − ${payload.inputs.rightSupport.canonical} = ${span} in` }) : null,
       node('p', { text: payload.valid ? `Derived span: ${span} in` : `Stopped: ${payload.unresolvedReason ?? 'incomplete input'}` }),
       node('p', { className: 'hint', text: `Rule: ${payload.ruleVersion ?? 'unidentified'}` }),
     ]),
@@ -126,7 +127,7 @@ function picnicSummary(payload) {
   const derived = payload.derived ?? {};
   return [
     node('article', { className: 'config-engine-card' }, [
-      node('h3', { text: 'DERIVATION' }),
+      node('h3', { text: 'HOW THE NUMBER WAS CALCULATED' }),
       node('p', { text: payload.valid ? `Product length: ${payload.input?.productLength?.canonical ?? '—'} in` : `Stopped: ${payload.unresolvedReason ?? 'incomplete input'}` }),
       node('p', { text: derived.longitudinalMemberLength ? `Longitudinal member = L − 12 = ${derived.longitudinalMemberLength.canonical} in` : 'Longitudinal relation unavailable.' }),
       node('p', { text: derived.framePositions ? `End frames at ${derived.framePositions.a.canonical} in and ${derived.framePositions.b.canonical} in.` : 'Frame placement unavailable.' }),
@@ -230,7 +231,7 @@ async function renderIntoScreen(root) {
   if (token !== renderToken || !root.contains(screen)) return;
   const staleStatus = screen.querySelector('.handoff-status');
   if (staleStatus) {
-    staleStatus.textContent = 'Registered class configurator is running as candidate application code. Store and production paths remain independent and unresolved unless an owning system actually answers them.';
+    staleStatus.textContent = 'These inputs produce a proposed definition. Store support and production permission require their own answers.';
   }
   const panel = buildPanel(descriptor, candidate, projection, statusByProject.get(localRecordId) ?? '');
   const firstPane = screen.querySelector('.source-pane');
@@ -301,3 +302,4 @@ export function startProjectConfigurator(root) {
   observer.observe(root, { childList: true, subtree: true });
   schedule();
 }
+
