@@ -495,6 +495,8 @@ export const STATIC_ASSETS = Object.freeze({
   '/ui/candidate-view.mjs': JS('browser/ui/candidate-view.mjs'),
   '/ui/store-panel.mjs': JS('browser/ui/store-panel.mjs'),
   '/ui/review-panel.mjs': JS('browser/ui/review-panel.mjs'),
+  '/ui/narrative.mjs': JS('browser/ui/narrative.mjs'),
+  '/ui/open-door.mjs': JS('browser/ui/open-door.mjs'),
   '/domain/classes.mjs': JS('browser/domain/classes.mjs'),
   '/domain/candidate.mjs': JS('browser/domain/candidate.mjs'),
   '/domain/derive.mjs': JS('browser/domain/derive.mjs'),
