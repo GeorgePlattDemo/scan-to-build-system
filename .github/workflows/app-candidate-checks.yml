@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - build/app-configurator-engine-0.1
+      - build/app-operational-jobs-0.1
   workflow_dispatch:
 
 permissions:
