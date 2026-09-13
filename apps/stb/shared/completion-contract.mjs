@@ -263,11 +263,13 @@ export function evaluateCompletionPlan(plan) {
   const closeoutReady = handoffReady && plan.custodyStatus === 'TRANSFERRED';
 
   let status = COMPLETION_PLAN_STATUS.BLOCKED;
-  if (customerDecisionPending) status = COMPLETION_PLAN_STATUS.NEEDS_CUSTOMER_DECISION;
-  else if (stewardDecisionPending) status = COMPLETION_PLAN_STATUS.NEEDS_STEWARD_DECISION;
-  else if (yardWorkPending) status = COMPLETION_PLAN_STATUS.SECONDARY_WORK_PENDING;
-  else if (handoffReady) status = COMPLETION_PLAN_STATUS.READY_FOR_HANDOFF;
-  if (closeoutReady) status = COMPLETION_PLAN_STATUS.CLOSED;
+  if (plan.storeDisposition === 'SUPPORTABLE') {
+    if (customerDecisionPending) status = COMPLETION_PLAN_STATUS.NEEDS_CUSTOMER_DECISION;
+    else if (stewardDecisionPending) status = COMPLETION_PLAN_STATUS.NEEDS_STEWARD_DECISION;
+    else if (yardWorkPending) status = COMPLETION_PLAN_STATUS.SECONDARY_WORK_PENDING;
+    else if (handoffReady) status = COMPLETION_PLAN_STATUS.READY_FOR_HANDOFF;
+    if (closeoutReady) status = COMPLETION_PLAN_STATUS.CLOSED;
+  }
 
   return {
     status,
@@ -352,6 +354,7 @@ export function buildCloseoutRecord(input) {
       throw new TypeError(`${key} must match the evaluated completion plan`);
     }
   }
+  const labelIds = uniqueStrings(input.labelIds);
   return Object.freeze({
     recordType: COMPLETION_RECORD_TYPES.CLOSEOUT,
     closeoutVersion: 'STB-PROJECT-CLOSEOUT-0.1',
@@ -359,16 +362,16 @@ export function buildCloseoutRecord(input) {
     projectId: requiredString('projectId', input.projectId),
     candidateRevisionId: requiredString('candidateRevisionId', input.candidateRevisionId),
     completionPlanId: requiredString('completionPlanId', input.completionPlanId),
-    labelIds: uniqueStrings(input.labelIds),
-    packageIds: uniqueStrings(input.packageIds),
-    receiptProfiles: uniqueStrings(input.receiptProfiles),
+    labelIds: Object.freeze(labelIds),
+    packageIds: Object.freeze(uniqueStrings(input.packageIds)),
+    receiptProfiles: Object.freeze(uniqueStrings(input.receiptProfiles)),
     custody: Object.freeze({
       status: 'TRANSFERRED',
       method: requiredString('custody.method', input.custody?.method),
       transferredAt: requiredString('custody.transferredAt', input.custody?.transferredAt),
       handoffRef: string(input.custody?.handoffRef),
     }),
-    exceptions: uniqueStrings(input.exceptions),
+    exceptions: Object.freeze(uniqueStrings(input.exceptions)),
     recordRef: requiredString('recordRef', input.recordRef),
     createdAt: requiredString('createdAt', input.createdAt),
     authority: false,
