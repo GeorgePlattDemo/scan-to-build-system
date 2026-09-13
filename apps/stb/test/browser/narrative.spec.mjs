@@ -49,7 +49,7 @@ test('review, Store, result, and record pages expose authority boundaries withou
     'does not by itself mean ordered, paid, material allocated, production released',
   );
   await expect(page.locator('[data-narrative="qualified-resolution"]')).toContainText(
-    'Routing and persistence for qualified resolution are not implemented in this build',
+    'Routing, standing validation, expiry, blocking behavior, and persistence',
   );
 
   await page.locator('[data-nav-page="store"]').click();
@@ -69,10 +69,20 @@ test('review, Store, result, and record pages expose authority boundaries withou
   await expect(page.locator('[data-future-chain="true"]')).toContainText(
     'Release is its own authority. It is not machine readiness',
   );
-  await expect(page.locator('[data-narrative="authority-map"]')).toContainText('YOU');
-  await expect(page.locator('[data-narrative="authority-map"]')).toContainText('OWNER RECORD');
+
+  const map = page.locator('[data-narrative="authority-map"]');
+  await expect(map).toContainText('YOU');
+  await expect(map).toContainText('OWNER RECORD');
+  await expect(map.locator('[data-authority-stage]')).toHaveCount(8);
+  await expect(map.locator('[data-authority-stage="STORE"]')).toContainText('RECEIVES');
+  await expect(map.locator('[data-authority-stage="STORE"]')).toContainText('MAY DO');
+  await expect(map.locator('[data-authority-stage="LOCAL CELL"]')).toContainText('local Cycle Start');
+
   await expect(page.locator('[data-narrative="qualified-loop-result"]')).toContainText(
     'Qualified resolution is a loop, not a ninth stage',
+  );
+  await expect(page.locator('[data-narrative="collapses"]')).toContainText(
+    'Qualified resolution is not production release',
   );
   await expect(page.locator('[data-narrative="collapses"]')).toContainText(
     'Production release is not machine readiness',
