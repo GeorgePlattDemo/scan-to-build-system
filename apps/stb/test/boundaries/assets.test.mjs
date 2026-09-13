@@ -55,6 +55,8 @@ test('only allowlisted browser and shared assets are served', async (t) => {
     ['/ui/panels.mjs', 'javascript'],
     ['/ui/source-viewer.mjs', 'javascript'],
     ['/ui/candidate-view.mjs', 'javascript'],
+    ['/ui/narrative.mjs', 'javascript'],
+    ['/ui/open-door.mjs', 'javascript'],
     ['/vendor/pdfjs/pdf.min.mjs', 'javascript'],
     ['/vendor/pdfjs/pdf.worker.min.mjs', 'javascript'],
     ['/domain/classes.mjs', 'javascript'],
