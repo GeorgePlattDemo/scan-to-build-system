@@ -28,6 +28,7 @@ test('operator authority is stop/report only', () => {
     COMPLETION_ACTIONS.CHOOSE_SECONDARY_OPTION,
     COMPLETION_ACTIONS.ACCEPT_COMPLETION_PLAN,
     COMPLETION_ACTIONS.MARK_SECONDARY_COMPLETE,
+    COMPLETION_ACTIONS.RECORD_INSPECTION,
     COMPLETION_ACTIONS.MARK_LABEL_APPLIED,
     COMPLETION_ACTIONS.MARK_STAGED,
     COMPLETION_ACTIONS.RECORD_CUSTODY_TRANSFER,
@@ -115,6 +116,7 @@ test('customer-completes path can be handed off only after customer and steward 
   const result = evaluateCompletionPlan({
     storeDisposition: 'SUPPORTABLE',
     lines: [line],
+    inspectionStatus: 'RECORDED',
     labelingStatus: 'APPLIED',
     stagingStatus: 'STAGED',
     fulfillmentStatus: 'PICKUP_READY',
@@ -128,10 +130,25 @@ test('customer-completes path can be handed off only after customer and steward 
   assert.equal(result.operatorMayPromote, false);
 });
 
+test('inspection is a hard pre-handoff record gate', () => {
+  const result = evaluateCompletionPlan({
+    storeDisposition: 'SUPPORTABLE',
+    lines: [{ lineId: 'CUT-001', primaryContribution: { status: 'COMPLETE' } }],
+    labelingStatus: 'APPLIED',
+    stagingStatus: 'STAGED',
+    fulfillmentStatus: 'PICKUP_READY',
+    closeoutRecordStatus: 'PREPARED',
+    custodyStatus: 'NOT_TRANSFERRED',
+  });
+  assert.equal(result.handoffReady, false);
+  assert.ok(result.reasons.includes('INSPECTION_NOT_RECORDED'));
+});
+
 test('Store refusal cannot be converted into a completion plan', () => {
   const result = evaluateCompletionPlan({
     storeDisposition: 'REFUSED',
     lines: [{ primaryContribution: { status: 'COMPLETE' } }],
+    inspectionStatus: 'RECORDED',
     labelingStatus: 'APPLIED',
     stagingStatus: 'STAGED',
     fulfillmentStatus: 'PICKUP_READY',
@@ -147,6 +164,7 @@ test('custody transfer closes an otherwise handoff-ready plan', () => {
   const result = evaluateCompletionPlan({
     storeDisposition: 'SUPPORTABLE',
     lines: [{ lineId: 'CUT-001', primaryContribution: { status: 'COMPLETE' } }],
+    inspectionStatus: 'RECORDED',
     labelingStatus: 'APPLIED',
     stagingStatus: 'STAGED',
     fulfillmentStatus: 'DELIVERY_ARRANGED',
@@ -201,6 +219,7 @@ test('completion plan record carries project/Store identity without authority', 
   });
   assert.equal(plan.recordType, COMPLETION_RECORD_TYPES.PLAN);
   assert.equal(plan.storeDisposition, 'SUPPORTABLE');
+  assert.equal(plan.inspectionStatus, 'NOT_RECORDED');
   assert.equal(plan.physicalExecutionAuthority, false);
   assert.equal(plan.operatorMayPromote, false);
 });
@@ -209,6 +228,7 @@ test('closeout record cannot exist before custody transfer', () => {
   const plan = {
     storeDisposition: 'SUPPORTABLE',
     lines: [{ lineId: 'CUT-001', primaryContribution: { status: 'COMPLETE' } }],
+    inspectionStatus: 'RECORDED',
     labelingStatus: 'APPLIED',
     stagingStatus: 'STAGED',
     fulfillmentStatus: 'PICKUP_READY',
@@ -256,6 +276,7 @@ test('individual and contractor receipts are presentations over the same record'
   const contractor = receiptSections(RECEIPT_PROFILES.CONTRACTOR);
   assert.ok(individual.includes('WHAT_REMAINS_OR_IS_ASSIGNED'));
   assert.ok(contractor.includes('SECONDARY_OPERATIONS'));
+  assert.ok(contractor.includes('INSPECTION_DISPOSITIONS'));
   assert.ok(contractor.includes('CUSTODY_TRANSFER'));
   assert.ok(individual.includes('RECORD_REFERENCE'));
   assert.ok(contractor.includes('RECORD_REFERENCE'));
