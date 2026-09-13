@@ -1,4 +1,5 @@
 import { COPY } from '/shared/contracts.mjs';
+import { renderProjectProjection } from '/ui/project-renderer.mjs';
 
 function el(tag, options = {}, children = []) {
   const node = document.createElement(tag);
@@ -48,6 +49,11 @@ function identityAttrs(projection, view) {
     'data-valid': payload.valid ? 'true' : 'false',
     'data-store-request-complete': payload.request?.complete ? 'true' : 'false',
   };
+}
+
+function isMappedProjectProjection(projection) {
+  const payload = projection?.payload ?? null;
+  return Boolean(payload?.classId && payload?.render);
 }
 
 export function renderPartSummary(projection, { selectedOccurrenceId } = {}) {
@@ -181,6 +187,26 @@ export function renderSharedCandidateView(projection, options = {}) {
       el('p', { className: 'hint', text: COPY.boardBlank }),
     ]);
   }
+
+  if (isMappedProjectProjection(projection)) {
+    const payload = projection.payload;
+    return el(
+      'section',
+      {
+        className: 'candidate-view candidate-view-project',
+        attrs: {
+          'data-candidate-view': 'true',
+          'data-view': 'shared',
+          'data-projection-id': projection.id,
+          'data-class-id': payload.classId,
+          'data-valid': payload.valid ? 'true' : 'false',
+          'data-store-request-complete': payload.request?.complete ? 'true' : 'false',
+        },
+      },
+      [renderProjectProjection(projection)],
+    );
+  }
+
   const payload = projection.payload;
   return el(
     'section',
