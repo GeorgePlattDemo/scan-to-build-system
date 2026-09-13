@@ -4,6 +4,7 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { pathToFileURL } from 'node:url';
 
+import { derivePublishedJobCompletionPreview } from '../shared/completion-from-result.mjs';
 import {
   PUBLISHED_JOB_STORE_PIN,
   buildPublishedJobSpec,
@@ -275,29 +276,31 @@ export async function createPublishedJobAdapter({ storeRoot = process.env.STB_ST
           },
         };
       }
-      return {
-        status: 200,
-        body: {
-          kind: 'published-job-store-answer',
-          ready: true,
-          jobId: request.job.id,
-          label: request.job.label,
-          requestType: request.job.requestType,
-          storeSku: request.job.storeSku,
-          storePin: PUBLISHED_JOB_STORE_PIN,
-          inputs,
-          status: evaluation.status,
-          evidenceClass: evaluation?.evidenceClass ?? null,
-          physicalStatus: evaluation?.physicalStatus ?? null,
-          commissioned: evaluation?.commissioned ?? null,
-          ...boundedPublishedEvaluation(evaluation),
-          estimate: boundedPublishedEstimate(estimate),
-          boundary: request.job.boundary,
-          notClaimed: request.job.notClaimed,
-          physicalExecutionAuthorized: false,
-          controllerOutputProduced: false,
-        },
+      const boundedEvaluation = boundedPublishedEvaluation(evaluation);
+      const answer = {
+        kind: 'published-job-store-answer',
+        ready: true,
+        jobId: request.job.id,
+        label: request.job.label,
+        machineFamily: request.job.machineFamily,
+        requestType: request.job.requestType,
+        storeSku: request.job.storeSku,
+        storePin: PUBLISHED_JOB_STORE_PIN,
+        inputs,
+        status: evaluation.status,
+        evidenceClass: evaluation?.evidenceClass ?? null,
+        physicalStatus: evaluation?.physicalStatus ?? null,
+        commissioned: evaluation?.commissioned ?? null,
+        ...boundedEvaluation,
+        estimate: boundedPublishedEstimate(estimate),
+        operationalRequirements: request.job.operationalRequirements,
+        boundary: request.job.boundary,
+        notClaimed: request.job.notClaimed,
+        physicalExecutionAuthorized: false,
+        controllerOutputProduced: false,
       };
+      answer.completionPreview = derivePublishedJobCompletionPreview(answer);
+      return { status: 200, body: answer };
     },
   };
 }
