@@ -34,6 +34,19 @@
         </dl>
       </details>
     </footer>
+    <script>
+      (() => {
+        const root = document.getElementById('app');
+        const exposeBeginMain = () => {
+          const begin = root.querySelector('.app-shell[data-screen="begin"] > main.screen-begin');
+          if (begin && !begin.hasAttribute('data-screen')) {
+            begin.setAttribute('data-screen', 'begin');
+          }
+        };
+        new MutationObserver(exposeBeginMain).observe(root, { childList: true, subtree: true });
+        exposeBeginMain();
+      })();
+    </script>
     <script type="module" src="/app.mjs"></script>
   </body>
 </html>
