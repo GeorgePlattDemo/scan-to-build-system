@@ -46,7 +46,7 @@ test('landing reproduces the controlling words, order, rail, and README pill', a
   ]);
   const readme = landing.getByRole('link', { name: 'Readme', exact: true });
   await expect(readme).toHaveAttribute('href', 'https://github.com/GeorgePlattDemo/scan-to-build-system#readme');
-  await expect(landing.locator('[data-build-guide] .foot')).toContainText('Reference build. Input welcome.');
+  await expect(landing.locator('[data-build-guide] .foot p')).toHaveCount(0);
 });
 
 test('all three orientation pages reproduce the controlling copy and converge on Page 1', async ({ page }) => {
@@ -100,6 +100,7 @@ test('Page 1 reproduces the controlling four-door ribbon and explanatory field',
     'https://github.com/GeorgePlattDemo/scan-to-build-system#readme',
   );
   await expect(page1.getByRole('button', { name: '← Back', exact: true })).toBeVisible();
+  await expect(page1.locator('[data-build-guide] .foot p')).toHaveCount(0);
 });
 
 test('existing project plumbing remains behind Start your own, Critical fit, and Outdoor build', async ({ page }) => {
