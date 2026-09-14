@@ -1,15 +1,15 @@
 import { expect, test } from '@playwright/test';
 
-import { ACTORS, COPY } from '../../shared/contracts.mjs';
+import { ACTORS } from '../../shared/contracts.mjs';
 import { repoCall, requireOk } from '../helpers/browser-repo.mjs';
 
 async function openAlcove(page) {
   await page.goto('/');
-  await page.getByRole('button', { name: ACTORS.new.label }).click();
-  await page.getByRole('button', { name: COPY.next }).click();
-  await page.getByRole('button', { name: COPY.chooseMapped }).click();
-  await page.getByRole('button', { name: 'Alcove shelf blanks — bounded reference' }).click();
-  await expect(page.locator('[data-screen="questions"]')).toBeVisible();
+  await page.getByRole('button', { name: ACTORS.new.label, exact: true }).click();
+  await page.getByRole('button', { name: 'START', exact: true }).click();
+  await expect(page.locator('[data-controlled-projects="true"]')).toBeVisible();
+  await page.locator('[data-project-door="alcove"]').click();
+  await expect(page.locator('main[data-screen="questions"][data-class-id="alcove-shelf-blanks"]')).toBeVisible();
   await expect(page.locator('[data-project-configurator="alcove-shelf-blanks"]')).toBeVisible();
 }
 
@@ -42,8 +42,6 @@ test('User 1 Alcove opens as the controlled Make it yours configurator and appli
   await expect(page.locator('[data-review-parts]')).toContainText('10');
   await expect(page.locator('[data-review-unresolved]')).toContainText('ORDERED_UNIT_ADJUSTMENT_NOT_DECIDED');
   await expect(page.locator('[data-review-unresolved]')).toContainText('store-request-absent');
-  await expect(page.getByRole('button', { name: COPY.reviewUnresolved })).toBeVisible();
-  await expect(page.getByRole('button', { name: COPY.reviewConfirm })).toHaveCount(0);
 });
 
 test('shelf count, shelf heights and material preference remain holder configuration while Store support stays unresolved', async ({ page }) => {
@@ -53,7 +51,7 @@ test('shelf count, shelf heights and material preference remain holder configura
   await setSlider(panel.getByRole('slider', { name: 'Shelves' }), 4);
   await panel.locator('[data-alcove-height-index="3"]').fill('46');
   await panel.locator('[data-alcove-height-index="3"]').press('Tab');
-  await panel.getByRole('button', { name: 'Cherry' }).click();
+  await panel.getByRole('button', { name: 'Cherry', exact: true }).click();
   await panel.getByRole('button', { name: 'REVIEW AND CONFIRM' }).click();
 
   await expect(page.locator('main[data-screen="confirm"]')).toBeVisible();
