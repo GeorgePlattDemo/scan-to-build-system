@@ -6,7 +6,7 @@ import { FIXED_HOST, FIXED_ORIGIN, FIXED_PORT } from '../../shared/contracts.mjs
 import { startServer } from '../../server/main.mjs';
 import { connect, occupyPort, rawRequest } from '../helpers/http.mjs';
 
-test('static host binds loopback, serves the foundation page, and rejects invalid access', async (t) => {
+test('static host binds loopback, serves the foundation page and internal S-001 engine, and rejects invalid access', async (t) => {
   const host = await startServer();
   t.after(() => host.close());
 
@@ -28,6 +28,11 @@ test('static host binds loopback, serves the foundation page, and rejects invali
   const moduleResponse = await rawRequest({ path: '/app.mjs' });
   assert.equal(moduleResponse.status, 200);
   assert.match(moduleResponse.headers['content-type'], /javascript/);
+
+  const s001Engine = await rawRequest({ path: '/domain/s001-engine.mjs' });
+  assert.equal(s001Engine.status, 200);
+  assert.match(s001Engine.headers['content-type'], /javascript/);
+  assert.match(s001Engine.body, /planS001CenteredArchDerivation/);
 
   const invalidHost = await rawRequest({
     headers: { Host: 'evil.example:4317' },

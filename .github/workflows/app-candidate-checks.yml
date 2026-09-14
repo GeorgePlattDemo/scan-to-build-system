@@ -1,0 +1,72 @@
+name: App candidate checks
+
+on:
+  push:
+    branches:
+      - build/app-configurator-engine-0.1
+      - build/app-operational-jobs-0.1
+      - build/app-durable-jobs-0.1
+      - build/s001-canonical-configurator-0.1
+      - build/global-completion-path-0.1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  app-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/stb
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/stb/.node-version
+          cache: npm
+          cache-dependency-path: apps/stb/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Boundary tests
+        run: npm run test:boundaries
+
+      # This workflow intentionally has no cross-repository Store checkout.
+      # Exercise the source gate in the state CI actually has instead of pretending
+      # the pinned integration suite can run without STB_STORE_ZERO_ROOT.
+      - name: Store fail-closed tests (no external checkout)
+        run: >-
+          node --test --test-concurrency=1
+          --test-name-pattern="missing STB_STORE_ZERO_ROOT|nonexistent Store root|wrong Store pin|unavailable Store source"
+          test/store/source-gate.test.mjs
+
+      # These two browser cases exercise the real pinned Store checkout rather than
+      # the browser-side mock transport. They remain part of npm run test:browser
+      # for a workspace that has the exact clean Store checkout mounted.
+      - name: Browser tests (Store checkout not mounted)
+        run: >-
+          npx playwright test --config test/playwright.config.mjs
+          --grep-invert "P5-01 valid committed 45 auto-asks once and Board/Page 5 copy the actual Store answer|incomplete Board and unapplied buffer do not auto-ask"
+
+      - name: Upload bounded app source for integration proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: stb-app-source
+          path: |
+            apps/stb/ops
+            apps/stb/shared
+            apps/stb/server
+          if-no-files-found: error
+          retention-days: 7

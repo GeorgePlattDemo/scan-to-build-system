@@ -1,83 +1,126 @@
 # Current State
 
-**Baseline:** post-application working state  
-**Rule:** present tense is reserved for demonstrated or implemented capability.
+**Rule:** present tense is reserved for implemented or demonstrated facts at an exact identity.  
+**Promotion rule:** accepted baseline and current candidate are separate states.
 
-## Application — IMPLEMENTED
+For the shortest authoritative status view, read [`../../STB-CURRENT-BASELINE.md`](../../STB-CURRENT-BASELINE.md). For proof mapping, read [`VERIFICATION-REGISTER.md`](VERIFICATION-REGISTER.md).
 
-The accepted application baseline is `GeorgePlattDemo/grok-file` branch `build/app-foundation-0.1` at `4595b4785a2686486e477ce2e70fb3f476285a8d`.
+## Repository baseline — ACCEPTED / MERGED
 
-Its recorded Build 8 closeout includes:
+`main@f4769bbf2daaf7e719b723478b7a24f3dfa1344a`
 
-- three entry orientations converging on one application architecture;
-- project identity and local persistence;
-- durable original evidence custody;
-- explicit observations and correction history;
-- bounded Board identity, occurrence, definition, and revision behavior;
-- Store request/correlation against the pinned Stage-2 Store;
-- budgetary Store-result presentation;
-- `DefinitionReviewRecorded` and `UnresolvedDefinitionAcknowledged`;
-- truthful result presentation;
-- owner-record export/import/reopen;
-- integrated first-vertical acceptance.
+The accepted application tree was transferred into this repository by merged PR #3. Its source lineage is:
 
-The accepted app remains a local/reference application build. It is not a live commercial service or physical fabrication service.
+`GeorgePlattDemo/grok-file@4595b4785a2686486e477ce2e70fb3f476285a8d`
 
-## Store — REFERENCE / SIMULATION
+That source pin remains provenance for the transferred app. It does not describe later candidate development in this repository.
 
-The application consumes Stage-2 Store Zero at `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`.
+## Current application candidate — NOT YET ACCEPTED
 
-Store Zero provides fixture-backed offerings, fixture stock facts, bounded capability evaluation, and modeled budgetary economics. Those facts are reference behavior, not live yard inventory, reservation, commercial quotation, or measured production evidence.
+`build/global-completion-path-0.1@b0caba518aa0e152fa107fe89267ab48ee81296f`
 
-The next Store development horizon is **Store 1**: a deliberate expansion of current Store concepts to broader SKU/inventory coverage and a special-order path. That work has not yet been implemented in this repository.
+Latest code head recorded with full App candidate checks passing:
 
-## Governed Reference — REFERENCE / SIMULATION
+`dee4a307cf0866ac0985da92dfb5f74045ee90f9`
 
-The current governed baseline is `18949f163718a937f072f4be3a654bb303e53160`.
+The current candidate is the descendant of the open promotion chain:
 
-It provides current governed semantics and a bounded simulation/reference path. Production authorization remains unavailable. A favorable Store answer does not create governed simulation or production authority.
+`#6 → #8 → #9 → #10`
 
-## Machine / cell — PLANNED / RESEARCH
+It includes, among other bounded candidate behavior:
 
-The future physical direction is intentionally not presented as completed architecture.
+- published D-001 / rectangular-sheet / canonical S-001 Store jobs;
+- canonical centered S-001 configuration;
+- exact Store-backed S-001 proof at the current published-job pin;
+- durable S-001 candidate revision → Store request → attempt → response → Review → Result / Record → export/import/reopen custody;
+- stale/imported live-retry refusal;
+- response quarantine / authority firewall behavior;
+- global completion and closeout semantics;
+- explicit customer / cell-steward / operator authority separation;
+- mandatory labeling before part/package leaves the primary cell stream.
 
-Current intent is to:
+These are current-candidate software facts. They do not by themselves promote the candidate to `main` or establish physical production.
 
-- add bounded useful capability to the dimensional machine;
-- build an initial sheet-processing machine with limited automation;
-- establish those machines as a research cell once a useful bounded task is selected;
-- use measured operation, refusals, material behavior, workflow, labor, and economics to determine what deserves further development.
+## Store — PATH-SPECIFIC REFERENCE / CANDIDATE
 
-Physical capability is claimed only after it is demonstrated.
+### Transferred accepted-app / Stage-2 path
 
-## User 1 — PLANNED
+`b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
 
-The first post-baseline user/project path has not yet been defined here.
+This remains the Store Zero reference pin associated with the transferred accepted-app path.
 
-It should be built through the accepted application architecture rather than by reviving a standalone early demo flow.
+### Current published-job / canonical S-001 candidate path
 
-## Historical Sarah material — NOT CURRENT BASELINE
+`4402abeb6b0299a5b6db2eec85ed04c3b0236bcc`
 
-The early Sarah journey was useful as a toy/prototype for demonstrating a chain and surfacing requirements. It is not a current authority source.
+The current candidate expects this exact Store identity for the durable S-001 path and used it for the post-polish exact Store regression.
 
-Useful elements may later be recovered after checking them against present terminology, layer ownership, Store capability, governed semantics, and machine reality. Nothing from the early Sarah chain is assumed current merely because it was previously demonstrated.
+Store support remains reference/software evidence. It is not live inventory, reservation, binding quotation, payment, or physical fabrication authorization.
 
-## Commercial and physical capability — NOT CLAIMED
+## D-001 — REFERENCE / SOFTWARE PATH
 
-The current system does not claim:
+D-001 remains bounded and Store-evaluated in the current candidate. Modeled machine or economic behavior is not measured commissioned production.
 
-- live inventory;
+No commissioned D-001 physical production system is claimed here.
+
+## S-001 — CURRENT CANDIDATE APPLICATION PATH; REFERENCE MACHINE STATUS
+
+Canonical project: `S001_CENTERED_ARCHED_SHEET_V0`.
+
+Current candidate geometry:
+
+- parent: `96 in` horizontal × `48 in` vertical;
+- centered Store-owned work field: `48 in` horizontal × `36 in` vertical;
+- reserved parent-sheet margins: `24 in` left/right and `6 in` top/bottom;
+- opening margins inside the work field: `6 in` left/right and `0 in` top/bottom;
+- Store-derived radius;
+- retained-tab removal as selective downstream completion work;
+- S-001 drilling not admitted this round;
+- physical tab-retention strength not measured;
+- controller output false;
+- physical execution authority false.
+
+The earlier PR #8 statement of `6 in` left/right and `30 in` top/bottom is superseded by the centered-field correction in PR #9 and retained in PR #10.
+
+## Completion / handoff — CURRENT CANDIDATE
+
+The candidate completion contract requires Store support plus resolution of residual completion work, inspection, mandatory labeling, staging, pickup/delivery readiness, and closeout preparation before handoff readiness.
+
+Custody transfer promotes an otherwise handoff-ready project to closed status.
+
+Operator authority remains STOP / REPORT only. Operator actions do not promote Store, completion, inspection, staging, custody, closeout, controller, or production state.
+
+## Machine controller / safety work — PARALLEL CANDIDATE
+
+PR #7 at `b23b2a95f71c89347bdf5c465369b7399b75e834` contains the fail-closed virtual safety kernel.
+
+It is intentionally separate from the application promotion chain.
+
+Current truthful status:
+
+- safety kernel simulation: implemented in PR #7;
+- controller target: selected for prototype;
+- controller-in-loop validated: **false**;
+- physical commissioned: **false**;
+- physical execution authorized: **false**.
+
+## Commercial and physical capability — NOT ESTABLISHED / NOT AUTHORIZED
+
+The current repository does not establish:
+
+- live commercial inventory;
 - binding quotation;
-- commercial ordering or payment;
-- stock reservation;
-- fulfillment completion;
-- production authorization;
-- commissioned two-machine cell capability;
-- physical fabrication recorded by the current app;
-- measured production time where only modeled time exists.
+- ordering/payment/reservation;
+- commissioned D-001 or S-001 physical production;
+- controller-in-loop validation;
+- measured S-001 tab-retention physics;
+- physical Cycle Start authority;
+- physical production authorization.
 
-## Safety
+## Next project step
+
+Complete and review the baseline-reconciliation pass, then make an explicit promotion decision about the current candidate chain.
+
+Do not add new Store scope, machine scope, controller authority, or Page-1 capability merely to avoid making that project-state decision.
 
 **NO BLOOD ON WOOD.**
-
-A software success path, Store result, user review, simulation record, and physical execution are separate facts.

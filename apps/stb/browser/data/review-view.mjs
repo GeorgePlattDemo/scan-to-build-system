@@ -30,6 +30,8 @@ function eventLabel(record) {
       return 'Observation mapped into the candidate';
     case 'observation-corrected':
       return 'Observation corrected';
+    case 'class-configuration-applied':
+      return 'Project configuration applied';
     case 'board-requirement-applied':
       return 'Board finished length applied';
     case 'board-cut001-referenced':
@@ -77,8 +79,18 @@ function suppliedLines(assembled) {
       });
     }
   }
+  const configuration = assembled.candidate?.payload?.configuration;
+  if (configuration?.inputs) {
+    for (const [key, value] of Object.entries(configuration.inputs)) {
+      if (!value?.raw) continue;
+      lines.push({
+        id: `configuration:${key}`,
+        text: `${key}: ${value.raw}${value.unit ? ` ${value.unit}` : ''} (${configuration.basis ?? value.method ?? 'configuration'})`,
+      });
+    }
+  }
   if (lines.length === 0) {
-    lines.push({ id: 'none', text: 'No source or typed original is attached yet.' });
+    lines.push({ id: 'none', text: 'No source, typed original, or configuration input is attached yet.' });
   }
   return lines;
 }
@@ -86,10 +98,8 @@ function suppliedLines(assembled) {
 function choseLines(assembled) {
   const mappings = assembled.candidate?.payload?.mappings ?? [];
   const accepted = mappings.filter((entry) => entry.status === 'accepted');
-  if (accepted.length === 0) {
-    return [{ id: 'none', text: 'No mapping has been accepted into the candidate.' }];
-  }
-  return accepted.map((entry) => {
+  const configured = assembled.candidate?.payload?.configuration?.inputs ?? null;
+  const lines = accepted.map((entry) => {
     const observation = (assembled.observations ?? []).find(
       (record) => record.id === entry.observationId,
     );
@@ -104,6 +114,28 @@ function choseLines(assembled) {
       text: `${entry.inputKey} from ${methodLabel}`,
     };
   });
+  if (configured) {
+    lines.push({
+      id: 'configuration-basis',
+      text: `Mapped project configuration basis: ${assembled.candidate?.payload?.configuration?.basis ?? 'manual-entry'}`,
+    });
+  }
+  return lines.length > 0
+    ? lines
+    : [{ id: 'none', text: 'No mapping or mapped project configuration has been accepted into the candidate.' }];
+}
+
+function dimensionText(part) {
+  const length = part?.length?.canonical ?? null;
+  const depth = part?.depth?.canonical ?? null;
+  const thickness = part?.thickness?.canonical ?? null;
+  if (length && depth && thickness) {
+    return `${length} × ${depth} × ${thickness} in`;
+  }
+  if (part?.finishedLength?.canonical) {
+    return `${part.finishedLength.canonical} in`;
+  }
+  return null;
 }
 
 function partsLines(assembled) {
@@ -116,10 +148,22 @@ function partsLines(assembled) {
       {
         id: 'unresolved',
         text: projection.payload?.unresolvedReason
-          ? `Board requirement unresolved (${projection.payload.unresolvedReason}).`
-          : 'Board requirement is unresolved.',
+          ? `Definition unresolved (${projection.payload.unresolvedReason}).`
+          : 'Definition is unresolved.',
       },
     ];
+  }
+  const projectedParts = projection.payload?.parts ?? [];
+  if (projectedParts.length > 0) {
+    return projectedParts.map((part, index) => {
+      const dimensions = dimensionText(part);
+      return {
+        id: part.occurrenceId ?? `part-${index + 1}`,
+        text: `${part.label ?? `Part ${index + 1}`}${dimensions ? `, ${dimensions}` : ''}${part.quantity ? `, ${part.quantity} ${part.quantityUnit ?? 'ea'}` : ''}.`,
+        occurrenceId: part.occurrenceId ?? null,
+        definitionRevisionId: part.definitionRevisionId ?? null,
+      };
+    });
   }
   const length = projection.payload.finishedLength?.canonical ?? null;
   const occurrenceId = projection.payload.occurrenceId;
@@ -129,7 +173,7 @@ function partsLines(assembled) {
       id: occurrenceId ?? 'part',
       text: length
         ? `One desired finished board, ${length} in, 1 ea, square CROSSCUT.`
-        : 'One desired finished board.',
+        : projection.payload?.summary?.title ?? 'One derived part.',
       occurrenceId,
       definitionRevisionId,
     },
@@ -149,7 +193,7 @@ function buildTrace(assembled) {
     {
       id: 'need',
       label: 'Need / evidence',
-      status: (assembled.evidence?.length ?? 0) > 0 || (assembled.observations?.length ?? 0) > 0
+      status: (assembled.evidence?.length ?? 0) > 0 || (assembled.observations?.length ?? 0) > 0 || assembled.candidate?.payload?.configuration
         ? 'actual'
         : 'unavailable',
     },

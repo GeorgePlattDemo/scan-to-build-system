@@ -51,7 +51,7 @@ test('exactly three actor orientations use the compact §21.2 copy', () => {
   assert.equal(ACTORS.new.heading, 'Bring what you know.');
   assert.equal(
     ACTORS.new.body,
-    'We keep your source and show what remains unresolved. A scan is one way in. Enter 45 in, and the parts begin with that number. Fit, load and code suitability still need your judgment.',
+    'We keep what you provide and show what remains unknown. Measurements stay tied to their source. Fit, load, and code suitability need appropriate evidence and qualified review where required.',
   );
   assert.equal(ACTORS.returning.label, 'RETURNING USER');
   assert.equal(
@@ -140,25 +140,39 @@ test('Page 5 is the existing Store view, not a ninth primary page', () => {
   assert.equal(PRIMARY_PAGES.length, 8);
 });
 
-test('class register has one mapped reference and an unclassified own start', () => {
-  assert.equal(CLASS_REFERENCES.length, 1);
-  assert.equal(CLASS_REFERENCES[0].kind, 'mapped');
-  assert.equal(CLASS_REFERENCES[0].classId, 'alcove-shelf-blanks');
-  assert.equal(CLASS_REFERENCES[0].label, 'Alcove shelf blanks — bounded reference');
-  assert.equal(CLASS_REFERENCES[0].status, 'candidate-reference');
-  assert.equal(CLASS_REFERENCES[0].storePath, 'unresolved');
-  assert.equal(CLASS_REFERENCES[0].classVersion, '0.1-reference');
-  assert.equal(CLASS_REFERENCES[0].ruleVersion, null);
-  assert.equal(CLASS_REFERENCES[0].source.repository, GR_SOURCE.repository);
-  assert.equal(CLASS_REFERENCES[0].source.pin, GR_SOURCE.pin);
+test('class register exposes two mapped candidate classes and one unclassified own start', () => {
+  assert.equal(CLASS_REFERENCES.length, 2);
+  const alcove = CLASS_REFERENCES.find((entry) => entry.classId === 'alcove-shelf-blanks');
+  const picnic = CLASS_REFERENCES.find((entry) => entry.classId === 'classic-picnic-table-fixture');
+  assert.ok(alcove);
+  assert.equal(alcove.kind, 'mapped');
+  assert.equal(alcove.label, 'Alcove shelf blanks — bounded reference');
+  assert.equal(alcove.status, 'candidate-reference');
+  assert.equal(alcove.storePath, 'unresolved');
+  assert.equal(alcove.classVersion, '0.1-reference');
+  assert.equal(alcove.ruleVersion, null);
+  assert.equal(alcove.source.repository, GR_SOURCE.repository);
+  assert.equal(alcove.source.pin, GR_SOURCE.pin);
   assert.equal(
-    CLASS_REFERENCES[0].source.basis,
+    alcove.source.basis,
     'GR dimensional definition from roadmap §5.2 (bounded alcove shelf blanks)',
   );
-  assert.equal(CLASS_REFERENCES[0].source.ruleVersion, null);
-  assert.equal(CLASS_REFERENCES[0].source.sourceFile, null);
-  assert.equal(CLASS_REFERENCES[0].source.executable, false);
-  assert.equal(CLASS_REFERENCES[0].source.authority, false);
+  assert.equal(alcove.source.ruleVersion, null);
+  assert.equal(alcove.source.sourceFile, null);
+  assert.equal(alcove.source.executable, false);
+  assert.equal(alcove.source.authority, false);
+
+  assert.ok(picnic);
+  assert.equal(picnic.kind, 'mapped');
+  assert.equal(picnic.label, 'Classic Picnic Table — configurable demonstration');
+  assert.equal(picnic.classVersion, '0.1-software-fixture');
+  assert.equal(picnic.ruleVersion, 'classic.picnic-table.fixture/0.1');
+  assert.equal(picnic.status, 'candidate-software-fixture');
+  assert.equal(picnic.storePath, 'unresolved');
+  assert.equal(picnic.source.authority, false);
+  assert.equal(picnic.source.executable, false);
+  assert.match(picnic.source.basis, /software-fixture assumptions/);
+
   assert.equal(OWN_ENTRY.kind, 'own');
   assert.equal(OWN_ENTRY.classId, null);
   assert.equal(OWN_ENTRY.classVersion, null);
@@ -190,3 +204,4 @@ test('page 2 intake cards keep locked names and planned versus active status', (
   assert.equal(PDFJS.cdn, false);
   assert.equal(PDFJS.enableScripting, false);
 });
+

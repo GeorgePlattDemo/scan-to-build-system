@@ -7,7 +7,7 @@ import {
   getRecord,
   listRecords,
 } from '/data/repository.mjs';
-import { planBoardDerivation } from '/domain/derive.mjs';
+import { planCandidateDerivation } from '/domain/class-runner.mjs';
 
 function requireString(name, value) {
   if (typeof value !== 'string' || value.length === 0) {
@@ -42,6 +42,7 @@ export function emptyCandidatePayload({ entryMode, classRef, actorId }) {
     originalNeed: null,
     unresolved: true,
     actorContext: actorId,
+    configuration: null,
     parts: null,
     dimensions: null,
     material: null,
@@ -51,6 +52,7 @@ export function emptyCandidatePayload({ entryMode, classRef, actorId }) {
     activeOccurrenceIds: [],
     projectionId: null,
     definitionRevisionId: null,
+    definitionRevisionIds: [],
   };
 }
 
@@ -63,6 +65,7 @@ export function successorCandidatePayload(previous, patch = {}) {
     originalNeed: prior.originalNeed ?? null,
     unresolved: prior.unresolved !== false,
     actorContext: prior.actorContext ?? null,
+    configuration: prior.configuration ?? null,
     parts: null,
     dimensions: null,
     material: null,
@@ -72,6 +75,9 @@ export function successorCandidatePayload(previous, patch = {}) {
     activeOccurrenceIds: [...(prior.activeOccurrenceIds ?? [])],
     projectionId: prior.projectionId ?? null,
     definitionRevisionId: prior.definitionRevisionId ?? null,
+    definitionRevisionIds: [
+      ...(prior.definitionRevisionIds ?? (prior.definitionRevisionId ? [prior.definitionRevisionId] : [])),
+    ],
     ...patch,
   };
 }
@@ -266,11 +272,22 @@ export async function commitCandidateChange(input) {
     }
   }
 
-  const previousDefinitionId = previous.payload?.definitionRevisionId ?? null;
-  const previousDefinition = previousDefinitionId
-    ? await getRecord(localRecordId, 'definition', previousDefinitionId)
-    : null;
-  const planned = planBoardDerivation({
+  const previousDefinitionIds = [
+    ...(previous.payload?.definitionRevisionIds
+      ?? (previous.payload?.definitionRevisionId ? [previous.payload.definitionRevisionId] : [])),
+  ];
+  const previousDefinitions = new Map();
+  let previousDefinition = null;
+  for (const id of previousDefinitionIds) {
+    const record = await getRecord(localRecordId, 'definition', id);
+    if (!record) continue;
+    if (!previousDefinition) previousDefinition = record;
+    if (record.payload?.occurrenceId) {
+      previousDefinitions.set(record.payload.occurrenceId, record);
+    }
+  }
+
+  const planned = planCandidateDerivation({
     candidateRevisionId: nextHead,
     createdAt,
     projectId: project.projectId,
@@ -278,6 +295,7 @@ export async function commitCandidateChange(input) {
     observationById,
     previousPayload: previous.payload ?? {},
     previousDefinition,
+    previousDefinitions,
   });
   const derivedPayload = {
     ...payload,

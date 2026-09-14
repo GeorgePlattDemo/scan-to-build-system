@@ -180,6 +180,40 @@ Keep out of ordinary Store records unless genuinely required:
 
 The Store needs to know **what the cell can truthfully support**, not how every bearing and bit makes it happen.
 
+## Operational authority at the yard / cell
+
+The machine and fulfillment surfaces use a firm human-authority split.
+
+A site owner may hold or delegate the **CELL_STEWARD** role. The cell steward may be granted bounded authority to accept/reject a completion plan, accept/reject declared yard secondary work, confirm completion records, stage identified parts, record custody transfer, and close the project.
+
+The **OPERATOR** role is intentionally different.
+
+> **Operator authority is STOP / REPORT only. An operator may not promote state.**
+
+An operator must not be allowed to:
+
+- reinterpret a project requirement;
+- substitute an operation or tool requirement;
+- change a Store disposition;
+- widen an envelope;
+- accept a customer's secondary-work choice on behalf of the yard;
+- waive a gate;
+- change price or commercial terms;
+- mark a project ready for handoff;
+- transfer custody;
+- close a project;
+- create controller or production authority.
+
+If an operator performs physical work under an already accepted local process, the operator may report the condition/outcome. Promotion to an authoritative completion, staging, custody, or closeout state belongs to the cell steward or to a separately approved self-verifying rule. No automatic promotion rule is established here.
+
+The cross-project completion contract is documented in:
+
+`../../capability-bridge/COMPLETION-PATH-0.1.md`
+
+and implemented in:
+
+`apps/stb/shared/completion-contract.mjs`
+
 ## Immediate engineering deliverable
 
 The next deep mechanical pass should reconcile the Cell spine + Atlas 04–06 into three new post-app planning documents without yet buying parts or claiming commissioning:

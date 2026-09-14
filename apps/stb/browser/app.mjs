@@ -3,6 +3,10 @@ import { sha256Hex } from '/shared/canonical.mjs';
 import { commitPreparedChange, getDraft } from '/data/repository.mjs';
 import { attemptInspection, blobCustody } from '/data/selectors.mjs';
 import { startShell } from '/ui/shell.mjs';
+import { startNarrativeLayer } from '/ui/narrative.mjs';
+import { startOpenDoorLayer } from '/ui/open-door.mjs';
+import { startFutureChainLayer } from '/ui/future-chain.mjs';
+import { startProjectConfigurator } from '/ui/project-configurator.mjs';
 
 function setStatus(id, text) {
   const element = document.getElementById(id);
@@ -74,6 +78,10 @@ export async function inspectUnapplied(localRecordId, draftId) {
 const root = document.getElementById('app');
 if (root) {
   startShell(root);
+  startNarrativeLayer(root);
+  startOpenDoorLayer(root);
+  startFutureChainLayer(root);
+  startProjectConfigurator(root);
 }
 
 setStatus('origin-status', window.location.origin === FIXED_ORIGIN ? FIXED_ORIGIN : window.location.origin);

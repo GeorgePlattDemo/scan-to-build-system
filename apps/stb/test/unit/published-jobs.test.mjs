@@ -1,0 +1,196 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+
+import {
+  PUBLISHED_JOBS,
+  PUBLISHED_JOB_STORE_PIN,
+  buildPublishedJobSpec,
+  deriveCenteredArchedProjectGeometry,
+  normalizePublishedJobInputs,
+  publishedJob,
+} from '../../ops/published-jobs.mjs';
+
+const FORBIDDEN_EXECUTION_KEYS = /(?:gcode|g-code|controller|toolpath|cycleStart|cycle-start|feedRate|spindleSpeed)/i;
+
+test('published job menu is exactly the bounded three-offering trial', () => {
+  assert.equal(PUBLISHED_JOB_STORE_PIN, '4402abeb6b0299a5b6db2eec85ed04c3b0236bcc');
+  assert.deepEqual(PUBLISHED_JOBS.map((job) => job.id), [
+    'square-stick',
+    'rect-stencil',
+    'arched-opening',
+  ]);
+  assert.deepEqual(PUBLISHED_JOBS.map((job) => job.requestType), [
+    'BOARD_SQUARE_V1',
+    'SHEET_MODE2_STENCIL_V1',
+    'SHEET_MODE2_ARCHED_APERTURE_V0',
+  ]);
+  assert.deepEqual(PUBLISHED_JOBS.map((job) => job.machineFamily), ['D001', 'S001', 'S001']);
+});
+
+test('published completion boundary requires labels and keeps sheet drilling out of S-001 this round', () => {
+  const square = publishedJob('square-stick');
+  const rect = publishedJob('rect-stencil');
+  const arch = publishedJob('arched-opening');
+  assert.equal(square.operationalRequirements.labeling.required, true);
+  assert.equal(rect.operationalRequirements.labeling.required, true);
+  assert.equal(arch.operationalRequirements.labeling.required, true);
+  assert.equal(rect.operationalRequirements.sheetDrillingThisRound, false);
+  assert.equal(arch.operationalRequirements.sheetDrillingThisRound, false);
+  assert.equal(rect.operationalRequirements.tabRemovalSelective, true);
+  assert.equal(arch.operationalRequirements.tabRemovalSelective, true);
+  assert.ok(rect.notClaimed.includes('sheet drilling'));
+  assert.ok(arch.notClaimed.includes('sheet drilling'));
+});
+
+test('published defaults are human numbers, with fixed Store policy kept separate', () => {
+  assert.deepEqual(publishedJob('square-stick').defaults, { keptLengthIn: 45 });
+  assert.deepEqual(publishedJob('rect-stencil').defaults, { lengthIn: 24, widthIn: 18 });
+  assert.deepEqual(publishedJob('rect-stencil').fixed, {
+    profileKind: 'STRAIGHT_RECT',
+    tabCount: 4,
+    routeDepthIn: 0.5,
+  });
+  assert.deepEqual(publishedJob('arched-opening').defaults, {
+    openingWidthIn: 36,
+    straightHeightIn: 24,
+    riseIn: 12,
+  });
+  assert.deepEqual(publishedJob('arched-opening').fixed, {
+    parentHorizontalIn: 96,
+    parentVerticalIn: 48,
+    outerL_in: 96,
+    outerW_in: 48,
+    placement: 'CENTERED_ON_PARENT',
+    workField: {
+      id: 'S001-CENTER-WORK-FIELD-V0',
+      horizontalIn: 48,
+      verticalIn: 36,
+      containment: 'WHOLE_PROFILE',
+    },
+    tabCount: 4,
+    routeDepthIn: 0.5,
+  });
+  assert.equal(publishedJob('arched-opening').projectClassId, 'S001_CENTERED_ARCHED_SHEET_V0');
+  assert.equal(publishedJob('arched-opening').projectRole, 'CANONICAL_S001_BOUNDED_PROJECT');
+});
+
+test('rect human inputs map only to Store blank dimensions', () => {
+  const job = publishedJob('rect-stencil');
+  const spec = buildPublishedJobSpec(job, { lengthIn: 30, widthIn: 20 });
+  assert.deepEqual(spec.inputs, { lengthIn: 30, widthIn: 20 });
+  assert.deepEqual(spec.evaluation.line, {
+    storeSku: 'STB-ZERO-PLY-075-48X96-001',
+    qty: 1,
+    profileKind: 'STRAIGHT_RECT',
+    blankL_in: 30,
+    blankW_in: 20,
+    tabCount: 4,
+    routeDepthIn: 0.5,
+  });
+});
+
+test('canonical arch uses horizontal 96 x vertical 48 sheet with centered 48 x 36 working field', () => {
+  const job = publishedJob('arched-opening');
+  const geometry = deriveCenteredArchedProjectGeometry(job);
+  assert.deepEqual(geometry.parent, { horizontalIn: 96, verticalIn: 48 });
+  assert.deepEqual(geometry.workField, {
+    id: 'S001-CENTER-WORK-FIELD-V0',
+    horizontalIn: 48,
+    verticalIn: 36,
+    containment: 'WHOLE_PROFILE',
+    sheetOffsets: {
+      leftIn: 24,
+      rightIn: 24,
+      bottomIn: 6,
+      topIn: 6,
+    },
+  });
+  assert.deepEqual(geometry.opening, {
+    widthIn: 36,
+    straightHeightIn: 24,
+    riseIn: 12,
+    totalHeightIn: 36,
+    sheetOffsets: {
+      leftIn: 30,
+      rightIn: 30,
+      bottomIn: 6,
+      topIn: 6,
+    },
+    marginsWithinWorkField: {
+      leftIn: 6,
+      rightIn: 6,
+      bottomIn: 0,
+      topIn: 0,
+    },
+  });
+  assert.equal(geometry.withinWorkField, true);
+  assert.equal(geometry.localGate, 'PROJECT_GEOMETRY_INSIDE_CANONICAL_FIELD');
+  assert.equal(geometry.placement, 'CENTERED_ON_PARENT');
+  assert.equal(geometry.basis, 'PROJECT_CLASS_DERIVATION');
+  assert.equal(geometry.storeCapabilityClaim, false);
+});
+
+test('configurator flags but does not clamp demand outside the canonical work field', () => {
+  const job = publishedJob('arched-opening');
+  const geometry = deriveCenteredArchedProjectGeometry(job, {
+    openingWidthIn: 60,
+    straightHeightIn: 30,
+    riseIn: 10,
+  });
+  assert.equal(geometry.withinWorkField, false);
+  assert.equal(geometry.localGate, 'PROJECT_GEOMETRY_OUTSIDE_CANONICAL_FIELD');
+  assert.equal(geometry.opening.marginsWithinWorkField.leftIn, -6);
+  assert.equal(geometry.opening.marginsWithinWorkField.rightIn, -6);
+  assert.equal(geometry.opening.marginsWithinWorkField.topIn, -2);
+  assert.equal(geometry.opening.marginsWithinWorkField.bottomIn, -2);
+  assert.equal(geometry.opening.sheetOffsets.leftIn, 18);
+  assert.equal(geometry.opening.sheetOffsets.topIn, 4);
+});
+
+test('arch sends full-sheet demand and does not send project placement, work-field preview, or radius', () => {
+  const job = publishedJob('arched-opening');
+  const spec = buildPublishedJobSpec(job, {
+    openingWidthIn: 40,
+    straightHeightIn: 20,
+    riseIn: 10,
+  });
+  assert.deepEqual(spec.inputs, { openingWidthIn: 40, straightHeightIn: 20, riseIn: 10 });
+  assert.deepEqual(spec.evaluation.line, {
+    storeSku: 'STB-ZERO-PLY-050-48X96-001',
+    qty: 1,
+    outerL_in: 96,
+    outerW_in: 48,
+    apertureW_in: 40,
+    apertureStraightH_in: 20,
+    arcChord_in: 40,
+    arcRise_in: 10,
+    tabCount: 4,
+    routeDepthIn: 0.5,
+  });
+  assert.equal(spec.projectGeometry.withinWorkField, true);
+  assert.equal(spec.projectGeometry.opening.sheetOffsets.leftIn, 28);
+  assert.equal(spec.projectGeometry.opening.sheetOffsets.topIn, 9);
+  assert.equal('arcRadius_in' in spec.evaluation.line, false);
+  assert.equal('geometryClass' in spec.evaluation.line, false);
+  assert.equal('placement' in spec.evaluation.line, false);
+  assert.equal('workField' in spec.evaluation.line, false);
+});
+
+test('published input schema rejects missing, extra, and non-finite values without Store range clamping', () => {
+  const rect = publishedJob('rect-stencil');
+  assert.throws(() => normalizePublishedJobInputs(rect, { lengthIn: 24 }), /exactly/);
+  assert.throws(() => normalizePublishedJobInputs(rect, { lengthIn: 24, widthIn: 18, routeDepthIn: 0.5 }), /exactly/);
+  assert.throws(() => normalizePublishedJobInputs(rect, { lengthIn: Number.NaN, widthIn: 18 }), /finite/);
+  assert.deepEqual(normalizePublishedJobInputs(rect, { lengthIn: -1, widthIn: 1000 }), { lengthIn: -1, widthIn: 1000 });
+});
+
+test('published job specs contain demand geometry, not executable machine instructions', () => {
+  for (const job of PUBLISHED_JOBS) {
+    const serialized = JSON.stringify(buildPublishedJobSpec(job));
+    assert.equal(FORBIDDEN_EXECUTION_KEYS.test(serialized), false, `${job.id} leaked an execution key`);
+  }
+});
+
+test('unknown published job does not silently fall through', () => {
+  assert.equal(publishedJob('not-a-job'), null);
+});

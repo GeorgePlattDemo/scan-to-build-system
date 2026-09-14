@@ -6,6 +6,7 @@ import {
   REVIEW_RECORD_TYPES,
   STORE_SCOPES,
 } from '/shared/contracts.mjs';
+import { S001_CENTERED_ARCH_CLASS_ID } from '/shared/class-config.mjs';
 import { presentStoreAnswer } from '/shared/store-present.mjs';
 import {
   collectDisclosures,
@@ -48,6 +49,12 @@ function opaqueId() {
   return crypto.randomUUID();
 }
 
+function storeScopeForProject(project) {
+  return project?.classId === S001_CENTERED_ARCH_CLASS_ID
+    ? 'SHEET_MODE2_ARCHED_APERTURE_V0'
+    : STORE_SCOPES.BOARD_SQUARE_V1;
+}
+
 function classReferenceSlice(candidate) {
   const ref = candidate?.payload?.classReference ?? null;
   if (!ref) {
@@ -83,6 +90,15 @@ function estimateIdentity(storeView, store) {
   };
 }
 
+function candidateDefinitionRevisionIds(candidate) {
+  const ids = candidate?.payload?.definitionRevisionIds;
+  if (Array.isArray(ids)) {
+    return [...ids];
+  }
+  const first = candidate?.payload?.definitionRevisionId ?? null;
+  return first ? [first] : [];
+}
+
 export async function assembleReviewSnapshot(localRecordId, { unapplied = false } = {}) {
   const project = await getProject(localRecordId);
   if (!project) {
@@ -94,7 +110,7 @@ export async function assembleReviewSnapshot(localRecordId, { unapplied = false 
   const observations = await listProjectObservations(localRecordId);
   const store = await currentStoreAnswer(localRecordId, {
     candidateRevisionId: project.currentHead,
-    scope: STORE_SCOPES.BOARD_SQUARE_V1,
+    scope: storeScopeForProject(project),
   });
   const storeView = presentStoreAnswer(store, {
     unapplied,
@@ -125,9 +141,7 @@ export async function assembleReviewSnapshot(localRecordId, { unapplied = false 
     candidateRevisionId: project.currentHead,
     projectionId: candidate?.payload?.projectionId ?? null,
     occurrenceIds: [...(candidate?.payload?.activeOccurrenceIds ?? [])],
-    definitionRevisionIds: candidate?.payload?.definitionRevisionId
-      ? [candidate.payload.definitionRevisionId]
-      : [],
+    definitionRevisionIds: candidateDefinitionRevisionIds(candidate),
     definitionKind: candidate?.payload?.definitionKind ?? projection?.payload?.definitionKind ?? null,
     ruleVersion: candidate?.payload?.ruleVersion ?? projection?.payload?.ruleVersion ?? null,
     classReference: classReferenceSlice(candidate),

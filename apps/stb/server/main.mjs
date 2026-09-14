@@ -20,9 +20,45 @@ import {
   httpStatusForAdapterCode,
   isJsonContentType,
 } from '../shared/store-wire.mjs';
+import { createPublishedJobAdapter, PUBLISHED_JOB_PATH } from './published-job-adapter.mjs';
 import { createStoreAdapter } from './store-adapter.mjs';
 
 export const APP_ROOT = fileURLToPath(new URL('..', import.meta.url));
+
+const CANDIDATE_STATIC_ASSETS = Object.freeze({
+  '/ui/project-configurator.mjs': Object.freeze({
+    relativePath: 'browser/ui/project-configurator.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+  '/ui/project-renderer.mjs': Object.freeze({
+    relativePath: 'browser/ui/project-renderer.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+  '/domain/configurator.mjs': Object.freeze({
+    relativePath: 'browser/domain/configurator.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+  '/domain/class-runner.mjs': Object.freeze({
+    relativePath: 'browser/domain/class-runner.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+  '/domain/alcove-engine.mjs': Object.freeze({
+    relativePath: 'browser/domain/alcove-engine.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+  '/domain/s001-engine.mjs': Object.freeze({
+    relativePath: 'browser/domain/s001-engine.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+  '/integration/published-project-client.mjs': Object.freeze({
+    relativePath: 'browser/integration/published-project-client.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+  '/shared/alcove-rule.mjs': Object.freeze({
+    relativePath: 'shared/alcove-rule.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
+});
 
 export { isAllowedHost, isAllowedOrigin };
 
@@ -53,7 +89,7 @@ export function resolveStaticAsset(requestUrl) {
     return null;
   }
 
-  return STATIC_ASSETS[collapsed] ?? null;
+  return STATIC_ASSETS[collapsed] ?? CANDIDATE_STATIC_ASSETS[collapsed] ?? null;
 }
 
 function extractRawPath(requestUrl) {
@@ -70,7 +106,6 @@ function extractRawPath(requestUrl) {
   }
   return withoutQuery;
 }
-
 
 function sendText(res, status, body, extraHeaders = {}) {
   const payload = Buffer.from(body, 'utf8');
@@ -166,7 +201,56 @@ async function handleStorePost(req, res, adapter) {
   sendJson(res, result.status, result.body);
 }
 
-async function handleRequest(req, res, adapter) {
+async function handlePublishedJobPost(req, res, adapter) {
+  if (!isJsonContentType(req.headers['content-type'])) {
+    try {
+      await readRequestBody(req, MAX_STORE_REQUEST_BYTES);
+    } catch {
+      // drain only; this endpoint stays fail-closed
+    }
+    sendJson(res, 415, {
+      kind: 'published-job-store-answer',
+      ready: false,
+      code: 'INVALID_CONTENT_TYPE',
+      physicalExecutionAuthorized: false,
+      controllerOutputProduced: false,
+    });
+    return;
+  }
+
+  let raw;
+  try {
+    raw = await readRequestBody(req, MAX_STORE_REQUEST_BYTES);
+  } catch (error) {
+    sendJson(res, error.code === ADAPTER_ERROR_CODES.REQUEST_TOO_LARGE ? 413 : 400, {
+      kind: 'published-job-store-answer',
+      ready: false,
+      code: error.code === ADAPTER_ERROR_CODES.REQUEST_TOO_LARGE ? 'REQUEST_TOO_LARGE' : 'MALFORMED_REQUEST',
+      physicalExecutionAuthorized: false,
+      controllerOutputProduced: false,
+    });
+    return;
+  }
+
+  let body;
+  try {
+    body = JSON.parse(raw.toString('utf8'));
+  } catch {
+    sendJson(res, 400, {
+      kind: 'published-job-store-answer',
+      ready: false,
+      code: 'MALFORMED_REQUEST',
+      physicalExecutionAuthorized: false,
+      controllerOutputProduced: false,
+    });
+    return;
+  }
+
+  const result = await adapter.dispatch(body);
+  sendJson(res, result.status, result.body);
+}
+
+async function handleRequest(req, res, adapter, publishedJobAdapter) {
   if (!isAllowedHost(req.headers.host)) {
     sendText(res, 403, 'Forbidden host');
     return;
@@ -179,6 +263,15 @@ async function handleRequest(req, res, adapter) {
 
   const rawPath = extractRawPath(req.url ?? '');
   const pathname = rawPath === null ? '' : rawPath.split('?')[0];
+
+  if (pathname === PUBLISHED_JOB_PATH) {
+    if (req.method === 'POST') {
+      await handlePublishedJobPost(req, res, publishedJobAdapter);
+      return;
+    }
+    sendText(res, 405, 'Method not allowed', { Allow: 'POST' });
+    return;
+  }
 
   if (isStorePath(pathname)) {
     if (req.method === 'POST') {
@@ -259,14 +352,15 @@ function occupiedError(port, cause) {
   return error;
 }
 
-export async function startServer({ port = FIXED_PORT, storeAdapter } = {}) {
+export async function startServer({ port = FIXED_PORT, storeAdapter, publishedJobAdapter } = {}) {
   const adapter = storeAdapter ?? (await createStoreAdapter());
+  const trialAdapter = publishedJobAdapter ?? (await createPublishedJobAdapter());
   const servers = [];
 
   try {
     for (const host of LOOPBACK_ADDRESSES) {
       const server = http.createServer((req, res) => {
-        handleRequest(req, res, adapter).catch(() => {
+        handleRequest(req, res, adapter, trialAdapter).catch(() => {
           if (!res.headersSent) {
             sendText(res, 500, 'Internal error');
           }
@@ -302,6 +396,9 @@ export async function startServer({ port = FIXED_PORT, storeAdapter } = {}) {
     storeReady: adapter.ready === true,
     storeInspection: adapter.inspection ?? null,
     storeAdapter: adapter,
+    publishedJobReady: trialAdapter.ready === true,
+    publishedJobInspection: trialAdapter.inspection ?? null,
+    publishedJobAdapter: trialAdapter,
     async close() {
       await Promise.all(servers.map(closeServer));
     },

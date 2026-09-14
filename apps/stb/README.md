@@ -3,6 +3,8 @@
 
 # Scan-to-Build (`apps/stb`)
 
+<a href="https://georgeplattdemo.github.io/scan-to-build-review/working-app.html"><kbd>← BACK TO WORKING APP</kbd></a>
+
 Local application subtree.
 
 Checkpoints complete here:

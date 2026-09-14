@@ -1,241 +1,245 @@
 # Scan-to-Build Project State and Source Index
 
-**Status:** post-application working index  
+**Status:** reconciled project-order index  
 **Repository:** `GeorgePlattDemo/scan-to-build-system`  
-**Baseline rule:** earlier project material is source evidence until explicitly admitted here.
+**Rule:** earlier material is source evidence until explicitly admitted; current-candidate evidence is not accepted/merged merely because it passes tests.
 
 ## 1. Start here
 
-This repository is the current working surface for Scan-to-Build.
+Use these documents before relying on any older planning, PR description, donor repository, or conversation history:
 
-The accepted application build is the starting datum for post-app work. Earlier demonstrations, prototypes, research packages, staging repositories, and planning branches are not automatically current. They are reviewed for useful content and admitted only when their language, ownership, flow, authority, and capability claims are compatible with the current system.
+1. [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md) — concise current baseline and candidate manifest.
+2. [`docs/project/VERIFICATION-REGISTER.md`](docs/project/VERIFICATION-REGISTER.md) — exact proof map.
+3. [`docs/project/BRANCH-PR-GENEALOGY.md`](docs/project/BRANCH-PR-GENEALOGY.md) — branch/PR order and disposition.
+4. [`provenance/SOURCE-PINS.md`](provenance/SOURCE-PINS.md) — exact source identities by role/path.
 
-The accepted application is present in [`apps/stb/`](apps/stb/). Use [`apps/README.md`](apps/README.md) for launch instructions and [`provenance/APP-TRANSFER.md`](provenance/APP-TRANSFER.md) for the transfer record. The source pin below identifies its accepted lineage.
+The accepted application tree is in [`apps/stb/`](apps/stb/). Read [`apps/README.md`](apps/README.md) before using a Store pin or describing the app's status.
 
-For active post-app work, start at the daily [`capability-bridge bench`](work/capability-bridge/README.md); [`work/README.md`](work/README.md) indexes the wider workbench.
+## 2. Project states
 
-For physical machine research, the controlling current program is [`work/machines/MACHINE-BUILD-PROGRAM-0.1.md`](work/machines/MACHINE-BUILD-PROGRAM-0.1.md).
+### ACCEPTED / MERGED
 
-## 2. Exact baseline identities
+Current merged repository baseline:
 
-| Subject | Source | Pin / identity | Current role |
-| --- | --- | --- | --- |
-| Accepted application | `GeorgePlattDemo/grok-file`, `build/app-foundation-0.1` | `4595b4785a2686486e477ce2e70fb3f476285a8d` | Implemented first bounded application vertical |
-| Frozen app roadmap | `GeorgePlattDemo/grok-file`, `plan/app-master-roadmap-0.1` | `985db87a707bd454d7c58419e2cf4d884f00cded` | Application build sequence and page-contract source |
-| Entry/intake contract | `GeorgePlattDemo/grok-file`, `plan/app-entry-intake-contract-0.1` | `2d80b5a7b0e7687c425e100bfa0ff3a833166d42` | Intake source; `ADMIT AFTER REWRITE` due stale embedded Store pin |
-| Application semantic boundaries | `GeorgePlattDemo/grok-file`, accepted app branch | contained in `4595b4785a2686486e477ce2e70fb3f476285a8d` | Application-level cross-layer terminology |
-| Governed Reference | `GeorgePlattDemo/scan-to-build-governed-reference`, `main` | `18949f163718a937f072f4be3a654bb303e53160` | Governed semantics and bounded simulation/reference authority |
-| Stage-2 Store Zero | `GeorgePlattDemo/scan-to-build-store`, `stage-2-store-zero-reference` | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | Current Store reference consumed by the app |
-| Store documentary foundation | `GeorgePlattDemo/scan-to-build-store`, `main` | `3620b35369d70cf49733bbb0b62c0f3d9969b738` | Store ownership and boundary reference |
-| Post-app Cell spine | `GeorgePlattDemo/grok-file`, accepted app pin | `4595b4785a2686486e477ce2e70fb3f476285a8d` | Descriptive machine/cell engineering reference; candidate objects remain candidate |
-| U.S. Patent 9,720,401 B2 | `docs/patents/source/US9720401B2.pdf` | SHA-256 `d6ff401ee0a60720c0d8b9819a0f828e15036deee1882da06dab7282da0311a4` | Primary issued patent source |
-| U.S. Patent 10,768,609 B2 | `docs/patents/source/US10768609B2.pdf` | SHA-256 `3fd23f9dab7419098162836af25257d2736771bf27196824ad972b479a02b092` | Primary issued patent source / continuation |
+`main@f4769bbf2daaf7e719b723478b7a24f3dfa1344a`
 
-Pins and hashes are identities, not blanket endorsements of every secondary statement elsewhere in the project corpus.
+The accepted application tree entered this repository through merged PR #3. Its source lineage remains:
 
-## 3. Current capability and evidence
+`GeorgePlattDemo/grok-file@4595b4785a2686486e477ce2e70fb3f476285a8d`
 
-### IMPLEMENTED
+That source pin is provenance for the transferred application tree, not the identity of later system-repository candidate work.
 
-- local application entry and routing;
-- durable project identity and local persistence;
-- original evidence custody and supported viewing;
-- observation mapping and correction history;
-- bounded Board definition and revision history;
-- Store request/correlation/presentation against the pinned Stage-2 Store;
-- definition review and unresolved acknowledgment;
-- truthful result presentation;
-- owner archive export/import/reopen;
-- integrated first-vertical acceptance tests recorded at the accepted app baseline.
+### CURRENT CANDIDATE
 
-### REFERENCE / SIMULATION
+`build/global-completion-path-0.1@b0caba518aa0e152fa107fe89267ab48ee81296f`
 
-- callable Stage-2 Store Zero with fixture offerings, fixture stock, bounded capability evaluation, and budgetary economics;
-- bounded Governed Reference simulation/reference path;
-- D-001 reference capability at Store Stage 2;
-- one exact bounded sheet simulation path in the Governed Reference.
+Latest code identity recorded with full App candidate checks passing:
 
-### PHYSICAL CONTROL CASE
+`dee4a307cf0866ac0985da92dfb5f74045ee90f9`
 
-The present local physical comparison condition is conventional manual yard practice:
+The current candidate is descended through the open promotion chain:
 
-- radial-arm saw;
-- eyes;
-- tape measure;
-- pencil;
-- operator judgment and manual positioning/cutting.
+```text
+build/app-configurator-engine-0.1 @ 8730c801...
+        ↓
+PR #6 @ 17b950d6...
+        ↓
+PR #8 @ 62bf1ab1...
+        ↓
+PR #9 @ 1fe12d6e...
+        ↓
+PR #10 @ b0caba51...
+```
 
-No commissioned Scan-to-Build physical machine is claimed today.
+The chain is current candidate history. It is not yet the merged repository baseline.
 
-### DOCUMENTED / PRIMARY SOURCE
+### REFERENCE / PARALLEL
 
-- broader governed architecture beyond the implemented slice;
-- Store/cell evidence stages;
-- post-app Cell spine and Atlas machine/control research;
-- full issued U.S. Patents 9,720,401 B2 and 10,768,609 B2 as direct primary sources;
-- dimensional and sheet patent correspondence that remains descriptive until physically implemented and evidenced.
+PR #7 — `build/machine-controller-sim-safety-0.1@b23b2a95f71c89347bdf5c465369b7399b75e834`
 
-### PLANNED / RESEARCH
+This fail-closed machine-safety simulation is intentionally separate from the application promotion chain.
 
-- **User 1** as the first post-baseline user/project build carried through the current application architecture;
-- **Store 1** expansion beyond the present reference fixtures;
-- broader SKU/inventory coverage and a special-order path;
-- **Machine Build 1 — Digital Bridge Proof:** one bounded digital-to-physical dimensional cut-to-length chain;
-- **Machine Build 2 — Store Integration Proof:** expose only the earned bounded capability to Store Zero / Store 1;
-- **Machine Build 3 — Research Cell / Deployment Question:** determine what local dimensional and sheet capability should actually be deployed, if any;
-- **Machine Build 4 — Frontier:** preserve larger possibilities without making them current obligations.
+### SUPERSEDED
 
-### NOT CLAIMED
+PR #4 — `build/sheet-mode2-storezero-0.1@0fc232e30843a67ed47c64c7a232c9980ff11e54`
+
+Useful provenance; not the current S-001 source of truth.
+
+### HISTORICAL / DO NOT BUILD FROM
+
+PR #5 — failed recovery/recombination trial, closed without merge.
+
+Earlier demos, donor branches, public exhibits, and historical repositories remain source evidence except where a current repository document specifically admits and pins them.
+
+## 3. Exact current identities
+
+| Subject | Identity | Role |
+| --- | --- | --- |
+| merged repository baseline | `scan-to-build-system/main@f4769bbf2daaf7e719b723478b7a24f3dfa1344a` | ACCEPTED / MERGED |
+| transferred accepted app source | `grok-file/build/app-foundation-0.1@4595b4785a2686486e477ce2e70fb3f476285a8d` | accepted app provenance |
+| current promotion base | `build/app-configurator-engine-0.1@8730c801d3cd2df193d8647b3de1e78fffeea62a` | frozen base of open promotion chain |
+| current candidate branch | `build/global-completion-path-0.1@b0caba518aa0e152fa107fe89267ab48ee81296f` | CURRENT CANDIDATE |
+| latest fully checked current-candidate code | `dee4a307cf0866ac0985da92dfb5f74045ee90f9` | code proof identity |
+| Governed Reference | `scan-to-build-governed-reference/main@18949f163718a937f072f4be3a654bb303e53160` | governed reference |
+| Stage-2 Store Zero | `scan-to-build-store@b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | transferred accepted-app / Stage-2 path |
+| current published-job / canonical S-001 Store | `scan-to-build-store@4402abeb6b0299a5b6db2eec85ed04c3b0236bcc` | current candidate exact Store proof path |
+| parallel machine-safety candidate | `build/machine-controller-sim-safety-0.1@b23b2a95f71c89347bdf5c465369b7399b75e834` | PARALLEL CANDIDATE |
+
+See [`provenance/SOURCE-PINS.md`](provenance/SOURCE-PINS.md) for historical/superseded pins and primary patent hashes.
+
+## 4. Current candidate capability
+
+### Application — CURRENT CANDIDATE
+
+The current candidate includes bounded software paths for:
+
+- project identity and durable local custody;
+- evidence/observation/revision handling;
+- Store request, attempt, response, review, result, and record custody;
+- D-001 / Board published-job evaluation;
+- rectangular sheet published-job evaluation;
+- canonical centered S-001 configuration;
+- exact Store-backed canonical S-001 evaluation;
+- durable S-001 archive/export/import/reopen behavior;
+- stale/imported Store retry refusal;
+- response identity/authority quarantine;
+- bounded completion plan, labeling, handoff, custody, and closeout semantics.
+
+These are software-candidate facts. They do not establish physical production.
+
+### D-001 — REFERENCE / SOFTWARE PATH
+
+D-001 remains bounded and Store-evaluated. Modeled cell/economic behavior is not measured commissioned production.
+
+### S-001 — CURRENT CANDIDATE APPLICATION PATH / REFERENCE MACHINE STATUS
+
+Canonical project: `S001_CENTERED_ARCHED_SHEET_V0`.
+
+Current geometry and status:
+
+- parent sheet: `96 in` horizontal × `48 in` vertical;
+- Store-owned centered work field: `48 in` horizontal × `36 in` vertical;
+- reserved parent-sheet margins: `24 in` left/right and `6 in` top/bottom;
+- canonical opening margins inside field: `6 in` left/right and `0 in` top/bottom;
+- Store derives radius;
+- current tab policy remains Store-owned;
+- tab-retention strength is not measured;
+- retained-tab removal is selective downstream work;
+- S-001 drilling is not admitted this round;
+- physical/controller authority remains false.
+
+The older PR #8 orientation statement of `6 in` left/right and `30 in` top/bottom is superseded by the PR #9 centered-field implementation/proof and the PR #10 retained result.
+
+### Completion / handoff — CURRENT CANDIDATE
+
+The candidate completion chain preserves Store refusal and requires explicit residual-work resolution, inspection, labeling, staging, pickup/delivery readiness, and closeout preparation before handoff readiness.
+
+Operator authority remains STOP / REPORT only. Cell-steward authority is distinct from customer choice and machine/controller authority.
+
+## 5. Verification evidence
+
+Use [`docs/project/VERIFICATION-REGISTER.md`](docs/project/VERIFICATION-REGISTER.md) rather than inferring proof from prose.
+
+Current evidence includes:
+
+- exact code identities;
+- exact Store identities;
+- Store-backed published-job trials;
+- current S-001 geometry proof;
+- durable archive round trips;
+- stale/imported retry refusal;
+- response/authority firewall tests;
+- completion hardening tests;
+- proof/trial hashes;
+- a separate fail-closed machine-safety simulation test record.
+
+Evidence remains bounded by its exact pins and claim.
+
+## 6. Physical / commercial non-claims
+
+Current project documents do not establish:
 
 - live yard inventory;
-- commercial quotation, ordering, payment, reservation, or fulfillment;
+- commercial quotation, payment, reservation, or order acceptance merely from Store support;
 - production authorization;
-- commissioned Scan-to-Build physical fabrication capability;
-- measured production performance where only modeled behavior exists;
-- a commissioned physical two-machine cell;
-- cloud custody or durable hosted synchronization.
+- commissioned D-001 physical production;
+- commissioned S-001 physical production;
+- controller-in-loop validation;
+- physical Cycle Start authority;
+- measured S-001 tab-retention physics;
+- measured production performance where only modeled behavior exists.
 
-## 4. Authority by layer
+## 7. Authority by layer
 
-Authority is subject-specific.
-
-- **Application:** user-facing interaction, evidence custody, observations, configuration, revisions, Store-result presentation, review records, and owner record.
-- **Store:** offerings, inventory/availability facts, Store capability evaluation, Store economics, sourcing, and fulfillment facts.
+- **Application:** user interaction, evidence custody, configuration, revisions, Store-result presentation, review, records, completion/closeout state admitted in the candidate.
+- **Store:** offerings, availability/inventory facts, bounded capability evaluation, Store economics, sourcing, and fulfillment facts.
 - **Governed layer:** governed semantics, unresolved conditions, refusal, protected transitions, authorization boundaries, and governed provenance.
-- **Machine / cell:** demonstrated physical process capability, local operating limits, controls, readiness, and measured physical behavior.
-- **Research:** questions, observations, comparison, evidence, and future possibilities. Research does not create authority merely by proposing a path.
-- **Issued patents:** primary sources for patent wording and disclosed technical/system correspondence. They do not create present physical capability or safety evidence.
+- **Machine / cell:** demonstrated physical capability, local operating limits, controls, readiness, and measured physical behavior.
+- **Research:** questions, comparisons, evidence, and future possibilities.
+- **Issued patents:** primary technical/patent-lineage sources; not present capability or safety evidence.
 
 Words do not transfer authority between layers.
 
-## 5. Protected distinctions
+## 8. Protected distinctions
 
-The post-app baseline preserves at least these distinctions:
+Preserve these distinctions:
 
+- accepted baseline ≠ current candidate;
 - candidate definition ≠ canonical governed WorkPacket;
-- Store `SUPPORTABLE` ≠ governed acceptance;
+- Store `SUPPORTABLE` ≠ physical execution;
 - Store evaluation ≠ fabrication authorization;
-- user review ≠ order, payment, Store commercial acceptance, governed authorization, or execution;
-- budgetary Q / `BudgetaryEstimate` ≠ commercial quotation or payable total;
-- fixture stock ≠ live physical inventory;
+- user review ≠ order/payment/Store commercial acceptance/governed execution authority;
+- budgetary estimate ≠ binding commercial quotation;
+- fixture/reference stock ≠ live yard inventory;
 - modeled cycle time ≠ measured production time;
-- current/applicable ≠ live or commercially fresh;
 - simulation ≠ physical execution;
-- network presence ≠ Cycle Start authority;
+- controller target selected ≠ controller-in-loop validated;
+- reference safety kernel ≠ commissioned physical safety system;
 - patent correspondence ≠ installed capability;
-- exemplary patent embodiment ≠ mandatory MVP design;
 - candidate component ≠ commissioned machine fact.
 
-## 6. Patent-source rule
+## 9. Current stable work surfaces
 
-The complete issued PDFs are in [`docs/patents/source/`](docs/patents/source/).
+| Work surface | Role |
+| --- | --- |
+| `apps/stb/` | accepted transferred app lineage plus current candidate development |
+| `work/capability-bridge/` | daily evidence/trial bench |
+| `work/user-intake/` | user/project intake work |
+| `work/store/` | Store expansion/research work |
+| `work/machines/` | machine research, engineering, simulation, and evidence |
+| `work/cell/` | bounded cell convergence/research |
+| `docs/project/` | current state, verification, source authority, branch/PR order |
+| `docs/patents/` | issued patent sources and patent-alignment discipline |
+| `provenance/` | exact pins, admission history, source disposition |
+| `source-library/` | donor/source material not automatically current |
 
-For patent-related build work:
+Folders are durable subject ownership. Branches are bounded change sets, not permanent filing cabinets.
 
-1. read the issued claim language;
-2. read the relevant specification and figure(s);
-3. classify the current relationship using [`docs/patents/PATENT-ALIGNMENT-GATE.md`](docs/patents/PATENT-ALIGNMENT-GATE.md);
-4. record intentional narrowing or divergence;
-5. keep capability, commissioning and safety evidence separate.
+## 10. Legacy admission rule
 
-Old demos and summaries do not override the grants.
-
-## 7. Legacy admission rule
-
-Every pre-baseline artifact considered for this repository receives one of four outcomes:
+Every pre-baseline artifact considered for current use receives one of four outcomes:
 
 - `ADMIT AS-IS`
 - `ADMIT AFTER REWRITE`
 - `ARCHIVE ONLY`
 - `REJECT FROM CURRENT BASELINE`
 
-Useful content can survive without preserving obsolete language or obsolete flow.
+The same discipline applies to historical PR statements. Preserve them as evidence, but do not let superseded statements remain unlabeled current truth.
 
-### Sarah and early research-demo material
+## 11. Next bounded work
 
-The historical Sarah journey is **not admitted as current architecture, terminology, authority, or implementation**.
+The next pass is project order, not capability expansion:
 
-It was a useful toy/prototype used to demonstrate a chain and expose requirements while the project was still evolving. Later review may recover useful behavior, geometry, questions, explanation, or research value from it. Any such recovery must be translated through the current Application, Store, Governed, Machine, and patent-source boundaries before admission.
+1. review this reconciliation branch;
+2. verify the front-door documents agree;
+3. verify the candidate/parallel/superseded PR map remains accurate;
+4. make an explicit promotion decision about the current candidate chain;
+5. only then select the next real build from the reconciled baseline.
 
-No early Sarah assumption should be used to fill a missing current definition merely because it once appeared in a demo.
+Potential later directions include Page-1/completion UX, machine/controller convergence, or another bounded project. None is automatically authorized by this index.
 
-## 8. Current stable work surfaces
-
-| Work surface | Role |
-| --- | --- |
-| `work/capability-bridge/` | current daily capability-bridge bench; trial protocol gates amendments |
-| `work/user-intake/` | User 1 entry, retained evidence, observations and candidate project definition |
-| `work/store/` | Store 1 expansion, SKU/inventory/special-order/economic/fulfillment work |
-| `work/machines/MACHINE-BUILD-PROGRAM-0.1.md` | controlling physical research sequence and current manual control case |
-| `work/machines/staging/` | Store/Cell evidence-stage navigation and dimensional/sheet status |
-| `work/machines/engineering/` | detailed mechanics, components, controls, lowering and patent correspondence |
-| `work/cell/` | bounded future two-machine research-cell convergence |
-| `docs/patents/` | direct issued patent sources and alignment discipline |
-
-Folders are durable subject ownership. Branches are for bounded change sets, not permanent filing cabinets.
-
-## 9. Stage and Machine Build numbering discipline
-
-The existing Store/Cell Stage 1–4 document remains an evidence vocabulary:
-
-1. Stage 1 — CUT-001 information-chain reference;
-2. Stage 2 — Store Zero + D-001 reference capability;
-3. Stage 3 — pilot physical support/workholding/safety controls/commissioning/measured behavior;
-4. Stage 4 — evidence-informed architecture.
-
-The newer **Machine Build 1–4** program asks a different sequence of physical/research questions. Always write `Machine Build` in full when using those numbers.
-
-Directional relationship:
-
-- Machine Build 1 physically tests the smallest CUT-001-style digital bridge;
-- Machine Build 2 plugs earned capability into the Stage-2 Store membrane;
-- Machine Build 3 produces Stage-3 measured evidence and asks what should actually be deployed;
-- Machine Build 4 preserves the frontier consistent with Stage-4 evidence-informed evolution.
-
-## 10. Working sequence from here
-
-Completed foundation work:
-
-1. post-app documentation/provenance foundation;
-2. current governance documentary spine;
-3. post-app Application / User Intake / Store / Machine / Cell work-surface structure;
-4. current Store boundary/stage sources;
-5. full issued patent PDFs, patent-alignment gate and current Machine Build 1–4 program;
-6. accepted application tree transferred into `apps/stb/`, with launch instructions in `apps/README.md`.
-
-Next bounded work:
-
-7. define User 1 and Store 1 expansion from current terms;
-8. write the detailed **Machine Build 1 — Digital Bridge** engineering plan from the manual radial-arm-saw control case;
-9. select and test only the minimum physical mechanism needed to answer the Build-1 question under a separately resolved safety boundary;
-10. connect earned capability to Store in Build 2;
-11. delay the sheet/research-cell deployment decision until Build-1/2 evidence makes the next question clearer;
-12. recover additional legacy/research material only through the admission gate.
-
-## 11. Safety
+## 12. Safety
 
 **NO BLOOD ON WOOD.**
 
 Safety, refusal, unresolved conditions, human responsibility, and physical operating limits remain part of the architecture. A cleaner repository must not create a stronger capability claim than the evidence supports.
-
-## 12. Navigation
-
-- [`README.md`](README.md) — repository purpose and working rules
-- [`work/README.md`](work/README.md) — active post-app work surfaces
-- [`work/machines/MACHINE-BUILD-PROGRAM-0.1.md`](work/machines/MACHINE-BUILD-PROGRAM-0.1.md) — current physical machine/research sequence
-- [`work/NEXT-ENGINEERING-STEP.md`](work/NEXT-ENGINEERING-STEP.md) — immediate Build-1 planning handoff
-- [`docs/patents/README.md`](docs/patents/README.md) — primary patent-source orientation
-- [`docs/patents/PATENT-ALIGNMENT-GATE.md`](docs/patents/PATENT-ALIGNMENT-GATE.md) — required patent check for build work
-- [`docs/patents/source/US9720401B2.pdf`](docs/patents/source/US9720401B2.pdf) — full issued 2017 grant
-- [`docs/patents/source/US10768609B2.pdf`](docs/patents/source/US10768609B2.pdf) — full issued 2020 continuation grant
-- [`docs/project/CURRENT-STATE.md`](docs/project/CURRENT-STATE.md) — concise capability baseline
-- [`docs/project/SOURCE-AUTHORITY.md`](docs/project/SOURCE-AUTHORITY.md) — layer ownership and precedence
-- [`docs/definitions/README.md`](docs/definitions/README.md) — protected terminology/admission discipline
-- [`docs/governance/README.md`](docs/governance/README.md) — admitted governed guidance and builder reading order
-- [`docs/application/README.md`](docs/application/README.md) — accepted application guidance and current terminology
-- [`docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md`](docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md) — Cell + Atlas engineering source family
-- [`work/machines/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md`](work/machines/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md) — dimensional evidence/build staging
-- [`work/machines/staging/SHEET-MACHINE-STAGING-0.1.md`](work/machines/staging/SHEET-MACHINE-STAGING-0.1.md) — sheet evidence/build staging
-- [`work/cell/RESEARCH-CELL-STAGING-0.1.md`](work/cell/RESEARCH-CELL-STAGING-0.1.md) — two-machine research-cell staging
-- [`provenance/SOURCE-PINS.md`](provenance/SOURCE-PINS.md) — exact source identities
-- [`provenance/ADMISSION-REGISTER.md`](provenance/ADMISSION-REGISTER.md) — what has and has not crossed into this baseline
