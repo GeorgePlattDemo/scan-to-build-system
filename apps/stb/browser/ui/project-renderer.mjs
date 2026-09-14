@@ -61,13 +61,19 @@ function alcoveBlankStack(render) {
   return svg;
 }
 
+function fulfillmentStroke(part) {
+  return part?.fulfillment === 'holder-supplied'
+    ? { 'stroke-dasharray': '6 4', opacity: 0.62, 'data-holder-supplied': part.role ?? 'holder-supplied' }
+    : {};
+}
+
 function picnicOrthographic(render) {
   const width = 760;
-  const height = 470;
+  const height = 490;
   const svg = svgNode('svg', {
     viewBox: `0 0 ${width} ${height}`,
     role: 'img',
-    'aria-label': 'Classic Picnic Table software-fixture top and end orthographic views',
+    'aria-label': 'Picnic Table candidate top and end orthographic views',
     class: 'project-orthographic-svg',
   });
   const parts = render.parts ?? [];
@@ -81,10 +87,9 @@ function picnicOrthographic(render) {
   const topW = 650;
   const topH = 230;
   const xScale = topW / productLength;
-  const yScale = topH / overallWidth;
   const xAt = (value) => topX + value * xScale;
 
-  svg.append(svgNode('text', { x: topX, y: 24, 'font-size': 13, 'font-weight': 650 }, `TOP VIEW · software fixture · L = ${render.productLength} in`));
+  svg.append(svgNode('text', { x: topX, y: 24, 'font-size': 13, 'font-weight': 650 }, `TOP VIEW · ${render.tableForm ?? 'picnic candidate'} · L = ${render.productLength} in`));
   svg.append(svgNode('rect', { x: topX, y: topY, width: topW, height: topH, fill: 'none', stroke: 'currentColor', 'stroke-width': 1, 'stroke-dasharray': '4 4' }));
 
   const tabletop = parts.filter((part) => part.family === 'tabletop-member');
@@ -94,6 +99,7 @@ function picnicOrthographic(render) {
       x: xAt(6), y: memberY, width: Math.max(20, (productLength - 12) * xScale), height: 14,
       fill: 'none', stroke: 'currentColor', 'stroke-width': 1.2,
       'data-render-occurrence': part.occurrenceId,
+      ...fulfillmentStroke(part),
     }));
   });
 
@@ -104,6 +110,7 @@ function picnicOrthographic(render) {
       x: xAt(6), y: memberY, width: Math.max(20, (productLength - 12) * xScale), height: 14,
       fill: 'none', stroke: 'currentColor', 'stroke-width': 1.2,
       'data-render-occurrence': part.occurrenceId,
+      ...fulfillmentStroke(part),
     }));
   });
 
@@ -115,11 +122,12 @@ function picnicOrthographic(render) {
       x: frameX - 5, y: topY + inset, width: 10, height: topH - inset * 2,
       fill: 'none', stroke: 'currentColor', 'stroke-width': 1,
       'data-render-occurrence': part.occurrenceId,
+      ...fulfillmentStroke(part),
     }));
   });
 
   svg.append(svgNode('line', { x1: topX, y1: topY + topH + 20, x2: topX + topW, y2: topY + topH + 20, stroke: 'currentColor' }));
-  svg.append(svgNode('text', { x: topX + topW / 2, y: topY + topH + 15, 'text-anchor': 'middle', 'font-size': 11 }, `${render.productLength} in fixture length`));
+  svg.append(svgNode('text', { x: topX + topW / 2, y: topY + topH + 15, 'text-anchor': 'middle', 'font-size': 11 }, `${render.productLength} in candidate length`));
 
   const legParts = parts.filter((part) => part.family === 'end-frame-leg');
   const endBaseY = 424;
@@ -149,7 +157,12 @@ function picnicOrthographic(render) {
     svg.append(svgNode('line', { x1: cx - 130, y1: 390, x2: cx - 40, y2: 390, stroke: 'currentColor', 'stroke-width': 7, 'stroke-linecap': 'round' }));
     svg.append(svgNode('line', { x1: cx + 40, y1: 390, x2: cx + 130, y2: 390, stroke: 'currentColor', 'stroke-width': 7, 'stroke-linecap': 'round' }));
   });
-  svg.append(svgNode('text', { x: width / 2, y: 458, 'text-anchor': 'middle', 'font-size': 11 }, render.note ?? 'Software-fixture orthographic proof only.'));
+  const holderSuppliedCount = parts.filter((part) => part.fulfillment === 'holder-supplied').length;
+  if (holderSuppliedCount > 0) {
+    svg.append(svgNode('line', { x1: 48, y1: 458, x2: 92, y2: 458, stroke: 'currentColor', 'stroke-width': 2, 'stroke-dasharray': '6 4', opacity: 0.62 }));
+    svg.append(svgNode('text', { x: 101, y: 462, 'font-size': 11 }, 'dashed = holder-supplied member retained in the candidate'));
+  }
+  svg.append(svgNode('text', { x: width / 2, y: 482, 'text-anchor': 'middle', 'font-size': 11 }, render.note ?? 'Software-fixture orthographic proof only.'));
   return svg;
 }
 
@@ -184,7 +197,14 @@ export function renderProjectProjection(projection) {
     section.append(picnicOrthographic(render));
     section.append(node('p', {
       className: 'hint',
-      text: 'Top and end views are generated from the synthetic class fixture. They are software-test geometry, not a construction drawing, engineering analysis, or fabrication release.',
+      text: 'Top and end views are generated from the current synthetic candidate fixture. Holder-supplied members remain visible when scope is frames only. This is not a construction drawing, engineering analysis, Store commitment, or fabrication release.',
+    }));
+    return section;
+  }
+  if (payload.classId === 'classic-picnic-table-fixture' && payload.input?.tableForm?.id === 'separate-benches') {
+    section.append(node('p', {
+      className: 'unresolved',
+      text: 'Separate benches is the recorded form choice. No geometry is drawn because that form does not yet have an admitted bounded geometry source.',
     }));
     return section;
   }
