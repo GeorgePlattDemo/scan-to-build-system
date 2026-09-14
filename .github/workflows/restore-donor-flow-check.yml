@@ -7,7 +7,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: restore-donor-flow-check
+  cancel-in-progress: true
 
 jobs:
   restored-flow:
@@ -19,6 +23,43 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Apply bounded presentation repair
+        working-directory: ${{ github.workspace }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('apps/stb/browser/ui/future-chain.mjs')
+          text = path.read_text()
+
+          old_window = "function windowSeat(screen){const [tag,title,narrative,resolves]=WINDOW_STEPS[windowStep];screen.dataset.rx=`window-${windowStep}`;mount("
+          new_window = "function windowSeat(screen){const key=`window-${windowStep}`;if(screen.dataset.rx===key)return;const [tag,title,narrative,resolves]=WINDOW_STEPS[windowStep];screen.dataset.rx=key;mount("
+          if old_window in text:
+              text = text.replace(old_window, new_window, 1)
+          elif new_window not in text:
+              raise SystemExit('window-seat guard target not found')
+
+          old_observer = "new MutationObserver(schedule).observe(root,{childList:true,subtree:true});window.addEventListener('popstate',schedule);schedule();"
+          new_observer = "new MutationObserver(schedule).observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['data-class-id','data-child']});window.addEventListener('popstate',schedule);schedule();"
+          if old_observer in text:
+              text = text.replace(old_observer, new_observer, 1)
+          elif new_observer not in text:
+              raise SystemExit('presentation observer target not found')
+
+          path.write_text(text)
+          PY
+
+          if ! git diff --quiet -- apps/stb/browser/ui/future-chain.mjs; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add apps/stb/browser/ui/future-chain.mjs
+            git commit -m "Stabilize restored presentation routing"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
