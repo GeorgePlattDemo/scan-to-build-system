@@ -18,7 +18,7 @@ Accepted source used to start stabilization: `main` at `287349c7906b9d0258b60008
 
 Controlled application branch: `stabilize/controlled-app-baseline-0.1`.
 
-Latest verified checkpoint on that line: `8bf5801e583f844b26d32b23854d9290b51d4593`.
+First verification-clean controlled-entry checkpoint: `8bf5801e583f844b26d32b23854d9290b51d4593`.
 
 GitHub Actions run `34865963192` completed successfully for that checkpoint. The targeted stabilization workflow passed the unit suite, boundary suite, and controlled-entry browser suite.
 
@@ -32,6 +32,8 @@ This does **not** mean the whole application recovery is complete. It means the 
 - README pill;
 - existing project-switch gate preserved;
 - window-seat door is functional navigation rather than decoration.
+
+Source-reconciliation work continues on `stabilize/source-reconciliation-0.1`, which descends from that clean checkpoint.
 
 ## Human-facing source authority
 
@@ -137,50 +139,97 @@ The current system contains:
 
 The product problem is that these capabilities are no longer exposed through a coherent human story. Their future visible placement must be deliberate. Do not delete them merely because they are not yet represented by a controlling project door.
 
-## Store reconciliation — verified facts
+## Store reconciliation — verified facts and result
 
 Repository: `GeorgePlattDemo/scan-to-build-store`.
 
-Current `main`: `3620b35369d70cf49733bbb0b62c0f3d9969b738`.
+Store `main`: `3620b35369d70cf49733bbb0b62c0f3d9969b738`.
 
-The branch `build/store-published-jobs-0.1` is at `0023b39a9a59c7cd2c882627c78ef59236f553e4`.
+Historical branch facts:
 
-Verified relationship:
+- `build/store-published-jobs-0.1` = `0023b39a9a59c7cd2c882627c78ef59236f553e4`;
+- `build/store-d001-s001-combined-0.1` = `096e99d645d745b1670185f46c75de75f9e59661`;
+- canonical centered S-001 functional commit = `4402abeb6b0299a5b6db2eec85ed04c3b0236bcc`;
+- centered-field branch head = `0da283c01ae9980b39c94e41437bf34340b7c337`;
+- established Stage-2/Board Store commit = `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`.
 
-- Store `main` is the merge base of `build/store-published-jobs-0.1`;
-- the published-jobs branch is 14 commits ahead and 0 behind `main`;
-- therefore substantial Store implementation work is stranded off `main`, not lost.
+Verified genealogy:
 
-However, **do not merge that branch into Store main yet**.
+1. Store `main` is an ancestor of the later Store work.
+2. `b40cdc60...` is an ancestor of the combined D-001/S-001 Store line.
+3. `096e99d...` combines the dimensional D-001 and sheet S-001 candidates without broadening either machine envelope.
+4. `build/store-published-jobs-0.1` adds only two files beyond that combined base: `store-published-jobs.json` and `store-published-jobs.test.mjs`.
+5. The centered S-001 line also descends from `096e99d...` and updates the canonical arched project to the full 96 × 48 in parent with the centered 48 × 36 in work field.
+6. `4402abeb...` and the old published-jobs head are divergent, so the old named-job JSON could not simply be copied forward unchanged.
+7. From `4402abeb...` to the later centered-field head, the functional Store runtime is unchanged; later commits chiefly strengthen the centered-field test/workflow proof.
 
-The current system intentionally contains two Store relationships:
+### Reconciled Store candidate
+
+Branch: `stabilize/store-reconciliation-0.1`.
+
+Candidate head: `c0a34c180dfd39960f1c90d773f7954e4bd73a1b`.
+
+The candidate uses the newer centered-field Store line and reconciles the two named-job files instead of choosing one historical branch over the other.
+
+The named-job register now matches the current System concepts:
+
+- `square-stick` / Square 2x4;
+- `rect-stencil` / Rectangular sheet stencil;
+- `arched-opening` / Centered arched cutout in 1/2 in ply.
+
+The arched job now uses the canonical values already used by the System:
+
+- parent: 96 × 48 in;
+- centered work field: 48 × 36 in;
+- opening width: 36 in;
+- straight height: 24 in;
+- rise: 12 in;
+- derived radius: 19.5 in;
+- whole routed profile must remain inside the centered work field.
+
+The reconciliation did **not** create physical-retention proof, edge-routing authority, Cycle Start authority, controller output, or physical fabrication authority.
+
+### Store candidate verification
+
+GitHub Actions run `34869574228` on Store candidate head `c0a34c...` passed the complete eight-file Store test set:
+
+- `d-001-stage2-mill.test.mjs`;
+- `d001-five-tool.test.mjs`;
+- `d001-stage2-envelope.test.mjs`;
+- `s001-mode2-arched.test.mjs`;
+- `s001-mode2-envelope.test.mjs`;
+- `store-zero-disposition.test.mjs`;
+- `store-zero-stage2.test.mjs`;
+- `store-published-jobs.test.mjs`.
+
+### Cross-repository System trial
+
+The current accepted System still intentionally names two Store pins:
 
 1. `STORE_PIN = b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` for the established Stage-2/Board Store path.
-2. `PUBLISHED_JOB_STORE_PIN = 4402abeb6b0299a5b6db2eec85ed04c3b0236bcc` for the published D-001 / rectangular-sheet / S-001 trial path.
+2. `PUBLISHED_JOB_STORE_PIN = 4402abeb6b0299a5b6db2eec85ed04c3b0236bcc` for the published D-001 / rectangular-sheet / canonical S-001 path.
 
-The canonical centered S-001 commit `4402abeb...` and `build/store-published-jobs-0.1` do **not** form a simple head/ancestor relationship. Their comparison is diverged. Therefore the proposal "merge published-jobs and point everything at the new Store main HEAD" is not currently safe.
+Those production pins have **not** been changed.
 
-The correct Store recovery task is reconciliation, not a blind merge:
+To test consolidation without changing source authority, System GitHub Actions run `34869707774` ephemerally replaced both pins in the CI workspace with the exact reconciled Store candidate `c0a34c180dfd39960f1c90d773f7954e4bd73a1b` and pointed both Store roots at one clean checkout.
 
-- preserve the Stage-2/Board path;
-- preserve the published-job work;
-- preserve the canonical centered S-001 work;
-- compare the divergent Store branches against their common combined base;
-- construct one tested Store stabilization candidate;
-- only after that candidate passes its Store tests and the System integration tests should Store `main` or either System pin move.
+The result passed:
 
-A Store reconciliation branch has been created from current Store `main`:
+- exact candidate identity / clean-checkout gate;
+- System `test:store` source-gate suite;
+- all three `trial:published-jobs` bounded jobs;
+- final clean-checkout verification.
 
-`stabilize/store-reconciliation-0.1`
+Therefore one reconciled Store state can satisfy both existing System Store relationships in the tested trial. This is evidence that the Store work can be consolidated without rewriting the Store or discarding the accepted Stage-2 path.
 
-No Store runtime changes are authorized merely by this register.
+**Promotion is still a separate decision.** Do not move Store `main` or the System pins merely because the candidate is newer. Promotion should happen at a deliberate stabilization checkpoint after the visible application work is reviewed.
 
 ## What Claude's gap analysis got right
 
 Use as recovery evidence:
 
 - much of the human-facing presentation was lost or never made durable in the current application;
-- important Store implementation is stranded on branches rather than gone;
+- important Store implementation was stranded on branches rather than gone;
 - branch proliferation makes source-of-truth expensive to determine;
 - important product copy and imagery need a named, versioned, testable home;
 - the app should be rebuilt page-by-page, starting with the real Page 1 and project doors;
@@ -196,7 +245,7 @@ Use as recovery evidence:
 ## Stabilization sequence from here
 
 1. Keep `8bf5801e...` as the first verification-clean controlled-entry checkpoint until George visually accepts it.
-2. Reconcile Store branches on `stabilize/store-reconciliation-0.1` without changing System pins yet.
+2. Keep Store candidate `c0a34c...` as the tested reconciliation candidate; do not promote or repin yet.
 3. Recover **Critical fit / Alcove** exactly from the controlling product source onto the current alcove engine.
 4. Validate visually and technically before advancing.
 5. Recover **Space utilization / Window seat** as the edge-of-envelope demonstrator, preserving unresolved/qualified-resolution boundaries.
