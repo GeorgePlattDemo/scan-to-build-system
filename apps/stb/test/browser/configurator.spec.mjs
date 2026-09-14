@@ -13,33 +13,33 @@ async function openAlcove(page) {
   await expect(page.locator('[data-project-configurator="alcove-shelf-blanks"]')).toBeVisible();
 }
 
-test('mapped alcove configurator runs the published arithmetic and renders three stable blank occurrences', async ({ page }) => {
+test('User 1 Alcove baseline carries the measured opening, depth, shelf heights and material preference without an ordering allowance', async ({ page }) => {
   await openAlcove(page);
   const panel = page.locator('[data-project-configurator="alcove-shelf-blanks"]');
-  await panel.getByRole('button', { name: 'USE PUBLISHED EXAMPLE' }).click();
+  await panel.getByRole('button', { name: 'USE USER 1 BASELINE' }).click();
 
   await expect(page.locator('[data-config-engine="valid"]')).toBeVisible();
-  await expect(page.locator('[data-config-engine="valid"]')).toContainText('Derived span: 44.75 in');
-  await expect(page.locator('[data-config-engine="valid"]')).toContainText('Shelf blank 1: 44.75 × 11 × 0.75 in');
-  await expect(page.locator('[data-config-engine="valid"]')).toContainText('STRUCTURAL_SPAN_NOT_EVALUATED');
-  await expect(page.locator('[data-render-occurrence]')).toHaveCount(3);
+  await expect(page.locator('[data-config-engine="valid"]')).toContainText('Derived span: 44 in');
+  await expect(page.locator('[data-config-engine="valid"]')).toContainText('Shelf blank 1: 44 × 14 × 0.75 in');
+  await expect(page.locator('[data-config-engine="valid"]')).toContainText('ORDERED_UNIT_ADJUSTMENT_NOT_DECIDED');
+  await expect(page.locator('[data-render-occurrence]')).toHaveCount(5);
 
   const beforeIds = await page.locator('[data-render-occurrence]').evaluateAll((nodes) =>
     nodes.map((node) => node.getAttribute('data-render-occurrence')),
   );
-  await page.locator('[data-config-field="blankDepth"]').fill('10.00');
+  await page.locator('[data-config-field="blankDepth"]').fill('10');
   await page.getByRole('button', { name: 'APPLY TO CANDIDATE' }).click();
-  await expect(page.locator('[data-config-engine="valid"]')).toContainText('Shelf blank 1: 44.75 × 10 × 0.75 in');
+  await expect(page.locator('[data-config-engine="valid"]')).toContainText('Shelf blank 1: 44 × 10 × 0.75 in');
   const afterIds = await page.locator('[data-render-occurrence]').evaluateAll((nodes) =>
     nodes.map((node) => node.getAttribute('data-render-occurrence')),
   );
   expect(afterIds).toEqual(beforeIds);
 });
 
-test('changing shelf count revises demand while review remains unresolved rather than fabricating Store support', async ({ page }) => {
+test('changing shelf count revises demand while review keeps ordering and Store responsibility unresolved', async ({ page }) => {
   await openAlcove(page);
-  await page.getByRole('button', { name: 'USE PUBLISHED EXAMPLE' }).click();
-  await expect(page.locator('[data-render-occurrence]')).toHaveCount(3);
+  await page.getByRole('button', { name: 'USE USER 1 BASELINE' }).click();
+  await expect(page.locator('[data-render-occurrence]')).toHaveCount(5);
 
   await page.locator('[data-config-field="shelfCount"]').fill('4');
   await page.getByRole('button', { name: 'APPLY TO CANDIDATE' }).click();
@@ -57,7 +57,7 @@ test('changing shelf count revises demand while review remains unresolved rather
   await page.locator('[data-nav-page="confirm"]').click();
   await expect(page.locator('main[data-screen="confirm"]')).toBeVisible();
   await expect(page.locator('[data-review-parts] [data-review-item]')).toHaveCount(4);
-  await expect(page.locator('[data-review-unresolved]')).toContainText('STRUCTURAL_SPAN_NOT_EVALUATED');
+  await expect(page.locator('[data-review-unresolved]')).toContainText('ORDERED_UNIT_ADJUSTMENT_NOT_DECIDED');
   await expect(page.locator('[data-review-unresolved]')).toContainText('store-request-absent');
   await expect(page.getByRole('button', { name: COPY.reviewUnresolved })).toBeVisible();
   await expect(page.getByRole('button', { name: COPY.reviewConfirm })).toHaveCount(0);
