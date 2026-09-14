@@ -34,6 +34,10 @@ const CANDIDATE_STATIC_ASSETS = Object.freeze({
     relativePath: 'browser/ui/alcove-back-controls.mjs',
     contentType: 'text/javascript; charset=utf-8',
   }),
+  '/ui/closing-pair.mjs': Object.freeze({
+    relativePath: 'browser/ui/closing-pair.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
   '/ui/project-renderer.mjs': Object.freeze({
     relativePath: 'browser/ui/project-renderer.mjs',
     contentType: 'text/javascript; charset=utf-8',
