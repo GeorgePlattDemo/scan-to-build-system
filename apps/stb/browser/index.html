@@ -126,11 +126,14 @@
           }
         };
 
+        const restoredHost = (main) => {
+          const restored = main?.querySelector(':scope > [data-restored-surface]');
+          return restored?.querySelector('.rx-main, .rx-ribbonbody') ?? restored ?? main;
+        };
+
         const ensureBackButton = (main) => {
           if (!main || screenName(main) === 'landing' || main.classList.contains('screen-landing')) return;
-
-          const restored = main.querySelector(':scope > [data-restored-surface]');
-          const host = restored?.querySelector('.rx-main, .rx-ribbonbody') ?? restored ?? main;
+          const host = restoredHost(main);
           if (!host) return;
 
           let button = main.querySelector('[data-rx-back-nav]');
@@ -142,8 +145,16 @@
             button.setAttribute('aria-label', 'Back');
             button.textContent = '← Back';
           }
-
           if (!host.contains(button)) host.prepend(button);
+        };
+
+        const ensureVisibleProjectGate = (main) => {
+          if (!main?.classList.contains('rx-host')) return;
+          const host = restoredHost(main);
+          if (!host) return;
+          const dialog = [...main.querySelectorAll('.switch-dialog')]
+            .find((node) => !host.contains(node));
+          if (dialog) host.append(dialog);
         };
 
         const ensureReadmePills = () => {
@@ -163,7 +174,10 @@
 
         const refreshPresentationControls = () => {
           exposeBeginMain();
-          for (const main of root.querySelectorAll('main')) ensureBackButton(main);
+          for (const main of root.querySelectorAll('main')) {
+            ensureBackButton(main);
+            ensureVisibleProjectGate(main);
+          }
           ensureReadmePills();
         };
 
