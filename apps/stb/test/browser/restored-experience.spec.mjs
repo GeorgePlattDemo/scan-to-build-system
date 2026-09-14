@@ -1,17 +1,19 @@
 import { expect, test } from '@playwright/test';
 
+const ORIENTATION = {
+  'NEW USER': { heading: 'We don’t sell products.', button: 'START' },
+  'RETURNING USER': { heading: 'Nothing moved while you were gone.', button: 'START SOMETHING NEW' },
+  PROFESSIONAL: { heading: 'Send us what you want. Nothing else.', button: 'TYPE IT IN' },
+};
+
 async function openPage1(page, actor = 'NEW USER') {
   await page.goto('/');
-  await page.getByRole('button', { name: actor }).click();
-  if (actor === 'NEW USER') {
-    await page.getByRole('button', { name: 'START' }).click();
-  } else if (actor === 'RETURNING USER') {
-    await page.getByRole('button', { name: 'START SOMETHING NEW' }).click();
-  } else {
-    await page.getByRole('button', { name: 'TYPE IT IN' }).click();
-  }
+  await page.getByRole('button', { name: actor, exact: true }).click();
+  const orientation = ORIENTATION[actor];
+  await expect(page.getByRole('heading', { name: orientation.heading, exact: true })).toBeVisible();
+  await page.getByRole('button', { name: orientation.button, exact: true }).click();
   await expect(page.locator('main[data-screen="begin"]')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'What are you making?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'What are you making?', exact: true })).toBeVisible();
 }
 
 test('restored landing and all three orientation doors converge on the same Page 1', async ({ page }) => {
@@ -20,19 +22,19 @@ test('restored landing and all three orientation doors converge on the same Page
   await expect(page.getByText('Capture the space with laser, AR, or tape. The measurements are yours.', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'NEW USER' }).click();
   await expect(page.getByRole('heading', { name: 'We don’t sell products.' })).toBeVisible();
-  await page.getByRole('button', { name: 'START' }).click();
+  await page.getByRole('button', { name: 'START', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'What are you making?' })).toBeVisible();
 
   await page.goto('/');
   await page.getByRole('button', { name: 'RETURNING USER' }).click();
   await expect(page.getByRole('heading', { name: 'Nothing moved while you were gone.' })).toBeVisible();
-  await page.getByRole('button', { name: 'START SOMETHING NEW' }).click();
+  await page.getByRole('button', { name: 'START SOMETHING NEW', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'What are you making?' })).toBeVisible();
 
   await page.goto('/');
   await page.getByRole('button', { name: 'PROFESSIONAL' }).click();
   await expect(page.getByRole('heading', { name: 'Send us what you want. Nothing else.' })).toBeVisible();
-  await page.getByRole('button', { name: 'TYPE IT IN' }).click();
+  await page.getByRole('button', { name: 'TYPE IT IN', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'What are you making?' })).toBeVisible();
 });
 
@@ -76,7 +78,7 @@ test('Space utilization picture opens the preserved nine-step window-seat refere
   await page.locator('[data-front-door="window-seat"]').click();
   await expect(page.getByRole('heading', { name: 'Window Seat Insert — 103″ Wall Fixture' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'The Object She Wants' })).toBeVisible();
-  await page.getByRole('button', { name: 'Capture' }).click();
+  await page.getByRole('button', { name: 'Capture', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'The Room Becomes Data' })).toBeVisible();
   await expect(page.getByText('103″ overall wall width', { exact: true })).toBeVisible();
 });
