@@ -33,5 +33,8 @@ jobs:
         run: npm run test:unit
       - name: Boundary tests
         run: npm run test:boundaries
-      - name: Controlled entry browser tests
-        run: npx playwright test --config test/playwright.config.mjs test/browser/controlled-entry.spec.mjs
+      - name: Controlled entry and User 1 Alcove browser tests
+        run: >-
+          npx playwright test --config test/playwright.config.mjs
+          test/browser/controlled-entry.spec.mjs
+          test/browser/configurator.spec.mjs
