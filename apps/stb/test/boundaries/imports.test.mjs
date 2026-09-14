@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import { STATIC_ASSETS } from '../../shared/contracts.mjs';
+import { resolveStaticAsset } from '../../server/main.mjs';
 
 const APP_ROOT = fileURLToPath(new URL('../..', import.meta.url));
 
@@ -69,14 +70,14 @@ function collectImports(source) {
 }
 
 function mapUrlToFile(specifier) {
-  const asset = STATIC_ASSETS[specifier];
+  const asset = STATIC_ASSETS[specifier] ?? resolveStaticAsset(specifier);
   if (!asset) {
     return null;
   }
   return path.join(APP_ROOT, asset.relativePath);
 }
 
-test('browser and shared import graph stay on the static allowlist and cannot import Store or server code', () => {
+test('browser and shared import graph stay on the served static allowlist and cannot import Store or server code', () => {
   const html = fs.readFileSync(path.join(APP_ROOT, 'browser/index.html'), 'utf8');
   const scriptSrc = [...html.matchAll(/<script[^>]+src=["']([^"']+)["']/g)].map(
     (match) => match[1],
@@ -181,6 +182,7 @@ test('browser and shared contain no Store implementation, pricing engine, or exe
   assert.equal(fs.existsSync(path.join(APP_ROOT, 'browser/domain/alcove-engine.mjs')), true);
   assert.equal(fs.existsSync(path.join(APP_ROOT, 'browser/ui/project-configurator.mjs')), true);
   assert.equal(fs.existsSync(path.join(APP_ROOT, 'browser/ui/project-renderer.mjs')), true);
+  assert.equal(fs.existsSync(path.join(APP_ROOT, 'browser/ui/alcove-back-controls.mjs')), true);
   assert.equal(fs.existsSync(path.join(APP_ROOT, 'shared/alcove-rule.mjs')), true);
 });
 
