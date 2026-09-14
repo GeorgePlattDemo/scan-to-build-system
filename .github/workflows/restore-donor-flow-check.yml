@@ -1,0 +1,37 @@
+name: Restored donor flow check
+
+on:
+  push:
+    branches:
+      - fix/restore-donor-flow-0.1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  restored-flow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/stb
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/stb/.node-version
+          cache: npm
+          cache-dependency-path: apps/stb/package-lock.json
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Boundary tests
+        run: npm run test:boundaries
+      - name: Restored human-path browser tests
+        run: npx playwright test --config test/playwright.config.mjs test/browser/restored-experience.spec.mjs
