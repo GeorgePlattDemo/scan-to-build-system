@@ -1,0 +1,82 @@
+name: Reconciled Store system trial
+
+on:
+  push:
+    branches:
+      - stabilize/source-reconciliation-0.1
+    paths:
+      - '.github/workflows/store-reconciliation-system-trial.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reconciled-store-trial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout System stabilization line
+        uses: actions/checkout@v4
+        with:
+          path: system
+
+      - name: Checkout exact reconciled Store candidate
+        uses: actions/checkout@v4
+        with:
+          repository: GeorgePlattDemo/scan-to-build-store
+          ref: c0a34c180dfd39960f1c90d773f7954e4bd73a1b
+          path: store-candidate
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: system/apps/stb/.node-version
+          cache: npm
+          cache-dependency-path: system/apps/stb/package-lock.json
+
+      - name: Install System dependencies
+        working-directory: system/apps/stb
+        run: npm ci --no-audit --no-fund
+
+      - name: Ephemerally point both System Store relationships at the reconciled candidate
+        working-directory: system
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const candidate = 'c0a34c180dfd39960f1c90d773f7954e4bd73a1b';
+          const replacements = [
+            ['apps/stb/shared/contracts.mjs', 'b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d'],
+            ['apps/stb/ops/published-jobs.mjs', '4402abeb6b0299a5b6db2eec85ed04c3b0236bcc'],
+          ];
+          for (const [path, oldPin] of replacements) {
+            const before = fs.readFileSync(path, 'utf8');
+            if (!before.includes(oldPin)) throw new Error(`${path} does not contain expected old pin ${oldPin}`);
+            fs.writeFileSync(path, before.replaceAll(oldPin, candidate));
+          }
+          NODE
+
+      - name: Verify exact Store candidate identity and cleanliness
+        working-directory: store-candidate
+        run: |
+          test "$(git rev-parse HEAD)" = "c0a34c180dfd39960f1c90d773f7954e4bd73a1b"
+          test -z "$(git status --porcelain)"
+
+      - name: Run System Store source-gate suite against reconciled candidate
+        working-directory: system/apps/stb
+        env:
+          STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-candidate
+          STB_STORE_PUBLISHED_JOBS_ROOT: ${{ github.workspace }}/store-candidate
+        run: npm run test:store
+
+      - name: Run all three bounded published-job trials against reconciled candidate
+        working-directory: system/apps/stb
+        env:
+          STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-candidate
+          STB_STORE_PUBLISHED_JOBS_ROOT: ${{ github.workspace }}/store-candidate
+        run: npm run trial:published-jobs
+
+      - name: Confirm trial did not alter Store checkout
+        working-directory: store-candidate
+        run: test -z "$(git status --porcelain)"
