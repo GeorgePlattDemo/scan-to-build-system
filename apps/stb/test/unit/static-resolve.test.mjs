@@ -25,6 +25,14 @@ test('allowlisted paths resolve to known relative files', () => {
     resolveStaticAsset('/ui/candidate-view.mjs').relativePath,
     'browser/ui/candidate-view.mjs',
   );
+  assert.equal(
+    resolveStaticAsset('/ui/controlled-entry.mjs').relativePath,
+    'browser/ui/controlled-entry.mjs',
+  );
+  assert.equal(
+    resolveStaticAsset('/ui/controlled-entry-layer.mjs').relativePath,
+    'browser/ui/controlled-entry-layer.mjs',
+  );
   assert.equal(resolveStaticAsset('/domain/classes.mjs').relativePath, 'browser/domain/classes.mjs');
   assert.equal(
     resolveStaticAsset('/domain/candidate.mjs').relativePath,
@@ -191,6 +199,8 @@ test('allowlist is exact and finite', () => {
     '/start/returning',
     '/styles.css',
     '/ui/candidate-view.mjs',
+    '/ui/controlled-entry-layer.mjs',
+    '/ui/controlled-entry.mjs',
     '/ui/future-chain.mjs',
     '/ui/narrative.mjs',
     '/ui/open-door.mjs',
