@@ -13,52 +13,52 @@ async function openAlcove(page) {
   await expect(page.locator('[data-project-configurator="alcove-shelf-blanks"]')).toBeVisible();
 }
 
-test('User 1 Alcove baseline carries the measured opening, depth, shelf heights and material preference without an ordering allowance', async ({ page }) => {
+test('User 1 Alcove opens as the controlled Make it yours configurator and applies one exact review revision', async ({ page }) => {
   await openAlcove(page);
   const panel = page.locator('[data-project-configurator="alcove-shelf-blanks"]');
-  await panel.getByRole('button', { name: 'USE USER 1 BASELINE' }).click();
 
-  await expect(page.locator('[data-config-engine="valid"]')).toBeVisible();
-  await expect(page.locator('[data-config-engine="valid"]')).toContainText('Derived span: 44 in');
-  await expect(page.locator('[data-config-engine="valid"]')).toContainText('Shelf blank 1: 44 × 14 × 0.75 in');
-  await expect(page.locator('[data-config-engine="valid"]')).toContainText('ORDERED_UNIT_ADJUSTMENT_NOT_DECIDED');
-  await expect(page.locator('[data-render-occurrence]')).toHaveCount(5);
+  await expect(panel.getByRole('heading', { name: 'Make it yours' })).toBeVisible();
+  await expect(panel.getByRole('slider', { name: 'Shelves' })).toHaveValue('5');
+  await expect(panel.getByRole('slider', { name: 'Depth' })).toHaveValue('14');
+  await expect(panel.locator('[data-config-field="materialPreference"]')).toHaveValue('Pine');
+  await expect(panel.locator('[data-config-field="shelfHeights"]')).toHaveValue('12, 24, 36, 45, 65');
+  await expect(panel.getByText('UNRESOLVED', { exact: true })).toBeVisible();
 
-  const beforeIds = await page.locator('[data-render-occurrence]').evaluateAll((nodes) =>
-    nodes.map((node) => node.getAttribute('data-render-occurrence')),
-  );
-  await page.locator('[data-config-field="blankDepth"]').fill('10');
-  await page.getByRole('button', { name: 'APPLY TO CANDIDATE' }).click();
-  await expect(page.locator('[data-config-engine="valid"]')).toContainText('Shelf blank 1: 44 × 10 × 0.75 in');
-  const afterIds = await page.locator('[data-render-occurrence]').evaluateAll((nodes) =>
-    nodes.map((node) => node.getAttribute('data-render-occurrence')),
-  );
-  expect(afterIds).toEqual(beforeIds);
+  await panel.getByRole('slider', { name: 'Depth' }).fill('10');
+  await panel.getByRole('button', { name: 'REVIEW AND CONFIRM' }).click();
+
+  await expect(page.locator('main[data-screen="confirm"]')).toBeVisible();
+  await expect(page.locator('[data-review-parts] [data-review-item]')).toHaveCount(5);
+  await expect(page.locator('[data-review-parts]')).toContainText('44');
+  await expect(page.locator('[data-review-parts]')).toContainText('10');
+  await expect(page.locator('[data-review-unresolved]')).toContainText('ORDERED_UNIT_ADJUSTMENT_NOT_DECIDED');
+  await expect(page.locator('[data-review-unresolved]')).toContainText('store-request-absent');
+  await expect(page.getByRole('button', { name: COPY.reviewUnresolved })).toBeVisible();
+  await expect(page.getByRole('button', { name: COPY.reviewConfirm })).toHaveCount(0);
 });
 
-test('changing shelf count revises demand while review keeps ordering and Store responsibility unresolved', async ({ page }) => {
+test('shelf count, shelf heights and material preference remain holder configuration while Store support stays unresolved', async ({ page }) => {
   await openAlcove(page);
-  await page.getByRole('button', { name: 'USE USER 1 BASELINE' }).click();
-  await expect(page.locator('[data-render-occurrence]')).toHaveCount(5);
+  const panel = page.locator('[data-project-configurator="alcove-shelf-blanks"]');
 
-  await page.locator('[data-config-field="shelfCount"]').fill('4');
-  await page.getByRole('button', { name: 'APPLY TO CANDIDATE' }).click();
-  await expect(page.locator('[data-render-occurrence]')).toHaveCount(4);
-  await expect(page.locator('[data-config-engine="valid"]')).toContainText('4 ea sheet-form blanks');
+  await panel.getByRole('slider', { name: 'Shelves' }).fill('4');
+  await panel.locator('[data-alcove-height-index="3"]').fill('46');
+  await panel.locator('[data-alcove-height-index="3"]').press('Tab');
+  await panel.getByRole('button', { name: 'Cherry' }).click();
+  await panel.getByRole('button', { name: 'REVIEW AND CONFIRM' }).click();
 
-  const localRecordId = await page.locator('[data-screen="questions"]').getAttribute('data-local-record-id');
+  await expect(page.locator('main[data-screen="confirm"]')).toBeVisible();
+  await expect(page.locator('[data-review-parts] [data-review-item]')).toHaveCount(4);
+
+  const localRecordId = new URL(page.url()).searchParams.get('project');
   const assembled = requireOk(
     await repoCall(page, 'assembleReview', { localRecordId }),
     'mapped review snapshot',
   );
   expect(assembled.snapshot.occurrenceIds).toHaveLength(4);
   expect(assembled.snapshot.definitionRevisionIds).toHaveLength(4);
-
-  await page.locator('[data-nav-page="confirm"]').click();
-  await expect(page.locator('main[data-screen="confirm"]')).toBeVisible();
-  await expect(page.locator('[data-review-parts] [data-review-item]')).toHaveCount(4);
-  await expect(page.locator('[data-review-unresolved]')).toContainText('ORDERED_UNIT_ADJUSTMENT_NOT_DECIDED');
-  await expect(page.locator('[data-review-unresolved]')).toContainText('store-request-absent');
-  await expect(page.getByRole('button', { name: COPY.reviewUnresolved })).toBeVisible();
-  await expect(page.getByRole('button', { name: COPY.reviewConfirm })).toHaveCount(0);
+  expect(assembled.projection.payload.inputs.shelfHeights.canonical).toEqual(['12', '24', '36', '46']);
+  expect(assembled.projection.payload.inputs.materialPreference.canonical).toBe('Cherry');
+  expect(assembled.projection.payload.store.connected).toBe(false);
+  expect(assembled.projection.payload.store.price).toBeNull();
 });
