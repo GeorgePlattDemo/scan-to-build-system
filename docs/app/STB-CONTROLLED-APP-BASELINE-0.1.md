@@ -20,6 +20,11 @@ The branch was created directly from that exact `main` commit. No older feature/
 
 The attached reference build `stb-app-build-pages-0.9.html` is the controlling human-facing source for this stabilization pass.
 
+Exact source fingerprint:
+
+- byte size: `217841`
+- SHA-256: `c415bfd7047d42f4431384a612171b3ba56fc0d9cc54811c67f54d137860df8e`
+
 For the material represented there, the following are controlling unless George explicitly changes them:
 
 - visible copy;
