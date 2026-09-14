@@ -45,11 +45,13 @@ function buildRenderModel(parts, evaluation) {
     kind: 'orthographic-project-v1',
     projection: 'schematic-blank-stack',
     schematic: true,
-    note: 'Blank rows are stacked for inspection only. Vertical spacing is not an installation dimension.',
+    note: 'Blank rows are stacked for inspection only. User 1 shelf elevations are carried separately as placement preferences and are not part-blank geometry.',
     openingWidth: evaluation.inputs.openingWidth?.canonical ?? null,
     supportLeft: evaluation.inputs.leftSupport?.canonical ?? null,
     supportRight: evaluation.inputs.rightSupport?.canonical ?? null,
     derivedSpan: evaluation.derived.span?.canonical ?? null,
+    shelfHeights: evaluation.inputs.shelfHeights?.canonical ?? [],
+    materialPreference: evaluation.inputs.materialPreference?.canonical ?? null,
     parts: parts.map((part) => ({
       occurrenceId: part.occurrenceId,
       definitionRevisionId: part.definitionRevisionId,
@@ -74,6 +76,8 @@ function buildProjectionPayload({
     ...(evaluation.unresolvedInputs ?? []),
     ...(evaluation.unresolvedConditions ?? []),
   ];
+  const materialPreference = evaluation.inputs.materialPreference?.canonical ?? null;
+  const shelfHeights = evaluation.inputs.shelfHeights?.canonical ?? [];
   return {
     derivationVersion: ALCOVE_RULE_VERSION,
     definitionKind: ALCOVE_DEFINITION_KIND,
@@ -88,6 +92,14 @@ function buildProjectionPayload({
     definitionRevisionIds,
     inputs: evaluation.inputs,
     derived: evaluation.derived,
+    placementPreferences: valid
+      ? {
+          shelfHeights,
+          basis: 'holder-configuration',
+          authority: false,
+          note: 'Shelf heights are User 1 placement preferences. They do not change blank length and do not create installation or structural authority.',
+        }
+      : null,
     parts,
     materialDemand: valid
       ? {
@@ -99,10 +111,11 @@ function buildProjectionPayload({
             depth: evaluation.inputs.blankDepth,
             thickness: evaluation.inputs.blankThickness,
           },
+          materialPreference,
           species: null,
           grade: null,
           sku: null,
-          status: 'unresolved',
+          status: 'preference-unresolved',
         }
       : null,
     operationRequirements: valid
@@ -119,18 +132,21 @@ function buildProjectionPayload({
     render: buildRenderModel(parts, evaluation),
     summary: {
       title: valid ? `${parts.length} candidate shelf blank${parts.length === 1 ? '' : 's'}` : 'Alcove shelf-blank definition is unresolved',
-      formula: 'span = opening width - left support - right support',
+      formula: 'nominal interior span = opening width - left support - right support',
       span: evaluation.derived.span?.canonical ?? null,
       depth: evaluation.inputs.blankDepth?.canonical ?? null,
       thickness: evaluation.inputs.blankThickness?.canonical ?? null,
       quantity: evaluation.inputs.shelfCount?.canonical ?? null,
       quantityUnit: 'ea',
+      shelfHeights,
+      materialPreference,
+      orderedUnitAdjustment: null,
       configurationBasis: configuration?.basis ?? 'manual-entry',
       disclosure: evaluation.disclosure,
     },
     request: {
       complete: false,
-      reason: valid ? 'Store sheet-material/capability resolution is not implemented for this class.' : 'Class definition is incomplete.',
+      reason: valid ? 'Store material/capability resolution is not yet connected for the User 1 Alcove class.' : 'Class definition is incomplete.',
       intended: valid
         ? {
             form: 'sheet',
@@ -139,13 +155,16 @@ function buildProjectionPayload({
             blankLength: evaluation.derived.span,
             blankDepth: evaluation.inputs.blankDepth,
             blankThickness: evaluation.inputs.blankThickness,
+            shelfHeights,
+            materialPreference,
+            orderedUnitAdjustment: null,
             referenceOperations: ['simulate_crosscut', 'simulate_shelf_blank'],
           }
         : null,
     },
     store: {
       connected: false,
-      reason: 'Store path unresolved for alcove shelf blanks.',
+      reason: 'Store path for the full User 1 Alcove configuration is not yet admitted by the current application protocol.',
       offering: null,
       price: null,
       availability: null,
@@ -237,7 +256,8 @@ export function planAlcoveDerivation({
         length: evaluation.derived.span,
         depth: evaluation.inputs.blankDepth,
         thickness: evaluation.inputs.blankThickness,
-        material: { form: 'sheet', status: 'unresolved' },
+        material: { form: 'sheet', preference: evaluation.inputs.materialPreference?.canonical ?? null, status: 'preference-unresolved' },
+        placement: { shelfHeight: evaluation.inputs.shelfHeights?.canonical?.[index] ?? null, status: 'holder-preference' },
         requiredOps: [],
         referenceOperations: ['simulate_crosscut', 'simulate_shelf_blank'],
         physicalFabricationEligible: false,
@@ -283,12 +303,15 @@ export function planAlcoveDerivation({
             derivedSpan: evaluation.derived.span,
             blankDepth: evaluation.inputs.blankDepth,
             blankThickness: evaluation.inputs.blankThickness,
+            shelfHeights: evaluation.inputs.shelfHeights,
+            orderedUnitAdjustment: null,
           }
         : null,
       material: evaluation.valid
         ? {
             form: 'sheet',
-            status: 'unresolved',
+            preference: evaluation.inputs.materialPreference?.canonical ?? null,
+            status: 'preference-unresolved',
           }
         : null,
     },
