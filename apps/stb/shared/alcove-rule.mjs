@@ -5,6 +5,18 @@ export const ALCOVE_CLASS_VERSION = '0.1-reference';
 export const ALCOVE_RULE_VERSION = 'alcove.shelf-blanks/0.1-candidate';
 export const ALCOVE_DEFINITION_KIND = 'alcove.shelf-blanks.v1';
 
+export const ALCOVE_BACK_TYPES = Object.freeze({
+  none: 'None',
+  flush: 'Flush',
+  recessed: 'Recessed',
+});
+
+export const ALCOVE_BACK_MATERIALS = Object.freeze({
+  match: 'Match project material',
+  veneer: 'Veneered panel',
+  mdf: 'MDF',
+});
+
 // User 1 is the single worked Alcove project in this build. These values are
 // presentation/reference facts carried forward from the public review project.
 // They are not personalization and they are not an ordering allowance.
@@ -22,6 +34,10 @@ export const ALCOVE_USER1_BASELINE = Object.freeze({
   shelfHeightsIn: Object.freeze([12, 24, 36, 45, 65]),
   materialPreference: 'Pine',
   sideThicknessIn: 0.75,
+  backType: ALCOVE_BACK_TYPES.none,
+  backMaterial: '',
+  veneerSpecies: '',
+  recessedBackSetbackIn: 0.25,
   orderedUnitAdjustmentIn: null,
   orderedUnitAdjustmentStatus: 'NOT_YET_DECIDED',
 });
@@ -40,6 +56,10 @@ export const ALCOVE_REFERENCE_EXAMPLE = Object.freeze({
   shelfCount: '5',
   shelfHeights: '12, 24, 36, 45, 65',
   materialPreference: 'Pine',
+  backType: 'None',
+  backMaterial: '',
+  veneerSpecies: '',
+  backSetback: '',
 });
 
 const INPUT_KEYS = Object.freeze([
@@ -51,6 +71,10 @@ const INPUT_KEYS = Object.freeze([
   'shelfCount',
   'shelfHeights',
   'materialPreference',
+  'backType',
+  'backMaterial',
+  'veneerSpecies',
+  'backSetback',
 ]);
 
 function raw(input, key) {
@@ -61,13 +85,32 @@ function raw(input, key) {
   return String(value ?? '').trim();
 }
 
+function parseInchToken(token) {
+  const text = String(token ?? '').trim();
+  if (!text) return null;
+  let match = text.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+  if (match) {
+    const denominator = Number(match[3]);
+    if (!(denominator > 0)) return null;
+    return Number(match[1]) + Number(match[2]) / denominator;
+  }
+  match = text.match(/^(\d+)\/(\d+)$/);
+  if (match) {
+    const denominator = Number(match[2]);
+    if (!(denominator > 0)) return null;
+    return Number(match[1]) / denominator;
+  }
+  const value = Number(text);
+  return Number.isFinite(value) ? value : null;
+}
+
 function parsePositiveInches(input, key, label, unresolved) {
   const text = raw(input, key);
   if (!text) {
     unresolved.push(`missing-${key}`);
     return null;
   }
-  const value = Number(text);
+  const value = parseInchToken(text);
   if (!Number.isFinite(value)) {
     unresolved.push(`invalid-${key}`);
     return null;
@@ -103,25 +146,6 @@ function parseCount(input, unresolved) {
     canonical: String(value),
     raw: text,
   };
-}
-
-function parseInchToken(token) {
-  const text = String(token ?? '').trim();
-  if (!text) return null;
-  let match = text.match(/^(\d+)\s+(\d+)\/(\d+)$/);
-  if (match) {
-    const denominator = Number(match[3]);
-    if (!(denominator > 0)) return null;
-    return Number(match[1]) + Number(match[2]) / denominator;
-  }
-  match = text.match(/^(\d+)\/(\d+)$/);
-  if (match) {
-    const denominator = Number(match[2]);
-    if (!(denominator > 0)) return null;
-    return Number(match[1]) / denominator;
-  }
-  const value = Number(text);
-  return Number.isFinite(value) ? value : null;
 }
 
 function parseShelfHeights(input, shelfCount, unresolved) {
@@ -169,6 +193,67 @@ function parseMaterialPreference(input, unresolved) {
   };
 }
 
+function parseBackType(input, unresolved) {
+  const text = raw(input, 'backType');
+  if (!text) {
+    return { label: 'Back', raw: '', canonical: 'none', display: ALCOVE_BACK_TYPES.none, defaulted: true };
+  }
+  const normalized = text.toLowerCase();
+  const entry = Object.entries(ALCOVE_BACK_TYPES).find(([key, label]) => key === normalized || label.toLowerCase() === normalized);
+  if (!entry) {
+    unresolved.push('invalid-backType');
+    return null;
+  }
+  return { label: 'Back', raw: text, canonical: entry[0], display: entry[1], defaulted: false };
+}
+
+function parseBackMaterial(input, backType, unresolved) {
+  if (!backType || backType.canonical === 'none') {
+    return { label: 'Back material', raw: '', canonical: null, display: null, applicable: false };
+  }
+  const text = raw(input, 'backMaterial');
+  if (!text) {
+    unresolved.push('missing-backMaterial');
+    return null;
+  }
+  const normalized = text.toLowerCase();
+  const entry = Object.entries(ALCOVE_BACK_MATERIALS).find(([key, label]) => key === normalized || label.toLowerCase() === normalized);
+  if (!entry) {
+    unresolved.push('invalid-backMaterial');
+    return null;
+  }
+  return { label: 'Back material', raw: text, canonical: entry[0], display: entry[1], applicable: true, authority: 'holder-preference' };
+}
+
+function parseVeneerSpecies(input, backMaterial, unresolved) {
+  if (!backMaterial || backMaterial.canonical !== 'veneer') {
+    return { label: 'Veneer species', raw: '', canonical: null, applicable: false };
+  }
+  const text = raw(input, 'veneerSpecies');
+  if (!text) {
+    unresolved.push('missing-veneerSpecies');
+    return null;
+  }
+  return { label: 'Veneer species', raw: text, canonical: text, applicable: true, authority: 'holder-preference' };
+}
+
+function parseBackSetback(input, backType, unresolved) {
+  if (!backType || backType.canonical !== 'recessed') {
+    return { label: 'Back set back', raw: '', value: null, unit: 'in', canonical: null, applicable: false };
+  }
+  const text = raw(input, 'backSetback');
+  if (!text) {
+    unresolved.push('missing-backSetback');
+    return null;
+  }
+  const value = parseInchToken(text);
+  if (!Number.isFinite(value) || value < 0) {
+    unresolved.push('invalid-backSetback');
+    return null;
+  }
+  return { label: 'Back set back', raw: text, value, unit: 'in', canonical: canonicalInchString(value), applicable: true };
+}
+
 export function normalizeAlcoveConfiguration(input = {}, { basis = 'manual-entry' } = {}) {
   const normalized = {
     kind: 'alcove.shelf-blanks.config.v1',
@@ -177,9 +262,13 @@ export function normalizeAlcoveConfiguration(input = {}, { basis = 'manual-entry
   };
   for (const key of INPUT_KEYS) {
     const value = raw(input.inputs ?? input, key);
+    let unit = 'in';
+    if (key === 'shelfCount') unit = 'ea';
+    if (['materialPreference', 'backType', 'backMaterial', 'veneerSpecies'].includes(key)) unit = 'plain-words';
+    if (key === 'shelfHeights') unit = 'in-list';
     normalized.inputs[key] = {
       raw: value,
-      unit: key === 'shelfCount' ? 'ea' : key === 'materialPreference' ? 'plain-words' : key === 'shelfHeights' ? 'in-list' : 'in',
+      unit,
       method: basis,
     };
   }
@@ -197,6 +286,10 @@ export function evaluateAlcoveConfiguration(configuration) {
   const shelfCount = parseCount(inputs, unresolved);
   const shelfHeights = parseShelfHeights(inputs, shelfCount, unresolved);
   const materialPreference = parseMaterialPreference(inputs, unresolved);
+  const backType = parseBackType(inputs, unresolved);
+  const backMaterial = parseBackMaterial(inputs, backType, unresolved);
+  const veneerSpecies = parseVeneerSpecies(inputs, backMaterial, unresolved);
+  const backSetback = parseBackSetback(inputs, backType, unresolved);
 
   let span = null;
   if (openingWidth && leftSupport && rightSupport) {
@@ -221,6 +314,8 @@ export function evaluateAlcoveConfiguration(configuration) {
         'STRUCTURAL_SPAN_NOT_EVALUATED',
         'INSTALLATION_NOT_DEFINED',
         'STORE_RESOLUTION_NOT_EVALUATED',
+        ...(backType?.canonical !== 'none' ? ['BACK_PANEL_GEOMETRY_NOT_DERIVED', 'BACK_STORE_RESOLUTION_NOT_EVALUATED'] : []),
+        ...(backType?.canonical === 'recessed' ? ['BACK_RECESS_FEATURE_NOT_RESOLVED'] : []),
       ]
     : [];
 
@@ -238,10 +333,26 @@ export function evaluateAlcoveConfiguration(configuration) {
       shelfCount,
       shelfHeights,
       materialPreference,
+      backType,
+      backMaterial,
+      veneerSpecies,
+      backSetback,
     },
     derived: {
       span,
     },
+    backRequirement: arithmeticValid
+      ? {
+          style: backType?.canonical ?? 'none',
+          styleLabel: backType?.display ?? ALCOVE_BACK_TYPES.none,
+          material: backMaterial?.canonical ?? null,
+          materialLabel: backMaterial?.display ?? null,
+          veneerSpecies: veneerSpecies?.canonical ?? null,
+          setback: backSetback?.applicable ? backSetback : null,
+          geometryStatus: backType?.canonical === 'none' ? 'not-required' : 'not-yet-derived',
+          authority: 'holder-configuration',
+        }
+      : null,
     disclosure: 'Arithmetic completeness is not the holder\'s ordered-size decision, structural adequacy, Store support, production release, machine readiness, or fabrication authorization.',
   };
 }
