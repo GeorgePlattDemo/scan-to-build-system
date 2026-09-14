@@ -38,6 +38,8 @@ export const ALCOVE_REFERENCE_EXAMPLE = Object.freeze({
   blankDepth: '14',
   blankThickness: '0.75',
   shelfCount: '5',
+  shelfHeights: '12, 24, 36, 45, 65',
+  materialPreference: 'Pine',
 });
 
 const INPUT_KEYS = Object.freeze([
@@ -47,6 +49,8 @@ const INPUT_KEYS = Object.freeze([
   'blankDepth',
   'blankThickness',
   'shelfCount',
+  'shelfHeights',
+  'materialPreference',
 ]);
 
 function raw(input, key) {
@@ -101,6 +105,70 @@ function parseCount(input, unresolved) {
   };
 }
 
+function parseInchToken(token) {
+  const text = String(token ?? '').trim();
+  if (!text) return null;
+  let match = text.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+  if (match) {
+    const denominator = Number(match[3]);
+    if (!(denominator > 0)) return null;
+    return Number(match[1]) + Number(match[2]) / denominator;
+  }
+  match = text.match(/^(\d+)\/(\d+)$/);
+  if (match) {
+    const denominator = Number(match[2]);
+    if (!(denominator > 0)) return null;
+    return Number(match[1]) / denominator;
+  }
+  const value = Number(text);
+  return Number.isFinite(value) ? value : null;
+}
+
+function parseShelfHeights(input, shelfCount, unresolved) {
+  const text = raw(input, 'shelfHeights');
+  if (!text) {
+    unresolved.push('missing-shelfHeights');
+    return null;
+  }
+  const tokens = text.split(',').map((item) => item.trim()).filter(Boolean);
+  if (!shelfCount || tokens.length < shelfCount.value) {
+    unresolved.push('insufficient-shelfHeights');
+    return null;
+  }
+  const values = tokens.slice(0, shelfCount.value).map(parseInchToken);
+  if (values.some((value) => !Number.isFinite(value) || value <= 0)) {
+    unresolved.push('invalid-shelfHeights');
+    return null;
+  }
+  for (let index = 1; index < values.length; index += 1) {
+    if (!(values[index] > values[index - 1])) {
+      unresolved.push('shelfHeights-not-ascending');
+      return null;
+    }
+  }
+  return {
+    label: 'Shelf heights',
+    values,
+    unit: 'in',
+    canonical: values.map(canonicalInchString),
+    raw: text,
+  };
+}
+
+function parseMaterialPreference(input, unresolved) {
+  const text = raw(input, 'materialPreference');
+  if (!text) {
+    unresolved.push('missing-materialPreference');
+    return null;
+  }
+  return {
+    label: 'Material preference',
+    raw: text,
+    canonical: text,
+    authority: 'holder-preference',
+  };
+}
+
 export function normalizeAlcoveConfiguration(input = {}, { basis = 'manual-entry' } = {}) {
   const normalized = {
     kind: 'alcove.shelf-blanks.config.v1',
@@ -111,7 +179,7 @@ export function normalizeAlcoveConfiguration(input = {}, { basis = 'manual-entry
     const value = raw(input.inputs ?? input, key);
     normalized.inputs[key] = {
       raw: value,
-      unit: key === 'shelfCount' ? 'ea' : 'in',
+      unit: key === 'shelfCount' ? 'ea' : key === 'materialPreference' ? 'plain-words' : key === 'shelfHeights' ? 'in-list' : 'in',
       method: basis,
     };
   }
@@ -127,6 +195,8 @@ export function evaluateAlcoveConfiguration(configuration) {
   const blankDepth = parsePositiveInches(inputs, 'blankDepth', 'Blank depth', unresolved);
   const blankThickness = parsePositiveInches(inputs, 'blankThickness', 'Blank thickness', unresolved);
   const shelfCount = parseCount(inputs, unresolved);
+  const shelfHeights = parseShelfHeights(inputs, shelfCount, unresolved);
+  const materialPreference = parseMaterialPreference(inputs, unresolved);
 
   let span = null;
   if (openingWidth && leftSupport && rightSupport) {
@@ -166,6 +236,8 @@ export function evaluateAlcoveConfiguration(configuration) {
       blankDepth,
       blankThickness,
       shelfCount,
+      shelfHeights,
+      materialPreference,
     },
     derived: {
       span,
