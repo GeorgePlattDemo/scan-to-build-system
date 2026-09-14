@@ -4,27 +4,31 @@ This is the working repository. Other Scan-to-Build repositories are provenance 
 
 ## First read
 
-1. [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md) — one answer for accepted baseline, current candidate, Store pins, capability status, open promotion chain, and next authorized change.
+1. [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md) — one answer for the accepted source tree, promotion event, Store pins, capability status, and parallel work.
 2. [`docs/project/VERIFICATION-REGISTER.md`](docs/project/VERIFICATION-REGISTER.md) — what is actually proven, under which exact pins, and what remains not validated / not measured / not authorized.
-3. [`docs/project/BRANCH-PR-GENEALOGY.md`](docs/project/BRANCH-PR-GENEALOGY.md) — current promotion chain, parallel work, superseded work, and historical work.
+3. [`docs/project/BRANCH-PR-GENEALOGY.md`](docs/project/BRANCH-PR-GENEALOGY.md) — accepted ancestry, parallel work, superseded work, and historical work.
 
 Do not infer current status from PR chronology alone.
 
 ## Repository status
 
-**Accepted merged repository baseline**
+**Accepted source tree**
 
-`main@f4769bbf2daaf7e719b723478b7a24f3dfa1344a`
+`1621d2ea146a248d200ecba59f4b87034a1b1cd5`
 
-**Current application candidate**
+**Acceptance event**
 
-`build/global-completion-path-0.1@b0caba518aa0e152fa107fe89267ab48ee81296f`
+PR #12, normal merge commit:
 
-Latest code head recorded with full App candidate checks passing:
+`97416e85b7cba3dabded6f32e419f7851514026c`
+
+Accepted on **2026-09-13**.
+
+Latest code head in the accepted ancestry recorded with full App candidate checks passing:
 
 `dee4a307cf0866ac0985da92dfb5f74045ee90f9`
 
-A green candidate is not an accepted baseline merely because its tests pass.
+PR #10 is accepted ancestry, not a current application candidate. PR #7 remains the separate parallel machine-safety/controller-simulation candidate.
 
 ## Application
 
@@ -34,7 +38,7 @@ The transferred accepted application source lineage remains:
 
 `GeorgePlattDemo/grok-file@4595b4785a2686486e477ce2e70fb3f476285a8d`
 
-That is provenance for the transferred app. It is not the identity of the later system-repository candidate chain.
+That is provenance for the transferred app. The later system-repository application development is accepted through source tree `1621d2ea146a248d200ecba59f4b87034a1b1cd5` and promotion PR #12.
 
 Launch instructions and path-specific Store pins: [`apps/README.md`](apps/README.md).
 
@@ -43,7 +47,7 @@ Launch instructions and path-specific Store pins: [`apps/README.md`](apps/README
 Do not use one Store pin as a universal project constant.
 
 - transferred accepted-app / Stage-2 Store Zero path: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
-- current published-job / canonical S-001 candidate proof path: `4402abeb6b0299a5b6db2eec85ed04c3b0236bcc`
+- accepted published-job / canonical S-001 proof path: `4402abeb6b0299a5b6db2eec85ed04c3b0236bcc`
 
 Historical candidate pins and their roles are listed in [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md).
 
@@ -60,7 +64,7 @@ Do not start in `grok-file`, a public exhibit, or a new demo folder.
 
 | Need | Place |
 | --- | --- |
-| Current baseline/candidate status | `STB-CURRENT-BASELINE.md` |
+| Accepted baseline / promotion status | `STB-CURRENT-BASELINE.md` |
 | Verification evidence | `docs/project/VERIFICATION-REGISTER.md` |
 | Branch / PR genealogy | `docs/project/BRANCH-PR-GENEALOGY.md` |
 | App | `apps/stb/` |
@@ -73,12 +77,12 @@ Do not start in `grok-file`, a public exhibit, or a new demo folder.
 
 ## Do not
 
-- Promote a candidate to accepted by wording alone.
+- Promote a parallel or historical candidate by wording alone.
 - Invent a second app to try an idea.
 - Widen an envelope so a trial passes.
 - Treat Store `SUPPORTABLE` as a physical cut.
 - Treat simulated or reference machine behavior as commissioned production.
-- Read a superseded PR statement as current merely because the PR remains open.
+- Read a superseded PR statement as current merely because its branch remains recoverable.
 - Delete historical repositories or branches until their required pins remain recoverable.
 
 **NO BLOOD ON WOOD.**
