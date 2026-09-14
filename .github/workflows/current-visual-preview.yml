@@ -1,0 +1,75 @@
+name: Current visual preview
+
+on:
+  push:
+    branches:
+      - main
+      - 'fix/**'
+      - 'ui/**'
+      - 'build/app-**'
+    paths:
+      - 'apps/stb/**'
+      - '.github/workflows/current-visual-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stb-current-visual-preview
+  cancel-in-progress: true
+
+jobs:
+  render-current-app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout source branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/stb/.node-version
+          cache: npm
+          cache-dependency-path: apps/stb/package-lock.json
+
+      - name: Install application dependencies
+        working-directory: apps/stb
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Chromium
+        working-directory: apps/stb
+        run: npx playwright install --with-deps chromium
+
+      - name: Render current application checkpoints
+        working-directory: apps/stb
+        env:
+          STB_VISUAL_PREVIEW_OUT: ${{ github.workspace }}/visual-preview-output
+        run: node test/preview/current-preview.mjs
+
+      - name: Keep downloadable visual checkpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: stb-current-visual-checkpoint
+          path: visual-preview-output
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish one-click visual checkpoint branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/stb-current-visual-preview
+          mkdir -p /tmp/stb-current-visual-preview
+          cp -a visual-preview-output/. /tmp/stb-current-visual-preview/
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --orphan preview/current-ui
+          git rm -rf . || true
+          git clean -fdx
+          cp -a /tmp/stb-current-visual-preview/. .
+          git add README.md source.json *.png
+          git commit -m "Publish visual checkpoint from ${GITHUB_REF_NAME} ${GITHUB_SHA}"
+          git push --force origin HEAD:preview/current-ui
