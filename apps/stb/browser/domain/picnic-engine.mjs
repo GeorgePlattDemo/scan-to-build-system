@@ -19,14 +19,31 @@ function profile(width, thickness) {
   };
 }
 
+function holderSupplied(template) {
+  return {
+    ...template,
+    quantity: 1,
+    quantityUnit: 'ea',
+    fulfillment: 'holder-supplied',
+    physicalFabricationEligible: false,
+  };
+}
+
 function roleDefinitions(evaluation) {
-  if (!evaluation.valid) return [];
+  if (!evaluation.valid) return { parts: [], holderSuppliedParts: [] };
+  if (evaluation.input?.tableForm?.id === 'separate-benches') {
+    return { parts: [], holderSuppliedParts: [] };
+  }
+
   const fixture = evaluation.fixture;
   const longitudinal = evaluation.derived.longitudinalMemberLength;
   const parts = [];
+  const holderSuppliedParts = [];
+  const frameKit = evaluation.input?.requestedScope?.id === 'frame-kit';
 
+  const longitudinalMembers = [];
   for (let index = 0; index < fixture.tabletopCount; index += 1) {
-    parts.push({
+    longitudinalMembers.push({
       role: `tabletop-${index + 1}`,
       family: 'tabletop-member',
       label: `Tabletop member ${index + 1}`,
@@ -38,7 +55,7 @@ function roleDefinitions(evaluation) {
     });
   }
   for (let index = 0; index < fixture.seatCount; index += 1) {
-    parts.push({
+    longitudinalMembers.push({
       role: `seat-${index + 1}`,
       family: 'seat-member',
       label: `Seat member ${index + 1}`,
@@ -48,6 +65,11 @@ function roleDefinitions(evaluation) {
       features: [],
       operationNeeds: ['SQUARE_CUT'],
     });
+  }
+  if (frameKit) {
+    holderSuppliedParts.push(...longitudinalMembers.map(holderSupplied));
+  } else {
+    parts.push(...longitudinalMembers);
   }
 
   const framePositions = [
@@ -109,7 +131,7 @@ function roleDefinitions(evaluation) {
       operationNeeds: ['SQUARE_CUT'],
     });
   }
-  return parts;
+  return { parts, holderSuppliedParts };
 }
 
 function definitionBasis(payload) {
@@ -132,6 +154,16 @@ function definitionBasis(payload) {
 
 function priorDefinition(previousDefinitions, occurrenceId) {
   return previousDefinitions instanceof Map ? previousDefinitions.get(occurrenceId) ?? null : null;
+}
+
+function previousOccurrenceByRole(previousDefinitions) {
+  const byRole = new Map();
+  if (!(previousDefinitions instanceof Map)) return byRole;
+  for (const [occurrenceId, record] of previousDefinitions.entries()) {
+    const role = record?.payload?.role ?? record?.role ?? null;
+    if (role) byRole.set(role, occurrenceId);
+  }
+  return byRole;
 }
 
 function totalLinearDemand(parts) {
@@ -157,12 +189,14 @@ function totalLinearDemand(parts) {
   };
 }
 
-function buildRender(parts, evaluation) {
+function buildRender(parts, holderSuppliedParts, evaluation) {
   return {
     kind: 'orthographic-project-v1',
     projection: 'picnic-fixture-orthographic',
     schematic: true,
     fixtureId: evaluation.fixture.fixtureId,
+    tableForm: evaluation.input?.tableForm?.id ?? null,
+    requestedScope: evaluation.input?.requestedScope?.id ?? null,
     productLength: evaluation.input.productLength.canonical,
     overallWidth: String(evaluation.fixture.overallWidth),
     topHeight: String(evaluation.fixture.topHeight),
@@ -170,18 +204,33 @@ function buildRender(parts, evaluation) {
     frameA: evaluation.derived.framePositions.a.canonical,
     frameB: evaluation.derived.framePositions.b.canonical,
     legSource: evaluation.fixture.leg,
-    note: 'Software-fixture orthographic proof only. Placement is not a construction drawing.',
-    parts: parts.map((part) => ({
-      occurrenceId: part.occurrenceId,
-      definitionRevisionId: part.definitionRevisionId,
-      role: part.role,
-      family: part.family,
-      label: part.label,
-      length: part.length.canonical,
-      profile: part.profile,
-      placement: part.placement,
-      features: part.features,
-    })),
+    note: 'Software-fixture orthographic proof only. Placement is not a construction drawing. Dashed/holder-supplied meaning is presentation-only until a governed fulfillment path exists.',
+    parts: [
+      ...parts.map((part) => ({
+        occurrenceId: part.occurrenceId,
+        definitionRevisionId: part.definitionRevisionId,
+        role: part.role,
+        family: part.family,
+        label: part.label,
+        length: part.length.canonical,
+        profile: part.profile,
+        placement: part.placement,
+        features: part.features,
+        fulfillment: 'candidate-we-make',
+      })),
+      ...holderSuppliedParts.map((part) => ({
+        occurrenceId: null,
+        definitionRevisionId: null,
+        role: part.role,
+        family: part.family,
+        label: part.label,
+        length: part.length.canonical,
+        profile: part.profile,
+        placement: part.placement,
+        features: part.features,
+        fulfillment: 'holder-supplied',
+      })),
+    ],
   };
 }
 
@@ -195,16 +244,17 @@ export function planPicnicDerivation({
 }) {
   const configuration = payload.configuration ?? null;
   const evaluation = evaluatePicnicConfiguration(configuration);
-  const templates = roleDefinitions(evaluation);
-  const previousOccurrenceIds = [...(previousPayload.activeOccurrenceIds ?? [])];
+  const definitions = roleDefinitions(evaluation);
+  const templates = definitions.parts;
+  const holderSuppliedParts = definitions.holderSuppliedParts;
+  const priorByRole = previousOccurrenceByRole(previousDefinitions);
   const records = [];
   const occurrenceIds = [];
   const definitionRevisionIds = [];
   const parts = [];
 
-  for (let index = 0; index < templates.length; index += 1) {
-    const template = templates[index];
-    let occurrenceId = previousOccurrenceIds[index] ?? null;
+  for (const template of templates) {
+    let occurrenceId = priorByRole.get(template.role) ?? null;
     if (!occurrenceId) {
       occurrenceId = opaqueId();
       records.push({
@@ -262,6 +312,7 @@ export function planPicnicDerivation({
       quantity: 1,
       quantityUnit: 'ea',
       material: definitionContent.material,
+      fulfillment: 'candidate-we-make',
       physicalFabricationEligible: false,
     });
   }
@@ -272,6 +323,8 @@ export function planPicnicDerivation({
     ...(evaluation.unresolvedConditions ?? []),
   ];
   const materialDemand = evaluation.valid ? totalLinearDemand(parts) : null;
+  const holderSupplyDemand = evaluation.valid ? totalLinearDemand(holderSuppliedParts) : null;
+  const renderable = evaluation.valid && evaluation.input?.tableForm?.id !== 'separate-benches';
   records.push({
     kind: 'projection',
     id: projectionId,
@@ -292,8 +345,10 @@ export function planPicnicDerivation({
       input: evaluation.input,
       derived: evaluation.derived,
       parts,
+      holderSuppliedParts,
       materialDemand,
-      operationRequirements: evaluation.valid
+      holderSupplyDemand,
+      operationRequirements: evaluation.valid && parts.length > 0
         ? {
             status: 'application-requirements-only',
             required: [...new Set(parts.flatMap((part) => part.operationNeeds))],
@@ -305,13 +360,16 @@ export function planPicnicDerivation({
       productionAuthorization: false,
       machineReady: false,
       configurationBasis: configuration?.basis ?? 'manual-entry',
-      render: evaluation.valid ? buildRender(parts, evaluation) : null,
+      render: renderable ? buildRender(parts, holderSuppliedParts, evaluation) : null,
       summary: {
-        title: evaluation.valid ? 'Classic Picnic Table software-fixture candidate' : 'Picnic Table software fixture is unresolved',
+        title: evaluation.valid ? 'Picnic Table candidate' : 'Picnic Table software fixture is unresolved',
+        tableForm: evaluation.input?.tableForm?.id ?? null,
+        requestedScope: evaluation.input?.requestedScope?.id ?? null,
         productLength: evaluation.input?.productLength?.canonical ?? null,
         affectedLongitudinalLength: evaluation.derived?.longitudinalMemberLength?.canonical ?? null,
         totalLongitudinalLength: evaluation.derived?.totalLongitudinalLength?.canonical ?? null,
         partCount: parts.length,
+        holderSuppliedPartCount: holderSuppliedParts.length,
         fixtureId: PICNIC_FIXTURE.fixtureId,
         configurationBasis: configuration?.basis ?? 'manual-entry',
         disclosure: evaluation.disclosure ?? 'Synthetic software fixture only.',
@@ -322,7 +380,9 @@ export function planPicnicDerivation({
         intended: evaluation.valid
           ? {
               dimensionalMemberCount: parts.length,
+              holderSuppliedMemberCount: holderSuppliedParts.length,
               materialDemand,
+              holderSupplyDemand,
               operationRequirements: [...new Set(parts.flatMap((part) => part.operationNeeds))],
             }
           : null,
@@ -353,6 +413,15 @@ export function planPicnicDerivation({
         definitionRevisionId: part.definitionRevisionId,
         label: part.label,
         family: part.family,
+        fulfillment: 'candidate-we-make',
+      })),
+      holderSuppliedParts: holderSuppliedParts.map((part) => ({
+        role: part.role,
+        label: part.label,
+        family: part.family,
+        length: part.length,
+        profile: part.profile,
+        fulfillment: 'holder-supplied',
       })),
       dimensions: evaluation.valid
         ? {
