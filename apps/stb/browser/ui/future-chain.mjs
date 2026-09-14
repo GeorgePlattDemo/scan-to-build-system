@@ -1,3 +1,6 @@
+import { projectIndex } from '/data/selectors.mjs';
+import { ALCOVE_CLASS_ID, ALCOVE_USER1_BASELINE } from '/shared/alcove-rule.mjs';
+
 function node(tag, { className, text, attrs } = {}, children = []) {
   const element = document.createElement(tag);
   if (className) element.className = className;
@@ -80,7 +83,7 @@ function buildChain() {
   ]);
 }
 
-function decorate(root) {
+function decorateFutureChain(root) {
   const screen = root.querySelector('[data-screen="result"]');
   if (!screen || screen.querySelector('[data-future-chain="true"]')) return;
   const anchor = screen.querySelector('[data-narrative="authority-map"]')
@@ -89,17 +92,369 @@ function decorate(root) {
   if (anchor) anchor.before(buildChain());
 }
 
+/*
+TRANSACTION SCREEN GRAMMAR — FIXED SHELL
+Project classes may change question count, wording, options, prices, and availability.
+They do not change this screen grammar without an explicit UI-system revision:
+1. One sheet = one transaction stage.
+2. Header = no more than four compact identity/status cells.
+3. Decision row = number / title + one-line help / choices / value or status.
+4. Defaults stay visible; unavailable choices stay visible but disabled.
+5. Running summary sits immediately above the boundary strip and action rail.
+6. Boundary language stays short; detailed architecture lives elsewhere.
+7. Primary action is first. Every later stage has Back.
+8. Planned, completed, staged, ready, and custody states remain distinct.
+9. Class-specific content is data. Authority boundaries are not class-specific.
+*/
+
+export const ORDER_SCREEN_GRAMMAR = Object.freeze({
+  maxHeaderCells: 4,
+  numberedDecisions: true,
+  unavailableChoicesVisible: true,
+  runningSummaryRequired: true,
+  primaryActionFirst: true,
+  backRequiredAfterEntry: true,
+  plannedIsNotCompleted: true,
+  custodyIsNotStaging: true,
+});
+
+const ALCOVE_DECISIONS = Object.freeze([
+  ['edge', 'Edge condition', 'how the cut edges arrive', [
+    ['ascut', 'As cut', 'included'],
+    ['deburr', 'Deburred', 'yard price'],
+    ['s150', 'Sanded 150', 'yard price'],
+  ]],
+  ['bore', 'Shelf-pin boring', 'beyond what the class declares', [
+    ['class', 'Class default', 'included'],
+    ['cols', 'Adjustable columns', 'yard price'],
+    ['none', 'No bores', 'included'],
+  ]],
+  ['hw', 'Hardware pack', 'pins and fasteners', [
+    ['none', 'No added pack', 'included'],
+    ['yard', 'Yard-sourced pack', 'yard price'],
+    ['mine', 'I supply my own', 'included'],
+  ]],
+  ['label', 'Labels', 'what travels with the parts', [
+    ['std', 'Labels only', 'included'],
+    ['sheet', '+ Assembly sheet', 'yard price'],
+    ['qr', '+ QR to record', 'yard price'],
+  ]],
+  ['finish', 'Finishing', 'only if the yard declares it', [
+    ['none', 'None — raw', 'included'],
+    ['stain', 'Stain + clear', 'not offered', true],
+  ]],
+  ['excess', 'Offcuts', 'usable remnants and scrap', [
+    ['take', 'I take them', 'included'],
+    ['dispose', 'Disposal', 'yard price'],
+    ['rack', 'Leave for remnant rack', 'yard decision'],
+  ]],
+  ['pack', 'Packaging', 'how it leaves the cart', [
+    ['loose', 'Loose on cart', 'included'],
+    ['band', 'Banded', 'yard price'],
+    ['box', 'Boxed', 'yard price'],
+  ]],
+  ['handoff', 'Handoff', 'custody transfers here', [
+    ['pickup', 'Pickup', 'included'],
+    ['later', 'Pickup later', 'hold policy'],
+    ['curb', 'Curbside', 'yard price'],
+    ['door', 'Through the door', 'yard price'],
+  ]],
+  ['who', 'Who collects', 'named on the record', [
+    ['me', 'Me', 'included'],
+    ['agent', 'Named agent', 'included'],
+    ['contractor', 'My contractor', 'included'],
+  ]],
+  ['stock', 'If something is out of stock', 'this shapes the yard response', [
+    ['ask', 'Ask me first', 'included'],
+    ['wait', 'Wait for stock', 'included'],
+    ['refuse', 'No substitutes', 'included'],
+  ]],
+]);
+
+const ALCOVE_DEFAULTS = Object.freeze({
+  edge: 'ascut',
+  bore: 'class',
+  hw: 'none',
+  label: 'std',
+  finish: 'none',
+  excess: 'take',
+  pack: 'loose',
+  handoff: 'pickup',
+  who: 'me',
+  stock: 'ask',
+});
+
+function addOrderStyle() {
+  if (document.getElementById('stb-order-exchange-style')) return;
+  const style = document.createElement('style');
+  style.id = 'stb-order-exchange-style';
+  style.textContent = `
+    .order-exchange{max-width:860px;margin:14px auto 18px;background:#fff;border:1px solid #e3ded7;border-radius:10px;padding:16px 18px 14px;color:#1c1917}
+    .order-exchange h2{margin:0 0 1px;font-size:17px;letter-spacing:-.01em;text-transform:none;color:inherit}
+    .order-exchange h3{margin:14px 0 7px;font-size:12px;letter-spacing:.04em;color:#7a4f22;text-transform:uppercase;font-weight:700}
+    .order-exchange .oe-sub{margin:0 0 11px;font-size:11.5px;color:#57534e}
+    .oe-tag{font-size:10.5px;font-weight:600;letter-spacing:.09em;color:#8a8580;margin:0 0 4px}
+    .oe-hdr{display:flex;flex-wrap:wrap;border:1px solid #d9c3a2;border-radius:7px;overflow:hidden;margin-bottom:10px}
+    .oe-hdr>div{flex:1;min-width:120px;padding:5px 9px;border-right:1px solid #e3ded7;background:#f4f2ef}
+    .oe-hdr>div:last-child{border-right:0}.oe-hdr b{display:block;font-size:8.5px;letter-spacing:.07em;color:#8a8580}.oe-hdr span{font-size:11px;font-family:ui-monospace,Menlo,monospace}
+    .oe-band{border-radius:6px;padding:7px 10px;font-size:11px;margin-bottom:10px;line-height:1.45;background:#f4f2ef;border:1px solid #e3ded7;color:#57534e}
+    .oe-band.warn{background:#fdf6e3;border-color:#d9c3a2;color:#8a6d1f}.oe-band.ok{background:#f6efe4;border-color:#d9c3a2;color:#7a4f22}
+    .oe-row{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px dotted #e3ded7}.oe-row:last-of-type{border-bottom:0}
+    .oe-num{flex:none;width:17px;font-size:9.5px;font-weight:700;color:#8a8580}.oe-title{flex:none;width:150px;font-weight:600;font-size:12px}.oe-title i{display:block;font-style:normal;font-weight:400;font-size:10px;color:#8a8580;line-height:1.3}
+    .oe-options{flex:1;display:flex;gap:4px;flex-wrap:wrap;min-width:0}.oe-value{flex:none;width:72px;text-align:right;font-size:10.5px;font-family:ui-monospace,Menlo,monospace;color:#8a8580}
+    .oe-pill{font:inherit;font-size:11px;padding:3px 9px;border-radius:999px;cursor:pointer;border:1px solid #e3ded7;background:#faf9f7;color:#57534e;white-space:nowrap}.oe-pill:hover{border-color:#8a8580}.oe-pill.on{background:#f6efe4;border-color:#d9c3a2;color:#7a4f22;font-weight:600}.oe-pill:disabled{opacity:.45;cursor:not-allowed;text-decoration:line-through}
+    .oe-total{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;background:#f6efe4;border:1px solid #d9c3a2;border-radius:8px;padding:10px 13px;margin:11px 0 10px}.oe-total .left{font-size:11px;color:#7a4f22;line-height:1.5}.oe-total .left b{color:#1c1917}.oe-total .big{font-size:20px;font-weight:600;color:#7a4f22;line-height:1;text-align:right}.oe-total .big i{display:block;font-style:normal;font-size:10px;font-weight:400;color:#57534e;margin-top:3px}
+    .oe-boundary{font-size:10.5px;color:#8a8580;line-height:1.6;margin:0}.oe-boundary b{color:#57534e}.oe-boundary strong{color:#7a4f22}
+    .oe-foot{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:11px;padding-top:10px;border-top:1px solid #e3ded7}.oe-foot button{font:inherit;font-size:12px;padding:7px 14px;border-radius:7px;cursor:pointer;border:1px solid #e3ded7;background:#faf9f7;color:#1c1917}.oe-foot button.go{background:#f6efe4;border-color:#d9c3a2;color:#7a4f22;font-weight:600}.oe-foot button:disabled{opacity:.4;cursor:not-allowed}.oe-fine{margin-left:auto;font-size:9.5px;color:#8a8580;text-align:right;line-height:1.4;white-space:pre-line}
+    .oe-kv{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;padding:4px 0;border-bottom:1px dotted #e3ded7}.oe-kv:last-child{border-bottom:0}.oe-kv span:first-child{color:#57534e}.oe-kv span:last-child{text-align:right}.oe-chip{display:inline-block;font-size:8px;font-weight:700;letter-spacing:.05em;padding:1px 5px;border-radius:3px;margin-right:5px;vertical-align:1px}.oe-chip.ok{background:#e8f0e0;color:#5d7f3f;border:1px solid #cddcbf}.oe-chip.wn{background:#fdf6e3;color:#8a6d1f;border:1px solid #d9c3a2}.oe-chip.no{background:#f7e6e1;color:#9a3f2f;border:1px solid #e8cabf}
+    .oe-pick{border:1px solid #e3ded7;border-radius:8px;padding:9px 11px;margin-bottom:6px;cursor:pointer}.oe-pick.on{border-color:#d9c3a2;background:#f6efe4}.oe-pick .head{display:flex;justify-content:space-between;gap:10px;font-size:12px;font-weight:600}.oe-pick p{margin:3px 0 0;font-size:10.5px;color:#8a8580;line-height:1.4}
+    .oe-tl{display:grid;grid-template-columns:13px 1fr auto auto;gap:0 9px;font-size:11.5px;align-items:baseline}.oe-tl>div{padding:3.5px 0;border-bottom:1px dotted #e3ded7}.oe-dot{color:#5d7f3f;font-weight:700}.oe-dot.open{color:#8a8580}.oe-dot.now{color:#7a4f22}.oe-who,.oe-when{color:#8a8580;font-size:10px;white-space:nowrap}.oe-when{font-family:ui-monospace,Menlo,monospace}
+    @media(prefers-color-scheme:dark){.order-exchange{background:#1e1c16;border-color:#332f26;color:#f2efe8}.order-exchange .oe-sub,.oe-band,.oe-kv span:first-child,.oe-total .big i,.oe-boundary,.oe-pick p,.oe-fine,.oe-who,.oe-when{color:#b4aea3}.oe-hdr>div,.oe-band{background:#191711;border-color:#332f26}.oe-total,.oe-pill.on,.oe-pick.on{background:#262015;border-color:#4d4130}.oe-pill,.oe-foot button{background:#16150f;color:#f2efe8;border-color:#332f26}.oe-total .left b{color:#f2efe8}.order-exchange h3{color:#e0ad74}}
+    @media(max-width:700px){.oe-row{flex-wrap:wrap}.oe-title{width:auto;flex:1}.oe-value{width:auto}.oe-fine{width:100%;margin-left:0;text-align:left}}
+  `;
+  document.head.append(style);
+}
+
+function formatInches(value) {
+  const whole = Math.floor(value);
+  const frac = Number((value - whole).toFixed(3));
+  const fractions = new Map([[0.125, '⅛'], [0.25, '¼'], [0.375, '⅜'], [0.5, '½'], [0.625, '⅝'], [0.75, '¾'], [0.875, '⅞']]);
+  const suffix = fractions.get(frac);
+  if (!suffix) return Number.isInteger(value) ? String(value) : String(value);
+  return whole ? `${whole}${suffix}` : suffix;
+}
+
+function alcoveSummaryLine() {
+  const b = ALCOVE_USER1_BASELINE;
+  const span = b.openingWidthIn - (2 * b.sideThicknessIn);
+  return `${formatInches(b.openingWidthIn)}″ opening · ${b.shelfCount} shelves · ${formatInches(b.shelfDepthIn)}″ deep · ${b.materialPreference.toLowerCase()} · ${formatInches(span)}″ nominal span · back ${String(b.backType).toLowerCase()}`;
+}
+
+function header(items) {
+  return node('div', { className: 'oe-hdr' }, items.slice(0, ORDER_SCREEN_GRAMMAR.maxHeaderCells).map(([label, value]) =>
+    node('div', {}, [node('b', { text: label }), node('span', { text: value })]),
+  ));
+}
+
+function stateFor(screen) {
+  if (!screen.__stbOrderExchange) {
+    screen.__stbOrderExchange = {
+      stage: 'request',
+      choices: { ...ALCOVE_DEFAULTS },
+      stockChoice: null,
+    };
+  }
+  return screen.__stbOrderExchange;
+}
+
+function selectedOption(decision, state) {
+  return decision[3].find((option) => option[0] === state.choices[decision[0]]) ?? null;
+}
+
+function renderRequest(host, project, state) {
+  const answered = ALCOVE_DECISIONS.filter((decision) => state.choices[decision[0]]).length;
+  const rows = ALCOVE_DECISIONS.map((decision, index) => {
+    const selected = selectedOption(decision, state);
+    return node('div', { className: 'oe-row' }, [
+      node('span', { className: 'oe-num', text: String(index + 1).padStart(2, '0') }),
+      node('span', { className: 'oe-title' }, [node('span', { text: decision[1] }), node('i', { text: decision[2] })]),
+      node('span', { className: 'oe-options' }, decision[3].map((option) => node('button', {
+        className: `oe-pill${state.choices[decision[0]] === option[0] ? ' on' : ''}`,
+        text: option[1],
+        attrs: {
+          type: 'button',
+          'data-oe-choice': decision[0],
+          'data-oe-value': option[0],
+          ...(option[3] ? { disabled: 'true', title: option[2] } : {}),
+        },
+      }))),
+      node('span', { className: 'oe-value', text: selected?.[2] ?? '' }),
+    ]);
+  });
+
+  host.replaceChildren(
+    node('p', { className: 'oe-tag', text: 'STB — ALCOVE INSERT · SUBMISSION & RESPONSE 0.1' }),
+    node('h2', { text: 'Before we build it — ten questions' }),
+    node('p', { className: 'oe-sub', text: `Definition frozen · ${alcoveSummaryLine()}` }),
+    header([
+      ['VERSION', project.currentHead ?? 'current confirmed revision'],
+      ['PROJECT', project.title ?? 'alcove insert'],
+      ['NODE', 'store-zero'],
+      ['THIS SHEET', 'REQUEST · not an order'],
+    ]),
+    node('div', { className: 'oe-band' }, [node('b', { text: 'Answer all ten, including the noes. ' }), node('span', { text: 'Defaults add nothing. Yard may adjust, add or revoke before acceptance — with a reason.' })]),
+    ...rows,
+    node('div', { className: 'oe-total' }, [
+      node('div', { className: 'left' }, [
+        node('span', { text: 'Fabrication ' }), node('b', { text: 'unresolved' }),
+        node('span', { text: ' · extras ' }), node('b', { text: '$0 default' }),
+        node('span', { text: ' · ' }), node('b', { text: 'YARD ≤2 business h · PICKUP 4 business h after READY' }),
+      ]),
+      node('div', { className: 'big' }, [node('span', { text: 'YARD PRICES' }), node('i', { text: `${answered} of ${ALCOVE_DECISIONS.length} answered` })]),
+    ]),
+    node('p', { className: 'oe-boundary' }, [
+      node('strong', { text: '≠ ' }), node('span', { text: 'request is not order · ' }),
+      node('strong', { text: '≠ ' }), node('span', { text: 'order is not payment · ' }),
+      node('strong', { text: '≠ ' }), node('span', { text: 'payment is not allocation · ' }),
+      node('strong', { text: '≠ ' }), node('span', { text: 'allocation is not release · ' }),
+      node('strong', { text: '≠ ' }), node('b', { text: 'staged is not picked up' }),
+    ]),
+    node('div', { className: 'oe-foot' }, [
+      node('button', { className: 'go', text: 'SEND TO THE YARD', attrs: { type: 'button', 'data-oe-action': 'send', ...(answered !== ALCOVE_DECISIONS.length ? { disabled: 'true' } : {}) } }),
+      node('button', { text: 'Use all defaults', attrs: { type: 'button', 'data-oe-action': 'defaults' } }),
+      node('button', { text: 'Back', attrs: { type: 'button', 'data-action': 'open-confirm' } }),
+      node('span', { className: 'oe-fine', text: 'Nothing charged · nothing reserved\nuntil you accept what comes back.' }),
+    ]),
+  );
+}
+
+function renderResponse(host, project, state) {
+  host.replaceChildren(
+    node('p', { className: 'oe-tag', text: 'STB — ALCOVE INSERT · YARD RESPONSE' }),
+    node('h2', { text: 'The yard came back' }),
+    node('p', { className: 'oe-sub', text: 'Reference response · confirmed geometry unchanged' }),
+    header([
+      ['RESPONSE', 'REF-SZ-001'],
+      ['AGAINST', project.currentHead ?? 'current confirmed revision'],
+      ['FROM', 'steward · store-zero'],
+      ['STATUS', 'ADJUSTMENT REQUIRED'],
+    ]),
+    node('div', { className: 'oe-band ok' }, [node('b', { text: 'Definition unchanged. ' }), node('span', { text: 'The yard may price services, decline unavailable work, or return a material/timing question. It may not silently rewrite the confirmed geometry.' })]),
+    node('div', { className: 'oe-kv' }, [node('span', {}, [node('span', { className: 'oe-chip ok', text: 'ACCEPTED' }), node('span', { text: 'Default edge / labels / loose-cart pickup' })]), node('span', { text: 'as asked' })]),
+    node('div', { className: 'oe-kv' }, [node('span', {}, [node('span', { className: 'oe-chip wn', text: 'PRICE' }), node('span', { text: 'Any paid extras' })]), node('span', { text: 'yard-priced before acceptance' })]),
+    node('div', { className: 'oe-kv' }, [node('span', {}, [node('span', { className: 'oe-chip no', text: 'NOT OFFERED' }), node('span', { text: 'Stain + clear' })]), node('span', { text: 'capability not declared' })]),
+    node('h3', { text: 'One thing only you can decide' }),
+    node('div', { className: `oe-pick${state.stockChoice === 'wait' ? ' on' : ''}`, attrs: { 'data-oe-stock': 'wait' } }, [
+      node('div', { className: 'head' }, [node('span', { text: 'Wait for the requested material' }), node('span', { text: 'same definition' })]),
+      node('p', { text: 'No substitute. Yard returns a later plan.' }),
+    ]),
+    node('div', { className: `oe-pick${state.stockChoice === 'review' ? ' on' : ''}`, attrs: { 'data-oe-stock': 'review' } }, [
+      node('div', { className: 'head' }, [node('span', { text: 'Review a substitute' }), node('span', { text: 'new decision' })]),
+      node('p', { text: 'Material identity changes only if you explicitly accept it.' }),
+    ]),
+    node('h3', { text: 'Timing' }),
+    node('div', { className: 'oe-tl' }, [
+      node('div', { className: 'oe-dot now', text: '●' }), node('div', { text: 'Yard response' }), node('div', { className: 'oe-who', text: 'yard' }), node('div', { className: 'oe-when', text: 'now' }),
+      node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Offer / terms' }), node('div', { className: 'oe-who', text: 'commercial' }), node('div', { className: 'oe-when', text: 'after answer' }),
+      node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Payment / allocation / release' }), node('div', { className: 'oe-who', text: 'separate' }), node('div', { className: 'oe-when', text: 'later' }),
+      node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Stage ≤2 business h after last required cycle' }), node('div', { className: 'oe-who', text: 'yard' }), node('div', { className: 'oe-when', text: 'target' }),
+      node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Pickup 4 business h after READY' }), node('div', { className: 'oe-who', text: 'holder' }), node('div', { className: 'oe-when', text: 'then hold policy' }),
+    ]),
+    node('div', { className: 'oe-total' }, [
+      node('div', { className: 'left' }, [node('span', { text: 'Fabrication ' }), node('b', { text: 'unresolved' }), node('span', { text: ' · secondary services ' }), node('b', { text: 'not catalogued' })]),
+      node('div', { className: 'big' }, [node('span', { text: state.stockChoice ? 'RESPONSE READY' : 'ONE ANSWER' }), node('i', { text: state.stockChoice ? 'yard may issue terms next' : 'material response required' })]),
+    ]),
+    node('p', { className: 'oe-boundary', text: 'Acceptance, settlement, allocation, production release, local readiness and Cycle Start remain separate records.' }),
+    node('div', { className: 'oe-foot' }, [
+      node('button', { className: 'go', text: 'CONTINUE TO TERMS', attrs: { type: 'button', 'data-oe-action': 'terms', ...(state.stockChoice ? {} : { disabled: 'true' }) } }),
+      node('button', { text: 'Back', attrs: { type: 'button', 'data-oe-action': 'back-request' } }),
+      node('span', { className: 'oe-fine', text: 'Reference process only.\nNo commercial order is created.' }),
+    ]),
+  );
+}
+
+function renderTerms(host, project) {
+  host.replaceChildren(
+    node('p', { className: 'oe-tag', text: 'STB — REFERENCE COMMERCIAL HANDOFF' }),
+    node('h2', { text: 'Terms → settlement → queue' }),
+    node('p', { className: 'oe-sub', text: 'Known sequence · not live commerce' }),
+    header([
+      ['VERSION', project.currentHead ?? 'current confirmed revision'],
+      ['TERMS', 'reference only'],
+      ['PRICE', 'not established'],
+      ['AUTHORITY', 'no physical execution'],
+    ]),
+    node('div', { className: 'oe-tl' }, [
+      node('div', { className: 'oe-dot now', text: '●' }), node('div', { text: 'Definition review recorded' }), node('div', { className: 'oe-who', text: 'holder' }), node('div', { className: 'oe-when', text: 'complete' }),
+      node('div', { className: 'oe-dot now', text: '●' }), node('div', { text: 'Submission / yard response' }), node('div', { className: 'oe-who', text: 'yard' }), node('div', { className: 'oe-when', text: 'reference' }),
+      node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Offer accepted' }), node('div', { className: 'oe-who', text: 'holder' }), node('div', { className: 'oe-when', text: 'future' }),
+      node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Settlement evidence' }), node('div', { className: 'oe-who', text: 'commercial' }), node('div', { className: 'oe-when', text: 'future' }),
+      node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Material allocated' }), node('div', { className: 'oe-who', text: 'store' }), node('div', { className: 'oe-when', text: 'future' }),
+      node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Production released' }), node('div', { className: 'oe-who', text: 'release' }), node('div', { className: 'oe-when', text: 'future' }),
+      node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Queued / local readiness / Cycle Start' }), node('div', { className: 'oe-who', text: 'cell' }), node('div', { className: 'oe-when', text: 'future' }),
+      node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Inspect · label · stage' }), node('div', { className: 'oe-who', text: 'quality' }), node('div', { className: 'oe-when', text: '≤2 h target' }),
+      node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'READY notice → 4 h pickup window' }), node('div', { className: 'oe-who', text: 'fulfillment' }), node('div', { className: 'oe-when', text: 'future' }),
+      node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Custody transfer → close' }), node('div', { className: 'oe-who', text: 'handoff' }), node('div', { className: 'oe-when', text: 'future' }),
+    ]),
+    node('div', { className: 'oe-band warn' }, [node('b', { text: 'Current Alcove truth: ' }), node('span', { text: '44″ nominal interior span; no ordered-size reduction applied. Ordered-size adjustment, structure, installation and Store resolution remain unresolved.' })]),
+    node('div', { className: 'oe-foot' }, [
+      node('button', { text: 'Back', attrs: { type: 'button', 'data-oe-action': 'back-response' } }),
+      node('button', { text: 'Review definition', attrs: { type: 'button', 'data-action': 'open-confirm' } }),
+      node('span', { className: 'oe-fine', text: 'Shell fixed.\nClass content may change.' }),
+    ]),
+  );
+}
+
+function renderOrderExchange(host, project, screen) {
+  const state = stateFor(screen);
+  if (state.stage === 'response') return renderResponse(host, project, state);
+  if (state.stage === 'terms') return renderTerms(host, project);
+  return renderRequest(host, project, state);
+}
+
+async function decorateOrderExchange(root) {
+  const screen = root.querySelector('[data-screen="result"][data-local-record-id]');
+  if (!screen || screen.querySelector('[data-order-exchange="alcove"]')) return;
+  const localRecordId = screen.getAttribute('data-local-record-id');
+  if (!localRecordId) return;
+  const project = await projectIndex(localRecordId);
+  if (!project || project.classId !== ALCOVE_CLASS_ID || !root.contains(screen)) return;
+  const host = node('section', { className: 'order-exchange', attrs: { 'data-order-exchange': 'alcove' } });
+  host.__stbProject = project;
+  const anchor = screen.querySelector('[data-future-chain="true"]')
+    ?? screen.querySelector('[data-narrative="authority-map"]')
+    ?? screen.querySelector('.result-retained')
+    ?? screen.querySelector('.screen-heading');
+  if (anchor) anchor.before(host);
+  renderOrderExchange(host, project, screen);
+}
+
 export function startFutureChainLayer(root) {
   if (!root || root.dataset.futureChainLayer === 'true') return;
   root.dataset.futureChainLayer = 'true';
   addStyle();
+  addOrderStyle();
+
+  root.addEventListener('click', (event) => {
+    const host = event.target.closest('[data-order-exchange="alcove"]');
+    if (!host || !root.contains(host)) return;
+    const screen = host.closest('[data-screen="result"]');
+    const project = host.__stbProject;
+    if (!screen || !project) return;
+    const state = stateFor(screen);
+
+    const choice = event.target.closest('[data-oe-choice]');
+    if (choice && !choice.disabled) {
+      state.choices[choice.getAttribute('data-oe-choice')] = choice.getAttribute('data-oe-value');
+      renderOrderExchange(host, project, screen);
+      return;
+    }
+
+    const stock = event.target.closest('[data-oe-stock]');
+    if (stock) {
+      state.stockChoice = stock.getAttribute('data-oe-stock');
+      renderOrderExchange(host, project, screen);
+      return;
+    }
+
+    const action = event.target.closest('[data-oe-action]')?.getAttribute('data-oe-action');
+    if (!action) return;
+    if (action === 'defaults') state.choices = { ...ALCOVE_DEFAULTS };
+    if (action === 'send') state.stage = 'response';
+    if (action === 'back-request') state.stage = 'request';
+    if (action === 'terms') state.stage = 'terms';
+    if (action === 'back-response') state.stage = 'response';
+    renderOrderExchange(host, project, screen);
+  });
+
   let queued = false;
   const schedule = () => {
     if (queued) return;
     queued = true;
     queueMicrotask(() => {
       queued = false;
-      decorate(root);
+      decorateFutureChain(root);
+      void decorateOrderExchange(root);
     });
   };
   const observer = new MutationObserver(schedule);
