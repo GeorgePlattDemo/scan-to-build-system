@@ -1,9 +1,13 @@
 import { expect, test } from '@playwright/test';
 
+async function clickVisibleButton(page, label) {
+  await page.locator('button', { hasText: new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }).click();
+}
+
 async function openPage1(page, actor = 'NEW USER', forward = 'START') {
   await page.goto('/');
   await page.getByRole('button', { name: actor, exact: true }).click();
-  await page.getByRole('button', { name: forward, exact: true }).click();
+  await clickVisibleButton(page, forward);
   await expect(page.locator('[data-controlled-projects="true"]')).toBeVisible();
 }
 
@@ -57,7 +61,8 @@ test('all three orientation pages reproduce the controlling copy and converge on
     await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: '← Back', exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Readme', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: forward, exact: true }).click();
+    await expect(page.locator('button', { hasText: new RegExp(`^${forward.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) })).toBeVisible();
+    await clickVisibleButton(page, forward);
     await expect(page.getByRole('heading', { name: 'What are you making?', exact: true })).toBeVisible();
   }
 });
@@ -104,13 +109,13 @@ test('existing project plumbing remains behind Start your own, Critical fit, and
 
   await page.goto('/');
   await page.getByRole('button', { name: 'NEW USER', exact: true }).click();
-  await page.getByRole('button', { name: 'START', exact: true }).click();
+  await clickVisibleButton(page, 'START');
   await page.locator('[data-project-door="alcove"]').click();
   await expect(page.locator('main[data-screen="questions"][data-class-id="alcove-shelf-blanks"]')).toBeVisible();
 
   await page.goto('/');
   await page.getByRole('button', { name: 'NEW USER', exact: true }).click();
-  await page.getByRole('button', { name: 'START', exact: true }).click();
+  await clickVisibleButton(page, 'START');
   await page.locator('[data-project-door="picnic"]').click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('button', { name: 'Keep this project and start another', exact: true }).click();
