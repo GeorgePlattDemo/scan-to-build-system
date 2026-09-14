@@ -123,30 +123,44 @@ function alcoveSummary(payload) {
 
 function picnicSummary(payload) {
   const parts = payload.parts ?? [];
+  const holderSupplied = payload.holderSuppliedParts ?? [];
   const demand = payload.materialDemand;
+  const holderDemand = payload.holderSupplyDemand;
   const derived = payload.derived ?? {};
+  const tableForm = payload.input?.tableForm?.id ?? 'unresolved';
+  const requestedScope = payload.input?.requestedScope?.id ?? 'unresolved';
   return [
     node('article', { className: 'config-engine-card' }, [
-      node('h3', { text: 'HOW THE NUMBER WAS CALCULATED' }),
+      node('h3', { text: 'YOUR PATH / CURRENT GEOMETRY' }),
+      node('p', { text: `Form: ${tableForm}` }),
+      node('p', { text: `Requested scope: ${requestedScope}` }),
       node('p', { text: payload.valid ? `Product length: ${payload.input?.productLength?.canonical ?? '—'} in` : `Stopped: ${payload.unresolvedReason ?? 'incomplete input'}` }),
       node('p', { text: derived.longitudinalMemberLength ? `Longitudinal member = L − 12 = ${derived.longitudinalMemberLength.canonical} in` : 'Longitudinal relation unavailable.' }),
-      node('p', { text: derived.framePositions ? `End frames at ${derived.framePositions.a.canonical} in and ${derived.framePositions.b.canonical} in.` : 'Frame placement unavailable.' }),
-      node('p', { text: derived.legLength ? `Fixture leg length remains ${derived.legLength.canonical} in.` : 'Fixture leg geometry unavailable.' }),
+      node('p', { text: tableForm === 'separate-benches' ? 'Separate-bench geometry is intentionally not borrowed from the attached-bench fixture.' : derived.framePositions ? `End frames at ${derived.framePositions.a.canonical} in and ${derived.framePositions.b.canonical} in.` : 'Frame placement unavailable.' }),
       node('p', { className: 'hint', text: `Fixture: ${payload.fixtureId ?? 'unidentified'} · Rule: ${payload.ruleVersion ?? 'unidentified'}` }),
     ]),
-    node('article', { className: 'config-engine-card' }, [
-      node('h3', { text: `PARTS · ${parts.length}` }),
+    node('article', { className: 'config-engine-card', attrs: { 'data-picnic-we-make': 'true' } }, [
+      node('h3', { text: `WE MAKE · ${parts.length}` }),
       parts.length > 0
         ? node('ul', { className: 'config-parts' }, parts.map((part) =>
             node('li', { attrs: { 'data-config-part': part.occurrenceId ?? '' }, text: `${part.label}: ${dimensionText(part)} · ${part.operationNeeds?.join(', ') ?? 'operation unresolved'}` }),
           ))
-        : node('p', { className: 'hint', text: 'No current fixture occurrences.' }),
+        : node('p', { className: 'hint', text: tableForm === 'separate-benches' ? 'No frame parts are derived until separate-bench geometry is admitted.' : 'No current fixture occurrences.' }),
+    ]),
+    node('article', { className: 'config-engine-card', attrs: { 'data-picnic-you-supply': 'true' } }, [
+      node('h3', { text: `YOU SUPPLY · ${holderSupplied.length}` }),
+      holderSupplied.length > 0
+        ? node('ul', { className: 'config-parts' }, holderSupplied.map((part) =>
+            node('li', { attrs: { 'data-holder-supplied-role': part.role ?? '' }, text: `${part.label}: ${dimensionText(part)} · holder supplied` }),
+          ))
+        : node('p', { className: 'hint', text: requestedScope === 'frame-kit' ? 'Holder-supplied members are not available until the selected form has admitted geometry.' : 'Nothing is separated into holder supply for this current candidate.' }),
     ]),
     node('article', { className: 'config-engine-card' }, [
       node('h3', { text: 'DEMAND / REQUIREMENTS' }),
-      node('p', { text: demand ? `Synthetic dimensional demand: ${demand.totalInches} in total (${demand.totalFeet.toFixed(2)} ft) across ${parts.length} occurrences.` : 'Demand unavailable until the fixture input is valid.' }),
+      node('p', { text: demand ? `Local-side dimensional demand: ${demand.totalInches} in total (${demand.totalFeet.toFixed(2)} ft) across ${parts.length} occurrences.` : 'Local-side demand unavailable until geometry is complete.' }),
+      node('p', { text: holderDemand && holderSupplied.length > 0 ? `Holder-supplied demand remains on the record: ${holderDemand.totalInches} in total (${holderDemand.totalFeet.toFixed(2)} ft) across ${holderSupplied.length} members.` : 'No separate holder-supply demand is currently derived.' }),
       node('p', { text: payload.operationRequirements?.required?.length ? `Application requirements: ${payload.operationRequirements.required.join(' · ')}` : 'Operation requirements unavailable.' }),
-      node('p', { className: 'hint', text: 'No Store neutral sequence, engineering approval, hardware suitability, governed make path, or production release is claimed.' }),
+      node('p', { className: 'hint', text: 'No Store neutral sequence, engineering approval, hardware suitability, governed make path, production release, or fabrication authority is claimed.' }),
     ]),
   ];
 }
@@ -302,4 +316,3 @@ export function startProjectConfigurator(root) {
   observer.observe(root, { childList: true, subtree: true });
   schedule();
 }
-
