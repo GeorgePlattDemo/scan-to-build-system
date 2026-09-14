@@ -519,6 +519,8 @@ export const STATIC_ASSETS = Object.freeze({
   '/ui/future-chain.mjs': JS('browser/ui/future-chain.mjs'),
   '/ui/project-configurator.mjs': JS('browser/ui/project-configurator.mjs'),
   '/ui/project-renderer.mjs': JS('browser/ui/project-renderer.mjs'),
+  '/ui/controlled-entry.mjs': JS('browser/ui/controlled-entry.mjs'),
+  '/ui/controlled-entry-layer.mjs': JS('browser/ui/controlled-entry-layer.mjs'),
   '/domain/classes.mjs': JS('browser/domain/classes.mjs'),
   '/domain/candidate.mjs': JS('browser/domain/candidate.mjs'),
   '/domain/derive.mjs': JS('browser/domain/derive.mjs'),
@@ -617,4 +619,3 @@ export function projectHref(localRecordId, view, child) {
   }
   return `${ROUTES.project}?${params.toString()}`;
 }
-
