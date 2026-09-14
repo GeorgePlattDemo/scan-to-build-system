@@ -111,6 +111,8 @@ test('existing project plumbing remains behind Start your own, Critical fit, and
   await page.getByRole('button', { name: 'NEW USER', exact: true }).click();
   await clickVisibleButton(page, 'START');
   await page.locator('[data-project-door="alcove"]').click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('button', { name: 'Keep this project and start another', exact: true }).click();
   await expect(page.locator('main[data-screen="questions"][data-class-id="alcove-shelf-blanks"]')).toBeVisible();
 
   await page.goto('/');
