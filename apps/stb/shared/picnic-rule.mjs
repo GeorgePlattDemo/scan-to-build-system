@@ -10,11 +10,11 @@ export const PICNIC_DEFINITION_KIND = 'classic.picnic-table.fixture.v1';
  *
  * Compatibility note:
  * CLASS_ID / CLASS_VERSION / RULE_VERSION stay unchanged in this branch so
- * existing candidate records remain inspectable. The added range, requested
- * scope, and material-preference fields are candidate-only inputs. A later
- * sanitizing/versioning pass should decide whether to cut a 0.2 class/rule ID.
+ * existing candidate records remain inspectable. The added range, table form,
+ * requested scope, and material-preference fields are candidate-only inputs.
+ * A later sanitizing/versioning pass should decide whether to cut a 0.2 class/rule ID.
  */
-export const PICNIC_CANDIDATE_REVISION = '0.2-donor-extension';
+export const PICNIC_CANDIDATE_REVISION = '0.3-front-door-form-scope';
 
 export const PICNIC_FIXTURE = Object.freeze({
   fixtureId: 'PT-SOFTWARE-FIXTURE-0.1',
@@ -46,9 +46,22 @@ export const PICNIC_FIXTURE = Object.freeze({
   }),
 });
 
+export const PICNIC_TABLE_FORMS = Object.freeze([
+  Object.freeze({
+    id: 'attached-bench',
+    label: 'Attached bench',
+    note: 'Seats belong to the same table frame.',
+  }),
+  Object.freeze({
+    id: 'separate-benches',
+    label: 'Separate benches',
+    note: 'A table and two independent benches.',
+  }),
+]);
+
 export const PICNIC_REQUEST_SCOPES = Object.freeze([
-  Object.freeze({ id: 'complete-part-set', label: 'Complete part-set request' }),
-  Object.freeze({ id: 'frame-kit', label: 'Frame-kit request; long deck stock holder-supplied' }),
+  Object.freeze({ id: 'complete-part-set', label: 'Complete cut-kit request' }),
+  Object.freeze({ id: 'frame-kit', label: 'Frames / hard-parts request; long straight stock holder-supplied' }),
 ]);
 
 export const PICNIC_REFERENCE_EXAMPLES = Object.freeze([
@@ -56,6 +69,7 @@ export const PICNIC_REFERENCE_EXAMPLES = Object.freeze([
     id: 'fixture-72',
     label: 'USE 72 IN COMPLETE-PART EXAMPLE',
     productLength: '72',
+    tableForm: 'attached-bench',
     requestedScope: 'complete-part-set',
     materialPreference: '',
     basis: 'software-fixture-0.1',
@@ -64,6 +78,7 @@ export const PICNIC_REFERENCE_EXAMPLES = Object.freeze([
     id: 'fixture-84',
     label: 'USE 84 IN COMPLETE-PART EXAMPLE',
     productLength: '84',
+    tableForm: 'attached-bench',
     requestedScope: 'complete-part-set',
     materialPreference: '',
     basis: 'software-fixture-0.1',
@@ -72,17 +87,19 @@ export const PICNIC_REFERENCE_EXAMPLES = Object.freeze([
     id: 'candidate-96-frame-kit',
     label: 'USE 96 IN FRAME-KIT EXAMPLE',
     productLength: '96',
+    tableForm: 'attached-bench',
     requestedScope: 'frame-kit',
     materialPreference: 'pressure-treated pine',
-    basis: 'picnic-donor-candidate-0.2',
+    basis: 'picnic-donor-candidate-0.3',
   }),
   Object.freeze({
     id: 'candidate-144-frame-kit',
     label: 'USE 144 IN FRAME-KIT EXAMPLE',
     productLength: '144',
+    tableForm: 'attached-bench',
     requestedScope: 'frame-kit',
     materialPreference: 'cedar',
-    basis: 'picnic-donor-candidate-0.2',
+    basis: 'picnic-donor-candidate-0.3',
   }),
 ]);
 
@@ -100,6 +117,7 @@ function readRawInput(input, key) {
 
 export function normalizePicnicConfiguration(input = {}, { basis = 'manual-entry' } = {}) {
   const productLength = readRawInput(input, 'productLength');
+  const tableForm = readRawInput(input, 'tableForm');
   const requestedScope = readRawInput(input, 'requestedScope');
   const materialPreference = readRawInput(input, 'materialPreference');
   return {
@@ -111,6 +129,11 @@ export function normalizePicnicConfiguration(input = {}, { basis = 'manual-entry
       productLength: {
         raw: productLength,
         unit: 'in',
+        method: basis,
+      },
+      tableForm: {
+        raw: tableForm,
+        unit: null,
         method: basis,
       },
       requestedScope: {
@@ -129,6 +152,7 @@ export function normalizePicnicConfiguration(input = {}, { basis = 'manual-entry
 
 export function evaluatePicnicConfiguration(configuration) {
   const productLengthRaw = raw(configuration?.inputs?.productLength?.raw);
+  const tableFormRaw = raw(configuration?.inputs?.tableForm?.raw);
   const requestedScopeRaw = raw(configuration?.inputs?.requestedScope?.raw);
   const materialPreferenceRaw = raw(configuration?.inputs?.materialPreference?.raw);
 
@@ -137,7 +161,11 @@ export function evaluatePicnicConfiguration(configuration) {
       valid: false,
       unresolvedReason: 'missing-productLength',
       unresolvedConditions: [],
-      input: null,
+      input: {
+        tableForm: tableFormRaw ? { id: tableFormRaw, status: 'holder-choice', authority: false } : null,
+        requestedScope: requestedScopeRaw ? { id: requestedScopeRaw, status: 'holder-request', authority: false } : null,
+        materialPreference: materialPreferenceRaw ? { raw: materialPreferenceRaw, status: 'holder-preference', authority: false } : null,
+      },
       fixture: PICNIC_FIXTURE,
       derived: null,
     };
@@ -166,6 +194,15 @@ export function evaluatePicnicConfiguration(configuration) {
       derived: null,
     };
   }
+
+  const formIds = new Set(PICNIC_TABLE_FORMS.map((item) => item.id));
+  const tableForm = tableFormRaw && formIds.has(tableFormRaw)
+    ? {
+        id: tableFormRaw,
+        status: 'holder-choice',
+        authority: false,
+      }
+    : null;
 
   const scopeIds = new Set(PICNIC_REQUEST_SCOPES.map((item) => item.id));
   const requestedScope = requestedScopeRaw && scopeIds.has(requestedScopeRaw)
@@ -197,6 +234,12 @@ export function evaluatePicnicConfiguration(configuration) {
     'STORE_RESOLUTION_NOT_EVALUATED',
     'GOVERNED_MAKE_PATH_ABSENT',
   ];
+  if (!tableFormRaw || !tableForm) {
+    unresolvedConditions.push('TABLE_FORM_UNRESOLVED');
+  }
+  if (tableForm?.id === 'separate-benches') {
+    unresolvedConditions.push('SEPARATE_BENCH_GEOMETRY_UNRESOLVED');
+  }
   if (!requestedScopeRaw || !requestedScope) {
     unresolvedConditions.push('REQUESTED_SCOPE_UNRESOLVED');
   }
@@ -207,6 +250,7 @@ export function evaluatePicnicConfiguration(configuration) {
     unresolvedConditions,
     input: {
       productLength: inch(productLength),
+      tableForm,
       requestedScope,
       materialPreference: materialPreferenceRaw
         ? {
@@ -227,6 +271,6 @@ export function evaluatePicnicConfiguration(configuration) {
       totalLongitudinalLength: inch(totalLongitudinalLength),
     },
     disclosure:
-      'Candidate geometry only. The 60–216 in input range is not a structural rule, Store stock limit, machine envelope, or fulfillment promise. Material text is a holder preference, not material identity. Structural span remains unresolved until an attributed rule or qualified person resolves the exact condition.',
+      'Candidate geometry only. Table form and fulfillment scope are holder choices, not engineering or Store claims. The 60–216 in input range is not a structural rule, Store stock limit, machine envelope, or fulfillment promise. Material text is a holder preference, not material identity. Separate-bench geometry remains unresolved until an admitted rule supplies it.',
   };
 }
