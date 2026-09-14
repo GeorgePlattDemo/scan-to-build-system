@@ -13,9 +13,9 @@ Start with [`START-HERE.md`](START-HERE.md).
 
 For project state, use these files in this order:
 
-1. [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md) — accepted baseline, current candidate, Store pins, capability status, and next authorized change.
+1. [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md) — accepted source tree, promotion event, Store pins, capability status, and parallel work.
 2. [`docs/project/VERIFICATION-REGISTER.md`](docs/project/VERIFICATION-REGISTER.md) — exact proof for current claims and explicit non-claims.
-3. [`docs/project/BRANCH-PR-GENEALOGY.md`](docs/project/BRANCH-PR-GENEALOGY.md) — promotion chain, parallel work, superseded work, and historical work.
+3. [`docs/project/BRANCH-PR-GENEALOGY.md`](docs/project/BRANCH-PR-GENEALOGY.md) — accepted ancestry, parallel work, superseded work, and historical work.
 4. [`STB-PROJECT-STATE-AND-SOURCE-INDEX.md`](STB-PROJECT-STATE-AND-SOURCE-INDEX.md) — wider source and work-surface index.
 
 Do not reconstruct current state from PR chronology, conversation history, or an old source pin when these files give a newer bounded answer.
@@ -24,24 +24,19 @@ Do not reconstruct current state from PR chronology, conversation history, or an
 
 ## Project-order rule
 
-The repository distinguishes four primary states:
+The current application baseline was accepted on **2026-09-13**.
 
-- **ACCEPTED / MERGED** — content actually promoted into `main`.
-- **CURRENT CANDIDATE** — coherent descendant under review for promotion.
-- **REFERENCE / PARALLEL** — useful bounded work that is intentionally not part of the current application promotion chain.
-- **HISTORICAL / SUPERSEDED / DONOR** — preserved evidence that must not be treated as current implementation authority.
+Accepted source tree:
 
-A green candidate is not an accepted baseline merely because tests pass.
+`1621d2ea146a248d200ecba59f4b87034a1b1cd5`
 
-The current merged repository baseline is:
+Promotion PR #12 normal merge / acceptance event:
 
-`main@f4769bbf2daaf7e719b723478b7a24f3dfa1344a`
+`97416e85b7cba3dabded6f32e419f7851514026c`
 
-The current application candidate is:
+PR #10 is accepted ancestry, not a current application candidate. PR #7 remains a separate parallel machine-safety/controller-simulation candidate at `b23b2a95f71c89347bdf5c465369b7399b75e834`.
 
-`build/global-completion-path-0.1@b0caba518aa0e152fa107fe89267ab48ee81296f`
-
-See [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md) for exact lineage and current proof pins.
+Acceptance does not establish physical production, controller-in-loop validation, live inventory, payment, reservation, or binding quotation.
 
 ---
 
@@ -80,15 +75,15 @@ The application owns the user-facing and owner-record path, including:
 - review and unresolved acknowledgment;
 - result/record custody;
 - export, import, and reopening;
-- current-candidate completion and closeout semantics where admitted.
+- accepted bounded completion and closeout semantics.
 
-`apps/stb/` contains both the transferred accepted application lineage and later candidate development. Read [`apps/README.md`](apps/README.md) before using a source pin or Store pin.
+`apps/stb/` contains the transferred accepted application lineage and the later promoted development. Read [`apps/README.md`](apps/README.md) before using a source pin or Store pin.
 
 ### Store
 
 The Store owns offerings, material/inventory facts, bounded capability evaluation, economics, sourcing, and fulfillment facts within the Store contract.
 
-Store identity is path-specific. The transferred accepted-app Stage-2 path and the current published-job/S-001 candidate path do not use the same Store pin.
+Store identity is path-specific. The transferred accepted-app Stage-2 path and the accepted published-job/S-001 proof path do not use the same Store pin.
 
 A Store answer does not by itself authorize physical fabrication.
 
@@ -104,7 +99,7 @@ Unresolved conditions remain unresolved until evidence supports their resolution
 
 Machine/cell work is evidence-bounded.
 
-Reference and simulated D-001/S-001 behavior is not commissioned physical production. The current parallel fail-closed machine-safety kernel remains separate from the application promotion chain and does not establish controller-in-loop validation or physical execution authority.
+Reference and simulated D-001/S-001 behavior is not commissioned physical production. The parallel fail-closed machine-safety kernel remains separate from the accepted application ancestry and does not establish controller-in-loop validation or physical execution authority.
 
 Physical capability must be demonstrated before it is claimed.
 
@@ -116,8 +111,8 @@ Machine research and engineering live under [`work/machines/`](work/machines/).
 
 Use explicit status language:
 
-- **IMPLEMENTED**
-- **CURRENT CANDIDATE**
+- **ACCEPTED / MERGED**
+- **PARALLEL CANDIDATE**
 - **REFERENCE / SIMULATION**
 - **DOCUMENTED**
 - **RESEARCH**
@@ -168,7 +163,7 @@ Every pre-baseline artifact considered for current use should receive one of the
 
 Age alone does not determine disposition. Newer does not automatically mean correct.
 
-Open PRs follow the same principle: an older PR may remain useful history even when a later descendant expressly corrects one of its statements.
+Historical PRs follow the same principle: an older PR may remain useful history even when a later accepted descendant expressly corrects one of its statements.
 
 ---
 
@@ -226,11 +221,9 @@ Folders are durable subject ownership. Branches and PRs are bounded change sets,
 
 ## Current project direction
 
-The immediate project-management task is not additional capability. It is to keep the repository's accepted baseline, current candidate, proof record, Store identities, and open-PR genealogy aligned.
+The baseline-promotion task is complete. Any next Page-1/completion UX, Store, machine/controller convergence, or bounded-project work should begin as a new bounded change from the accepted source tree.
 
-After that reconciliation is reviewed, make an explicit promotion decision about the current candidate chain before selecting the next real build.
-
-Possible later work may include Page-1/completion UX, machine/controller convergence, or another bounded project. None is automatically authorized by this README.
+PR #7 remains separate and requires its own integration decision.
 
 ---
 

@@ -1,16 +1,16 @@
 # Scan-to-Build Project State and Source Index
 
-**Status:** reconciled project-order index  
+**Status:** accepted project-order index  
 **Repository:** `GeorgePlattDemo/scan-to-build-system`  
-**Rule:** earlier material is source evidence until explicitly admitted; current-candidate evidence is not accepted/merged merely because it passes tests.
+**Rule:** earlier material is source evidence until explicitly admitted; acceptance does not broaden physical, Store, machine, controller, or commercial authority.
 
 ## 1. Start here
 
 Use these documents before relying on any older planning, PR description, donor repository, or conversation history:
 
-1. [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md) — concise current baseline and candidate manifest.
+1. [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md) — concise accepted source tree and promotion manifest.
 2. [`docs/project/VERIFICATION-REGISTER.md`](docs/project/VERIFICATION-REGISTER.md) — exact proof map.
-3. [`docs/project/BRANCH-PR-GENEALOGY.md`](docs/project/BRANCH-PR-GENEALOGY.md) — branch/PR order and disposition.
+3. [`docs/project/BRANCH-PR-GENEALOGY.md`](docs/project/BRANCH-PR-GENEALOGY.md) — accepted ancestry, parallel work, superseded work, and historical work.
 4. [`provenance/SOURCE-PINS.md`](provenance/SOURCE-PINS.md) — exact source identities by role/path.
 
 The accepted application tree is in [`apps/stb/`](apps/stb/). Read [`apps/README.md`](apps/README.md) before using a Store pin or describing the app's status.
@@ -19,25 +19,23 @@ The accepted application tree is in [`apps/stb/`](apps/stb/). Read [`apps/README
 
 ### ACCEPTED / MERGED
 
-Current merged repository baseline:
+Accepted source tree:
 
-`main@f4769bbf2daaf7e719b723478b7a24f3dfa1344a`
+`1621d2ea146a248d200ecba59f4b87034a1b1cd5`
 
-The accepted application tree entered this repository through merged PR #3. Its source lineage remains:
+Acceptance event:
+
+PR #12 normal merge commit `97416e85b7cba3dabded6f32e419f7851514026c`
+
+Acceptance date: **2026-09-13**.
+
+The original transferred application source lineage remains:
 
 `GeorgePlattDemo/grok-file@4595b4785a2686486e477ce2e70fb3f476285a8d`
 
-That source pin is provenance for the transferred application tree, not the identity of later system-repository candidate work.
+That source pin is provenance for the transferred application tree, not a competing current baseline.
 
-### CURRENT CANDIDATE
-
-`build/global-completion-path-0.1@b0caba518aa0e152fa107fe89267ab48ee81296f`
-
-Latest code identity recorded with full App candidate checks passing:
-
-`dee4a307cf0866ac0985da92dfb5f74045ee90f9`
-
-The current candidate is descended through the open promotion chain:
+### ACCEPTED ANCESTRY
 
 ```text
 build/app-configurator-engine-0.1 @ 8730c801...
@@ -49,21 +47,25 @@ PR #8 @ 62bf1ab1...
 PR #9 @ 1fe12d6e...
         ↓
 PR #10 @ b0caba51...
+        ↓
+PR #11 / accepted source @ 1621d2ea...
+        ↓
+PR #12 normal merge @ 97416e85...
 ```
 
-The chain is current candidate history. It is not yet the merged repository baseline.
+PR #10 is accepted ancestry, not the current candidate.
 
 ### REFERENCE / PARALLEL
 
 PR #7 — `build/machine-controller-sim-safety-0.1@b23b2a95f71c89347bdf5c465369b7399b75e834`
 
-This fail-closed machine-safety simulation is intentionally separate from the application promotion chain.
+This fail-closed machine-safety simulation remains intentionally separate from the accepted application ancestry.
 
 ### SUPERSEDED
 
 PR #4 — `build/sheet-mode2-storezero-0.1@0fc232e30843a67ed47c64c7a232c9980ff11e54`
 
-Useful provenance; not the current S-001 source of truth.
+Useful provenance; not the accepted S-001 source of truth.
 
 ### HISTORICAL / DO NOT BUILD FROM
 
@@ -75,23 +77,25 @@ Earlier demos, donor branches, public exhibits, and historical repositories rema
 
 | Subject | Identity | Role |
 | --- | --- | --- |
-| merged repository baseline | `scan-to-build-system/main@f4769bbf2daaf7e719b723478b7a24f3dfa1344a` | ACCEPTED / MERGED |
+| accepted source tree | `scan-to-build-system@1621d2ea146a248d200ecba59f4b87034a1b1cd5` | ACCEPTED SOURCE TREE |
+| promotion acceptance merge | `scan-to-build-system/main@97416e85b7cba3dabded6f32e419f7851514026c` | ACCEPTANCE EVENT |
+| prior merged starting baseline | `scan-to-build-system/main@f4769bbf2daaf7e719b723478b7a24f3dfa1344a` | HISTORICAL ACCEPTED START |
 | transferred accepted app source | `grok-file/build/app-foundation-0.1@4595b4785a2686486e477ce2e70fb3f476285a8d` | accepted app provenance |
-| current promotion base | `build/app-configurator-engine-0.1@8730c801d3cd2df193d8647b3de1e78fffeea62a` | frozen base of open promotion chain |
-| current candidate branch | `build/global-completion-path-0.1@b0caba518aa0e152fa107fe89267ab48ee81296f` | CURRENT CANDIDATE |
-| latest fully checked current-candidate code | `dee4a307cf0866ac0985da92dfb5f74045ee90f9` | code proof identity |
+| accepted promotion base | `build/app-configurator-engine-0.1@8730c801d3cd2df193d8647b3de1e78fffeea62a` | accepted ancestry base |
+| PR #10 branch head | `build/global-completion-path-0.1@b0caba518aa0e152fa107fe89267ab48ee81296f` | accepted ancestry |
+| latest fully checked code in accepted ancestry | `dee4a307cf0866ac0985da92dfb5f74045ee90f9` | code proof identity |
 | Governed Reference | `scan-to-build-governed-reference/main@18949f163718a937f072f4be3a654bb303e53160` | governed reference |
 | Stage-2 Store Zero | `scan-to-build-store@b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | transferred accepted-app / Stage-2 path |
-| current published-job / canonical S-001 Store | `scan-to-build-store@4402abeb6b0299a5b6db2eec85ed04c3b0236bcc` | current candidate exact Store proof path |
+| accepted published-job / canonical S-001 Store | `scan-to-build-store@4402abeb6b0299a5b6db2eec85ed04c3b0236bcc` | accepted exact Store proof path |
 | parallel machine-safety candidate | `build/machine-controller-sim-safety-0.1@b23b2a95f71c89347bdf5c465369b7399b75e834` | PARALLEL CANDIDATE |
 
 See [`provenance/SOURCE-PINS.md`](provenance/SOURCE-PINS.md) for historical/superseded pins and primary patent hashes.
 
-## 4. Current candidate capability
+## 4. Accepted bounded software capability
 
-### Application — CURRENT CANDIDATE
+### Application — ACCEPTED SOFTWARE BASELINE
 
-The current candidate includes bounded software paths for:
+The accepted tree includes bounded software paths for:
 
 - project identity and durable local custody;
 - evidence/observation/revision handling;
@@ -105,13 +109,13 @@ The current candidate includes bounded software paths for:
 - response identity/authority quarantine;
 - bounded completion plan, labeling, handoff, custody, and closeout semantics.
 
-These are software-candidate facts. They do not establish physical production.
+These are software facts. They do not establish physical production.
 
 ### D-001 — REFERENCE / SOFTWARE PATH
 
 D-001 remains bounded and Store-evaluated. Modeled cell/economic behavior is not measured commissioned production.
 
-### S-001 — CURRENT CANDIDATE APPLICATION PATH / REFERENCE MACHINE STATUS
+### S-001 — ACCEPTED APPLICATION PATH / REFERENCE MACHINE STATUS
 
 Canonical project: `S001_CENTERED_ARCHED_SHEET_V0`.
 
@@ -128,11 +132,11 @@ Current geometry and status:
 - S-001 drilling is not admitted this round;
 - physical/controller authority remains false.
 
-The older PR #8 orientation statement of `6 in` left/right and `30 in` top/bottom is superseded by the PR #9 centered-field implementation/proof and the PR #10 retained result.
+The older PR #8 orientation statement of `6 in` left/right and `30 in` top/bottom is superseded by the PR #9 centered-field implementation/proof and retained through the accepted source tree.
 
-### Completion / handoff — CURRENT CANDIDATE
+### Completion / handoff — ACCEPTED SOFTWARE BASELINE
 
-The candidate completion chain preserves Store refusal and requires explicit residual-work resolution, inspection, labeling, staging, pickup/delivery readiness, and closeout preparation before handoff readiness.
+The accepted completion chain preserves Store refusal and requires explicit residual-work resolution, inspection, labeling, staging, pickup/delivery readiness, and closeout preparation before handoff readiness.
 
 Operator authority remains STOP / REPORT only. Cell-steward authority is distinct from customer choice and machine/controller authority.
 
@@ -171,7 +175,7 @@ Current project documents do not establish:
 
 ## 7. Authority by layer
 
-- **Application:** user interaction, evidence custody, configuration, revisions, Store-result presentation, review, records, completion/closeout state admitted in the candidate.
+- **Application:** user interaction, evidence custody, configuration, revisions, Store-result presentation, review, records, completion/closeout state admitted in the accepted software baseline.
 - **Store:** offerings, availability/inventory facts, bounded capability evaluation, Store economics, sourcing, and fulfillment facts.
 - **Governed layer:** governed semantics, unresolved conditions, refusal, protected transitions, authorization boundaries, and governed provenance.
 - **Machine / cell:** demonstrated physical capability, local operating limits, controls, readiness, and measured physical behavior.
@@ -184,7 +188,7 @@ Words do not transfer authority between layers.
 
 Preserve these distinctions:
 
-- accepted baseline ≠ current candidate;
+- accepted software baseline ≠ physical production;
 - candidate definition ≠ canonical governed WorkPacket;
 - Store `SUPPORTABLE` ≠ physical execution;
 - Store evaluation ≠ fabrication authorization;
@@ -202,7 +206,7 @@ Preserve these distinctions:
 
 | Work surface | Role |
 | --- | --- |
-| `apps/stb/` | accepted transferred app lineage plus current candidate development |
+| `apps/stb/` | accepted transferred lineage plus accepted promoted application development |
 | `work/capability-bridge/` | daily evidence/trial bench |
 | `work/user-intake/` | user/project intake work |
 | `work/store/` | Store expansion/research work |
@@ -228,18 +232,14 @@ The same discipline applies to historical PR statements. Preserve them as eviden
 
 ## 11. Next bounded work
 
-The next pass is project order, not capability expansion:
+The application baseline is accepted. Select the next real build from that state rather than from open ancestral PRs.
 
-1. review this reconciliation branch;
-2. verify the front-door documents agree;
-3. verify the candidate/parallel/superseded PR map remains accurate;
-4. make an explicit promotion decision about the current candidate chain;
-5. only then select the next real build from the reconciled baseline.
+Potential later directions include Page-1/completion UX, machine/controller convergence, Store work, or another bounded project. None is automatically authorized by this index.
 
-Potential later directions include Page-1/completion UX, machine/controller convergence, or another bounded project. None is automatically authorized by this index.
+PR #7 remains a separate integration decision.
 
 ## 12. Safety
 
 **NO BLOOD ON WOOD.**
 
-Safety, refusal, unresolved conditions, human responsibility, and physical operating limits remain part of the architecture. A cleaner repository must not create a stronger capability claim than the evidence supports.
+Safety, refusal, unresolved conditions, human responsibility, and physical operating limits remain part of the architecture. Repository acceptance must not create a stronger capability claim than the evidence supports.
