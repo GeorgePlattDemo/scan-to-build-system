@@ -7,6 +7,7 @@ import { startNarrativeLayer } from '/ui/narrative.mjs';
 import { startOpenDoorLayer } from '/ui/open-door.mjs';
 import { startFutureChainLayer } from '/ui/future-chain.mjs';
 import { startProjectConfigurator } from '/ui/project-configurator.mjs';
+import { startControlledEntryLayer } from '/ui/controlled-entry-layer.mjs';
 
 function setStatus(id, text) {
   const element = document.getElementById(id);
@@ -82,6 +83,7 @@ if (root) {
   startOpenDoorLayer(root);
   startFutureChainLayer(root);
   startProjectConfigurator(root);
+  startControlledEntryLayer(root);
 }
 
 setStatus('origin-status', window.location.origin === FIXED_ORIGIN ? FIXED_ORIGIN : window.location.origin);
