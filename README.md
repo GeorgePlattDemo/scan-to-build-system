@@ -9,11 +9,11 @@ U.S. Patents 9,720,401 B2 and 10,768,609 B2
 
 ## Open Scan-to-Build
 
-<a href="https://georgeplattdemo.github.io/scan-to-build-review/working-app.html"><kbd>▶ OPEN INTERACTIVE UI PREVIEW</kbd></a>
+<a href="https://georgeplattdemo.github.io/scan-to-build-review/system-build.html"><kbd>▶ OPEN SYSTEM BUILD</kbd></a>
 &nbsp;
 <a href="http://localhost:4317/"><kbd>▶ OPEN CURRENT APP — LOCAL</kbd></a>
 
-- **Interactive UI preview** is the one-click presentation review surface. It is rebuilt from the supplied front-door and picnic-table HTML donors so layout, wording, imagery, and navigation can be judged in a normal browser while current runtime wiring is being integrated. It is not Store, machine, ordering, payment, reservation, production-release, or fabrication authority.
+- **System Build** is the one-click human-path acceptance surface. Use it to judge what is actually present now: landing → three user paths → the same Page 1 → four working project doors, Back navigation on every non-home screen, BUILD GUIDE rails, and the README pill at the bottom of each rail. The visible product words/drawings follow the supplied build deck. Store, machine, ordering, payment, reservation, production-release, and fabrication authority remain governed separately and are not established by this browser surface.
 - **Current app — local** opens the actual application runtime at its fixed origin from the repository branch you have checked out. Start the local server first:
 
 ```text
