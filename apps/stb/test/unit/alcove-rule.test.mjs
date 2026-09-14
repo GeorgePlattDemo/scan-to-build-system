@@ -22,7 +22,7 @@ test('User 1 Alcove baseline stays normalized to the public review measurements'
   assert.equal(ALCOVE_USER1_BASELINE.orderedUnitAdjustmentStatus, 'NOT_YET_DECIDED');
 });
 
-test('User 1 Alcove candidate derives the nominal interior span without inventing an ordering allowance', () => {
+test('User 1 Alcove candidate carries configuration without inventing an ordering allowance', () => {
   const configuration = normalizeAlcoveConfiguration(ALCOVE_REFERENCE_EXAMPLE, {
     basis: 'user1-sarah-baseline',
   });
@@ -35,12 +35,24 @@ test('User 1 Alcove candidate derives the nominal interior span without inventin
   assert.equal(result.inputs.blankDepth.canonical, '14');
   assert.equal(result.inputs.blankThickness.canonical, '0.75');
   assert.equal(result.inputs.shelfCount.value, 5);
+  assert.deepEqual(result.inputs.shelfHeights.canonical, ['12', '24', '36', '45', '65']);
+  assert.equal(result.inputs.materialPreference.canonical, 'Pine');
   assert.deepEqual(result.unresolvedConditions, [
     'ORDERED_UNIT_ADJUSTMENT_NOT_DECIDED',
     'STRUCTURAL_SPAN_NOT_EVALUATED',
     'INSTALLATION_NOT_DEFINED',
     'STORE_RESOLUTION_NOT_EVALUATED',
   ]);
+});
+
+test('fractional shelf heights are preserved as candidate configuration', () => {
+  const configuration = normalizeAlcoveConfiguration({
+    ...ALCOVE_REFERENCE_EXAMPLE,
+    shelfHeights: '12, 24 1/2, 36, 45, 65',
+  });
+  const result = evaluateAlcoveConfiguration(configuration);
+  assert.equal(result.valid, true);
+  assert.deepEqual(result.inputs.shelfHeights.canonical, ['12', '24.5', '36', '45', '65']);
 });
 
 test('missing input stops alcove geometry instead of inventing a value', () => {
@@ -51,6 +63,8 @@ test('missing input stops alcove geometry instead of inventing a value', () => {
     blankDepth: '14',
     blankThickness: '0.75',
     shelfCount: '5',
+    shelfHeights: '12, 24, 36, 45, 65',
+    materialPreference: 'Pine',
   });
   const result = evaluateAlcoveConfiguration(configuration);
   assert.equal(result.valid, false);
@@ -66,6 +80,8 @@ test('nonpositive derived span is refused', () => {
     blankDepth: '14',
     blankThickness: '0.75',
     shelfCount: '5',
+    shelfHeights: '12, 24, 36, 45, 65',
+    materialPreference: 'Pine',
   });
   const result = evaluateAlcoveConfiguration(configuration);
   assert.equal(result.valid, false);
