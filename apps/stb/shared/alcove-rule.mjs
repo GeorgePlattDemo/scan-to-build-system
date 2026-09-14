@@ -5,14 +5,39 @@ export const ALCOVE_CLASS_VERSION = '0.1-reference';
 export const ALCOVE_RULE_VERSION = 'alcove.shelf-blanks/0.1-candidate';
 export const ALCOVE_DEFINITION_KIND = 'alcove.shelf-blanks.v1';
 
+// User 1 is the single worked Alcove project in this build. These values are
+// presentation/reference facts carried forward from the public review project.
+// They are not personalization and they are not an ordering allowance.
+export const ALCOVE_USER1_BASELINE = Object.freeze({
+  actorId: 'user-1',
+  projectLabel: 'Alcove shelf insert',
+  openingWidthIn: 45.5,
+  mantelHeightIn: 45,
+  topShelfPreferenceIn: 65,
+  floorSlopeDeg: 1.2,
+  wallCondition: 'bowed-wall-recorded',
+  shelfCount: 5,
+  shelfDepthIn: 14,
+  shelfThicknessIn: 0.75,
+  shelfHeightsIn: Object.freeze([12, 24, 36, 45, 65]),
+  materialPreference: 'Pine',
+  sideThicknessIn: 0.75,
+  orderedUnitAdjustmentIn: null,
+  orderedUnitAdjustmentStatus: 'NOT_YET_DECIDED',
+});
+
+// The candidate engine still carries the two side members explicitly because
+// downstream part derivation currently consumes them. The later ordering step
+// may apply a holder-selected unit-width adjustment; that decision is not
+// silently baked into this baseline.
 export const ALCOVE_REFERENCE_EXAMPLE = Object.freeze({
-  basis: 'published-reference-example',
-  openingWidth: '46.25',
+  basis: 'user1-sarah-baseline',
+  openingWidth: '45.5',
   leftSupport: '0.75',
   rightSupport: '0.75',
-  blankDepth: '11.00',
+  blankDepth: '14',
   blankThickness: '0.75',
-  shelfCount: '3',
+  shelfCount: '5',
 });
 
 const INPUT_KEYS = Object.freeze([
@@ -110,7 +135,7 @@ export function evaluateAlcoveConfiguration(configuration) {
       unresolved.push('nonpositive-derived-span');
     } else {
       span = {
-        label: 'Derived shelf span',
+        label: 'Nominal interior shelf span before ordering adjustment',
         value,
         unit: 'in',
         canonical: canonicalInchString(value),
@@ -122,8 +147,8 @@ export function evaluateAlcoveConfiguration(configuration) {
   const arithmeticValid = unresolved.length === 0;
   const engineeringUnresolved = arithmeticValid
     ? [
+        'ORDERED_UNIT_ADJUSTMENT_NOT_DECIDED',
         'STRUCTURAL_SPAN_NOT_EVALUATED',
-        'SHELF_ELEVATIONS_UNRESOLVED',
         'INSTALLATION_NOT_DEFINED',
         'STORE_RESOLUTION_NOT_EVALUATED',
       ]
@@ -145,6 +170,6 @@ export function evaluateAlcoveConfiguration(configuration) {
     derived: {
       span,
     },
-    disclosure: 'Arithmetic completeness is not structural adequacy, Store support, production release, machine readiness, or fabrication authorization.',
+    disclosure: 'Arithmetic completeness is not the holder\'s ordered-size decision, structural adequacy, Store support, production release, machine readiness, or fabrication authorization.',
   };
 }
