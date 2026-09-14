@@ -121,7 +121,8 @@ export function collectDisclosures({ projection, storeView, documentaryReference
   }
   if (projection?.payload?.classId === 'alcove-shelf-blanks') {
     disclosures.push(
-      'Alcove arithmetic does not establish structural adequacy, shelf elevations, installation design, Store support, or production eligibility.',
+      'User 1 shelf heights and material selection are holder configuration values; they do not establish structural adequacy, installation design, Store material identity, Store support, or production eligibility.',
+      'The ordered-unit adjustment remains a separate holder decision until it is explicitly recorded.',
       'The displayed simulate_crosscut → simulate_shelf_blank sequence is reference context only, not an application-issued process plan or machine instruction.',
     );
   }
