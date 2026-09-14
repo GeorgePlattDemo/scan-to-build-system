@@ -60,6 +60,26 @@ test('P1-02 mapped start creates one project and opens bounded-question context'
   expect(saved[0].entryMode).toBe('mapped');
 });
 
+test('P1 picnic-table start reaches the registered shared configurator', async ({ page }) => {
+  const picnic = CLASS_REFERENCES.find((entry) => entry.classId === 'classic-picnic-table-fixture');
+  expect(picnic).toBeTruthy();
+
+  await openBegin(page);
+  await page.getByRole('button', { name: COPY.chooseMapped }).click();
+  await expect(page.getByRole('button', { name: picnic.label })).toBeVisible();
+  await page.getByRole('button', { name: picnic.label }).click();
+
+  await expect(page.locator('[data-screen="questions"]')).toBeVisible();
+  await expect(page.getByRole('heading', { name: COPY.questionsHeading })).toBeVisible();
+  await expect(page.locator('[data-project-configurator="classic-picnic-table-fixture"]')).toBeVisible();
+  expect(page.url()).toContain('view=questions');
+
+  const saved = requireOk(await repoCall(page, 'listSaved'), 'picnic');
+  expect(saved).toHaveLength(1);
+  expect(saved[0].classId).toBe('classic-picnic-table-fixture');
+  expect(saved[0].entryMode).toBe('mapped');
+});
+
 test('P1-03 repeated own dispatch does not duplicate the project', async ({ page }) => {
   await openBegin(page);
   const own = page.getByRole('button', { name: COPY.startOwn });
