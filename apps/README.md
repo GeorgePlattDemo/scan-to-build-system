@@ -1,25 +1,26 @@
 # Application
 
-`apps/stb/` contains the accepted transferred application tree plus later candidate development in this repository.
+`apps/stb/` contains the transferred application lineage plus the later development accepted into the current system baseline.
 
-Do not use one SHA to describe both facts.
+Do not use one SHA to describe both provenance and the accepted system state.
 
 ## Accepted transferred lineage
 
 **Source:** `GeorgePlattDemo/grok-file` `build/app-foundation-0.1`  
 **Source pin:** `4595b4785a2686486e477ce2e70fb3f476285a8d`  
 **Repository admission:** merged PR #3  
-**Disposition:** accepted transferred application provenance
+**Disposition:** transferred application provenance
 
-The accepted tree was copied into this repository. That source pin remains provenance for the transferred application baseline.
+That pin remains provenance for the application originally copied into this repository. It is not the identity of the later promoted system baseline.
 
-## Current candidate lineage
+## Accepted system lineage
 
-**Promotion base:** `build/app-configurator-engine-0.1@8730c801d3cd2df193d8647b3de1e78fffeea62a`  
-**Current candidate:** `build/global-completion-path-0.1@b0caba518aa0e152fa107fe89267ab48ee81296f`  
-**Latest fully checked code head recorded in PR #10:** `dee4a307cf0866ac0985da92dfb5f74045ee90f9`
+**Accepted source tree:** `1621d2ea146a248d200ecba59f4b87034a1b1cd5`  
+**Promotion PR:** #12  
+**Acceptance merge event:** `97416e85b7cba3dabded6f32e419f7851514026c`  
+**Latest fully checked code ancestor recorded before promotion:** `dee4a307cf0866ac0985da92dfb5f74045ee90f9`
 
-This candidate is not accepted/merged merely because its checks pass.
+PR #10 and its ancestors are accepted ancestry, not a competing current candidate. PR #7 remains a separate parallel machine-safety/controller-simulation candidate.
 
 See [`../STB-CURRENT-BASELINE.md`](../STB-CURRENT-BASELINE.md) before changing the app.
 
@@ -32,33 +33,37 @@ npx playwright install chromium
 npm start
 ```
 
-Fixed origin: `http://localhost:4317`
+Fixed accepted-app origin: `http://localhost:4317/`
+
+Public working evaluation: `https://georgeplattdemo.github.io/scan-to-build-review/working-app.html`
+
+The public page is an evaluation surface. The fixed local origin above is the accepted application runtime.
 
 ## Store paths
 
 Store identity is path-specific.
 
-### Transferred accepted-app / Stage-2 Store Zero path
+### Transferred Stage-2 Store Zero path
 
 ```text
 STB_STORE_ZERO_ROOT=<clean scan-to-build-store at b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d> npm start
 ```
 
-### Current published-job / canonical S-001 candidate path
+### Accepted published-job / canonical S-001 proof path
 
 Use a clean exact Store checkout at:
 
 `4402abeb6b0299a5b6db2eec85ed04c3b0236bcc`
 
-with the published-job path / runner as documented by the current candidate.
+with the published-job path / runner carried by the accepted application ancestry.
 
 Do not silently substitute the published-job Store pin for the Stage-2 Store Zero pin or vice versa.
 
-Historical candidate Store pins are listed in [`../provenance/SOURCE-PINS.md`](../provenance/SOURCE-PINS.md).
+Historical Store pins are listed in [`../provenance/SOURCE-PINS.md`](../provenance/SOURCE-PINS.md).
 
-## Current candidate scope
+## Accepted bounded software scope
 
-The current candidate includes bounded software support for:
+The accepted application includes bounded software support for:
 
 - D-001 / Board published-job evaluation;
 - rectangular sheet published-job evaluation;
@@ -87,6 +92,6 @@ Trial log: [`../work/capability-bridge/TRIAL-LOG.md`](../work/capability-bridge/
 - not controller-in-loop validated;
 - not physical execution authority;
 - not authority to convert Store refusal into production approval;
-- not evidence that every open PR description remains current.
+- not evidence that every historical PR description remains current.
 
 **NO BLOOD ON WOOD.**
