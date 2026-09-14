@@ -74,5 +74,44 @@ jobs:
         run: npm run test:unit
       - name: Boundary tests
         run: npm run test:boundaries
+      - name: Diagnose picnic transition
+        shell: bash
+        run: |
+          cat > test/browser/_picnic-diagnostic.spec.mjs <<'EOF'
+          import { test } from '@playwright/test';
+
+          test('diagnose picnic final DOM', async ({ page }) => {
+            await page.goto('/');
+            await page.getByRole('button', { name: 'NEW USER', exact: true }).click();
+            await page.getByRole('heading', { name: 'We don’t sell products.', exact: true }).waitFor();
+            await page.getByRole('button', { name: 'START', exact: true }).click();
+            const begin = page.locator('main[data-screen="begin"]');
+            await begin.locator('.rx-ribbon [data-front-door="picnic"]').click();
+            await page.getByRole('heading', { name: 'Picnic tables', exact: true }).waitFor();
+            await page.locator('.rx-ribbon [data-picnic-form="attached-bench"][data-picnic-scope="frame-kit"]').click();
+            const questions = page.locator('main[data-screen="questions"][data-class-id="classic-picnic-table-fixture"]');
+            await questions.waitFor();
+            await page.locator('[data-project-configurator="classic-picnic-table-fixture"]').waitFor();
+            await page.waitForTimeout(700);
+            const state = await questions.evaluate((el) => ({
+              dataset: { ...el.dataset },
+              className: el.className,
+              restored: Boolean(el.querySelector(':scope > [data-restored-surface]')),
+              back: Boolean(el.querySelector('[data-rx-back-nav]')),
+              banner: Boolean(el.querySelector('.rx-banner')),
+              configuratorParent: el.querySelector('[data-project-configurator]')?.parentElement?.className ?? null,
+              childSummary: [...el.children].map((child) => ({
+                tag: child.tagName,
+                className: child.className,
+                restored: child.hasAttribute('data-restored-surface'),
+                text: child.textContent?.slice(0, 120),
+              })),
+              htmlStart: el.innerHTML.slice(0, 3500),
+            }));
+            console.log('PICNIC_DIAGNOSTIC=' + JSON.stringify(state));
+          });
+          EOF
+          npx playwright test --config test/playwright.config.mjs test/browser/_picnic-diagnostic.spec.mjs
+          rm test/browser/_picnic-diagnostic.spec.mjs
       - name: Restored human-path browser tests
         run: npx playwright test --config test/playwright.config.mjs test/browser/restored-experience.spec.mjs
