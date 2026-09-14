@@ -7,6 +7,7 @@ import { startNarrativeLayer } from '/ui/narrative.mjs';
 import { startOpenDoorLayer } from '/ui/open-door.mjs';
 import { startFutureChainLayer } from '/ui/future-chain.mjs';
 import { startProjectConfigurator } from '/ui/project-configurator.mjs';
+import { startAlcoveBackControls } from '/ui/alcove-back-controls.mjs';
 import { startControlledEntryLayer } from '/ui/controlled-entry-layer.mjs';
 
 function setStatus(id, text) {
@@ -83,6 +84,7 @@ if (root) {
   startOpenDoorLayer(root);
   startFutureChainLayer(root);
   startProjectConfigurator(root);
+  startAlcoveBackControls(root);
   startControlledEntryLayer(root);
 }
 
