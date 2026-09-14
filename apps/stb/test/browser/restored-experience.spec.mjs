@@ -100,9 +100,10 @@ test('Outdoor build picture opens four picnic choices and hands the choice to th
   await expect(page.getByText('Off the shelf, three choices. You have a tape measure.', { exact: true })).toBeVisible();
   await expect(page.locator('.rx-ribbon [data-picnic-form][data-picnic-scope]')).toHaveCount(4);
   await page.locator('.rx-ribbon [data-picnic-form="attached-bench"][data-picnic-scope="frame-kit"]').click();
-  await expect(page.locator('main[data-screen="questions"][data-class-id="classic-picnic-table-fixture"]')).toBeVisible();
-  await expect(page.locator('[data-project-configurator="classic-picnic-table-fixture"]')).toBeVisible();
-  await expect(page.getByText('The historical donor’s placeholder 2×6 SKUs, prices, 60 in structural trigger, and cell-recovery arithmetic are not imported as present authority.', { exact: true })).toBeVisible();
+  const picnic = page.locator('main[data-screen="questions"][data-class-id="classic-picnic-table-fixture"]');
+  await expect(picnic).toBeVisible();
+  await expect(picnic.locator('[data-project-configurator="classic-picnic-table-fixture"]')).toBeVisible();
+  await expect(picnic.locator('.rx-banner')).toContainText('The historical donor’s placeholder 2×6 SKUs, prices, 60 in structural trigger, and cell-recovery arithmetic are not imported as present authority.');
 });
 
 test('developer rail restores the GitHub Readme pill at the bottom and wires it to the system README', async ({ page }) => {
@@ -117,7 +118,7 @@ test('developer rail restores the GitHub Readme pill at the bottom and wires it 
   await expect(foot.locator(':scope > *').last()).toHaveAttribute('data-rx-readme', 'true');
 });
 
-test('Back is present after home and walks back through Page 1 and both configurator paths', async ({ page }) => {
+test('Back is absent on home and walks back through orientation, Page 1, alcove, and picnic', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('[data-rx-back-nav]')).toHaveCount(0);
 
@@ -136,11 +137,16 @@ test('Back is present after home and walks back through Page 1 and both configur
   await expect(page1Heading(page)).toBeVisible();
 
   await page1Door(page, 'picnic').click();
-  await expect(page.getByRole('heading', { name: 'Picnic tables' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Picnic tables', exact: true })).toBeVisible();
   await expect(page.locator('main[data-screen="begin"] [data-rx-back-nav]')).toBeVisible();
   await page.locator('.rx-ribbon [data-picnic-form="attached-bench"][data-picnic-scope="frame-kit"]').click();
+
+  const switchKeep = page.locator('[data-action="switch-keep"]');
+  await expect(switchKeep).toBeVisible();
+  await switchKeep.click();
+
   const picnic = page.locator('main[data-screen="questions"][data-class-id="classic-picnic-table-fixture"]');
   await expect(picnic.locator('[data-rx-back-nav]')).toBeVisible();
   await picnic.locator('[data-rx-back-nav]').click();
-  await expect(page.getByRole('heading', { name: 'Picnic tables' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Picnic tables', exact: true })).toBeVisible();
 });
