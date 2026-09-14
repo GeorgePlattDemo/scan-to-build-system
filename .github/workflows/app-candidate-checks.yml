@@ -8,6 +8,7 @@ on:
       - build/app-durable-jobs-0.1
       - build/s001-canonical-configurator-0.1
       - build/global-completion-path-0.1
+      - fix/front-door-picnic-visual-paths-0.1
   workflow_dispatch:
 
 permissions:
