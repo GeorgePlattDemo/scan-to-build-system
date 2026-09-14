@@ -128,19 +128,22 @@
 
         const ensureBackButton = (main) => {
           if (!main || screenName(main) === 'landing' || main.classList.contains('screen-landing')) return;
-          if (main.querySelector('[data-rx-back-nav]')) return;
 
           const restored = main.querySelector(':scope > [data-restored-surface]');
           const host = restored?.querySelector('.rx-main, .rx-ribbonbody') ?? restored ?? main;
           if (!host) return;
 
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.className = 'rx-context-back';
-          button.dataset.rxBackNav = 'true';
-          button.setAttribute('aria-label', 'Back');
-          button.textContent = '← Back';
-          host.prepend(button);
+          let button = main.querySelector('[data-rx-back-nav]');
+          if (!button) {
+            button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'rx-context-back';
+            button.dataset.rxBackNav = 'true';
+            button.setAttribute('aria-label', 'Back');
+            button.textContent = '← Back';
+          }
+
+          if (!host.contains(button)) host.prepend(button);
         };
 
         const ensureReadmePills = () => {
