@@ -45,13 +45,14 @@ function buildRenderModel(parts, evaluation) {
     kind: 'orthographic-project-v1',
     projection: 'schematic-blank-stack',
     schematic: true,
-    note: 'Blank rows are stacked for inspection only. User 1 shelf elevations are carried separately as placement preferences and are not part-blank geometry.',
+    note: 'Blank rows are stacked for inspection only. User 1 shelf elevations and back choices are carried as holder configuration and are not silently promoted to machine instructions.',
     openingWidth: evaluation.inputs.openingWidth?.canonical ?? null,
     supportLeft: evaluation.inputs.leftSupport?.canonical ?? null,
     supportRight: evaluation.inputs.rightSupport?.canonical ?? null,
     derivedSpan: evaluation.derived.span?.canonical ?? null,
     shelfHeights: evaluation.inputs.shelfHeights?.canonical ?? [],
     materialPreference: evaluation.inputs.materialPreference?.canonical ?? null,
+    backRequirement: evaluation.backRequirement ?? null,
     parts: parts.map((part) => ({
       occurrenceId: part.occurrenceId,
       definitionRevisionId: part.definitionRevisionId,
@@ -78,6 +79,9 @@ function buildProjectionPayload({
   ];
   const materialPreference = evaluation.inputs.materialPreference?.canonical ?? null;
   const shelfHeights = evaluation.inputs.shelfHeights?.canonical ?? [];
+  const backRequirement = evaluation.backRequirement ?? null;
+  const backRequired = backRequirement?.style && backRequirement.style !== 'none';
+  const recessedBack = backRequirement?.style === 'recessed';
   return {
     derivationVersion: ALCOVE_RULE_VERSION,
     definitionKind: ALCOVE_DEFINITION_KIND,
@@ -100,6 +104,7 @@ function buildProjectionPayload({
           note: 'Shelf heights are User 1 placement preferences. They do not change blank length and do not create installation or structural authority.',
         }
       : null,
+    backRequirement: valid ? backRequirement : null,
     parts,
     materialDemand: valid
       ? {
@@ -112,6 +117,17 @@ function buildProjectionPayload({
             thickness: evaluation.inputs.blankThickness,
           },
           materialPreference,
+          back: backRequired
+            ? {
+                required: true,
+                material: backRequirement.material,
+                materialLabel: backRequirement.materialLabel,
+                veneerSpecies: backRequirement.veneerSpecies,
+                geometryStatus: backRequirement.geometryStatus,
+                sku: null,
+                status: 'preference-unresolved',
+              }
+            : { required: false },
           species: null,
           grade: null,
           sku: null,
@@ -122,7 +138,11 @@ function buildProjectionPayload({
       ? {
           status: 'reference-only',
           sequence: ['simulate_crosscut', 'simulate_shelf_blank'],
-          sourceMeaning: 'Governed reference sequence only; not an application-issued process plan or machine instruction.',
+          requiredFeatures: [
+            ...(backRequired ? ['back-panel'] : []),
+            ...(recessedBack ? ['recessed-back-seat'] : []),
+          ],
+          sourceMeaning: 'User-visible finished choices are carried as requirements only. They are not application-issued process plans or machine instructions.',
         }
       : null,
     physicalFabricationEligible: false,
@@ -140,6 +160,7 @@ function buildProjectionPayload({
       quantityUnit: 'ea',
       shelfHeights,
       materialPreference,
+      back: backRequirement,
       orderedUnitAdjustment: null,
       configurationBasis: configuration?.basis ?? 'manual-entry',
       disclosure: evaluation.disclosure,
@@ -157,8 +178,13 @@ function buildProjectionPayload({
             blankThickness: evaluation.inputs.blankThickness,
             shelfHeights,
             materialPreference,
+            back: backRequirement,
             orderedUnitAdjustment: null,
             referenceOperations: ['simulate_crosscut', 'simulate_shelf_blank'],
+            requiredFeatures: [
+              ...(backRequired ? ['back-panel'] : []),
+              ...(recessedBack ? ['recessed-back-seat'] : []),
+            ],
           }
         : null,
     },
@@ -304,6 +330,7 @@ export function planAlcoveDerivation({
             blankDepth: evaluation.inputs.blankDepth,
             blankThickness: evaluation.inputs.blankThickness,
             shelfHeights: evaluation.inputs.shelfHeights,
+            backSetback: evaluation.inputs.backSetback,
             orderedUnitAdjustment: null,
           }
         : null,
@@ -311,9 +338,11 @@ export function planAlcoveDerivation({
         ? {
             form: 'sheet',
             preference: evaluation.inputs.materialPreference?.canonical ?? null,
+            back: evaluation.backRequirement,
             status: 'preference-unresolved',
           }
         : null,
+      backRequirement: evaluation.valid ? evaluation.backRequirement : null,
     },
   };
 }
