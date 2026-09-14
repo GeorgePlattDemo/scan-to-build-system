@@ -181,11 +181,13 @@ export const CLASS_CONFIGURATORS = Object.freeze({
       Object.freeze({ key: 'blankDepth', label: 'Shelf blank depth', unit: 'in', inputMode: 'decimal', help: 'User 1 baseline: 14 in. Installed-clearance responsibility is handled later.' }),
       Object.freeze({ key: 'blankThickness', label: 'Shelf blank thickness', unit: 'in', inputMode: 'decimal', help: 'Bounded-class blank thickness. Structural adequacy is not evaluated here.' }),
       Object.freeze({ key: 'shelfCount', label: 'Shelf count', unit: 'ea', inputMode: 'numeric', help: 'User 1 baseline: five shelf occurrences.' }),
+      Object.freeze({ key: 'shelfHeights', label: 'Shelf heights', unit: 'in, comma-separated', inputMode: 'text', help: 'User preference carried with the candidate. Fractions or decimals are accepted; values must rise from bottom to top.' }),
+      Object.freeze({ key: 'materialPreference', label: 'Material preference', unit: 'plain words', inputMode: 'text', help: 'Holder preference only. Store material identity, availability and price still require a Store answer.' }),
     ]),
     examples: Object.freeze([
       Object.freeze({ id: 'user1-sarah-baseline', label: 'USE USER 1 BASELINE', basis: 'user1-sarah-baseline', configuration: ALCOVE_REFERENCE_EXAMPLE }),
     ]),
-    exampleNote: 'User 1 baseline is 45.5 in opening, 0.75 in sides, 14 in depth, 0.75 in thickness and 5 shelves. The candidate engine therefore carries a 44.0 in nominal interior span before any later ordered-unit adjustment. The ordering/fit decision is intentionally not baked into this screen.',
+    exampleNote: 'User 1 baseline is 45.5 in opening, 0.75 in sides, 14 in depth, 0.75 in thickness, 5 shelves at 12 / 24 / 36 / 45 / 65 in, with Pine as the holder preference. The candidate engine carries a 44.0 in nominal interior span before any later ordered-unit adjustment. The ordering/fit decision is intentionally not baked into this screen.',
   }),
   [PICNIC_CLASS_ID]: Object.freeze({
     classId: PICNIC_CLASS_ID,
