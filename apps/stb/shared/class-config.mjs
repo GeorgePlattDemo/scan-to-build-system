@@ -189,21 +189,27 @@ export const CLASS_CONFIGURATORS = Object.freeze({
   }),
   [PICNIC_CLASS_ID]: Object.freeze({
     classId: PICNIC_CLASS_ID,
-    title: 'CLASSIC PICNIC TABLE — CANDIDATE FIXTURE',
-    kicker: 'Second bounded class · shared runner proof + donor extension',
-    lead: 'Product length drives candidate geometry. Requested scope and material are holder inputs only: they do not create Store availability, price, structural adequacy, machine support, production release, or fabrication authority.',
+    title: 'PICNIC TABLE',
+    kicker: 'Bounded picnic family · current candidate engine',
+    lead: 'Choose the table form separately from how much of the job you want locally supplied. Product length then drives the admitted attached-bench fixture geometry. Separate-bench geometry remains visible but unresolved rather than being silently treated as the attached table.',
     fields: Object.freeze([
+      Object.freeze({ key: 'tableForm', label: 'Table form', unit: 'attached-bench | separate-benches', inputMode: 'text', help: 'Holder choice. The front door supplies this value. Separate-benches geometry remains unresolved in this build.' }),
       Object.freeze({ key: 'productLength', label: 'Overall product length', unit: 'in', inputMode: 'decimal', help: 'Candidate input range 60–216 in. This range is only an application/demo bound, not a structural rule, Store stock limit, or machine envelope.' }),
-      Object.freeze({ key: 'requestedScope', label: 'Requested scope', unit: 'complete-part-set | frame-kit', inputMode: 'text', help: 'Holder request only. “frame-kit” does not mean a Store or machine can fulfill it.' }),
+      Object.freeze({ key: 'requestedScope', label: 'What we provide', unit: 'complete-part-set | frame-kit', inputMode: 'text', help: 'Holder request. Frame-kit keeps the long straight members visible as holder-supplied rather than pretending they disappeared.' }),
       Object.freeze({ key: 'materialPreference', label: 'Material preference', unit: 'plain words', inputMode: 'text', help: 'Preference only. Store material identity, treatment/use category, SKU, availability and price remain unresolved.' }),
     ]),
     examples: Object.freeze(PICNIC_REFERENCE_EXAMPLES.map((example) => Object.freeze({
       id: example.id,
       label: example.label,
       basis: example.basis,
-      configuration: Object.freeze({ productLength: example.productLength, requestedScope: example.requestedScope, materialPreference: example.materialPreference }),
+      configuration: Object.freeze({
+        productLength: example.productLength,
+        tableForm: example.tableForm,
+        requestedScope: example.requestedScope,
+        materialPreference: example.materialPreference,
+      }),
     }))),
-    exampleNote: 'This pass admits the donor’s broader length and frame-kit request vocabulary without admitting its structural, price, Store, shipping, or machine claims. Separate-benches geometry and adjustable-height geometry remain donor research, not implemented class behavior.',
+    exampleNote: 'The front-door donor admits two form choices and two fulfillment scopes. Attached-bench geometry is the currently admitted software fixture. Separate-benches remains a first-class holder choice but stops at SEPARATE_BENCH_GEOMETRY_UNRESOLVED until a bounded geometry source is admitted. No donor price, Store, shipping, machine, or structural claim is imported.',
   }),
   [S001_CENTERED_ARCH_CLASS_ID]: Object.freeze({
     classId: S001_CENTERED_ARCH_CLASS_ID,
