@@ -14,10 +14,12 @@ State all of the following in one block:
 ```text
 PART:     <what is being tried>
 CLAIM:    <one sentence of expected behavior>
-AGAINST:  accepted app pin 4595b478 + current capability-bridge files
+AGAINST:  accepted system baseline in STB-CURRENT-BASELINE.md + current capability-bridge files
 OWNER:    Application | Store | Governed | Machine | Research
 EVIDENCE: IMPLEMENTED | REFERENCE | DOCUMENTED | PLANNED | NOT CLAIMED
 ```
+
+The accepted application source tree is recorded in [`../../STB-CURRENT-BASELINE.md`](../../STB-CURRENT-BASELINE.md). The older `GeorgePlattDemo/grok-file@4595b478...` identity is transferred-app provenance, not the current accepted system identity.
 
 If the claim needs a patent relationship, open [`PATENTS.md`](PATENTS.md) first.
 
@@ -29,7 +31,7 @@ If the claim needs a patent relationship, open [`PATENTS.md`](PATENTS.md) first.
    - `npm run test:unit`
    - `npm run test:browser`
    - `npm run test:boundaries`
-   - Store/vertical suites only when `STB_STORE_ZERO_ROOT` is the exact Stage-2 pin.
+   - Store-backed suites only when the exact clean Store checkout required by that path is mounted. Current exact identities are maintained in [`../../provenance/SOURCE-PINS.md`](../../provenance/SOURCE-PINS.md); do not treat the Stage-2 Store Zero pin and the published-job/S-001 proof pin as interchangeable.
 4. A refuse can be a pass. If the claim was “this must stop,” and it stopped, that is success.
 
 ## Report
@@ -48,7 +50,7 @@ NOTE:     <one factual sentence>
 | `APP-CONSTRAINT` | The app refused or limited the part under a current rule. The rule may be correct. Amend the app only if the constraint is wrong for the current architecture. |
 | `PART-DEFECT` | The new model, offering, class, or instruction packet is wrong or incomplete. |
 | `BRIDGE-GAP` | App and part both look locally consistent, but the connecting surface (neutral ops, Store publication, evidence class) is missing. |
-| `STORE-PIN` | Failure is the Stage-2 fixture or pin checkout, not the app and not the new part. |
+| `STORE-PIN` | Failure is the required Store fixture or pin checkout, not the app and not the new part. |
 | `SAFETY` | Stop. Do not amend to proceed. **NO BLOOD ON WOOD.** |
 
 ## What must not happen
