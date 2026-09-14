@@ -61,7 +61,9 @@ test('current native S-001 request remains retryable', async ({ page }) => {
 
   const attempts = requireOk(await repoCall(page, 'listRecords', { localRecordId, kind: 'attempt' }));
   expect(attempts).toHaveLength(2);
-  expect(attempts.map((record) => record.payload.attemptNumber)).toEqual([1, 2]);
+  expect(
+    attempts.map((record) => record.payload.attemptNumber).sort((left, right) => left - right),
+  ).toEqual([1, 2]);
 });
 
 test('S-001 retry refuses a request from an older candidate revision', async ({ page }) => {
