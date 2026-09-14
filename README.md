@@ -7,6 +7,25 @@ U.S. Patents 9,720,401 B2 and 10,768,609 B2
 
 **Private working repository**
 
+## Open Scan-to-Build
+
+<a href="https://georgeplattdemo.github.io/scan-to-build-review/working-app.html"><kbd>▶ OPEN PUBLIC WORKING HTML</kbd></a>
+&nbsp;
+<a href="http://localhost:4317/"><kbd>▶ OPEN ACCEPTED APP — LOCAL</kbd></a>
+
+- **Public working HTML** opens the rendered evaluation page in a browser without access to this private repository. It is an evaluation surface, not live Store, machine, ordering, or physical-fabrication authority.
+- **Accepted app — local** opens the actual accepted application landing page at its fixed origin. Start the local server first:
+
+```text
+cd apps/stb
+npm ci --no-audit --no-fund
+npx playwright install chromium
+npm start
+```
+
+Application entry source: [`apps/stb/browser/index.html`](apps/stb/browser/index.html).  
+Application operating notes: [`apps/README.md`](apps/README.md).
+
 ## Read order
 
 Start with [`START-HERE.md`](START-HERE.md).

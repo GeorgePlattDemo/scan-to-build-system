@@ -1,13 +1,12 @@
-name: App candidate checks
+name: App baseline checks
 
 on:
   push:
     branches:
-      - build/app-configurator-engine-0.1
-      - build/app-operational-jobs-0.1
-      - build/app-durable-jobs-0.1
-      - build/s001-canonical-configurator-0.1
-      - build/global-completion-path-0.1
+      - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
