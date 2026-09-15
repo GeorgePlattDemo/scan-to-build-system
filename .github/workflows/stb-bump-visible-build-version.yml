@@ -1,0 +1,35 @@
+name: STB bump visible build version
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Update only the System Build version token
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('README.md')
+          s = p.read_text()
+          old = 'https://georgeplattdemo.github.io/scan-to-build-review/system-build-current.html?v=7a840e2'
+          new = 'https://georgeplattdemo.github.io/scan-to-build-review/system-build-current.html?v=1b08252'
+          if s.count(old) != 1:
+              raise SystemExit(f'Expected exactly one old System Build URL, found {s.count(old)}')
+          p.write_text(s.replace(old, new, 1))
+          PY
+      - name: Commit README plumbing only
+        run: |
+          git config user.name 'Scan-to-Build bounded edit'
+          git config user.email 'actions@users.noreply.github.com'
+          git add README.md
+          git commit -m 'Point System Build button to repaired project-start revision'
+          git push origin HEAD:main
