@@ -1,5 +1,5 @@
-import { projectIndex } from '/data/selectors.mjs';
-import { ALCOVE_CLASS_ID, ALCOVE_USER1_BASELINE } from '/shared/alcove-rule.mjs';
+import { projectIndex, recordSnapshot } from '/data/selectors.mjs';
+import { ALCOVE_CLASS_ID, evaluateAlcoveConfiguration } from '/shared/alcove-rule.mjs';
 
 function node(tag, { className, text, attrs } = {}, children = []) {
   const element = document.createElement(tag);
@@ -224,10 +224,11 @@ function formatInches(value) {
   return whole ? `${whole}${suffix}` : suffix;
 }
 
-function alcoveSummaryLine() {
-  const b = ALCOVE_USER1_BASELINE;
-  const span = b.openingWidthIn - (2 * b.sideThicknessIn);
-  return `${formatInches(b.openingWidthIn)}″ opening · ${b.shelfCount} shelves · ${formatInches(b.shelfDepthIn)}″ deep · ${b.materialPreference.toLowerCase()} · ${formatInches(span)}″ nominal span · back ${String(b.backType).toLowerCase()}`;
+function alcoveSummaryLine(project) {
+  const result = project.referenceConfiguration;
+  if (!result?.valid) return 'Configuration unresolved — review the project definition.';
+  const inputs = result.inputs;
+  return `${formatInches(inputs.openingWidth.value)}″ opening · ${inputs.shelfCount.value} shelves · ${formatInches(inputs.blankDepth.value)}″ deep · ${inputs.materialPreference.canonical} · ${formatInches(result.derived.span.value)}″ nominal span · back ${inputs.backType.display}`;
 }
 
 function header(items) {
@@ -276,7 +277,7 @@ function renderRequest(host, project, state) {
   host.replaceChildren(
     node('p', { className: 'oe-tag', text: 'STB — ALCOVE INSERT · SUBMISSION & RESPONSE 0.1' }),
     node('h2', { text: 'Before we build it — ten questions' }),
-    node('p', { className: 'oe-sub', text: `Definition frozen · ${alcoveSummaryLine()}` }),
+    node('p', { className: 'oe-sub', text: `Identified revision · ${alcoveSummaryLine(project)}` }),
     header([
       ['VERSION', project.currentHead ?? 'current confirmed revision'],
       ['PROJECT', project.title ?? 'alcove insert'],
@@ -304,7 +305,7 @@ function renderRequest(host, project, state) {
       node('button', { className: 'go', text: 'SEND TO THE YARD', attrs: { type: 'button', 'data-oe-action': 'send', ...(answered !== ALCOVE_DECISIONS.length ? { disabled: 'true' } : {}) } }),
       node('button', { text: 'Use all defaults', attrs: { type: 'button', 'data-oe-action': 'defaults' } }),
       node('button', { text: 'Back', attrs: { type: 'button', 'data-action': 'open-confirm' } }),
-      node('span', { className: 'oe-fine', text: 'Nothing charged · nothing reserved\nuntil you accept what comes back.' }),
+      node('span', { className: 'oe-fine', text: 'Reference walkthrough only. Nothing charged or reserved.\nThese service choices reset when you leave or reload this screen.' }),
     ]),
   );
 }
@@ -313,7 +314,7 @@ function renderResponse(host, project, state) {
   host.replaceChildren(
     node('p', { className: 'oe-tag', text: 'STB — ALCOVE INSERT · YARD RESPONSE' }),
     node('h2', { text: 'The yard came back' }),
-    node('p', { className: 'oe-sub', text: 'Reference response · confirmed geometry unchanged' }),
+    node('p', { className: 'oe-sub', text: 'Reference response · identified geometry unchanged' }),
     header([
       ['RESPONSE', 'REF-SZ-001'],
       ['AGAINST', project.currentHead ?? 'current confirmed revision'],
@@ -321,7 +322,13 @@ function renderResponse(host, project, state) {
       ['STATUS', 'ADJUSTMENT REQUIRED'],
     ]),
     node('div', { className: 'oe-band ok' }, [node('b', { text: 'Definition unchanged. ' }), node('span', { text: 'The yard may price services, decline unavailable work, or return a material/timing question. It may not silently rewrite the confirmed geometry.' })]),
-    node('div', { className: 'oe-kv' }, [node('span', {}, [node('span', { className: 'oe-chip ok', text: 'ACCEPTED' }), node('span', { text: 'Default edge / labels / loose-cart pickup' })]), node('span', { text: 'as asked' })]),
+    ...ALCOVE_DECISIONS.map((decision) => {
+      const selected = selectedOption(decision, state);
+      return node('div', { className: 'oe-kv' }, [
+        node('span', { text: decision[1] }),
+        node('span', { text: selected ? `${selected[1]} · ${selected[2]}` : 'unresolved' }),
+      ]);
+    }),
     node('div', { className: 'oe-kv' }, [node('span', {}, [node('span', { className: 'oe-chip wn', text: 'PRICE' }), node('span', { text: 'Any paid extras' })]), node('span', { text: 'yard-priced before acceptance' })]),
     node('div', { className: 'oe-kv' }, [node('span', {}, [node('span', { className: 'oe-chip no', text: 'NOT OFFERED' }), node('span', { text: 'Stain + clear' })]), node('span', { text: 'capability not declared' })]),
     node('h3', { text: 'One thing only you can decide' }),
@@ -354,7 +361,11 @@ function renderResponse(host, project, state) {
   );
 }
 
-function renderTerms(host, project) {
+function renderTerms(host, project, screen) {
+  const reviewStatus = screen.dataset.reviewCurrent !== 'true' ? 'not recorded'
+    : screen.dataset.reviewType === 'CONFIRM_DEFINITION' ? 'confirmed'
+      : screen.dataset.reviewType === 'ACKNOWLEDGE_UNRESOLVED' ? 'unresolved acknowledged'
+        : 'unresolved';
   host.replaceChildren(
     node('p', { className: 'oe-tag', text: 'STB — REFERENCE COMMERCIAL HANDOFF' }),
     node('h2', { text: 'Terms → settlement → queue' }),
@@ -366,7 +377,7 @@ function renderTerms(host, project) {
       ['AUTHORITY', 'no physical execution'],
     ]),
     node('div', { className: 'oe-tl' }, [
-      node('div', { className: 'oe-dot now', text: '●' }), node('div', { text: 'Definition review recorded' }), node('div', { className: 'oe-who', text: 'holder' }), node('div', { className: 'oe-when', text: 'complete' }),
+      node('div', { className: reviewStatus === 'not recorded' ? 'oe-dot open' : 'oe-dot now', text: reviewStatus === 'not recorded' ? '○' : '●' }), node('div', { text: 'Definition review' }), node('div', { className: 'oe-who', text: 'holder' }), node('div', { className: 'oe-when', text: reviewStatus }),
       node('div', { className: 'oe-dot now', text: '●' }), node('div', { text: 'Submission / yard response' }), node('div', { className: 'oe-who', text: 'yard' }), node('div', { className: 'oe-when', text: 'reference' }),
       node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Offer accepted' }), node('div', { className: 'oe-who', text: 'holder' }), node('div', { className: 'oe-when', text: 'future' }),
       node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Settlement evidence' }), node('div', { className: 'oe-who', text: 'commercial' }), node('div', { className: 'oe-when', text: 'future' }),
@@ -377,7 +388,7 @@ function renderTerms(host, project) {
       node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'READY notice → 4 h pickup window' }), node('div', { className: 'oe-who', text: 'fulfillment' }), node('div', { className: 'oe-when', text: 'future' }),
       node('div', { className: 'oe-dot open', text: '○' }), node('div', { text: 'Custody transfer → close' }), node('div', { className: 'oe-who', text: 'handoff' }), node('div', { className: 'oe-when', text: 'future' }),
     ]),
-    node('div', { className: 'oe-band warn' }, [node('b', { text: 'Current Alcove truth: ' }), node('span', { text: '44″ nominal interior span; no ordered-size reduction applied. Ordered-size adjustment, structure, installation and Store resolution remain unresolved.' })]),
+    node('div', { className: 'oe-band warn' }, [node('b', { text: 'Current Alcove truth: ' }), node('span', { text: `${alcoveSummaryLine(project)} No ordered-size reduction applied. Ordered-size adjustment, structure, installation and Store resolution remain unresolved.` })]),
     node('div', { className: 'oe-foot' }, [
       node('button', { text: 'Back', attrs: { type: 'button', 'data-oe-action': 'back-response' } }),
       node('button', { text: 'Review definition', attrs: { type: 'button', 'data-action': 'open-confirm' } }),
@@ -389,7 +400,7 @@ function renderTerms(host, project) {
 function renderOrderExchange(host, project, screen) {
   const state = stateFor(screen);
   if (state.stage === 'response') return renderResponse(host, project, state);
-  if (state.stage === 'terms') return renderTerms(host, project);
+  if (state.stage === 'terms') return renderTerms(host, project, screen);
   return renderRequest(host, project, state);
 }
 
@@ -400,6 +411,11 @@ async function decorateOrderExchange(root) {
   if (!localRecordId) return;
   const project = await projectIndex(localRecordId);
   if (!project || project.classId !== ALCOVE_CLASS_ID || !root.contains(screen)) return;
+  const candidate = await recordSnapshot(localRecordId, 'candidate', project.currentHead);
+  if (!root.contains(screen)) return;
+  project.referenceConfiguration = candidate?.payload?.configuration
+    ? evaluateAlcoveConfiguration(candidate.payload.configuration)
+    : null;
   // Another observer callback may have completed while projectIndex was pending.
   if (screen.querySelector('[data-order-exchange="alcove"]')) return;
   const host = node('section', { className: 'order-exchange', attrs: { 'data-order-exchange': 'alcove' } });
@@ -428,6 +444,8 @@ export function startFutureChainLayer(root) {
 
     const choice = event.target.closest('[data-oe-choice]');
     if (choice && !choice.disabled) {
+      if (state.stage !== 'request') return;
+      state.stockChoice = null;
       state.choices[choice.getAttribute('data-oe-choice')] = choice.getAttribute('data-oe-value');
       renderOrderExchange(host, project, screen);
       host.querySelector(`[data-oe-choice="${choice.getAttribute('data-oe-choice')}"][data-oe-value="${choice.getAttribute('data-oe-value')}"]`)?.focus();
@@ -435,21 +453,38 @@ export function startFutureChainLayer(root) {
     }
 
     const stock = event.target.closest('[data-oe-stock]');
-    if (stock) {
+    if (stock && !stock.disabled && state.stage === 'response') {
       state.stockChoice = stock.getAttribute('data-oe-stock');
       renderOrderExchange(host, project, screen);
       host.querySelector(`[data-oe-stock="${state.stockChoice}"]`)?.focus();
       return;
     }
 
-    const action = event.target.closest('[data-oe-action]')?.getAttribute('data-oe-action');
-    if (!action) return;
-    if (action === 'defaults') state.choices = { ...ALCOVE_DEFAULTS };
-    if (action === 'send') state.stage = 'response';
-    if (action === 'back-request') state.stage = 'request';
-    if (action === 'terms') state.stage = 'terms';
-    if (action === 'back-response') state.stage = 'response';
+    const control = event.target.closest('[data-oe-action]');
+    if (!control || control.disabled) return;
+    const action = control.getAttribute('data-oe-action');
+    if (action === 'defaults' && state.stage === 'request') {
+      state.choices = { ...ALCOVE_DEFAULTS };
+      state.stockChoice = null;
+    } else if (action === 'send' && state.stage === 'request') {
+      if (!ALCOVE_DECISIONS.every((decision) => {
+        const selected = selectedOption(decision, state);
+        return selected && !selected[3];
+      })) return;
+      state.stage = 'response';
+    } else if (action === 'back-request' && state.stage === 'response') {
+      state.stage = 'request';
+    } else if (action === 'terms' && state.stage === 'response' && ['wait', 'review'].includes(state.stockChoice)) {
+      state.stage = 'terms';
+    } else if (action === 'back-response' && state.stage === 'terms') {
+      state.stage = 'response';
+    } else return;
     renderOrderExchange(host, project, screen);
+    const focusTarget = action === 'defaults' ? host.querySelector('[data-oe-action="defaults"]') : host.querySelector('h2');
+    if (focusTarget) {
+      if (focusTarget.tagName === 'H2') focusTarget.tabIndex = -1;
+      focusTarget.focus();
+    }
   });
 
   let queued = false;
