@@ -207,10 +207,10 @@ function addOrderStyle() {
     .oe-boundary{font-size:10.5px;color:#8a8580;line-height:1.6;margin:0}.oe-boundary b{color:#57534e}.oe-boundary strong{color:#7a4f22}
     .oe-foot{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:11px;padding-top:10px;border-top:1px solid #e3ded7}.oe-foot button{font:inherit;font-size:12px;padding:7px 14px;border-radius:7px;cursor:pointer;border:1px solid #e3ded7;background:#faf9f7;color:#1c1917}.oe-foot button.go{background:#f6efe4;border-color:#d9c3a2;color:#7a4f22;font-weight:600}.oe-foot button:disabled{opacity:.4;cursor:not-allowed}.oe-fine{margin-left:auto;font-size:9.5px;color:#8a8580;text-align:right;line-height:1.4;white-space:pre-line}
     .oe-kv{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;padding:4px 0;border-bottom:1px dotted #e3ded7}.oe-kv:last-child{border-bottom:0}.oe-kv span:first-child{color:#57534e}.oe-kv span:last-child{text-align:right}.oe-chip{display:inline-block;font-size:8px;font-weight:700;letter-spacing:.05em;padding:1px 5px;border-radius:3px;margin-right:5px;vertical-align:1px}.oe-chip.ok{background:#e8f0e0;color:#5d7f3f;border:1px solid #cddcbf}.oe-chip.wn{background:#fdf6e3;color:#8a6d1f;border:1px solid #d9c3a2}.oe-chip.no{background:#f7e6e1;color:#9a3f2f;border:1px solid #e8cabf}
-    .oe-pick{border:1px solid #e3ded7;border-radius:8px;padding:9px 11px;margin-bottom:6px;cursor:pointer}.oe-pick.on{border-color:#d9c3a2;background:#f6efe4}.oe-pick .head{display:flex;justify-content:space-between;gap:10px;font-size:12px;font-weight:600}.oe-pick p{margin:3px 0 0;font-size:10.5px;color:#8a8580;line-height:1.4}
+    .oe-pick{display:block;width:100%;font:inherit;text-align:left;background:transparent;color:inherit;border:1px solid #e3ded7;border-radius:8px;padding:9px 11px;margin-bottom:6px;cursor:pointer}.oe-pick.on{border-color:#d9c3a2;background:#f6efe4}.oe-pick .head{display:flex;justify-content:space-between;gap:10px;font-size:12px;font-weight:600}.oe-pick .description{display:block;margin:3px 0 0;font-size:10.5px;color:#8a8580;line-height:1.4}
     .oe-tl{display:grid;grid-template-columns:13px 1fr auto auto;gap:0 9px;font-size:11.5px;align-items:baseline}.oe-tl>div{padding:3.5px 0;border-bottom:1px dotted #e3ded7}.oe-dot{color:#5d7f3f;font-weight:700}.oe-dot.open{color:#8a8580}.oe-dot.now{color:#7a4f22}.oe-who,.oe-when{color:#8a8580;font-size:10px;white-space:nowrap}.oe-when{font-family:ui-monospace,Menlo,monospace}
-    @media(prefers-color-scheme:dark){.order-exchange{background:#1e1c16;border-color:#332f26;color:#f2efe8}.order-exchange .oe-sub,.oe-band,.oe-kv span:first-child,.oe-total .big i,.oe-boundary,.oe-pick p,.oe-fine,.oe-who,.oe-when{color:#b4aea3}.oe-hdr>div,.oe-band{background:#191711;border-color:#332f26}.oe-total,.oe-pill.on,.oe-pick.on{background:#262015;border-color:#4d4130}.oe-pill,.oe-foot button{background:#16150f;color:#f2efe8;border-color:#332f26}.oe-total .left b{color:#f2efe8}.order-exchange h3{color:#e0ad74}}
-    @media(max-width:700px){.oe-row{flex-wrap:wrap}.oe-title{width:auto;flex:1}.oe-value{width:auto}.oe-fine{width:100%;margin-left:0;text-align:left}}
+    @media(prefers-color-scheme:dark){.order-exchange{background:#1e1c16;border-color:#332f26;color:#f2efe8}.order-exchange .oe-sub,.oe-band,.oe-kv span:first-child,.oe-total .big i,.oe-boundary,.oe-pick .description,.oe-fine,.oe-who,.oe-when{color:#b4aea3}.oe-hdr>div,.oe-band{background:#191711;border-color:#332f26}.oe-total,.oe-pill.on,.oe-pick.on{background:#262015;border-color:#4d4130}.oe-pill,.oe-foot button{background:#16150f;color:#f2efe8;border-color:#332f26}.oe-total .left b{color:#f2efe8}.order-exchange h3{color:#e0ad74}}
+    @media(max-width:700px){.oe-row{flex-wrap:wrap}.oe-title{width:auto;flex:1}.oe-value{width:auto}.oe-fine{width:100%;margin-left:0;text-align:left}.oe-total{flex-wrap:wrap}.oe-tl{grid-template-columns:13px minmax(0,1fr) auto auto}.oe-who,.oe-when{white-space:normal}.oe-hdr span{overflow-wrap:anywhere}}
   `;
   document.head.append(style);
 }
@@ -263,6 +263,7 @@ function renderRequest(host, project, state) {
         text: option[1],
         attrs: {
           type: 'button',
+          'aria-pressed': String(state.choices[decision[0]] === option[0]),
           'data-oe-choice': decision[0],
           'data-oe-value': option[0],
           ...(option[3] ? { disabled: 'true', title: option[2] } : {}),
@@ -324,13 +325,13 @@ function renderResponse(host, project, state) {
     node('div', { className: 'oe-kv' }, [node('span', {}, [node('span', { className: 'oe-chip wn', text: 'PRICE' }), node('span', { text: 'Any paid extras' })]), node('span', { text: 'yard-priced before acceptance' })]),
     node('div', { className: 'oe-kv' }, [node('span', {}, [node('span', { className: 'oe-chip no', text: 'NOT OFFERED' }), node('span', { text: 'Stain + clear' })]), node('span', { text: 'capability not declared' })]),
     node('h3', { text: 'One thing only you can decide' }),
-    node('div', { className: `oe-pick${state.stockChoice === 'wait' ? ' on' : ''}`, attrs: { 'data-oe-stock': 'wait' } }, [
-      node('div', { className: 'head' }, [node('span', { text: 'Wait for the requested material' }), node('span', { text: 'same definition' })]),
-      node('p', { text: 'No substitute. Yard returns a later plan.' }),
+    node('button', { className: `oe-pick${state.stockChoice === 'wait' ? ' on' : ''}`, attrs: { type: 'button', 'aria-pressed': String(state.stockChoice === 'wait'), 'data-oe-stock': 'wait' } }, [
+      node('span', { className: 'head' }, [node('span', { text: 'Wait for the requested material' }), node('span', { text: 'same definition' })]),
+      node('span', { className: 'description', text: 'No substitute. Yard returns a later plan.' }),
     ]),
-    node('div', { className: `oe-pick${state.stockChoice === 'review' ? ' on' : ''}`, attrs: { 'data-oe-stock': 'review' } }, [
-      node('div', { className: 'head' }, [node('span', { text: 'Review a substitute' }), node('span', { text: 'new decision' })]),
-      node('p', { text: 'Material identity changes only if you explicitly accept it.' }),
+    node('button', { className: `oe-pick${state.stockChoice === 'review' ? ' on' : ''}`, attrs: { type: 'button', 'aria-pressed': String(state.stockChoice === 'review'), 'data-oe-stock': 'review' } }, [
+      node('span', { className: 'head' }, [node('span', { text: 'Review a substitute' }), node('span', { text: 'new decision' })]),
+      node('span', { className: 'description', text: 'Material identity changes only if you explicitly accept it.' }),
     ]),
     node('h3', { text: 'Timing' }),
     node('div', { className: 'oe-tl' }, [
@@ -399,6 +400,8 @@ async function decorateOrderExchange(root) {
   if (!localRecordId) return;
   const project = await projectIndex(localRecordId);
   if (!project || project.classId !== ALCOVE_CLASS_ID || !root.contains(screen)) return;
+  // Another observer callback may have completed while projectIndex was pending.
+  if (screen.querySelector('[data-order-exchange="alcove"]')) return;
   const host = node('section', { className: 'order-exchange', attrs: { 'data-order-exchange': 'alcove' } });
   host.__stbProject = project;
   const anchor = screen.querySelector('[data-future-chain="true"]')
@@ -427,6 +430,7 @@ export function startFutureChainLayer(root) {
     if (choice && !choice.disabled) {
       state.choices[choice.getAttribute('data-oe-choice')] = choice.getAttribute('data-oe-value');
       renderOrderExchange(host, project, screen);
+      host.querySelector(`[data-oe-choice="${choice.getAttribute('data-oe-choice')}"][data-oe-value="${choice.getAttribute('data-oe-value')}"]`)?.focus();
       return;
     }
 
@@ -434,6 +438,7 @@ export function startFutureChainLayer(root) {
     if (stock) {
       state.stockChoice = stock.getAttribute('data-oe-stock');
       renderOrderExchange(host, project, screen);
+      host.querySelector(`[data-oe-stock="${state.stockChoice}"]`)?.focus();
       return;
     }
 
