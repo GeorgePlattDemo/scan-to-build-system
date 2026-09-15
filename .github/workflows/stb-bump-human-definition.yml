@@ -1,0 +1,37 @@
+name: STB bump human definition
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update only the visible-build token
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('README.md')
+          s = p.read_text()
+          old = 'system-build-current.html?v=84b70f3'
+          new = 'system-build-current.html?v=913fc8a'
+          if s.count(old) != 1:
+              raise SystemExit(f'expected one old token, found {s.count(old)}')
+          p.write_text(s.replace(old, new, 1))
+          PY
+          git diff --check -- README.md
+      - name: Commit README and remove temporary workflow
+        run: |
+          git rm .github/workflows/stb-bump-human-definition.yml
+          git config user.name 'Scan-to-Build bounded edit'
+          git config user.email 'actions@users.noreply.github.com'
+          git add README.md
+          test "$(git diff --cached --name-only | sort | tr '\n' ' ')" = ".github/workflows/stb-bump-human-definition.yml README.md "
+          git commit -m 'Point System Build button to critical-fit human-definition revision'
+          git push origin HEAD:main
