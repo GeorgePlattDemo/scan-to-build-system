@@ -363,8 +363,8 @@ function renderResponse(host, project, state) {
 
 function renderTerms(host, project, screen) {
   const reviewStatus = screen.dataset.reviewCurrent !== 'true' ? 'not recorded'
-    : screen.dataset.reviewType === 'CONFIRM_DEFINITION' ? 'confirmed'
-      : screen.dataset.reviewType === 'ACKNOWLEDGE_UNRESOLVED' ? 'unresolved acknowledged'
+    : screen.dataset.reviewType === 'DefinitionReviewRecorded' ? 'confirmed'
+      : screen.dataset.reviewType === 'UnresolvedDefinitionAcknowledged' ? 'unresolved acknowledged'
         : 'unresolved';
   host.replaceChildren(
     node('p', { className: 'oe-tag', text: 'STB — REFERENCE COMMERCIAL HANDOFF' }),
