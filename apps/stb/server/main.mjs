@@ -26,6 +26,10 @@ import { createStoreAdapter } from './store-adapter.mjs';
 export const APP_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 const CANDIDATE_STATIC_ASSETS = Object.freeze({
+  '/domain/reference-receipt.mjs': Object.freeze({
+    relativePath: 'browser/domain/reference-receipt.mjs',
+    contentType: 'text/javascript; charset=utf-8',
+  }),
   '/ui/project-configurator.mjs': Object.freeze({
     relativePath: 'browser/ui/project-configurator.mjs',
     contentType: 'text/javascript; charset=utf-8',

@@ -18,6 +18,10 @@ function sortEvents(records) {
 function eventLabel(record) {
   const type = record.payload?.type ?? record.kind;
   switch (type) {
+    case 'ReferenceRequestSaved':
+      return `Reference request receipt saved (${record.payload.receiptId})`;
+    case 'ReferenceMaterialChoiceSaved':
+      return `Reference material decision saved (${record.payload.receiptId})`;
     case 'project-created':
       return 'Project created';
     case 'evidence-attached':

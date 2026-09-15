@@ -1,3 +1,4 @@
+import { referenceReceipts, saveReferenceRequest, saveReferenceMaterialChoice } from '/domain/reference-receipt.mjs';
 import { projectIndex, recordSnapshot } from '/data/selectors.mjs';
 import { ALCOVE_CLASS_ID, evaluateAlcoveConfiguration } from '/shared/alcove-rule.mjs';
 
@@ -197,7 +198,7 @@ function addOrderStyle() {
     .oe-hdr{display:flex;flex-wrap:wrap;border:1px solid #d9c3a2;border-radius:7px;overflow:hidden;margin-bottom:10px}
     .oe-hdr>div{flex:1;min-width:120px;padding:5px 9px;border-right:1px solid #e3ded7;background:#f4f2ef}
     .oe-hdr>div:last-child{border-right:0}.oe-hdr b{display:block;font-size:8.5px;letter-spacing:.07em;color:#8a8580}.oe-hdr span{font-size:11px;font-family:ui-monospace,Menlo,monospace}
-    .oe-band{border-radius:6px;padding:7px 10px;font-size:11px;margin-bottom:10px;line-height:1.45;background:#f4f2ef;border:1px solid #e3ded7;color:#57534e}
+    .oe-band{overflow-wrap:anywhere;border-radius:6px;padding:7px 10px;font-size:11px;margin-bottom:10px;line-height:1.45;background:#f4f2ef;border:1px solid #e3ded7;color:#57534e}
     .oe-band.warn{background:#fdf6e3;border-color:#d9c3a2;color:#8a6d1f}.oe-band.ok{background:#f6efe4;border-color:#d9c3a2;color:#7a4f22}
     .oe-row{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px dotted #e3ded7}.oe-row:last-of-type{border-bottom:0}
     .oe-num{flex:none;width:17px;font-size:9.5px;font-weight:700;color:#8a8580}.oe-title{flex:none;width:150px;font-weight:600;font-size:12px}.oe-title i{display:block;font-style:normal;font-weight:400;font-size:10px;color:#8a8580;line-height:1.3}
@@ -243,6 +244,10 @@ function stateFor(screen) {
       stage: 'request',
       choices: { ...ALCOVE_DEFAULTS },
       stockChoice: null,
+      receipt: null,
+      history: [],
+      busy: false,
+      error: '',
     };
   }
   return screen.__stbOrderExchange;
@@ -305,7 +310,7 @@ function renderRequest(host, project, state) {
       node('button', { className: 'go', text: 'SEND TO THE YARD', attrs: { type: 'button', 'data-oe-action': 'send', ...(answered !== ALCOVE_DECISIONS.length ? { disabled: 'true' } : {}) } }),
       node('button', { text: 'Use all defaults', attrs: { type: 'button', 'data-oe-action': 'defaults' } }),
       node('button', { text: 'Back', attrs: { type: 'button', 'data-action': 'open-confirm' } }),
-      node('span', { className: 'oe-fine', text: 'Reference walkthrough only. Nothing charged or reserved.\nThese service choices reset when you leave or reload this screen.' }),
+      node('span', { className: 'oe-fine', text: 'Reference walkthrough only. Nothing charged or reserved.\nSending saves a reference receipt in this browser. Unsent edits are not saved.' }),
     ]),
   );
 }
@@ -313,10 +318,10 @@ function renderRequest(host, project, state) {
 function renderResponse(host, project, state) {
   host.replaceChildren(
     node('p', { className: 'oe-tag', text: 'STB — ALCOVE INSERT · YARD RESPONSE' }),
-    node('h2', { text: 'The yard came back' }),
-    node('p', { className: 'oe-sub', text: 'Reference response · identified geometry unchanged' }),
+    node('h2', { text: 'The yard came back — reference scenario' }),
+    node('p', { className: 'oe-sub', text: 'Reference scenario REF-SZ-001: requested material is unavailable. Your saved request remains unchanged.' }),
     header([
-      ['RESPONSE', 'REF-SZ-001'],
+      ['RECEIPT', state.receipt?.id ?? 'not saved'],
       ['AGAINST', project.currentHead ?? 'current confirmed revision'],
       ['FROM', 'steward · store-zero'],
       ['STATUS', 'ADJUSTMENT REQUIRED'],
@@ -399,9 +404,26 @@ function renderTerms(host, project, screen) {
 
 function renderOrderExchange(host, project, screen) {
   const state = stateFor(screen);
-  if (state.stage === 'response') return renderResponse(host, project, state);
-  if (state.stage === 'terms') return renderTerms(host, project, screen);
-  return renderRequest(host, project, state);
+  if (state.stage === 'response') renderResponse(host, project, state);
+  else if (state.stage === 'terms') renderTerms(host, project, screen);
+  else renderRequest(host, project, state);
+  if (state.receipt) host.append(node('p', { className: 'oe-band', attrs: { 'data-reference-receipt': state.receipt.id },
+    text: `Reference request receipt ${state.receipt.id} · saved ${state.receipt.createdAt}. This records your request, not payment or a commercial order.` }));
+  if (state.history.length) host.append(node('details', { attrs: { 'data-reference-history': 'true' } }, [
+    node('summary', { text: 'Saved receipts and changes' }),
+    ...state.history.map(record => node('div', { className: 'oe-band' }, [
+      node('b', { text: `${record.createdAt} · ${record.payload.type === 'ReferenceRequestSaved' ? 'Request receipt' : 'Material decision'}` }),
+      node('p', { text: `Receipt: ${record.id} · revision: ${record.payload.candidateRevisionId}` }),
+      node('p', { text: record.payload.reason }),
+      node('p', { text: `Earlier record: ${record.payload.previousReceiptId ?? record.payload.previousDecisionId ?? record.payload.requestId ?? 'none'}` }),
+      record.payload.choices ? node('p', { text: ALCOVE_DECISIONS.map(decision => {
+        const selected = decision[3].find(option => option[0] === record.payload.choices[decision[0]]);
+        return `${decision[1]}: ${selected?.[1] ?? 'unresolved'}`;
+      }).join(' · ') }) : null,
+    ])),
+    node('p', { text: 'These records are retained with the project and included in its existing record export. Imported receipts remain historical.' }),
+  ]));
+  if (state.error) host.append(node('p', { className: 'oe-band warn', attrs: { role: 'alert' }, text: state.error }));
 }
 
 async function decorateOrderExchange(root) {
@@ -412,6 +434,7 @@ async function decorateOrderExchange(root) {
   const project = await projectIndex(localRecordId);
   if (!project || project.classId !== ALCOVE_CLASS_ID || !root.contains(screen)) return;
   const candidate = await recordSnapshot(localRecordId, 'candidate', project.currentHead);
+  const history = await referenceReceipts(localRecordId);
   if (!root.contains(screen)) return;
   project.referenceConfiguration = candidate?.payload?.configuration
     ? evaluateAlcoveConfiguration(candidate.payload.configuration)
@@ -420,6 +443,15 @@ async function decorateOrderExchange(root) {
   if (screen.querySelector('[data-order-exchange="alcove"]')) return;
   const host = node('section', { className: 'order-exchange', attrs: { 'data-order-exchange': 'alcove' } });
   host.__stbProject = project;
+  const state = stateFor(screen);
+  state.history = history;
+  const receipt = history.filter(record => record.payload.type === 'ReferenceRequestSaved').at(-1);
+  if (!project.imported && receipt?.payload.candidateRevisionId === project.currentHead) {
+    state.receipt = receipt;
+    state.choices = { ...receipt.payload.choices };
+    state.stockChoice = history.filter(record => record.payload.type === 'ReferenceMaterialChoiceSaved' && record.payload.requestId === receipt.id).at(-1)?.payload.choice ?? null;
+    state.stage = 'response';
+  }
   const anchor = screen.querySelector('[data-future-chain="true"]')
     ?? screen.querySelector('[data-narrative="authority-map"]')
     ?? screen.querySelector('.result-retained')
@@ -434,13 +466,34 @@ export function startFutureChainLayer(root) {
   addStyle();
   addOrderStyle();
 
-  root.addEventListener('click', (event) => {
+  root.addEventListener('click', async (event) => {
     const host = event.target.closest('[data-order-exchange="alcove"]');
     if (!host || !root.contains(host)) return;
     const screen = host.closest('[data-screen="result"]');
     const project = host.__stbProject;
     if (!screen || !project) return;
     const state = stateFor(screen);
+    if (state.busy) return;
+    state.error = '';
+
+    const persist = async (save) => {
+      state.busy = true;
+      host.setAttribute('aria-busy', 'true');
+      const pending = node('p', { attrs: { role: 'status' }, text: 'Saving the reference record…' });
+      host.append(pending);
+      try {
+        const record = await save();
+        state.history = await referenceReceipts(project.localRecordId);
+        return record;
+      } catch (error) {
+        state.error = `Could not complete the reference-record save: ${error.message} Reopen the record to check what was retained before retrying.`;
+        return null;
+      } finally {
+        state.busy = false;
+        host.removeAttribute('aria-busy');
+        pending.remove();
+      }
+    };
 
     const choice = event.target.closest('[data-oe-choice]');
     if (choice && !choice.disabled) {
@@ -454,7 +507,10 @@ export function startFutureChainLayer(root) {
 
     const stock = event.target.closest('[data-oe-stock]');
     if (stock && !stock.disabled && state.stage === 'response') {
-      state.stockChoice = stock.getAttribute('data-oe-stock');
+      const choice = stock.getAttribute('data-oe-stock');
+      const saved = await persist(() => saveReferenceMaterialChoice({ localRecordId: project.localRecordId,
+        candidateRevisionId: project.currentHead, requestId: state.receipt?.id, choice }));
+      if (saved) state.stockChoice = choice;
       renderOrderExchange(host, project, screen);
       host.querySelector(`[data-oe-stock="${state.stockChoice}"]`)?.focus();
       return;
@@ -471,7 +527,13 @@ export function startFutureChainLayer(root) {
         const selected = selectedOption(decision, state);
         return selected && !selected[3];
       })) return;
-      state.stage = 'response';
+      const saved = await persist(() => saveReferenceRequest({ localRecordId: project.localRecordId,
+        candidateRevisionId: project.currentHead, choices: state.choices }));
+      if (saved) {
+        if (state.receipt?.id !== saved.id) state.stockChoice = null;
+        state.receipt = saved;
+        state.stage = 'response';
+      }
     } else if (action === 'back-request' && state.stage === 'response') {
       state.stage = 'request';
     } else if (action === 'terms' && state.stage === 'response' && ['wait', 'review'].includes(state.stockChoice)) {
@@ -494,7 +556,13 @@ export function startFutureChainLayer(root) {
     queueMicrotask(() => {
       queued = false;
       decorateFutureChain(root);
-      void decorateOrderExchange(root);
+      void decorateOrderExchange(root).catch(() => {
+        const screen = root.querySelector('[data-screen="result"]');
+        if (screen && !screen.querySelector('[data-reference-load-error]')) screen.append(node('p', {
+          attrs: { role: 'alert', 'data-reference-load-error': 'true' },
+          text: 'Reference receipts could not be loaded. Reopen the project before continuing; existing records have not been replaced.',
+        }));
+      });
     });
   };
   const observer = new MutationObserver(schedule);
