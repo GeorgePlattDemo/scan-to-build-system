@@ -1,0 +1,39 @@
+name: STB bump visible build version d80e1a8
+
+on:
+  push:
+    branches: ['main']
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    if: github.event.head_commit.message == 'chore: stage visible build version bump'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Advance only the System Build cache token
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('README.md')
+          s = p.read_text()
+          old = 'system-build-current.html?v=13fe867'
+          new = 'system-build-current.html?v=d80e1a8'
+          if s.count(old) != 1:
+              raise SystemExit(f'expected exactly one old System Build token, found {s.count(old)}')
+          s = s.replace(old, new, 1)
+          if s.count(new) != 1:
+              raise SystemExit('new System Build token verification failed')
+          p.write_text(s)
+          PY
+          git diff --check -- README.md
+      - name: Commit version bump and remove temporary workflow
+        run: |
+          git rm .github/workflows/stb-bump-visible-build-d80e1a8.yml
+          git config user.name 'Scan-to-Build bounded edit'
+          git config user.email 'actions@users.noreply.github.com'
+          git add README.md
+          git commit -m 'Point System Build button to project tile asset revision'
+          git push origin HEAD:main
