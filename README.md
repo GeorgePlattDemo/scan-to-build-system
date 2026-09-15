@@ -9,7 +9,7 @@ U.S. Patents 9,720,401 B2 and 10,768,609 B2
 
 ## Open Scan-to-Build
 
-<a href="https://georgeplattdemo.github.io/scan-to-build-review/system-build-current.html?v=13fe867"><kbd>▶ OPEN SYSTEM BUILD</kbd></a>
+<a href="https://georgeplattdemo.github.io/scan-to-build-review/system-build-current.html?v=d80e1a8"><kbd>▶ OPEN SYSTEM BUILD</kbd></a>
 &nbsp;
 <a href="http://localhost:4317/"><kbd>▶ OPEN CURRENT APP — LOCAL</kbd></a>
 
