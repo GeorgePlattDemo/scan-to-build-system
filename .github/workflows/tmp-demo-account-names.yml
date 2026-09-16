@@ -28,7 +28,7 @@ jobs:
           node --check apps/stb/test/unit/account-commerce.test.mjs
           git diff --check
           git diff --name-only
-          test -z "$(git diff --name-only | grep -Ev '^(apps/stb/|\.tmp-demo-account-names\.py|\.github/workflows/tmp-demo-account-names\.yml)$' || true)"
+          test -z "$(git diff --name-only | grep -Ev '^apps/stb/|^\.tmp-demo-account-names\.py$|^\.github/workflows/tmp-demo-account-names\.yml$' || true)"
 
       - name: Install app dependencies
         working-directory: apps/stb
