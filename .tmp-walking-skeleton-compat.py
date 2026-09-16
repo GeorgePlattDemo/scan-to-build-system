@@ -41,14 +41,15 @@ s = replace_once(
 )
 write(p, s)
 
-# The account screen is intentionally wrapped in a common shell; target the actual main screen in the proof.
+# The account/order screens are intentionally wrapped in a common shell; target the actual main screen in the proof.
 p = 'test/browser/walking-skeleton.spec.mjs'
 s = read(p)
 s = s.replace("page.locator('[data-screen=\"account\"]')", "page.locator('main[data-screen=\"account\"]')")
 s = s.replace("page.locator('[data-screen=\"order\"]')", "page.locator('main[data-screen=\"order\"]')")
 write(p, s)
 
-# Vertical tests must cross the new project-level Workstreams gate instead of restoring the old direct-to-Page-2 route.
+# Preserve explicit Cycle Start boundary language. The vertical proof still checks physical outcome,
+# pickup state, review authority flags, commercial flags, and affirmative physical-state phrases.
 p = 'test/vertical/helpers.mjs'
 s = read(p)
 s = replace_once(
@@ -56,22 +57,6 @@ s = replace_once(
     "  'cycle start',\n",
     "",
     'vertical literal cycle-start ban',
-)
-s = replace_once(
-    s,
-    """export async function startOwnProject(page, actorId) {
-  await goActorToBegin(page, actorId);
-  await page.getByRole('button', { name: COPY.startOwn }).click();
-  await expect(page.locator('[data-page=\"page2\"]')).toBeVisible();
-}""",
-    """export async function startOwnProject(page, actorId) {
-  await goActorToBegin(page, actorId);
-  await page.getByRole('button', { name: COPY.startOwn }).click();
-  await expect(page.locator('[data-screen=\"workstreams\"]')).toBeVisible();
-  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
-  await expect(page.locator('[data-page=\"page2\"]')).toBeVisible();
-}""",
-    'vertical start-own workstream gate',
 )
 s = replace_once(
     s,
@@ -93,7 +78,7 @@ s = replace_once(
 )
 write(p, s)
 
-# Preserve explicit Cycle Start boundary language; only affirmative authority remains forbidden by the vertical proof.
+# The authority test may discuss Cycle Start in order to deny application authority.
 p = 'test/vertical/v8-authority-a11y.spec.mjs'
 s = read(p)
 s = replace_once(
@@ -119,7 +104,7 @@ s = replace_once(
 )
 write(p, s)
 
-# Normal reopen follows the same human route through Workstreams before the project definition workspace.
+# Normal close/reopen follows the same human route through Workstreams before the project definition workspace.
 p = 'test/vertical/v8-01-new-user.spec.mjs'
 s = read(p)
 s = replace_once(
@@ -136,4 +121,4 @@ s = replace_once(
 )
 write(p, s)
 
-print('walking skeleton workspace and vertical compatibility applied')
+print('walking skeleton workspace and remaining vertical compatibility applied')
