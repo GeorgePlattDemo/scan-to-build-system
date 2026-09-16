@@ -1,6 +1,7 @@
 import { COPY } from '/shared/contracts.mjs';
 import { renderStorePanel } from '/ui/store-panel.mjs';
 import { renderSharedCandidateView } from '/ui/candidate-view.mjs';
+import { renderCriticalFitFullAudit } from '/ui/critical-fit-full-audit.mjs';
 
 function el(tag, options = {}, children = []) {
   const node = document.createElement(tag);
@@ -428,6 +429,7 @@ export function page7Main({ project, presentation }) {
           }),
         ],
       ),
+      renderCriticalFitFullAudit({ project, presentation }),
       el(
         'details',
         {
