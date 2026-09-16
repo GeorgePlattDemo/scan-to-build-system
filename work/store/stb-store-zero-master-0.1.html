@@ -284,11 +284,13 @@
   <h2 class="lab">IDENTITY AND PINS</h2>
   <div class="facts" id="sz-facts"></div>
 
-  <h2 class="lab">DECLARED STOCK — STATED FIGURES, NOT PHYSICAL COUNTS</h2>
+  <h2 class="lab">MODELED MATERIAL CATALOG — SEPTEMBER 15, 2026</h2>
+  <div class="band calm"><b>Store Zero is complete on purpose.</b> Material prices are modeled reference values built from an aggregate of local and regional retail sampling as of September 15, 2026. Store Zero applies its declared 5% mark-on to that sampled-retail basis. Inventory counts are modeled Store Zero test inventory — not merchant inventory and not physical counts — and are intentionally high enough for ordinary bounded demonstrations to resolve cleanly. A shortage becomes meaningful when a request actually exceeds a declared modeled count.</div>
+
+  <h2 class="lab">DIMENSIONAL STOCK — MODELED COUNTS</h2>
   <div id="sz-stock"></div>
 
-  <h2 class="lab">MENARDS REFERENCE SHEET SHELF — MERCHANT PRICE × 1.05</h2>
-  <div class="band calm"><b>Reference merchant shelf, not live Store inventory.</b> Menards Everyday Low Price is retained as the merchant basis and Store Zero derives its reference shelf price by applying the declared 5% mark-on. Expired rebate values are not used. Store Zero on-hand remains unresolved until a Store declaration establishes it.</div>
+  <h2 class="lab">SHEET GOODS — MODELED COUNTS</h2>
   <div id="sz-sheet-stock"></div>
 
   <h2 class="lab">THE NON-CLAIM</h2>
@@ -669,7 +671,8 @@ var PROJECT_DEFINITION = {
   quantityBasis: 'REFERENCE DEMONSTRATION — secondary-operation quantities not yet reconciled to a configurator-emitted part list',
 
   fabrication: {
-    material: 272.86, cellRecovery: 83.56, hardware: 18.00, total: 374.42,
+    material: null, cellRecovery: 83.56, hardware: 18.00, total: null,
+    priceBasis: 'derived at render from the pinned Store Zero catalog',
     cycleMin: 29.1, cycleMeasured: false, cycleBasis: 'CALCULATED'
   },
 
@@ -688,9 +691,20 @@ var PROJECT_DEFINITION = {
 /* ─────────────────────────────── STORE_ZERO ─────────────────────────────── */
 var STORE_ZERO = {
   node:          'store-zero',
-  catalogClock:  '2026-09-10',
-  engine:        'STB-ZERO-PRICE-1 v0.2.2',
+  catalogClock:  '2026-09-15',
+  engine:        'STB-ZERO-PRICE-1 v0.2.3',
   commit:        '096e99d',
+
+  catalogModel: {
+    revision:       'STB-ZERO-CATALOG-2026-09-15-01',
+    asOf:           '2026-09-15',
+    priceMode:      'MODELED_REFERENCE',
+    priceBasis:     'aggregate estimation from local and regional retail sampling as of September 15, 2026; exact-item observations where available, comparable retail sampling otherwise',
+    sampleSources:  'Menards · Home Depot · Lowe’s · regional hardwood/panel comparables',
+    markOn:         1.05,
+    inventoryMode:  'MODELED_TEST_INVENTORY',
+    inventoryBasis: 'Store Zero test inventory, intentionally sufficient for ordinary bounded demonstrations; shortage is triggered only when a request exceeds a declared modeled count'
+  },
 
   cells: {
     'D-001': { stream:'dimensional', status:'DECLARED — reference envelope' },
@@ -699,31 +713,27 @@ var STORE_ZERO = {
 
   secondaryOps: { declared:null, total:null },   /* counted from FAM at render */
 
-  /* declared stock — stated figures, not physical counts */
+  /* Dimensional material catalog.
+     row = sku · description · modeled sampled-retail basis · modeled on-hand · current-job need · pricing note */
   stock: [
-    ['STB-ZERO-PINE-1X6-96-001', 'Pine 1×6×96 select S4S',    20.99, 36, 10],
-    ['STB-ZERO-PINE-1X6-72-001', 'Pine 1×6×72 select S4S',    15.74, 30,  4],
-    ['STB-ZERO-POP-1X6-96-001',  'Poplar 1×6×96 select S4S',  32.18, 12,  0],
-    ['STB-ZERO-OAK-1X6-96-001',  'Red oak 1×6×96 select S4S', 34.99,  8,  0],
-    ['STB-ZERO-CHR-1X6-96-001',  'Cherry 1×6×96 select S4S',  55.98,  6,  0]
+    ['STB-ZERO-PINE-1X6-96-001', 'Pine 1×6×96 select S4S',    19.50, 200, 10, 'modeled from current regional retail observations; Home Depot sample $18.75 plus nearby comparable context'],
+    ['STB-ZERO-PINE-1X6-72-001', 'Pine 1×6×72 select S4S',    14.00, 200,  4, 'modeled from current regional retail observations; Lowe’s 6 ft sample $13.79 plus nearby comparable context'],
+    ['STB-ZERO-POP-1X6-96-001',  'Poplar 1×6×96 select S4S',  31.50, 200,  0, 'modeled from Home Depot $31.15 and Lowe’s $31.84 samples'],
+    ['STB-ZERO-OAK-1X6-96-001',  'Red oak 1×6×96 select S4S', 48.92, 200,  0, 'modeled from Home Depot $50.00 and Lowe’s $47.84 samples'],
+    ['STB-ZERO-CHR-1X6-96-001',  'Cherry 1×6×96 select S4S',  51.96, 200,  0, 'modeled from comparable Home Depot S4S cherry samples around $50.88–$53.03']
   ],
 
-  /* Reference merchant sheet shelf. Merchant price is retained; Store price is derived at render. */
+  /* Sheet-goods catalog.
+     row = sku · sample/source id · description · supported spec · modeled sampled-retail basis · modeled on-hand · role · pricing note */
   sheetStock: {
-    merchant:   'Menards',
-    sourceDate: '2026-09-15',
-    priceBasis: 'Everyday Low Price · expired rebate offers excluded',
-    markOn:     1.05,
     items: [
-      ['STB-ZERO-SHEET-PLY-B2-12-4X8-001', '1252015', '1/2 × 4 × 8 Sanded Utility Plywood', '.453 × 48 × 95-7/8 · B2 · Meranti/Okoume · veneer core · sanded 2 sides · moisture-resistant glue', 43.99, null, 'better-looking hardwood backing / utility veneer · NOT exterior grade'],
-      ['STB-ZERO-SHEET-ACX-34-4X8-001', '1251064 · model 690053', '3/4 × 4 × 8 Premium ACX Sanded Plywood', '.703 × 48 × 96 · Pine · AC · PS1 · exterior grade · sanded 2 sides', 52.59, null, 'verified exterior-grade panel · thicker than the roughly 1/2 in target'],
-      ['STB-ZERO-MDF-12-49X97-001', '1272002', '1/2 × 49 × 97 MDF Panel', '1/2 × 49 × 97 · Uniboard · standard MDF · smooth paintable surface', 45.00, null, 'full-sheet low-cost backing / paintable panel'],
-      ['STB-ZERO-MDF-12-2X4-001', '1272032', '1/2 × 2 × 4 MDF Handi-Panel', 'nominal 1/2 × 2 × 4 · Uniboard MDF', 12.99, null, 'small low-cost backing / trial panel'],
-      ['STB-ZERO-MDF-34-4X4-001', '1272049', '3/4 × 4 × 4 MDF Handi-Panel', 'nominal 3/4 × 4 × 4 · Uniboard MDF', 29.99, null, 'thicker low-cost panel / fixture or backing option']
-    ],
-    gaps: [
-      ['1/2 × 4 × 8 Premium ACX Sanded Plywood', 'model 690051', 'Exact target-family product exists, but the current merchant page does not expose a supported price.', 'PRICE UNRESOLVED'],
-      ['1/4 × 4 × 8 UV Prefinished Birch Veneer Core Plywood', 'Menards SKU 1251610', 'Strong decorative-backing candidate; current merchant page hides price behind JavaScript.', 'PRICE UNRESOLVED']
+      ['STB-ZERO-SHEET-PLY-B2-12-4X8-001', 'Menards 1252015', '1/2 × 4 × 8 Sanded Utility Plywood', '.453 × 48 × 95-7/8 · B2 · Meranti/Okoume · veneer core · sanded 2 sides · moisture-resistant glue', 43.99, 60, 'better-looking hardwood backing / utility veneer · NOT exterior grade', 'exact Menards item observation; nearby birch/sanded comparables bracket the same class'],
+      ['STB-ZERO-SHEET-ACX-34-4X8-001', 'Menards 1251064 · 690053', '3/4 × 4 × 8 Premium ACX Sanded Plywood', '.703 × 48 × 96 · Pine · AC · PS1 · exterior grade · sanded 2 sides', 52.59, 60, 'verified exterior-grade panel · thicker than the roughly 1/2 in target', 'exact Menards item observation'],
+      ['STB-ZERO-MDF-12-49X97-001', 'Menards 1272002 · Home Depot comparable', '1/2 × 49 × 97 MDF Panel', '1/2 × 49 × 97 · standard MDF · smooth paintable surface', 45.00, 60, 'full-sheet low-cost backing / paintable panel', 'Menards and Home Depot current samples both $45.00'],
+      ['STB-ZERO-MDF-12-2X4-001', 'Menards 1272032', '1/2 × 2 × 4 MDF Handi-Panel', 'nominal 1/2 × 2 × 4 · MDF', 12.99, 60, 'small low-cost backing / trial panel', 'exact Menards item observation'],
+      ['STB-ZERO-MDF-34-4X4-001', 'Menards 1272049', '3/4 × 4 × 4 MDF Handi-Panel', 'nominal 3/4 × 4 × 4 · MDF', 29.99, 60, 'thicker low-cost panel / fixture or backing option', 'exact Menards item observation'],
+      ['STB-ZERO-SHEET-ACX-12-4X8-001', 'Menards model 690051 · modeled', '1/2 × 4 × 8 Premium ACX Sanded Plywood', 'nominal 1/2 × 4 × 8 · ACX · sanded · exterior-family panel', 48.00, 60, 'preferred roughly-1/2 in exterior-capable reference panel', 'modeled best estimate: exact Menards family exists; nearby retail evidence places new 1/2 ACX around this level'],
+      ['STB-ZERO-SHEET-BIRCH-UV-14-4X8-001', 'Menards 1251610 · regional comparable', '1/4 × 4 × 8 UV Prefinished Birch Veneer Core Plywood', 'nominal 1/4 × 4 × 8 · birch veneer core · UV prefinished', 45.00, 60, 'decorative / nice backing reference panel', 'modeled retail estimate from Menards product identity plus current regional prefinished-birch comparables']
     ]
   },
 
@@ -734,7 +744,7 @@ var STORE_ZERO = {
   escalatesTo:         'store-one',
   responseWindow:      '[unresolved] — declared typical, never promised',
 
-  economics: { markOn:'5%', cellRecovery:'declared', cycleModel:'single-family only' },
+  economics: { markOn:'5% over modeled sampled-retail basis', cellRecovery:'declared', cycleModel:'single-family only' },
 
   authority: {
     commercial:false, liveInventory:false, payment:false,
@@ -842,6 +852,14 @@ function money(v){
   if(v === null || v === undefined) return '—';
   return (v<0?'\u2212':'') + '$' + Math.abs(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
 }
+function markedPrice(v){ return Math.round(v * STORE_ZERO.catalogModel.markOn * 100) / 100; }
+function storeUnit(s){ return markedPrice(s[2]); }
+function baseFabrication(){
+  var material = Math.round((storeUnit(STORE_ZERO.stock[0]) * STORE_ZERO.stock[0][4] +
+                             storeUnit(STORE_ZERO.stock[1]) * STORE_ZERO.stock[1][4]) * 100) / 100;
+  var total = Math.round((material + PROJECT_DEFINITION.fabrication.cellRecovery + PROJECT_DEFINITION.fabrication.hardware) * 100) / 100;
+  return { material:material, total:total };
+}
 function ops(){ var o=[]; FAM.forEach(function(f){ f[3].forEach(function(x){ o.push(x); }); }); return o; }
 function qty(op){ return PROJECT_DEFINITION.quantities[op[4]] || 0; }
 function applicable(op){ return qty(op) > 0; }
@@ -879,6 +897,9 @@ function renderStore(){
     ['CATALOG CLOCK', STORE_ZERO.catalogClock],
     ['ANSWERING ENGINE', STORE_ZERO.engine],
     ['SOURCE COMMIT / PIN', STORE_ZERO.commit],
+    ['CATALOG REVISION', STORE_ZERO.catalogModel.revision],
+    ['PRICE BASIS', STORE_ZERO.catalogModel.priceMode + ' · sampled ' + STORE_ZERO.catalogModel.asOf],
+    ['INVENTORY BASIS', STORE_ZERO.catalogModel.inventoryMode + ' · sufficient-by-default'],
     ['D-001 · DIMENSIONAL', STORE_ZERO.cells['D-001'].status],
     ['S-001 · SHEET', STORE_ZERO.cells['S-001'].status],
     ['SECONDARY OPERATIONS', STORE_ZERO.secondaryOps.declared + ' DECLARED OF ' + STORE_ZERO.secondaryOps.total],
@@ -893,30 +914,29 @@ function renderStore(){
   }).join('');
 
   $('sz-stock').innerHTML =
-    '<table><thead><tr><th>SKU</th><th>Description</th><th class="n">Unit</th>' +
-    '<th class="n">Declared on hand</th><th class="n">This job needs</th><th>State</th></tr></thead><tbody>' +
+    '<table><thead><tr><th>SKU</th><th>Description / basis</th><th class="n">Modeled retail</th><th class="n">Store Zero</th>' +
+    '<th class="n">Modeled on hand</th><th class="n">This job needs</th><th>State</th></tr></thead><tbody>' +
     STORE_ZERO.stock.map(function(s){
       var short = s[4] > s[3];
-      return '<tr><td>' + s[0] + '</td><td>' + s[1] + '</td><td class="n">' + money(s[2]) +
-        '</td><td class="n">' + s[3] + '</td><td class="n">' + (s[4] || '—') + '</td><td>' +
+      return '<tr><td>' + s[0] + '</td><td>' + s[1] + '<br><span style="font-size:9.5px;color:var(--text-3)">' + s[5] + '</span></td>' +
+        '<td class="n">' + money(s[2]) + '</td><td class="n">' + money(storeUnit(s)) + '</td><td class="n">' + s[3] +
+        '</td><td class="n">' + (s[4] || '—') + '</td><td>' +
         (short ? '<span class="chip wn">SHORT BY ' + (s[4]-s[3]) + '</span>' :
-          s[4] ? '<span class="chip ok">SUFFICIENT</span>' : '<span class="chip gy">—</span>') + '</td></tr>';
+          s[4] ? '<span class="chip ok">SUFFICIENT</span>' : '<span class="chip gy">AVAILABLE</span>') + '</td></tr>';
     }).join('') + '</tbody></table>' +
-    '<p style="margin:7px 0 0;font-size:10.5px;color:var(--text-3)">On-hand is a declared figure. It is not a physical count, and the estimate does not check it — price and availability are different questions with different answers.</p>';
+    '<p style="margin:7px 0 0;font-size:10.5px;color:var(--text-3)">Store Zero unit price = modeled sampled-retail basis × ' + STORE_ZERO.catalogModel.markOn.toFixed(2) + '. Modeled on-hand is intentionally sufficient for normal demonstrations. It is not a merchant claim or a physical count.</p>';
 
   var sh = STORE_ZERO.sheetStock;
   $('sz-sheet-stock').innerHTML =
-    '<table><thead><tr><th>Store Zero SKU</th><th>Menards item</th><th>Description / supported spec</th>' +
-    '<th class="n">Menards</th><th class="n">Store Zero</th><th>On hand</th><th>Role</th></tr></thead><tbody>' +
+    '<table><thead><tr><th>Store Zero SKU</th><th>Sample / source</th><th>Description / supported spec</th>' +
+    '<th class="n">Modeled retail</th><th class="n">Store Zero</th><th class="n">Modeled on hand</th><th>Role</th></tr></thead><tbody>' +
     sh.items.map(function(i){
-      var storePrice = Math.round(i[4] * sh.markOn * 100) / 100;
+      var storePrice = markedPrice(i[4]);
       return '<tr><td>' + i[0] + '</td><td>' + i[1] + '</td><td><b style="color:var(--text)">' + i[2] + '</b><br>' + i[3] +
-        '</td><td class="n">' + money(i[4]) + '</td><td class="n">' + money(storePrice) +
-        '</td><td><span class="chip wn">UNRESOLVED</span></td><td>' + i[6] + '</td></tr>';
+        '<br><span style="font-size:9.5px;color:var(--text-3)">' + i[7] + '</span></td><td class="n">' + money(i[4]) +
+        '</td><td class="n">' + money(storePrice) + '</td><td class="n">' + i[5] + '</td><td>' + i[6] + '</td></tr>';
     }).join('') + '</tbody></table>' +
-    '<p style="margin:7px 0 9px;font-size:10.5px;color:var(--text-3)">Merchant source — ' + sh.merchant + ' · observed ' + sh.sourceDate + ' · basis: ' + sh.priceBasis + '. Store Zero price = merchant price × ' + sh.markOn.toFixed(2) + '. Merchant availability and Store Zero declared on-hand are separate facts.</p>' +
-    '<div class="band warn" style="margin-bottom:0"><b>Useful candidates not promoted to priced stock.</b><br>' +
-    sh.gaps.map(function(g){ return '<span class="chip wn">' + g[3] + '</span><b>' + g[0] + '</b> · ' + g[1] + ' — ' + g[2]; }).join('<br>') + '</div>';
+    '<p style="margin:7px 0 0;font-size:10.5px;color:var(--text-3)">Catalog revision ' + STORE_ZERO.catalogModel.revision + ' · ' + STORE_ZERO.catalogModel.priceBasis + '. Sample sources: ' + STORE_ZERO.catalogModel.sampleSources + '. Store Zero price = modeled retail × ' + STORE_ZERO.catalogModel.markOn.toFixed(2) + '. Inventory = modeled Store Zero test inventory.</p>';
 }
 
 /* ═════════════════ 02 · REQUEST ═════════════════ */
@@ -932,7 +952,7 @@ function renderProject(){
   g.push(['SHELF ELEVATIONS', P.elevations.join(' · ') + ' in']);
   g.push(['WORKED PART GROUPS', P.parts.map(function(p){return p[0] + ' × ' + p[1];}).join(' · ')]);
   g.push(['SECONDARY-OPS QUANTITY BASIS', P.quantityBasis]);
-  g.push(['FABRICATION', money(P.fabrication.total) + ' budgetary']);
+  g.push(['FABRICATION', money(baseFabrication().total) + ' budgetary']);
   g.push(['CYCLE', P.fabrication.cycleMin + ' min · ' + P.fabrication.cycleBasis +
                    ' · measured: ' + P.fabrication.cycleMeasured]);
 
@@ -1009,7 +1029,7 @@ function renderTotals(){
   var plc      = sel.filter(function(o){ return o[5]==='placeholder'; });
   var sum      = priced.reduce(function(a,o){ return a + extended(o); }, 0);
   var lead     = sel.reduce(function(a,o){ return a + o[7]; }, 0);
-  var fab      = PROJECT_DEFINITION.fabrication.total;
+  var fab      = baseFabrication().total;
   var polDone  = FULFILLMENT.filter(function(f){ return pol(f[0]); }).length;
 
   $('t-sum').firstChild.nodeValue = money(fab + sum) + (rate.length ? ' + TBD' : '');
@@ -1079,7 +1099,7 @@ function submitRequest(){
     validUntil: 'Fri 18:00 · 48 h',
     lines: lines,
     opsTotal: Math.round(adj*100)/100,
-    pins: { clock: STORE_ZERO.catalogClock, engine: STORE_ZERO.engine, commit: STORE_ZERO.commit }
+    pins: { clock: STORE_ZERO.catalogClock, engine: STORE_ZERO.engine, commit: STORE_ZERO.commit, catalog: STORE_ZERO.catalogModel.revision }
   };
 
   /* Substitution policy is carried with the request, but it is invoked only if
@@ -1097,19 +1117,19 @@ function submitRequest(){
 function renderOffer(){
   var O = ORDER.offer, short = STORE_ZERO.stock[0];
   var shortage = short[4] > short[3];
-  var swapDelta = Math.round((STORE_ZERO.stock[2][2] - STORE_ZERO.stock[0][2]) * short[4] * 100)/100;
+  var swapDelta = Math.round((storeUnit(STORE_ZERO.stock[2]) - storeUnit(STORE_ZERO.stock[0])) * short[4] * 100)/100;
 
   $('o-hdr').innerHTML =
     '<div><b>OFFER</b><span>' + O.id + '</span></div>' +
     '<div><b>AGAINST</b><span>' + PROJECT_DEFINITION.id + ' · ' + PROJECT_DEFINITION.version + '</span></div>' +
     '<div><b>ANSWERED BY</b><span>' + STORE_ZERO.steward.role + ' · ' + STORE_ZERO.node + '</span></div>' +
-    '<div><b>PINS</b><span>' + O.pins.clock + ' · ' + O.pins.commit + '</span></div>' +
+    '<div><b>PINS</b><span>' + O.pins.clock + ' · ' + O.pins.catalog + ' · ' + O.pins.commit + '</span></div>' +
     '<div><b>VALID UNTIL</b><span>' + O.validUntil + '</span></div>';
 
   var rev = O.lines.filter(function(l){ return l[1] && l[0]==='no'; }).length;
   $('o-head').innerHTML =
     '<div class="band ok"><b>Answered against ' + PROJECT_DEFINITION.id + ' ' + PROJECT_DEFINITION.version +
-    ', pinned to catalog clock ' + O.pins.clock + ' and commit ' + O.pins.commit + '.</b> ' +
+    ', pinned to catalog clock ' + O.pins.clock + ', catalog revision ' + O.pins.catalog + ', and source commit ' + O.pins.commit + '.</b> ' +
     'Your opening, your five shelf elevations, your depth — read, not rewritten. The Store may answer about material, ' +
     'capability, price and timing. It may not edit the definition, and it did not.</div>' +
     (rev ? '<div class="band no"><b>' + rev + ' line' + (rev>1?'s':'') +
@@ -1147,8 +1167,8 @@ function renderOffer(){
         'Three days is not free, but only you can price it.</p></div>' +
       '<div class="pick" data-sub="swap"><div class="h"><span>All ' + short[4] + ' boards in ' +
         STORE_ZERO.stock[2][1] + '</span><span>+' + money(swapDelta) + '</span></div>' +
-        '<p>In stock now, ready on the original day. ' + money(STORE_ZERO.stock[2][2]) + ' against ' +
-        money(short[2]) + ' a board. Harder, paints better, different colour raw — if you were staining, ' +
+        '<p>In stock now, ready on the original day. ' + money(storeUnit(STORE_ZERO.stock[2])) + ' against ' +
+        money(storeUnit(short)) + ' a board. Harder, paints better, different colour raw — if you were staining, ' +
         'this is a real change and not a technicality.</p></div>' +
       '<div class="pick dead"><div class="h"><span>' + short[3] + ' pine + ' + (short[4]-short[3]) +
         ' poplar</span><span>refused</span></div>' +
@@ -1173,7 +1193,7 @@ function paintOfferTotals(swapDelta){
   });
 
   var swap = (sub === 'swap') ? swapDelta : 0;
-  var fab  = PROJECT_DEFINITION.fabrication.total;
+  var fab  = baseFabrication().total;
   var tot  = Math.round((fab + O.opsTotal + swap) * 100)/100;
   var rate = O.lines.filter(function(l){ return l[0]==='wn' && l[4]===null && l[1].indexOf('Ready')<0; }).length;
 
