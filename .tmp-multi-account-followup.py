@@ -115,4 +115,25 @@ new = """.utility-nav {
 text = replace_once(text, old, new, 'responsive account switcher')
 write(path, text)
 
+# The vertical keyboard test must cross the same real account chooser before
+# OPEN MY PROJECTS. This is the same user-visible order proved by entry.spec.
+path = 'apps/stb/test/vertical/v8-authority-a11y.spec.mjs'
+text = read(path)
+old = """  await expect(page.locator('#screen-heading')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: COPY.next })).toBeFocused();
+  await page.keyboard.press('Enter');
+"""
+new = """  await expect(page.locator('#screen-heading')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('[data-orientation-account]')).toBeFocused();
+  for (let index = 0; index < 7; index += 1) {
+    await page.keyboard.press('Tab');
+  }
+  await expect(page.getByRole('button', { name: COPY.next })).toBeFocused();
+  await page.keyboard.press('Enter');
+"""
+text = replace_once(text, old, new, 'vertical keyboard account chooser')
+write(path, text)
+
 print('multi-account keyboard and narrow-layout reconciliation applied')
