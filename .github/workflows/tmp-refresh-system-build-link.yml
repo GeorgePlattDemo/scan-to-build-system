@@ -1,0 +1,38 @@
+name: Temporary public build link refresh
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Refresh System Build cache key
+        run: python .tmp-refresh-system-build-link.py
+
+      - name: Verify bounded README-only change
+        run: |
+          set -euo pipefail
+          grep -q 'system-build-current.html?v=8d8a9dd' README.md
+          git diff --check
+          test -z "$(git diff --name-only | grep -Ev '^(README\.md|\.tmp-refresh-system-build-link\.py|\.github/workflows/tmp-refresh-system-build-link\.yml)$' || true)"
+
+      - name: Commit refreshed link and remove temporary machinery
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git rm -f .tmp-refresh-system-build-link.py .github/workflows/tmp-refresh-system-build-link.yml
+          git commit -m "Refresh System Build public checkpoint"
+          git push origin HEAD:main
