@@ -287,6 +287,10 @@
   <h2 class="lab">DECLARED STOCK — STATED FIGURES, NOT PHYSICAL COUNTS</h2>
   <div id="sz-stock"></div>
 
+  <h2 class="lab">MENARDS REFERENCE SHEET SHELF — MERCHANT PRICE × 1.05</h2>
+  <div class="band calm"><b>Reference merchant shelf, not live Store inventory.</b> Menards Everyday Low Price is retained as the merchant basis and Store Zero derives its reference shelf price by applying the declared 5% mark-on. Expired rebate values are not used. Store Zero on-hand remains unresolved until a Store declaration establishes it.</div>
+  <div id="sz-sheet-stock"></div>
+
   <h2 class="lab">THE NON-CLAIM</h2>
   <div class="band warn" style="margin-bottom:9px">The word <b>declared</b> is load-bearing and is used the same way everywhere in this system: declared, never inferred. A declared figure is a real, citable, checkable figure. It is not a measurement. The word <b>pins</b> is load-bearing in the same way: an answer without its catalog clock, engine version and commit is not reproducible, and an answer that cannot be reproduced cannot be audited.</div>
   <div class="nc">
@@ -704,6 +708,25 @@ var STORE_ZERO = {
     ['STB-ZERO-CHR-1X6-96-001',  'Cherry 1×6×96 select S4S',  55.98,  6,  0]
   ],
 
+  /* Reference merchant sheet shelf. Merchant price is retained; Store price is derived at render. */
+  sheetStock: {
+    merchant:   'Menards',
+    sourceDate: '2026-09-15',
+    priceBasis: 'Everyday Low Price · expired rebate offers excluded',
+    markOn:     1.05,
+    items: [
+      ['STB-ZERO-SHEET-PLY-B2-12-4X8-001', '1252015', '1/2 × 4 × 8 Sanded Utility Plywood', '.453 × 48 × 95-7/8 · B2 · Meranti/Okoume · veneer core · sanded 2 sides · moisture-resistant glue', 43.99, null, 'better-looking hardwood backing / utility veneer · NOT exterior grade'],
+      ['STB-ZERO-SHEET-ACX-34-4X8-001', '1251064 · model 690053', '3/4 × 4 × 8 Premium ACX Sanded Plywood', '.703 × 48 × 96 · Pine · AC · PS1 · exterior grade · sanded 2 sides', 52.59, null, 'verified exterior-grade panel · thicker than the roughly 1/2 in target'],
+      ['STB-ZERO-MDF-12-49X97-001', '1272002', '1/2 × 49 × 97 MDF Panel', '1/2 × 49 × 97 · Uniboard · standard MDF · smooth paintable surface', 45.00, null, 'full-sheet low-cost backing / paintable panel'],
+      ['STB-ZERO-MDF-12-2X4-001', '1272032', '1/2 × 2 × 4 MDF Handi-Panel', 'nominal 1/2 × 2 × 4 · Uniboard MDF', 12.99, null, 'small low-cost backing / trial panel'],
+      ['STB-ZERO-MDF-34-4X4-001', '1272049', '3/4 × 4 × 4 MDF Handi-Panel', 'nominal 3/4 × 4 × 4 · Uniboard MDF', 29.99, null, 'thicker low-cost panel / fixture or backing option']
+    ],
+    gaps: [
+      ['1/2 × 4 × 8 Premium ACX Sanded Plywood', 'model 690051', 'Exact target-family product exists, but the current merchant page does not expose a supported price.', 'PRICE UNRESOLVED'],
+      ['1/4 × 4 × 8 UV Prefinished Birch Veneer Core Plywood', 'Menards SKU 1251610', 'Strong decorative-backing candidate; current merchant page hides price behind JavaScript.', 'PRICE UNRESOLVED']
+    ]
+  },
+
   owner:   { name:'[unresolved]', role:'yard owner' },
   steward: { name:'[unresolved]', role:'cell steward' },
 
@@ -880,6 +903,20 @@ function renderStore(){
           s[4] ? '<span class="chip ok">SUFFICIENT</span>' : '<span class="chip gy">—</span>') + '</td></tr>';
     }).join('') + '</tbody></table>' +
     '<p style="margin:7px 0 0;font-size:10.5px;color:var(--text-3)">On-hand is a declared figure. It is not a physical count, and the estimate does not check it — price and availability are different questions with different answers.</p>';
+
+  var sh = STORE_ZERO.sheetStock;
+  $('sz-sheet-stock').innerHTML =
+    '<table><thead><tr><th>Store Zero SKU</th><th>Menards item</th><th>Description / supported spec</th>' +
+    '<th class="n">Menards</th><th class="n">Store Zero</th><th>On hand</th><th>Role</th></tr></thead><tbody>' +
+    sh.items.map(function(i){
+      var storePrice = Math.round(i[4] * sh.markOn * 100) / 100;
+      return '<tr><td>' + i[0] + '</td><td>' + i[1] + '</td><td><b style="color:var(--text)">' + i[2] + '</b><br>' + i[3] +
+        '</td><td class="n">' + money(i[4]) + '</td><td class="n">' + money(storePrice) +
+        '</td><td><span class="chip wn">UNRESOLVED</span></td><td>' + i[6] + '</td></tr>';
+    }).join('') + '</tbody></table>' +
+    '<p style="margin:7px 0 9px;font-size:10.5px;color:var(--text-3)">Merchant source — ' + sh.merchant + ' · observed ' + sh.sourceDate + ' · basis: ' + sh.priceBasis + '. Store Zero price = merchant price × ' + sh.markOn.toFixed(2) + '. Merchant availability and Store Zero declared on-hand are separate facts.</p>' +
+    '<div class="band warn" style="margin-bottom:0"><b>Useful candidates not promoted to priced stock.</b><br>' +
+    sh.gaps.map(function(g){ return '<span class="chip wn">' + g[3] + '</span><b>' + g[0] + '</b> · ' + g[1] + ' — ' + g[2]; }).join('<br>') + '</div>';
 }
 
 /* ═════════════════ 02 · REQUEST ═════════════════ */
