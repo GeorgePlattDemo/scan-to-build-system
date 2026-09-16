@@ -41,10 +41,11 @@ s = replace_once(
 )
 write(p, s)
 
-# The account/order screens are intentionally wrapped in a common shell; target the actual main screen in the proof.
+# Shell and main both expose route identity. The proof targets the actual main page.
 p = 'test/browser/walking-skeleton.spec.mjs'
 s = read(p)
 s = s.replace("page.locator('[data-screen=\"account\"]')", "page.locator('main[data-screen=\"account\"]')")
+s = s.replace("page.locator('[data-screen=\"result\"]')", "page.locator('main[data-screen=\"result\"]')")
 s = s.replace("page.locator('[data-screen=\"order\"]')", "page.locator('main[data-screen=\"order\"]')")
 write(p, s)
 
