@@ -1,0 +1,62 @@
+name: Temporary project workstream chassis patch
+
+on:
+  push:
+    branches:
+      - build/project-workstream-chassis-0.1
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: build/project-workstream-chassis-0.1
+
+      - name: Apply bounded chassis patch
+        run: python .tmp-project-chassis-patch.py
+
+      - name: Syntax and diff checks
+        run: |
+          set -euo pipefail
+          node --check apps/stb/shared/contracts.mjs
+          node --check apps/stb/browser/data/selectors.mjs
+          node --check apps/stb/browser/domain/classes.mjs
+          node --check apps/stb/browser/ui/panels.mjs
+          node --check apps/stb/browser/ui/shell.mjs
+          git diff --check
+          test -z "$(git diff --name-only | grep -Ev '^(apps/stb/|work/capability-bridge/TRIAL-LOG.md$)' || true)"
+
+      - name: Install app dependencies
+        working-directory: apps/stb
+        run: npm ci --no-audit --no-fund
+
+      - name: Unit tests
+        working-directory: apps/stb
+        run: npm run test:unit
+
+      - name: Browser tests
+        working-directory: apps/stb
+        run: npx playwright install --with-deps chromium && npm run test:browser
+
+      - name: Boundary tests
+        working-directory: apps/stb
+        run: npm run test:boundaries
+
+      - name: Vertical tests
+        working-directory: apps/stb
+        run: npm run test:vertical
+
+      - name: Commit app chassis only and remove helpers
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/stb work/capability-bridge/TRIAL-LOG.md
+          git rm .tmp-project-chassis-patch.py .github/workflows/tmp-project-chassis-patch.yml
+          git commit -m "Add uniform project workstream chassis"
+          git push origin HEAD:build/project-workstream-chassis-0.1
