@@ -20,6 +20,9 @@ jobs:
       - name: Apply bounded multi-account patch
         run: python .tmp-multi-account-project-ownership.py
 
+      - name: Reconcile account chooser keyboard and narrow layout
+        run: python .tmp-multi-account-followup.py
+
       - name: Syntax and diff guards
         run: |
           set -euo pipefail
@@ -30,8 +33,9 @@ jobs:
           node --check apps/stb/browser/ui/shell.mjs
           node --check apps/stb/test/unit/account-commerce.test.mjs
           node --check apps/stb/test/browser/multi-account.spec.mjs
+          node --check apps/stb/test/browser/entry.spec.mjs
           git diff --check
-          test -z "$(git diff --name-only | grep -Ev '^(apps/stb/|\.tmp-multi-account-project-ownership\.py$|\.github/workflows/tmp-multi-account-project-ownership\.yml$)' || true)"
+          test -z "$(git diff --name-only | grep -Ev '^(apps/stb/|\.tmp-multi-account-project-ownership\.py$|\.tmp-multi-account-followup\.py$|\.github/workflows/tmp-multi-account-project-ownership\.yml$)' || true)"
 
       - name: Mount exact accepted Store checkout
         run: |
@@ -73,6 +77,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add apps/stb
-          git rm -f .tmp-multi-account-project-ownership.py .github/workflows/tmp-multi-account-project-ownership.yml
+          git rm -f .tmp-multi-account-project-ownership.py .tmp-multi-account-followup.py .github/workflows/tmp-multi-account-project-ownership.yml
           git commit -m "Add account-scoped project ownership"
           git push origin HEAD:build/multi-account-project-ownership-0.1
