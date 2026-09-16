@@ -1,14 +1,16 @@
 # Sheet Machine Engineering
 
-This folder will hold the detailed current sheet-machine build record.
+This folder holds the current detailed sheet-machine build record.
 
-Start with `../../staging/SHEET-MACHINE-STAGING-0.1.md`.
+Start with `../../staging/SHEET-MACHINE-STAGING-0.1.md` for the short status surface, then read `SHEET-MACHINE-BUILD-0.1.md` for the first bounded engineering candidate.
 
-## First document
+## Current first build candidate
 
-Create `SHEET-MACHINE-BUILD-0.1.md` after the first bounded sheet capability and physical starting architecture are selected.
+`SHEET-MACHINE-BUILD-0.1.md` defines the first bounded S-001 research candidate around the existing `S001_CENTERED_ARCHED_SHEET_V0` project: one internal routed opening with three straight sides and an arched top in the current software/reference envelope.
 
-Use these sections:
+It is a candidate engineering plan, not commissioned capability. Physical support, workholding, motion architecture, tooling, control, guarding, sensing, tab retention, measured results, and commissioning remain evidence-gated.
+
+Use these sections as the continuing engineering record develops:
 
 1. first research function and why it is useful;
 2. physical frame/support/reference concept;
@@ -32,3 +34,5 @@ Use these sections:
 Do not assume S-001 must reproduce every patent mode. Build only the bounded functions justified by the research objective.
 
 Classify important statements using `../DETAIL-CLASSIFICATION.md`.
+
+**NO BLOOD ON WOOD.**
