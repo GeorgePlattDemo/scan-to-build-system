@@ -33,6 +33,7 @@ export const ROUTES = Object.freeze({
   startReturning: '/start/returning',
   startProfessional: '/start/professional',
   begin: '/begin',
+  account: '/account',
   project: '/project',
 });
 
@@ -62,6 +63,42 @@ export const ACTORS = Object.freeze({
 
 export const ACTOR_ORDER = Object.freeze(['new', 'returning', 'professional']);
 
+export const WORKSTREAMS = Object.freeze({
+  dimensional: Object.freeze({ id: 'dimensional', badge: 'D', label: 'DIMENSIONAL', machine: 'D-001' }),
+  sheet: Object.freeze({ id: 'sheet', badge: 'S', label: 'SHEET', machine: 'S-001' }),
+});
+
+export const PROJECT_WORKSTREAMS = Object.freeze({
+  'alcove-shelf-blanks': Object.freeze(['dimensional']),
+  'classic-picnic-table-fixture': Object.freeze(['dimensional']),
+  S001_CENTERED_ARCHED_SHEET_V0: Object.freeze(['sheet']),
+});
+
+export function workstreamsForClass(classId) {
+  return [...(PROJECT_WORKSTREAMS[classId] ?? [])];
+}
+
+export const CUSTOMER_ZERO = Object.freeze({
+  accountId: 'ACCT-000001',
+  fixture: true,
+  label: 'CUSTOMER ZERO',
+  name: 'Sarah Smith',
+  addressLine1: '123 Alcove Lane',
+  city: 'Greensboro',
+  region: 'NC',
+  country: 'US',
+});
+
+export const PROJECT_LIBRARY_SEED = Object.freeze([
+  Object.freeze({
+    libraryId: 'LIB-ALCOVE-001',
+    label: 'Alcove shelf blanks',
+    classId: 'alcove-shelf-blanks',
+    workstreams: Object.freeze(['dimensional']),
+    source: 'CUSTOMER_ZERO_ANONYMIZED',
+  }),
+]);
+
 export const COPY = Object.freeze({
   title: 'SCAN TO BUILD',
   tagline: 'Your idea. Your measurements. Your parts.',
@@ -77,11 +114,11 @@ export const COPY = Object.freeze({
   service:
     'WE CUT · MILL · DRILL · LABEL — Within stated limits. Staged for pickup. We tell you when YOUR parts are ready.',
   referenceDemonstration:
-    'Reference demonstration. Ordering, physical fabrication, and pickup notifications are not available in this build.',
+    'Reference demonstration. Account, order and payment screens are synthetic. No real charge, fabrication or pickup occurs in this build.',
   howStarting: 'HOW ARE YOU STARTING?',
   next: 'NEXT',
   back: 'Back',
-  beginHeading: 'Begin your project',
+  beginHeading: 'My Projects',
   invariant: 'NO BLOOD ON WOOD',
   notYetImplemented: 'Not yet implemented',
   chooseMapped: 'Choose a mapped project',
@@ -89,8 +126,61 @@ export const COPY = Object.freeze({
   mappedStatus: 'Candidate/reference. Store path unresolved.',
   startOwn: 'START YOUR OWN PROJECT',
   ownHint: 'Bring what you already have.',
-  resumeHeading: 'Resume saved project',
-  emptySaved: 'No saved projects.',
+  resumeHeading: 'Project list',
+  emptySaved: 'No saved projects yet.',
+  projectsIntro: 'Open a project or start another. Every project enters the same way.',
+  startAnotherProject: '+ START ANOTHER PROJECT',
+  workstreamsHeading: 'Project workstreams',
+  workstreamsIntro: 'Choose the workstream you are working on. Work that is not required stays visible.',
+  workstreamRequired: 'REQUIRED',
+  workstreamNotRequired: 'NOT REQUIRED',
+  workstreamNotAssigned: 'NOT ASSIGNED',
+  openDimensionalWork: 'OPEN DIMENSIONAL WORK',
+  openSheetWork: 'OPEN SHEET WORK',
+  openProjectDefinition: 'OPEN PROJECT DEFINITION',
+  backToProjects: 'Back to projects',
+  backToWorkstreams: 'Back to workstreams',
+  home: 'HOME',
+  myProjects: 'MY PROJECTS',
+  account: 'ACCOUNT',
+  projectLibraryHeading: 'PROJECT LIBRARY',
+  projectLibraryIntro: 'Reusable bounded projects. Library copies do not carry customer or contractor identity.',
+  anonymousLibrarySource: 'Anonymous reusable project',
+  accountHeading: 'Account',
+  accountBrowse: 'You can browse and configure without an account. An account is required to continue to an order.',
+  accountDemoOnly: 'Demonstration account layer. No live authentication or payment credentials are stored in this build.',
+  useCustomerZero: 'USE CUSTOMER ZERO',
+  addAccountHeading: 'Add an account',
+  addAccount: 'ADD ACCOUNT',
+  clearAccount: 'SIGN OUT OF DEMONSTRATION ACCOUNT',
+  accountName: 'Name',
+  accountAddress: 'Street address',
+  accountCity: 'City',
+  accountRegion: 'State / region',
+  accountEmail: 'Email (optional)',
+  libraryContributionHeading: 'Project library',
+  libraryContributionBody: 'Optional. Add an anonymous reusable copy of this project to the library. Account, customer, contractor and address information are excluded.',
+  addAnonymousLibrary: 'ADD ANONYMOUS COPY TO LIBRARY',
+  keepPrivate: 'KEEP PRIVATE',
+  libraryAdded: 'Anonymous project added to the local demonstration library.',
+  libraryPrivate: 'Project kept out of the library.',
+  continueToOrder: 'CONTINUE TO ORDER',
+  orderHeading: 'Order and payment',
+  orderDemoOnly: 'Demonstration commerce seam. No real charge is made.',
+  orderNeedsReview: 'A current project review is required before an order can be created.',
+  orderNeedsAccount: 'An account is required to continue to an order.',
+  continueToPayment: 'CONTINUE TO PAYMENT',
+  paymentZeroHeading: 'PAYMENT ZERO',
+  paymentRule: 'PAYMENT IN FULL REQUIRED BEFORE PRODUCTION RELEASE.',
+  paymentReceived: 'PAYMENT RECEIVED',
+  fundsAvailable: 'FUNDS AVAILABLE',
+  releasePermitted: 'RELEASE TO QUEUE PERMITTED',
+  releasedToQueue: 'RELEASED TO QUEUE',
+  receivePaymentInFull: 'RECEIVE PAYMENT IN FULL',
+  markFundsAvailable: 'MARK FUNDS AVAILABLE',
+  releaseToQueue: 'RELEASE TO QUEUE',
+  settlementNote: 'After funds are available, settlement may separate the declared platform fee and performing yard proceeds.',
+  queueBoundary: 'Queue release does not establish machine readiness and does not start a machine. Local Cycle Start remains separate.',
   keepAndStart: 'Keep this project and start another',
   cancel: 'Cancel',
   hubHeading: 'Bring what you have',
@@ -320,7 +410,7 @@ export const ACTOR_CARD_ORDER = Object.freeze({
 });
 
 export const PRIMARY_PAGES = Object.freeze([
-  Object.freeze({ id: 'begin', label: 'Begin', route: ROUTES.begin, implemented: true }),
+  Object.freeze({ id: 'begin', label: 'My Projects', route: ROUTES.begin, implemented: true }),
   Object.freeze({ id: 'evidence', label: 'Evidence', route: null, implemented: false }),
   Object.freeze({ id: 'choices', label: 'Choices', route: null, implemented: false }),
   Object.freeze({ id: 'parts', label: 'Parts', route: null, implemented: false }),
@@ -474,7 +564,7 @@ export const REVIEW_RECORD_TYPES = Object.freeze({
   DefinitionReviewRecorded: 'DefinitionReviewRecorded',
   UnresolvedDefinitionAcknowledged: 'UnresolvedDefinitionAcknowledged',
 });
-export const PROJECT_VIEWS = Object.freeze(['hub', 'questions', 'store', 'confirm', 'result', 'record']);
+export const PROJECT_VIEWS = Object.freeze(['hub', 'workspace', 'questions', 'store', 'confirm', 'order', 'result', 'record']);
 export const PROJECT_SCOPED_PAGES = Object.freeze(['store', 'confirm', 'result', 'record']);
 
 export const ARCHIVE_FORMAT = 'stb-owner-archive';
@@ -498,6 +588,7 @@ export const STATIC_ASSETS = Object.freeze({
   '/integration/store-client.mjs': JS('browser/integration/store-client.mjs'),
   '/integration/store-coordinator.mjs': JS('browser/integration/store-coordinator.mjs'),
   '/begin': HTML,
+  '/account': HTML,
   '/project': HTML,
   '/start/new': HTML,
   '/start/returning': HTML,
@@ -581,6 +672,9 @@ export function screenFromPath(pathname) {
   if (oriented) {
     return { name: 'orientation', actor: oriented };
   }
+  if (path === ROUTES.account) {
+    return { name: 'account', actor: null };
+  }
   if (path === ROUTES.begin) {
     return { name: 'begin', actor: null };
   }
@@ -597,23 +691,32 @@ export function screenFromLocation(location) {
   }
   const params = new URLSearchParams(location.search);
   const viewParam = params.get('view');
-  const view = PROJECT_VIEWS.includes(viewParam) ? viewParam : 'hub';
+  const requestedView = PROJECT_VIEWS.includes(viewParam) ? viewParam : 'hub';
   const child = params.get('child');
+  const view = requestedView === 'hub' && child ? 'workspace' : requestedView;
+  const workstreamParam = params.get('workstream');
+  const workstream = Object.prototype.hasOwnProperty.call(WORKSTREAMS, workstreamParam)
+    ? workstreamParam
+    : null;
   return {
     ...screen,
     localRecordId: params.get('id'),
     view,
+    workstream,
     child: child && INTAKE_CARDS.some((card) => card.id === child) ? child : null,
   };
 }
 
-export function projectHref(localRecordId, view, child) {
+export function projectHref(localRecordId, view, child, workstream) {
   const params = new URLSearchParams({
     id: localRecordId,
     view,
   });
   if (child) {
     params.set('child', child);
+  }
+  if (workstream && Object.prototype.hasOwnProperty.call(WORKSTREAMS, workstream)) {
+    params.set('workstream', workstream);
   }
   return `${ROUTES.project}?${params.toString()}`;
 }

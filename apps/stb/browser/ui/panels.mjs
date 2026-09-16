@@ -4,6 +4,7 @@ import {
   COPY,
   INTAKE_CARDS,
   OWN_ENTRY,
+  WORKSTREAMS,
 } from '/shared/contracts.mjs';
 import { renderSharedCandidateView } from '/ui/candidate-view.mjs';
 import { renderStorePanel } from '/ui/store-panel.mjs';
@@ -45,28 +46,58 @@ function heading(text) {
   });
 }
 
-function resumeSection(saved, actorId) {
+function workstreamSummary(project) {
+  const streams = new Set(project.workstreams ?? []);
+  if (streams.size === 0) return 'NOT ASSIGNED';
+  return [...streams]
+    .map((id) => WORKSTREAMS[id]?.label ?? id.toUpperCase())
+    .join(' + ');
+}
+
+function workstreamBadge(project, id) {
+  const stream = WORKSTREAMS[id];
+  const required = (project.workstreams ?? []).includes(id);
+  return el('span', {
+    className: required ? 'project-stream active' : 'project-stream',
+    attrs: {
+      'data-project-stream': id,
+      'data-required': required ? 'true' : 'false',
+      title: `${stream.label} · ${required ? COPY.workstreamRequired : COPY.workstreamNotRequired}`,
+    },
+    text: required ? `${stream.badge} ✓` : `${stream.badge} —`,
+  });
+}
+
+function resumeSection(saved) {
   const empty = saved.length === 0;
   const list = empty
     ? [el('p', { className: 'empty-saved', attrs: { 'data-empty-saved': 'true' }, text: COPY.emptySaved })]
     : saved.map((project) =>
         el('button', {
-          className: 'resume-item',
+          className: 'resume-item project-row',
           attrs: {
             type: 'button',
             'data-action': 'resume-project',
             'data-local-record-id': project.localRecordId,
           },
-          text: `${project.title ?? 'Untitled project'} (${project.updatedAt})`,
-        }),
+        }, [
+          el('span', { className: 'project-row-main' }, [
+            el('strong', { text: project.title ?? 'Untitled project' }),
+            el('span', { className: 'project-row-meta', text: workstreamSummary(project) }),
+          ]),
+          el('span', { className: 'project-row-streams', attrs: { 'aria-label': 'Required workstreams' } }, [
+            workstreamBadge(project, 'dimensional'),
+            workstreamBadge(project, 'sheet'),
+          ]),
+        ]),
       );
   return el(
     'section',
     {
       className: 'saved-projects',
-      attrs: { 'data-resume-order': actorId === 'returning' ? 'first' : 'later' },
+      attrs: { 'data-project-list': 'true' },
     },
-    [el('h2', { text: COPY.resumeHeading }), ...list],
+    [el('h2', { text: COPY.resumeHeading }), el('p', { className: 'hint', text: COPY.projectsIntro }), ...list],
   );
 }
 
@@ -120,6 +151,7 @@ export function page1Main({
   saved,
   current,
   mappedOpen,
+  startProjectOpen,
   pendingSwitch,
   pendingCollision,
   importStatus,
@@ -139,10 +171,21 @@ export function page1Main({
         text: current.title ?? 'Untitled project',
       })
     : null;
-  const resume = resumeSection(saved, actorId);
+  const resume = resumeSection(saved);
+  const startOpen = saved.length === 0 || startProjectOpen;
   const mapped = mappedSection(mappedOpen);
   const own = ownSection();
-  const starts = actorId === 'returning' ? [resume, mapped, own] : [mapped, own, resume];
+  const startAnother = el('section', { className: 'start-card start-another-card' }, [
+    el('button', {
+      attrs: {
+        type: 'button',
+        'data-action': 'toggle-start-project',
+        'aria-expanded': startOpen ? 'true' : 'false',
+      },
+      text: COPY.startAnotherProject,
+    }),
+  ]);
+  const starts = [resume, startAnother, ...(startOpen ? [mapped, own] : [])];
   const dialog = pendingSwitch
     ? el(
         'div',
@@ -224,6 +267,76 @@ export function page1Main({
     ]),
     dialog,
     collision,
+  ]);
+}
+
+function workstreamCard(project, id) {
+  const stream = WORKSTREAMS[id];
+  const assigned = project.workstreams ?? [];
+  const known = assigned.length > 0;
+  const required = assigned.includes(id);
+  const state = required
+    ? COPY.workstreamRequired
+    : known
+      ? COPY.workstreamNotRequired
+      : COPY.workstreamNotAssigned;
+  const openLabel = id === 'dimensional' ? COPY.openDimensionalWork : COPY.openSheetWork;
+  return el('article', {
+    className: required ? 'workstream-card required' : 'workstream-card',
+    attrs: {
+      'data-workstream-card': id,
+      'data-required': required ? 'true' : 'false',
+      'data-machine': stream.machine,
+    },
+  }, [
+    el('div', { className: 'workstream-card-head' }, [
+      el('strong', { text: `${stream.label} · ${stream.machine}` }),
+      el('span', { className: required ? 'workstream-state required' : 'workstream-state', text: state }),
+    ]),
+    required
+      ? el('button', {
+          attrs: {
+            type: 'button',
+            'data-action': 'open-workstream',
+            'data-workstream': id,
+          },
+          text: openLabel,
+        })
+      : null,
+  ]);
+}
+
+export function projectWorkstreamsMain({ project }) {
+  const hasAssignment = (project.workstreams ?? []).length > 0;
+  return el('main', {
+    className: 'screen screen-workstreams',
+    attrs: {
+      'data-screen': 'workstreams',
+      'data-local-record-id': project.localRecordId,
+      'data-project-id': project.projectId,
+      'data-class-id': project.classId ?? '',
+    },
+  }, [
+    heading(COPY.workstreamsHeading),
+    el('p', { className: 'project-name', text: project.title ?? 'Untitled project' }),
+    el('p', { className: 'handoff-status', text: COPY.workstreamsIntro }),
+    el('div', { className: 'workstream-grid', attrs: { 'data-workstream-grid': 'true' } }, [
+      workstreamCard(project, 'dimensional'),
+      workstreamCard(project, 'sheet'),
+    ]),
+    !hasAssignment
+      ? el('section', { className: 'start-card unassigned-project' }, [
+          el('p', { className: 'hint', text: 'This project has not established a machine workstream yet. Define the project first.' }),
+          el('button', {
+            attrs: { type: 'button', 'data-action': 'open-project-definition' },
+            text: COPY.openProjectDefinition,
+          }),
+        ])
+      : null,
+    el('button', {
+      attrs: { type: 'button', 'data-action': 'back-to-begin' },
+      text: COPY.backToProjects,
+    }),
   ]);
 }
 
@@ -758,6 +871,7 @@ export function page2Main({
   actor,
   view,
   child,
+  workstream,
   evidence,
   observations,
   candidate,
@@ -783,13 +897,14 @@ export function page2Main({
     {
       className: 'screen screen-page2',
       attrs: {
-        'data-screen': isQuestions ? 'questions' : 'hub',
+        'data-screen': isQuestions ? 'questions' : 'workspace',
         'data-page': 'page2',
         'data-entry-mode': project.entryMode,
         'data-local-record-id': project.localRecordId,
         'data-project-id': project.projectId,
         'data-class-id': project.classId ?? '',
         'data-child': child ?? '',
+        'data-workstream': workstream ?? '',
         'data-actor-order': actorId,
       },
     },
@@ -799,6 +914,13 @@ export function page2Main({
       isQuestions
         ? el('p', { className: 'handoff-status', text: COPY.questionsStatus })
         : el('p', { className: 'page2-prompt', text: COPY.page2Prompt }),
+      workstream && WORKSTREAMS[workstream]
+        ? el('p', {
+            className: 'workstream-context',
+            attrs: { 'data-workstream-context': workstream },
+            text: `${WORKSTREAMS[workstream].label} · ${WORKSTREAMS[workstream].machine}`,
+          })
+        : null,
       status
         ? el('p', { className: 'save-line', attrs: { 'data-page-status': status }, text: status })
         : null,
@@ -839,10 +961,16 @@ export function page2Main({
             }),
           ])
         : el('div', { className: 'intake-grid', attrs: { 'data-intake-grid': actorId } }, cards),
-      el('button', {
-        attrs: { type: 'button', 'data-action': 'back-to-begin' },
-        text: COPY.back,
-      }),
+      el('div', { className: 'actions project-navigation' }, [
+        el('button', {
+          attrs: { type: 'button', 'data-action': 'back-to-workstreams' },
+          text: COPY.backToWorkstreams,
+        }),
+        el('button', {
+          attrs: { type: 'button', 'data-action': 'back-to-begin' },
+          text: COPY.backToProjects,
+        }),
+      ]),
       el('input', {
         attrs: {
           type: 'file',

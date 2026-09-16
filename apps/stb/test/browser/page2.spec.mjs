@@ -14,6 +14,7 @@ async function openOwnHub(page, actorId = 'new') {
   await page.getByRole('button', { name: ACTORS[actorId].label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   await expect(page.locator('[data-page="page2"]')).toBeVisible();
 }
 
@@ -63,6 +64,8 @@ test('P2 actor order changes only card priority', async ({ page }) => {
   await page.getByRole('button', { name: ACTORS.professional.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.locator('.resume-item').first().click();
+  await expect(page.locator('[data-screen="workstreams"]')).toBeVisible();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   await expect(page.locator('[data-page="page2"]')).toBeVisible();
   expect(await page.locator('[data-project-id]').getAttribute('data-project-id')).toBe(projectId);
   expect(await cardNames(page)).toEqual([

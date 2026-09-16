@@ -441,6 +441,12 @@ export function page7Main({ project, presentation }) {
       ),
       historicalReviewList(presentation ?? { historicalReviews: [] }),
       el('div', { className: 'actions' }, [
+        current
+          ? el('button', {
+              attrs: { type: 'button', 'data-action': 'open-order' },
+              text: COPY.continueToOrder,
+            })
+          : null,
         el('button', {
           attrs: { type: 'button', 'data-action': 'open-confirm' },
           text: COPY.reviewOpenPage,

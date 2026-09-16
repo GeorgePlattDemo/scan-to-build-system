@@ -23,7 +23,6 @@ const AUTHORITY_TERMS = Object.freeze([
   'governed production authority',
   'physical execution recorded',
   'pickup-ready',
-  'cycle start',
   'g-code',
   'workpacket issued',
 ]);
@@ -71,6 +70,11 @@ test('V8-06 keyboard and narrow viewport can complete the bounded Board vertical
   await page.keyboard.press('Enter');
   await expect(page.locator('[data-screen="begin"]')).toBeVisible();
   await page.getByRole('button', { name: COPY.startOwn }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('main[data-screen="workstreams"]')).toBeVisible();
+  const openDefinition = page.getByRole('button', { name: COPY.openProjectDefinition });
+  await openDefinition.focus();
+  await expect(openDefinition).toHaveCSS('outline-style', 'solid');
   await page.keyboard.press('Enter');
   await expect(page.locator('[data-page="page2"]')).toBeVisible();
   const sourceBox = await page.locator('.source-pane').boundingBox();

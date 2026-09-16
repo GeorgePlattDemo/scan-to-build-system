@@ -9,6 +9,7 @@ async function openAlcove(page) {
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.chooseMapped }).click();
   await page.getByRole('button', { name: 'Alcove shelf blanks — bounded reference' }).click();
+  await page.getByRole('button', { name: COPY.openDimensionalWork }).click();
   await expect(page.locator('[data-screen="questions"]')).toBeVisible();
   await expect(page.locator('[data-project-configurator="alcove-shelf-blanks"]')).toBeVisible();
 }

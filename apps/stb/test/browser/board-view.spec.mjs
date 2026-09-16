@@ -8,6 +8,7 @@ async function openBoard(page) {
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   await expect(page.locator('[data-page="page2"]')).toBeVisible();
   await page.getByRole('button', { name: 'PICK A BOARD', exact: true }).click();
   await expect(page.locator('[data-child-panel="board"]')).toBeVisible();
@@ -193,6 +194,7 @@ test('Build 3 Keep/Use still do not invent a Board from an unmapped measurement'
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   await page.getByRole('button', { name: 'MEASUREMENTS', exact: true }).click();
   await page.locator('[data-field="measurement-raw"]').fill('45');
   await page.locator('[data-field="measurement-unit"]').fill('in');

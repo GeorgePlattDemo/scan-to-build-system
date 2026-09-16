@@ -8,6 +8,7 @@ test('allowlisted paths resolve to known relative files', () => {
   assert.equal(resolveStaticAsset('/').relativePath, 'browser/index.html');
   assert.equal(resolveStaticAsset('/index.html').relativePath, 'browser/index.html');
   assert.equal(resolveStaticAsset('/begin').relativePath, 'browser/index.html');
+  assert.equal(resolveStaticAsset('/account').relativePath, 'browser/index.html');
   assert.equal(resolveStaticAsset('/project').relativePath, 'browser/index.html');
   assert.equal(resolveStaticAsset('/start/new').relativePath, 'browser/index.html');
   assert.equal(resolveStaticAsset('/start/returning').relativePath, 'browser/index.html');
@@ -153,6 +154,7 @@ test('dot and encoded-null paths are rejected', () => {
 test('allowlist is exact and finite', () => {
   assert.deepEqual(Object.keys(STATIC_ASSETS).sort(), [
     '/',
+    '/account',
     '/app.mjs',
     '/begin',
     '/data/archive.mjs',

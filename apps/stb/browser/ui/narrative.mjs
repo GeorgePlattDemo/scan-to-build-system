@@ -404,7 +404,7 @@ function decorate(root) {
   if (name === 'landing') decorateLanding(screen);
   else if (name === 'orientation') decorateOrientation(screen);
   else if (name === 'begin') decorateBegin(screen);
-  else if (name === 'hub' || name === 'questions') decoratePage2(screen);
+  else if (name === 'hub' || name === 'workspace' || name === 'questions') decoratePage2(screen);
   else if (name === 'store') decorateStore(screen);
   else if (name === 'confirm') decorateConfirm(screen);
   else if (name === 'result') decorateResult(screen);

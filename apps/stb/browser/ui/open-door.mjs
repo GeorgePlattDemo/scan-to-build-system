@@ -248,7 +248,7 @@ async function runPublishedJobTrial(root, id, inputs) {
 }
 
 function decorateBoard(root) {
-  const screen = root.querySelector('[data-screen="hub"][data-child="board"], [data-screen="questions"][data-child="board"]');
+  const screen = root.querySelector('[data-screen="hub"][data-child="board"], [data-screen="workspace"][data-child="board"], [data-screen="questions"][data-child="board"]');
   if (!screen) return;
   const form = screen.querySelector('[data-board-form]');
   if (!form) return;
@@ -263,7 +263,7 @@ function decorateBoard(root) {
 }
 
 function decorateHub(root) {
-  const screen = root.querySelector('[data-screen="hub"], [data-screen="questions"]');
+  const screen = root.querySelector('[data-screen="hub"], [data-screen="workspace"], [data-screen="questions"]');
   if (!screen || screen.getAttribute('data-child')) return;
   const sourcePane = screen.querySelector('.source-pane');
   if (!sourcePane) return;

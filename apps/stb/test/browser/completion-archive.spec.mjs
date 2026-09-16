@@ -12,6 +12,7 @@ async function startOwn(page) {
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   await expect(page.locator('[data-page="page2"]')).toBeVisible();
   return page.locator('[data-local-record-id]').getAttribute('data-local-record-id');
 }

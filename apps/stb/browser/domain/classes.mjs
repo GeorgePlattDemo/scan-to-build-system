@@ -46,6 +46,10 @@ export function boardDefinition() {
   return BOARD_DEFINITION;
 }
 
-export function destinationView(entryMode) {
-  return entryMode === 'mapped' ? 'questions' : 'hub';
+export function destinationView() {
+  return 'hub';
+}
+
+export function projectWorkView(entryMode) {
+  return entryMode === 'mapped' ? 'questions' : 'workspace';
 }

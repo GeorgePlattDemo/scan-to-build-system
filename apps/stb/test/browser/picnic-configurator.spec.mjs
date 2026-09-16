@@ -8,6 +8,7 @@ async function openPicnic(page) {
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.chooseMapped }).click();
   await page.getByRole('button', { name: 'Classic Picnic Table — configurable demonstration' }).click();
+  await page.getByRole('button', { name: COPY.openDimensionalWork }).click();
   await expect(page.locator('[data-screen="questions"]')).toBeVisible();
   await expect(page.locator('[data-project-configurator="classic-picnic-table-fixture"]')).toBeVisible();
 }

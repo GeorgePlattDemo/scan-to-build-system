@@ -19,6 +19,7 @@ async function openBoard(page) {
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   await expect(page.locator('[data-page="page2"]')).toBeVisible();
   await page.getByRole('button', { name: 'PICK A BOARD', exact: true }).click();
   await expect(page.locator('[data-child-panel="board"]')).toBeVisible();
@@ -229,6 +230,8 @@ test('P8-02 reopen keeps identity; older revisions stay historical', async ({ pa
   const firstHead = first.currentHead;
   await page.locator('[data-nav-page="record"]').click();
   await page.getByRole('button', { name: COPY.recordResume }).click();
+  await expect(page.locator('[data-screen="workstreams"]')).toBeVisible();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   await expect(page.locator('[data-page="page2"]')).toBeVisible();
   expect(await localRecordId(page)).toBe(id);
   await page.getByRole('button', { name: 'PICK A BOARD', exact: true }).click();
@@ -250,6 +253,7 @@ test('P8-04 unknown class imports inspectably and disables editing', async ({ pa
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   const id = await localRecordId(page);
   const exported = await exportJson(page, id);
   const document = exported.document;
@@ -288,6 +292,7 @@ test('P8-05 imported authorization and physical claims stay inert', async ({ pag
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   const id = await localRecordId(page);
   const exported = await exportJson(page, id);
   const document = exported.document;
@@ -326,6 +331,7 @@ test('P8-06 unclassified incomplete demand survives export/import', async ({ pag
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   const id = await localRecordId(page);
   const project = requireOk(await repoCall(page, 'project', { localRecordId: id }));
   requireOk(
@@ -362,6 +368,7 @@ test('P8-07 more than 400 events remain retained after export/import', async ({ 
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   const id = await localRecordId(page);
   const project = requireOk(await repoCall(page, 'project', { localRecordId: id }));
   const extras = Array.from({ length: 401 }, (_, index) => ({
@@ -403,6 +410,7 @@ test('P8-08 export/import failure is visible and leaves existing projects intact
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   const id = await localRecordId(page);
   const savedBefore = requireOk(await repoCall(page, 'listSaved'));
   const failedExport = requireOk(
@@ -564,6 +572,7 @@ test('P8-01 original source bytes survive archive roundtrip', async ({ page }) =
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   const id = await localRecordId(page);
   const project = requireOk(await repoCall(page, 'project', { localRecordId: id }));
   const prepared = requireOk(

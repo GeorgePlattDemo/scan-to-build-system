@@ -1,3 +1,4 @@
+import { workstreamsForClass } from '/shared/contracts.mjs';
 import {
   describeDatabase,
   getBlob,
@@ -13,8 +14,18 @@ export async function databaseShape() {
   return describeDatabase();
 }
 
+function withWorkstreams(project) {
+  if (!project) {
+    return null;
+  }
+  const workstreams = Array.isArray(project.workstreams)
+    ? [...project.workstreams]
+    : workstreamsForClass(project.classId);
+  return { ...project, workstreams };
+}
+
 export async function projectIndex(localRecordId) {
-  return getProject(localRecordId);
+  return withWorkstreams(await getProject(localRecordId));
 }
 
 export async function listSavedProjects() {
@@ -36,6 +47,9 @@ export async function listSavedProjects() {
       entryMode: project.entryMode,
       classId: project.classId,
       classVersion: project.classVersion,
+      workstreams: Array.isArray(project.workstreams)
+        ? [...project.workstreams]
+        : workstreamsForClass(project.classId),
       imported: project.imported === true,
       importOrigin: project.importOrigin ?? null,
       importArchiveId: project.importArchiveId ?? null,

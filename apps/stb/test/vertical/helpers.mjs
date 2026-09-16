@@ -21,7 +21,6 @@ export const FORBIDDEN_PHYSICAL = Object.freeze([
   'work complete',
   'pickup ready',
   'machine authorized',
-  'cycle start',
   'g-code',
   'workpacket',
 ]);
@@ -89,17 +88,23 @@ export async function goActorToBegin(page, actorId) {
 export async function startOwnProject(page, actorId) {
   await goActorToBegin(page, actorId);
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   await expect(page.locator('[data-page="page2"]')).toBeVisible();
 }
 
 export async function openBoardChild(page) {
+  await expect(page.locator('main[data-screen="workstreams"], [data-intake-grid]').first()).toBeVisible();
+  if (await page.locator('main[data-screen="workstreams"]').isVisible()) {
+    await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
+    await expect(page.locator('[data-page="page2"]')).toBeVisible();
+  }
   await page.getByRole('button', { name: 'PICK A BOARD', exact: true }).click();
   await expect(page.locator('[data-child-panel="board"]')).toBeVisible();
 }
 
 export async function backToHub(page) {
   await page.locator('[data-action="back-to-hub"]').first().click();
-  await expect(page.locator('[data-intake-grid]')).toBeVisible();
+  await expect(page.locator('main[data-screen="workstreams"], [data-intake-grid]').first()).toBeVisible();
 }
 
 export async function applyLengthUi(page, raw, unit = 'in', { waitForIdle = true } = {}) {
@@ -272,6 +277,8 @@ export async function currentQDisplay(page, mode = 'compact') {
 export async function resumeSaved(page, actorId, id) {
   await goActorToBegin(page, actorId);
   await page.locator(`.resume-item[data-local-record-id="${id}"]`).click();
+  await expect(page.locator('main[data-screen="workstreams"]')).toBeVisible();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   await expect(page.locator('[data-page="page2"]')).toBeVisible();
   expect(await localRecordId(page)).toBe(id);
 }

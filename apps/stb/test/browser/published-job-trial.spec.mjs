@@ -7,7 +7,8 @@ async function startOwnProject(page) {
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
-  await expect(page.locator('[data-screen="hub"]')).toBeVisible();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
+  await expect(page.locator('[data-screen="workspace"]')).toBeVisible();
 }
 
 function assertBoundedRequest(actual, expected) {

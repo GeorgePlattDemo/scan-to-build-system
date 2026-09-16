@@ -9,7 +9,8 @@ async function startOwnProject(page, actorId = 'new') {
   await page.getByRole('button', { name: COPY.next }).click();
   await expect(page.locator('[data-screen="begin"]')).toBeVisible();
   await page.getByRole('button', { name: COPY.startOwn }).click();
-  await expect(page.locator('[data-screen="hub"]')).toBeVisible();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
+  await expect(page.locator('[data-screen="workspace"]')).toBeVisible();
 }
 
 test('landing and orientation expose the broad intake contract without promoting authority', async ({ page }) => {

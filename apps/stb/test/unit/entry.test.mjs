@@ -13,6 +13,8 @@ import {
   PDFJS,
   PRIMARY_PAGES,
   ROUTES,
+  WORKSTREAMS,
+  workstreamsForClass,
   actorFromPath,
   projectHref,
   screenFromLocation,
@@ -37,11 +39,11 @@ test('locked landing copy is exact and ordered', () => {
   );
   assert.equal(
     COPY.referenceDemonstration,
-    'Reference demonstration. Ordering, physical fabrication, and pickup notifications are not available in this build.',
+    'Reference demonstration. Account, order and payment screens are synthetic. No real charge, fabrication or pickup occurs in this build.',
   );
   assert.equal(COPY.howStarting, 'HOW ARE YOU STARTING?');
   assert.equal(COPY.invariant, 'NO BLOOD ON WOOD');
-  assert.equal(COPY.beginHeading, 'Begin your project');
+  assert.equal(COPY.beginHeading, 'My Projects');
 });
 
 test('exactly three actor orientations use the compact §21.2 copy', () => {
@@ -75,7 +77,7 @@ test('all three orientations resolve to the same Begin route', () => {
   assert.equal(actorFromPath('/start/professional').id, 'professional');
   assert.equal(screenFromPath('/begin').name, 'begin');
   assert.equal(screenFromPath('/project').name, 'project');
-  assert.equal(PRIMARY_PAGES[0].label, 'Begin');
+  assert.equal(PRIMARY_PAGES[0].label, 'My Projects');
   assert.equal(PRIMARY_PAGES[0].implemented, true);
   assert.equal(PRIMARY_PAGES.length, 8);
   assert.equal(PRIMARY_PAGES[4].id, 'store');
@@ -93,6 +95,37 @@ test('all three orientations resolve to the same Begin route', () => {
     PRIMARY_PAGES.filter((page) => page.implemented).length,
     5,
   );
+});
+
+test('project workstreams use one project route and independent D/S indicators', () => {
+  assert.equal(WORKSTREAMS.dimensional.machine, 'D-001');
+  assert.equal(WORKSTREAMS.sheet.machine, 'S-001');
+  assert.deepEqual(workstreamsForClass('alcove-shelf-blanks'), ['dimensional']);
+  assert.deepEqual(workstreamsForClass('classic-picnic-table-fixture'), ['dimensional']);
+  assert.deepEqual(workstreamsForClass('S001_CENTERED_ARCHED_SHEET_V0'), ['sheet']);
+  assert.deepEqual(workstreamsForClass('unknown-class'), []);
+
+  const sheet = screenFromLocation({
+    pathname: '/project',
+    search: '?id=local-1&view=questions&workstream=sheet',
+  });
+  assert.equal(sheet.view, 'questions');
+  assert.equal(sheet.workstream, 'sheet');
+  assert.equal(
+    projectHref('local-1', 'questions', null, 'sheet'),
+    '/project?id=local-1&view=questions&workstream=sheet',
+  );
+  const workspace = screenFromLocation({
+    pathname: '/project',
+    search: '?id=local-1&view=workspace',
+  });
+  assert.equal(workspace.view, 'workspace');
+  const legacyChild = screenFromLocation({
+    pathname: '/project',
+    search: '?id=local-1&view=hub&child=board',
+  });
+  assert.equal(legacyChild.view, 'workspace');
+  assert.equal(legacyChild.child, 'board');
 });
 
 test('Page 6 and Page 7 are existing project views, not new pathnames', () => {

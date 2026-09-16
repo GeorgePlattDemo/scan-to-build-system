@@ -197,6 +197,100 @@ summary:focus-visible {
   font-weight: 650;
 }
 
+.project-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  text-align: left;
+  margin-top: 0.55rem;
+  padding: 0.75rem;
+}
+
+.project-row-main,
+.project-row-streams {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.project-row-main {
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.project-row-meta {
+  color: #555;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.project-stream,
+.workstream-state {
+  border: 1px solid #aaa;
+  border-radius: 999px;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.project-stream.active,
+.workstream-state.required {
+  border-color: #2a2a2a;
+  background: #f3f3f0;
+}
+
+.workstream-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.workstream-card {
+  border: 1px solid #aaa;
+  background: #f7f7f4;
+  padding: 0.9rem;
+}
+
+.workstream-card.required {
+  border-color: #2a2a2a;
+  background: #fff;
+}
+
+.workstream-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.workstream-card button,
+.unassigned-project button {
+  width: 100%;
+  font-weight: 650;
+}
+
+.workstream-context {
+  font-weight: 650;
+  margin: 0.5rem 0 1rem;
+}
+
+.project-navigation {
+  margin-top: 1rem;
+}
+
+@media (max-width: 34rem) {
+  .project-row,
+  .workstream-card-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 .intake-grid {
   display: grid;
   gap: 0.75rem;
@@ -516,3 +610,47 @@ textarea:focus-visible,
   margin-top: 1.5rem;
 }
 
+
+
+.utility-nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.project-library,
+.payment-zero,
+.order-account,
+.account-form {
+  border: 1px solid #cfd5db;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.library-project {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.35rem 1rem;
+  padding: 0.7rem 0;
+  border-top: 1px solid #e5e8eb;
+}
+
+.library-project:first-of-type {
+  border-top: 0;
+}
+
+.library-project .hint {
+  grid-column: 1 / -1;
+}
+
+.account-form label {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.7rem 0;
+}
+
+.payment-rule {
+  font-weight: 700;
+}

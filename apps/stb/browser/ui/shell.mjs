@@ -1,7 +1,10 @@
 import {
   ACTOR_ORDER,
   ACTORS,
+  CLASS_REFERENCES,
   COPY,
+  CUSTOMER_ZERO,
+  PROJECT_LIBRARY_SEED,
   PRIMARY_PAGES,
   PROJECT_SCOPED_PAGES,
   ROUTES,
@@ -9,7 +12,7 @@ import {
   screenFromLocation,
 } from '/shared/contracts.mjs';
 import { createProject } from '/domain/candidate.mjs';
-import { destinationView } from '/domain/classes.mjs';
+import { destinationView, projectWorkView } from '/domain/classes.mjs';
 import {
   attachPreparedEvidence,
   prepareFileOriginal,
@@ -34,7 +37,7 @@ import {
   listSavedProjects,
   projectIndex,
 } from '/data/selectors.mjs';
-import { page1Main, page2Main, page5Main, projectMissingMain } from '/ui/panels.mjs';
+import { page1Main, page2Main, page5Main, projectMissingMain, projectWorkstreamsMain } from '/ui/panels.mjs';
 import { page6Main, page7Main, applyUnappliedReviewLock } from '/ui/review-panel.mjs';
 import { page8Main } from '/ui/record-panel.mjs';
 import { renderSourceView } from '/ui/source-viewer.mjs';
@@ -96,6 +99,270 @@ function heading(text) {
   });
 }
 
+const DEMO_ACCOUNT_KEY = 'stb-demo-account-v1';
+const DEMO_LIBRARY_KEY = 'stb-demo-library-v1';
+const DEMO_COMMERCE_KEY = 'stb-demo-commerce-v1';
+
+function readStoredJson(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeStoredJson(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function readActiveAccount() {
+  const account = readStoredJson(DEMO_ACCOUNT_KEY, null);
+  return account && account.accountId ? account : null;
+}
+
+function saveActiveAccount(account) {
+  writeStoredJson(DEMO_ACCOUNT_KEY, account);
+  return account;
+}
+
+function createLocalDemoAccount(root) {
+  const field = (name) => root.querySelector(`[data-account-field="${name}"]`)?.value?.trim() ?? '';
+  const name = field('name');
+  const addressLine1 = field('addressLine1');
+  const city = field('city');
+  const region = field('region');
+  if (!name || !addressLine1 || !city || !region) {
+    return null;
+  }
+  return saveActiveAccount({
+    accountId: `ACCT-DEMO-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+    fixture: false,
+    demonstration: true,
+    name,
+    addressLine1,
+    city,
+    region,
+    country: 'US',
+    email: field('email') || null,
+  });
+}
+
+function readAnonymousContributions() {
+  const entries = readStoredJson(DEMO_LIBRARY_KEY, []);
+  return Array.isArray(entries) ? entries : [];
+}
+
+function anonymousLibraryEntries() {
+  return [...PROJECT_LIBRARY_SEED, ...readAnonymousContributions()];
+}
+
+function contributeAnonymousProject(project) {
+  const reference = CLASS_REFERENCES.find((entry) => entry.classId === project.classId);
+  const entry = {
+    libraryId: `LIB-${crypto.randomUUID()}`,
+    label: reference?.label ?? 'Anonymous project',
+    classId: project.classId ?? null,
+    workstreams: [...(project.workstreams ?? [])],
+    source: 'ANONYMOUS_CONTRIBUTION',
+  };
+  const entries = readAnonymousContributions();
+  entries.push(entry);
+  writeStoredJson(DEMO_LIBRARY_KEY, entries);
+  return entry;
+}
+
+function readCommerceMap() {
+  const value = readStoredJson(DEMO_COMMERCE_KEY, {});
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
+
+function readCommerce(localRecordId) {
+  return readCommerceMap()[localRecordId] ?? null;
+}
+
+function writeCommerce(localRecordId, value) {
+  const map = readCommerceMap();
+  map[localRecordId] = value;
+  writeStoredJson(DEMO_COMMERCE_KEY, map);
+  return value;
+}
+
+function createDemoOrderState(project, account, currentReview) {
+  return writeCommerce(project.localRecordId, {
+    orderId: `ORD-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+    projectId: project.projectId,
+    accountId: account.accountId,
+    reviewId: currentReview.id,
+    demonstration: true,
+    paymentTerm: 'PAYMENT_IN_FULL',
+    paymentState: 'NOT_STARTED',
+    fundsAvailable: false,
+    queueRelease: 'BLOCKED',
+    settlement: {
+      platformFee: 'DECLARED_AT_ORDER',
+      performingYard: 'REMAINDER_AFTER_DECLARED_FEES',
+    },
+  });
+}
+
+function updateCommerce(localRecordId, mutator) {
+  const current = readCommerce(localRecordId);
+  if (!current) return null;
+  const next = mutator({ ...current });
+  return next ? writeCommerce(localRecordId, next) : current;
+}
+
+function utilityNav(current) {
+  const items = [
+    { id: 'home', label: COPY.home, href: ROUTES.landing },
+    { id: 'begin', label: COPY.myProjects, href: ROUTES.begin },
+    { id: 'account', label: COPY.account, href: ROUTES.account },
+  ];
+  return el('nav', { className: 'utility-nav', attrs: { 'aria-label': 'Home and account' } },
+    items.map((item) => el('a', {
+      className: current === item.id ? 'nav-current' : 'nav-link',
+      attrs: {
+        href: item.href,
+        'data-utility-nav': item.id,
+        ...(current === item.id ? { 'aria-current': 'page' } : {}),
+      },
+      text: item.label,
+    })),
+  );
+}
+
+function libraryWorkstreamLine(entry) {
+  const streams = new Set(entry.workstreams ?? []);
+  return `D ${streams.has('dimensional') ? '✓' : '—'} · S ${streams.has('sheet') ? '✓' : '—'}`;
+}
+
+function anonymousLibrarySection() {
+  const entries = anonymousLibraryEntries();
+  return el('section', { className: 'project-library', attrs: { 'data-project-library': 'true' } }, [
+    el('h2', { text: COPY.projectLibraryHeading }),
+    el('p', { className: 'hint', text: COPY.projectLibraryIntro }),
+    ...entries.map((entry) => el('article', {
+      className: 'library-project',
+      attrs: {
+        'data-library-id': entry.libraryId,
+        'data-library-class': entry.classId ?? '',
+        'data-library-source': entry.source,
+      },
+    }, [
+      el('strong', { text: entry.label }),
+      el('span', { className: 'library-streams', text: libraryWorkstreamLine(entry) }),
+      el('span', { className: 'hint', text: COPY.anonymousLibrarySource }),
+    ])),
+  ]);
+}
+
+function accountScreen() {
+  const account = readActiveAccount();
+  const accountBody = account
+    ? [
+        el('p', { className: 'account-state', attrs: { 'data-account-id': account.accountId }, text: `${account.name} · ${account.accountId}` }),
+        el('p', { text: account.addressLine1 }),
+        el('p', { text: `${account.city}, ${account.region}` }),
+        account.email ? el('p', { text: account.email }) : null,
+        account.fixture ? el('p', { className: 'hint', text: 'Synthetic Customer Zero fixture.' }) : null,
+        el('button', { attrs: { type: 'button', 'data-action': 'clear-demo-account' }, text: COPY.clearAccount }),
+      ]
+    : [
+        el('p', { text: COPY.accountBrowse }),
+        el('button', { attrs: { type: 'button', 'data-action': 'use-customer-zero' }, text: COPY.useCustomerZero }),
+        el('section', { className: 'account-form', attrs: { 'data-account-form': 'true' } }, [
+          el('h2', { text: COPY.addAccountHeading }),
+          ...[
+            ['name', COPY.accountName],
+            ['addressLine1', COPY.accountAddress],
+            ['city', COPY.accountCity],
+            ['region', COPY.accountRegion],
+            ['email', COPY.accountEmail],
+          ].map(([name, label]) => el('label', {}, [
+            el('span', { text: label }),
+            el('input', { attrs: { type: name === 'email' ? 'email' : 'text', 'data-account-field': name } }),
+          ])),
+          el('button', { attrs: { type: 'button', 'data-action': 'create-demo-account' }, text: COPY.addAccount }),
+        ]),
+      ];
+  return el('main', { className: 'screen screen-account', attrs: { 'data-screen': 'account' } }, [
+    heading(COPY.accountHeading),
+    el('p', { className: 'hint', attrs: { 'data-account-demo-only': 'true' }, text: COPY.accountDemoOnly }),
+    ...accountBody,
+  ]);
+}
+
+function orderScreen({ project, presentation }) {
+  const currentReview = presentation?.currentReview ?? null;
+  const account = readActiveAccount();
+  const stored = readCommerce(project.localRecordId);
+  const commerce = stored && currentReview && stored.reviewId === currentReview.id ? stored : null;
+  const state = commerce?.paymentState ?? 'NOT_STARTED';
+  const canRelease = commerce?.fundsAvailable === true && commerce?.queueRelease !== 'RELEASED_TO_QUEUE';
+  const released = commerce?.queueRelease === 'RELEASED_TO_QUEUE';
+  return el('main', {
+    className: 'screen screen-order',
+    attrs: {
+      'data-screen': 'order',
+      'data-page': 'order',
+      'data-local-record-id': project.localRecordId,
+      'data-project-id': project.projectId,
+      'data-account-present': String(Boolean(account)),
+      'data-review-current': String(Boolean(currentReview)),
+      'data-payment-state': state,
+      'data-funds-available': String(commerce?.fundsAvailable === true),
+      'data-queue-release': commerce?.queueRelease ?? 'BLOCKED',
+    },
+  }, [
+    heading(COPY.orderHeading),
+    el('p', { className: 'project-name', text: project.title ?? 'Untitled project' }),
+    el('p', { className: 'hint', text: COPY.orderDemoOnly }),
+    !currentReview ? el('p', { attrs: { 'data-order-block': 'review' }, text: COPY.orderNeedsReview }) : null,
+    currentReview && !account
+      ? el('section', { attrs: { 'data-order-block': 'account' } }, [
+          el('p', { text: COPY.orderNeedsAccount }),
+          el('a', { attrs: { href: ROUTES.account }, text: COPY.account }),
+        ])
+      : null,
+    currentReview && account
+      ? el('section', { className: 'order-account', attrs: { 'data-order-account': account.accountId } }, [
+          el('h2', { text: 'Account' }),
+          el('p', { text: `${account.name} · ${account.accountId}` }),
+        ])
+      : null,
+    currentReview && account && !commerce
+      ? el('button', { attrs: { type: 'button', 'data-action': 'create-demo-order' }, text: COPY.continueToPayment })
+      : null,
+    commerce
+      ? el('section', { className: 'payment-zero', attrs: { 'data-payment-zero': commerce.orderId } }, [
+          el('h2', { text: COPY.paymentZeroHeading }),
+          el('p', { className: 'payment-rule', text: COPY.paymentRule }),
+          el('p', { attrs: { 'data-order-id': commerce.orderId }, text: `Order ${commerce.orderId}` }),
+          el('p', { attrs: { 'data-payment-state-line': state }, text: `Payment state: ${state.replaceAll('_', ' ')}` }),
+          state === 'NOT_STARTED'
+            ? el('button', { attrs: { type: 'button', 'data-action': 'receive-payment-in-full' }, text: COPY.receivePaymentInFull })
+            : null,
+          state === 'PAYMENT_RECEIVED'
+            ? el('button', { attrs: { type: 'button', 'data-action': 'mark-funds-available' }, text: COPY.markFundsAvailable })
+            : null,
+          commerce.fundsAvailable === true
+            ? el('p', { className: 'payment-cleared', attrs: { 'data-funds-status': 'available' }, text: COPY.fundsAvailable })
+            : null,
+          canRelease
+            ? el('div', {}, [
+                el('p', { attrs: { 'data-release-permitted': 'true' }, text: COPY.releasePermitted }),
+                el('button', { attrs: { type: 'button', 'data-action': 'release-to-queue' }, text: COPY.releaseToQueue }),
+              ])
+            : null,
+          released ? el('p', { attrs: { 'data-queue-released': 'true' }, text: COPY.releasedToQueue }) : null,
+          el('p', { className: 'hint', text: COPY.settlementNote }),
+          el('p', { className: 'hint', attrs: { 'data-machine-boundary': 'true' }, text: COPY.queueBoundary }),
+        ])
+      : null,
+  ]);
+}
+
 function landingScreen() {
   return el(
     'main',
@@ -108,6 +375,7 @@ function landingScreen() {
       },
     },
     [
+      utilityNav('home'),
       heading(COPY.title),
       el('p', { className: 'tagline', text: COPY.tagline }),
       el(
@@ -121,6 +389,7 @@ function landingScreen() {
         attrs: { 'data-reference-demonstration': 'true' },
         text: COPY.referenceDemonstration,
       }),
+      anonymousLibrarySection(),
       el('h2', { text: COPY.howStarting }),
       el(
         'div',
@@ -153,6 +422,7 @@ function orientationScreen(actor) {
       },
     },
     [
+      utilityNav(null),
       el('p', { className: 'orientation-actor', text: actor.label }),
       heading(actor.heading),
       actor.body ? el('p', { className: 'orientation-body', text: actor.body }) : null,
@@ -231,7 +501,7 @@ function wrapShell(actor, inner, screenName, navContext = {}) {
       className: 'app-shell',
       attrs,
     },
-    [primaryNav({ ...navContext, screenName }), inner],
+    [utilityNav(screenName === 'begin' ? 'begin' : screenName === 'account' ? 'account' : null), primaryNav({ ...navContext, screenName }), inner],
   );
 }
 
@@ -248,6 +518,7 @@ function unknownScreen() {
 }
 
 let mappedOpen = false;
+let startProjectOpen = false;
 let pendingSwitch = null;
 let pendingCollision = null;
 let importStatus = null;
@@ -298,10 +569,13 @@ async function renderInto(root) {
   let content;
   if (screen.name === 'landing') {
     mappedOpen = false;
+    startProjectOpen = false;
     pendingSwitch = null;
     content = landingScreen();
   } else if (screen.name === 'orientation' && screen.actor) {
     content = orientationScreen(screen.actor);
+  } else if (screen.name === 'account') {
+    content = wrapShell(actor, accountScreen(), 'account');
   } else if (screen.name === 'begin') {
     const saved = await listSavedProjects();
     if (seq !== renderSeq) {
@@ -316,6 +590,7 @@ async function renderInto(root) {
         saved,
         current,
         mappedOpen,
+        startProjectOpen,
         pendingSwitch,
         pendingCollision,
         importStatus,
@@ -330,6 +605,13 @@ async function renderInto(root) {
     }
     if (!project) {
       content = wrapShell(actor, projectMissingMain(), 'begin');
+    } else if (screen.view === 'hub') {
+      content = wrapShell(
+        actor,
+        projectWorkstreamsMain({ project }),
+        'hub',
+        { project, view: 'hub' },
+      );
     } else {
       await recoverStoreOnOpen(project.localRecordId);
       if (seq !== renderSeq) {
@@ -416,6 +698,13 @@ async function renderInto(root) {
           'record',
           navContext,
         );
+      } else if (screen.view === 'order') {
+        content = wrapShell(
+          actor,
+          orderScreen({ project, presentation: reviewPresentation }),
+          'order',
+          navContext,
+        );
       } else {
         content = wrapShell(
           actor,
@@ -424,6 +713,7 @@ async function renderInto(root) {
             actor,
             view: screen.view,
             child: screen.child,
+            workstream: screen.workstream,
             evidence,
             observations,
             candidate,
@@ -477,6 +767,8 @@ async function renderInto(root) {
   document.title =
     screen.name === 'begin'
       ? `${COPY.beginHeading} — Scan-to-Build`
+      : screen.name === 'project' && screen.view === 'hub'
+        ? `${COPY.workstreamsHeading} — Scan-to-Build`
       : screen.name === 'project' && screen.view === 'store'
         ? `${COPY.storeAskHeading} — Scan-to-Build`
         : screen.name === 'project' && screen.view === 'confirm'
@@ -485,6 +777,8 @@ async function renderInto(root) {
             ? `${COPY.resultHeading} — Scan-to-Build`
             : screen.name === 'project' && screen.view === 'record'
               ? `${COPY.recordHeading} — Scan-to-Build`
+            : screen.name === 'project' && screen.view === 'order'
+              ? `${COPY.orderHeading} — Scan-to-Build`
             : screen.name === 'project'
               ? `${COPY.beginHeading} — Scan-to-Build`
           : screen.name === 'orientation' && screen.actor
@@ -1035,6 +1329,14 @@ export function startShell(root) {
       navigate(ROUTES.begin);
       return;
     }
+    if (action === 'toggle-start-project') {
+      startProjectOpen = !startProjectOpen;
+      if (!startProjectOpen) {
+        mappedOpen = false;
+      }
+      render();
+      return;
+    }
     if (action === 'expand-mapped') {
       mappedOpen = true;
       render();
@@ -1083,15 +1385,47 @@ export function startShell(root) {
       navigate(ROUTES.begin);
       return;
     }
+    if (action === 'open-workstream') {
+      const screen = screenFromLocation(window.location);
+      const workstream = button.getAttribute('data-workstream');
+      if (!screen.localRecordId || !workstream) {
+        return;
+      }
+      projectIndex(screen.localRecordId).then((project) => {
+        if (!project || !(project.workstreams ?? []).includes(workstream)) {
+          return;
+        }
+        navigate(projectHref(project.localRecordId, projectWorkView(project.entryMode), null, workstream));
+      });
+      return;
+    }
+    if (action === 'open-project-definition') {
+      const screen = screenFromLocation(window.location);
+      if (screen.localRecordId) {
+        navigate(projectHref(screen.localRecordId, 'workspace'));
+      }
+      return;
+    }
+    if (action === 'back-to-workstreams') {
+      const screen = screenFromLocation(window.location);
+      if (screen.localRecordId) {
+        navigate(projectHref(screen.localRecordId, 'hub'));
+      }
+      return;
+    }
     if (action === 'open-child') {
       const screen = screenFromLocation(window.location);
-      navigate(projectHref(screen.localRecordId, screen.view, button.getAttribute('data-child')));
+      navigate(projectHref(screen.localRecordId, screen.view, button.getAttribute('data-child'), screen.workstream));
       return;
     }
     if (action === 'back-to-hub') {
       const screen = screenFromLocation(window.location);
-      const view = screen.view === 'questions' ? 'questions' : 'hub';
-      navigate(projectHref(screen.localRecordId, view));
+      const view = screen.view === 'questions'
+        ? 'questions'
+        : screen.view === 'workspace'
+          ? 'workspace'
+          : 'hub';
+      navigate(projectHref(screen.localRecordId, view, null, screen.workstream));
       return;
     }
     if (action === 'open-store') {
@@ -1188,6 +1522,91 @@ export function startShell(root) {
           observationInFlight = null;
           pendingReviewActionId = null;
         });
+      return;
+    }
+    if (action === 'use-customer-zero') {
+      saveActiveAccount({ ...CUSTOMER_ZERO });
+      render();
+      return;
+    }
+    if (action === 'create-demo-account') {
+      createLocalDemoAccount(root);
+      render();
+      return;
+    }
+    if (action === 'clear-demo-account') {
+      localStorage.removeItem(DEMO_ACCOUNT_KEY);
+      render();
+      return;
+    }
+    if (action === 'contribute-library' || action === 'keep-library-private') {
+      const screen = screenFromLocation(window.location);
+      if (!screen.localRecordId) return;
+      projectIndex(screen.localRecordId).then((project) => {
+        if (!project) return;
+        if (action === 'contribute-library') {
+          contributeAnonymousProject(project);
+          pageStatus = COPY.libraryAdded;
+        } else {
+          pageStatus = COPY.libraryPrivate;
+        }
+        render();
+      });
+      return;
+    }
+    if (action === 'open-order') {
+      const screen = screenFromLocation(window.location);
+      if (screen.localRecordId) navigate(projectHref(screen.localRecordId, 'order'));
+      return;
+    }
+    if (action === 'create-demo-order') {
+      const screen = screenFromLocation(window.location);
+      if (!screen.localRecordId) return;
+      Promise.all([
+        projectIndex(screen.localRecordId),
+        loadReviewPresentation(screen.localRecordId, { unapplied: boardDirty }),
+      ]).then(([project, presentation]) => {
+        const account = readActiveAccount();
+        const review = presentation?.currentReview ?? null;
+        if (project && account && review) {
+          createDemoOrderState(project, account, review);
+          render();
+        }
+      });
+      return;
+    }
+    if (action === 'receive-payment-in-full') {
+      const screen = screenFromLocation(window.location);
+      if (!screen.localRecordId) return;
+      updateCommerce(screen.localRecordId, (state) => {
+        if (state.paymentState !== 'NOT_STARTED') return state;
+        state.paymentState = 'PAYMENT_RECEIVED';
+        return state;
+      });
+      render();
+      return;
+    }
+    if (action === 'mark-funds-available') {
+      const screen = screenFromLocation(window.location);
+      if (!screen.localRecordId) return;
+      updateCommerce(screen.localRecordId, (state) => {
+        if (state.paymentState !== 'PAYMENT_RECEIVED') return state;
+        state.paymentState = 'FUNDS_AVAILABLE';
+        state.fundsAvailable = true;
+        return state;
+      });
+      render();
+      return;
+    }
+    if (action === 'release-to-queue') {
+      const screen = screenFromLocation(window.location);
+      if (!screen.localRecordId) return;
+      updateCommerce(screen.localRecordId, (state) => {
+        if (state.fundsAvailable !== true) return state;
+        state.queueRelease = 'RELEASED_TO_QUEUE';
+        return state;
+      });
+      render();
       return;
     }
     if (action === 'retry-store') {

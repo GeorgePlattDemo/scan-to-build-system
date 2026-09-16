@@ -10,6 +10,7 @@ async function openBoard(page) {
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   await expect(page.locator('[data-page="page2"]')).toBeVisible();
   await page.getByRole('button', { name: 'PICK A BOARD', exact: true }).click();
   await expect(page.locator('[data-child-panel="board"]')).toBeVisible();

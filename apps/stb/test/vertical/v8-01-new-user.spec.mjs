@@ -200,6 +200,8 @@ test('V8-01 NEW USER complete real path with 45→46, reopen, export/import', as
       await page.goto(FIXED_ORIGIN);
       await goActorToBegin(page, 'new');
       await page.locator(`.resume-item[data-local-record-id="${id}"]`).click();
+      await expect(page.locator('main[data-screen="workstreams"]')).toBeVisible();
+      await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
       await expect(page.locator('[data-page="page2"]')).toBeVisible();
       expect(await localRecordId(page)).toBe(id);
       await openBoardChild(page);
@@ -268,6 +270,8 @@ test('V8-01 NEW USER complete real path with 45→46, reopen, export/import', as
       }).toBe(true);
 
       await page.getByRole('button', { name: COPY.recordResume }).click();
+      await expect(page.locator('[data-screen="workstreams"]')).toBeVisible();
+      await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
       await expect(page.locator('[data-page="page2"]')).toBeVisible();
       await openBoardChild(page);
       await waitForStoreIdle(page);

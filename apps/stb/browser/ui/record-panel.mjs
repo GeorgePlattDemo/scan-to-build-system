@@ -216,6 +216,24 @@ export function page8Main({ project, presentation, status }) {
           ),
         ],
       ),
+      el(
+        'section',
+        { className: 'record-section', attrs: { 'data-library-contribution': 'true' } },
+        [
+          el('h2', { text: COPY.libraryContributionHeading }),
+          el('p', { className: 'hint', text: COPY.libraryContributionBody }),
+          el('div', { className: 'actions' }, [
+            el('button', {
+              attrs: { type: 'button', 'data-action': 'contribute-library' },
+              text: COPY.addAnonymousLibrary,
+            }),
+            el('button', {
+              attrs: { type: 'button', 'data-action': 'keep-library-private' },
+              text: COPY.keepPrivate,
+            }),
+          ]),
+        ],
+      ),
       el('div', { className: 'actions record-actions' }, [
         el('button', {
           className: 'record-export',

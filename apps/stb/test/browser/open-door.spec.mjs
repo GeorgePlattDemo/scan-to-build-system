@@ -7,7 +7,8 @@ async function startOwn(page, actorId = 'new') {
   await page.getByRole('button', { name: ACTORS[actorId].label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: COPY.startOwn }).click();
-  await expect(page.locator('[data-screen="hub"]')).toBeVisible();
+  await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
+  await expect(page.locator('[data-screen="workspace"]')).toBeVisible();
 }
 
 test('open-door launcher routes broad starting material into existing bounded intake paths', async ({ page }) => {
@@ -38,7 +39,7 @@ test('open-door launcher routes broad starting material into existing bounded in
 test('professional starts at the same open door rather than a separate intake engine', async ({ page }) => {
   await startOwn(page, 'professional');
 
-  const screen = page.locator('[data-screen="hub"]');
+  const screen = page.locator('[data-screen="workspace"]');
   await expect(screen).toHaveAttribute('data-actor-order', 'professional');
   await expect(page.locator('[data-open-door="true"]')).toBeVisible();
   await expect(page.locator('[data-open-door-child="takeoff"]')).toBeVisible();
