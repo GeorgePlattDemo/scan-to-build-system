@@ -32,6 +32,9 @@ jobs:
       - name: Update intentional contract expectations
         run: python .tmp-walking-skeleton-testfix.py
 
+      - name: Restore renamed workspace layers
+        run: python .tmp-walking-skeleton-compat.py
+
       - name: Syntax and diff checks
         run: |
           set -euo pipefail
@@ -42,10 +45,22 @@ jobs:
           node --check apps/stb/browser/ui/shell.mjs
           node --check apps/stb/browser/ui/review-panel.mjs
           node --check apps/stb/browser/ui/record-panel.mjs
+          node --check apps/stb/browser/ui/narrative.mjs
+          node --check apps/stb/browser/ui/open-door.mjs
           node --check apps/stb/test/browser/walking-skeleton.spec.mjs
           node --check apps/stb/test/unit/account-commerce.test.mjs
           git diff --check
           test -z "$(git diff --name-only | grep -Ev '^(apps/stb/|work/capability-bridge/TRIAL-LOG.md$|\.tmp-|\.github/workflows/tmp-project-chassis-patch\.yml$)' || true)"
+
+      - name: Mount exact accepted Store checkout
+        run: |
+          set -euo pipefail
+          STORE_PIN=b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d
+          git clone --filter=blob:none --no-checkout https://github.com/GeorgePlattDemo/scan-to-build-store.git /tmp/stb-store-zero
+          git -C /tmp/stb-store-zero checkout --detach "$STORE_PIN"
+          test "$(git -C /tmp/stb-store-zero rev-parse HEAD)" = "$STORE_PIN"
+          test -z "$(git -C /tmp/stb-store-zero status --porcelain)"
+          echo "STB_STORE_ZERO_ROOT=/tmp/stb-store-zero" >> "$GITHUB_ENV"
 
       - name: Install app dependencies
         working-directory: apps/stb
@@ -63,6 +78,10 @@ jobs:
         working-directory: apps/stb
         run: npm run test:boundaries
 
+      - name: Store integration tests
+        working-directory: apps/stb
+        run: npm run test:store
+
       - name: Vertical tests
         working-directory: apps/stb
         run: npm run test:vertical
@@ -73,6 +92,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add apps/stb work/capability-bridge/TRIAL-LOG.md
-          git rm .tmp-project-chassis-patch.py .tmp-fix-project-chassis-helper.py .tmp-project-chassis-postfix.py .tmp-walking-skeleton.py .tmp-walking-skeleton-testfix.py .github/workflows/tmp-project-chassis-patch.yml
+          git rm .tmp-project-chassis-patch.py .tmp-fix-project-chassis-helper.py .tmp-project-chassis-postfix.py .tmp-walking-skeleton.py .tmp-walking-skeleton-testfix.py .tmp-walking-skeleton-compat.py .github/workflows/tmp-project-chassis-patch.yml
           git commit -m "Add account project and payment walking skeleton"
           git push origin HEAD:build/project-workstream-chassis-0.1
