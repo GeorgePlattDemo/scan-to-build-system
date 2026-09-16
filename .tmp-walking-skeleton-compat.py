@@ -66,14 +66,15 @@ s = replace_once(
   await expect(page.locator('[data-child-panel=\"board\"]')).toBeVisible();
 }""",
     """export async function openBoardChild(page) {
-  if (await page.locator('[data-screen=\"workstreams\"]').isVisible()) {
+  await expect(page.locator('main[data-screen=\"workstreams\"], [data-intake-grid]').first()).toBeVisible();
+  if (await page.locator('main[data-screen=\"workstreams\"]').isVisible()) {
     await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
     await expect(page.locator('[data-page=\"page2\"]')).toBeVisible();
   }
   await page.getByRole('button', { name: 'PICK A BOARD', exact: true }).click();
   await expect(page.locator('[data-child-panel=\"board\"]')).toBeVisible();
 }""",
-    'vertical board child workstream crossing',
+    'vertical board child route-aware crossing',
 )
 s = replace_once(
     s,
@@ -83,9 +84,9 @@ s = replace_once(
 }""",
     """export async function backToHub(page) {
   await page.locator('[data-action=\"back-to-hub\"]').first().click();
-  await expect(page.locator('[data-screen=\"workstreams\"]')).toBeVisible();
+  await expect(page.locator('main[data-screen=\"workstreams\"], [data-intake-grid]').first()).toBeVisible();
 }""",
-    'vertical back-to-workstreams expectation',
+    'vertical route-aware project return',
 )
 s = replace_once(
     s,
@@ -98,7 +99,7 @@ s = replace_once(
     """export async function resumeSaved(page, actorId, id) {
   await goActorToBegin(page, actorId);
   await page.locator(`.resume-item[data-local-record-id=\"${id}\"]`).click();
-  await expect(page.locator('[data-screen=\"workstreams\"]')).toBeVisible();
+  await expect(page.locator('main[data-screen=\"workstreams\"]')).toBeVisible();
   await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
   await expect(page.locator('[data-page=\"page2\"]')).toBeVisible();
   expect(await localRecordId(page)).toBe(id);
@@ -123,7 +124,7 @@ s = replace_once(
   await expect(page.locator('[data-page=\"page2\"]')).toBeVisible();""",
     """  await page.getByRole('button', { name: COPY.startOwn }).focus();
   await page.keyboard.press('Enter');
-  await expect(page.locator('[data-screen=\"workstreams\"]')).toBeVisible();
+  await expect(page.locator('main[data-screen=\"workstreams\"]')).toBeVisible();
   const openDefinition = page.getByRole('button', { name: COPY.openProjectDefinition });
   await openDefinition.focus();
   await expect(openDefinition).toHaveCSS('outline-style', 'solid');
@@ -142,7 +143,7 @@ s = replace_once(
       await expect(page.locator('[data-page=\"page2\"]')).toBeVisible();
       expect(await localRecordId(page)).toBe(id);""",
     """      await page.locator(`.resume-item[data-local-record-id=\"${id}\"]`).click();
-      await expect(page.locator('[data-screen=\"workstreams\"]')).toBeVisible();
+      await expect(page.locator('main[data-screen=\"workstreams\"]')).toBeVisible();
       await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
       await expect(page.locator('[data-page=\"page2\"]')).toBeVisible();
       expect(await localRecordId(page)).toBe(id);""",
@@ -150,4 +151,4 @@ s = replace_once(
 )
 write(p, s)
 
-print('walking skeleton workspace and vertical navigation compatibility applied')
+print('walking skeleton workspace and route-aware vertical compatibility applied')
