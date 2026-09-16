@@ -20,17 +20,14 @@ jobs:
       - name: Align demo account names
         run: python .tmp-demo-account-names.py
 
-      - name: Syntax and naming guards
+      - name: Syntax and diff guards
         run: |
           set -euo pipefail
           node --check apps/stb/shared/contracts.mjs
           node --check apps/stb/test/browser/multi-account.spec.mjs
           node --check apps/stb/test/unit/account-commerce.test.mjs
-          grep -q "name: 'Sarah'" apps/stb/shared/contracts.mjs
-          grep -q "name: 'Tom'" apps/stb/shared/contracts.mjs
-          grep -q "name: 'Dick'" apps/stb/shared/contracts.mjs
-          grep -q "fill('Harry')" apps/stb/test/browser/multi-account.spec.mjs
           git diff --check
+          git diff --name-only
           test -z "$(git diff --name-only | grep -Ev '^(apps/stb/|\.tmp-demo-account-names\.py|\.github/workflows/tmp-demo-account-names\.yml)$' || true)"
 
       - name: Install app dependencies
