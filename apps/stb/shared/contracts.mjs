@@ -78,15 +78,52 @@ export function workstreamsForClass(classId) {
   return [...(PROJECT_WORKSTREAMS[classId] ?? [])];
 }
 
-export const CUSTOMER_ZERO = Object.freeze({
-  accountId: 'ACCT-000001',
-  fixture: true,
-  label: 'CUSTOMER ZERO',
-  name: 'Sarah Smith',
-  addressLine1: '123 Alcove Lane',
-  city: 'Greensboro',
-  region: 'NC',
-  country: 'US',
+export const DEMO_ACCOUNTS = Object.freeze([
+  Object.freeze({
+    accountId: 'ACCT-000001',
+    fixture: true,
+    userNumber: 1,
+    label: 'USER 1',
+    name: 'Sarah Smith',
+    addressLine1: '123 Alcove Lane',
+    city: 'Greensboro',
+    region: 'NC',
+    country: 'US',
+    tags: Object.freeze(['INDIVIDUAL']),
+  }),
+  Object.freeze({
+    accountId: 'ACCT-000002',
+    fixture: true,
+    userNumber: 2,
+    label: 'USER 2',
+    name: 'Marcus Reed',
+    addressLine1: '456 Maple Street',
+    city: 'Greensboro',
+    region: 'NC',
+    country: 'US',
+    tags: Object.freeze(['INDIVIDUAL', 'RETURNING']),
+  }),
+  Object.freeze({
+    accountId: 'ACCT-000003',
+    fixture: true,
+    userNumber: 3,
+    label: 'USER 3',
+    name: 'Elena Torres',
+    addressLine1: '789 Builder Way',
+    city: 'Greensboro',
+    region: 'NC',
+    country: 'US',
+    tags: Object.freeze(['PROFESSIONAL', 'CONTRACTOR']),
+  }),
+]);
+
+export const CUSTOMER_ZERO = DEMO_ACCOUNTS[0];
+
+// These are demonstration suggestions only. Door choice is not account identity.
+export const ACTOR_DEMO_ACCOUNT_IDS = Object.freeze({
+  new: 'ACCT-000001',
+  returning: 'ACCT-000002',
+  professional: 'ACCT-000003',
 });
 
 export const PROJECT_LIBRARY_SEED = Object.freeze([
@@ -116,7 +153,7 @@ export const COPY = Object.freeze({
   referenceDemonstration:
     'Reference demonstration. Account, order and payment screens are synthetic. No real charge, fabrication or pickup occurs in this build.',
   howStarting: 'HOW ARE YOU STARTING?',
-  next: 'NEXT',
+  next: 'OPEN MY PROJECTS',
   back: 'Back',
   beginHeading: 'My Projects',
   invariant: 'NO BLOOD ON WOOD',
@@ -147,6 +184,12 @@ export const COPY = Object.freeze({
   projectLibraryIntro: 'Reusable bounded projects. Library copies do not carry customer or contractor identity.',
   anonymousLibrarySource: 'Anonymous reusable project',
   accountHeading: 'Account',
+  accountChooserHeading: 'Choose your account',
+  accountChooserIntro: 'Your entry door sets context. Your account controls which private projects appear.',
+  accountChooserLabel: 'Account',
+  accountTags: 'Account tags',
+  accountAddUser: 'ADD A NEW USER',
+  activeAccount: 'ACTIVE ACCOUNT',
   accountBrowse: 'You can browse and configure without an account. An account is required to continue to an order.',
   accountDemoOnly: 'Demonstration account layer. No live authentication or payment credentials are stored in this build.',
   useCustomerZero: 'USE CUSTOMER ZERO',

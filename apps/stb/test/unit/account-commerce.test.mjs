@@ -2,18 +2,29 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  ACTOR_DEMO_ACCOUNT_IDS,
   CUSTOMER_ZERO,
+  DEMO_ACCOUNTS,
   PROJECT_LIBRARY_SEED,
   ROUTES,
   screenFromPath,
 } from '../../shared/contracts.mjs';
 
-test('Customer Zero is an explicit synthetic account fixture', () => {
+test('Customer Zero is User 1 and three synthetic account fixtures seed all three doors', () => {
+  assert.equal(DEMO_ACCOUNTS.length, 3);
+  assert.equal(CUSTOMER_ZERO, DEMO_ACCOUNTS[0]);
   assert.equal(CUSTOMER_ZERO.fixture, true);
   assert.equal(CUSTOMER_ZERO.name, 'Sarah Smith');
   assert.equal(CUSTOMER_ZERO.addressLine1, '123 Alcove Lane');
   assert.equal(CUSTOMER_ZERO.city, 'Greensboro');
   assert.equal(CUSTOMER_ZERO.region, 'NC');
+  assert.deepEqual([...CUSTOMER_ZERO.tags], ['INDIVIDUAL']);
+  assert.deepEqual(ACTOR_DEMO_ACCOUNT_IDS, {
+    new: 'ACCT-000001',
+    returning: 'ACCT-000002',
+    professional: 'ACCT-000003',
+  });
+  assert.deepEqual([...DEMO_ACCOUNTS[2].tags], ['PROFESSIONAL', 'CONTRACTOR']);
 });
 
 test('anonymous project library seed contains no Customer Zero identity', () => {

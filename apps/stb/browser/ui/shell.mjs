@@ -1,9 +1,11 @@
 import {
+  ACTOR_DEMO_ACCOUNT_IDS,
   ACTOR_ORDER,
   ACTORS,
   CLASS_REFERENCES,
   COPY,
   CUSTOMER_ZERO,
+  DEMO_ACCOUNTS,
   PROJECT_LIBRARY_SEED,
   PRIMARY_PAGES,
   PROJECT_SCOPED_PAGES,
@@ -99,7 +101,9 @@ function heading(text) {
   });
 }
 
-const DEMO_ACCOUNT_KEY = 'stb-demo-account-v1';
+const DEMO_ACCOUNT_KEY = 'stb-demo-account-v1'; // legacy compatibility
+const DEMO_ACCOUNTS_KEY = 'stb-demo-accounts-v1';
+const DEMO_ACTIVE_ACCOUNT_KEY = 'stb-demo-active-account-v1';
 const DEMO_LIBRARY_KEY = 'stb-demo-library-v1';
 const DEMO_COMMERCE_KEY = 'stb-demo-commerce-v1';
 
@@ -116,17 +120,77 @@ function writeStoredJson(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+function normalizedAccount(account) {
+  if (!account || typeof account.accountId !== 'string' || !account.accountId) return null;
+  return {
+    ...account,
+    tags: Array.isArray(account.tags) ? [...account.tags] : [],
+  };
+}
+
+function readAccountRegistry() {
+  const merged = new Map();
+  for (const account of DEMO_ACCOUNTS) {
+    merged.set(account.accountId, normalizedAccount(account));
+  }
+  const stored = readStoredJson(DEMO_ACCOUNTS_KEY, []);
+  if (Array.isArray(stored)) {
+    for (const account of stored) {
+      const normalized = normalizedAccount(account);
+      if (normalized) merged.set(normalized.accountId, normalized);
+    }
+  }
+  const legacy = normalizedAccount(readStoredJson(DEMO_ACCOUNT_KEY, null));
+  if (legacy) merged.set(legacy.accountId, legacy);
+  return [...merged.values()].sort((left, right) => {
+    const leftNumber = Number(left.userNumber ?? Number.MAX_SAFE_INTEGER);
+    const rightNumber = Number(right.userNumber ?? Number.MAX_SAFE_INTEGER);
+    if (leftNumber !== rightNumber) return leftNumber - rightNumber;
+    return String(left.name).localeCompare(String(right.name));
+  });
+}
+
+function persistAccountRegistry(accounts) {
+  writeStoredJson(DEMO_ACCOUNTS_KEY, accounts.map((account) => normalizedAccount(account)));
+}
+
 function readActiveAccount() {
-  const account = readStoredJson(DEMO_ACCOUNT_KEY, null);
-  return account && account.accountId ? account : null;
+  const activeId = localStorage.getItem(DEMO_ACTIVE_ACCOUNT_KEY)
+    ?? readStoredJson(DEMO_ACCOUNT_KEY, null)?.accountId
+    ?? null;
+  return activeId ? readAccountRegistry().find((account) => account.accountId === activeId) ?? null : null;
 }
 
 function saveActiveAccount(account) {
-  writeStoredJson(DEMO_ACCOUNT_KEY, account);
-  return account;
+  const normalized = normalizedAccount(account);
+  if (!normalized) return null;
+  const accounts = readAccountRegistry();
+  const index = accounts.findIndex((entry) => entry.accountId === normalized.accountId);
+  if (index >= 0) accounts[index] = normalized;
+  else accounts.push(normalized);
+  persistAccountRegistry(accounts);
+  localStorage.setItem(DEMO_ACTIVE_ACCOUNT_KEY, normalized.accountId);
+  writeStoredJson(DEMO_ACCOUNT_KEY, normalized);
+  return normalized;
 }
 
-function createLocalDemoAccount(root) {
+function chooseAccount(accountId) {
+  const account = readAccountRegistry().find((entry) => entry.accountId === accountId) ?? null;
+  return account ? saveActiveAccount(account) : null;
+}
+
+function clearActiveAccount() {
+  localStorage.removeItem(DEMO_ACTIVE_ACCOUNT_KEY);
+  localStorage.removeItem(DEMO_ACCOUNT_KEY);
+}
+
+function accountLabel(account) {
+  const user = account.userNumber ? `USER ${account.userNumber} · ` : '';
+  const tags = (account.tags ?? []).join(' / ');
+  return `${user}${account.name}${tags ? ` · ${tags}` : ''}`;
+}
+
+function createLocalDemoAccount(root, actorId = null) {
   const field = (name) => root.querySelector(`[data-account-field="${name}"]`)?.value?.trim() ?? '';
   const name = field('name');
   const addressLine1 = field('addressLine1');
@@ -135,16 +199,23 @@ function createLocalDemoAccount(root) {
   if (!name || !addressLine1 || !city || !region) {
     return null;
   }
+  const accounts = readAccountRegistry();
+  const nextUserNumber = Math.max(0, ...accounts.map((account) => Number(account.userNumber ?? 0))) + 1;
+  const tags = actorId === 'professional' ? ['PROFESSIONAL'] : ['INDIVIDUAL'];
   return saveActiveAccount({
     accountId: `ACCT-DEMO-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
     fixture: false,
     demonstration: true,
+    userNumber: nextUserNumber,
+    label: `USER ${nextUserNumber}`,
     name,
     addressLine1,
     city,
     region,
     country: 'US',
     email: field('email') || null,
+    tags,
+    createdThroughActor: actorId,
   });
 }
 
@@ -213,14 +284,37 @@ function updateCommerce(localRecordId, mutator) {
   return next ? writeCommerce(localRecordId, next) : current;
 }
 
+function accountSwitcher() {
+  const accounts = readAccountRegistry();
+  const active = readActiveAccount();
+  return el('label', { className: 'account-switcher' }, [
+    el('span', { className: 'hint', text: COPY.activeAccount }),
+    el('select', {
+      attrs: {
+        'data-account-switcher': 'true',
+        'aria-label': COPY.activeAccount,
+      },
+    }, [
+      el('option', { attrs: { value: '' }, text: 'NO ACTIVE ACCOUNT' }),
+      ...accounts.map((account) => el('option', {
+        attrs: {
+          value: account.accountId,
+          ...(active?.accountId === account.accountId ? { selected: 'selected' } : {}),
+        },
+        text: accountLabel(account),
+      })),
+    ]),
+  ]);
+}
+
 function utilityNav(current) {
   const items = [
     { id: 'home', label: COPY.home, href: ROUTES.landing },
     { id: 'begin', label: COPY.myProjects, href: ROUTES.begin },
     { id: 'account', label: COPY.account, href: ROUTES.account },
   ];
-  return el('nav', { className: 'utility-nav', attrs: { 'aria-label': 'Home and account' } },
-    items.map((item) => el('a', {
+  return el('nav', { className: 'utility-nav', attrs: { 'aria-label': 'Home and account' } }, [
+    ...items.map((item) => el('a', {
       className: current === item.id ? 'nav-current' : 'nav-link',
       attrs: {
         href: item.href,
@@ -229,7 +323,8 @@ function utilityNav(current) {
       },
       text: item.label,
     })),
-  );
+    accountSwitcher(),
+  ]);
 }
 
 function libraryWorkstreamLine(entry) {
@@ -264,6 +359,7 @@ function accountScreen() {
         el('p', { className: 'account-state', attrs: { 'data-account-id': account.accountId }, text: `${account.name} · ${account.accountId}` }),
         el('p', { text: account.addressLine1 }),
         el('p', { text: `${account.city}, ${account.region}` }),
+        el('p', { attrs: { 'data-account-tags': 'true' }, text: `${COPY.accountTags}: ${(account.tags ?? []).join(' / ') || 'NONE'}` }),
         account.email ? el('p', { text: account.email }) : null,
         account.fixture ? el('p', { className: 'hint', text: 'Synthetic Customer Zero fixture.' }) : null,
         el('button', { attrs: { type: 'button', 'data-action': 'clear-demo-account' }, text: COPY.clearAccount }),
@@ -411,6 +507,9 @@ function landingScreen() {
 }
 
 function orientationScreen(actor) {
+  const accounts = readAccountRegistry();
+  const active = readActiveAccount();
+  const suggestedId = active?.accountId ?? ACTOR_DEMO_ACCOUNT_IDS[actor.id] ?? accounts[0]?.accountId ?? '';
   return el(
     'main',
     {
@@ -426,6 +525,34 @@ function orientationScreen(actor) {
       el('p', { className: 'orientation-actor', text: actor.label }),
       heading(actor.heading),
       actor.body ? el('p', { className: 'orientation-body', text: actor.body }) : null,
+      el('section', { className: 'account-form orientation-account', attrs: { 'data-orientation-account-form': 'true' } }, [
+        el('h2', { text: COPY.accountChooserHeading }),
+        el('p', { className: 'hint', text: COPY.accountChooserIntro }),
+        el('label', {}, [
+          el('span', { text: COPY.accountChooserLabel }),
+          el('select', { attrs: { 'data-orientation-account': 'true', 'aria-label': COPY.accountChooserLabel } }, [
+            ...accounts.map((account) => el('option', {
+              attrs: {
+                value: account.accountId,
+                ...(suggestedId === account.accountId ? { selected: 'selected' } : {}),
+              },
+              text: accountLabel(account),
+            })),
+          ]),
+        ]),
+        el('h2', { text: COPY.accountAddUser }),
+        ...[
+          ['name', COPY.accountName],
+          ['addressLine1', COPY.accountAddress],
+          ['city', COPY.accountCity],
+          ['region', COPY.accountRegion],
+          ['email', COPY.accountEmail],
+        ].map(([name, label]) => el('label', {}, [
+          el('span', { text: label }),
+          el('input', { attrs: { type: name === 'email' ? 'email' : 'text', 'data-account-field': name } }),
+        ])),
+        el('button', { attrs: { type: 'button', 'data-action': 'create-demo-account' }, text: COPY.accountAddUser }),
+      ]),
       el('div', { className: 'actions' }, [
         el('button', {
           className: 'action-next',
@@ -577,7 +704,8 @@ async function renderInto(root) {
   } else if (screen.name === 'account') {
     content = wrapShell(actor, accountScreen(), 'account');
   } else if (screen.name === 'begin') {
-    const saved = await listSavedProjects();
+    const activeAccount = readActiveAccount();
+    const saved = await listSavedProjects(activeAccount?.accountId ?? null);
     if (seq !== renderSeq) {
       return;
     }
@@ -599,7 +727,11 @@ async function renderInto(root) {
       { project: current, view: null },
     );
   } else if (screen.name === 'project') {
-    const project = screen.localRecordId ? await projectIndex(screen.localRecordId) : null;
+    const candidateProject = screen.localRecordId ? await projectIndex(screen.localRecordId) : null;
+    const activeAccountId = readActiveAccount()?.accountId ?? null;
+    const project = candidateProject && (candidateProject.ownerAccountId ?? null) === activeAccountId
+      ? candidateProject
+      : null;
     if (seq !== renderSeq) {
       return;
     }
@@ -808,6 +940,7 @@ async function completeCreate(intent) {
       classId: intent.classId,
       createdAt: new Date().toISOString(),
       actorId: readViewSession().actorId,
+      ownerAccountId: readActiveAccount()?.accountId ?? null,
     });
   }
   try {
@@ -1258,6 +1391,15 @@ export function startShell(root) {
   const render = () => renderInto(root);
 
   root.addEventListener('change', async (event) => {
+    const switcher = event.target.closest('[data-account-switcher]');
+    if (switcher) {
+      const accountId = switcher.value;
+      if (accountId) chooseAccount(accountId);
+      else clearActiveAccount();
+      setCurrentProject(null);
+      navigate(ROUTES.begin);
+      return;
+    }
     const archive = event.target.closest('[data-archive-input]');
     if (archive && archive.files && archive.files.length > 0) {
       const file = archive.files[0];
@@ -1326,6 +1468,11 @@ export function startShell(root) {
       return;
     }
     if (action === 'next') {
+      const selectedId = root.querySelector('[data-orientation-account]')?.value ?? readActiveAccount()?.accountId ?? null;
+      if (!selectedId || !chooseAccount(selectedId)) {
+        return;
+      }
+      setCurrentProject(null);
       navigate(ROUTES.begin);
       return;
     }
@@ -1530,12 +1677,19 @@ export function startShell(root) {
       return;
     }
     if (action === 'create-demo-account') {
-      createLocalDemoAccount(root);
+      const screen = screenFromLocation(window.location);
+      const account = createLocalDemoAccount(root, screen.actor?.id ?? null);
+      if (account && screen.name === 'orientation') {
+        setCurrentProject(null);
+        navigate(ROUTES.begin);
+        return;
+      }
       render();
       return;
     }
     if (action === 'clear-demo-account') {
-      localStorage.removeItem(DEMO_ACCOUNT_KEY);
+      clearActiveAccount();
+      setCurrentProject(null);
       render();
       return;
     }

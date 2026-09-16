@@ -87,6 +87,9 @@ export function prepareProjectCreation(input) {
   const createdAt = requireString('createdAt', input.createdAt);
   const entryMode = requireString('entryMode', input.entryMode);
   const actorId = input.actorId ?? null;
+  const ownerAccountId = input.ownerAccountId == null
+    ? null
+    : requireString('ownerAccountId', input.ownerAccountId);
 
   let classRef = null;
   if (entryMode === 'mapped') {
@@ -134,6 +137,7 @@ export function prepareProjectCreation(input) {
         entryMode,
         classId: classRef ? classRef.classId : null,
         classVersion: classRef ? classRef.classVersion : null,
+        ...(ownerAccountId ? { ownerAccountId } : {}),
       },
       records: [
         {

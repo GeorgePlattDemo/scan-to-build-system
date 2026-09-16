@@ -66,6 +66,10 @@ test('V8-06 keyboard and narrow viewport can complete the bounded Board vertical
   await expect(page.locator('[data-screen="orientation"][data-actor="new"]')).toBeVisible();
   await expect(page.locator('#screen-heading')).toBeFocused();
   await page.keyboard.press('Tab');
+  await expect(page.locator('[data-orientation-account]')).toBeFocused();
+  for (let index = 0; index < 7; index += 1) {
+    await page.keyboard.press('Tab');
+  }
   await expect(page.getByRole('button', { name: COPY.next })).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('[data-screen="begin"]')).toBeVisible();

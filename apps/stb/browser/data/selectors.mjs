@@ -28,9 +28,12 @@ export async function projectIndex(localRecordId) {
   return withWorkstreams(await getProject(localRecordId));
 }
 
-export async function listSavedProjects() {
+export async function listSavedProjects(ownerAccountId = undefined) {
   const projects = await listProjects();
-  return [...projects]
+  const visible = ownerAccountId === undefined
+    ? projects
+    : projects.filter((project) => (project.ownerAccountId ?? null) === ownerAccountId);
+  return [...visible]
     .sort((left, right) => {
       if (left.updatedAt === right.updatedAt) {
         return left.localRecordId < right.localRecordId ? 1 : -1;

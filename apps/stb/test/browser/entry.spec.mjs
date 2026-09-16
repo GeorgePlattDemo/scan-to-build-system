@@ -318,7 +318,7 @@ test('B1-07 browser history, reload, and direct routes do not create projects', 
   expect((await domainInventory(page)).projects).toBe(0);
 });
 
-test('B1-08 keyboard-only actor selection, Back, reselect, and NEXT', async ({ page }) => {
+test('B1-08 keyboard-only actor selection, account choice, Back, reselect, and My Projects', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#screen-heading')).toBeFocused();
   await page.keyboard.press('Tab');
@@ -327,6 +327,11 @@ test('B1-08 keyboard-only actor selection, Back, reselect, and NEXT', async ({ p
   await expect(page.locator('[data-screen="orientation"][data-actor="new"]')).toBeVisible();
   await expect(page.locator('#screen-heading')).toBeFocused();
   await page.keyboard.press('Tab');
+  await expect(page.locator('[data-orientation-account]')).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  for (let index = 0; index < 7; index += 1) {
+    await page.keyboard.press('Tab');
+  }
   await expect(page.getByRole('button', { name: COPY.next })).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: COPY.back })).toBeFocused();
@@ -340,6 +345,11 @@ test('B1-08 keyboard-only actor selection, Back, reselect, and NEXT', async ({ p
   await expect(page.locator('[data-screen="orientation"][data-actor="returning"]')).toBeVisible();
   await expect(page.locator('#screen-heading')).toBeFocused();
   await page.keyboard.press('Tab');
+  await expect(page.locator('[data-orientation-account]')).toBeFocused();
+  for (let index = 0; index < 7; index += 1) {
+    await page.keyboard.press('Tab');
+  }
+  await expect(page.getByRole('button', { name: COPY.next })).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('[data-screen="begin"]')).toBeVisible();
   await expect(page.locator('#screen-heading')).toBeFocused();

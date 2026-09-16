@@ -544,6 +544,9 @@ export async function commitPreparedChange(input) {
       entryMode: project ? project.entryMode : (input.index?.entryMode ?? null),
       classId: project ? project.classId : (input.index?.classId ?? null),
       classVersion: project ? project.classVersion : (input.index?.classVersion ?? null),
+      ...((project?.ownerAccountId ?? input.index?.ownerAccountId)
+        ? { ownerAccountId: project?.ownerAccountId ?? input.index.ownerAccountId }
+        : {}),
       ...(project?.imported === true
         ? {
             imported: true,
@@ -935,6 +938,7 @@ export async function importProjectNamespace(input) {
       entryMode: sourceProject.entryMode ?? null,
       classId: sourceProject.classId ?? null,
       classVersion: sourceProject.classVersion ?? null,
+      ...(sourceProject.ownerAccountId ? { ownerAccountId: sourceProject.ownerAccountId } : {}),
       imported: true,
       importOrigin: 'owner-archive',
       importArchiveId: archiveId,
