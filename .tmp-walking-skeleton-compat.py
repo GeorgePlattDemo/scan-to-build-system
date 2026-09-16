@@ -61,6 +61,34 @@ s = replace_once(
 )
 s = replace_once(
     s,
+    """export async function openBoardChild(page) {
+  await page.getByRole('button', { name: 'PICK A BOARD', exact: true }).click();
+  await expect(page.locator('[data-child-panel=\"board\"]')).toBeVisible();
+}""",
+    """export async function openBoardChild(page) {
+  if (await page.locator('[data-screen=\"workstreams\"]').isVisible()) {
+    await page.getByRole('button', { name: COPY.openProjectDefinition }).click();
+    await expect(page.locator('[data-page=\"page2\"]')).toBeVisible();
+  }
+  await page.getByRole('button', { name: 'PICK A BOARD', exact: true }).click();
+  await expect(page.locator('[data-child-panel=\"board\"]')).toBeVisible();
+}""",
+    'vertical board child workstream crossing',
+)
+s = replace_once(
+    s,
+    """export async function backToHub(page) {
+  await page.locator('[data-action=\"back-to-hub\"]').first().click();
+  await expect(page.locator('[data-intake-grid]')).toBeVisible();
+}""",
+    """export async function backToHub(page) {
+  await page.locator('[data-action=\"back-to-hub\"]').first().click();
+  await expect(page.locator('[data-screen=\"workstreams\"]')).toBeVisible();
+}""",
+    'vertical back-to-workstreams expectation',
+)
+s = replace_once(
+    s,
     """export async function resumeSaved(page, actorId, id) {
   await goActorToBegin(page, actorId);
   await page.locator(`.resume-item[data-local-record-id=\"${id}\"]`).click();
@@ -122,4 +150,4 @@ s = replace_once(
 )
 write(p, s)
 
-print('walking skeleton workspace and remaining vertical compatibility applied')
+print('walking skeleton workspace and vertical navigation compatibility applied')
