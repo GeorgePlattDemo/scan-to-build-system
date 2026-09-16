@@ -17,13 +17,13 @@ test('Customer Zero walking skeleton keeps library anonymous and payment gates q
   await expect(library).toBeVisible();
   await expect(library).toContainText('Alcove shelf blanks');
   await expect(library).toContainText('D ✓');
-  await expect(library).not.toContainText('Sarah Smith');
+  await expect(library).not.toContainText('Sarah');
   await expect(library).not.toContainText('123 Alcove Lane');
 
   await page.locator('[data-utility-nav="account"]').click();
   await expect(page.locator('main[data-screen="account"]')).toBeVisible();
   await page.getByRole('button', { name: COPY.useCustomerZero }).click();
-  await expect(page.locator('[data-account-id="ACCT-000001"]')).toContainText('Sarah Smith');
+  await expect(page.locator('[data-account-id="ACCT-000001"]')).toContainText('Sarah');
   await expect(page.locator('main[data-screen="account"]')).toContainText('123 Alcove Lane');
 
   await page.locator('[data-utility-nav="home"]').click();
@@ -46,7 +46,7 @@ test('Customer Zero walking skeleton keeps library anonymous and payment gates q
   await expect(page.locator('main[data-screen="result"]')).toBeVisible();
   await page.getByRole('button', { name: COPY.continueToOrder }).click();
   await expect(page.locator('main[data-screen="order"]')).toBeVisible();
-  await expect(page.locator('[data-order-account="ACCT-000001"]')).toContainText('Sarah Smith');
+  await expect(page.locator('[data-order-account="ACCT-000001"]')).toContainText('Sarah');
   await expect(page.locator('[data-release-permitted="true"]')).toHaveCount(0);
 
   await page.getByRole('button', { name: COPY.continueToPayment }).click();
@@ -68,6 +68,6 @@ test('Customer Zero walking skeleton keeps library anonymous and payment gates q
   await page.locator('[data-utility-nav="home"]').click();
   const updated = page.locator('[data-project-library="true"]');
   await expect(updated.locator('[data-library-source="ANONYMOUS_CONTRIBUTION"]')).toBeVisible();
-  await expect(updated).not.toContainText('Sarah Smith');
+  await expect(updated).not.toContainText('Sarah');
   await expect(updated).not.toContainText('123 Alcove Lane');
 });

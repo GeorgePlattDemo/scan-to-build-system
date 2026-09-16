@@ -68,7 +68,7 @@ test('four users exercise all three doors while My Projects stays account-scoped
   // User 4 proves account creation is available through an existing door rather than a fourth door.
   await page.goto('/');
   await page.getByRole('button', { name: ACTORS.returning.label }).click();
-  await page.locator('[data-account-field="name"]').fill('Jordan Lee');
+  await page.locator('[data-account-field="name"]').fill('Harry');
   await page.locator('[data-account-field="addressLine1"]').fill('321 Fourth Street');
   await page.locator('[data-account-field="city"]').fill('Greensboro');
   await page.locator('[data-account-field="region"]').fill('NC');
@@ -102,10 +102,10 @@ test('four users exercise all three doors while My Projects stays account-scoped
   const library = page.locator('[data-project-library="true"]');
   await expect(library).toBeVisible();
   await expect(library).toContainText('Alcove shelf blanks');
-  await expect(library).not.toContainText('Sarah Smith');
-  await expect(library).not.toContainText('Marcus Reed');
-  await expect(library).not.toContainText('Elena Torres');
-  await expect(library).not.toContainText('Jordan Lee');
+  await expect(library).not.toContainText('Sarah');
+  await expect(library).not.toContainText('Tom');
+  await expect(library).not.toContainText('Dick');
+  await expect(library).not.toContainText('Harry');
 });
 
 

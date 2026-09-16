@@ -14,7 +14,7 @@ test('Customer Zero is User 1 and three synthetic account fixtures seed all thre
   assert.equal(DEMO_ACCOUNTS.length, 3);
   assert.equal(CUSTOMER_ZERO, DEMO_ACCOUNTS[0]);
   assert.equal(CUSTOMER_ZERO.fixture, true);
-  assert.equal(CUSTOMER_ZERO.name, 'Sarah Smith');
+  assert.equal(CUSTOMER_ZERO.name, 'Sarah');
   assert.equal(CUSTOMER_ZERO.addressLine1, '123 Alcove Lane');
   assert.equal(CUSTOMER_ZERO.city, 'Greensboro');
   assert.equal(CUSTOMER_ZERO.region, 'NC');
@@ -29,7 +29,7 @@ test('Customer Zero is User 1 and three synthetic account fixtures seed all thre
 
 test('anonymous project library seed contains no Customer Zero identity', () => {
   const serialized = JSON.stringify(PROJECT_LIBRARY_SEED);
-  assert.doesNotMatch(serialized, /Sarah Smith|123 Alcove Lane|ACCT-000001|Greensboro/i);
+  assert.doesNotMatch(serialized, /Sarah|123 Alcove Lane|ACCT-000001|Greensboro/i);
   assert.equal(PROJECT_LIBRARY_SEED[0].classId, 'alcove-shelf-blanks');
   assert.deepEqual([...PROJECT_LIBRARY_SEED[0].workstreams], ['dimensional']);
 });
