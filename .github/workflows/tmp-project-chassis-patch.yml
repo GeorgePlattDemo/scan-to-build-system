@@ -23,6 +23,9 @@ jobs:
       - name: Apply bounded chassis patch
         run: python .tmp-project-chassis-patch.py
 
+      - name: Apply browser compatibility fixes
+        run: python .tmp-project-chassis-postfix.py
+
       - name: Syntax and diff checks
         run: |
           set -euo pipefail
@@ -60,6 +63,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add apps/stb work/capability-bridge/TRIAL-LOG.md
-          git rm .tmp-project-chassis-patch.py .tmp-fix-project-chassis-helper.py .github/workflows/tmp-project-chassis-patch.yml
+          git rm .tmp-project-chassis-patch.py .tmp-fix-project-chassis-helper.py .tmp-project-chassis-postfix.py .github/workflows/tmp-project-chassis-patch.yml
           git commit -m "Add uniform project workstream chassis"
           git push origin HEAD:build/project-workstream-chassis-0.1
