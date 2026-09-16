@@ -15,6 +15,11 @@ replace_once(
     'reference demonstration expectation',
 )
 replace_once(
+    "assert.equal(COPY.beginHeading, 'Projects');",
+    "assert.equal(COPY.beginHeading, 'My Projects');",
+    'my projects heading expectation',
+)
+replace_once(
     "assert.equal(PRIMARY_PAGES[0].label, 'Projects');",
     "assert.equal(PRIMARY_PAGES[0].label, 'My Projects');",
     'my projects primary label expectation',
