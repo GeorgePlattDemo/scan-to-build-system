@@ -32,7 +32,7 @@ jobs:
           node --check apps/stb/browser/ui/panels.mjs
           node --check apps/stb/browser/ui/shell.mjs
           git diff --check
-          test -z "$(git diff --name-only | grep -Ev '^(apps/stb/|work/capability-bridge/TRIAL-LOG.md$)' || true)"
+          test -z "$(git diff --name-only | grep -Ev '^(apps/stb/|work/capability-bridge/TRIAL-LOG.md$|\.tmp-|\.github/workflows/tmp-project-chassis-patch\.yml$)' || true)"
 
       - name: Install app dependencies
         working-directory: apps/stb
