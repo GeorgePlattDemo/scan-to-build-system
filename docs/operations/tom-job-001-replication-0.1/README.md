@@ -5,6 +5,16 @@
 **Demo actor:** Tom  
 **Purpose:** replay the established `STORE-JOB-001` operating circuit with one controlled customer-definition change, then surround that circuit with the newer account / offer / payment / release / receipt forms.
 
+## START HERE — completed job packet
+
+**Canonical completed reference binder:**
+
+- `04-COMPLETED-JOB-PACKET.md`
+
+That file is the single completed-job packet for Tom. It binds F00–F15, the transaction identities, Payment Zero receipt, separate release, Operations Packet, Job 001 machine replay, inspection, staging, closeout, custody, completion receipt, retained snags, and Owner Record into one inspectable artifact.
+
+The other files in this folder are its detailed exhibits and implementation punch list.
+
 ## Controlling donor
 
 Operational donor:
@@ -105,13 +115,16 @@ Where the existing architecture cannot complete a step honestly, the package rec
 
 ## Package files
 
-1. `01-PROJECT-THROUGH-OPERATIONS-PACKET.md`  
-   F00–F10: actor, source, configuration, WorkPacket, Store answer, dynamic price replay, offer, order, Payment Zero, release, Operations Packet.
+1. `04-COMPLETED-JOB-PACKET.md`  
+   **Canonical completed binder.** One end-to-end F00–F15 job packet with transaction record identities, receipts, Job 001 replay, closeout, Owner Record and retained snags.
 
-2. `02-JOB-001-CORE-RUN-AND-CLOSEOUT.md`  
-   F11–F15: the Job 001 donor circuit replayed with Tom's identified definition, including local run simulation, outcome reconciliation, staging, closeout, receipt, custody and Owner Record.
+2. `01-PROJECT-THROUGH-OPERATIONS-PACKET.md`  
+   Detailed F00–F10 exhibit: actor, source, configuration, WorkPacket, Store answer, dynamic price replay, offer, order, Payment Zero, release, Operations Packet.
 
-3. `03-IMPLEMENTATION-PUNCH-LIST.md`  
+3. `02-JOB-001-CORE-RUN-AND-CLOSEOUT.md`  
+   Detailed F11–F15 exhibit: the Job 001 donor circuit replayed with Tom's identified definition, including local run simulation, outcome reconciliation, staging, closeout, receipt, custody and Owner Record.
+
+4. `03-IMPLEMENTATION-PUNCH-LIST.md`  
    Exact gaps exposed by the replay. This is the implementation backlog; it is not permission to replace or streamline existing good work.
 
 ## Preservation rule
