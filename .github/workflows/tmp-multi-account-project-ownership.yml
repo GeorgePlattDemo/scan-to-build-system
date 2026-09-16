@@ -1,0 +1,78 @@
+name: Temporary multi-account project ownership build
+
+on:
+  push:
+    branches:
+      - build/multi-account-project-ownership-0.1
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: build/multi-account-project-ownership-0.1
+
+      - name: Apply bounded multi-account patch
+        run: python .tmp-multi-account-project-ownership.py
+
+      - name: Syntax and diff guards
+        run: |
+          set -euo pipefail
+          node --check apps/stb/shared/contracts.mjs
+          node --check apps/stb/browser/data/repository.mjs
+          node --check apps/stb/browser/domain/candidate.mjs
+          node --check apps/stb/browser/data/selectors.mjs
+          node --check apps/stb/browser/ui/shell.mjs
+          node --check apps/stb/test/unit/account-commerce.test.mjs
+          node --check apps/stb/test/browser/multi-account.spec.mjs
+          git diff --check
+          test -z "$(git diff --name-only | grep -Ev '^(apps/stb/|\.tmp-multi-account-project-ownership\.py$|\.github/workflows/tmp-multi-account-project-ownership\.yml$)' || true)"
+
+      - name: Mount exact accepted Store checkout
+        run: |
+          set -euo pipefail
+          STORE_PIN=b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d
+          git clone --filter=blob:none --no-checkout https://github.com/GeorgePlattDemo/scan-to-build-store.git /tmp/stb-store-zero
+          git -C /tmp/stb-store-zero checkout --detach "$STORE_PIN"
+          test "$(git -C /tmp/stb-store-zero rev-parse HEAD)" = "$STORE_PIN"
+          test -z "$(git -C /tmp/stb-store-zero status --porcelain)"
+          echo "STB_STORE_ZERO_ROOT=/tmp/stb-store-zero" >> "$GITHUB_ENV"
+
+      - name: Install app dependencies
+        working-directory: apps/stb
+        run: npm ci --no-audit --no-fund
+
+      - name: Unit tests
+        working-directory: apps/stb
+        run: npm run test:unit
+
+      - name: Browser tests
+        working-directory: apps/stb
+        run: npx playwright install --with-deps chromium && npm run test:browser
+
+      - name: Boundary tests
+        working-directory: apps/stb
+        run: npm run test:boundaries
+
+      - name: Store integration tests
+        working-directory: apps/stb
+        run: npm run test:store
+
+      - name: Vertical tests
+        working-directory: apps/stb
+        run: npm run test:vertical
+
+      - name: Commit clean multi-account build and remove helpers
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/stb
+          git rm -f .tmp-multi-account-project-ownership.py .github/workflows/tmp-multi-account-project-ownership.yml
+          git commit -m "Add account-scoped project ownership"
+          git push origin HEAD:build/multi-account-project-ownership-0.1
