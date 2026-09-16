@@ -1,0 +1,32 @@
+name: Temporary project chassis trial log update
+
+on:
+  push:
+    branches:
+      - build/project-workstream-chassis-0.1
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: build/project-workstream-chassis-0.1
+      - name: Append required trial row
+        run: python .tmp-project-chassis-trial.py
+      - name: Validate bounded log change
+        run: |
+          git diff --check
+          git diff -- work/capability-bridge/TRIAL-LOG.md
+      - name: Commit trial row and remove helpers
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add work/capability-bridge/TRIAL-LOG.md
+          git rm .tmp-project-chassis-trial.py .github/workflows/tmp-project-chassis-trial.yml
+          git commit -m "Log project workstream chassis app constraint"
+          git push origin HEAD:build/project-workstream-chassis-0.1
