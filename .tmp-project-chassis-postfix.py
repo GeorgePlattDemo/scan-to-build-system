@@ -33,10 +33,14 @@ new = """  const params = new URLSearchParams(location.search);
 s = replace_once(s, old, new, 'legacy child route compatibility')
 write(p, s)
 
-# Workspace is a real screen name now; do not keep calling it hub in the DOM.
+# Workspace is a real screen name now; scope the replacement to page2Main only.
 p = 'browser/ui/panels.mjs'
 s = read(p)
-s = replace_once(s, "'data-screen': isQuestions ? 'questions' : 'hub',", "'data-screen': isQuestions ? 'questions' : 'workspace',", 'workspace data-screen')
+start = s.index('export function page2Main(')
+end = s.index('\nexport function page5Main(', start)
+chunk = s[start:end]
+chunk = replace_once(chunk, "'data-screen': isQuestions ? 'questions' : 'hub',", "'data-screen': isQuestions ? 'questions' : 'workspace',", 'workspace data-screen')
+s = s[:start] + chunk + s[end:]
 write(p, s)
 
 # Archive resume is a normal human resume: stop at workstreams, then choose definition for this unassigned project.
@@ -61,10 +65,8 @@ old = """  await page.getByRole('button', { name: COPY.back }).click();
 new = """  await page.getByRole('button', { name: COPY.back }).click();
   await page.getByRole('button', { name: COPY.startAnotherProject }).click();
   await page.getByRole('button', { name: COPY.chooseMapped }).click();"""
-# This sequence should occur only in the switch test after the chassis patch.
 assert s.count(old) >= 1
 s = s.replace(old, new, 1)
-# After keep-and-start, mapped project stops at gate before questions.
 old2 = """  await page.getByRole('button', { name: COPY.keepAndStart }).click();
   await expect(page.locator('[data-screen=\"workstreams\"]')).toBeVisible();"""
 if old2 not in s:
