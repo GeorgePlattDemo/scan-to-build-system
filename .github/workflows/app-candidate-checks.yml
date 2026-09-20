@@ -77,6 +77,30 @@ jobs:
           test "$(git -C "$STB_STORE_ZERO_ROOT" rev-parse HEAD)" = "$STB_STAGE2_STORE_PIN"
           npm run test:vertical
 
+      - name: Checkout exact Start Own miter Store source
+        uses: actions/checkout@v4
+        with:
+          repository: GeorgePlattDemo/scan-to-build-store
+          ref: 0e9ac7a5d83575ebe0e0e2b5f63b266f2431b24c
+          path: .stb-store-start-own
+          fetch-depth: 1
+
+      - name: Exact Start Own Store tests
+        env:
+          STB_STORE_START_OWN_ROOT: ${{ github.workspace }}/.stb-store-start-own
+          STB_START_OWN_STORE_PIN: 0e9ac7a5d83575ebe0e0e2b5f63b266f2431b24c
+        run: |
+          test "$(git -C "$STB_STORE_START_OWN_ROOT" rev-parse HEAD)" = "$STB_START_OWN_STORE_PIN"
+          npm run test:start-own-store
+
+      - name: Exact Start Own browser proof
+        env:
+          STB_STORE_START_OWN_ROOT: ${{ github.workspace }}/.stb-store-start-own
+          STB_START_OWN_STORE_PIN: 0e9ac7a5d83575ebe0e0e2b5f63b266f2431b24c
+        run: |
+          test "$(git -C "$STB_STORE_START_OWN_ROOT" rev-parse HEAD)" = "$STB_START_OWN_STORE_PIN"
+          npm run test:start-own-browser
+
       - name: Checkout exact published-jobs Store source
         uses: actions/checkout@v4
         with:
