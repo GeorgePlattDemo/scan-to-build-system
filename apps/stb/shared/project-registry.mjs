@@ -41,7 +41,7 @@ export const PROJECT_REGISTRY = Object.freeze([
       donorSha256: '455db6e8351c9f5f28feac98e80461c852cd0f7682a9834a378bbedc82c17fed',
       donorBasis: 'User-provided Claude interaction prototype; Store logic removed from browser and rebound through System.',
       storeRepository: 'GeorgePlattDemo/scan-to-build-store',
-      storePin: '17166324763f8c9b1e31efb0290f01db87931a9e',
+      storePin: '0e9ac7a5d83575ebe0e0e2b5f63b266f2431b24c',
       priorReviewImplementationBlob: '45132afea1cc796b10e0fb667a7d2db3ee10e284',
       provenanceBlob: 'cbdb02996e161b951704acae29d8da2dd1c68c03',
     },
