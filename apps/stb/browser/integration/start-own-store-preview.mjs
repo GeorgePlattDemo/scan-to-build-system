@@ -13,16 +13,28 @@ function payloadFromDefinition(definition = {}) {
     cutPlane: definition.cutPlane,
     endIdentity: definition.endIdentity,
     endRelation: definition.endRelation ?? null,
+    lengthDatum: definition.lengthDatum,
   };
 }
 
 export async function askStartOwnStore({ projectId, definitionId, definition, signal } = {}) {
   const payload = payloadFromDefinition(definition);
-  const request = await buildStartOwnStoreRequest({
-    projectId,
-    definitionId,
-    payload,
-  });
+  let request;
+  try {
+    request = await buildStartOwnStoreRequest({
+      projectId,
+      definitionId,
+      payload,
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      code: 'STORE_DEMAND_INCOMPLETE',
+      details: error instanceof Error ? error.message : String(error),
+      request: null,
+      answer: null,
+    };
+  }
   let response;
   try {
     response = await fetch(START_OWN_STORE_PATH, {
