@@ -820,9 +820,12 @@ function cutTable(P){
 function buyPanel(P){
   var a=storeAnswer(P), r=resolveMaterial(P), s=stock(P.stockClass);
   if(!a){
-    return '<div class="panel"><h3>Store Zero</h3><p class="hint" style="margin:0">'
-      +(A.storePreviewPending?'Checking this definition against Store Zero…':'Change a definition fact to ask Store Zero.')
-      +'</p></div>';
+    var message=A.storePreviewPending
+      ? 'Checking this definition against Store Zero…'
+      : (A.storePreviewDiagnostic
+          ? 'Store Zero could not return a current answer · '+esc(A.storePreviewDiagnostic)+'.'
+          : 'No current Store answer for this definition.');
+    return '<div class="panel"><h3>Store Zero</h3><p class="hint" style="margin:0">'+message+'</p></div>';
   }
   var ev=a.rawEvaluation||{}, cap=ev.capability||{}, est=a.rawEstimate||null;
   if(!r||r.status!=='MAPPED')
@@ -919,7 +922,12 @@ function emitChanged(projectId,lastRef,cfg){
   var id=definitionId(physicalDemand(cfg.part()));
   if(id===lastRef.v)return;
   lastRef.v=id;
-  if(projectId==='start-own'){A.storePreviewPending=true;A.storePreview=null;A.storePreviewDefinitionId=null;}
+  if(projectId==='start-own'){
+    A.storePreviewPending=true;
+    A.storePreview=null;
+    A.storePreviewDefinitionId=null;
+    A.storePreviewDiagnostic=null;
+  }
   var msg={type:'STB_PROJECT_DEFINITION_CHANGED',projectId:projectId,definitionId:id,
     definition:window.STBProjectBridge?window.STBProjectBridge.getDefinition():null};
   window.dispatchEvent(new CustomEvent('STB_PROJECT_DEFINITION_CHANGED',{detail:msg}));
@@ -1027,7 +1035,7 @@ var A={
      angleReference:'measured-off-part',cutPlane:null,endIdentity:null,
      endRelation:null,lengthDatum:null},
   view:'leg', sent:null, lastId:{v:null},
-  storePreview:null, storePreviewDefinitionId:null, storePreviewPending:false
+  storePreview:null, storePreviewDefinitionId:null, storePreviewPending:false, storePreviewDiagnostic:null
 };
 function part(){return A.P}
 var CAME_OFF={'picnic-table':'the picnic table','bench':'the bench','something-else':'it'};
@@ -1326,6 +1334,7 @@ window.addEventListener('message',function(event){
   A.storePreviewPending=false;
   A.storePreviewDefinitionId=current;
   A.storePreview=data.answer||null;
+  A.storePreviewDiagnostic=data.diagnostic||null;
   render();
 });
 
