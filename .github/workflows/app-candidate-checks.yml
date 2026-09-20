@@ -42,22 +42,56 @@ jobs:
       - name: Boundary tests
         run: npm run test:boundaries
 
-      # This workflow intentionally has no cross-repository Store checkout.
-      # Exercise the source gate in the state CI actually has instead of pretending
-      # the pinned integration suite can run without STB_STORE_ZERO_ROOT.
       - name: Store fail-closed tests (no external checkout)
         run: >-
           node --test --test-concurrency=1
           --test-name-pattern="missing STB_STORE_ZERO_ROOT|nonexistent Store root|wrong Store pin|unavailable Store source"
           test/store/source-gate.test.mjs
 
-      # These two browser cases exercise the real pinned Store checkout rather than
-      # the browser-side mock transport. They remain part of npm run test:browser
-      # for a workspace that has the exact clean Store checkout mounted.
       - name: Browser tests (Store checkout not mounted)
         run: >-
           npx playwright test --config test/playwright.config.mjs
           --grep-invert "P5-01 valid committed 45 auto-asks once and Board/Page 5 copy the actual Store answer|incomplete Board and unapplied buffer do not auto-ask"
+
+      - name: Checkout exact Stage-2 Store source
+        uses: actions/checkout@v4
+        with:
+          repository: GeorgePlattDemo/scan-to-build-store
+          ref: b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d
+          path: .stb-store-stage2
+          fetch-depth: 1
+
+      - name: Exact Stage-2 Store tests
+        env:
+          STB_STORE_ZERO_ROOT: ${{ github.workspace }}/.stb-store-stage2
+          STB_STAGE2_STORE_PIN: b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d
+        run: |
+          test "$(git -C "$STB_STORE_ZERO_ROOT" rev-parse HEAD)" = "$STB_STAGE2_STORE_PIN"
+          npm run test:store
+
+      - name: Exact Stage-2 vertical
+        env:
+          STB_STORE_ZERO_ROOT: ${{ github.workspace }}/.stb-store-stage2
+          STB_STAGE2_STORE_PIN: b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d
+        run: |
+          test "$(git -C "$STB_STORE_ZERO_ROOT" rev-parse HEAD)" = "$STB_STAGE2_STORE_PIN"
+          npm run test:vertical
+
+      - name: Checkout exact published-jobs Store source
+        uses: actions/checkout@v4
+        with:
+          repository: GeorgePlattDemo/scan-to-build-store
+          ref: 4402abeb6b0299a5b6db2eec85ed04c3b0236bcc
+          path: .stb-store-published
+          fetch-depth: 1
+
+      - name: Exact published-jobs trial
+        env:
+          STB_STORE_PUBLISHED_JOBS_ROOT: ${{ github.workspace }}/.stb-store-published
+          STB_PUBLISHED_STORE_PIN: 4402abeb6b0299a5b6db2eec85ed04c3b0236bcc
+        run: |
+          test "$(git -C "$STB_STORE_PUBLISHED_JOBS_ROOT" rev-parse HEAD)" = "$STB_PUBLISHED_STORE_PIN"
+          npm run trial:published-jobs
 
       - name: Upload bounded app source for integration proof
         uses: actions/upload-artifact@v4
