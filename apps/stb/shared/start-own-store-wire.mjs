@@ -2,7 +2,7 @@ import { canonicalJson, sha256Hex } from './canonical.mjs';
 
 export const START_OWN_STORE_PROTOCOL_VERSION = 'stb-store-zero-start-own-http/1';
 export const START_OWN_STORE_PATH = '/api/store-zero/start-own';
-export const START_OWN_STORE_PIN = '17166324763f8c9b1e31efb0290f01db87931a9e';
+export const START_OWN_STORE_PIN = '0e9ac7a5d83575ebe0e0e2b5f63b266f2431b24c';
 export const START_OWN_STORE_REQUEST_TYPE = 'USER_DEFINED_BOARD_V1';
 export const START_OWN_STORE_SCOPE = 'USER_DEFINED_BOARD_REFERENCE';
 
@@ -10,6 +10,7 @@ const SIZE_KEYS = Object.freeze(['2x4', '2x6', '2x8', '4x4']);
 const CUT_PLANES = Object.freeze(['miter-face', 'bevel-thickness']);
 const END_IDENTITIES = Object.freeze(['both', 'first']);
 const END_RELATIONS = Object.freeze(['parallel', 'opposed', null]);
+const LENGTH_DATUMS = Object.freeze(['long-long-outer-edge', 'long-short']);
 
 function fail(code, details) {
   return { ok: false, code, details };
@@ -35,6 +36,7 @@ export function validateStartOwnPayload(payload) {
     'cutPlane',
     'endIdentity',
     'endRelation',
+    'lengthDatum',
   ]);
   if (Object.keys(payload).some((key) => !allowed.has(key))) {
     return fail('INVALID_BOUNDED_SCOPE', 'unexpected user-defined board fields');
@@ -60,6 +62,9 @@ export function validateStartOwnPayload(payload) {
   if (!END_RELATIONS.includes(payload.endRelation ?? null)) {
     return fail('INVALID_BOUNDED_SCOPE', 'endRelation must be parallel, opposed, or null');
   }
+  if (!LENGTH_DATUMS.includes(payload.lengthDatum)) {
+    return fail('INVALID_BOUNDED_SCOPE', 'lengthDatum must explicitly identify the angled-length datum');
+  }
   return {
     ok: true,
     payload: {
@@ -70,6 +75,7 @@ export function validateStartOwnPayload(payload) {
       cutPlane: payload.cutPlane,
       endIdentity: payload.endIdentity,
       endRelation: payload.endRelation ?? null,
+      lengthDatum: payload.lengthDatum,
     },
   };
 }
