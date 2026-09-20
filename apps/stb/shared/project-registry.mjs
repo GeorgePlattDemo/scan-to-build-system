@@ -227,7 +227,7 @@ export const REVIEW_CHILD_CLASS_REFERENCES = Object.freeze(
       hint: 'Preserved Review donor hosted by the canonical System application.',
       source: Object.freeze({
         repository: entry.sourceAuthority.repository,
-        pin: entry.sourceAuthority.commit,
+        pin: entry.sourceAuthority.commit ?? null,
         basis: 'REVIEW-TO-SYSTEM-ADMISSION-0.1',
         ruleVersion: null,
         sourceFile: entry.entryArtifact,
