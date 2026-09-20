@@ -65,5 +65,6 @@ test('Start Your Own uses the admitted Grab a Board child and exact path-specifi
   assert.equal(startOwn.sourceAuthority.donorSha256, '455db6e8351c9f5f28feac98e80461c852cd0f7682a9834a378bbedc82c17fed');
   assert.equal(startOwn.sourceAuthority.storePin, '0e9ac7a5d83575ebe0e0e2b5f63b266f2431b24c');
   assert.equal(startOwn.storeAdapterPath, 'start-own-store-http/1');
+  assert.equal(startOwn.sourceAuthority.commit ?? null, null);
   assert.equal(startOwn.sourceAuthority.priorReviewImplementationBlob, '45132afea1cc796b10e0fb667a7d2db3ee10e284');
 });
