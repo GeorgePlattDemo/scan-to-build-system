@@ -33,7 +33,7 @@ export const PROJECT_REGISTRY = Object.freeze([
     displayName: 'Start Your Own / Grab a Board',
     projectClass: 'USER_DEFINED_BOARD',
     hostMode: 'review-child',
-    entryArtifact: '/projects/review/stb-start-own-0.11.html',
+    entryArtifact: '/review-donors/stb-start-own-0.11.html',
     sourceAuthority: {
       class: 'REVIEW_DONOR_USER_DEFINED',
       ...REVIEW_DONOR,
@@ -60,7 +60,7 @@ export const PROJECT_REGISTRY = Object.freeze([
     displayName: 'Outdoor Build',
     projectClass: 'BOUNDED_SOURCE_BACKED',
     hostMode: 'review-child',
-    entryArtifact: '/projects/review/stb-outdoor-build.html',
+    entryArtifact: '/review-donors/stb-outdoor-build.html',
     sourceAuthority: {
       class: 'REVIEW_DONOR_BOUNDED_SOURCE',
       ...REVIEW_DONOR,
@@ -88,7 +88,7 @@ export const PROJECT_REGISTRY = Object.freeze([
     displayName: 'Alcove Insert',
     projectClass: 'ALCOVE_INSERT_MATURE',
     hostMode: 'review-child',
-    entryArtifact: '/projects/review/system-build-base-8d8a9dd.html',
+    entryArtifact: '/review-donors/system-build-base-8d8a9dd.html',
     sourceAuthority: {
       class: 'PROJECT_SPECIFIC_DONOR',
       ...REVIEW_DONOR,
@@ -115,7 +115,7 @@ export const PROJECT_REGISTRY = Object.freeze([
     displayName: 'Window Seat / Space Utilization',
     projectClass: 'WINDOW_SEAT_SPACE_UTILIZATION',
     hostMode: 'review-child',
-    entryArtifact: '/projects/review/stb-window-seat-space-utilization-0.7.4.html',
+    entryArtifact: '/review-donors/stb-window-seat-space-utilization-0.7.4.html',
     sourceAuthority: {
       class: 'PROJECT_SPECIFIC_DONOR',
       ...REVIEW_DONOR,

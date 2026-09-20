@@ -145,53 +145,6 @@ function alcovePageForStage(stage) {
 }
 
 
-function createComparisonStoreHandoff(source, payload) {
-  const contract = window.STBStoreHandoffContract || null;
-  if (!contract || !payload) return null;
-  let physicalDemand = null;
-  const projectId = source === 'start-own' ? 'start-own' : 'outdoor-build';
-  const projectClass = source === 'start-own' ? 'USER_DEFINED_BOARD' : 'BOUNDED_SOURCE_BACKED';
-  const sourceAuthority = source === 'start-own'
-    ? { kind: 'USER-DEFINED', artifact: 'stb-start-own-0.11.html' }
-    : { kind: 'BOUNDED SOURCE-BACKED', artifact: 'stb-outdoor-build.html', detail: payload.sourceAuthority || null };
-  if (source === 'start-own') {
-    try {
-      physicalDemand = JSON.parse(window.localStorage.getItem('stb-proof-ladder-job1') || 'null')?.semanticOutput || null;
-    } catch (_) {}
-  } else {
-    physicalDemand = payload.normalizedPart || null;
-  }
-  if (!physicalDemand && payload.definition) {
-    const def = payload.definition;
-    const part0 = payload.request && Array.isArray(payload.request.parts) ? payload.request.parts[0] : null;
-    physicalDemand = {
-      stockClass: def.stockClass || (def.stock && def.stock.nominal) || '',
-      finishedLength: Number(def.finishedLength != null ? def.finishedLength : (part0 && part0.len)),
-      quantity: Number(def.qty != null ? def.qty : (def.quantity != null ? def.quantity : (part0 && part0.qty) || 1)),
-      endCondition: def.endCondition || 'square',
-      straightCut: def.endCondition !== 'angled',
-      holeRequirement: def.holeRequirement || 'NONE',
-    };
-  }
-  if (!physicalDemand) return null;
-  const definitionId = payload.id || (source === 'start-own' ? 'SYO-IDENTIFIED' : 'OB-SAW-IDENTIFIED');
-  try {
-    return contract.createComparisonHandoff({
-      projectId,
-      projectClass,
-      definitionId,
-      versionId: definitionId,
-      physicalDemand,
-      sourceAuthority,
-      unresolvedConditions: source === 'start-own'
-        ? (Array.isArray(payload.storeReference?.unresolvedConditions) ? payload.storeReference.unresolvedConditions : [])
-        : ['STORE-PRICING-BRIDGE-GAP'],
-    });
-  } catch (_) {
-    return null;
-  }
-}
-
 function snapshotRows(snapshot) {
   if (!snapshot) {
     return [
@@ -509,14 +462,12 @@ export function activateCanonicalProjectHost(root, { project, definition, stage,
         return;
       }
       if (data.type === 'STB_START_OWN_CONFIRMED') {
-        const storeHandoff = createComparisonStoreHandoff('start-own', data.payload);
-        await persist(ctx, { ...clean(data.payload), storeHandoff }, data.type);
+        await persist(ctx, data.payload, data.type);
         setStage(ctx, 'store-answer', { updateHistory: true });
         return;
       }
       if (data.type === 'STB_OUTDOOR_CONFIRMED') {
-        const storeHandoff = createComparisonStoreHandoff('outdoor', data.payload);
-        await persist(ctx, { ...clean(data.payload), storeHandoff }, data.type);
+        await persist(ctx, data.payload, data.type);
         setStage(ctx, 'store-answer', { updateHistory: true });
         return;
       }

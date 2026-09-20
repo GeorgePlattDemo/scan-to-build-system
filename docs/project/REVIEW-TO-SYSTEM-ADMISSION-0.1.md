@@ -34,17 +34,17 @@ A child may preserve its own mature project-specific definition behavior. The pa
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `system-build-current.html` | `c2928dba234d952646e3dbbafafdbd6782c88fc7` | SOURCE / PROVENANCE ONLY | Evidence of the accepted five-project wrapper, project-bound routing, actor-stage labels, content conservation, and donor-child ownership | `docs/project/` admission record + System host implementation | Review UX evidence | no runtime copy | migrated project identity/navigation/actor-boundary tests |
 | `system-build-front-door-0.5.html` | `5ac9677bdd7b508a633c357d46a217062708cdb2` | ADMIT AFTER REWRITE | Mature project-library language and entry-to-project intent where consistent with current System entry contracts | System landing/library UI | Application presentation | no | browser landing/three-context/library acceptance |
-| `system-build-base-8d8a9dd.html` | `67f3c5324ac7ab2ccd798b0dc0d7179b0912eef4` | ADMIT THROUGH ADAPTER | Mature Alcove capture/configure behavior, exact-entry controls, native project economics, Store detail, and downstream evidence | bounded Alcove child under `apps/stb/browser/projects/alcove/` | Project-specific application donor; Store facts remain attributed | **yes for preserved child** | Alcove first-paint/economics/actor-boundary tests |
+| `system-build-base-8d8a9dd.html` | `67f3c5324ac7ab2ccd798b0dc0d7179b0912eef4` | ADMIT THROUGH ADAPTER | Mature Alcove capture/configure behavior, exact-entry controls, native project economics, Store detail, and downstream evidence | byte-identical donor under `apps/stb/review-donors/system-build-base-8d8a9dd.html`, hosted only through the System adapter | Project-specific application donor; Store facts remain attributed | **yes for preserved child** | Alcove first-paint/economics/actor-boundary tests |
 | `stb-canonical-journey.js` | `e0619841d245b392b4065d5aa5770fe7feaeb7eb` | ADMIT AFTER REWRITE | Canonical stage order and gate distinctions | System project registry/stage contract | Application navigation contract | no | registry + stage transition unit/browser tests |
 | `stb-store-handoff-contract.js` | `6be0f8b6d527c553b965a946a99adb848b3c9b7e` | ADMIT THROUGH ADAPTER | Review donor mappings, project-specific Store authority declarations, comparison-demand semantics; notably **no shared Alcove repricer** | bounded donor compatibility asset + System adapters; does not replace `shared/store-wire.mjs` | Review compatibility / attributed Store reference | yes where child dependency requires it | Store-boundary and no-Alcove-repricing tests |
 | `store-zero-canonical-doctrine.js` | `653663671f61dd77e0dae73917d33b8a8e896fd2` | ADMIT AS-IS | Generic twelve-event Store/transaction explanation and authority distinctions used by mature donors | bounded donor compatibility asset; System semantics remain controlling | Store doctrine presentation only | yes | doctrine invariant / actor-boundary tests |
 | `stb-start-own-0.10.html` | `cbdb02996e161b951704acae29d8da2dd1c68c03` | SOURCE / PROVENANCE ONLY | Locked provenance baseline for Start Your Own behavior | provenance/admission record | Review donor history | external frozen blob | lock/hash test retained as source evidence |
-| `stb-start-own-0.11.html` | `45132afea1cc796b10e0fb667a7d2db3ee10e284` | ADMIT THROUGH ADAPTER | Current generic board/definition bench, explicit operation semantics, exact-version Store handoff, unresolved class-scoped economics | bounded Start Your Own child under `apps/stb/browser/projects/start-own/` | User-defined project application donor; Store answers attributed | yes for preserved child | Start Own operation + Store convergence tests |
-| `stb-outdoor-build.html` | `7772620381179a70d550bbceda3da5155d445591` | ADMIT THROUGH ADAPTER | Current bounded Outdoor proof behavior and source-backed normalized demand; no redesign | bounded Outdoor child under `apps/stb/browser/projects/outdoor/` | Bounded source-backed project donor | yes for preserved child | Outdoor P1 + proof-ladder tests |
+| `stb-start-own-0.11.html` | `45132afea1cc796b10e0fb667a7d2db3ee10e284` | ADMIT THROUGH ADAPTER | Current generic board/definition bench, explicit operation semantics, exact-version Store handoff, unresolved class-scoped economics | byte-identical donor under `apps/stb/review-donors/stb-start-own-0.11.html`, hosted only through the System adapter | User-defined project application donor; Store answers attributed | yes for preserved child | Start Own operation + Store convergence tests |
+| `stb-outdoor-build.html` | `7772620381179a70d550bbceda3da5155d445591` | ADMIT THROUGH ADAPTER | Current bounded Outdoor proof behavior and source-backed normalized demand; no redesign | byte-identical donor under `apps/stb/review-donors/stb-outdoor-build.html`, hosted only through the System adapter | Bounded source-backed project donor | yes for preserved child | Outdoor P1 + proof-ladder tests |
 | `stb-outdoor-reference-authority-0.3.html` | `289e178b1c7a526c802e908155d4405e593cc706` | SOURCE / PROVENANCE ONLY | Outdoor authority evidence | source/provenance pointer; inspectable evidence, not runtime authority generator | Research / source authority evidence | external frozen blob | hash/pin in admission record |
 | `STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html` | `5c7d1acb78f65ab421423f531c87d2b4eb41059a` | SOURCE / PROVENANCE ONLY | Outdoor research evidence | source/provenance pointer | Research | external frozen blob | hash/pin in admission record |
 | `stb-outdoor-build-deck-0.1.html` | `8d619fbec7954c13d82a3b187c7d4fc5b84f46e7` | SOURCE / PROVENANCE ONLY | Outdoor build-deck planning/source explanation | source/provenance pointer | Planning / donor evidence | external frozen blob | admission record |
-| `stb-window-seat-space-utilization-0.7.4.html` | `96c85feef57b1196093e56495e7141452fc749a4` | ADMIT THROUGH ADAPTER | Gold-standard Window Seat scan/configure/Store/revision/owner-record behavior, three modules, solid-board demand, occurrence identity and actor mirrors | bounded Window Seat child under `apps/stb/browser/projects/window-seat/` | Mature project-specific application donor with attributed Store fixture evidence | **yes for preserved child** | gold-standard + actor-mirror + browser tests |
+| `stb-window-seat-space-utilization-0.7.4.html` | `96c85feef57b1196093e56495e7141452fc749a4` | ADMIT THROUGH ADAPTER | Gold-standard Window Seat scan/configure/Store/revision/owner-record behavior, three modules, solid-board demand, occurrence identity and actor mirrors | byte-identical donor under `apps/stb/review-donors/stb-window-seat-space-utilization-0.7.4.html`, hosted only through the System adapter | Mature project-specific application donor with attributed Store fixture evidence | **yes for preserved child** | gold-standard + actor-mirror + browser tests |
 
 ### Review regression-test disposition
 
@@ -117,3 +117,18 @@ No application behavior is changed by this checkpoint.
 Next permitted checkpoint: parent project registry / host contract only. No project redesign.
 
 **NO BLOOD ON WOOD.**
+
+
+## Checkpoint E2 boundary correction
+
+The first boundary run correctly rejected placing preserved Review donor implementation files under `apps/stb/browser/`. The correction does **not** weaken the firewall and does **not** edit donor bytes.
+
+- Frozen Review donor assets live under `apps/stb/review-donors/`.
+- The browser/shared trees contain only System host, adapter, registry, and custody code.
+- The System parent page does not load `stb-store-handoff-contract.js`.
+- Start Your Own and Outdoor retain their own byte-identical relative donor dependency on that contract inside the isolated donor package.
+- The parent persists the child-confirmed payload as evidence; it does not re-run donor Store logic.
+- Public static routes are exact allowlisted routes under `/review-donors/`.
+- This preserves the existing System rule that browser/shared code cannot contain Store implementation or pricing-engine source.
+
+This is a boundary repair only. It does not alter project truth, Store authority, donor economics, or machine authority.
