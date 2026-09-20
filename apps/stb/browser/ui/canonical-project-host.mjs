@@ -346,6 +346,7 @@ function bindAlcove(ctx) {
 function bindFrame(ctx) {
   if (ctx.definition.projectId === 'alcove') bindAlcove(ctx);
   applyChildStage(ctx);
+  renderSummary(ctx);
 }
 
 function setStage(ctx, stage, { updateHistory = false } = {}) {
@@ -493,11 +494,5 @@ export function switchCanonicalProjectStage(root, stage) {
   const ctx = ACTIVE.get(root);
   if (!ctx) return false;
   const changed = stage !== ctx.stage;
-  const ok = setStage(ctx, stage, { updateHistory: changed });
-  if (ok && ctx.definition.projectId === 'alcove' && stage === 'store-answer') {
-    persist(ctx, alcoveSnapshot(ctx), 'alcove-store-answer-view').catch((error) => {
-      ctx.status.textContent = 'Owner-record capture failed: ' + error.message;
-    });
-  }
-  return ok;
+  return setStage(ctx, stage, { updateHistory: changed });
 }
