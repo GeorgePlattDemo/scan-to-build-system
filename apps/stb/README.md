@@ -162,7 +162,7 @@ The admitted Start Your Own child uses a separate bounded Store question. It doe
 
 Exact Store pin for this path:
 
-`0e9ac7a5d83575ebe0e0e2b5f63b266f2431b24c` (`GeorgePlattDemo/scan-to-build-store`)
+`c66363597ed9b5ed355220d5599e726730cd2802` (`GeorgePlattDemo/scan-to-build-store`)
 
 Supply a clean checkout through `STB_STORE_START_OWN_ROOT`. The wrapper verifies the exact pin and clean working tree before loading Store modules.
 
