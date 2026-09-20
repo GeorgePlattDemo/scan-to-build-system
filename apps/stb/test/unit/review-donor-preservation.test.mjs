@@ -20,6 +20,10 @@ test('mature Review donor blobs remain byte-identical at admission', () => {
     ['browser/projects/review/stb-window-seat-space-utilization-0.7.4.html', '96c85feef57b1196093e56495e7141452fc749a4'],
     ['browser/projects/review/stb-canonical-journey.js', 'e0619841d245b392b4065d5aa5770fe7feaeb7eb'],
     ['browser/projects/review/store-zero-canonical-doctrine.js', '653663671f61dd77e0dae73917d33b8a8e896fd2'],
+    ['browser/projects/review/stb-outdoor-reference-authority-0.3.html', '289e178b1c7a526c802e908155d4405e593cc706'],
+    ['browser/projects/review/STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html', '5c7d1acb78f65ab421423f531c87d2b4eb41059a'],
+    ['browser/projects/review/stb-outdoor-build-deck-0.1.html', '8d619fbec7954c13d82a3b187c7d4fc5b84f46e7'],
+    ['browser/projects/review/stb-start-own-0.10.html', 'cbdb02996e161b951704acae29d8da2dd1c68c03'],
   ]);
   for (const [rel, sha] of expected) assert.equal(gitBlobSha(read(rel)), sha, rel);
 });

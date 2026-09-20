@@ -645,3 +645,15 @@ textarea:focus-visible,
     min-height: 70vh;
   }
 }
+
+.canonical-applicability {
+  margin: 0.75rem 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line, #d8d2c8);
+  border-radius: 0.45rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.canonical-applicability.stale {
+  border-style: dashed;
+}

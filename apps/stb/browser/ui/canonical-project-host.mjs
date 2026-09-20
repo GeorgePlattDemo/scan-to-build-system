@@ -210,14 +210,53 @@ function snapshotRows(snapshot) {
   ];
 }
 
+
+function currentDefinitionId(ctx) {
+  const win = ctx.frame?.contentWindow;
+  if (!win) return null;
+  try {
+    if (ctx.definition.projectId === 'start-own' && typeof win.currentDefinitionId === 'function') {
+      return String(win.currentDefinitionId());
+    }
+    if (ctx.definition.projectId === 'outdoor') {
+      return win.O?.sent?.id ? String(win.O.sent.id) : null;
+    }
+    if (ctx.definition.projectId === 'window-seat' && win.STBWindowSeatJourney) {
+      return definitionIdentity('window-seat', win.STBWindowSeatJourney.snapshot());
+    }
+    if (ctx.definition.projectId === 'alcove') {
+      const snapshot = alcoveSnapshot(ctx);
+      return snapshot ? definitionIdentity('alcove', snapshot) : null;
+    }
+  } catch (_) {}
+  return null;
+}
+
+function snapshotApplicability(ctx) {
+  if (!ctx.snapshot) return { current: false, label: 'NO IDENTIFIED CURRENT ANSWER' };
+  const currentId = currentDefinitionId(ctx);
+  if (!currentId) return { current: false, label: 'STALE / HISTORICAL ONLY' };
+  return currentId === ctx.snapshot.definitionId
+    ? { current: true, label: 'CURRENT FOR IDENTIFIED DEFINITION' }
+    : { current: false, label: 'STALE / HISTORICAL ONLY' };
+}
+
 function renderSummary(ctx) {
   const summary = ctx.host.querySelector('[data-canonical-summary]');
   if (!summary) return;
   const boundary = stageBoundary(ctx.stage, ctx.definition.projectId);
+  const applicability = snapshotApplicability(ctx);
   summary.replaceChildren(
     el('p', { className: 'canonical-stage-kicker', text: STAGE_LABELS[ctx.stage] }),
     el('h2', { text: boundary.heading }),
     el('p', { className: 'canonical-stage-copy', text: boundary.body }),
+    (ctx.stage === 'store-answer' || ctx.stage === 'accept-pay' || ctx.stage === 'store-yard' || ctx.stage === 'handoff-record')
+      ? el('p', {
+          className: applicability.current ? 'canonical-applicability current' : 'canonical-applicability stale',
+          attrs: { 'data-store-applicability': applicability.current ? 'current' : 'stale' },
+          text: 'STORE ANSWER APPLICABILITY · ' + applicability.label,
+        })
+      : null,
     el('div', { className: 'canonical-authority-grid' },
       snapshotRows(ctx.snapshot).map(([name, value]) =>
         el('div', { className: 'canonical-authority-row' }, [
