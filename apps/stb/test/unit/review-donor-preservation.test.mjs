@@ -13,6 +13,13 @@ function gitBlobSha(text) {
     .update('blob ' + Buffer.byteLength(text, 'utf8') + '\0' + text, 'utf8')
     .digest('hex');
 }
+function gitBlobShaFile(rel) {
+  const bytes = fs.readFileSync(path.join(projectRoot, rel));
+  return crypto.createHash('sha1')
+    .update('blob ' + bytes.length + '\0', 'utf8')
+    .update(bytes)
+    .digest('hex');
+}
 
 test('mature Review donor blobs remain byte-identical at admission', () => {
   const expected = new Map([
@@ -24,8 +31,13 @@ test('mature Review donor blobs remain byte-identical at admission', () => {
     ['review-donors/STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html', '5c7d1acb78f65ab421423f531c87d2b4eb41059a'],
     ['review-donors/stb-outdoor-build-deck-0.1.html', '8d619fbec7954c13d82a3b187c7d4fc5b84f46e7'],
     ['review-donors/stb-start-own-0.10.html', 'cbdb02996e161b951704acae29d8da2dd1c68c03'],
+    ['review-donors/stb-start-own-0.11.html', '45132afea1cc796b10e0fb667a7d2db3ee10e284'],
+    ['review-donors/stb-outdoor-build.html', '7772620381179a70d550bbceda3da5155d445591'],
+    ['review-donors/stb-store-handoff-contract.js', '6be0f8b6d527c553b965a946a99adb848b3c9b7e'],
+    ['review-donors/assets/project-tiles/start-your-own.webp', 'd7696f41ba26c6ed7c08fee1ded33e01e151f09a'],
+    ['review-donors/assets/project-tiles/plywood-curvilinear-shapes.webp', '677334bf55d6ed8adc61d3028f90beef22bad34b'],
   ]);
-  for (const [rel, sha] of expected) assert.equal(gitBlobSha(read(rel)), sha, rel);
+  for (const [rel, sha] of expected) assert.equal(gitBlobShaFile(rel), sha, rel);
 });
 
 test('Alcove donor retains project-native first paint economics', () => {
