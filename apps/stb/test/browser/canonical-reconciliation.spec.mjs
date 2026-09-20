@@ -229,3 +229,47 @@ test('Outdoor confirmation carries unresolved project-specific Store truth witho
   );
   expect(afterNavigation).toHaveLength(1);
 });
+
+
+test('Start Your Own keeps its preserved formal Store answer visible at the Store Answer stage', async ({ page }) => {
+  const localRecordId = await openCanonical(page, 'start-own', 'Start Your Own / Grab a Board');
+  const host = page.locator('[data-canonical-project-host="start-own"]');
+  const frame = page.frameLocator('iframe[data-canonical-child-frame="start-own"]');
+
+  await frame.getByRole('button', { name: /Take it to the bench/ }).click();
+  await frame.getByRole('button', { name: /LOOKS RIGHT — SEND TO STORE/ }).click();
+
+  await expect(host).toHaveAttribute('data-canonical-stage', 'store-answer');
+  await expect(page.locator('iframe[data-canonical-child-frame="start-own"]')).toBeVisible();
+  await expect(frame.locator('#storeanswer')).toBeVisible();
+  await expect(frame.locator('#storeanswer')).toContainText('STORE ZERO');
+  await expect(page.locator('[data-store-applicability="current"]')).toContainText('CURRENT FOR IDENTIFIED DEFINITION');
+
+  const before = requireOk(await repoCall(page, 'project', { localRecordId }), 'Start Your Own project');
+  await page.locator('[data-canonical-stage="accept-pay"]').click();
+  await expect(page.locator('iframe[data-canonical-child-frame="start-own"]')).toBeHidden();
+  await page.locator('[data-canonical-stage="store-answer"]').click();
+  await expect(page.locator('iframe[data-canonical-child-frame="start-own"]')).toBeVisible();
+  await expect(frame.locator('#storeanswer')).toContainText('STORE ZERO');
+  const after = requireOk(await repoCall(page, 'project', { localRecordId }), 'Start Your Own after stage navigation');
+  expect(after.projectId).toBe(before.projectId);
+  expect(after.localRecordId).toBe(before.localRecordId);
+});
+
+test('Outdoor keeps its preserved comparison and Store handoff receipt visible at Store Answer', async ({ page }) => {
+  await openCanonical(page, 'outdoor', 'Outdoor Build');
+  const host = page.locator('[data-canonical-project-host="outdoor"]');
+  const frame = page.frameLocator('iframe[data-canonical-child-frame="outdoor"]');
+
+  await frame.getByRole('button', { name: /OPEN THIS BOUNDED PROJECT/ }).click();
+  await frame.locator('[data-outdoor-assembly="left-bench"]').first().click();
+  await frame.locator('[data-outdoor-part="end-leg"]').click();
+  await frame.locator('#outdoor-confirm').click();
+
+  await expect(host).toHaveAttribute('data-canonical-stage', 'store-answer');
+  await expect(page.locator('iframe[data-canonical-child-frame="outdoor"]')).toBeVisible();
+  await expect(frame.locator('#comparison-receipt')).toBeVisible();
+  await expect(frame.locator('#comparison-receipt')).toContainText('STORE ECONOMICS');
+  await expect(frame.locator('#comparison-receipt')).toContainText('UNRESOLVED');
+  await expect(page.locator('[data-store-applicability="current"]')).toContainText('CURRENT FOR IDENTIFIED DEFINITION');
+});

@@ -268,7 +268,7 @@ function renderNav(ctx) {
 
 function frameShouldShow(ctx) {
   if (ctx.definition.projectId === 'start-own' || ctx.definition.projectId === 'outdoor') {
-    return ctx.stage === 'scan-evidence' || ctx.stage === 'configure';
+    return ctx.stage === 'scan-evidence' || ctx.stage === 'configure' || ctx.stage === 'store-answer';
   }
   return true;
 }
