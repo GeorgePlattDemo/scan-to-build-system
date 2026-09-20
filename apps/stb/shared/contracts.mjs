@@ -541,6 +541,7 @@ export const STATIC_ASSETS = Object.freeze({
   '/ui/record-panel.mjs': JS('browser/ui/record-panel.mjs'),
   '/shared/contracts.mjs': JS('shared/contracts.mjs'),
   '/shared/canonical.mjs': JS('shared/canonical.mjs'),
+  '/shared/review-child-identity.mjs': JS('shared/review-child-identity.mjs'),
   '/shared/board-rule.mjs': JS('shared/board-rule.mjs'),
   '/shared/alcove-rule.mjs': JS('shared/alcove-rule.mjs'),
   '/shared/picnic-rule.mjs': JS('shared/picnic-rule.mjs'),
