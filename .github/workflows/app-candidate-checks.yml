@@ -81,14 +81,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: GeorgePlattDemo/scan-to-build-store
-          ref: 0e9ac7a5d83575ebe0e0e2b5f63b266f2431b24c
+          ref: c66363597ed9b5ed355220d5599e726730cd2802
           path: .stb-store-start-own
           fetch-depth: 1
 
       - name: Exact Start Own Store tests
         env:
           STB_STORE_START_OWN_ROOT: ${{ github.workspace }}/.stb-store-start-own
-          STB_START_OWN_STORE_PIN: 0e9ac7a5d83575ebe0e0e2b5f63b266f2431b24c
+          STB_START_OWN_STORE_PIN: c66363597ed9b5ed355220d5599e726730cd2802
         run: |
           test "$(git -C "$STB_STORE_START_OWN_ROOT" rev-parse HEAD)" = "$STB_START_OWN_STORE_PIN"
           node "$STB_STORE_START_OWN_ROOT/d001-stage2-envelope.test.mjs"
@@ -98,7 +98,7 @@ jobs:
       - name: Exact Start Own browser proof
         env:
           STB_STORE_START_OWN_ROOT: ${{ github.workspace }}/.stb-store-start-own
-          STB_START_OWN_STORE_PIN: 0e9ac7a5d83575ebe0e0e2b5f63b266f2431b24c
+          STB_START_OWN_STORE_PIN: c66363597ed9b5ed355220d5599e726730cd2802
         run: |
           test "$(git -C "$STB_STORE_START_OWN_ROOT" rev-parse HEAD)" = "$STB_START_OWN_STORE_PIN"
           npm run test:start-own-browser
