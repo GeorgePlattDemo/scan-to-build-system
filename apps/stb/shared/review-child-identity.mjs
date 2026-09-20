@@ -25,6 +25,12 @@ function donorDefinitionId(projectId, payload) {
 }
 
 export async function reviewChildDefinitionIdentity(projectId, payload) {
+  if (
+    projectId === 'start-own'
+    && payload?.sourceAuthority?.artifact === 'stb-start-own-picnic-leg-0.1.html'
+  ) {
+    return `SYO-SHA256-${await canonicalPayloadDigest(payload?.definition ?? null)}`;
+  }
   const supplied = donorDefinitionId(projectId, payload);
   if (supplied !== null && supplied !== undefined && String(supplied).length > 0) {
     return String(supplied);
