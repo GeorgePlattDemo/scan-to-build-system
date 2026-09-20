@@ -38,7 +38,7 @@ test('reconciliation library exposes five canonical identities and keeps retaine
 });
 
 for (const [projectId, name, source] of [
-  ['start-own', 'Start Your Own / Grab a Board', '/review-donors/stb-start-own-0.11.html'],
+  ['start-own', 'Start Your Own / Grab a Board', '/project-children/stb-start-own-picnic-leg-0.1.html'],
   ['outdoor', 'Outdoor Build', '/review-donors/stb-outdoor-build.html'],
   ['window-seat', 'Window Seat / Space Utilization', '/review-donors/stb-window-seat-space-utilization-0.7.4.html'],
 ]) {
@@ -161,36 +161,43 @@ test('Window Seat parent navigation does not mint an answer; project confirmatio
 });
 
 
-test('Start Your Own confirmation carries its donor Store reference for the exact definition', async ({ page }) => {
+test('Start Your Own admitted child fails closed without its exact Store source and keeps canonical identity', async ({ page }) => {
   const localRecordId = await openCanonical(page, 'start-own', 'Start Your Own / Grab a Board');
   const host = page.locator('[data-canonical-project-host="start-own"]');
   const frame = page.frameLocator('iframe[data-canonical-child-frame="start-own"]');
 
   await frame.locator('#go').click();
-  await expect(frame.locator('#confirmstore')).toBeVisible();
-  await frame.locator('#confirmstore').click();
+  await frame.locator('select[data-fact="cutPlane"]').selectOption('miter-face');
+  await frame.locator('select[data-fact="endIdentity"]').selectOption('both');
+  await frame.locator('select[data-fact="endRelation"]').selectOption('parallel');
+  await frame.locator('select[data-fact="lengthDatum"]').selectOption('long-long-outer-edge');
+
+  await expect(frame.getByText(/Store Zero could not return a current answer/)).toBeVisible();
+  await expect(frame.locator('#go')).toBeEnabled();
+  await frame.locator('#go').click();
 
   await expect(host).toHaveAttribute('data-canonical-stage', 'store-answer');
-  await expect(page.locator('[data-store-applicability="current"]')).toContainText(
-    'CURRENT FOR IDENTIFIED DEFINITION',
+  await expect(page.locator('[data-store-applicability="stale"]')).toContainText(
+    'NO IDENTIFIED CURRENT ANSWER',
   );
 
   const snapshots = requireOk(
     await repoCall(page, 'listRecords', { localRecordId, kind: 'child-snapshot' }),
-    'Start Your Own snapshots after confirmation',
+    'Start Your Own snapshots after fail-closed confirmation',
   );
   expect(snapshots).toHaveLength(1);
   expect(snapshots[0].payload.sourceEvent).toBe('STB_START_OWN_CONFIRMED');
-  expect(snapshots[0].payload.payload.storeReference).toBeTruthy();
-  expect(snapshots[0].payload.payload.storeReference).toHaveProperty('capabilityStatus');
-  expect(snapshots[0].payload.payload.storeReference).toHaveProperty('economicsStatus');
+  expect(snapshots[0].payload.definitionId).toMatch(/^SYO-SHA256-/);
+  expect(snapshots[0].payload.definitionId).not.toMatch(/^PTL-/);
+  expect(snapshots[0].payload.payload.storeAnswer).toBeNull();
+  expect(snapshots[0].payload.payload.storeDiagnostic).toBe('STORE_SOURCE_UNAVAILABLE');
 
+  const before = requireOk(await repoCall(page, 'project', { localRecordId }), 'Start Your Own project');
   await page.locator('[data-canonical-stage="accept-pay"]').click();
-  const afterNavigation = requireOk(
-    await repoCall(page, 'listRecords', { localRecordId, kind: 'child-snapshot' }),
-    'Start Your Own snapshots after stage navigation',
-  );
-  expect(afterNavigation).toHaveLength(1);
+  await page.locator('[data-canonical-stage="store-answer"]').click();
+  const after = requireOk(await repoCall(page, 'project', { localRecordId }), 'Start Your Own after navigation');
+  expect(after.projectId).toBe(before.projectId);
+  expect(after.localRecordId).toBe(before.localRecordId);
 });
 
 test('Outdoor confirmation carries unresolved project-specific Store truth without invented economics', async ({ page }) => {
@@ -231,29 +238,20 @@ test('Outdoor confirmation carries unresolved project-specific Store truth witho
 });
 
 
-test('Start Your Own keeps its preserved formal Store answer visible at the Store Answer stage', async ({ page }) => {
+test('Start Your Own new child remains the same project across canonical stage navigation', async ({ page }) => {
   const localRecordId = await openCanonical(page, 'start-own', 'Start Your Own / Grab a Board');
-  const host = page.locator('[data-canonical-project-host="start-own"]');
-  const frame = page.frameLocator('iframe[data-canonical-child-frame="start-own"]');
+  const before = requireOk(await repoCall(page, 'project', { localRecordId }), 'Start Your Own before navigation');
 
-  await frame.getByRole('button', { name: /Take it to the bench/ }).click();
-  await frame.getByRole('button', { name: /LOOKS RIGHT — SEND TO STORE/ }).click();
+  for (const stage of ['configure', 'store-answer', 'accept-pay', 'store-yard', 'handoff-record']) {
+    await page.locator('[data-canonical-stage="' + stage + '"]').click();
+    expect(new URL(page.url()).searchParams.get('catalog')).toBe('start-own');
+    expect(new URL(page.url()).searchParams.get('id')).toBe(localRecordId);
+  }
 
-  await expect(host).toHaveAttribute('data-canonical-stage', 'store-answer');
-  await expect(page.locator('iframe[data-canonical-child-frame="start-own"]')).toBeVisible();
-  await expect(frame.locator('#storeanswer')).toBeVisible();
-  await expect(frame.locator('#storeanswer')).toContainText('STORE ZERO');
-  await expect(page.locator('[data-store-applicability="current"]')).toContainText('CURRENT FOR IDENTIFIED DEFINITION');
-
-  const before = requireOk(await repoCall(page, 'project', { localRecordId }), 'Start Your Own project');
-  await page.locator('[data-canonical-stage="accept-pay"]').click();
-  await expect(page.locator('iframe[data-canonical-child-frame="start-own"]')).toBeHidden();
-  await page.locator('[data-canonical-stage="store-answer"]').click();
-  await expect(page.locator('iframe[data-canonical-child-frame="start-own"]')).toBeVisible();
-  await expect(frame.locator('#storeanswer')).toContainText('STORE ZERO');
-  const after = requireOk(await repoCall(page, 'project', { localRecordId }), 'Start Your Own after stage navigation');
+  const after = requireOk(await repoCall(page, 'project', { localRecordId }), 'Start Your Own after navigation');
   expect(after.projectId).toBe(before.projectId);
   expect(after.localRecordId).toBe(before.localRecordId);
+  expect(after.classId).toBe(before.classId);
 });
 
 test('Outdoor keeps its preserved comparison and Store handoff receipt visible at Store Answer', async ({ page }) => {
