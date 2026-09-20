@@ -193,8 +193,10 @@ test('Start Your Own admitted child fails closed without its exact Store source 
   expect(snapshots[0].payload.payload.storeDiagnostic).toBe('STORE_SOURCE_UNAVAILABLE');
 
   const before = requireOk(await repoCall(page, 'project', { localRecordId }), 'Start Your Own project');
-  await page.locator('[data-canonical-stage="accept-pay"]').click();
-  await page.locator('[data-canonical-stage="store-answer"]').click();
+  await page.locator('button[data-canonical-stage="accept-pay"]').click();
+  await expect(host).toHaveAttribute('data-canonical-stage', 'accept-pay');
+  await page.locator('button[data-canonical-stage="store-answer"]').click();
+  await expect(host).toHaveAttribute('data-canonical-stage', 'store-answer');
   const after = requireOk(await repoCall(page, 'project', { localRecordId }), 'Start Your Own after navigation');
   expect(after.projectId).toBe(before.projectId);
   expect(after.localRecordId).toBe(before.localRecordId);
