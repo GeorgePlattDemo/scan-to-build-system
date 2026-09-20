@@ -22,6 +22,8 @@ import {
 } from '../shared/store-wire.mjs';
 import { createPublishedJobAdapter, PUBLISHED_JOB_PATH } from './published-job-adapter.mjs';
 import { createStoreAdapter } from './store-adapter.mjs';
+import { createStartOwnStoreAdapter } from './start-own-store-adapter.mjs';
+import { START_OWN_STORE_PATH } from '../shared/start-own-store-wire.mjs';
 
 export const APP_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -250,7 +252,7 @@ async function handlePublishedJobPost(req, res, adapter) {
   sendJson(res, result.status, result.body);
 }
 
-async function handleRequest(req, res, adapter, publishedJobAdapter) {
+async function handleRequest(req, res, adapter, publishedJobAdapter, startOwnStoreAdapter) {
   if (!isAllowedHost(req.headers.host)) {
     sendText(res, 403, 'Forbidden host');
     return;
@@ -263,6 +265,15 @@ async function handleRequest(req, res, adapter, publishedJobAdapter) {
 
   const rawPath = extractRawPath(req.url ?? '');
   const pathname = rawPath === null ? '' : rawPath.split('?')[0];
+
+  if (pathname === START_OWN_STORE_PATH) {
+    if (req.method === 'POST') {
+      await handleStorePost(req, res, startOwnStoreAdapter);
+      return;
+    }
+    sendText(res, 405, 'Method not allowed', { Allow: 'POST' });
+    return;
+  }
 
   if (pathname === PUBLISHED_JOB_PATH) {
     if (req.method === 'POST') {
@@ -352,15 +363,21 @@ function occupiedError(port, cause) {
   return error;
 }
 
-export async function startServer({ port = FIXED_PORT, storeAdapter, publishedJobAdapter } = {}) {
+export async function startServer({
+  port = FIXED_PORT,
+  storeAdapter,
+  publishedJobAdapter,
+  startOwnStoreAdapter,
+} = {}) {
   const adapter = storeAdapter ?? (await createStoreAdapter());
   const trialAdapter = publishedJobAdapter ?? (await createPublishedJobAdapter());
+  const startOwnAdapter = startOwnStoreAdapter ?? (await createStartOwnStoreAdapter());
   const servers = [];
 
   try {
     for (const host of LOOPBACK_ADDRESSES) {
       const server = http.createServer((req, res) => {
-        handleRequest(req, res, adapter, trialAdapter).catch(() => {
+        handleRequest(req, res, adapter, trialAdapter, startOwnAdapter).catch(() => {
           if (!res.headersSent) {
             sendText(res, 500, 'Internal error');
           }
@@ -399,6 +416,9 @@ export async function startServer({ port = FIXED_PORT, storeAdapter, publishedJo
     publishedJobReady: trialAdapter.ready === true,
     publishedJobInspection: trialAdapter.inspection ?? null,
     publishedJobAdapter: trialAdapter,
+    startOwnStoreReady: startOwnAdapter.ready === true,
+    startOwnStoreInspection: startOwnAdapter.inspection ?? null,
+    startOwnStoreAdapter: startOwnAdapter,
     async close() {
       await Promise.all(servers.map(closeServer));
     },
