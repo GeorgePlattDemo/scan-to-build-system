@@ -91,6 +91,8 @@ jobs:
           STB_START_OWN_STORE_PIN: 0e9ac7a5d83575ebe0e0e2b5f63b266f2431b24c
         run: |
           test "$(git -C "$STB_STORE_START_OWN_ROOT" rev-parse HEAD)" = "$STB_START_OWN_STORE_PIN"
+          node "$STB_STORE_START_OWN_ROOT/d001-stage2-envelope.test.mjs"
+          node "$STB_STORE_START_OWN_ROOT/d001-five-tool.test.mjs"
           npm run test:start-own-store
 
       - name: Exact Start Own browser proof
