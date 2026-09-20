@@ -132,3 +132,16 @@ The first boundary run correctly rejected placing preserved Review donor impleme
 - This preserves the existing System rule that browser/shared code cannot contain Store implementation or pricing-engine source.
 
 This is a boundary repair only. It does not alter project truth, Store authority, donor economics, or machine authority.
+
+
+## Checkpoint E7 frozen Start Your Own compatibility correction
+
+Browser proof exposed one defect in the frozen Start Your Own 0.11 donor during its real confirmation path. Its `storeAnswerModel()` reads the identifiers `work` and `material` when forming `economics.complete`, but those identifiers are not defined in that function. Because `confirmToStore()` renders the confirmed answer before posting `STB_START_OWN_CONFIRMED`, the resulting exception prevents the already-defined confirmation payload from reaching the System host.
+
+The frozen donor remains byte-identical at blob `45132afea1cc796b10e0fb667a7d2db3ee10e284`.
+
+The System host therefore applies a bounded compatibility shim inside the same-origin Start Your Own donor frame immediately before the donor's own confirmation handler runs. The shim supplies only those two missing identifiers from the donor's own `workQuote()` and `referenceCostModel().material`, then removes them on the next task. It does not copy catalog rows, Store pricing formulas, capability rules, Store authority, or machine authority into System browser code. The donor remains owner of the calculation and of the confirmation payload.
+
+Outdoor required no application correction. Its browser proof selectors were narrowed to the actual assembly and part buttons because the frozen donor intentionally provides matching SVG hit targets.
+
+This checkpoint restores the frozen donor's own intended confirmation path without changing donor bytes or widening authority.

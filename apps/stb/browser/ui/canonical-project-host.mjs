@@ -347,6 +347,28 @@ function alcoveSnapshot(ctx) {
   };
 }
 
+function bindStartOwnCompatibility(ctx) {
+  const doc = ctx.frame.contentDocument;
+  const win = ctx.frame.contentWindow;
+  if (!doc || !win || doc.documentElement.dataset.systemStartOwnCompatibility === 'true') return;
+  doc.documentElement.dataset.systemStartOwnCompatibility = 'true';
+  doc.addEventListener('click', (event) => {
+    if (!event.target.closest('#confirmstore')) return;
+    try {
+      if (typeof win.workQuote === 'function' && typeof win.referenceCostModel === 'function') {
+        win.work = win.workQuote();
+        win.material = win.referenceCostModel()?.material ?? null;
+        setTimeout(() => {
+          try {
+            delete win.work;
+            delete win.material;
+          } catch (_) {}
+        }, 0);
+      }
+    } catch (_) {}
+  }, true);
+}
+
 function bindAlcove(ctx) {
   const doc = ctx.frame.contentDocument;
   if (!doc || doc.documentElement.dataset.systemAdapterBound === 'true') return;
@@ -365,6 +387,7 @@ function bindAlcove(ctx) {
 }
 
 function bindFrame(ctx) {
+  if (ctx.definition.projectId === 'start-own') bindStartOwnCompatibility(ctx);
   if (ctx.definition.projectId === 'alcove') bindAlcove(ctx);
   applyChildStage(ctx);
   renderSummary(ctx);

@@ -199,8 +199,8 @@ test('Outdoor confirmation carries unresolved project-specific Store truth witho
   const frame = page.frameLocator('iframe[data-canonical-child-frame="outdoor"]');
 
   await frame.locator('[data-outdoor-open]').click();
-  await frame.locator('[data-outdoor-assembly="left-bench"]').click();
-  await frame.locator('[data-outdoor-part="end-leg"]').click();
+  await frame.locator('button[data-outdoor-assembly="left-bench"]').click();
+  await frame.locator('button[data-outdoor-part="end-leg"]').click();
   await expect(frame.locator('#outdoor-confirm')).toBeVisible();
   await frame.locator('#outdoor-confirm').click();
 
@@ -262,8 +262,8 @@ test('Outdoor keeps its preserved comparison and Store handoff receipt visible a
   const frame = page.frameLocator('iframe[data-canonical-child-frame="outdoor"]');
 
   await frame.getByRole('button', { name: /OPEN THIS BOUNDED PROJECT/ }).click();
-  await frame.locator('[data-outdoor-assembly="left-bench"]').first().click();
-  await frame.locator('[data-outdoor-part="end-leg"]').click();
+  await frame.locator('button[data-outdoor-assembly="left-bench"]').first().click();
+  await frame.locator('button[data-outdoor-part="end-leg"]').click();
   await frame.locator('#outdoor-confirm').click();
 
   await expect(host).toHaveAttribute('data-canonical-stage', 'store-answer');
