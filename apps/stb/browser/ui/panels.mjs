@@ -137,7 +137,7 @@ function canonicalProjectLibrarySection() {
 function legacyReferenceSection(mappedOpen, mapped, own) {
   return el('details', {
     className: 'legacy-reference-paths',
-    attrs: mappedOpen ? { open: 'true' } : {},
+    attrs: { open: 'true' },
   }, [
     el('summary', { text: 'Additional System reference paths' }),
     el('p', {
