@@ -4,6 +4,7 @@ import {
   resolveProjectStage,
 } from '/shared/project-registry.mjs';
 import { recordReviewChildSnapshot } from '/domain/review-child.mjs';
+import { canonicalPayloadDigest, reviewChildDefinitionIdentity } from '/shared/review-child-identity.mjs';
 
 const ACTIVE = new WeakMap();
 
@@ -27,42 +28,9 @@ function el(tag, options = {}, children = []) {
   return node;
 }
 
-function fnv1a(value) {
-  let h = 0x811c9dc5;
-  const s = String(value);
-  for (let i = 0; i < s.length; i += 1) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return (h >>> 0).toString(16).padStart(8, '0');
-}
-
 function clean(value) {
   try { return JSON.parse(JSON.stringify(value ?? null)); }
   catch { return null; }
-}
-
-function definitionIdentity(projectId, payload) {
-  if (projectId === 'start-own') {
-    return String(payload?.id || payload?.definitionId || ('SYO-' + fnv1a(JSON.stringify(payload ?? null))));
-  }
-  if (projectId === 'outdoor') {
-    return String(
-      payload?.id
-      || payload?.definitionId
-      || payload?.versionId
-      || payload?.normalizedPart?.versionId
-      || ('OUTDOOR-' + fnv1a(JSON.stringify(payload?.normalizedPart ?? payload ?? null))),
-    );
-  }
-  if (projectId === 'window-seat') {
-    const revision = payload?.revision?.number ?? payload?.storeRequest?.revision ?? 'candidate';
-    return 'WINDOW-SEAT-R' + String(revision) + '-' + fnv1a(JSON.stringify(payload?.definition ?? null));
-  }
-  if (projectId === 'alcove') {
-    return 'ALCOVE-' + fnv1a(JSON.stringify(payload ?? null));
-  }
-  return projectId.toUpperCase() + '-' + fnv1a(JSON.stringify(payload ?? null));
 }
 
 function stageBoundary(stage, projectId) {
@@ -164,7 +132,7 @@ function snapshotRows(snapshot) {
 }
 
 
-function currentDefinitionId(ctx) {
+async function currentDefinitionId(ctx) {
   const win = ctx.frame?.contentWindow;
   if (!win) return null;
   try {
@@ -175,11 +143,11 @@ function currentDefinitionId(ctx) {
       return win.O?.sent?.id ? String(win.O.sent.id) : null;
     }
     if (ctx.definition.projectId === 'window-seat' && win.STBWindowSeatJourney) {
-      return definitionIdentity('window-seat', win.STBWindowSeatJourney.snapshot());
+      return await reviewChildDefinitionIdentity('window-seat', win.STBWindowSeatJourney.snapshot());
     }
     if (ctx.definition.projectId === 'alcove') {
       const snapshot = alcoveSnapshot(ctx);
-      return snapshot ? definitionIdentity('alcove', snapshot) : null;
+      return snapshot ? await reviewChildDefinitionIdentity('alcove', snapshot) : null;
     }
   } catch (_) {}
   return null;
@@ -204,22 +172,25 @@ function snapshotCarriesFormalStoreAnswer(ctx) {
   return Boolean(child.storeReference || child.storeAnswer);
 }
 
-function snapshotApplicability(ctx) {
+async function snapshotApplicability(ctx) {
   if (!ctx.snapshot || !snapshotCarriesFormalStoreAnswer(ctx)) {
     return { current: false, label: 'NO IDENTIFIED CURRENT ANSWER' };
   }
-  const currentId = currentDefinitionId(ctx);
+  const currentId = await currentDefinitionId(ctx);
   if (!currentId) return { current: false, label: 'STALE / HISTORICAL ONLY' };
   return currentId === ctx.snapshot.definitionId
     ? { current: true, label: 'CURRENT FOR IDENTIFIED DEFINITION' }
     : { current: false, label: 'STALE / HISTORICAL ONLY' };
 }
 
-function renderSummary(ctx) {
+async function renderSummary(ctx) {
   const summary = ctx.host.querySelector('[data-canonical-summary]');
   if (!summary) return;
+  const renderToken = (ctx.summaryRenderToken ?? 0) + 1;
+  ctx.summaryRenderToken = renderToken;
   const boundary = stageBoundary(ctx.stage, ctx.definition.projectId);
-  const applicability = snapshotApplicability(ctx);
+  const applicability = await snapshotApplicability(ctx);
+  if (ctx.summaryRenderToken !== renderToken || !summary.isConnected) return;
   summary.replaceChildren(
     el('p', { className: 'canonical-stage-kicker', text: STAGE_LABELS[ctx.stage] }),
     el('h2', { text: boundary.heading }),
@@ -295,9 +266,10 @@ function replaceUrl(ctx) {
 async function persist(ctx, payload, sourceEvent) {
   const cleaned = clean(payload);
   if (!cleaned) return null;
-  const fingerprint = fnv1a(JSON.stringify(cleaned));
-  if (fingerprint === ctx.lastFingerprint) return ctx.snapshot;
-  const definitionId = definitionIdentity(ctx.definition.projectId, cleaned);
+  const fingerprint = await canonicalPayloadDigest(cleaned);
+  const lastFingerprint = await ctx.lastFingerprintPromise;
+  if (fingerprint === lastFingerprint) return ctx.snapshot;
+  const definitionId = await reviewChildDefinitionIdentity(ctx.definition.projectId, cleaned);
   const saved = await recordReviewChildSnapshot({
     localRecordId: ctx.project.localRecordId,
     catalogProjectId: ctx.definition.projectId,
@@ -305,9 +277,9 @@ async function persist(ctx, payload, sourceEvent) {
     sourceEvent,
     payload: cleaned,
   });
-  ctx.lastFingerprint = fingerprint;
+  ctx.lastFingerprintPromise = Promise.resolve(fingerprint);
   ctx.snapshot = saved;
-  renderSummary(ctx);
+  void renderSummary(ctx);
   return saved;
 }
 
@@ -390,7 +362,7 @@ function bindFrame(ctx) {
   if (ctx.definition.projectId === 'start-own') bindStartOwnCompatibility(ctx);
   if (ctx.definition.projectId === 'alcove') bindAlcove(ctx);
   applyChildStage(ctx);
-  renderSummary(ctx);
+  void renderSummary(ctx);
 }
 
 function setStage(ctx, stage, { updateHistory = false } = {}) {
@@ -398,7 +370,7 @@ function setStage(ctx, stage, { updateHistory = false } = {}) {
   ctx.stage = stage;
   ctx.host.dataset.canonicalStage = stage;
   renderNav(ctx);
-  renderSummary(ctx);
+  void renderSummary(ctx);
   applyChildStage(ctx);
   if (updateHistory) replaceUrl(ctx);
   return true;
@@ -488,9 +460,10 @@ export function activateCanonicalProjectHost(root, { project, definition, stage,
     definition,
     stage: resolveProjectStage(definition.projectId, stage) ? stage : 'scan-evidence',
     snapshot: latestSnapshot?.payload ?? latestSnapshot ?? host.__stbInitialSnapshot ?? null,
-    lastFingerprint: latestSnapshot?.payload?.payload
-      ? fnv1a(JSON.stringify(latestSnapshot.payload.payload))
-      : null,
+    lastFingerprintPromise: latestSnapshot?.payload?.payload
+      ? canonicalPayloadDigest(latestSnapshot.payload.payload).catch(() => null)
+      : Promise.resolve(null),
+    summaryRenderToken: 0,
     messageHandler: null,
   };
   ctx.messageHandler = async (event) => {
@@ -529,7 +502,7 @@ export function activateCanonicalProjectHost(root, { project, definition, stage,
   frame.addEventListener('load', () => bindFrame(ctx), { once: true });
   ACTIVE.set(root, ctx);
   renderNav(ctx);
-  renderSummary(ctx);
+  void renderSummary(ctx);
   frame.hidden = !frameShouldShow(ctx);
   return ctx;
 }
