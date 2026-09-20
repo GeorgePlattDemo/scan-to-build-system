@@ -61,6 +61,10 @@ test('allowlisted paths resolve to known relative files', () => {
     'browser/integration/store-coordinator.mjs',
   );
   assert.equal(
+    resolveStaticAsset('/integration/start-own-store-preview.mjs').relativePath,
+    'browser/integration/start-own-store-preview.mjs',
+  );
+  assert.equal(
     resolveStaticAsset('/shared/contracts.mjs').relativePath,
     'shared/contracts.mjs',
   );
@@ -71,6 +75,14 @@ test('allowlisted paths resolve to known relative files', () => {
   assert.equal(
     resolveStaticAsset('/shared/store-wire.mjs').relativePath,
     'shared/store-wire.mjs',
+  );
+  assert.equal(
+    resolveStaticAsset('/shared/start-own-store-wire.mjs').relativePath,
+    'shared/start-own-store-wire.mjs',
+  );
+  assert.equal(
+    resolveStaticAsset('/project-children/stb-start-own-picnic-leg-0.1.html').relativePath,
+    'project-children/stb-start-own-picnic-leg-0.1.html',
   );
   assert.equal(
     resolveStaticAsset('/shared/store-present.mjs').relativePath,
@@ -174,9 +186,11 @@ test('allowlist is exact and finite', () => {
     '/domain/review-child.mjs',
     '/domain/review.mjs',
     '/index.html',
+    '/integration/start-own-store-preview.mjs',
     '/integration/store-client.mjs',
     '/integration/store-coordinator.mjs',
     '/project',
+    '/project-children/stb-start-own-picnic-leg-0.1.html',
     '/review-donors/STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html',
     '/review-donors/assets/project-tiles/plywood-curvilinear-shapes.webp',
     '/review-donors/assets/project-tiles/start-your-own.webp',
@@ -200,6 +214,7 @@ test('allowlist is exact and finite', () => {
     '/shared/project-registry.mjs',
     '/shared/review-child-identity.mjs',
     '/shared/review-digest.mjs',
+    '/shared/start-own-store-wire.mjs',
     '/shared/store-present.mjs',
     '/shared/store-wire.mjs',
     '/start/new',
