@@ -23,7 +23,11 @@ import {
 import { createPublishedJobAdapter, PUBLISHED_JOB_PATH } from './published-job-adapter.mjs';
 import { createStoreAdapter } from './store-adapter.mjs';
 import { createStartOwnStoreAdapter } from './start-own-store-adapter.mjs';
-import { START_OWN_STORE_PATH } from '../shared/start-own-store-wire.mjs';
+import {
+  START_OWN_STORE_PATH,
+  START_OWN_STORE_PIN,
+  START_OWN_STORE_PROTOCOL_VERSION,
+} from '../shared/start-own-store-wire.mjs';
 
 export const APP_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -152,7 +156,24 @@ async function readRequestBody(req, maxBytes) {
   return Buffer.concat(chunks);
 }
 
-async function handleStorePost(req, res, adapter) {
+function startOwnAdapterErrorBody(code, details, envelope = null) {
+  return {
+    protocolVersion: START_OWN_STORE_PROTOCOL_VERSION,
+    storePin: START_OWN_STORE_PIN,
+    adapterError: true,
+    code,
+    details: details ?? null,
+    requestId: envelope?.requestId ?? null,
+    projectId: envelope?.projectId ?? null,
+    definitionId: envelope?.definitionId ?? null,
+    requestType: envelope?.requestType ?? null,
+    scope: envelope?.scope ?? null,
+    attemptId: envelope?.attemptId ?? null,
+    attemptNumber: envelope?.attemptNumber ?? null,
+  };
+}
+
+async function handleStorePost(req, res, adapter, makeErrorBody = adapterErrorBody) {
   if (!isJsonContentType(req.headers['content-type'])) {
     try {
       await readRequestBody(req, MAX_STORE_REQUEST_BYTES);
@@ -162,7 +183,7 @@ async function handleStorePost(req, res, adapter) {
     sendJson(
       res,
       httpStatusForAdapterCode(ADAPTER_ERROR_CODES.INVALID_CONTENT_TYPE),
-      adapterErrorBody(ADAPTER_ERROR_CODES.INVALID_CONTENT_TYPE, 'Content-Type must be application/json'),
+      makeErrorBody(ADAPTER_ERROR_CODES.INVALID_CONTENT_TYPE, 'Content-Type must be application/json'),
     );
     return;
   }
@@ -175,14 +196,14 @@ async function handleStorePost(req, res, adapter) {
       sendJson(
         res,
         httpStatusForAdapterCode(ADAPTER_ERROR_CODES.REQUEST_TOO_LARGE),
-        adapterErrorBody(ADAPTER_ERROR_CODES.REQUEST_TOO_LARGE, 'request body exceeds 64 KiB'),
+        makeErrorBody(ADAPTER_ERROR_CODES.REQUEST_TOO_LARGE, 'request body exceeds 64 KiB'),
       );
       return;
     }
     sendJson(
       res,
       400,
-      adapterErrorBody(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'request body could not be read'),
+      makeErrorBody(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'request body could not be read'),
     );
     return;
   }
@@ -194,7 +215,7 @@ async function handleStorePost(req, res, adapter) {
     sendJson(
       res,
       400,
-      adapterErrorBody(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'request body is not valid JSON'),
+      makeErrorBody(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'request body is not valid JSON'),
     );
     return;
   }
@@ -268,7 +289,7 @@ async function handleRequest(req, res, adapter, publishedJobAdapter, startOwnSto
 
   if (pathname === START_OWN_STORE_PATH) {
     if (req.method === 'POST') {
-      await handleStorePost(req, res, startOwnStoreAdapter);
+      await handleStorePost(req, res, startOwnStoreAdapter, startOwnAdapterErrorBody);
       return;
     }
     sendText(res, 405, 'Method not allowed', { Allow: 'POST' });
