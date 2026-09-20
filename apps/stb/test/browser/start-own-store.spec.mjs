@@ -11,6 +11,7 @@ async function openStartOwn(page) {
   await page.getByRole('button', { name: ACTORS.new.label }).click();
   await page.getByRole('button', { name: COPY.next }).click();
   await page.getByRole('button', { name: 'Start Your Own / Grab a Board', exact: true }).click();
+  await expect(page).toHaveURL(/catalog=start-own/);
   const url = new URL(page.url());
   const localRecordId = url.searchParams.get('id');
   expect(localRecordId).toBeTruthy();
