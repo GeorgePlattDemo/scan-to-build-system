@@ -159,3 +159,73 @@ test('Window Seat parent navigation does not mint an answer; project confirmatio
   );
   expect(afterStage).toHaveLength(1);
 });
+
+
+test('Start Your Own confirmation carries its donor Store reference for the exact definition', async ({ page }) => {
+  const localRecordId = await openCanonical(page, 'start-own', 'Start Your Own / Grab a Board');
+  const host = page.locator('[data-canonical-project-host="start-own"]');
+  const frame = page.frameLocator('iframe[data-canonical-child-frame="start-own"]');
+
+  await frame.locator('#go').click();
+  await expect(frame.locator('#confirmstore')).toBeVisible();
+  await frame.locator('#confirmstore').click();
+
+  await expect(host).toHaveAttribute('data-canonical-stage', 'store-answer');
+  await expect(page.locator('[data-store-applicability="current"]')).toContainText(
+    'CURRENT FOR IDENTIFIED DEFINITION',
+  );
+
+  const snapshots = requireOk(
+    await repoCall(page, 'listRecords', { localRecordId, kind: 'child-snapshot' }),
+    'Start Your Own snapshots after confirmation',
+  );
+  expect(snapshots).toHaveLength(1);
+  expect(snapshots[0].payload.sourceEvent).toBe('STB_START_OWN_CONFIRMED');
+  expect(snapshots[0].payload.payload.storeReference).toBeTruthy();
+  expect(snapshots[0].payload.payload.storeReference).toHaveProperty('capabilityStatus');
+  expect(snapshots[0].payload.payload.storeReference).toHaveProperty('economicsStatus');
+
+  await page.locator('[data-canonical-stage="accept-pay"]').click();
+  const afterNavigation = requireOk(
+    await repoCall(page, 'listRecords', { localRecordId, kind: 'child-snapshot' }),
+    'Start Your Own snapshots after stage navigation',
+  );
+  expect(afterNavigation).toHaveLength(1);
+});
+
+test('Outdoor confirmation carries unresolved project-specific Store truth without invented economics', async ({ page }) => {
+  const localRecordId = await openCanonical(page, 'outdoor', 'Outdoor Build');
+  const host = page.locator('[data-canonical-project-host="outdoor"]');
+  const frame = page.frameLocator('iframe[data-canonical-child-frame="outdoor"]');
+
+  await frame.locator('[data-outdoor-open]').click();
+  await frame.locator('[data-outdoor-assembly="left-bench"]').click();
+  await frame.locator('[data-outdoor-part="end-leg"]').click();
+  await expect(frame.locator('#outdoor-confirm')).toBeVisible();
+  await frame.locator('#outdoor-confirm').click();
+
+  await expect(host).toHaveAttribute('data-canonical-stage', 'store-answer');
+  await expect(page.locator('[data-store-applicability="current"]')).toContainText(
+    'CURRENT FOR IDENTIFIED DEFINITION',
+  );
+
+  const snapshots = requireOk(
+    await repoCall(page, 'listRecords', { localRecordId, kind: 'child-snapshot' }),
+    'Outdoor snapshots after confirmation',
+  );
+  expect(snapshots).toHaveLength(1);
+  expect(snapshots[0].payload.sourceEvent).toBe('STB_OUTDOOR_CONFIRMED');
+  const storeReference = snapshots[0].payload.payload.storeReference;
+  expect(storeReference).toBeTruthy();
+  expect(storeReference.economicsStatus).toBe('UNRESOLVED_CLASS_SCOPED_RECOVERY');
+  expect(storeReference.unresolvedConditions).toContain('STORE-PRICING-BRIDGE-GAP');
+  expect(snapshots[0].payload.payload.storeEconomics.engine).toBeNull();
+  expect(snapshots[0].payload.payload.storeEconomics.version).toBeNull();
+
+  await page.locator('[data-canonical-stage="store-yard"]').click();
+  const afterNavigation = requireOk(
+    await repoCall(page, 'listRecords', { localRecordId, kind: 'child-snapshot' }),
+    'Outdoor snapshots after stage navigation',
+  );
+  expect(afterNavigation).toHaveLength(1);
+});
