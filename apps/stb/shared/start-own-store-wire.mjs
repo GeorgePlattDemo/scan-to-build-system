@@ -2,7 +2,7 @@ import { canonicalJson, sha256Hex } from './canonical.mjs';
 
 export const START_OWN_STORE_PROTOCOL_VERSION = 'stb-store-zero-start-own-http/1';
 export const START_OWN_STORE_PATH = '/api/store-zero/start-own';
-export const START_OWN_STORE_PIN = '0e9ac7a5d83575ebe0e0e2b5f63b266f2431b24c';
+export const START_OWN_STORE_PIN = 'c66363597ed9b5ed355220d5599e726730cd2802';
 export const START_OWN_STORE_REQUEST_TYPE = 'USER_DEFINED_BOARD_V1';
 export const START_OWN_STORE_SCOPE = 'USER_DEFINED_BOARD_REFERENCE';
 
