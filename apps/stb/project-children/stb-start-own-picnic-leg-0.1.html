@@ -822,9 +822,11 @@ function buyPanel(P){
   if(!a){
     var message=A.storePreviewPending
       ? 'Checking this definition against Store Zero…'
-      : (A.storePreviewDiagnostic
-          ? 'Store Zero could not return a current answer · '+esc(A.storePreviewDiagnostic)+'.'
-          : 'No current Store answer for this definition.');
+      : (A.storePreviewDiagnostic==='STORE_DEMAND_INCOMPLETE'
+          ? 'Finish defining the cut and its length datum before Store Zero can answer.'
+          : (A.storePreviewDiagnostic
+              ? 'Store Zero could not return a current answer · '+esc(A.storePreviewDiagnostic)+'.'
+              : 'No current Store answer for this definition.'));
     return '<div class="panel"><h3>Store Zero</h3><p class="hint" style="margin:0">'+message+'</p></div>';
   }
   var ev=a.rawEvaluation||{}, cap=ev.capability||{}, est=a.rawEstimate||null;
@@ -1114,7 +1116,7 @@ function renderCapture(){
     +'<span class="body" style="padding:18px 20px 20px">'
     +'<b>Make them an inch longer</b>'
     +'<span>It always sat a bit low. One more inch of leg, everything else the same. '
-    +'It changes what the leg is, so it goes on the record — and, as it turns out, it costs nothing.</span></span></button>';
+    +'It changes what the leg is, so it goes on the record — and Store Zero answers the changed definition.</span></span></button>';
   h+='</div>';
 
   var target=A.measuredLen+(A.wantTaller?1:0);
