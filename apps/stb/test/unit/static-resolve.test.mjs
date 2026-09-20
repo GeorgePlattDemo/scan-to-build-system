@@ -198,6 +198,7 @@ test('allowlist is exact and finite', () => {
     '/shared/contracts.mjs',
     '/shared/picnic-rule.mjs',
     '/shared/project-registry.mjs',
+    '/shared/review-child-identity.mjs',
     '/shared/review-digest.mjs',
     '/shared/store-present.mjs',
     '/shared/store-wire.mjs',
