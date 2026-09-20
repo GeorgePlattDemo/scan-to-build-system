@@ -14,7 +14,9 @@
     "test:boundaries": "node --test --test-concurrency=1 test/boundaries/*.test.mjs",
     "test:store": "node --test --test-concurrency=1 test/store/*.test.mjs",
     "test:vertical": "playwright test --config test/playwright.vertical.config.mjs",
-    "trial:published-jobs": "node ops/run-published-job.mjs --all"
+    "trial:published-jobs": "node ops/run-published-job.mjs --all",
+    "test:start-own-store": "node --test --test-concurrency=1 test/start-own-store/*.test.mjs",
+    "test:start-own-browser": "playwright test --config test/playwright.config.mjs start-own-store.spec.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0"

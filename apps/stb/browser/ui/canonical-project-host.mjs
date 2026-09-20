@@ -5,6 +5,7 @@ import {
 } from '/shared/project-registry.mjs';
 import { recordReviewChildSnapshot } from '/domain/review-child.mjs';
 import { canonicalPayloadDigest, reviewChildDefinitionIdentity } from '/shared/review-child-identity.mjs';
+import { askStartOwnStore } from '/integration/start-own-store-preview.mjs';
 
 const ACTIVE = new WeakMap();
 
@@ -136,8 +137,18 @@ async function currentDefinitionId(ctx) {
   const win = ctx.frame?.contentWindow;
   if (!win) return null;
   try {
-    if (ctx.definition.projectId === 'start-own' && typeof win.currentDefinitionId === 'function') {
-      return String(win.currentDefinitionId());
+    if (ctx.definition.projectId === 'start-own') {
+      const bridge = win.STBProjectBridge;
+      if (bridge && typeof bridge.getDefinition === 'function') {
+        const definition = clean(bridge.getDefinition());
+        const sourceAuthority = clean(bridge.sourceAuthority ?? definition?.sourceAuthority ?? null);
+        if (definition) {
+          return await reviewChildDefinitionIdentity('start-own', { definition, sourceAuthority });
+        }
+      }
+      if (typeof win.currentDefinitionId === 'function') {
+        return String(win.currentDefinitionId());
+      }
     }
     if (ctx.definition.projectId === 'outdoor') {
       return win.O?.sent?.id ? String(win.O.sent.id) : null;
@@ -283,6 +294,47 @@ async function persist(ctx, payload, sourceEvent) {
   return saved;
 }
 
+function startOwnBridgeDefinition(ctx) {
+  const win = ctx.frame?.contentWindow;
+  const bridge = win?.STBProjectBridge;
+  if (!bridge || typeof bridge.getDefinition !== 'function') return null;
+  try {
+    const definition = clean(bridge.getDefinition());
+    if (!definition) return null;
+    return {
+      definition,
+      sourceAuthority: clean(bridge.sourceAuthority ?? definition.sourceAuthority ?? null),
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
+async function askStartOwnReference(ctx, { childDefinitionId = null, definition = null, sourceAuthority = null } = {}) {
+  const bridgeValue = definition
+    ? { definition: clean(definition), sourceAuthority: clean(sourceAuthority ?? definition?.sourceAuthority ?? null) }
+    : startOwnBridgeDefinition(ctx);
+  if (!bridgeValue?.definition) {
+    return { ok: false, code: 'CHILD_DEFINITION_UNAVAILABLE', answer: null, canonicalDefinitionId: null };
+  }
+  const canonicalDefinitionId = await reviewChildDefinitionIdentity('start-own', bridgeValue);
+  const result = await askStartOwnStore({
+    projectId: ctx.project.projectId,
+    definitionId: canonicalDefinitionId,
+    definition: bridgeValue.definition,
+  });
+  if (childDefinitionId && ctx.frame?.contentWindow) {
+    ctx.frame.contentWindow.postMessage({
+      type: 'STB_START_OWN_STORE_PREVIEW',
+      childDefinitionId,
+      canonicalDefinitionId,
+      answer: result.ok ? result.answer : null,
+      diagnostic: result.ok ? null : result.code,
+    }, window.location.origin);
+  }
+  return { ...result, canonicalDefinitionId };
+}
+
 function alcoveSnapshot(ctx) {
   const doc = ctx.frame.contentDocument;
   if (!doc) return null;
@@ -320,6 +372,7 @@ function alcoveSnapshot(ctx) {
 }
 
 function bindStartOwnCompatibility(ctx) {
+  if (ctx.definition.entryArtifact !== '/review-donors/stb-start-own-0.11.html') return;
   const doc = ctx.frame.contentDocument;
   const win = ctx.frame.contentWindow;
   if (!doc || !win || doc.documentElement.dataset.systemStartOwnCompatibility === 'true') return;
@@ -479,8 +532,27 @@ export function activateCanonicalProjectHost(root, { project, definition, stage,
         status.textContent = 'Start Your Own remains a separate project identity. Return to the Project Library to open or create it.';
         return;
       }
+      if (data.type === 'STB_PROJECT_DEFINITION_CHANGED' && ctx.definition.projectId === 'start-own') {
+        const bridgeValue = startOwnBridgeDefinition(ctx);
+        if (bridgeValue?.definition) {
+          void askStartOwnReference(ctx, {
+            childDefinitionId: data.definitionId ?? null,
+            definition: bridgeValue.definition,
+            sourceAuthority: bridgeValue.sourceAuthority,
+          }).catch(() => {});
+        }
+        return;
+      }
       if (data.type === 'STB_START_OWN_CONFIRMED') {
-        await persist(ctx, data.payload, data.type);
+        const payload = clean(data.payload) ?? {};
+        const formal = await askStartOwnReference(ctx, {
+          definition: payload.definition ?? null,
+          sourceAuthority: payload.sourceAuthority ?? null,
+        });
+        payload.storeAnswer = formal.ok ? clean(formal.answer) : null;
+        payload.storeDiagnostic = formal.ok ? null : formal.code;
+        payload.formalStoreDefinitionId = formal.canonicalDefinitionId;
+        await persist(ctx, payload, data.type);
         setStage(ctx, 'store-answer', { updateHistory: true });
         return;
       }
