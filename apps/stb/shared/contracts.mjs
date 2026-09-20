@@ -491,6 +491,8 @@ const JS = (relativePath) =>
     relativePath,
     contentType: 'text/javascript; charset=utf-8',
   });
+const HTML_FILE = (relativePath) => Object.freeze({ relativePath, contentType: 'text/html; charset=utf-8' });
+const WEBP = (relativePath) => Object.freeze({ relativePath, contentType: 'image/webp' });
 
 export const STATIC_ASSETS = Object.freeze({
   '/': HTML,
@@ -547,6 +549,18 @@ export const STATIC_ASSETS = Object.freeze({
   '/shared/store-present.mjs': JS('shared/store-present.mjs'),
   '/shared/review-digest.mjs': JS('shared/review-digest.mjs'),
   '/shared/archive-format.mjs': JS('shared/archive-format.mjs'),
+  '/shared/project-registry.mjs': JS('shared/project-registry.mjs'),
+  '/domain/review-child.mjs': JS('browser/domain/review-child.mjs'),
+  '/ui/canonical-project-host.mjs': JS('browser/ui/canonical-project-host.mjs'),
+  '/projects/review/system-build-base-8d8a9dd.html': HTML_FILE('browser/projects/review/system-build-base-8d8a9dd.html'),
+  '/projects/review/stb-window-seat-space-utilization-0.7.4.html': HTML_FILE('browser/projects/review/stb-window-seat-space-utilization-0.7.4.html'),
+  '/projects/review/stb-start-own-0.11.html': HTML_FILE('browser/projects/review/stb-start-own-0.11.html'),
+  '/projects/review/stb-outdoor-build.html': HTML_FILE('browser/projects/review/stb-outdoor-build.html'),
+  '/projects/review/stb-canonical-journey.js': JS('browser/projects/review/stb-canonical-journey.js'),
+  '/projects/review/store-zero-canonical-doctrine.js': JS('browser/projects/review/store-zero-canonical-doctrine.js'),
+  '/projects/review/stb-store-handoff-contract.js': JS('browser/projects/review/stb-store-handoff-contract.js'),
+  '/projects/review/assets/project-tiles/start-your-own.webp': WEBP('browser/projects/review/assets/project-tiles/start-your-own.webp'),
+  '/projects/review/assets/project-tiles/plywood-curvilinear-shapes.webp': WEBP('browser/projects/review/assets/project-tiles/plywood-curvilinear-shapes.webp'),
   '/vendor/pdfjs/pdf.min.mjs': JS('browser/vendor/pdfjs/pdf.min.mjs'),
   '/vendor/pdfjs/pdf.worker.min.mjs': JS('browser/vendor/pdfjs/pdf.worker.min.mjs'),
 });
@@ -603,6 +617,8 @@ export function screenFromLocation(location) {
     ...screen,
     localRecordId: params.get('id'),
     view,
+    catalogProjectId: params.get('catalog'),
+    requestedStage: params.get('stage'),
     child: child && INTAKE_CARDS.some((card) => card.id === child) ? child : null,
   };
 }

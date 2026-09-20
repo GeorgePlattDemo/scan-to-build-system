@@ -9,6 +9,7 @@ import { renderSharedCandidateView } from '/ui/candidate-view.mjs';
 import { renderStorePanel } from '/ui/store-panel.mjs';
 import { presentStoreAnswer } from '/shared/store-present.mjs';
 import { renderInlineReview } from '/ui/review-panel.mjs';
+import { listCanonicalProjects } from '/shared/project-registry.mjs';
 
 function el(tag, options = {}, children = []) {
   const node = document.createElement(tag);
@@ -104,6 +105,50 @@ function mappedSection(mappedOpen) {
   ]);
 }
 
+
+function canonicalProjectLibrarySection() {
+  const projects = listCanonicalProjects();
+  return el('section', {
+    className: 'canonical-project-library',
+    attrs: { 'data-canonical-project-library': 'true' },
+  }, [
+    el('p', { className: 'library-kicker', text: 'HOME / PROJECT LIBRARY' }),
+    el('h2', { text: 'Choose a project' }),
+    el('p', {
+      className: 'hint',
+      text: 'Each project keeps one identity from Scan / Evidence through Handoff / Record. A stage change never selects another project.',
+    }),
+    el('div', { className: 'canonical-project-grid' },
+      projects.map((project) =>
+        el('button', {
+          className: 'canonical-project-card',
+          attrs: {
+            type: 'button',
+            'data-action': 'start-canonical-project',
+            'data-canonical-project-id': project.projectId,
+          },
+          text: project.displayName,
+        }),
+      ),
+    ),
+  ]);
+}
+
+function legacyReferenceSection(mappedOpen, mapped, own) {
+  return el('details', {
+    className: 'legacy-reference-paths',
+    attrs: mappedOpen ? { open: 'true' } : {},
+  }, [
+    el('summary', { text: 'Additional System reference paths' }),
+    el('p', {
+      className: 'hint',
+      text: 'Retained for compatibility and evidence. These are not the five-project canonical library.',
+    }),
+    mapped,
+    own,
+  ]);
+}
+
 function ownSection() {
   return el('section', { className: 'start-card own-card' }, [
     el('button', {
@@ -140,9 +185,11 @@ export function page1Main({
       })
     : null;
   const resume = resumeSection(saved, actorId);
+  const canonicalLibrary = canonicalProjectLibrarySection();
   const mapped = mappedSection(mappedOpen);
   const own = ownSection();
-  const starts = actorId === 'returning' ? [resume, mapped, own] : [mapped, own, resume];
+  const legacy = legacyReferenceSection(mappedOpen, mapped, own);
+  const starts = actorId === 'returning' ? [resume, canonicalLibrary, legacy] : [canonicalLibrary, resume, legacy];
   const dialog = pendingSwitch
     ? el(
         'div',

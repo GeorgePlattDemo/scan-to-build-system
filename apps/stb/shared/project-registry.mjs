@@ -29,6 +29,7 @@ function project(definition) {
 export const PROJECT_REGISTRY = Object.freeze([
   project({
     projectId: 'start-own',
+    systemClassId: 'REVIEW_START_OWN_V011',
     displayName: 'Start Your Own / Grab a Board',
     projectClass: 'USER_DEFINED_BOARD',
     hostMode: 'review-child',
@@ -55,6 +56,7 @@ export const PROJECT_REGISTRY = Object.freeze([
   }),
   project({
     projectId: 'outdoor',
+    systemClassId: 'REVIEW_OUTDOOR_BUILD_V01',
     displayName: 'Outdoor Build',
     projectClass: 'BOUNDED_SOURCE_BACKED',
     hostMode: 'review-child',
@@ -82,6 +84,7 @@ export const PROJECT_REGISTRY = Object.freeze([
   }),
   project({
     projectId: 'alcove',
+    systemClassId: 'REVIEW_ALCOVE_INSERT_CURRENT',
     displayName: 'Alcove Insert',
     projectClass: 'ALCOVE_INSERT_MATURE',
     hostMode: 'review-child',
@@ -99,15 +102,16 @@ export const PROJECT_REGISTRY = Object.freeze([
       'scan-evidence': 'child:alcove-capture',
       configure: 'child:alcove-config',
       'store-answer': 'child:store',
-      'accept-pay': 'system-commercial-boundary',
-      'store-yard': 'system-yard-boundary',
-      'handoff-record': 'system-owner-record',
+      'accept-pay': 'child:request',
+      'store-yard': 'child:yard',
+      'handoff-record': 'child:record',
     },
     storeAdapterPath: 'project-native-alcove',
     ownerRecordPath: 'system-owner-record',
   }),
   project({
     projectId: 'window-seat',
+    systemClassId: 'REVIEW_WINDOW_SEAT_V074',
     displayName: 'Window Seat / Space Utilization',
     projectClass: 'WINDOW_SEAT_SPACE_UTILIZATION',
     hostMode: 'review-child',
@@ -134,6 +138,7 @@ export const PROJECT_REGISTRY = Object.freeze([
   }),
   project({
     projectId: 's001',
+    systemClassId: 'S001_CENTERED_ARCHED_SHEET_V0',
     displayName: 'S-001 / Centered Arched Sheet',
     projectClass: 'S001_CENTERED_ARCHED_SHEET_V0',
     hostMode: 'system-native',
@@ -147,7 +152,7 @@ export const PROJECT_REGISTRY = Object.freeze([
     confirmationEvent: 'DefinitionReviewRecorded',
     legalStages: CANONICAL_PROJECT_STAGES,
     stageDestinations: {
-      'scan-evidence': 'system:evidence',
+      'scan-evidence': 'system:questions',
       configure: 'system:questions',
       'store-answer': 'system:store',
       'accept-pay': 'system:confirm',
@@ -160,9 +165,14 @@ export const PROJECT_REGISTRY = Object.freeze([
 ]);
 
 const BY_ID = new Map(PROJECT_REGISTRY.map((entry) => [entry.projectId, entry]));
+const BY_CLASS_ID = new Map(PROJECT_REGISTRY.map((entry) => [entry.systemClassId, entry]));
 
 export function getProjectDefinition(projectId) {
   return BY_ID.get(projectId) ?? null;
+}
+
+export function getProjectDefinitionByClassId(classId) {
+  return BY_CLASS_ID.get(classId) ?? null;
 }
 
 export function listCanonicalProjects() {
@@ -187,3 +197,37 @@ export function resolveProjectStage(projectId, requestedStage) {
 export function projectStageAllowed(projectId, requestedStage) {
   return resolveProjectStage(projectId, requestedStage) !== null;
 }
+
+export function canonicalProjectHref(localRecordId, projectId, stage) {
+  if (!localRecordId || !resolveProjectStage(projectId, stage)) return null;
+  const params = new URLSearchParams({
+    id: localRecordId,
+    catalog: projectId,
+    stage,
+  });
+  return '/project?' + params.toString();
+}
+
+export const REVIEW_CHILD_CLASS_REFERENCES = Object.freeze(
+  PROJECT_REGISTRY
+    .filter((entry) => entry.hostMode === 'review-child')
+    .map((entry) => Object.freeze({
+      kind: 'mapped',
+      classId: entry.systemClassId,
+      classVersion: 'review-child-adapter/0.1',
+      ruleVersion: null,
+      label: entry.displayName,
+      status: 'admitted-review-child',
+      storePath: entry.storeAdapterPath,
+      hint: 'Preserved Review donor hosted by the canonical System application.',
+      source: Object.freeze({
+        repository: entry.sourceAuthority.repository,
+        pin: entry.sourceAuthority.commit,
+        basis: 'REVIEW-TO-SYSTEM-ADMISSION-0.1',
+        ruleVersion: null,
+        sourceFile: entry.entryArtifact,
+        executable: false,
+        authority: false,
+      }),
+    })),
+);
