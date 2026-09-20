@@ -62,6 +62,6 @@ test('System host does not reprice Alcove or mint custody from Store navigation'
   for (const donorValue of ['272.86', '83.56', '374.42']) {
     assert.equal(source.includes(donorValue), false, donorValue);
   }
-  assert.match(source, /sourceEvent: 'alcove-native-confirmation'/);
+  assert.match(source, /persist\(ctx, alcoveSnapshot\(ctx\), 'alcove-native-confirmation'\)/);
   assert.match(source, /snapshotCarriesFormalStoreAnswer/);
 });
