@@ -48,3 +48,20 @@ test('Window Seat donor retains project/revision/store and owner-record boundari
   ]) assert.ok(source.includes(token), token);
   assert.match(source, /WINDOW_SEAT_ACTOR_STAGES=\['scan','configure','store-answer','accept-pay','store-yard','handoff-record'\]/);
 });
+
+
+test('System host does not reprice Alcove or mint custody from Store navigation', () => {
+  const source = read('browser/ui/canonical-project-host.mjs');
+  for (const forbidden of [
+    'applyAlcoveEconomicsBoundary',
+    'quoteAlcoveInsert',
+    'createComparisonStoreHandoff',
+    'STBStoreHandoffContract',
+    'alcove-store-answer-view',
+  ]) assert.equal(source.includes(forbidden), false, forbidden);
+  for (const donorValue of ['272.86', '83.56', '374.42']) {
+    assert.equal(source.includes(donorValue), false, donorValue);
+  }
+  assert.match(source, /sourceEvent: 'alcove-native-confirmation'/);
+  assert.match(source, /snapshotCarriesFormalStoreAnswer/);
+});

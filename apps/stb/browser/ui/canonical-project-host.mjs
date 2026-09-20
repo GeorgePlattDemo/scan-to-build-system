@@ -185,8 +185,29 @@ function currentDefinitionId(ctx) {
   return null;
 }
 
+function snapshotCarriesFormalStoreAnswer(ctx) {
+  const child = ctx.snapshot?.payload ?? null;
+  if (!child) return false;
+  if (ctx.definition.projectId === 'alcove') {
+    return ctx.snapshot.sourceEvent === 'alcove-native-confirmation';
+  }
+  if (ctx.definition.projectId === 'window-seat') {
+    const revision = child.revision ?? {};
+    const answer = child.storeAnswer ?? null;
+    return Boolean(
+      revision.confirmed
+      && answer
+      && !answer.stale
+      && Number(answer.atRevision) === Number(revision.number)
+    );
+  }
+  return Boolean(child.storeReference || child.storeAnswer);
+}
+
 function snapshotApplicability(ctx) {
-  if (!ctx.snapshot) return { current: false, label: 'NO IDENTIFIED CURRENT ANSWER' };
+  if (!ctx.snapshot || !snapshotCarriesFormalStoreAnswer(ctx)) {
+    return { current: false, label: 'NO IDENTIFIED CURRENT ANSWER' };
+  }
   const currentId = currentDefinitionId(ctx);
   if (!currentId) return { current: false, label: 'STALE / HISTORICAL ONLY' };
   return currentId === ctx.snapshot.definitionId
