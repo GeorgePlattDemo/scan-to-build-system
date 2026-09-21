@@ -220,7 +220,7 @@ function validateJobPayload(payload) {
     ok: true,
     line: {
       lineId: line.lineId,
-      materialDemand: { ...line.materialDemand },
+      storeSku: line.storeSku,
       quantity: 1,
       unit: 'ea',
       requiredOps: ['CROSSCUT'],
