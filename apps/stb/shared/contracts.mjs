@@ -417,6 +417,13 @@ export const USER_DEFINED_BOARD_DEFINITION = Object.freeze({
   occurrenceRole: 'user-defined-board-workpiece',
 });
 
+export const USER_DEFINED_BOARD_MATERIAL_DEMAND = Object.freeze({
+  species: 'spf',
+  form: 'board',
+  nominalT: 2,
+  nominalW: 4,
+});
+
 export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
   id: 'CUT-001',
   repository: 'GeorgePlattDemo/scan-to-build-store',
@@ -434,7 +441,7 @@ export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
 
 export const STORE_PROTOCOL_VERSION = 'stb-store-zero-http/1';
 export const STORE_REPOSITORY = 'GeorgePlattDemo/scan-to-build-store';
-export const STORE_PIN = 'c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a';
+export const STORE_PIN = 'ab8a4c5d470c310f27fef82683611622ab976168';
 export const WRAPPER_BUILD_ID = 'stb-app-build-5';
 export const APP_BUILD_ID = 'stb-app-build-7';
 export const PUBLISHED_BOARD_SKU = 'STB-ZERO-SPF-2X4-72-001';
