@@ -150,7 +150,7 @@ Bounded endpoints:
 - `POST /api/store-zero/offering` (`OFFERING_LOOKUP`)
 - `POST /api/store-zero/job` (`BOARD_SQUARE_V1` or `USER_DEFINED_BOARD_V1`)
 
-`BOARD_SQUARE_V1` remains the accepted square-Board path. `USER_DEFINED_BOARD_V1` is a separate bounded request for an already-defined 24–60 in Board workpiece with explicit supported operation demand. It does not redefine the project to the Store SKU. The current Start Your Own X-brace proof carries a 60 in workpiece, 3 modeled saw/miter cycles and 2 modeled drill/spot cycles; Store Zero owns the resulting BudgetaryEstimate/Q.
+`BOARD_SQUARE_V1` remains the accepted square-Board path. `USER_DEFINED_BOARD_V1` is a separate bounded request for an already-defined 24–60 in Board workpiece with explicit operation meaning carried at the application/Store boundary. It does not redefine the project to the Store SKU. For the current Start Your Own X-brace proof, Store Zero supplies a 72 in raw SKU while the identified project workpiece remains 60 in. The integration accounts for one raw-stock preparation cut plus the three defined saw/miter cycles. The requested centered spot remains `SPOT_ON_LOCATION` with unresolved tooling and is not silently priced as a generic 0.75 in drilled hole. Store Zero still owns the Stage-2 modeled BudgetaryEstimate for the resolved encoded operations; while unresolved operation conditions remain, the application presents that value as partial rather than as a complete commercial total.
 
 The Store checkout is never statically served. Browser modules do not import Store implementation, the pricing engine, or the envelope. Support is evaluated before estimate. Raw Store evaluation and estimate remain separate. Transport and adapter errors are not Store dispositions.
 

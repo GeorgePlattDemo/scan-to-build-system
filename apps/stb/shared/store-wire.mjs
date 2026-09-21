@@ -267,6 +267,14 @@ function validateUserDefinedBoardPayload(payload) {
     'sawCuts',
     'sawAngleDeg',
     'drillCycles',
+    'drillDepthIn',
+    'cutPlane',
+    'endIdentity',
+    'endRelation',
+    'lengthDatum',
+    'spotDemand',
+    'unresolvedConditions',
+    'materialSource',
   ]);
   if (Object.keys(line).some((key) => !allowedLine.has(key))) {
     return fail(
@@ -275,13 +283,9 @@ function validateUserDefinedBoardPayload(payload) {
     );
   }
   const lineIdError = requireNonemptyString('lineId', line.lineId);
-  if (lineIdError) {
-    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, lineIdError);
-  }
+  if (lineIdError) return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, lineIdError);
   const skuError = requireNonemptyString('storeSku', line.storeSku);
-  if (skuError) {
-    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, skuError);
-  }
+  if (skuError) return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, skuError);
   if (line.storeSku !== PUBLISHED_BOARD_SKU) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
@@ -327,9 +331,7 @@ function validateUserDefinedBoardPayload(payload) {
     );
   }
   const parsed = parseCanonicalInch(workpiece.value);
-  if (!parsed.ok) {
-    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, parsed.reason);
-  }
+  if (!parsed.ok) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, parsed.reason);
   if (
     parsed.value < USER_DEFINED_BOARD_DEFINITION.minWorkpieceInches ||
     parsed.value > USER_DEFINED_BOARD_DEFINITION.maxWorkpieceInches
@@ -365,14 +367,43 @@ function validateUserDefinedBoardPayload(payload) {
   if (line.sawAngleDeg > 0 && !line.requiredOps.includes('MITER_LIMITED')) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'angled user-defined Board work requires MITER_LIMITED',
+      'nonzero saw angle requires MITER_LIMITED',
     );
   }
   if (line.drillCycles > 0 && !line.requiredOps.includes('DRILL')) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'drillCycles require DRILL',
+      'positive drillCycles requires DRILL',
     );
+  }
+  if (line.drillCycles > 0 && !(Number.isFinite(line.drillDepthIn) && line.drillDepthIn > 0)) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'positive drillCycles requires explicit positive drillDepthIn',
+    );
+  }
+  for (const key of ['cutPlane', 'endIdentity', 'endRelation', 'lengthDatum', 'materialSource']) {
+    if (line[key] != null && (typeof line[key] !== 'string' || line[key].trim() === '')) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, key + ' must be a nonempty string when supplied');
+    }
+  }
+  if (
+    line.unresolvedConditions != null &&
+    (!Array.isArray(line.unresolvedConditions) ||
+      line.unresolvedConditions.some((item) => typeof item !== 'string' || item.trim() === ''))
+  ) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'unresolvedConditions must be an array of nonempty strings when supplied',
+    );
+  }
+  if (line.spotDemand != null) {
+    if (typeof line.spotDemand !== 'object' || Array.isArray(line.spotDemand)) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'spotDemand must be an object when supplied');
+    }
+    if (line.spotDemand.mode !== 'SPOT_ON_LOCATION') {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'spotDemand mode must be SPOT_ON_LOCATION');
+    }
   }
   return {
     ok: true,
@@ -387,6 +418,14 @@ function validateUserDefinedBoardPayload(payload) {
       sawCuts: line.sawCuts,
       sawAngleDeg: line.sawAngleDeg,
       drillCycles: line.drillCycles,
+      drillDepthIn: line.drillDepthIn ?? null,
+      cutPlane: line.cutPlane ?? null,
+      endIdentity: line.endIdentity ?? null,
+      endRelation: line.endRelation ?? null,
+      lengthDatum: line.lengthDatum ?? null,
+      spotDemand: line.spotDemand ?? null,
+      unresolvedConditions: [...(line.unresolvedConditions ?? [])],
+      materialSource: line.materialSource ?? null,
     },
     definitionKind: USER_DEFINED_BOARD_DEFINITION.kind,
     ruleVersion: USER_DEFINED_BOARD_DEFINITION.ruleVersion,
@@ -646,8 +685,16 @@ export function userDefinedBoardJobPayload({
   definedWorkpieceLengthCanonical,
   sawCuts,
   sawAngleDeg,
-  drillCycles,
+  drillCycles = 0,
+  drillDepthIn = null,
   requiredOps,
+  cutPlane = null,
+  endIdentity = null,
+  endRelation = null,
+  lengthDatum = null,
+  spotDemand = null,
+  unresolvedConditions = [],
+  materialSource = null,
 }) {
   return {
     line: {
@@ -660,6 +707,14 @@ export function userDefinedBoardJobPayload({
       sawCuts,
       sawAngleDeg,
       drillCycles,
+      drillDepthIn,
+      cutPlane,
+      endIdentity,
+      endRelation,
+      lengthDatum,
+      spotDemand,
+      unresolvedConditions: [...unresolvedConditions],
+      materialSource,
     },
     definitionKind: USER_DEFINED_BOARD_DEFINITION.kind,
     ruleVersion: USER_DEFINED_BOARD_DEFINITION.ruleVersion,
@@ -681,6 +736,14 @@ export async function userDefinedBoardDemandSignature(payload) {
     sawCuts: payload.line.sawCuts,
     sawAngleDeg: payload.line.sawAngleDeg,
     drillCycles: payload.line.drillCycles,
+    drillDepthIn: payload.line.drillDepthIn ?? null,
+    cutPlane: payload.line.cutPlane ?? null,
+    endIdentity: payload.line.endIdentity ?? null,
+    endRelation: payload.line.endRelation ?? null,
+    lengthDatum: payload.line.lengthDatum ?? null,
+    spotDemand: payload.line.spotDemand ?? null,
+    unresolvedConditions: payload.line.unresolvedConditions ?? [],
+    materialSource: payload.line.materialSource ?? null,
   });
 }
 

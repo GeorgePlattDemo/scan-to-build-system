@@ -87,8 +87,16 @@ export async function scheduleUserDefinedBoardStoreQuestion(
     definedWorkpieceLengthCanonical,
     sawCuts,
     sawAngleDeg,
-    drillCycles,
+    drillCycles = 0,
+    drillDepthIn = null,
     requiredOps,
+    cutPlane = null,
+    endIdentity = null,
+    endRelation = null,
+    lengthDatum = null,
+    spotDemand = null,
+    unresolvedConditions = [],
+    materialSource = null,
     unapplied = false,
   } = {},
 ) {
@@ -113,6 +121,7 @@ export async function scheduleUserDefinedBoardStoreQuestion(
   ) {
     return { status: 'incomplete' };
   }
+
   const candidateRevisionId = project.currentHead;
   const existing = await currentStoreAnswer(localRecordId, {
     candidateRevisionId,
@@ -143,7 +152,15 @@ export async function scheduleUserDefinedBoardStoreQuestion(
       sawCuts,
       sawAngleDeg,
       drillCycles,
+      drillDepthIn,
       requiredOps,
+      cutPlane,
+      endIdentity,
+      endRelation,
+      lengthDatum,
+      spotDemand,
+      unresolvedConditions,
+      materialSource,
     }),
     background: true,
   }).then((result) => {

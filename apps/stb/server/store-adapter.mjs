@@ -389,6 +389,16 @@ export async function createStoreAdapter({
     const evaluateDigest = await digestCanonical(evaluateInput);
     const offering = attributedOffering(item, runtimeCatalog, observations);
 
+    const preparationSawCuts =
+      line.materialSource === 'STORE_ZERO' &&
+      item &&
+      Number.isFinite(Number(item.stockL_in)) &&
+      Number(item.stockL_in) > line.definedWorkpieceLengthIn
+        ? 1
+        : 0;
+    const totalModeledSawCuts = line.sawCuts + preparationSawCuts;
+    const unresolvedConditions = [...(line.unresolvedConditions ?? [])];
+
     let rawEstimate = null;
     let estimateInput = null;
     let estimateDigest = null;
@@ -408,10 +418,10 @@ export async function createStoreAdapter({
             qty: 1,
             keptLengthIn: line.definedWorkpieceLengthIn,
             widthIn: item.actualW,
-            sawCuts: line.sawCuts,
+            sawCuts: totalModeledSawCuts,
             sawTraverseIn,
             holes: line.drillCycles,
-            depthIn: 0.75,
+            depthIn: line.drillCycles > 0 ? line.drillDepthIn : 0,
           },
         ],
       };
@@ -428,6 +438,20 @@ export async function createStoreAdapter({
       }
     }
 
+    const priceCompleteness = {
+      status:
+        rawEstimate && unresolvedConditions.length === 0
+          ? 'COMPLETE_FOR_ENCODED_DEMAND'
+          : rawEstimate
+            ? 'PARTIAL'
+            : 'UNAVAILABLE',
+      unresolvedConditions,
+      note:
+        unresolvedConditions.length > 0
+          ? 'The Store value models only the resolved encoded operations. Unresolved work is not silently converted into a priced operation.'
+          : 'The Store value models the encoded demand only. It is a Stage-2 BudgetaryEstimate, not a commercial quote.',
+    };
+
     return {
       status: 200,
       body: await successEnvelope(envelope, {
@@ -436,12 +460,31 @@ export async function createStoreAdapter({
         rawEstimate,
         estimateAssociationId,
         estimateError,
+        priceCompleteness,
         mappedCallInputs: {
           definition: {
+            materialSource: line.materialSource,
+            rawStockLengthIn: item?.stockL_in ?? null,
             definedWorkpieceLengthIn: line.definedWorkpieceLengthIn,
-            sawCuts: line.sawCuts,
+            preparation: {
+              required: preparationSawCuts > 0,
+              sawCuts: preparationSawCuts,
+              source:
+                preparationSawCuts > 0
+                  ? 'Store raw stock is longer than the identified workpiece'
+                  : 'No Store raw-stock preparation cut modeled',
+            },
+            productionSawCuts: line.sawCuts,
+            totalModeledSawCuts,
             sawAngleDeg: line.sawAngleDeg,
             drillCycles: line.drillCycles,
+            drillDepthIn: line.drillDepthIn,
+            cutPlane: line.cutPlane,
+            endIdentity: line.endIdentity,
+            endRelation: line.endRelation,
+            lengthDatum: line.lengthDatum,
+            spotDemand: line.spotDemand,
+            unresolvedConditions,
           },
           evaluation: evaluateInput,
           evaluationDigest: evaluateDigest,

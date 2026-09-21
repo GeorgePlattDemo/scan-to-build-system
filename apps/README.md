@@ -66,7 +66,7 @@ Historical Store pins are listed in [`../provenance/SOURCE-PINS.md`](../provenan
 The accepted application includes bounded software support for:
 
 - D-001 / Board published-job evaluation;
-- a separate `USER_DEFINED_BOARD_V1` Store request carrying an already-defined Board workpiece plus explicit bounded saw/miter and drill-cycle demand into the pinned Store pricing engine;
+- a separate `USER_DEFINED_BOARD_V1` Store request carrying an already-defined Board workpiece plus explicit operation semantics, raw-stock lineage, resolved saw/drill demand, and named unresolved conditions into the pinned Store integration without converting unresolved spots into holes;
 - rectangular sheet published-job evaluation;
 - canonical centered S-001 arched project;
 - durable S-001 Store request/attempt/response/review/result/record custody;

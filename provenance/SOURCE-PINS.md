@@ -15,7 +15,8 @@ For current project status, read [`../STB-CURRENT-BASELINE.md`](../STB-CURRENT-B
 | Frozen application roadmap | `GeorgePlattDemo/grok-file` | `plan/app-master-roadmap-0.1` | `985db87a707bd454d7c58419e2cf4d884f00cded` | Historical controlling roadmap for transferred application build |
 | Entry/intake contract | `GeorgePlattDemo/grok-file` | `plan/app-entry-intake-contract-0.1` | `2d80b5a7b0e7687c425e100bfa0ff3a833166d42` | Source contract; subject to current repository corrections |
 | Governed Reference | `GeorgePlattDemo/scan-to-build-governed-reference` | `main` | `18949f163718a937f072f4be3a654bb303e53160` | Governed reference identity |
-| Stage-2 Store Zero | `GeorgePlattDemo/scan-to-build-store` | `stage-2-store-zero-reference` | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | Transferred accepted-app / Stage-2 Store reference path |
+| Stage-2 Store Zero — accepted 2026-09-13 identity | `GeorgePlattDemo/scan-to-build-store` | `stage-2-store-zero-reference` | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | ACCEPTED BASELINE HISTORY; superseded for the current post-acceptance Stage-2 working path |
+| Stage-2 Store Zero — current post-acceptance working path | `GeorgePlattDemo/scan-to-build-store` | `main` | `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a` | Current `USER_DEFINED_BOARD_V1` material/capability/economics source |
 | Store documentary foundation | `GeorgePlattDemo/scan-to-build-store` | `main` | `3620b35369d70cf49733bbb0b62c0f3d9969b738` | Store boundary/background source |
 
 ## Accepted application ancestry / proof identities
@@ -38,6 +39,8 @@ For current project status, read [`../STB-CURRENT-BASELINE.md`](../STB-CURRENT-B
 | PR #6 combined published-job Store candidate | `096e99d645d745b1670185f46c75de75f9e59661` | ACCEPTED ancestry; superseded for current S-001 proof |
 
 Do not replace the Stage-2 Store pin with the published-job pin globally. The Store identity is path-specific.
+
+Current repair lock: [`../docs/project/CURRENT-STATE-LOCK-2026-09-21.md`](../docs/project/CURRENT-STATE-LOCK-2026-09-21.md).
 
 ## Parallel candidate identity
 
