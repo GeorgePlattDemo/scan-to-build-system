@@ -148,7 +148,9 @@ Protocol: `stb-store-zero-http/1`
 Bounded endpoints:
 
 - `POST /api/store-zero/offering` (`OFFERING_LOOKUP`)
-- `POST /api/store-zero/job` (`BOARD_SQUARE_V1`)
+- `POST /api/store-zero/job` (`BOARD_SQUARE_V1` or `USER_DEFINED_BOARD_V1`)
+
+`BOARD_SQUARE_V1` remains the accepted square-Board path. `USER_DEFINED_BOARD_V1` is a separate bounded request for an already-defined 24–60 in Board workpiece with explicit supported operation demand. It does not redefine the project to the Store SKU. The current Start Your Own X-brace proof carries a 60 in workpiece, 3 modeled saw/miter cycles and 2 modeled drill/spot cycles; Store Zero owns the resulting BudgetaryEstimate/Q.
 
 The Store checkout is never statically served. Browser modules do not import Store implementation, the pricing engine, or the envelope. Support is evaluated before estimate. Raw Store evaluation and estimate remain separate. Transport and adapter errors are not Store dispositions.
 
