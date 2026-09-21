@@ -112,7 +112,7 @@ test('BOARD_SQUARE_V1 45-in and 46-in invoke actual evaluate then estimate', asy
   assert.equal(adapter.instrumentation.estimateCalls, 2);
 });
 
-test('USER_DEFINED_BOARD_V1 returns pinned Store modeled Q for the starting X-brace', async (t) => {
+test('USER_DEFINED_BOARD_V1 models only resolved starting X-brace demand', async (t) => {
   const { adapter } = await withHost(t);
   adapter.instrumentation.evaluationCalls = 0;
   adapter.instrumentation.estimateCalls = 0;
@@ -121,20 +121,41 @@ test('USER_DEFINED_BOARD_V1 returns pinned Store modeled Q for the starting X-br
   const response = await postJob(request);
   assert.equal(response.status, 200);
   const body = parseJson(response);
+
   assert.equal(body.rawEvaluation.status, 'SUPPORTABLE');
-  assert.equal(body.mappedCallInputs.definition.definedWorkpieceLengthIn, 60);
-  assert.equal(body.mappedCallInputs.definition.sawCuts, 3);
-  assert.equal(body.mappedCallInputs.definition.sawAngleDeg, 30);
-  assert.equal(body.mappedCallInputs.definition.drillCycles, 2);
-  assert.deepEqual(body.mappedCallInputs.evaluation.lines[0].requiredOps, [
-    'MITER_LIMITED',
-    'DRILL',
+  assert.deepEqual(body.mappedCallInputs.evaluation.lines[0].requiredOps, ['MITER_LIMITED']);
+
+  const definition = body.mappedCallInputs.definition;
+  assert.equal(definition.materialSource, 'STORE_ZERO');
+  assert.equal(definition.rawStockLengthIn, 72);
+  assert.equal(definition.definedWorkpieceLengthIn, 60);
+  assert.equal(definition.preparation.required, true);
+  assert.equal(definition.preparation.sawCuts, 1);
+  assert.equal(definition.productionSawCuts, 3);
+  assert.equal(definition.totalModeledSawCuts, 4);
+  assert.equal(definition.sawAngleDeg, 30);
+  assert.equal(definition.drillCycles, 0);
+  assert.equal(definition.drillDepthIn, null);
+  assert.equal(definition.cutPlane, 'miter-face');
+  assert.equal(definition.endIdentity, 'both');
+  assert.equal(definition.endRelation, 'parallel');
+  assert.equal(definition.lengthDatum, 'long-long-outer-edge');
+  assert.equal(definition.spotDemand.mode, 'SPOT_ON_LOCATION');
+  assert.equal(definition.spotDemand.toolingStatus, 'UNRESOLVED');
+  assert.deepEqual(definition.unresolvedConditions, [
+    'MITER_LIMITED_NUMERIC_ANGLE_RANGE_STAGE2_UNRESOLVED',
+    'CENTER_SPOT_TOOLING_ENVELOPE_UNRESOLVED',
   ]);
+
+  assert.equal(body.mappedCallInputs.estimate.pieces[0].sawCuts, 4);
+  assert.equal(body.mappedCallInputs.estimate.pieces[0].holes, 0);
   assert.equal(body.rawEstimate.status, 'BUDGETARY_ESTIMATE');
-  assert.equal(body.rawEstimate.cycle.T_job_min, 10.077);
+  assert.equal(body.rawEstimate.cycle.T_job_min, 9.867);
   assert.equal(body.rawEstimate.totals.material, 3.13);
-  assert.equal(body.rawEstimate.totals.cell_recovery, 51.79);
-  assert.equal(body.rawEstimate.totals.Q, 54.92);
+  assert.equal(body.rawEstimate.totals.cell_recovery, 51.45);
+  assert.equal(body.rawEstimate.totals.Q, 54.58);
+  assert.equal(body.priceCompleteness.status, 'PARTIAL');
+  assert.deepEqual(body.priceCompleteness.unresolvedConditions, definition.unresolvedConditions);
   assert.equal(body.attributedBasis.pricingEngine.id, 'STB-STORE-ZERO-PRICE-1');
   assert.equal(body.attributedBasis.cycleModel.id, 'STB-D001-CYCLE-MODEL-S2-0.1');
   assert.equal(adapter.instrumentation.evaluationCalls, 1);
