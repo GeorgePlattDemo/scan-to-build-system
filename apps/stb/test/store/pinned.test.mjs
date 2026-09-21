@@ -63,21 +63,21 @@ test('actual 45-in and 46-in Board HTTP invoke pinned evaluateJob and matching e
   assert.notEqual(body46.rawEstimate.totals.Q, 0);
 });
 
-test('user-defined X-brace invokes one pinned Store evaluation with explicit lineage', async (t) => {
+test('user-defined X-brace keeps 60-in project truth and resolves against pinned Store', async (t) => {
   const adapter = await withAdapter(t);
   const body = parseJson(await postJob(await userDefinedBoardJobBody()));
   assert.equal(body.rawEvaluation.status, 'SUPPORTABLE');
   assert.deepEqual(body.mappedCallInputs.evaluation.lines[0].requiredOps, ['MITER_LIMITED']);
   assert.equal(body.mappedCallInputs.evaluation.lines[0].keptLengthIn, 60);
+  assert.equal(body.mappedCallInputs.evaluation.lines[0].sawAngleDeg, 30);
 
   const definition = body.mappedCallInputs.definition;
   assert.equal(definition.materialSource, 'STORE_ZERO');
-  assert.equal(definition.rawStockLengthIn, 72);
+  assert.equal(definition.rawStockLengthIn, undefined);
+  assert.equal(definition.preparation, undefined);
   assert.equal(definition.definedWorkpieceLengthIn, 60);
-  assert.equal(definition.preparation.required, true);
-  assert.equal(definition.preparation.sawCuts, 1);
   assert.equal(definition.productionSawCuts, 3);
-  assert.equal(definition.totalModeledSawCuts, 4);
+  assert.equal(definition.totalModeledSawCuts, 3);
   assert.equal(definition.sawAngleDeg, 30);
   assert.equal(definition.drillCycles, 0);
   assert.equal(definition.cutPlane, 'miter-face');
@@ -85,28 +85,50 @@ test('user-defined X-brace invokes one pinned Store evaluation with explicit lin
   assert.equal(definition.endRelation, 'parallel');
   assert.equal(definition.lengthDatum, 'long-long-outer-edge');
   assert.equal(definition.spotDemand.mode, 'SPOT_ON_LOCATION');
-  assert.equal(definition.spotDemand.toolingStatus, 'UNRESOLVED');
+  assert.equal(definition.spotDemand.totalCount, 2);
+  assert.equal(definition.spotDemand.toolingStatus, undefined);
+  assert.deepEqual(definition.unresolvedConditions, []);
+
+  assert.equal(body.materialResolution.status, 'MAPPED');
+  assert.equal(body.materialResolution.workpieceLengthIn, 60);
+  assert.equal(body.materialResolution.pricingReferenceSku, PUBLISHED_BOARD_SKU);
+  assert.equal(body.materialResolution.pricingReferenceStockLengthIn, 72);
+  assert.equal(body.materialResolution.allocationClaimed, false);
 
   assert.equal(body.mappedCallInputs.estimate.pieces[0].keptLengthIn, 60);
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].sawCuts, 4);
+  assert.equal(body.mappedCallInputs.estimate.pieces[0].sawCuts, 3);
   assert.equal(body.mappedCallInputs.estimate.pieces[0].holes, 0);
+  assert.equal(body.mappedCallInputs.estimate.pieces[0].spots, 2);
   assert.equal(body.mappedCallInputs.estimate.pieces[0].depthIn, 0);
   assert.ok(body.mappedCallInputs.estimate.pieces[0].sawTraverseIn > 3.5);
 
   assert.equal(body.rawEstimate.status, 'BUDGETARY_ESTIMATE');
   assert.equal(body.rawEstimate.totals.material, 3.13);
-  assert.equal(body.rawEstimate.cycle.T_job_min, 9.867);
-  assert.equal(body.rawEstimate.totals.cell_recovery, 51.45);
-  assert.equal(body.rawEstimate.totals.Q, 54.58);
-  assert.equal(body.priceCompleteness.status, 'PARTIAL');
-  assert.ok(
-    body.priceCompleteness.unresolvedConditions.includes(
-      'CENTER_SPOT_TOOLING_ENVELOPE_UNRESOLVED',
-    ),
-  );
+  assert.equal(body.rawEstimate.cycle.T_job_min, 10.014);
+  assert.equal(body.rawEstimate.totals.cell_recovery, 51.69);
+  assert.equal(body.rawEstimate.totals.Q, 54.82);
+  assert.equal(body.priceCompleteness.status, 'COMPLETE_FOR_ENCODED_DEMAND');
+  assert.deepEqual(body.priceCompleteness.unresolvedConditions, []);
   assert.equal(body.rawEstimate.cycle.model, 'STB-D001-CYCLE-MODEL-S2-0.1');
   assert.equal(body.attributedBasis.pricingEngine.id, 'STB-STORE-ZERO-PRICE-1');
-  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.2');
+  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.3');
+  assert.equal(body.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.3');
+});
+
+test('user-defined miter boundary is Store-owned: 45 supports and 46 refuses', async (t) => {
+  await withAdapter(t);
+
+  const at45 = parseJson(await postJob(await userDefinedBoardJobBody({ sawAngleDeg: 45 })));
+  assert.equal(at45.rawEvaluation.status, 'SUPPORTABLE');
+  assert.equal(at45.priceCompleteness.status, 'COMPLETE_FOR_ENCODED_DEMAND');
+  assert.ok(at45.rawEstimate);
+
+  const at46Response = await postJob(await userDefinedBoardJobBody({ sawAngleDeg: 46 }));
+  assert.equal(at46Response.status, 200, '46-degree project demand reaches Store instead of failing adapter scope');
+  const at46 = parseJson(at46Response);
+  assert.equal(at46.rawEvaluation.status, 'REFUSED');
+  assert.equal(at46.rawEstimate, null);
+  assert.equal(at46.materialResolution.status, 'REFUSED');
 });
 
 test('unknown SKU through actual evaluateJob retains UNRESOLVED and raw NO_OFFERING/MISSING_PRICE', async (t) => {
@@ -226,11 +248,11 @@ test('RIP diagnostic retains exact OP_NOT_ON_OFFERING:RIP', async (t) => {
 test('Store basis distinguishes pricing engine, cycle model, and envelope identity', async (t) => {
   const adapter = await withAdapter(t);
   assert.equal(adapter.modules.ENGINE.id, 'STB-STORE-ZERO-PRICE-1');
-  assert.equal(adapter.modules.ENGINE.version, '0.2.2');
+  assert.equal(adapter.modules.ENGINE.version, '0.2.3');
   assert.equal(adapter.modules.CYCLE_MODEL.id, 'STB-D001-CYCLE-MODEL-S2-0.1');
   assert.equal(adapter.modules.CYCLE_MODEL.measured, false);
   assert.equal(adapter.modules.CYCLE_MODEL.commissioned, false);
-  assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.id, 'D001-STAGE2-ENVELOPE-0.2');
+  assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.id, 'D001-STAGE2-ENVELOPE-0.3');
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.measured, false);
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.commissioned, false);
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.motion.Y_MILL_TRAVEL_MAX_IN, 14);
@@ -241,9 +263,9 @@ test('Store basis distinguishes pricing engine, cycle model, and envelope identi
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.stock.maxParentLengthWithoutExternalSupportIn, 96);
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.stock.minControlledLengthIn, 24);
   const body = parseJson(await postJob(await boardJobBody({ keptLengthIn: 45 })));
-  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.2');
+  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.3');
   assert.equal(body.attributedBasis.cycleModel.id, 'STB-D001-CYCLE-MODEL-S2-0.1');
-  assert.equal(body.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.2');
+  assert.equal(body.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.3');
 });
 
 test('missing selling price remains UNRESOLVED and never $0', async (t) => {
