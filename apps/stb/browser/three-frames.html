@@ -62,6 +62,8 @@
   .spec{padding:8px 9px;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
   .spec b{display:block;font-size:8.5px;letter-spacing:.07em;color:var(--text-3);margin-bottom:2px}
   .spec span{display:block;font-size:12px;font-weight:600}
+  .stb-system-answer{margin:10px 0 0;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:11.5px;color:var(--text-2)}
+  .stb-system-answer b{color:var(--text)}
   .steps{margin:16px 0 0;padding:0;list-style:none;counter-reset:s}
   .steps li{position:relative;padding:0 0 10px 30px;font-size:12.5px;color:var(--text-2)}
   .steps li b{color:var(--text)}
@@ -150,7 +152,7 @@
   </div>
 
   <div class="frame">
-    <div class="frame-tab">FRAME 2 · THE USER INTENT</div>
+    <div class="frame-tab">USER 1 INTENT</div>
     <div class="frame-in">
       <div class="stb-user1-body">
         <div>
@@ -167,8 +169,8 @@
     </div>
   </div>
 
-  <div class="frame">
-    <div class="frame-tab">FRAME 3 · THE BOARD ON THE BENCH — THE WHOLE JOB</div>
+  <div class="frame" id="stb-user1-bench">
+    <div class="frame-tab">THE SAME BOARD, ON THE BENCH</div>
     <div class="frame-in">
       <div class="stage">
       <svg viewBox="0 0 900 320" role="img" aria-label="One five-foot two-by-four, marked left to right: three thirty-degree cuts make two sixteen-inch parts, leaving twenty-eight inches. The saw must keep twenty-four inches gripped between it and the roller, so only four inches are true spare: within limits, but tight.">
@@ -266,6 +268,7 @@
         <div class="spec"><b>PARTS</b><span>2</span></div>
         <div class="spec"><b>CONTROL</b><span>24 in min</span></div>
       </div>
+      <div class="stb-system-answer" id="stb-system-answer" aria-live="polite"><b>STORE</b> · bring this 2×4 to the bench to check the job against the current Store and machine window.</div>
       <ol class="steps">
         <li><b>Cut it.</b> Three cuts along the one board — a 30° angle each — make the two parts.</li>
         <li><b>Drill it.</b> One spot, on location, centered in each part.</li>
