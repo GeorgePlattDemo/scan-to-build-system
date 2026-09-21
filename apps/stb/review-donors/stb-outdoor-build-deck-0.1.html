@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scan-to-Build · Outdoor Build Deck 0.1</title><style>
+:root{
+ --paper:#f4efe5;--paper2:#fbf8f1;--surface:#fffdf8;--stage:#eee4d2;--ink:#291f15;--muted:#705f4d;--quiet:#998875;
+ --line:#ded0ba;--line2:#c7b390;--accent:#a65a2b;--accent2:#80431f;--good:#557646;--blue:#55768c;--bad:#a04c43;
+ --shadow:0 9px 27px rgba(65,42,20,.08);--lift:0 16px 35px rgba(65,42,20,.14)
+}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-image:radial-gradient(850px 420px at 6% -3%,rgba(166,90,43,.075),transparent 60%)}
+button,input{font:inherit}a{color:var(--accent2)}.wrap{max-width:1180px;margin:auto;padding:24px 22px 80px}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:28px}.brand{font:800 11px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;color:var(--quiet)}
+.ref{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 11px;text-decoration:none;font-size:12px;font-weight:800;color:var(--muted)}
+.crumb{border:0;background:transparent;color:var(--muted);font-weight:700;padding:6px 0;cursor:pointer}
+h1{font-size:clamp(38px,6vw,64px);line-height:.99;letter-spacing:-.043em;margin:0 0 13px;max-width:15ch}h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:clamp(17px,2vw,20px);color:var(--muted);max-width:68ch;margin:0}.stage-title{display:flex;align-items:center;gap:10px;margin:36px 0 14px}.stage-title .n{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:white;font-size:12px;font-weight:800}.stage-title h2{font-size:20px;margin:0}.stage-title span:last-child{margin-left:auto;color:var(--quiet);font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.card{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:17px;overflow:hidden;padding:0;text-align:left;color:inherit;cursor:pointer;box-shadow:var(--shadow);transition:.16s}.card:hover{transform:translateY(-2px);box-shadow:var(--lift)}.card .art{background:var(--paper2);border-bottom:1px solid var(--line);padding:7px}.card svg{width:100%;display:block}.card .body{padding:14px 15px 16px}.kicker{font:800 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.09em;color:var(--quiet);margin-bottom:6px}.card b{display:block;font-size:18px}.card p{margin:5px 0;color:var(--muted);font-size:13px}.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.chip{border:1px solid var(--line);background:var(--paper2);border-radius:999px;padding:4px 7px;color:var(--muted);font-size:10.5px}
+.detail{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:18px;align-items:start}.drawing{border:1px solid var(--line);background:var(--stage);border-radius:17px;padding:10px;box-shadow:var(--shadow)}.drawing svg{width:100%;display:block}.panel{border:1px solid var(--line);background:var(--surface);border-radius:15px;padding:15px;box-shadow:var(--shadow);margin-bottom:13px}.panel h3{font-size:10px;letter-spacing:.1em;color:var(--quiet);margin:0 0 10px}.measure{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px}.measure:last-child{border-bottom:0}.measure span{color:var(--muted)}.measure em{font-style:normal;font:800 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--quiet)}
+.partlist{display:grid;gap:7px}.partbtn{width:100%;display:grid;grid-template-columns:1fr auto;gap:8px;border:1px solid var(--line);background:var(--paper2);border-radius:9px;padding:9px;text-align:left;cursor:pointer;color:var(--ink)}.partbtn.on{border-color:var(--accent);background:#f7e9d6}.partbtn b{font-size:12.5px}.partbtn span{font-size:10.5px;color:var(--quiet);text-align:right}
+.partcard{border-left:3px solid var(--accent);background:var(--paper2);border-radius:0 10px 10px 0;padding:11px}.partcard h4{font-size:15px;margin:0 0 7px}.partcard dl{display:grid;grid-template-columns:115px 1fr;gap:4px 8px;margin:0;font-size:11.5px}.partcard dt{color:var(--quiet)}.partcard dd{margin:0;color:var(--muted)}.partcard a{font-weight:800}
+.status{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 6px;font:800 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace}.supported{color:var(--good)}.derived{color:var(--blue)}.unknown{color:var(--bad)}
+.scenarios{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:17px}.scenario{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:14px;box-shadow:var(--shadow)}.scenario h3{font-size:14px;margin:0 0 7px}.scenario p{font-size:12.5px;color:var(--muted);margin:6px 0}.scenario ul{font-size:12px;color:var(--muted);padding-left:18px;margin:8px 0}.go{color:var(--good);font-weight:800}.stop{color:var(--bad);font-weight:800}
+.sourcebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px;border:1px dashed var(--line2);border-radius:12px;padding:11px 13px;color:var(--muted);font-size:12px}.sourcebar b{color:var(--ink)}.sourcebar a{font-weight:800}.sourcebar a:last-child{margin-left:auto}
+.wood{fill:#e3cb98;stroke:#8d693f;stroke-width:2}.beam{stroke:#8d693f;stroke-width:22;stroke-linecap:square}.beam.thick{stroke-width:25}.brace{stroke:#a47742;stroke-width:13}.ground{stroke:var(--line2);stroke-width:2}.hi{stroke:var(--accent)!important;fill:#efb878!important;stroke-width:4!important}.label{font-size:10.5px;fill:var(--muted)}.goodtxt{font-size:10.5px;fill:var(--good)}.badtxt{font-size:10.5px;fill:var(--bad)}.joint{fill:var(--surface);stroke:var(--good);stroke-width:3}
+.foot{margin-top:45px;border-top:1px solid var(--line2);padding-top:16px;color:var(--quiet);font-size:12px}
+@media(max-width:900px){.detail,.cards,.scenarios{grid-template-columns:1fr}}@media(max-width:640px){.wrap{padding:18px 14px 60px}.stage-title span:last-child{width:100%;margin-left:37px}}
+</style></head>
+<body><main class="wrap">
+<div class="top"><span class="brand">SCAN-TO-BUILD · OUTDOOR BUILD DECK · 0.1</span><a class="ref" href="stb-outdoor-build.html" onclick="if(window.opener){window.close();return false}">← RETURN TO PROOF LADDER</a><a class="ref" href="stb-outdoor-reference-authority-0.3.html" target="_blank" rel="opener">REFERENCE & AUTHORITY →</a></div>
+<div id="app"></div>
+<footer class="foot"><b>BUILD DECK, NOT CONFIGURATOR.</b> The deck exposes the usable subset of the authority: family, important measurements, selectable parts, real sourced geometry and direct change consequences. Unsupported transformations stop visibly. Store/commercial/machine authority remains downstream. <b>NO BLOOD ON WOOD.</b></footer>
+</main><script>
+"use strict";
+const $=id=>document.getElementById(id);
+const AUTH="stb-outdoor-reference-authority-0.3.html";
+const F={
+ aframe:{
+  name:"Attached A-frame table",short:"Home Depot 6-ft A-frame",authority:"AUTH-AF01",source:"SRC-AF-01",
+  copy:"Classic attached table-and-seat station. The leg is not defined by 30° alone.",
+  measures:[["Overall / tabletop length","PROJECT"],["Finished table height","CHECK"],["Actual 2×8 leg section","MEASURE"],["Leg length along outer edge","MEASURE"],["Existing connection holes if replacing","MEASURE"]],
+  parts:[
+   {id:"leg",name:"Table leg",stock:"2×8",length:"32¾ in",datum:"cut end → cut end along outer edge",angle:"30°",conv:"face line · both end lines parallel",connect:"connection-hole offsets UNKNOWN",status:"SUPPORTED",measure:"actual stock + matching assembly holes",depends:"side-frame height, foot position, supports / braces"},
+   {id:"top",name:"Tabletop slat",stock:"2×8",length:"72 in",datum:"end to end",angle:"0° member",conv:"square longitudinal member",connect:"supported by named cross members",status:"SUPPORTED",measure:"actual project length if matching existing table",depends:"material demand / longitudinal span"},
+   {id:"bench",name:"Bench slat",stock:"2×6",length:"68 in",datum:"end to end",angle:"0° member",conv:"square longitudinal member",connect:"attached-bench support system",status:"SUPPORTED",measure:"actual project length",depends:"material demand / seat span"}
+  ],
+  safe:{title:"CHANGE LONGITUDINAL MEMBER LENGTH",lines:["top / bench longitudinal members change","material demand changes","A-frame end station remains the named reference","support / span suitability still NEEDS CHECKING"]},
+  stop:{title:"CHANGE FRAME HEIGHT OR LEG ANGLE",lines:["angled leg length changes","foot spread / station geometry changes","brace / support relationships may move","connection geometry may move"],note:"NOT YET A BOUNDED CHANGE"},
+  svg:"aframe"
+ },
+ xtable:{
+  name:"Detached X / splayed table",short:"Kreg X Base Outdoor Dining Table",authority:"AUTH-DT01",source:"SRC-DT-01",
+  copy:"Independent table with 10° legs and source-specific X components. The X crossing belongs to the system.",
+  measures:[["Overall tabletop / top size","PROJECT"],["Frame height","CHECK"],["Foot spread / end-frame width","MEASURE"],["4×4 leg length / section","MEASURE"],["X member / crossing geometry if replacing","MEASURE"]],
+  parts:[
+   {id:"leg",name:"Splayed table leg",stock:"4×4",length:"29 in",datum:"part cut-list length",angle:"10°",conv:"off square · ends parallel",connect:"ties into source-specific end frame",status:"SUPPORTED",measure:"actual section / project foot position",depends:"height, foot spread, X / stretcher relationships"},
+   {id:"xlong",name:"Long X component",stock:"2×2",length:"29½ in",datum:"longest-side convention in cut list",angle:"52° class",conv:"source-specific X end cut",connect:"X assembly / end-frame relationship",status:"SUPPORTED",measure:"matching end-frame / component if replacing",depends:"crossing, frame height / width"},
+   {id:"xshort",name:"Short X components",stock:"2×2",length:"12¼ / 16¼ in classes",datum:"part-specific longest-side dimensions",angle:"52° / 13° classes",conv:"different component classes carry different ends",connect:"X assembly",status:"SUPPORTED",measure:"part identity before measuring",depends:"crossing / X topology"}
+  ],
+  safe:{title:"CHANGE TABLETOP / LONGITUDINAL LENGTH",lines:["top / longitudinal members change","material demand changes","X end-frame geometry stays frozen","station spacing / support adequacy may NEED CHECKING"]},
+  stop:{title:"CHANGE X FRAME HEIGHT OR WIDTH",lines:["X member angles / lengths can change","crossing point moves","foot spread changes","stretcher / connection geometry may move"],note:"NOT YET A BOUNDED CHANGE"},
+  svg:"xtable"
+ },
+ xbench:{
+  name:"Detached X-frame bench",short:"Ana White X Bench",authority:"AUTH-DB01",source:"SRC-DB-01",
+  copy:"Segmented X support system. Several parts use the same 30° magnitude but not the same end convention.",
+  measures:[["Seat / bench length","PROJECT"],["Seat height","CHECK"],["X station width / foot spread","MEASURE"],["19¼-in X member class","MEASURE"],["Short X segment class / orientation","IDENTIFY"]],
+  parts:[
+   {id:"xlong",name:"Long X component",stock:"1×3 class",length:"19¼ in",datum:"source part-class length",angle:"30°",conv:"off square · both ends parallel",connect:"segmented X end station",status:"SUPPORTED",measure:"part class + long-point orientation",depends:"X crossing / seat datum"},
+   {id:"xshort",name:"Short X segment",stock:"1×3 class",length:"9¼ / 9⅞ / 12⅜ in classes",datum:"part-specific long-point convention",angle:"30°",conv:"ends NOT parallel on short classes",connect:"segmented X assembly",status:"SUPPORTED",measure:"exact class before measuring",depends:"X crossing / station geometry"},
+   {id:"seat",name:"Seat / longitudinal structure",stock:"2×4 / 2×6 classes",length:"source-specific",datum:"end to end",angle:"0° longitudinal",conv:"square longitudinal members",connect:"rests on X stations",status:"SUPPORTED",measure:"actual desired / existing bench length",depends:"material demand / station spacing"}
+  ],
+  safe:{title:"CHANGE BENCH LENGTH",lines:["seat / longitudinal members change","material demand changes","X end-frame stations remain unchanged","station spacing / span may NEED CHECKING"]},
+  stop:{title:"CHANGE SEAT HEIGHT OR X WIDTH",lines:["X segment lengths change","crossing point moves","foot spread changes","support / connection relation changes"],note:"NOT YET A BOUNDED CHANGE"},
+  svg:"xbench"
+ },
+ saw:{
+  name:"Multi-angle / sawhorse bench",short:"Ana White Sawhorse Outdoor Bench",authority:"AUTH-DB02",source:"SRC-DB-02",
+  copy:"Angle semantics are part identity: the design uses double bevels, off-square cuts and different bevels on opposite ends.",
+  measures:[["Bench / seat length","PROJECT"],["Overall / end-frame height","CHECK"],["End-frame foot spread","MEASURE"],["Actual angled-member length","MEASURE"],["Which face / bevel belongs to each end","IDENTIFY"]],
+  parts:[
+   {id:"endleg",name:"Sawhorse end leg",stock:"2×4",length:"15½ in",datum:"source part-class length",angle:"10°",conv:"DOUBLE BEVEL · ends parallel",connect:"sawhorse end-frame assembly",status:"SUPPORTED",measure:"length + bevel face / direction",depends:"end-frame height / foot spread"},
+   {id:"center",name:"Center / angled member",stock:"2×4",length:"15¼-in class",datum:"source part-class length",angle:"10°",conv:"angle off square — not the same fact as double bevel",connect:"end-frame system",status:"SUPPORTED",measure:"which part class / cut face",depends:"end-frame geometry"},
+   {id:"brace",name:"Multi-angle brace / support",stock:"2×4",length:"32¼-in class",datum:"source part-class length",angle:"25° / 17°",conv:"different bevels on opposite ends",connect:"multi-angle end-frame relationship",status:"SUPPORTED",measure:"both end conventions",depends:"end-frame geometry / fit"}
+  ],
+  safe:{title:"CHANGE BENCH LONGITUDINAL LENGTH",lines:["longitudinal members change","material demand changes","multi-angle end frame remains frozen","station spacing / support adequacy may NEED CHECKING"]},
+  stop:{title:"CHANGE END-FRAME HEIGHT OR SPLAY",lines:["10° bevel legs move","other angled members change","25° / 17° member fit changes","end-frame relationships must be recomputed as a system"],note:"STRUCTURAL RELATIONSHIP CHANGED — DEFER"},
+  svg:"saw"
+ }
+};
+const S={family:null,part:null};
+
+function art(type,part){
+ const hi=id=>part===id?"hi":"";
+ if(type==="aframe") return `<svg viewBox="0 0 620 300"><line x1="30" y1="250" x2="590" y2="250" class="ground"/><path data-svgpart="leg" d="M155 248 L270 78 L304 78 L205 248" class="wood ${hi("leg")}"/><path data-svgpart="leg" d="M465 248 L350 78 L316 78 L415 248" class="wood ${hi("leg")}"/><rect data-svgpart="top" x="205" y="57" width="210" height="24" class="wood ${hi("top")}"/><rect data-svgpart="bench" x="62" y="158" width="195" height="19" class="wood ${hi("bench")}"/><rect data-svgpart="bench" x="363" y="158" width="195" height="19" class="wood ${hi("bench")}"/><text x="310" y="287" text-anchor="middle" class="label">2×8 leg · 32¾ along edge · 30° / /</text></svg>`;
+ if(type==="xtable") return `<svg viewBox="0 0 620 300"><line x1="32" y1="250" x2="588" y2="250" class="ground"/><path data-svgpart="leg" d="M120 248 L245 75" class="beam thick ${hi("leg")}"/><path data-svgpart="leg" d="M275 248 L150 75" class="beam thick ${hi("leg")}"/><path data-svgpart="leg" d="M345 248 L470 75" class="beam thick ${hi("leg")}"/><path data-svgpart="leg" d="M500 248 L375 75" class="beam thick ${hi("leg")}"/><rect x="92" y="52" width="436" height="25" class="wood"/><line data-svgpart="xlong" x1="210" y1="230" x2="410" y2="93" class="brace ${hi("xlong")}"/><line data-svgpart="xshort" x1="210" y1="93" x2="410" y2="230" class="brace ${hi("xshort")}"/><circle cx="310" cy="162" r="7" class="joint"/><text x="310" y="286" text-anchor="middle" class="label">10° splayed legs · source-specific X classes</text></svg>`;
+ if(type==="xbench") return `<svg viewBox="0 0 620 300"><rect data-svgpart="seat" x="70" y="55" width="480" height="25" class="wood ${hi("seat")}"/><path data-svgpart="xlong" d="M130 248 L270 88" class="beam ${hi("xlong")}"/><path data-svgpart="xshort" d="M292 248 L150 88" class="beam ${hi("xshort")}"/><path data-svgpart="xlong" d="M330 248 L470 88" class="beam ${hi("xlong")}"/><path data-svgpart="xshort" d="M492 248 L350 88" class="beam ${hi("xshort")}"/><text x="310" y="286" text-anchor="middle" class="label">30° appears in multiple part classes — end direction differs</text></svg>`;
+ return `<svg viewBox="0 0 620 300"><rect x="64" y="55" width="492" height="25" class="wood"/><path data-svgpart="endleg" d="M115 248 L205 80" class="beam ${hi("endleg")}"/><path data-svgpart="center" d="M274 248 L205 80" class="beam ${hi("center")}"/><path data-svgpart="center" d="M346 248 L415 80" class="beam ${hi("center")}"/><path data-svgpart="endleg" d="M505 248 L415 80" class="beam ${hi("endleg")}"/><line data-svgpart="brace" x1="225" y1="190" x2="395" y2="125" class="brace ${hi("brace")}"/><text x="310" y="286" text-anchor="middle" class="label">double bevel · off-square · multi-angle support</text></svg>`;
+}
+function smallArt(type){return art(type,null)}
+function home(){
+ S.family=null;S.part=null;
+ $("app").innerHTML=`<h1>Pick the geometry that <em>looks like yours.</em></h1><p class="lede">Four bounded families. Each card shows the characteristic frame, what matters to measure, and which changes are already defensible from the authority.</p>
+ <div class="stage-title"><span class="n">1</span><h2>Outdoor build families</h2><span>simple surface · deep proof behind it</span></div>
+ <div class="cards">${Object.entries(F).map(([k,f])=>`<button class="card" data-family="${k}"><div class="art">${smallArt(f.svg)}</div><div class="body"><div class="kicker">${f.name.toUpperCase()}</div><b>${f.short}</b><p>${f.copy}</p><div class="chips"><span class="chip">${f.measures.length} things to measure</span><span class="chip">clickable parts</span><span class="chip">bounded change guidance</span></div></div></button>`).join("")}</div>`;
+ document.querySelectorAll("[data-family]").forEach(b=>b.onclick=()=>openFamily(b.dataset.family));
+}
+function openFamily(k){
+ S.family=k;S.part=F[k].parts[0].id;renderFamily();
+}
+function renderFamily(){
+ const f=F[S.family],p=f.parts.find(x=>x.id===S.part);
+ $("app").innerHTML=`<div class="top"><button class="crumb" id="back">← Outdoor build deck</button><a class="ref" href="${AUTH}#${f.authority}" target="_blank" rel="opener">GEOMETRY BASIS ↗</a></div>
+ <h1>${f.name}</h1><p class="lede">${f.copy}</p>
+ <div class="detail">
+  <div><div class="drawing" id="drawing">${art(f.svg,S.part)}</div>
+   <div class="sourcebar"><b>${f.short}</b><span>deck fact → authority record → original source</span><a href="${AUTH}#${f.authority}" target="_blank" rel="opener">WHY THESE NUMBERS? ↗</a><a href="${AUTH}#${f.source}" target="_blank" rel="opener">VIEW SOURCE RECORD ↗</a></div>
+  </div>
+  <aside>
+   <section class="panel"><h3>WHAT YOU MEASURE</h3>${f.measures.map(m=>`<div class="measure"><span>${m[0]}</span><em>${m[1]}</em></div>`).join("")}</section>
+   <section class="panel"><h3>CLICK A PART</h3><div class="partlist">${f.parts.map(x=>`<button class="partbtn ${S.part===x.id?"on":""}" data-part="${x.id}"><b>${x.name}</b><span>${x.stock}</span></button>`).join("")}</div></section>
+   <section class="panel"><h3>PART CARD</h3>${partCard(p,f)}</section>
+  </aside>
+ </div>
+ <div class="stage-title"><span class="n">2</span><h2>What can change?</h2><span>consequence preview · not a configurator</span></div>
+ <div class="scenarios">
+  <article class="scenario"><div class="go">BOUNDED / PROJECT-LENGTH CHANGE</div><h3>${f.safe.title}</h3><ul>${f.safe.lines.map(x=>`<li>${x}</li>`).join("")}</ul><p>This is a direct consequence preview. It does not create a structural approval or Store answer.</p></article>
+  <article class="scenario"><div class="stop">${f.stop.note}</div><h3>${f.stop.title}</h3><ul>${f.stop.lines.map(x=>`<li>${x}</li>`).join("")}</ul><p>The deck stops here because the authority does not yet supply a verified transformation for the whole frame.</p></article>
+ </div>`;
+ $("back").onclick=home;
+ document.querySelectorAll("[data-part]").forEach(b=>b.onclick=()=>{S.part=b.dataset.part;renderFamily()});
+ document.querySelectorAll("[data-svgpart]").forEach(el=>el.onclick=()=>{S.part=el.dataset.svgpart;renderFamily()});
+}
+function partCard(p,f){
+ const status=p.status==="SUPPORTED"?"supported":p.status==="DERIVED"?"derived":"unknown";
+ return `<div class="partcard"><h4>${p.name}</h4><dl>
+ <dt>STOCK</dt><dd>${p.stock}</dd><dt>FINISHED LENGTH</dt><dd>${p.length}</dd><dt>LENGTH DATUM</dt><dd>${p.datum}</dd>
+ <dt>ANGLE</dt><dd>${p.angle}</dd><dt>ANGLE CONVENTION</dt><dd>${p.conv}</dd><dt>CONNECTION / INTERSECTION</dt><dd>${p.connect}</dd>
+ <dt>SOURCE STATUS</dt><dd><span class="status ${status}">${p.status}</span></dd><dt>WHAT TO MEASURE</dt><dd>${p.measure}</dd><dt>WHAT DEPENDS ON IT</dt><dd>${p.depends}</dd>
+ </dl><p style="margin:10px 0 0;font-size:11.5px"><a href="${AUTH}#${f.authority}" target="_blank" rel="opener">WHY THESE NUMBERS? →</a></p></div>`;
+}
+home();
+</script></body></html>

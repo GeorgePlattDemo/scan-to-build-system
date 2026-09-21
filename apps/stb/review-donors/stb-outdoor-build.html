@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scan-to-Build · Outdoor Build · Project 1</title>
+<style>
+:root{
+  --paper:#F5F0E6;--paper2:#FBF7EF;--surface:#FFFDF8;--stage:#EFE7D8;
+  --ink:#2A1E13;--ink2:#6E5C48;--ink3:#9C8A75;--line:#E7DCC9;--line2:#D5C5A9;
+  --accent:#A85A2A;--accent2:#8A4520;--tint:#F7E9D6;--good:#5C7A45;
+  --shadow:0 1px 2px rgba(60,40,20,.05),0 8px 24px -12px rgba(60,40,20,.18);
+  --lift:0 2px 4px rgba(60,40,20,.06),0 18px 40px -16px rgba(60,40,20,.26);--r:16px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#14110D;--paper2:#1A1612;--surface:#211C16;--stage:#241E17;
+    --ink:#F4EDE1;--ink2:#BDAC97;--ink3:#8B7B68;--line:#332B21;--line2:#4A3E2F;
+    --accent:#E09A5F;--accent2:#F2B47C;--tint:#2B2118;--good:#8FB06B;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+    --lift:0 2px 6px rgba(0,0,0,.5),0 22px 46px -18px rgba(0,0,0,.85);
+  }
+}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:16px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(1000px 520px at 10% -10%,rgba(168,90,42,.06),transparent 60%),
+                   radial-gradient(800px 420px at 95% 4%,rgba(120,90,50,.05),transparent 62%)}
+button,input{font:inherit}
+.wrap{max-width:1160px;margin:0 auto;padding:26px 22px 80px}
+.eyebrow{font-size:11px;font-weight:750;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin:0 0 14px}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.crumb{border:0;background:transparent;color:var(--ink2);padding:7px 0;cursor:pointer}
+.crumb:hover{color:var(--ink)}
+h1{font-size:clamp(32px,5.4vw,52px);line-height:1.03;letter-spacing:-.03em;margin:0 0 12px;font-weight:650}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:clamp(16px,2vw,19px);line-height:1.55;color:var(--ink2);max-width:58ch;margin:0}
+.lede strong{color:var(--ink);font-weight:650}
+.pathA{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:22px 0 0;padding:14px 16px;
+  border:1px dashed var(--line2);border-radius:var(--r);background:var(--paper2)}
+.pathA b{display:block;font-size:14.5px}
+.pathA span{display:block;font-size:12.5px;color:var(--ink3);max-width:62ch}
+.pathA a,.link{color:var(--accent2);font-weight:650;text-decoration:none}
+.pathA a:hover,.link:hover{text-decoration:underline;text-underline-offset:2px}
+.step{display:flex;align-items:center;gap:12px;margin:40px 0 14px}
+.step .n{width:27px;height:27px;flex:none;border-radius:50%;background:var(--accent);color:#fff;
+  display:grid;place-items:center;font-size:13px;font-weight:750}
+@media (prefers-color-scheme:dark){.step .n{color:#1a1208}}
+.step h2{font-size:20px;letter-spacing:-.01em;margin:0}
+.step .sub{margin-left:auto;color:var(--ink3);font-size:13px}
+.grid3,.grid4,.grid2{display:grid;gap:16px}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{position:relative;display:block;width:100%;text-align:left;cursor:pointer;padding:0;font:inherit;color:inherit;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);transition:.18s}
+.card:hover{transform:translateY(-2px);box-shadow:var(--lift);border-color:var(--line2)}
+.card.on{border-color:var(--accent);box-shadow:var(--lift),inset 0 0 0 1px var(--accent)}
+.card .pic{display:block;width:100%;height:auto;background:linear-gradient(165deg,var(--paper2),var(--stage))}
+.card .body{padding:14px 16px 16px}
+.card b{display:block;font-size:16px;margin-bottom:3px}
+.card span{display:block;color:var(--ink3);font-size:13px;line-height:1.45}
+.card .tick{display:none;position:absolute;top:11px;right:11px;width:26px;height:26px;border-radius:50%;
+  background:var(--accent);color:#fff;place-items:center;font-weight:800;font-size:13px}
+.card.on .tick{display:grid}
+@media (prefers-color-scheme:dark){.card .tick{color:#1a1208}}
+.note{margin:14px 0 0;padding:13px 15px;border:1px dashed var(--line2);border-radius:12px;background:var(--paper2);font-size:13.5px;color:var(--ink2)}
+.note b{color:var(--ink)}
+.go{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:26px 0 0;padding:17px 19px;
+  border:1px solid var(--line);background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
+.go .copy{flex:1;min-width:240px;color:var(--ink2);font-size:14px}
+.go .copy b{color:var(--ink)}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:12px;padding:12px 22px;
+  font-weight:650;cursor:pointer;box-shadow:0 2px 10px -2px rgba(168,90,42,.5);transition:.15s}
+.btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn:disabled{background:var(--surface);color:var(--ink3);border-color:var(--line);box-shadow:none;cursor:not-allowed;filter:none;transform:none}
+.btn.ghost{background:transparent;color:var(--ink2);border-color:var(--line);box-shadow:none}
+.btn.sm{font-size:13px;padding:8px 13px;border-radius:9px}
+@media (prefers-color-scheme:dark){.btn{color:#1a1208}}
+.top{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin-bottom:18px}
+.top h1{font-size:clamp(28px,4vw,38px);margin:0}
+.tag{font-size:12px;color:var(--accent2);background:var(--tint);border:1px solid var(--line2);padding:5px 9px;border-radius:999px}
+.bench{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+.stage{background:var(--stage);border:1px solid var(--line);border-radius:var(--r);padding:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);overflow:hidden}
+.stage svg{width:100%;display:block}
+.readout{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 3px 0;font-size:13.5px;color:var(--ink2)}
+.readout b{color:var(--ink);font-variant-numeric:tabular-nums}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 17px;box-shadow:var(--shadow);margin-bottom:14px}
+.panel h3{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);margin:0 0 12px}
+.preset{padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--paper2);margin-bottom:13px}
+.preset b{display:block;font-size:14px}
+.preset span{display:block;font-size:12.5px;color:var(--ink3)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:var(--paper2);color:var(--ink2);border-radius:9px;padding:8px 11px;cursor:pointer;font-size:13px}
+.seg button.on{border-color:var(--accent);background:var(--tint);color:var(--accent2);font-weight:650}
+.row{display:flex;align-items:center;gap:10px;margin:12px 0}
+.row .lab{flex:1;min-width:0;font-size:14px}
+.row .lab i{display:block;font-style:normal;font-size:11.5px;color:var(--ink3)}
+.num{display:flex;align-items:center;gap:6px}
+.num input{width:100px;padding:7px 8px;border:1px solid var(--line2);border-radius:8px;background:var(--paper2);color:var(--ink);font-variant-numeric:tabular-nums}
+.num input:focus{outline:2px solid var(--tint);border-color:var(--accent)}
+.num .unit{font-size:12px;color:var(--ink3)}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line);background:var(--paper2);border-radius:9px;padding:2px}
+.stepper button{width:30px;height:30px;border:0;background:transparent;color:var(--ink2);cursor:pointer;border-radius:7px;font-size:17px}
+.stepper .v{min-width:38px;text-align:center;font-weight:650}
+.help{font-size:12px;line-height:1.5;color:var(--ink3);margin:8px 0 0}
+.help strong{color:var(--ink2)}
+.customonly{display:none}.custom .customonly{display:block}
+.slider{width:100%;accent-color:var(--accent)}
+.error{margin:12px 0 0;border:1px dashed var(--accent);background:var(--tint);color:var(--accent2);padding:10px 12px;border-radius:10px;font-size:13px}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+.cut{width:100%;border-collapse:collapse;font-size:13.5px}
+.cut th{text-align:left;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:0 0 8px;border-bottom:1px solid var(--line)}
+.cut td{padding:9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.cut tr:last-child td{border-bottom:0}
+.cut td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.cut .sub{display:block;font-size:11.5px;color:var(--ink3);margin-top:2px}
+.buyline{display:flex;gap:12px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line)}
+.buyline .w{flex:1}
+.buyline .w b{font-size:14px}
+.buyline .w span{display:block;font-size:11.5px;color:var(--ink3)}
+.buyline .p{color:var(--ink2);font-variant-numeric:tabular-nums}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding:12px 14px;border:1px solid var(--line2);background:var(--tint);border-radius:10px;color:var(--accent2)}
+.total b{font-size:23px;font-variant-numeric:tabular-nums}
+.boardmap{margin-top:12px;padding:9px;border:1px solid var(--line);background:var(--paper2);border-radius:10px}
+.boardmap svg{width:100%;display:block}
+.donebar{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:20px;padding:18px 20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.donebar .copy{flex:1;min-width:240px}
+.donebar .copy b{display:block;font-size:18px}
+.donebar .copy span{font-size:13px;color:var(--ink3)}
+.storesentence{font-size:15px;color:var(--ink2);margin:0}
+details.fold{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;font-size:12px;color:var(--ink3)}
+details summary{cursor:pointer;color:var(--ink2);font-weight:650;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary:after{content:"  +";color:var(--accent)}
+details[open] summary:after{content:"  –"}
+.foldbody{padding-top:9px;line-height:1.65;max-width:860px}
+.version{font:11px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--paper2);border:1px solid var(--line);border-radius:7px;padding:4px 6px}
+.proofbox{margin:18px 0;padding:16px 18px;border:1px solid var(--line2);border-radius:var(--r);background:var(--tint)}
+.proofbox .k{font-size:10px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2)}
+.proofbox h2{margin:5px 0 6px;font-size:21px}
+.proofbox p{margin:0;color:var(--ink2);font-size:13.5px}
+.prooflinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.prooflinks a{display:inline-block;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--accent2);font-size:12px;font-weight:650;text-decoration:none}
+.prooflinks a:hover{text-decoration:underline;text-underline-offset:2px}
+.choicegate{margin:0 0 14px;padding:11px 13px;border:1px dashed var(--line2);border-radius:10px;background:var(--paper2);font-size:12.5px;color:var(--ink2)}
+.choicegate b{color:var(--ink)}
+.receipt{margin:18px 0;padding:18px 19px;border:1px solid var(--line2);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow)}
+.receipt h2{margin:3px 0 5px;font-size:23px}
+.receipt .lead{margin:0 0 14px;color:var(--ink2)}
+.receiptgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.receiptbox{padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--paper2);font-size:12.5px}
+.receiptbox b{display:block;margin-bottom:4px}
+.receiptbox ul{margin:5px 0 0;padding-left:18px;color:var(--ink2)}
+.receiptbox .metric{font-size:22px;color:var(--accent2);font-weight:700}
+.match{margin-top:12px;padding:10px 12px;border:1px dashed var(--line2);border-radius:9px;color:var(--ink2);font-size:12.5px}
+.match b{color:var(--ink)}
+@media(max-width:720px){.receiptgrid{grid-template-columns:1fr}}
+.foot{margin-top:48px;font-size:12px;color:var(--ink3);max-width:78ch}
+.cutlist{margin:18px 0 0}
+@media(max-width:980px){.bench{grid-template-columns:1fr}.results{grid-template-columns:1fr}}
+@media(max-width:820px){.grid3,.grid4,.grid2{grid-template-columns:1fr}.step .sub{width:100%;margin-left:39px}}
+@media(max-width:560px){.wrap{padding:20px 14px 60px}.row{align-items:flex-start;flex-wrap:wrap}.row .lab{flex-basis:100%}}
+/* 0.2 proof-family surface */
+.familyhero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:18px;align-items:start;margin:18px 0}
+.familyhero .stage{min-height:330px}.assembly-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.assembly-card{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:13px;text-align:left;cursor:pointer;color:var(--ink)}
+.assembly-card.on{border-color:var(--accent);background:var(--tint)}.assembly-card b,.assembly-card span{display:block}.assembly-card span{font-size:11.5px;color:var(--ink3);margin-top:4px}
+.part-grid{display:grid;gap:7px}.part-select{width:100%;border:1px solid var(--line);background:var(--paper2);border-radius:9px;padding:10px;text-align:left;cursor:pointer;color:var(--ink)}
+.part-select.on{border-color:var(--accent);background:var(--tint)}.part-select b,.part-select span{display:block}.part-select span{font-size:11px;color:var(--ink3);margin-top:3px}
+.partfacts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.partfacts>div{border:1px solid var(--line);border-radius:9px;padding:9px;background:var(--paper2)}
+.partfacts b,.partfacts span{display:block}.partfacts b{font-size:9.5px;letter-spacing:.07em;color:var(--ink3)}.partfacts span{margin-top:4px;font-size:12px}
+.occurrences{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.occurrences button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 8px;font-size:10.5px;cursor:pointer;color:var(--ink2)}
+.occurrences button.on{border-color:var(--accent);background:var(--tint);color:var(--accent2);font-weight:700}
+.height-gate{margin:14px 0;padding:13px 14px;border:1px solid var(--line2);border-radius:11px;background:var(--surface)}.height-gate input{width:110px;padding:7px 8px;border:1px solid var(--line2);border-radius:8px;background:var(--paper2);color:var(--ink)}
+.defer{margin:10px 0;padding:10px 12px;border-left:4px solid var(--bad);background:var(--tint);font-size:12px;line-height:1.5}.carry{margin:10px 0;padding:10px 12px;border-left:4px solid var(--good);background:var(--surface);font-size:12px;line-height:1.5}
+.projectnav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}.projectnav button{border:0;background:transparent;color:var(--ink2);font-weight:700;cursor:pointer;padding:5px 0}
+.outdoor-receipt{margin:18px 0;padding:18px;border:1px solid var(--line2);background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
+.outdoor-receipt h2{margin:4px 0 8px}.receipt-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.receipt-cols>div{border:1px solid var(--line);border-radius:9px;padding:10px;background:var(--paper2);font-size:12px}.receipt-cols b{display:block;margin-bottom:4px}
+@media(max-width:900px){.familyhero,.assembly-grid,.partfacts,.receipt-cols{grid-template-columns:1fr}}
+</style>
+<script src="stb-store-handoff-contract.js?v=6be0f8b6"></script>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+"use strict";
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>')}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function money(v){return '$'+(Math.round(v*100)/100).toFixed(2)}
+function parseInch(s){
+  s=String(s||'').trim().replace(/−/g,'-'); if(!s)return NaN;
+  if(/^[-+]?\d+(?:\.\d+)?$/.test(s))return Number(s);
+  var m=s.match(/^([-+]?\d+)\s+(\d+)\/(\d+)$/); if(m)return Number(m[1])+(Number(m[1])<0?-1:1)*Number(m[2])/Number(m[3]);
+  m=s.match(/^([-+]?\d+)-(\d+)\/(\d+)$/); if(m)return Number(m[1])+(Number(m[1])<0?-1:1)*Number(m[2])/Number(m[3]);
+  m=s.match(/^([-+]?)(\d+)\/(\d+)$/); if(m)return (m[1]==='-'?-1:1)*Number(m[2])/Number(m[3]);
+  return NaN;
+}
+function fmt(v){
+  if(!isFinite(v))return '—'; var sign=v<0?'-':'',a=Math.abs(v),w=Math.floor(a+1e-9),e=Math.round((a-w)*16),d=16;
+  if(e===16){w++;e=0} if(!e)return sign+w; while(e%2===0){e/=2;d/=2} return sign+(w?w+' ':'')+e+'/'+d;
+}
+function hash32(str){var h=2166136261;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return ('00000000'+(h>>>0).toString(16).toUpperCase()).slice(-8)}
+
+/* ── cited pins. Do not “improve”. ── */
+var REF={
+  syoPrice:4.18, kerf:.125, board:96,
+  leg:16.5, thick:1.5, wid:3.5, seat:18,
+  holeEx:[3,7],
+  aframe:{L:72, tableH:30.25, tableW:30.5, seatH:17, legLen:32.75, legAng:30, top:'2×8 × 72 in × 4', bench:'2×6 × 68 in × 4', bolts:'½ × 3½ in carriage'},
+  mop:{legsEachBench:2, totalLegs:4, support:11.5, tableLeg:26}
+};
+var BASE={length:REF.leg, h1:REF.holeEx[0], h2:REF.holeEx[1]};
+var S={screen:'home', family:null, style:null, part:null, mode:null,
+  qty:1, assembly:8, length:BASE.length, h1:BASE.h1, h2:BASE.h2, spot:false, sent:null,
+  choices:{quantity:false,length:false,spots:false}};
+var METRICS={uiActions:0};
+
+function definition(){
+  return {project:'OUTDOOR-BUILD/P1', family:'bench', part:'bench-leg', style:'detached',
+    mode:S.mode, qty:S.qty, assembly:S.assembly,
+    finishedLength:+S.length.toFixed(5),
+    stock:{nominal:'2x4', actualWidth:REF.wid, actualThickness:REF.thick},
+    endCondition:'square',
+    holeRequirement:S.spot?'MEASURED_SPOTS':'NONE',
+    datum:S.spot?'TOP':null,
+    holes:S.spot?[{datum:'TOP',down:+S.h1.toFixed(5),cross:'CENTERLINE'},{datum:'TOP',down:+S.h2.toFixed(5),cross:'CENTERLINE'}]:[],
+    operation:S.spot?'SPOT_HOLE_LOCATIONS':'CUT_ONLY', raiseAt:'BOTTOM'};
+}
+function versionId(){return 'OB-P1-'+hash32(JSON.stringify(definition()))}
+function validate(){
+  var a=[];
+  if(!(S.length>=12&&S.length<=30))a.push('Leg length needs to stay between 12 and 30 in for this bounded prototype.');
+  if(S.spot){
+    if(!(S.h1>=.75&&S.h1<=S.length-.75))a.push('First hole needs to stay on the leg.');
+    if(!(S.h2>=.75&&S.h2<=S.length-.75))a.push('Second hole needs to stay on the leg.');
+    if(S.h2<=S.h1+.75)a.push('Keep the second hole at least ¾ in below the first.');
+  }
+  return a;
+}
+function storeContract(){
+  return window.STBStoreHandoffContract || null;
+}
+function resolveOutdoorMaterial(sizeKey, len, wid, qty){
+  var contract=storeContract();
+  if(!contract||typeof contract.resolveStartOwnMaterial!=='function'){
+    return {status:'UNRESOLVED',code:'STORE_RESOLVER_UNAVAILABLE',details:'Shared Store Zero material resolver is unavailable.'};
+  }
+  return contract.resolveStartOwnMaterial({
+    sizeKey:sizeKey,
+    parts:[{name:'part',len:Number(len),wid:Number(wid),qty:Number(qty)}]
+  });
+}
+function outdoorStoreReference(resolution, extraUnresolved){
+  var unresolved=[];
+  if(!resolution||resolution.status!=='MAPPED') unresolved.push((resolution&&resolution.code)||'STORE_MATERIAL_RESOLUTION_UNAVAILABLE');
+  (extraUnresolved||[]).forEach(function(code){ if(unresolved.indexOf(code)<0) unresolved.push(code); });
+  var authority=storeContract()&&storeContract().storeAuthority?storeContract().storeAuthority('outdoor'):null;
+  return {
+    capabilityStatus:resolution&&resolution.status==='MAPPED'?'SUPPORTABLE':'UNRESOLVED',
+    economicsStatus:authority&&authority.economicsStatus||'UNRESOLVED_CLASS_SCOPED_RECOVERY',
+    material:resolution&&resolution.status==='MAPPED'?resolution.materialTotal:null,
+    combinedValue:null,
+    complete:false,
+    unresolvedConditions:unresolved,
+    materialResolution:resolution||null,
+    authority:authority
+  };
+}
+function boardPlan(){
+  var kerf=REF.kerf, per=Math.max(1,Math.floor((REF.board+kerf)/(S.length+kerf))), n=Math.ceil(S.qty/per);
+  var resolution=resolveOutdoorMaterial('2x4', S.length, REF.wid, S.qty);
+  return {
+    per:per, n:n,
+    cost:resolution&&resolution.status==='MAPPED'?resolution.materialTotal:null,
+    resolution:resolution,
+    sku:resolution&&resolution.storeSku||null
+  };
+}
+function explicitDecisionList(){
+  var out=[];
+  if(S.choices.quantity)out.push('quantity');
+  if(S.choices.length)out.push('finished_length');
+  if(S.choices.spots)out.push('hole_spot_requirement');
+  return out;
+}
+function normalizedCore(def){
+  if(!def)return null;
+  return {
+    stockClass:def.stockClass||(def.stock&&def.stock.nominal)||null,
+    finishedLength:Number(def.finishedLength),
+    quantity:Number(def.quantity!=null?def.quantity:def.qty),
+    endCondition:def.endCondition||null,
+    holeRequirement:def.holeRequirement||((def.holes&&def.holes.length)?'MEASURED_SPOTS':'NONE'),
+    datum:def.datum||((def.holes&&def.holes.length)?'TOP':null)
+  };
+}
+function sameCore(a,b){
+  if(!a||!b)return false;
+  return a.stockClass===b.stockClass
+    && Math.abs(a.finishedLength-b.finishedLength)<0.00001
+    && a.quantity===b.quantity
+    && a.endCondition===b.endCondition
+    && a.holeRequirement===b.holeRequirement
+    && a.datum===b.datum;
+}
+function readJob1Proof(){
+  try{return JSON.parse(localStorage.getItem('stb-proof-ladder-job1')||'null')}catch(_){return null}
+}
+function comparisonReceipt(){
+  if(!S.sent)return '';
+  var job1=readJob1Proof();
+  var job2Core=normalizedCore(S.sent.definition);
+  var job1Core=job1&&job1.semanticOutput?normalizedCore(job1.semanticOutput):null;
+  var equal=!!(job1&&job1.targetMatch&&sameCore(job1Core,job2Core));
+  var job1Decision=job1&&job1.measured?String(job1.explicitProjectDecisionCount):'not measured in this session';
+  var job1Actions=job1&&job1.measured?String(job1.uiActions):'not measured in this session';
+  var job2Decision=String(S.sent.metrics.explicitProjectDecisionCount);
+  var job2Actions=String(S.sent.metrics.uiActions);
+  var unresolved=S.sent.definition.holeRequirement==='MEASURED_SPOTS'
+    ?'<li>supported-cell answer for hole spotting</li><li>physical release, machine readiness and local Cycle Start</li>'
+    :'<li>physical release, machine readiness and local Cycle Start</li>';
+  var userSupplied='<li>project quantity</li><li>no spots or measured spot locations</li>'
+    +(S.sent.metrics.explicitProjectDecisions.includes('finished_length')?'<li>changed finished length for this replacement</li>':'');
+  var matchCopy=equal
+    ?'<b>NORMALIZED CORE REQUIREMENT: MATCH.</b> Both measured paths currently resolve to 2×4 · 16½ in · quantity 8 · square ends · no hole spots.'
+    :'<b>NORMALIZED CORE REQUIREMENT: NOT CLAIMED AS A MATCH.</b> '+(job1Core?'The recorded Job 1 semantic output differs from this Job 2 output.':'Complete Job 1 through the instrumented generic floor first; no generic-floor semantic receipt is available in this session.');
+  return '<section class="receipt" id="comparison-receipt"><span class="eyebrow">COMPARISON RECEIPT</span>'
+    +'<h2>SAME EIGHT LEGS. LESS RE-DEFINITION.</h2><p class="lead">The count below comes from the interactions actually recorded in this browser session. It is not a marketing click claim.</p>'
+    +'<div class="receiptgrid">'
+    +'<div class="receiptbox"><b>START YOUR OWN</b><span class="metric">'+esc(job1Decision)+'</span><span> explicit project decisions</span><br><span>'+esc(job1Actions)+' UI actions recorded</span></div>'
+    +'<div class="receiptbox"><b>OUTDOOR BUILD</b><span class="metric">'+esc(job2Decision)+'</span><span> explicit project decisions</span><br><span>'+esc(job2Actions)+' UI actions recorded</span></div>'
+    +'<div class="receiptbox"><b>CARRIED BY THE BOUNDED PROJECT</b><ul><li>detached bench replacement-leg family</li><li>2×4 stock class / actual 1½ × 3½ in section</li><li>square-end condition</li><li>16½ in cited reference geometry as the starting choice</li></ul></div>'
+    +'<div class="receiptbox"><b>STILL REQUIRED FROM YOU</b><ul>'+userSupplied+'</ul></div>'
+    +'<div class="receiptbox"><b>STILL UNKNOWN / DOWNSTREAM</b><ul>'+unresolved+'</ul></div>'
+    +'<div class="receiptbox"><b>AUTHORITY CHECK</b><ul><li>quantity 8 remains project/user-specific</li><li>3 in / 7 in are not published standards</li><li>spotting is not through-drilling authority</li></ul></div>'
+    +'</div><div class="match">'+matchCopy+'</div></section>';
+}
+
+function woodDefs(){
+  return '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>'
+    +'<linearGradient id="face" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EFE0BC"/><stop offset="1" stop-color="#E0CCA2"/></linearGradient>'
+    +'<linearGradient id="topg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3E7C8"/><stop offset="1" stop-color="#EFE0BC"/></linearGradient>'
+    +'<linearGradient id="endg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D8C49B"/><stop offset="1" stop-color="#B79D72"/></linearGradient>'
+    +'<pattern id="grain" width="46" height="13" patternUnits="userSpaceOnUse">'
+    +'<path d="M0 3 Q12 1.2 23 3.2 T46 2.6" fill="none" stroke="rgba(150,118,70,.34)" stroke-width="1"/>'
+    +'<path d="M0 8.4 Q14 10.2 26 8 T46 9" fill="none" stroke="rgba(150,118,70,.34)" stroke-width=".8" opacity=".75"/>'
+    +'</pattern>'
+    +'<radialGradient id="drop" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(70,45,20,.28)"/><stop offset="1" stop-color="rgba(70,45,20,0)"/></radialGradient>'
+    +'</defs></svg>';
+}
+function wrect(x,y,w,h){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="2" fill="url(#face)"/><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="2" fill="url(#grain)" opacity=".85"/><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="2" fill="none" stroke="rgba(70,45,20,.35)"/>'}
+function TICK(){return '<span class="tick">✓</span>'}
+
+function picPicnic(){
+  var o=['<svg class="pic" viewBox="0 0 340 150" aria-hidden="true">'];
+  o.push('<ellipse cx="170" cy="132" rx="118" ry="12" fill="url(#drop)"/>');
+  o.push('<polygon points="86,128 128,46 148,46 106,128" fill="url(#endg)"/>');
+  o.push('<polygon points="254,128 212,46 192,46 234,128" fill="url(#endg)"/>');
+  o.push(wrect(78,40,184,16));
+  o.push(wrect(58,88,92,12));
+  o.push(wrect(190,88,92,12));
+  o.push('</svg>'); return o.join('');
+}
+function picBench(){
+  var o=['<svg class="pic" viewBox="0 0 340 150" aria-hidden="true">'];
+  o.push('<ellipse cx="170" cy="132" rx="118" ry="12" fill="url(#drop)"/>');
+  o.push(wrect(64,44,212,18));
+  o.push(wrect(86,62,28,58));
+  o.push(wrect(226,62,28,58));
+  o.push('<circle cx="100" cy="78" r="3.2" fill="#A85A2A"/><circle cx="100" cy="96" r="3.2" fill="#A85A2A"/>');
+  o.push('</svg>'); return o.join('');
+}
+function picParts(){
+  var o=['<svg class="pic" viewBox="0 0 340 150" aria-hidden="true">'];
+  o.push('<ellipse cx="170" cy="128" rx="110" ry="11" fill="url(#drop)"/>');
+  o.push(wrect(148,22,36,108));
+  o.push('<line x1="120" y1="22" x2="120" y2="130" stroke="#A85A2A" stroke-width="1.5"/>');
+  o.push('<text x="112" y="28" text-anchor="end" font-size="10" fill="#8A4520" font-weight="700">TOP</text>');
+  o.push('<circle cx="166" cy="48" r="4" fill="#FFFDF8" stroke="#A85A2A" stroke-width="1.6"/>');
+  o.push('<circle cx="166" cy="72" r="4" fill="#FFFDF8" stroke="#A85A2A" stroke-width="1.6"/>');
+  o.push('</svg>'); return o.join('');
+}
+function picAframe(){
+  return picPicnic();
+}
+function picDetached(){
+  var o=['<svg class="pic" viewBox="0 0 340 150" aria-hidden="true">'];
+  o.push('<ellipse cx="170" cy="132" rx="124" ry="11" fill="url(#drop)"/>');
+  o.push(wrect(118,28,104,14));
+  o.push(wrect(132,42,18,52)); o.push(wrect(190,42,18,52));
+  o.push(wrect(38,70,92,12)); o.push(wrect(54,82,16,36)); o.push(wrect(98,82,16,36));
+  o.push(wrect(210,70,92,12)); o.push(wrect(226,82,16,36)); o.push(wrect(270,82,16,36));
+  o.push('<rect x="54" y="82" width="16" height="36" fill="none" stroke="#A85A2A" stroke-width="2"/>');
+  o.push('</svg>'); return o.join('');
+}
+
+function aframeSvg(){
+  var sc=6.2, g=210, x0=70;
+  var tH=REF.aframe.tableH*sc, sH=REF.aframe.seatH*sc, tW=REF.aframe.tableW*sc;
+  var o=['<svg viewBox="0 0 820 340" role="img" aria-label="6-foot A-frame picnic table, Home Depot reference">'];
+  o.push('<text x="38" y="28" font-size="12" fill="#8A7763" font-weight="700" letter-spacing="1.2">SIMPLE A-FRAME · HOME DEPOT 6-FT DIY</text>');
+  o.push('<line x1="40" y1="'+g+'" x2="780" y2="'+g+'" stroke="#C4B49A"/>');
+  var topY=g-tH, seatY=g-sH, cx=410;
+  o.push('<polygon points="'+(cx-tW*.85)+','+g+' '+(cx-18)+','+topY+' '+(cx+8)+','+topY+' '+(cx-tW*.55)+','+g+'" fill="url(#endg)" stroke="#9E7C4D"/>');
+  o.push('<polygon points="'+(cx+tW*.85)+','+g+' '+(cx+18)+','+topY+' '+(cx-8)+','+topY+' '+(cx+tW*.55)+','+g+'" fill="url(#endg)" stroke="#9E7C4D"/>');
+  o.push(wrect(cx-tW/2, topY-10, tW, 12));
+  o.push(wrect(cx-tW/2-118, seatY-8, 110, 10));
+  o.push(wrect(cx+tW/2+8, seatY-8, 110, 10));
+  o.push('<line x1="48" y1="'+topY+'" x2="48" y2="'+g+'" stroke="#A85A2A"/><text x="42" y="'+(topY+g)/2+'" text-anchor="end" font-size="12" fill="#8A4520">'+fmt(REF.aframe.tableH)+' in table</text>');
+  o.push('<line x1="64" y1="'+seatY+'" x2="64" y2="'+g+'" stroke="#6E5C48"/><text x="70" y="'+(seatY+g)/2+'" font-size="12" fill="#6E5C48">'+fmt(REF.aframe.seatH)+' in seat</text>');
+  o.push('<text x="410" y="248" text-anchor="middle" font-size="13" fill="#2A1E13">Legs 2×8 × '+fmt(REF.aframe.legLen)+' in · both ends '+REF.aframe.legAng+'° parallel</text>');
+  o.push('<text x="410" y="270" text-anchor="middle" font-size="12" fill="#6E5C48">Not a 16½ in 2×4. Angled 2×8s. Project 1 does not order this table.</text>');
+  o.push('</svg>');
+  return o.join('');
+}
+
+function benchSvg(){
+  var L=S.length, scale=9.2, topY=88, bottomY=topY+L*scale, legX=530, legW=REF.wid*scale;
+  if(bottomY>400){scale=300/L; bottomY=topY+L*scale; legW=REF.wid*scale}
+  var h1y=topY+S.h1*scale, h2y=topY+S.h2*scale, baseBottom=topY+BASE.length*scale, ext=Math.max(0,bottomY-baseBottom);
+  var o=['<svg viewBox="0 0 820 440" role="img" aria-label="Detached bench and dimensioned replacement leg">'];
+  o.push('<text x="38" y="30" font-size="12" fill="#8A7763" font-weight="700" letter-spacing="1.2">WHERE IT SITS</text>');
+  o.push('<g fill="url(#face)" stroke="#A78250" stroke-width="1.2">');
+  o.push('<rect x="36" y="58" width="310" height="22" rx="3"/>');
+  o.push('<rect x="70" y="80" width="22" height="108" rx="3"/>');
+  o.push('<rect x="290" y="80" width="22" height="108" rx="3"/>');
+  o.push('</g>');
+  o.push('<rect x="70" y="80" width="22" height="108" rx="3" fill="none" stroke="#A85A2A" stroke-width="2"/>');
+  o.push('<circle cx="81" cy="108" r="3.4" fill="#A85A2A"/><circle cx="81" cy="136" r="3.4" fill="#A85A2A"/>');
+  o.push('<path d="M94 140 C140 138 168 132 198 118" fill="none" stroke="#A85A2A" stroke-width="1.5" stroke-dasharray="4 4"/>');
+  o.push('<text x="204" y="120" font-size="12" fill="#8A4520">replacement leg</text>');
+  o.push('<text x="38" y="232" font-size="12" fill="#6E5C48">MyOutdoorPlans 6-ft all-2×4 · 16½ in legs · ~18 in seat</text>');
+  o.push('<text x="38" y="254" font-size="13" fill="#2A1E13">Raise the bench 1 in: the bottom moves; the hole pattern does not.</text>');
+  o.push('<text x="470" y="30" font-size="12" fill="#8A7763" font-weight="700" letter-spacing="1.2">THE PART YOU ARE DEFINING</text>');
+  o.push('<rect x="'+legX+'" y="'+topY+'" width="'+legW+'" height="'+(bottomY-topY)+'" rx="3" fill="url(#face)" stroke="#9E7C4D"/>');
+  o.push('<rect x="'+legX+'" y="'+topY+'" width="'+legW+'" height="'+(bottomY-topY)+'" fill="url(#grain)" opacity=".8"/>');
+  if(ext>1){
+    o.push('<rect x="'+legX+'" y="'+baseBottom+'" width="'+legW+'" height="'+ext+'" fill="#F1C890"/>');
+    o.push('<text x="'+(legX+legW+14)+'" y="'+(baseBottom+Math.min(ext/2+4,16))+'" font-size="12" fill="#8A4520">+ '+fmt(S.length-BASE.length)+' in at bottom</text>');
+  }
+  o.push('<line x1="'+(legX-18)+'" y1="'+topY+'" x2="'+(legX+legW+18)+'" y2="'+topY+'" stroke="#A85A2A" stroke-width="2"/>');
+  o.push('<text x="'+(legX+legW+24)+'" y="'+(topY+4)+'" font-size="12" fill="#8A4520" font-weight="700">TOP DATUM</text>');
+  if(S.spot){
+    [[h1y,S.h1],[h2y,S.h2]].forEach(function(p){
+      o.push('<circle cx="'+(legX+legW/2)+'" cy="'+p[0]+'" r="5" fill="#FFFDF8" stroke="#A85A2A" stroke-width="2"/>');
+      o.push('<line x1="'+(legX+legW/2+8)+'" y1="'+p[0]+'" x2="'+(legX+legW+58)+'" y2="'+p[0]+'" stroke="#A85A2A"/>');
+      o.push('<text x="'+(legX+legW+64)+'" y="'+(p[0]+4)+'" font-size="12" fill="#6E5C48">'+fmt(p[1])+' from TOP</text>');
+    });
+  }
+  o.push('<line x1="'+(legX-38)+'" y1="'+topY+'" x2="'+(legX-38)+'" y2="'+bottomY+'" stroke="#6E5C48"/>');
+  o.push('<text x="'+(legX-46)+'" y="'+((topY+bottomY)/2)+'" font-size="13" fill="#2A1E13" text-anchor="end">'+fmt(L)+' in</text>');
+  o.push('<line x1="'+legX+'" y1="'+(bottomY+22)+'" x2="'+(legX+legW)+'" y2="'+(bottomY+22)+'" stroke="#6E5C48"/>');
+  o.push('<text x="'+(legX+legW/2)+'" y="'+(bottomY+40)+'" font-size="12" fill="#6E5C48" text-anchor="middle">'+fmt(REF.wid)+' in</text>');
+  o.push('</svg>');
+  return o.join('');
+}
+function boardSvg(){
+  var p=boardPlan(), o=['<svg viewBox="0 0 620 '+(p.n*48+14)+'" role="img" aria-label="Pieces on the boards you buy">'];
+  var left=16,w=586;
+  for(var b=0;b<p.n;b++){
+    var y=10+b*48;
+    o.push('<rect x="'+left+'" y="'+y+'" width="'+w+'" height="26" rx="4" fill="#E8D1A3" stroke="#A78250"/>');
+    var used=Math.min(p.per,S.qty-b*p.per);
+    for(var j=0;j<used;j++){
+      var x=left+(j*(S.length+REF.kerf)/REF.board)*w, ww=(S.length/REF.board)*w;
+      o.push('<rect x="'+x+'" y="'+y+'" width="'+ww+'" height="26" fill="'+(j%2?'#DDBF88':'#EBD6AF')+'" stroke="#A85A2A"/>');
+    }
+    o.push('<text x="'+(left+4)+'" y="'+(y+40)+'" font-size="9.5" fill="#8A7763">8 ft 2×4</text>');
+  }
+  o.push('</svg>'); return o.join('');
+}
+
+function researchFold(){
+  return '<details class="fold"><summary>Why these reference shapes?</summary><div class="foldbody">'
+    +'<p style="margin:0 0 10px"><a class="link" href="stb-outdoor-reference-authority-0.3.html" target="_blank" rel="opener">WHY THESE NUMBERS? →</a> &nbsp; <a class="link" href="STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html" target="_blank" rel="opener">VIEW FULL RESEARCH →</a></p>'
+    +'<b>There is no universal picnic-table standard.</b> Numbers on this floor are named references.<br><br>'
+    +'<b>Detached 2×4 benches</b> — MyOutdoorPlans 6-ft all-2×4: legs <b>16½ in</b> square, supports 11½ in, seat three 2×4s at 72 in. That plan uses <b>4 legs for two benches</b> (2 each) and 5 in carriage bolts. It does <b>not</b> publish hole distances from TOP.<br><br>'
+    +'Seat height here is derived: 16½ + 1½ (actual 2×4) = <b>18 in</b>, inside the 17–18 in comfort band. 15 in is too low (Flowyline).<br><br>'
+    +'<b>A-frame</b> — Home Depot 6-ft DIY: table <b>30¼ in</b> high × ~30½ in wide × 72 in long; legs <b>2×8 × 32¾ in, 30° both ends parallel</b>; benches 2×6 × 68 in; ½ × 3½ in carriage bolts. This Old House uses 28° / 32¼ in / ~17 in seat. Pilot Rock commercial AFT: 30¼ / 17¾ nominal. Angled 2×8s are not 16½ in 2×4s.<br><br>'
+    +'<b>Holes 3 in and 7 in from TOP</b> are example starting values for a replacement. Measure the old leg. Spot only — not through-drilled.<br><br>'
+    +'ADA 902.3 dining surface 28–34 in is cited, not claimed for this backyard prototype. $'+REF.syoPrice.toFixed(2)+' per 8-ft 2×4 is the Start Your Own donor pin, not an outdoor-material approval.'
+    +'</div></details>';
+}
+
+function pathA(){
+  return '<div class="pathA"><div><b>Path A — the generic floor</b><span>Use Start Your Own as-is. Define the 2×4 part, 16½ in finished length and quantity 8 yourself. Optional hole spots remain measured project evidence; the cited plan does not publish reusable TOP offsets.</span></div>'
+    +'<button class="btn ghost sm" type="button" id="openjob1">Open Start Your Own →</button><a class="link" style="font-size:11px" href="stb-start-own-0.10.html">locked artifact</a></div>';
+}
+
+function renderHome(){
+  var h=woodDefs();
+  h+='<div class="topline"><button class="crumb" type="button" id="gohome">← Project library</button><span class="eyebrow" style="margin:0">Scan-to-Build · Outdoor Build</span></div>';
+  h+='<h1>Find the part. <em>Put it on the bench.</em></h1>';
+  h+='<p class="lede"><strong>Same replacement job, two definitions.</strong> Start Your Own makes you define the part from the generic floor. Outdoor Build can carry only the facts the bounded project legitimately knows.</p>';
+  h+='<div class="proofbox"><span class="k">TEST 02 · FROM A BOUNDED PROJECT</span><h2>SAME JOB · BOUNDED PROJECT</h2><p>Detached bench replacement leg. The project carries the part family, 2×4 stock class, square ends and the cited 16½ in reference geometry. For the same job, you still supply the quantity and whether measured hole spots are required. Change the finished length only if this replacement is different.</p><div class="prooflinks"><button class="btn sm" type="button" id="samejob">Make the same eight-leg job →</button></div></div>';
+  h+=pathA();
+  h+='<div class="proofbox"><span class="k">MORE BOUNDED OUTDOOR FAMILIES</span><h2>Research-backed geometry deck</h2><p>Attached A-frame · Detached X / splayed table · Detached X-frame bench · Multi-angle / sawhorse bench. This deck exposes sourced geometry and stops where the authority stops; it does not replace the simple same-job comparison.</p><div class="prooflinks"><a href="stb-outdoor-build-deck-0.1.html" target="_blank" rel="opener">OPEN BOUNDED FAMILY DECK →</a><a href="stb-outdoor-reference-authority-0.3.html" target="_blank" rel="opener">WHY THESE NUMBERS? →</a><a href="STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html" target="_blank" rel="opener">VIEW FULL RESEARCH →</a></div></div>';
+  h+='<div class="step"><span class="n">1</span><h2>What are you working on?</h2><span class="sub">Path B · pick the family</span></div><div class="grid3">';
+  [['picnic','Picnic tables','A-frame, or a table with detached benches.',picPicnic()],
+   ['bench','Benches','A whole bench, or go straight to a replacement part.',picBench()],
+   ['parts','Parts','You already know what broke. Start there.',picParts()]].forEach(function(x){
+    h+='<button class="card '+(S.family===x[0]?'on ':'')+'" data-family="'+x[0]+'">'+TICK()+'<span class="pic">'+x[3]+'</span><span class="body"><b>'+x[1]+'</b><span>'+x[2]+'</span></span></button>';
+  });
+  h+='</div>';
+  if(S.family==='picnic'){
+    h+='<div class="step"><span class="n">2</span><h2>Which style?</h2><span class="sub">Named references, not a universal standard</span></div><div class="grid2">';
+    h+='<button class="card '+(S.style==='aframe'?'on ':'')+'" data-style="aframe">'+TICK()+picAframe()+'<span class="body"><b>Simple A-frame</b><span>Home Depot 6-ft DIY · 30¼ in table · 17 in seat · 2×8 legs at 30°. Not Project 1’s first cut.</span></span></button>';
+    h+='<button class="card '+(S.style==='detached'?'on ':'')+'" data-style="detached">'+TICK()+picDetached()+'<span class="body"><b>Table + detached benches</b><span>MyOutdoorPlans 6-ft all-2×4 · 16½ in square 2×4 legs. This is Project 1.</span></span></button></div>';
+  }
+  if(S.family==='bench'||S.family==='parts'||S.style==='detached'){
+    h+='<div class="step"><span class="n">'+(S.family==='picnic'?'3':'2')+'</span><h2>What do you need?</h2><span class="sub">Project 1 is the leg</span></div><div class="grid4">';
+    [['leg','Bench leg','The playable Project 1 path.',false],
+     ['whole','Whole bench','Drawing only in this build.',true],
+     ['seat','Seat board','Planned — a 2×4 slat, not this order.',true],
+     ['support','Support','Planned — 11½ in in the cited plan.',true]].forEach(function(x){
+      h+='<button class="card '+(S.part===x[0]?'on ':'')+'" data-part="'+x[0]+'">'+TICK()+picParts()+'<span class="body"><b>'+x[1]+'</b><span>'+x[2]+'</span></span></button>';
+    });
+    h+='</div>';
+  }
+  if(S.part==='leg'){
+    h+='<div class="step"><span class="n">3</span><h2>How do you want to start?</h2><span class="sub">Same part. Different amount of typing.</span></div><div class="grid2">';
+    h+='<button class="card '+(S.mode==='standard'?'on ':'')+'" data-mode="standard">'+TICK()+picParts()+'<span class="body"><b>Standard geometry</b><span>16½ in square 2×4. Keep it, raise it 1 in, or type a new length. Holes stay off until you ask.</span></span></button>';
+    h+='<button class="card '+(S.mode==='custom'?'on ':'')+'" data-mode="custom">'+TICK()+picParts()+'<span class="body"><b>Custom geometry</b><span>Sliders and exact type-in. Same bounded leg. Spots from TOP if you need them.</span></span></button></div>';
+    if(S.mode)h+='<div class="go"><div class="copy"><b>'+(S.mode==='standard'?'Reference leg loaded.':'Custom bench ready.')+'</b> Hole locations are not a published standard — they belong to the leg you are replacing.</div><button class="btn" id="takebench">Put the leg on the bench →</button></div>';
+  }
+  if(S.part&&S.part!=='leg'){
+    h+='<div class="note"><b>Planned — Project 2.</b> '+(S.part==='whole'?'A whole detached bench is the family drawing, not a second order in this prototype. Start with a leg.':S.part==='seat'?'The cited plan uses three 2×4s at 72 in with ½ in gaps. Not ordered here.':'The cited plan’s bench support is 11½ in. Not ordered here.')
+      +' <button class="btn sm" style="margin-top:10px" data-part="leg">Go to the bench leg instead</button></div>';
+  }
+  h+=researchFold();
+  h+='<p class="foot">Start Your Own stays the generic path and is not modified by this prototype. Path A opens it as-is. Nothing here is ordered, reserved, or released.</p>';
+  $('app').innerHTML=h; bindHome();
+}
+
+function bindHome(){
+  if($('gohome'))$('gohome').onclick=function(){
+    if(window.self!==window.top)window.parent.postMessage({type:'STB_PROOF_RETURN_LIBRARY'},location.origin);
+    else location.href='working-app.html';
+  };
+  if($('openjob1'))$('openjob1').onclick=function(){
+    if(window.self!==window.top)window.parent.postMessage({type:'STB_PROOF_OPEN_JOB1'},location.origin);
+    else location.href='stb-start-own-0.10.html';
+  };
+  if($('samejob'))$('samejob').onclick=function(){
+    S.family='bench';S.style='detached';S.part='leg';S.mode='standard';
+    S.qty=1;S.length=BASE.length;S.h1=BASE.h1;S.h2=BASE.h2;S.spot=false;S.sent=null;
+    S.choices={quantity:false,length:false,spots:false};
+    S.screen='bench';render();window.scrollTo(0,0);
+  };
+  document.querySelectorAll('[data-family]').forEach(function(b){b.onclick=function(){S.family=b.dataset.family;S.style=null;S.part=null;S.mode=null;render()}});
+  document.querySelectorAll('[data-style]').forEach(function(b){b.onclick=function(){
+    S.style=b.dataset.style;
+    if(S.style==='aframe'){S.screen='aframe';render();return}
+    S.family='bench'; S.part=null; S.mode=null; render();
+  }});
+  document.querySelectorAll('[data-part]').forEach(function(b){b.onclick=function(){S.part=b.dataset.part; if(S.part!=='leg')S.mode=null; render()}});
+  document.querySelectorAll('[data-mode]').forEach(function(b){b.onclick=function(){
+    S.mode=b.dataset.mode; S.length=BASE.length; S.h1=BASE.h1; S.h2=BASE.h2; S.qty=1; S.spot=false; S.sent=null;
+    S.choices={quantity:false,length:false,spots:false}; render();
+  }});
+  if($('takebench'))$('takebench').onclick=function(){S.screen='bench'; render(); window.scrollTo(0,0)};
+}
+
+function renderAframe(){
+  var a=REF.aframe, h=woodDefs();
+  h+='<div class="top"><button class="crumb" id="backhome">← Outdoor Build</button><h1>Simple A-frame</h1><span class="tag">REFERENCE GEOMETRY · PROJECT 2</span></div>';
+  h+='<p class="lede">A 6-foot attached-bench picnic table. <strong>Legs are angled 2×8s, not 16½ in 2×4s.</strong> This page is the cited drawing. It is not Project 1’s order.</p>';
+  h+='<div class="stage">'+aframeSvg()+'</div>';
+  h+='<div class="results"><section class="panel"><h3>Cited cut list · Home Depot 6-ft DIY</h3><table class="cut"><thead><tr><th>Part</th><th>Definition</th><th>Qty</th></tr></thead><tbody>'
+    +'<tr><td><b>Tabletop</b><span class="sub">2×8</span></td><td>72 in</td><td>4</td></tr>'
+    +'<tr><td><b>Bench slats</b><span class="sub">2×6</span></td><td>68 in</td><td>4</td></tr>'
+    +'<tr><td><b>Legs</b><span class="sub">2×8 · '+a.legAng+'° both ends parallel</span></td><td>'+fmt(a.legLen)+' in along the edge</td><td>4</td></tr>'
+    +'<tr><td><b>Bench supports</b></td><td>61 in</td><td>2</td></tr>'
+    +'<tr><td><b>Tabletop supports</b></td><td>28¾ in</td><td>3</td></tr>'
+    +'</tbody></table><p class="help">Hardware in that plan: sixteen ½ × 3½ in galvanized carriage bolts. This Old House variant: 28° legs, 32¼ in, ~17 in seat. Not mixed into this drawing.</p></section>'
+    +'<section class="panel"><h3>What this is</h3><p class="help" style="margin:0"><strong>Geometry, not an order.</strong> Project 1 is a detached-bench replacement leg — square 2×4, TOP datum, optional spots. Ordering a whole A-frame is Project 2.</p>'
+    +'<div class="go" style="margin-top:14px;padding:0;border:0;box-shadow:none"><button class="btn" id="toleg">Project 1 is the detached leg →</button></div></section></div>';
+  h+=researchFold();
+  $('app').innerHTML=h;
+  $('backhome').onclick=function(){S.screen='home';S.style=null;render();window.scrollTo(0,0)};
+  $('toleg').onclick=function(){S.family='bench';S.style='detached';S.part='leg';S.mode='standard';S.spot=false;S.sent=null;S.choices={quantity:false,length:false,spots:false};S.screen='home';render();window.scrollTo(0,0)};
+}
+
+function renderBench(){
+  var errs=validate(), plan=boardPlan(), seat=S.length+REF.thick, custom=S.mode==='custom';
+  var h=woodDefs();
+  h+='<div class="top"><button class="crumb" id="backhome">← Outdoor Build</button><h1>Bench leg</h1><span class="tag">DETACHED · PROJECT 1</span></div>';
+  h+='<p class="lede">The old leg broke. The bounded project already knows what kind of part this is. <strong>You define what is different this time.</strong></p>';
+  h+='<div class="choicegate"><b>Still yours:</b> choose the quantity and say whether this job needs measured hole spots. The cited 16½ in finished length is carried by the bounded reference unless you change it. Quantity 8 is project-specific / user-declared for this demonstration; the cited published plan does not establish eight legs.</div>';
+  h+='<div class="bench '+(custom?'custom':'')+'"><div><div class="stage">'+benchSvg()+'</div>'
+    +'<div class="readout"><span>Finished leg <b>'+fmt(S.length)+' in</b></span><span>Quantity <b>'+S.qty+'</b></span><span>Reference seat <b>~'+fmt(seat)+' in</b></span><span>Hole datum <b>TOP</b></span>'
+    +(S.spot?'<span>Spots <b>'+fmt(S.h1)+' / '+fmt(S.h2)+'</b></span>':'<span>Spots <b>off</b></span>')+'</div></div><div>';
+  h+='<section class="panel"><h3>Start point</h3><div class="preset"><b>Detached bench leg · 2×4 · 16½ in</b><span>MyOutdoorPlans 6-ft all-2×4. Square ends. Actual 1½ × 3½ in.</span></div>'
+    +'<div class="seg"><button data-modepick="standard" class="'+(S.mode==='standard'?'on':'')+'">Standard geometry</button><button data-modepick="custom" class="'+(S.mode==='custom'?'on':'')+'">Custom</button></div></section>';
+  h+='<section class="panel"><h3>How many?</h3><div class="seg"><button data-qtyquick="1" class="'+(S.qty===1?'on':'')+'">One leg</button><button data-qtyquick="'+S.assembly+'" class="'+(S.qty===S.assembly?'on':'')+'">All '+S.assembly+'</button></div>'
+    +'<div class="row"><div class="lab">Quantity<i>This prototype’s replacement set is two benches × four legs = 8. The published plan as drawn uses 4 legs for two benches.</i></div><div class="stepper"><button id="qminus">−</button><span class="v">'+S.qty+'</span><button id="qplus">+</button></div></div></section>';
+  h+='<section class="panel"><h3>Height</h3><div class="seg"><button data-lift="0" class="'+(Math.abs(S.length-BASE.length)<.001?'on':'')+'">Original height</button><button data-lift="1" class="'+(Math.abs(S.length-(BASE.length+1))<.001?'on':'')+'">+ 1 in</button></div>'
+    +'<div class="row"><div class="lab">Finished leg length<i>Extra length goes at the bottom.</i></div><div class="num"><input id="length" value="'+fmt(S.length)+'" inputmode="decimal" aria-label="Finished leg length"><span class="unit">in</span></div></div>'
+    +'<div class="customonly"><input class="slider" id="lengthSlider" type="range" min="12" max="30" step="0.25" value="'+S.length+'"></div></section>';
+  h+='<section class="panel"><h3>Hole locations</h3><div class="seg"><button id="spotOn" class="'+(S.spot?'on':'')+'">Spot centers</button><button id="spotOff" class="'+(!S.spot?'on':'')+'">No hole spots</button></div>'
+    +'<p class="help"><strong>These are not “standard” holes.</strong> The cited plan does not publish distances from TOP. If you spot, 3 in and 7 in are example starting values — measure the old leg. Across: centerline, 1¾ in from either long edge. <b>Spot only</b>; through-drilling is not claimed.</p>';
+  if(S.spot){
+    h+='<div class="row"><div class="lab">Hole 1 from top</div><div class="num"><input id="h1" value="'+fmt(S.h1)+'" inputmode="decimal"><span class="unit">in</span></div></div>';
+    h+='<div class="customonly"><input class="slider" id="h1Slider" type="range" min="0.75" max="'+Math.max(.75,S.length-.75)+'" step="0.25" value="'+S.h1+'"></div>';
+    h+='<div class="row"><div class="lab">Hole 2 from top</div><div class="num"><input id="h2" value="'+fmt(S.h2)+'" inputmode="decimal"><span class="unit">in</span></div></div>';
+    h+='<div class="customonly"><input class="slider" id="h2Slider" type="range" min="0.75" max="'+Math.max(.75,S.length-.75)+'" step="0.25" value="'+S.h2+'"></div>';
+  }
+  h+='</section>';
+  if(errs.length)h+='<div class="error">'+errs.map(esc).join('<br>')+'</div>';
+  var unanswered=[];
+  if(!S.choices.quantity)unanswered.push('quantity');
+  if(!S.choices.spots)unanswered.push('hole-spot requirement');
+  if(unanswered.length)h+='<div class="choicegate"><b>Before this definition can be sent:</b> answer '+unanswered.join(', ')+'.</div>';
+  h+='</div></div>';
+  h+='<div class="results"><section class="panel"><h3>Cut list</h3><table class="cut"><thead><tr><th>Part</th><th>Definition</th><th>Qty</th></tr></thead><tbody>'
+    +'<tr><td><b>Bench leg</b><span class="sub">2×4 · square ends</span></td><td>'+fmt(S.length)+' in finished<span class="sub">extra length at bottom</span></td><td>'+S.qty+'</td></tr>'
+    +(S.spot?'<tr><td><b>Hole spots</b><span class="sub">center marks only · TOP datum</span></td><td>'+fmt(S.h1)+' / '+fmt(S.h2)+' in from TOP<span class="sub">on board centerline</span></td><td>'+(S.qty*2)+'</td></tr>':'')
+    +'</tbody></table><p class="help">Change the definition and this list changes with it. Saw kerf '+fmt(REF.kerf)+' in.</p></section>';
+  h+='<section class="panel"><h3>What to buy</h3><div class="buyline"><div class="w"><b>'+plan.n+' × 8 ft 2×4</b><span>Reference stock planning · Store confirms outdoor material</span></div><div class="p">'+money(plan.cost)+'</div></div>'
+    +'<div class="boardmap">'+boardSvg()+'</div>'
+    +'<div class="total"><span>About</span><b>'+money(plan.cost)+'</b></div>'
+    +'<p class="help">Uses the Start Your Own 8-ft 2×4 donor pin ('+money(REF.syoPrice)+'). It is not an order or an outdoor-material approval.</p></section></div>';
+  h+='<div class="donebar"><div class="copy"><b>That is a project.</b><span>'+S.qty+' replacement leg'+(S.qty===1?'':'s')+', '+fmt(S.length)+' in finished'+(S.spot?', with '+(S.qty*2)+' hole centers spotted from TOP':'')+'.</span></div>'
+    +'<button class="btn" id="send" '+((errs.length||unanswered.length)?'disabled':'')+'>Looks right — send to Store</button></div>';
+  if(S.sent){
+    var current=versionId(), stale=current!==S.sent.id;
+  var stock=plan.n+' 8-foot 2×4'+(plan.n===1?'':'s');
+  if(plan.n===1) stock='one 8-foot 2×4';
+  var mapped=plan.resolution&&plan.resolution.status==='MAPPED'&&plan.cost!=null;
+    var sentence=stale?'You changed the part after sending it. Send the new version when it looks right.'
+      :(!mapped?'This part is defined. Store Zero did not return a mapped parent offering for this version. Nothing is ordered.'
+      :(S.spot?'Store Zero maps this version to '+stock+', material '+money(plan.cost)+'. Hole spotting still needs a supported cell answer. Processing recovery is not published for this class. Nothing is ordered.'
+               :'Store Zero maps this version to '+stock+', material '+money(plan.cost)+'. Processing recovery is not published for this class. Nothing is ordered.'));
+    h+='<section class="panel" style="margin-top:14px"><h3>Store answer</h3><p class="storesentence">'+sentence+'</p>'
+      +'<details class="fold"><summary>What gets carried forward?</summary><div class="foldbody"><span class="version">'+esc(S.sent.id)+'</span><br><br>'
+      +'The Store receives this exact definition. It does not redesign it. Finished length and hole locations remain project truth. Local machine datum, tool, compensation, readiness and Cycle Start stay with the commissioned cell.<br><br>'
+      +'Confirmation is not an order, payment, allocation, production release, machine readiness or Cycle Start.<br><br><b>NO BLOOD ON WOOD.</b></div></details></section>';
+    h+=comparisonReceipt();
+  }
+  h+=researchFold();
+  h+='<p class="foot">Parallel prototype. Start Your Own 0.10 is not modified. Path A remains <a class="link" href="stb-start-own-0.10.html">the generic 2×4 floor</a>.</p>';
+  $('app').innerHTML=h; bindBench();
+}
+function bindBench(){
+  $('backhome').onclick=function(){S.screen='home';render();window.scrollTo(0,0)};
+  document.querySelectorAll('[data-modepick]').forEach(function(b){b.onclick=function(){S.mode=b.dataset.modepick;S.sent=null;renderBench()}});
+  document.querySelectorAll('[data-qtyquick]').forEach(function(b){b.onclick=function(){S.qty=+b.dataset.qtyquick;S.choices.quantity=true;S.sent=null;renderBench()}});
+  $('qminus').onclick=function(){S.qty=clamp(S.qty-1,1,8);S.choices.quantity=true;S.sent=null;renderBench()};
+  $('qplus').onclick=function(){S.qty=clamp(S.qty+1,1,8);S.choices.quantity=true;S.sent=null;renderBench()};
+  document.querySelectorAll('[data-lift]').forEach(function(b){b.onclick=function(){S.length=BASE.length+(+b.dataset.lift);S.choices.length=Math.abs(S.length-BASE.length)>.00001;S.sent=null;renderBench()}});
+  function bindInput(id,key){var el=$(id); if(!el)return; el.onchange=el.onblur=function(){var v=parseInch(el.value); if(isFinite(v)){S[key]=v;if(key==='length')S.choices.length=Math.abs(v-BASE.length)>.00001;S.sent=null;renderBench()}else el.value=fmt(S[key])}; el.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();el.blur()}}}
+  bindInput('length','length'); bindInput('h1','h1'); bindInput('h2','h2');
+  if($('lengthSlider'))$('lengthSlider').oninput=function(){S.length=+this.value;S.choices.length=Math.abs(S.length-BASE.length)>.00001;S.sent=null;renderBench()};
+  if($('h1Slider'))$('h1Slider').oninput=function(){S.h1=+this.value;S.sent=null;renderBench()};
+  if($('h2Slider'))$('h2Slider').oninput=function(){S.h2=+this.value;S.sent=null;renderBench()};
+  $('spotOn').onclick=function(){S.spot=true;S.choices.spots=true; if(S.h1==null)S.h1=BASE.h1; if(S.h2==null)S.h2=BASE.h2; S.sent=null; renderBench()};
+  $('spotOff').onclick=function(){S.spot=false;S.choices.spots=true;S.sent=null;renderBench()};
+  if($('send'))$('send').onclick=function(){
+    if(validate().length||!S.choices.quantity||!S.choices.spots)return;
+    var decisions=explicitDecisionList();
+    var resolution=resolveOutdoorMaterial('2x4', S.length, REF.wid, S.qty);
+    var extra=S.spot?['HOLE_SPOTTING_CELL_ANSWER_UNRESOLVED']:[];
+    S.sent={
+      id:versionId(),
+      definition:JSON.parse(JSON.stringify(definition())),
+      metrics:{explicitProjectDecisions:decisions,explicitProjectDecisionCount:decisions.length,uiActions:METRICS.uiActions},
+      storeReference:outdoorStoreReference(resolution, extra)
+    };
+    try{localStorage.setItem('stb-proof-ladder-job2',JSON.stringify({measured:true,metrics:S.sent.metrics,semanticOutput:normalizedCore(S.sent.definition),storeReference:S.sent.storeReference}))}catch(_){}
+    if(window.self!==window.top)window.parent.postMessage({type:'STB_OUTDOOR_CONFIRMED',payload:JSON.parse(JSON.stringify(S.sent))},window.location.origin);
+    renderBench()
+  };
+}
+/* ═══════════════ PROOF FAMILY · TABLE + TWO MATCHING SAWHORSE BENCHES ═══════════════ */
+var OUTDOOR_FAMILY={
+  id:'ANA-WHITE-SAW-HORSE-OUTDOOR-PAIR/0.1',
+  name:'Sawhorse outdoor table + matching benches',
+  tableSource:'Ana White · Sawhorse Outdoor Table · DT-03',
+  benchSource:'Ana White · Sawhorse Outdoor Bench · DB-02',
+  note:'The publisher identifies the bench as matching the Sawhorse Outdoor Table. This demonstration uses one table and two instances of that matching bench; it does not claim the source publishes a single three-piece kit.',
+  assemblies:{
+    table:{
+      label:'TABLE',
+      copy:'Sawhorse table · source-specific splayed / bevel end frames.',
+      parts:[
+        {id:'table-leg',name:'Table leg',stock:'2×6',length:27.375,displayLength:'27⅜ in',qty:8,angle:'10°',angleReference:'SOURCE-STATED BEVEL',plane:'BEVEL / ACROSS THICKNESS',ends:'source member class',relation:'source-specific',datum:'LONG POINT → SHORT POINT',connection:'Sawhorse end-frame / table frame relationship',status:'SUPPORTED',changes:'overall-height / splay change affects end-frame system',measure:'No user member-length edit. Height transform is not published.'},
+        {id:'table-brace',name:'45° brace class',stock:'2×6 class',length:39.5,displayLength:'39½ in',qty:3,angle:'45°',angleReference:'SOURCE-STATED BEVEL',plane:'BEVEL / ACROSS THICKNESS',ends:'source member class',relation:'source-specific',datum:'LONG POINT → LONG POINT',connection:'Sawhorse frame support',status:'SUPPORTED',changes:'end-frame geometry / support relationship',measure:'Source diagram controls exact placement.'}
+      ]
+    },
+    'left-bench':{
+      label:'LEFT BENCH',
+      copy:'Matching Sawhorse Outdoor Bench · project instance A.',
+      parts:[
+        {id:'end-leg',name:'Sawhorse end leg',stock:'2×4',length:15.5,displayLength:'15½ in',qty:4,angle:'10°',angleReference:'SOURCE-STATED ANGLE',plane:'DOUBLE BEVEL / ACROSS THICKNESS',ends:'BOTH ENDS',relation:'PARALLEL',datum:'SOURCE CUT-LIST LENGTH / STATED EDGE DATUM',connection:'Sawhorse end-frame assembly',status:'SUPPORTED',changes:'end-frame height / foot spread',measure:'Part identity and orientation still matter; connection locations are not generalized.'},
+        {id:'center',name:'Center / angled member',stock:'2×4',length:15.25,displayLength:'15¼ in class',qty:null,angle:'10°',angleReference:'SOURCE-STATED ANGLE',plane:'ANGLE OFF SQUARE / ACROSS FACE',ends:'SOURCE MEMBER CLASS',relation:'NOT THE SAME CUT AS DOUBLE BEVEL',datum:'SOURCE PART-CLASS LENGTH',connection:'End-frame system',status:'SUPPORTED',changes:'end-frame geometry',measure:'Occurrence count is not promoted on this proof surface.'},
+        {id:'brace',name:'Multi-angle brace / support',stock:'2×4',length:32.25,displayLength:'32¼ in class',qty:null,angle:'25° / 17°',angleReference:'SOURCE-STATED BEVELS',plane:'DIFFERENT BEVELS ON OPPOSITE ENDS',ends:'BOTH ENDS',relation:'NON-IDENTICAL ENDS',datum:'SOURCE PART-CLASS LENGTH',connection:'Multi-angle end-frame relationship',status:'SUPPORTED',changes:'end-frame geometry / fit',measure:'Occurrence count is not promoted on this proof surface.'}
+      ]
+    },
+    'right-bench':{
+      label:'RIGHT BENCH',
+      copy:'Matching Sawhorse Outdoor Bench · project instance B.',
+      parts:null
+    }
+  }
+};
+OUTDOOR_FAMILY.assemblies['right-bench'].parts=OUTDOOR_FAMILY.assemblies['left-bench'].parts.map(function(p){return Object.assign({},p)});
+var O={screen:'project',assembly:null,part:null,occurrence:null,heightRequest:null,sent:null,uiActions:0};
+
+function outdoorAssembly(){return O.assembly?OUTDOOR_FAMILY.assemblies[O.assembly]:null}
+function outdoorPart(){
+  var a=outdoorAssembly();
+  return a&&O.part?a.parts.find(function(p){return p.id===O.part})||null:null;
+}
+function occurrenceIds(part){
+  if(!part||!part.qty)return [];
+  var prefix=O.assembly==='table'?'TABLE':(O.assembly==='left-bench'?'LEFT-BENCH':'RIGHT-BENCH');
+  return Array.from({length:part.qty},function(_,i){return prefix+'.'+part.id.toUpperCase()+'.'+String(i+1).padStart(2,'0')});
+}
+function projectComparisonQuantity(part){
+  if(!part||part.id!=='end-leg')return part&&part.qty||null;
+  return 8; // project composition: two matching bench instances × four published end-leg pieces each
+}
+function outdoorNormalizedPart(){
+  var p=outdoorPart();
+  if(!p||p.id!=='end-leg')return null;
+  return {
+    stockClass:'2x4',
+    finishedLength:15.5,
+    quantity:8,
+    endCondition:'angled',
+    straightCut:true,
+    angleDegrees:10,
+    angleReference:'source-stated',
+    cutPlane:'bevel-thickness',
+    endIdentity:'both',
+    endRelation:'parallel',
+    lengthDatum:'source-length'
+  };
+}
+function sameProofPart(a,b){
+  if(!a||!b)return false;
+  var keys=['stockClass','finishedLength','quantity','endCondition','straightCut','angleDegrees','angleReference','cutPlane','endIdentity','endRelation','lengthDatum'];
+  return keys.every(function(k){
+    return typeof a[k]==='number'?Math.abs(a[k]-b[k])<.00001:a[k]===b[k];
+  });
+}
+function outdoorProjectSvg(){
+  var hi=O.assembly, p=O.part;
+  function ass(name){return hi===name?'var(--accent)':'#8d693f'}
+  var h='<svg viewBox="0 0 760 400" role="img" aria-label="Sawhorse table with two separate matching benches">'
+    +'<text x="24" y="24" font-size="10.5" font-weight="700" letter-spacing=".08em" fill="var(--ink3)">SCHEMATIC · ASSEMBLY IDENTITY / PART SELECTION · NOT FABRICATION GEOMETRY</text>'
+    +'<rect x="220" y="70" width="320" height="28" rx="3" fill="#e3cb98" stroke="'+ass('table')+'" stroke-width="3"/>'
+    +'<g stroke="'+ass('table')+'" stroke-width="20" stroke-linecap="square"><line x1="275" y1="100" x2="230" y2="260"/><line x1="335" y1="100" x2="380" y2="260"/><line x1="425" y1="100" x2="380" y2="260"/><line x1="485" y1="100" x2="530" y2="260"/></g>'
+    +'<line x1="235" y1="180" x2="525" y2="180" stroke="'+ass('table')+'" stroke-width="13"/>'
+    +'<rect x="55" y="285" width="270" height="22" rx="3" fill="#e3cb98" stroke="'+ass('left-bench')+'" stroke-width="3"/>'
+    +'<g stroke="'+ass('left-bench')+'" stroke-width="16"><line x1="105" y1="307" x2="75" y2="365"/><line x1="155" y1="307" x2="185" y2="365"/><line x1="230" y1="307" x2="200" y2="365"/><line x1="280" y1="307" x2="310" y2="365"/></g>'
+    +'<rect x="435" y="285" width="270" height="22" rx="3" fill="#e3cb98" stroke="'+ass('right-bench')+'" stroke-width="3"/>'
+    +'<g stroke="'+ass('right-bench')+'" stroke-width="16"><line x1="485" y1="307" x2="455" y2="365"/><line x1="535" y1="307" x2="565" y2="365"/><line x1="610" y1="307" x2="580" y2="365"/><line x1="660" y1="307" x2="690" y2="365"/></g>'
+    +'<rect data-outdoor-assembly="table" x="205" y="55" width="350" height="220" fill="transparent" style="cursor:pointer"/>'
+    +'<rect data-outdoor-assembly="left-bench" x="40" y="270" width="300" height="110" fill="transparent" style="cursor:pointer"/>'
+    +'<rect data-outdoor-assembly="right-bench" x="420" y="270" width="300" height="110" fill="transparent" style="cursor:pointer"/>'
+    +'<text x="380" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="'+ass('table')+'">TABLE</text>'
+    +'<text x="190" y="392" text-anchor="middle" font-size="12" font-weight="700" fill="'+ass('left-bench')+'">LEFT BENCH</text>'
+    +'<text x="570" y="392" text-anchor="middle" font-size="12" font-weight="700" fill="'+ass('right-bench')+'">RIGHT BENCH</text>'
+    +'</svg>';
+  return h;
+}
+function projectLibrary(){
+  if(window.self!==window.top)window.parent.postMessage({type:'STB_PROOF_RETURN_LIBRARY'},window.location.origin);
+  else window.location.href='working-app.html';
+}
+function outdoorPartCard(){
+  var a=outdoorAssembly(),p=outdoorPart();
+  if(!a)return '<div class="panel"><h3>Assemblies</h3><p class="help">Choose TABLE, LEFT BENCH, or RIGHT BENCH in the drawing or below.</p></div>';
+  var h='<div class="panel"><h3>'+esc(a.label)+' · PARTS</h3><div class="part-grid">'+a.parts.map(function(x){
+    return '<button class="part-select '+(O.part===x.id?'on':'')+'" data-outdoor-part="'+x.id+'"><b>'+esc(x.name)+'</b><span>'+esc(x.stock)+' · '+esc(x.displayLength)+' · '+esc(x.angle)+'</span></button>';
+  }).join('')+'</div></div>';
+  if(!p)return h;
+  var ids=occurrenceIds(p);
+  if(ids.length&&(!O.occurrence||ids.indexOf(O.occurrence)<0))O.occurrence=ids[0];
+  h+='<div class="panel"><h3>SELECTED PART</h3><div class="partfacts">'
+    +'<div><b>PART</b><span>'+esc(p.name)+'</span></div>'
+    +'<div><b>STOCK</b><span>'+esc(p.stock)+'</span></div>'
+    +'<div><b>QUANTITY / OCCURRENCES</b><span>'+(p.id==='end-leg'?'4 this bench · 8 across the two project benches':(p.qty||'not promoted on this proof surface'))+'</span></div>'
+    +'<div><b>FINISHED GEOMETRY</b><span>'+esc(p.displayLength)+'</span></div>'
+    +'<div><b>ANGLE / CUT CONVENTION</b><span>'+esc(p.angle)+' · '+esc(p.plane)+' · '+esc(p.relation)+'</span></div>'
+    +'<div><b>LENGTH DATUM</b><span>'+esc(p.datum)+'</span></div>'
+    +'<div><b>CONNECTION / INTERSECTION</b><span>'+esc(p.connection)+'</span></div>'
+    +'<div><b>SOURCE STATUS</b><span>'+esc(p.status)+'</span></div>'
+    +'<div><b>WHAT CHANGES IT</b><span>'+esc(p.changes)+'</span></div>'
+    +'<div><b>WHAT STILL NEEDS MEASURING</b><span>'+esc(p.measure)+'</span></div>'
+    +'</div>';
+  if(ids.length)h+='<div class="occurrences"><span style="font-size:10px;color:var(--ink3);padding:5px 0">OCCURRENCE</span>'+ids.map(function(id){return '<button data-outdoor-occ="'+id+'" class="'+(O.occurrence===id?'on':'')+'">'+esc(id)+'</button>'}).join('')+'</div>';
+  h+='</div>';
+  return h;
+}
+function outdoorHeightGate(){
+  var requested=O.heightRequest;
+  return '<div class="height-gate"><h3 style="margin:0 0 7px;font-size:11px;letter-spacing:.08em;color:var(--ink3)">ASSEMBLY-LEVEL CONFIGURATION</h3>'
+    +'<p style="margin:0 0 9px;font-size:13px"><b>Overall height</b> belongs at project / assembly level. It is not a leg-length control.</p>'
+    +'<label style="font-size:12px;color:var(--ink2)">Requested different overall height <input id="outdoor-height" inputmode="decimal" placeholder="leave source geometry" value="'+(requested==null?'':esc(requested))+'"> in</label>'
+    +(requested!=null?'<div class="defer"><b>NEEDS GEOMETRY CHECK · DEFER.</b> The current evidence does not publish a verified overall-height → angled-member length → crossing / brace / connection transform. No member is stretched. <button type="button" class="btn ghost sm" data-outdoor-clear-height>CLEAR REQUEST</button></div>'
+      :'<div class="carry"><b>SOURCE GEOMETRY FROZEN.</b> Longitudinal project changes may be separately bounded; end-frame height / splay is not changed here.</div>')
+    +'</div>';
+}
+function outdoorReceipt(){
+  if(!O.sent)return '';
+  var job1=null;try{job1=JSON.parse(localStorage.getItem('stb-proof-ladder-job1')||'null')}catch(_){}
+  var current=outdoorNormalizedPart(),match=!!(job1&&job1.targetMatch&&sameProofPart(job1.semanticOutput,current));
+  var job1Count=job1&&job1.measured?String(job1.explicitProjectDecisionCount):'not measured in this session';
+  var carried=['2×4 stock class','15½ in source cut-list length','10° source-stated angle','double bevel / across thickness','both ends','parallel end relation','source cut-list length datum','8 occurrences from project composition: two benches × four end legs'];
+  return '<section class="outdoor-receipt" id="comparison-receipt"><span class="eyebrow">COMPARISON RECEIPT</span><h2>SAME ANGLED PART. LESS RE-DEFINITION.</h2>'
+    +'<div class="receipt-cols">'
+    +'<div><b>START YOUR OWN · facts explicitly supplied</b><span>'+esc(job1Count)+' explicit definition facts recorded by the generic-floor instrument.</span></div>'
+    +'<div><b>OUTDOOR BUILD · facts explicitly supplied</b><span>Project set → assembly → part selection. No member geometry was retyped for the unchanged source part.</span></div>'
+    +'<div><b>CARRIED BY THE BOUNDED PROJECT</b><span>'+carried.map(esc).join(' · ')+'</span></div>'
+    +'<div><b>STILL USER-SPECIFIC</b><span>Which project / assembly / part; any requested overall-height change. Quantity 8 is project composition, not a claimed published eight-leg bench.</span></div>'
+    +'<div><b>STILL UNRESOLVED</b><span>Any overall-height/splay transform; generalized connection locations; common Store angled-operation pricing/capability bridge.</span></div>'
+    +'<div><b>STORE ECONOMICS</b><span>Same Store boundary for Job 1 and Job 2 · processing / total UNRESOLVED · CURRENT MODEL MISMATCH. No app-only discount.</span></div>'
+    +'</div><div class="match"><b>NORMALIZED PART REQUIREMENT: '+(match?'MATCH.':'NOT CLAIMED AS A MATCH.')+'</b> '+(match?'The recorded generic definition and this bounded source part agree field-for-field.':'Complete Job 1 with the exact angled semantics above, or resolve the differing field, before MATCH is asserted.')+'</div>'
+    +'<div class="donebar" style="margin-top:12px"><div class="copy"><b>Store handoff remains separate.</b><span>The same unresolved Store pricing bridge applies to this semantic demand.</span></div><button class="btn" type="button" id="outdoor-handoff">CONTINUE → STORE ANSWER</button></div></section>';
+}
+function renderProofProject(){
+  var h=woodDefs();
+  h+='<div class="projectnav"><button type="button" id="proof-library">← PROJECT LIBRARY</button><span class="eyebrow" style="margin:0">TEST 02 · FROM A BOUNDED PROJECT</span></div>';
+  if(O.screen==='project'){
+    h+='<h1>Table + separate benches. <em>The angles are part of the project.</em></h1>'
+      +'<p class="lede"><strong>'+esc(OUTDOOR_FAMILY.name)+'.</strong> '+esc(OUTDOOR_FAMILY.note)+'</p>'
+      +'<div class="familyhero"><div class="stage">'+outdoorProjectSvg()+'</div><div>'
+      +'<section class="panel"><h3>WHY THIS FAMILY</h3><p class="help" style="margin:0">The table source publishes real sawhorse / bevel geometry. The matching bench publishes a particularly clear comparison member: 2×4 × 15½ in, 10° double bevel, both ends parallel. That makes angle meaning visible instead of reducing the proof to a straight board.</p></section>'
+      +'<section class="panel"><h3>SOURCE LIMIT</h3><p class="help" style="margin:0">The sources do not publish a verified parametric rule for changing overall height / splay while recomputing every angled member, crossing, brace and connection. Height changes therefore DEFER.</p></section>'
+      +'<button class="btn" type="button" data-outdoor-open>OPEN THIS BOUNDED PROJECT →</button></div></div>';
+  }else{
+    var a=outdoorAssembly(),p=outdoorPart();
+    h+='<h1>Click the assembly. <em>Then click the part.</em></h1><p class="lede">The customer configures the product. The bounded project carries the member geometry that its evidence actually supports.</p>'
+      +'<div class="stage">'+outdoorProjectSvg()+'</div>'
+      +'<div class="assembly-grid">'+Object.keys(OUTDOOR_FAMILY.assemblies).map(function(id){var x=OUTDOOR_FAMILY.assemblies[id];return '<button class="assembly-card '+(O.assembly===id?'on':'')+'" data-outdoor-assembly="'+id+'"><b>'+esc(x.label)+'</b><span>'+esc(x.copy)+'</span></button>'}).join('')+'</div>'
+      +'<div class="familyhero"><div>'+outdoorHeightGate()+'<div class="proofbox"><span class="k">SOURCE BASIS</span><h2>'+esc(OUTDOOR_FAMILY.tableSource)+' + '+esc(OUTDOOR_FAMILY.benchSource)+'</h2><p>'+esc(OUTDOOR_FAMILY.note)+'</p><div class="prooflinks"><a href="stb-outdoor-build-deck-0.1.html" target="_blank" rel="opener">OPEN BUILD DECK →</a><a href="stb-outdoor-reference-authority-0.3.html" target="_blank" rel="opener">WHY THESE NUMBERS? →</a><a href="STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html" target="_blank" rel="opener">VIEW FULL RESEARCH →</a></div></div></div><aside>'+outdoorPartCard()+'</aside></div>';
+    if(p&&p.id==='end-leg'){
+      h+='<div class="donebar"><div class="copy"><b>Comparison part ready.</b><span>Two project benches × four source end legs each = 8 occurrences. Source geometry is carried; no member length was calculated by the customer.</span></div><button class="btn" id="outdoor-confirm" '+(O.heightRequest!=null?'disabled':'')+'>CONFIRM THIS BOUNDED PART →</button></div>';
+    }
+    if(O.sent)h+=outdoorReceipt();
+  }
+  h+=researchFold();
+  h+='<p class="foot"><b>NO BLOOD ON WOOD.</b> This is project definition and evidence custody. It is not controller output, physical release, machine readiness or Cycle Start.</p>';
+  $('app').innerHTML=h;
+  if($('proof-library'))$('proof-library').onclick=projectLibrary;
+  if($('outdoor-confirm'))$('outdoor-confirm').onclick=function(){
+    if(O.heightRequest!=null)return;
+    var normalized=outdoorNormalizedPart();
+    var resolution=normalized?resolveOutdoorMaterial('2x4', normalized.finishedLength, 3.5, normalized.quantity):{status:'UNRESOLVED',code:'NORMALIZED_PART_UNAVAILABLE'};
+    var storeReference=outdoorStoreReference(resolution, ['STORE-PRICING-BRIDGE-GAP','MITER_RANGE_NOT_PUBLISHED','OUTDOOR-CLASS-SCOPED-RECOVERY-NOT-PUBLISHED']);
+    O.sent={id:'OB-SAW-'+hash32(JSON.stringify(normalized)),normalizedPart:normalized,sourceAuthority:{family:OUTDOOR_FAMILY.id,table:OUTDOOR_FAMILY.tableSource,bench:OUTDOOR_FAMILY.benchSource,part:'DB-02 / end-leg'},project:OUTDOOR_FAMILY.id,assembly:O.assembly,occurrence:O.occurrence,storeReference:storeReference,storeEconomics:{status:storeReference.economicsStatus,engine:null,version:null}};
+    try{localStorage.setItem('stb-proof-ladder-job2',JSON.stringify({measured:true,semanticOutput:normalized,storeReference:storeReference}))}catch(_){}
+    if(window.self!==window.top)window.parent.postMessage({type:'STB_OUTDOOR_CONFIRMED',payload:JSON.parse(JSON.stringify(O.sent))},window.location.origin);
+    renderProofProject();
+    setTimeout(function(){document.getElementById('comparison-receipt')?.scrollIntoView({behavior:'smooth',block:'start'})},0);
+  };
+  if($('outdoor-handoff'))$('outdoor-handoff').onclick=function(){
+    if(window.self!==window.top)window.parent.postMessage({type:'STB_OUTDOOR_CONFIRMED',payload:JSON.parse(JSON.stringify(O.sent))},window.location.origin);
+  };
+  if($('outdoor-height'))$('outdoor-height').onchange=function(){
+    var v=parseInch(this.value);O.heightRequest=Number.isFinite(v)&&v>0?v:null;O.sent=null;renderProofProject();
+  };
+}
+function render(){renderProofProject()}
+document.addEventListener('click',function(event){
+  var open=event.target.closest?.('[data-outdoor-open]');
+  if(open){O.uiActions+=1;O.screen='configure';O.assembly=null;O.part=null;O.occurrence=null;renderProofProject();return}
+  var ass=event.target.closest?.('[data-outdoor-assembly]');
+  if(ass){O.uiActions+=1;if(O.screen==='project')O.screen='configure';O.assembly=ass.dataset.outdoorAssembly;O.part=null;O.occurrence=null;O.sent=null;renderProofProject();return}
+  var part=event.target.closest?.('[data-outdoor-part]');
+  if(part){O.uiActions+=1;O.part=part.dataset.outdoorPart;O.occurrence=null;O.sent=null;renderProofProject();return}
+  var occ=event.target.closest?.('[data-outdoor-occ]');
+  if(occ){O.uiActions+=1;O.occurrence=occ.dataset.outdoorOcc;O.sent=null;renderProofProject();return}
+  var clear=event.target.closest?.('[data-outdoor-clear-height]');
+  if(clear){O.uiActions+=1;O.heightRequest=null;O.sent=null;renderProofProject();return}
+});
+renderProofProject();
+
+document.addEventListener('click',function(event){
+  if(event.target&&event.target.closest&&event.target.closest('button,a'))METRICS.uiActions+=1;
+},true);
+document.addEventListener('change',function(event){
+  if(event.target&&event.target.matches&&event.target.matches('input,select,textarea'))METRICS.uiActions+=1;
+},true);
+/* primary proof renderer was invoked above */
+</script>
+</body>
+</html>

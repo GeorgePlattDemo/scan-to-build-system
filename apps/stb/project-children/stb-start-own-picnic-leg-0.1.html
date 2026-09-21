@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scan-to-Build · Start Your Own · Picnic table leg 0.1</title>
+<meta name="description" content="Measure a broken picnic table leg, define it yourself, and see exactly what eight of them cost.">
+<style>
+:root{
+  --paper:#F5F0E6; --paper2:#FBF7EF; --surface:#FFFDF8; --stage:#EFE7D8;
+  --ink:#2A1E13; --ink2:#6E5C48; --ink3:#9C8A75;
+  --line:#E7DCC9; --line2:#D5C5A9;
+  --accent:#A85A2A; --accent2:#8A4520; --tint:#F7E9D6;
+  --good:#5C7A45; --goodtint:#EDF1E4;
+  --shadow:0 1px 2px rgba(60,40,20,.05),0 8px 24px -12px rgba(60,40,20,.18);
+  --lift:0 2px 4px rgba(60,40,20,.06),0 18px 40px -16px rgba(60,40,20,.28);
+  --r:16px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#14110D; --paper2:#1A1612; --surface:#211C16; --stage:#241E17;
+    --ink:#F4EDE1; --ink2:#BDAC97; --ink3:#8B7B68;
+    --line:#332B21; --line2:#4A3E2F;
+    --accent:#E09A5F; --accent2:#F2B47C; --tint:#2B2118;
+    --good:#8FB06B; --goodtint:#1E2418;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+    --lift:0 2px 6px rgba(0,0,0,.5),0 22px 46px -18px rgba(0,0,0,.85);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:16px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  background-image:radial-gradient(1100px 520px at 10% -10%,rgba(168,90,42,.055),transparent 60%),
+                   radial-gradient(900px 440px at 94% 2%,rgba(120,90,50,.05),transparent 62%);
+  background-attachment:fixed}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1140px;margin:0 auto;padding:26px 22px 76px}
+
+/* ── the thin line that says where you are ── */
+.rail{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 26px}
+.rail .back{font-size:13.5px;color:var(--ink2);background:none;border:0;cursor:pointer;
+  padding:7px 11px;border-radius:9px;font-weight:600;transition:.15s}
+.rail .back:hover{background:var(--surface);color:var(--ink)}
+.rail .steps{display:flex;align-items:center;gap:7px;margin-left:auto;flex-wrap:wrap}
+.rail .s{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);
+  border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px 5px 6px}
+.rail .s i{width:19px;height:19px;border-radius:50%;background:var(--line);color:var(--surface);
+  font-style:normal;font-size:11px;font-weight:700;display:grid;place-items:center;line-height:1}
+.rail .s.on{border-color:var(--accent);color:var(--accent2);background:var(--tint);font-weight:650}
+.rail .s.on i{background:var(--accent);color:#fff}
+.rail .s.done i{background:var(--good);color:#fff}
+@media (prefers-color-scheme:dark){.rail .s.on i,.rail .s.done i{color:#1a1208}}
+
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin:0 0 16px}
+h1{font-size:clamp(30px,4.8vw,46px);line-height:1.05;letter-spacing:-.026em;margin:0 0 14px;font-weight:640}
+h1 em{font-style:normal;color:var(--accent)}
+h1 .q{color:var(--ink3);font-weight:400}
+.lede{font-size:clamp(16px,1.9vw,18.5px);line-height:1.55;color:var(--ink2);max-width:56ch;margin:0}
+.lede b{color:var(--ink);font-weight:650}
+
+.step{display:flex;align-items:center;gap:12px;margin:40px 0 15px}
+.step .n{width:27px;height:27px;flex:none;border-radius:50%;background:var(--accent);color:#fff;
+  font-size:13px;font-weight:700;display:grid;place-items:center;line-height:1;
+  box-shadow:0 2px 7px -2px rgba(168,90,42,.55)}
+.step .n.done{background:var(--good);box-shadow:0 2px 7px -2px rgba(92,122,69,.55)}
+.step h2{font-size:20px;letter-spacing:-.014em;margin:0;font-weight:650}
+.step .sub{margin-left:auto;font-size:13.5px;color:var(--ink3)}
+@media (prefers-color-scheme:dark){.step .n{color:#1a1208}}
+
+/* ── cards ── */
+.grid3,.grid2{display:grid;gap:16px}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{position:relative;display:block;width:100%;text-align:left;cursor:pointer;padding:0;font:inherit;color:inherit;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);
+  transition:transform .2s cubic-bezier(.2,.7,.3,1),box-shadow .2s,border-color .2s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--lift);border-color:var(--line2)}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.card.on{border-color:var(--accent);box-shadow:var(--lift),inset 0 0 0 1px var(--accent)}
+.card .pic{display:block;width:100%;height:auto;background:linear-gradient(170deg,var(--paper2),var(--stage))}
+.card .body{padding:14px 16px 16px}
+.card.plain{display:flex;align-items:center}
+.card.plain .body{padding:20px 22px}
+.card .body b{display:block;font-size:16.5px;font-weight:650;letter-spacing:-.012em;margin-bottom:3px}
+.card .body span{display:block;font-size:13.5px;line-height:1.45;color:var(--ink3)}
+.card .tick{position:absolute;top:12px;right:12px;width:27px;height:27px;border-radius:50%;
+  background:var(--accent);display:none;place-items:center;box-shadow:0 2px 9px -2px rgba(0,0,0,.4)}
+.card.on .tick{display:grid}
+.card .tick svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+@media (prefers-color-scheme:dark){.card .tick svg{stroke:#1a1208}}
+.card .flag{position:absolute;top:12px;left:12px;font-size:10.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;padding:5px 9px;border-radius:999px;background:var(--surface);
+  border:1px solid var(--line2);color:var(--ink3)}
+.card .flag.warm{border-color:var(--accent);color:var(--accent2);background:var(--tint)}
+
+/* ── buttons ── */
+.btn{font:inherit;font-size:15px;font-weight:650;padding:13px 26px;border-radius:12px;cursor:pointer;
+  border:1px solid var(--accent);background:var(--accent);color:#fff;min-height:46px;
+  box-shadow:0 2px 10px -2px rgba(168,90,42,.55);transition:.16s}
+.btn:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{background:var(--surface);color:var(--ink3);border-color:var(--line);box-shadow:none;cursor:not-allowed;transform:none;filter:none}
+@media (prefers-color-scheme:dark){.btn{color:#1a1208}}
+.btn.ghost{background:transparent;color:var(--ink2);border-color:var(--line);box-shadow:none;font-weight:550}
+.btn.ghost:hover{border-color:var(--line2);color:var(--ink);filter:none}
+.btn.sm{font-size:13.5px;padding:9px 17px;border-radius:10px;min-height:40px}
+.gobar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:34px 0 0;padding:18px 20px;
+  border-radius:var(--r);border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow)}
+.gobar .sum{flex:1;min-width:230px;font-size:14.5px;color:var(--ink2)}
+.gobar .sum b{color:var(--ink);font-weight:650}
+.gobar .sum strong{display:block;color:var(--ink);font-weight:650;font-size:16px;margin-bottom:2px}
+
+/* ── the bench ── */
+.bench{display:grid;grid-template-columns:minmax(0,1fr) 358px;gap:20px;align-items:start}
+.results{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;margin:18px 0 0}
+.results .panel{margin:0}
+.stage{background:var(--stage);border:1px solid var(--line);border-radius:var(--r);padding:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);overflow:hidden}
+@media (prefers-color-scheme:dark){.stage{box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}}
+.stage svg{width:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+.stage [data-grab]{cursor:grab}
+.stage [data-grab]:active{cursor:grabbing}
+.stage [data-grab]:focus{outline:none}
+.stage [data-grab]:focus .grip{stroke-width:3.2}
+.viewseg{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}
+.viewseg button{border:1px solid var(--line);background:var(--surface);color:var(--ink2);border-radius:10px;
+  padding:9px 14px;cursor:pointer;min-height:42px;font-size:13.5px;transition:.15s}
+.viewseg button:hover{border-color:var(--line2);color:var(--ink)}
+.viewseg button.on{border-color:var(--accent);background:var(--tint);color:var(--accent2);font-weight:650}
+.readout{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 2px 0;font-size:14px;color:var(--ink2)}
+.readout b{color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums}
+.readout span.i{white-space:nowrap}
+.readout .sep{color:var(--line2)}
+
+/* ── panels and controls ── */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 17px;margin:0 0 14px;box-shadow:var(--shadow)}
+.panel h3{font-size:11px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);margin:0 0 13px;
+  display:flex;align-items:center;gap:8px}
+.panel h3 .badge{margin-left:auto;font-size:9.5px;letter-spacing:.06em;padding:3px 7px;border-radius:5px;
+  border:1px solid var(--line2);color:var(--ink3);font-weight:700}
+.panel h3 .badge.src{border-color:var(--good);color:var(--good);background:var(--goodtint)}
+.dim{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.dim:last-child{margin-bottom:0}
+.dim .lab{flex:1;min-width:0;font-size:14.5px}
+.dim .lab i{display:block;font-style:normal;font-size:12px;color:var(--ink3);margin-top:1px}
+.stepper{display:inline-flex;align-items:center;gap:2px;background:var(--paper2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.stepper button{width:34px;height:34px;border:0;background:transparent;color:var(--ink2);cursor:pointer;
+  font-size:17px;line-height:1;border-radius:7px;transition:.13s;font-family:inherit}
+.stepper button:hover{background:var(--surface);color:var(--accent)}
+.stepper button:disabled{opacity:.3;cursor:not-allowed;background:none}
+.stepper .v{min-width:70px;text-align:center;font-size:14.5px;font-weight:650;font-variant-numeric:tabular-nums}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.pill{font:inherit;font-size:12.5px;padding:8px 11px;min-height:40px;border-radius:9px;cursor:pointer;
+  border:1px solid var(--line);background:var(--paper2);color:var(--ink2);transition:.13s}
+.pill:hover{border-color:var(--line2);color:var(--ink)}
+.pill.on{border-color:var(--accent);background:var(--tint);color:var(--accent2);font-weight:650}
+.pill.ghosted{border-style:dashed;color:var(--ink3)}
+
+/* drop-down tools */
+.tool{margin:0 0 12px}
+.tool:last-child{margin-bottom:0}
+.tool label{display:block;font-size:14px;margin:0 0 6px;color:var(--ink)}
+.tool label i{display:block;font-style:normal;font-size:12px;color:var(--ink3);margin-top:1px}
+.selwrap{position:relative}
+.selwrap select{width:100%;appearance:none;-webkit-appearance:none;font-size:14px;padding:11px 36px 11px 12px;
+  min-height:46px;border-radius:10px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink);cursor:pointer}
+.selwrap select:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px var(--tint)}
+.selwrap select:disabled{cursor:default;color:var(--ink);opacity:1;background:var(--goodtint);border-color:var(--good)}
+.selwrap:after{content:"";position:absolute;right:14px;top:50%;width:8px;height:8px;pointer-events:none;
+  border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);transform:translateY(-70%) rotate(45deg)}
+.selwrap.locked:after{display:none}
+.selwrap .lock{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;
+  font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--good)}
+.exact input{width:100%;max-width:160px;font:inherit;font-size:13.5px;font-variant-numeric:tabular-nums;
+  padding:10px;border:1px solid var(--line2);border-radius:9px;background:var(--paper2);color:var(--ink);min-height:42px}
+.exact input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px var(--tint)}
+
+.factlock{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:0 0 8px;border-radius:10px;
+  background:var(--goodtint);border:1px solid var(--good)}
+.factlock:last-of-type{margin-bottom:0}
+.factlock .t{flex:1;min-width:0}
+.factlock .t b{display:block;font-size:13.5px;font-weight:600;line-height:1.35}
+.factlock .t i{display:block;font-style:normal;font-size:11.5px;color:var(--ink3);margin-top:1px}
+.factlock .src{font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--good);flex:none;align-self:flex-start;margin-top:2px}
+.factdone{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.factdone:last-of-type{border-bottom:0}
+.factdone .t{flex:1;min-width:0}
+.factdone .t b{display:block;font-size:14px;font-weight:600;line-height:1.35}
+.factdone .t i{display:block;font-style:normal;font-size:11.5px;color:var(--ink3);margin-top:1px}
+.factdone .chg{font:inherit;font-size:12px;color:var(--ink3);background:none;border:1px solid var(--line);
+  border-radius:8px;padding:6px 10px;min-height:34px;cursor:pointer;flex:none}
+.factdone .chg:hover{border-color:var(--accent);color:var(--accent2)}
+.link{color:var(--accent2);font-weight:650;text-decoration:underline;text-underline-offset:2px}
+.hint{font-size:12.5px;line-height:1.55;color:var(--ink3);margin:10px 0 0}
+.hint b{color:var(--ink2)}
+.said{margin:0 0 14px;padding:13px 15px;border-radius:12px;background:var(--goodtint);border:1px solid var(--good)}
+.said>b{display:block;font-size:14.5px}
+.said span b{font-weight:650;color:var(--ink)}
+.said span{display:block;font-size:13px;color:var(--ink2);margin-top:3px}
+.note{margin:14px 0 0;padding:13px 15px;border:1px dashed var(--line2);border-radius:12px;background:var(--paper2);
+  font-size:13.5px;line-height:1.55;color:var(--ink2)}
+.note b{color:var(--ink)}
+
+/* ── the numbers ── */
+.cut{width:100%;border-collapse:collapse;font-size:13.5px}
+.cut th{text-align:left;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);
+  font-weight:700;padding:0 0 8px;border-bottom:1px solid var(--line)}
+.cut td{padding:9px 0;border-bottom:1px solid var(--line);vertical-align:baseline}
+.cut tr:last-child td{border-bottom:0}
+.cut td.q{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink2);white-space:nowrap}
+.cut td.n{font-weight:600}
+.cut td.d{color:var(--ink2);font-variant-numeric:tabular-nums}
+.buy{display:flex;align-items:baseline;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.buy .w{flex:1;min-width:0}
+.buy .w i{display:block;font-style:normal;font-size:12px;color:var(--ink3)}
+.buy .p{font-variant-numeric:tabular-nums;color:var(--ink2)}
+.total{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:14px 0 0;
+  padding:13px 15px;border-radius:11px;background:var(--tint);border:1px solid var(--line2)}
+.total span{font-size:13px;color:var(--accent2);font-weight:600}
+.total b{font-size:23px;font-weight:650;color:var(--accent2);font-variant-numeric:tabular-nums;letter-spacing:-.015em}
+
+/* ── confirm ── */
+.object{margin:0;padding:22px 24px;border-radius:var(--r);border:1px solid var(--line2);background:var(--surface);box-shadow:var(--lift)}
+.object .eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin:0 0 8px}
+.object h2{margin:0 0 6px;font-size:27px;letter-spacing:-.02em;font-weight:650}
+.object .idline{font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent2);margin:0 0 18px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:9px}
+.facts div{border:1px solid var(--line);border-radius:10px;padding:10px 11px;background:var(--paper2)}
+.facts b{display:block;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);font-weight:700}
+.facts span{display:block;margin-top:4px;font-size:13.5px}
+.facts div.changed{border-color:var(--accent);background:var(--tint)}
+.facts div.changed span{color:var(--accent2);font-weight:650}
+.crosslink{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:20px 0 0;padding:17px 19px;
+  border-radius:var(--r);border:1px solid var(--line2);background:var(--paper2)}
+.crosslink .c{flex:1;min-width:250px;font-size:13.5px;color:var(--ink2)}
+.crosslink .c b{display:block;color:var(--ink);font-size:15px;font-weight:650;margin-bottom:2px}
+.prooflinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.prooflinks a{display:inline-flex;align-items:center;padding:9px 12px;border:1px solid var(--line);border-radius:9px;
+  background:var(--surface);color:var(--accent2);font-size:12.5px;font-weight:650;text-decoration:none;min-height:40px}
+.prooflinks a:hover{border-color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+.fold{margin:16px 0 0;border:1px solid var(--line);border-radius:12px;background:var(--paper2);overflow:hidden}
+.fold summary{cursor:pointer;list-style:none;padding:13px 15px;font-size:13.5px;font-weight:650;color:var(--ink2);
+  display:flex;align-items:center;gap:9px}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary:before{content:"";width:7px;height:7px;border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);
+  transform:rotate(-45deg);transition:transform .18s;flex:none;margin-left:2px}
+.fold[open] summary:before{transform:rotate(45deg)}
+.fold .in{padding:0 15px 15px;font-size:13px;line-height:1.65;color:var(--ink2)}
+.fold .in b{color:var(--ink)}
+pre.spec{margin:0;padding:15px 16px;border-radius:10px;background:var(--surface);border:1px solid var(--line);
+  font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink2);white-space:pre-wrap;max-height:340px;overflow:auto}
+
+.flash{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);opacity:0;
+  background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:999px;font-size:14px;font-weight:600;
+  pointer-events:none;transition:.22s;box-shadow:0 10px 30px -8px rgba(0,0,0,.4);z-index:50}
+.flash.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{margin:52px 0 0;font-size:12.5px;line-height:1.7;color:var(--ink3);max-width:74ch}
+.foot b{color:var(--ink2)}
+
+@media (max-width:980px){.bench,.results,.grid3,.grid2{grid-template-columns:1fr}}
+@media (max-width:560px){.wrap{padding:20px 14px 60px}.step .sub{width:100%;margin-left:39px}.rail .steps{margin-left:0;width:100%}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<!-- Store capability, material resolution, modeled work, and economics come only from the System bounded Store membrane. -->
+
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="flash" id="flash"></div>
+<script>
+/* ── shared core ─────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   SHARED CORE — compiled byte-identically into both journeys.
+
+   Both pages describe the same physical object. The definition id is computed
+   here, from the physical facts only, so "grab a board" and "outdoor build"
+   arrive at the same id when they arrive at the same part. What differs
+   between them is how each fact came to be known, and that rides on the
+   request as provenance rather than in the object's identity.
+   ═══════════════════════════════════════════════════════════════════════════ */
+"use strict";
+
+var $=function(i){return document.getElementById(i)};
+function esc(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function money(v){return '$'+(Math.round(v*100)/100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',')}
+function clamp(v,a,b){return v<a?a:(v>b?b:v)}
+function q4(v){return Math.round(v*4)/4}
+function fmt(v){
+  if(v==null||!isFinite(v))return '—';
+  var n=Math.abs(v)<1e-10?0:v, n32=Math.round(n*32)/32;
+  if(Math.abs(n-n32)<1e-8){
+    var sign=n32<0?'-':'', a=Math.abs(n32), w=Math.floor(a), e=Math.round((a-w)*32), d=32;
+    if(e===0)return sign+w;
+    if(e===32)return sign+(w+1);
+    while(e%2===0){e/=2;d/=2}
+    return sign+(w?w+' ':'')+e+'/'+d;
+  }
+  return String(Math.round(n*10000)/10000);
+}
+function hash32(str){
+  var h=2166136261;
+  for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}
+  return ('00000000'+(h>>>0).toString(16).toUpperCase()).slice(-8);
+}
+function parseDimension(raw){
+  var x=(''+raw).trim().toLowerCase().replace(/\s*(?:in|inch|inches|")\s*$/,'').trim();
+  if(!x)return null;
+  if(/^\d+(?:\.\d+)?$/.test(x))return +x;
+  var m=x.match(/^(\d+)\s+(\d+)\/(\d+)$/)||x.match(/^(\d+)-(\d+)\/(\d+)$/);
+  if(m){var d=+m[3];return d?(+m[1]+(+m[2]/d)):null}
+  m=x.match(/^(\d+)\/(\d+)$/);
+  if(m){var d2=+m[2];return d2?(+m[1]/d2):null}
+  return null;
+}
+function flash(msg){
+  var f=$('flash'); if(!f)return;
+  f.textContent=msg; f.classList.add('show');
+  clearTimeout(flash._t); flash._t=setTimeout(function(){f.classList.remove('show')},1800);
+}
+
+/* ═══════════ 1 · THE PUBLISHED SOURCE ═══════════
+   AF-01 on the Outdoor Reference & Authority page. Path B reads from it.
+   Path A never sees it — she measures her own broken leg — and the numbers
+   agree because the leg is the leg. */
+var SOURCE={
+  id:'AF-01', record:'SRC-AF-01',
+  publisher:'The Home Depot',
+  work:'How to Build a Picnic Table — 6-ft A-frame',
+  family:'ATTACHED A-FRAME PICNIC TABLE',
+  overall:'72 in long · 30¼ in high · 30½ in wide',
+  legStock:'2x8',
+  legLength:32.75,
+  legLengthLabel:'32¾ in',
+  angle:30,
+  cutPlane:'miter-face',
+  endIdentity:'both',
+  endRelation:'parallel',
+  lengthDatum:'long-long-outer-edge',
+  legsPerTable:4,
+  unknowns:['reusable connection-hole offsets',
+            'a verified height / angle transformation rule']
+};
+var AUTH_PAGE='stb-outdoor-reference-authority-0.3.html';
+var DECK_PAGE='stb-outdoor-build-deck-0.1.html';
+var DOSSIER_PAGE='STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html';
+
+var STOCKS=[
+  {k:'2x4', label:'2×4', w:3.5,  t:1.5},
+  {k:'2x6', label:'2×6', w:5.5,  t:1.5},
+  {k:'2x8', label:'2×8', w:7.25, t:1.5},
+  {k:'4x4', label:'4×4', w:3.5,  t:3.5}
+];
+function stock(k){return STOCKS.filter(function(s){return s.k===k})[0]||STOCKS[2]}
+
+/* Plain words for every stored value. Nothing on screen is a raw key. */
+var WORDS={
+  'miter-face'          :'Across the face',
+  'bevel-thickness'     :'Across the thickness',
+  'both'                :'Both ends',
+  'first'               :'One end only',
+  'parallel'            :'Parallel — same direction',
+  'opposed'             :'Opposed — mirrored',
+  'long-long-outer-edge':'Long point to long point, along the outer edge',
+  'long-short'          :'Long point to short point',
+  'source-stated'       :'The plan states it',
+  'measured-off-part'   :'Measured off the broken one',
+  'NONE'                :'None'
+};
+function words(v){return WORDS[v]||v||'not set'}
+
+/* ═══════════ 2 · THE OBJECT ═══════════ */
+function physicalDemand(P){
+  var s=stock(P.stockClass);
+  return {
+    family:'picnic-table', part:'picnic-table-leg', style:'attached-a-frame',
+    stockClass:P.stockClass, actualWidth:s.w, actualThickness:s.t,
+    finishedLength:Number(P.finishedLength), quantity:Number(P.quantity),
+    endCondition:'angled', straightCut:true,
+    angleDegrees:Number(P.angleDegrees),
+    angleReference:P.angleReference,
+    cutPlane:P.cutPlane, endIdentity:P.endIdentity, endRelation:P.endRelation,
+    lengthDatum:P.lengthDatum,
+    holeRequirement:'NONE', datum:null, holes:[]
+  };
+}
+/* Fixed order, physical facts only. angleReference is deliberately absent:
+   two identical sticks are identical however you learned the angle. */
+function identityTuple(d){
+  return ['picnic-table-leg', d.stockClass,
+    Number(d.finishedLength).toFixed(4), Number(d.quantity).toFixed(0),
+    d.endCondition, Number(d.angleDegrees).toFixed(2),
+    d.cutPlane, d.endIdentity, d.endRelation, d.lengthDatum, d.holeRequirement];
+}
+function definitionId(d){return 'PTL-'+hash32(identityTuple(d).join('|'))}
+function partsList(P){
+  var s=stock(P.stockClass);
+  return [{name:'Table leg',len:Number(P.finishedLength),wid:s.w,qty:Number(P.quantity)}];
+}
+function isComplete(P){
+  return !!(P.stockClass && P.finishedLength>0 && P.quantity>0 &&
+            P.angleDegrees>0 && P.angleReference && P.cutPlane &&
+            P.endIdentity && P.endRelation && P.lengthDatum);
+}
+function missingBits(P){
+  var a=[];
+  if(!(P.angleDegrees>0))a.push('the angle');
+  if(!P.angleReference)a.push('how you know the angle');
+  if(!P.cutPlane)a.push('which way the cut runs');
+  if(!P.endIdentity)a.push('which ends are cut');
+  if(P.endIdentity==='both'&&!P.endRelation)a.push('whether the ends match or mirror');
+  if(!P.lengthDatum)a.push('where the length is measured');
+  return a;
+}
+
+/* ═══════════ 3 · THE STORE ═══════════ */
+function storeAnswer(P){
+  var id=definitionId(physicalDemand(P));
+  return A.storePreview && A.storePreviewDefinitionId===id ? A.storePreview : null;
+}
+function resolveMaterial(P){
+  var a=storeAnswer(P);
+  var r=a&&a.rawEvaluation&&a.rawEvaluation.materialResolution;
+  return r || {status:'UNRESOLVED',code:A.storePreviewPending?'STORE_ANSWER_PENDING':'STORE_ANSWER_NOT_CURRENT'};
+}
+function storeCapability(P){
+  var a=storeAnswer(P);
+  return a&&a.rawEvaluation?a.rawEvaluation.capability:null;
+}
+function storeEstimate(P){
+  var a=storeAnswer(P);
+  return a?a.rawEstimate:null;
+}
+var CUT_CAVEAT='Store Zero evaluates this exact definition through the bounded D-001 reference. '
+  +'A supportable miter is not an order, production release, machine readiness or Cycle Start.';
+function unresolvedConditions(P){
+  var a=storeAnswer(P), u=[];
+  if(!a){
+    u.push(A.storePreviewPending?'STORE_ANSWER_PENDING':'STORE_ANSWER_NOT_CURRENT');
+    return u;
+  }
+  var ev=a.rawEvaluation||{};
+  if(ev.status && ev.status!=='SUPPORTABLE')u.push('STORE_'+String(ev.status));
+  var mat=ev.materialResolution;
+  if(!mat||mat.status!=='MAPPED')u.push((mat&&mat.code)||'STORE_MATERIAL_RESOLUTION_UNAVAILABLE');
+  var cap=ev.capability;
+  if(cap&&cap.status&&cap.status!=='SUPPORTABLE')
+    (cap.missing||cap.reasons||[]).forEach(function(x){u.push(String(x))});
+  var est=a.rawEstimate;
+  if(est&&est.economics&&est.economics.status)u.push(String(est.economics.status));
+  return u.filter(function(v,i,list){return list.indexOf(v)===i});
+}
+
+/* ═══════════ 4 · WOOD ═══════════ */
+var GRAIN={
+  lumber   :{f1:'#EFE0BC',f2:'#E0CCA2',top:'#F3E7C8',end:'#D8C49B',ring:'#C0A87C',
+             line:'rgba(150,118,70,.34)',dark:'#B79D72',knot:'#AE8A54'},
+  weathered:{f1:'#CFC7B6',f2:'#B9B0A0',top:'#D8D1C2',end:'#B3AA99',ring:'#968D7E',
+             line:'rgba(96,88,76,.34)',dark:'#948B7B',knot:'#7E7365'}
+};
+function woodDefs(){
+  var o='<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>';
+  Object.keys(GRAIN).forEach(function(k){
+    var g=GRAIN[k];
+    o+='<linearGradient id="face-'+k+'" x1="0" y1="0" x2="0" y2="1">'
+      +'<stop offset="0" stop-color="'+g.f1+'"/><stop offset="1" stop-color="'+g.f2+'"/></linearGradient>'
+      +'<linearGradient id="top-'+k+'" x1="0" y1="0" x2="1" y2="1">'
+      +'<stop offset="0" stop-color="'+g.top+'"/><stop offset="1" stop-color="'+g.f1+'"/></linearGradient>'
+      +'<linearGradient id="end-'+k+'" x1="0" y1="0" x2="1" y2="1">'
+      +'<stop offset="0" stop-color="'+g.end+'"/><stop offset="1" stop-color="'+g.dark+'"/></linearGradient>'
+      +'<pattern id="grain-'+k+'" width="46" height="13" patternUnits="userSpaceOnUse">'
+      +'<path d="M0 3 Q12 1.2 23 3.2 T46 2.6" fill="none" stroke="'+g.line+'" stroke-width="1"/>'
+      +'<path d="M0 8.4 Q14 10.2 26 8 T46 9" fill="none" stroke="'+g.line+'" stroke-width=".8" opacity=".75"/>'
+      +'</pattern>';
+  });
+  o+='<radialGradient id="drop" cx=".5" cy=".5" r=".5">'
+    +'<stop offset="0" stop-color="rgba(70,45,20,.30)"/><stop offset="1" stop-color="rgba(70,45,20,0)"/>'
+    +'</radialGradient></defs></svg>';
+  return o;
+}
+/* an isometric board with knots, grain and growth rings on the end */
+function boardPortrait(kind,broken,wide){
+  var g=GRAIN[kind], x0=54,x1=292,yT=60,yB=110,dx=30,dy=-19, o=[];
+  o.push('<svg class="pic" viewBox="'+(wide?'-150 0 640 150':'0 0 340 150')+'" role="img" aria-hidden="true">');
+  o.push('<ellipse cx="192" cy="124" rx="122" ry="13" fill="url(#drop)"/>');
+  o.push('<path d="M'+x0+' '+yT+'L'+(x0+dx)+' '+(yT+dy)+'L'+(x1+dx)+' '+(yT+dy)+'L'+x1+' '+yT+'Z" fill="url(#top-'+kind+')"/>');
+  o.push('<clipPath id="ct-'+kind+'"><path d="M'+x0+' '+yT+'L'+(x0+dx)+' '+(yT+dy)+'L'+(x1+dx)+' '+(yT+dy)+'L'+x1+' '+yT+'Z"/></clipPath>');
+  o.push('<g clip-path="url(#ct-'+kind+')">');
+  for(var i=1;i<5;i++){
+    var t=i/5, ay=yT+dy*t;
+    o.push('<path d="M'+(x0+dx*t+6)+' '+ay+'L'+(x1+dx*t-6)+' '+ay+'" stroke="'+g.line+'" stroke-width=".9" opacity=".6"/>');
+  }
+  o.push('</g>');
+  o.push('<rect x="'+x0+'" y="'+yT+'" width="'+(x1-x0)+'" height="'+(yB-yT)+'" fill="url(#face-'+kind+')"/>');
+  o.push('<clipPath id="cf-'+kind+'"><rect x="'+x0+'" y="'+yT+'" width="'+(x1-x0)+'" height="'+(yB-yT)+'"/></clipPath>');
+  o.push('<g clip-path="url(#cf-'+kind+')">');
+  o.push('<rect x="'+x0+'" y="'+yT+'" width="'+(x1-x0)+'" height="'+(yB-yT)+'" fill="url(#grain-'+kind+')"/>');
+  [[128,94,7,-16],[224,80,4.6,10]].forEach(function(k){
+    var kx=k[0],ky=k[1],r=k[2],tf=' transform="rotate('+k[3]+' '+kx+' '+ky+')"';
+    for(var q=3;q>=1;q--)
+      o.push('<ellipse cx="'+kx+'" cy="'+ky+'" rx="'+(r*(1+q*.62))+'" ry="'+(r*(.68+q*.34))+'"'
+        +' fill="none" stroke="'+g.line+'" stroke-width="'+(1.25-q*.2)+'" opacity="'+(.85-q*.16)+'"'+tf+'/>');
+    o.push('<ellipse cx="'+kx+'" cy="'+ky+'" rx="'+r+'" ry="'+(r*.68)+'" fill="'+g.knot+'" opacity=".9"'+tf+'/>');
+    o.push('<ellipse cx="'+kx+'" cy="'+ky+'" rx="'+(r*.52)+'" ry="'+(r*.34)+'" fill="'+g.dark+'" opacity=".55"'+tf+'/>');
+    o.push('<ellipse cx="'+kx+'" cy="'+ky+'" rx="'+r+'" ry="'+(r*.68)+'" fill="none" stroke="rgba(70,45,20,.45)" stroke-width=".9"'+tf+'/>');
+  });
+  if(broken){
+    /* a split running out of the lower knot — this board is the reason she is here */
+    o.push('<path d="M128 100 L150 96 L176 103 L205 97 L238 104 L268 99 L292 104" fill="none"'
+      +' stroke="rgba(60,38,16,.55)" stroke-width="2.2" stroke-linejoin="round"/>');
+    o.push('<path d="M128 100 L150 96 L176 103 L205 97 L238 104 L268 99 L292 104" fill="none"'
+      +' stroke="rgba(255,250,240,.35)" stroke-width=".9" transform="translate(0,-1.6)"/>');
+  }
+  o.push('</g>');
+  var ep='M'+x0+' '+yT+'L'+(x0+dx)+' '+(yT+dy)+'L'+(x0+dx)+' '+(yB+dy)+'L'+x0+' '+yB+'Z';
+  o.push('<clipPath id="ce-'+kind+'"><path d="'+ep+'"/></clipPath>');
+  o.push('<path d="'+ep+'" fill="url(#end-'+kind+')"/>');
+  o.push('<g clip-path="url(#ce-'+kind+')">');
+  for(var n=1;n<=7;n++)
+    o.push('<ellipse cx="'+(x0+4)+'" cy="'+(yB-2)+'" rx="'+(n*10)+'" ry="'+(n*13)+'" fill="none"'
+      +' stroke="'+g.ring+'" stroke-width="1.3" opacity="'+(0.9-n*0.07)+'"'
+      +' transform="rotate(-24 '+(x0+4)+' '+(yB-2)+')"/>');
+  o.push('</g>');
+  o.push('<path d="'+ep+'" fill="none" stroke="rgba(70,45,20,.34)"/>');
+  o.push('<path d="M'+x0+' '+yT+'L'+(x0+dx)+' '+(yT+dy)+'L'+(x1+dx)+' '+(yT+dy)+'L'+x1+' '+yT+'L'+x1+' '+yB+'L'+x0+' '+yB+'Z"'
+    +' fill="none" stroke="rgba(70,45,20,.34)"/>');
+  o.push('<line x1="'+x0+'" y1="'+yT+'" x2="'+x1+'" y2="'+yT+'" stroke="rgba(70,45,20,.22)"/>');
+  o.push('</svg>');
+  return o.join('');
+}
+function stockSwatch(sz){
+  var h=Math.round(clamp(sz.w*2.4,5,17));
+  return '<svg width="26" height="18" viewBox="0 0 26 18" aria-hidden="true">'
+    +'<rect x="0" y="'+((18-h)/2)+'" width="26" height="'+h+'" rx="2.5" fill="url(#face-lumber)"/>'
+    +'<rect x="0" y="'+((18-h)/2)+'" width="26" height="'+h+'" rx="2.5" fill="url(#grain-lumber)" opacity=".8"/></svg>';
+}
+
+/* ═══════════ 5 · HANDLES ═══════════ */
+var GEO=null, grab=null, focusKey=null;
+function grip(key,x,y,vert,label,val){
+  var w=vert?38:16, h=vert?16:38, a='var(--accent)';
+  var ch=vert
+    ? '<path d="M'+(x-5)+' '+(y-2)+'l5 -3.8l5 3.8M'+(x-5)+' '+(y+2)+'l5 3.8l5 -3.8" stroke="'+a+'" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+    : '<path d="M'+(x-2)+' '+(y-5)+'l-3.8 5l3.8 5M'+(x+2)+' '+(y-5)+'l3.8 5l-3.8 5" stroke="'+a+'" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+  return '<g data-grab="'+esc(key)+'" tabindex="0" role="slider" aria-label="'+esc(label)+'"'
+    +' aria-valuenow="'+esc(val==null?'':val)+'">'
+    +'<rect x="'+(x-(vert?26:18))+'" y="'+(y-(vert?18:26))+'" width="'+(vert?52:36)+'" height="'+(vert?36:52)+'" fill="rgba(0,0,0,0)"/>'
+    +'<ellipse cx="'+x+'" cy="'+(y+h/2+3)+'" rx="'+(w/2)+'" ry="3" fill="url(#drop)" opacity=".8"/>'
+    +'<rect class="grip" x="'+(x-w/2)+'" y="'+(y-h/2)+'" width="'+w+'" height="'+h+'" rx="8"'
+    +' fill="var(--surface)" stroke="'+a+'" stroke-width="2.2"/>'+ch+'</g>';
+}
+function dimH(x1,x2,y,label){
+  var m=(x1+x2)/2, w=String(label).length*6.6+16;
+  return '<g><line x1="'+x1+'" y1="'+y+'" x2="'+x2+'" y2="'+y+'" stroke="var(--accent)" opacity=".55"/>'
+    +'<path d="M'+x1+' '+(y-4)+'v8M'+x2+' '+(y-4)+'v8" stroke="var(--accent)" opacity=".55"/>'
+    +'<rect x="'+(m-w/2)+'" y="'+(y-9.5)+'" width="'+w+'" height="19" rx="5" fill="var(--stage)"/>'
+    +'<text x="'+m+'" y="'+(y+4.5)+'" text-anchor="middle" font-size="12.5" font-weight="650" fill="var(--accent2)"'
+    +' font-family="ui-sans-serif,sans-serif">'+esc(label)+'</text></g>';
+}
+
+/* ═══════════ 6 · THE DRAWINGS ═══════════ */
+
+/* One leg, face on. The end cuts are drawn at the angle you set, so the
+   picture moves when the definition moves. */
+function drawLeg(P){
+  var s=stock(P.stockClass), L=Number(P.finishedLength)||1;
+  var ang=Number(P.angleDegrees)||0;
+  var face=P.cutPlane!=='bevel-thickness';
+  var W=face?s.w:s.t;                      /* the cut runs across this dimension */
+  var skewIn=W*Math.tan(ang*Math.PI/180);
+  var vw=760, ML=70, MR=70, MT=96;
+  var SC=(vw-ML-MR)/(L+Math.abs(skewIn));
+  var wPx=W*SC, skew=skewIn*SC, lPx=L*SC;
+  var vh=MT+wPx+152;
+  var yT=MT, yB=MT+wPx, x0=ML;
+  var both=P.endIdentity!=='first';
+  var mirrored=P.endRelation==='opposed';
+  /* lower edge is the datum edge: x0 → x0+lPx. upper edge is shifted by skew. */
+  var topL=x0+skew, topR=x0+skew+lPx, botL=x0, botR=x0+lPx;
+  if(mirrored){topR=x0+lPx-skew}
+  if(!both){topL=x0}
+  var TANMAX=Math.tan(55*Math.PI/180);
+  GEO={vw:vw,vh:vh,handles:{
+    len:{axis:'x',o:x0,s:SC,min:6,max:96,
+         get:function(){return Number(P.finishedLength)},
+         set:function(v){P.finishedLength=q4(v)}},
+    /* the handle rides on tan(angle), so the linear engine drives a real angle */
+    ang:{axis:'x',o:x0+lPx,s:W*SC,min:0,max:TANMAX,
+         get:function(){return Math.tan((Number(P.angleDegrees)||0)*Math.PI/180)},
+         set:function(v){P.angleDegrees=Math.round(Math.atan(clamp(v,0,TANMAX))*180/Math.PI*2)/2}}
+  }};
+  if(P.angleLocked)delete GEO.handles.ang;
+  var g=GRAIN.lumber, o=['<svg viewBox="0 0 '+vw+' '+vh+'" role="img" aria-label="one table leg, drawn to its definition">'];
+  o.push('<text x="'+ML+'" y="26" font-size="11" font-weight="700" letter-spacing=".09em" fill="var(--ink3)"'
+    +' font-family="ui-sans-serif,sans-serif">ONE LEG · '+(face?'LOOKING AT THE FACE':'LOOKING AT THE EDGE')+'</text>');
+
+  var poly=[[topL,yT],[topR,yT],[botR,yB],[botL,yB]];
+  var d='M'+poly.map(function(p){return p[0]+' '+p[1]}).join('L')+'Z';
+  o.push('<ellipse cx="'+(x0+lPx/2+skew/2)+'" cy="'+(yB+9)+'" rx="'+(lPx/2)+'" ry="6" fill="url(#drop)" opacity=".65"/>');
+  o.push('<path d="'+d+'" fill="url(#face-lumber)"/>');
+  o.push('<clipPath id="clip-leg"><path d="'+d+'"/></clipPath>');
+  o.push('<g clip-path="url(#clip-leg)"><rect x="'+(x0-40)+'" y="'+yT+'" width="'+(lPx+Math.abs(skew)+80)+'" height="'+wPx+'" fill="url(#grain-lumber)" opacity=".9"/></g>');
+  o.push('<path d="'+d+'" fill="none" stroke="rgba(70,45,20,.42)" stroke-width="1.2"/>');
+
+  /* the cut ends, drawn heavy, because they are the part */
+  o.push('<path d="M'+topL+' '+yT+'L'+botL+' '+yB+'" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round"/>');
+  o.push('<path d="M'+topR+' '+yT+'L'+botR+' '+yB+'" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round"/>');
+
+  /* the angle, measured off square, drawn clear of the wood so it can be read */
+  if(ang>0){
+    var ax=botR, ay=yB, r=44;
+    var rd=ang*Math.PI/180, dir=(mirrored?-1:1);
+    var sqx=ax, sqy=ay+r, enx=ax-r*Math.sin(rd)*dir, eny=ay+r*Math.cos(rd);
+    o.push('<path d="M'+ax+' '+ay+'L'+sqx+' '+sqy+'" stroke="var(--ink3)" stroke-dasharray="3 3"/>');
+    o.push('<path d="M'+ax+' '+ay+'L'+enx+' '+eny+'" stroke="var(--accent)" stroke-width="1.4" opacity=".8"/>');
+    o.push('<path d="M'+sqx+' '+sqy+'A'+r+' '+r+' 0 0 '+(mirrored?1:0)+' '+enx+' '+eny+'"'
+      +' fill="none" stroke="var(--accent)" stroke-width="1.6"/>');
+    o.push('<text x="'+(ax-dir*(r*0.74)-11)+'" y="'+(ay+r*0.95)+'" font-size="13" font-weight="700"'
+      +' fill="var(--accent2)" font-family="ui-sans-serif,sans-serif">'+fmt(ang)+'°</text>');
+    o.push('<text x="'+(ax+14)+'" y="'+(ay+r+5)+'" font-size="10.5" fill="var(--ink3)"'
+      +' font-family="ui-sans-serif,sans-serif">off square</text>');
+  }
+  /* the datum, drawn along the edge it is actually measured on */
+  o.push(dimH(botL,botR,yB+100,fmt(L)+' in along this edge'));
+  o.push('<text x="'+(x0+lPx/2)+'" y="'+(yB+126)+'" text-anchor="middle" font-size="11.5" fill="var(--ink3)"'
+    +' font-family="ui-sans-serif,sans-serif">'+esc(words(P.lengthDatum))+'</text>');
+  o.push('<text x="'+ML+'" y="'+(yT-14)+'" font-size="11.5" fill="var(--ink3)" font-family="ui-sans-serif,sans-serif">'
+    +esc(stock(P.stockClass).label)+' · '+fmt(W)+' in across the cut · '+esc(words(P.endIdentity))
+    +(both?' · '+esc(words(P.endRelation)):'')+'</text>');
+  o.push(grip('len',botR,yB-wPx/2,false,'finished length',fmt(L)));
+  if(both&&!P.angleLocked)o.push(grip('ang',topR,yT,false,'angle of the end cut',fmt(ang)));
+  if(P.angleLocked&&ang>0)
+    o.push('<g><rect x="'+(topR-30)+'" y="'+(yT-30)+'" width="62" height="19" rx="9" fill="var(--goodtint)"'
+      +' stroke="var(--good)"/><text x="'+(topR+1)+'" y="'+(yT-17)+'" text-anchor="middle" font-size="10"'
+      +' font-weight="700" letter-spacing=".05em" fill="var(--good)"'
+      +' font-family="ui-sans-serif,sans-serif">'+esc(P.angleSource||'FIXED')+'</text></g>');
+  o.push('</svg>');
+  return o.join('');
+}
+
+/* The end frame. Two legs actually crossing, at the angle you set — because
+   the crossing is the reason both ends carry the same cut. */
+function drawFrame(P){
+  var ang=clamp(Number(P.angleDegrees)||0,0,45), rad=ang*Math.PI/180;
+  var vw=760, vh=430, yTop=88, yCross=152, yFoot=344, cx=380;
+  var dTop=Math.tan(rad)*(yCross-yTop), dFoot=Math.tan(rad)*(yFoot-yCross);
+  var TANMAX=Math.tan(45*Math.PI/180);
+  GEO={vw:vw,vh:vh,handles:{
+    /* pull the foot out: x sits at cx − tan(angle)·run, so tan is what moves */
+    ang:{axis:'x',o:cx,s:-(yFoot-yCross),min:0,max:TANMAX,
+         get:function(){return Math.tan((Number(P.angleDegrees)||0)*Math.PI/180)},
+         set:function(v){P.angleDegrees=Math.round(Math.atan(clamp(v,0,TANMAX))*180/Math.PI*2)/2}}
+  }};
+  if(P.angleLocked)GEO={vw:vw,vh:vh,handles:{}};
+  var lw=Math.max(10,Math.min(22,stock(P.stockClass).w*2.6));
+  var o=['<svg viewBox="0 0 '+vw+' '+vh+'" role="img" aria-label="the end frame, two legs crossing">'];
+  function label(x,y,txt,anchor,cls){
+    var wpx=String(txt).length*6.3+12;
+    var lx=anchor==='end'?x-wpx:(anchor==='middle'?x-wpx/2:x);
+    return '<rect x="'+lx+'" y="'+(y-11)+'" width="'+wpx+'" height="17" rx="5" fill="var(--stage)" opacity=".9"/>'
+      +'<text x="'+x+'" y="'+y+'" text-anchor="'+(anchor||'start')+'" font-size="11.5"'
+      +' fill="'+(cls||'var(--ink3)')+'" font-family="ui-sans-serif,sans-serif">'+esc(txt)+'</text>';
+  }
+  o.push('<text x="46" y="26" font-size="11" font-weight="700" letter-spacing=".09em" fill="var(--ink3)"'
+    +' font-family="ui-sans-serif,sans-serif">THE END FRAME · TWO OF THESE LEGS, CROSSED</text>');
+  o.push('<ellipse cx="'+cx+'" cy="'+(yFoot+9)+'" rx="'+(dFoot+80)+'" ry="7" fill="url(#drop)" opacity=".55"/>');
+  function legPath(sign){return 'M'+(cx+sign*dTop)+' '+yTop+'L'+(cx-sign*dFoot)+' '+yFoot}
+  /* the far leg first, then the near one, so the crossing reads as a crossing */
+  o.push('<path d="'+legPath(-1)+'" stroke="'+GRAIN.lumber.dark+'" stroke-width="'+lw+'" stroke-linecap="butt" opacity=".85"/>');
+  o.push('<path d="'+legPath(1)+'" stroke="var(--accent)" stroke-width="'+lw+'" stroke-linecap="butt"/>');
+  o.push('<path d="'+legPath(1)+'" stroke="rgba(255,248,236,.16)" stroke-width="'+(lw*.32)+'" stroke-linecap="butt"/>');
+  /* the feet are cut flat, so mask everything below the ground */
+  o.push('<rect x="0" y="'+yFoot+'" width="'+vw+'" height="'+(vh-yFoot)+'" fill="var(--stage)"/>');
+  o.push('<line x1="46" y1="'+yFoot+'" x2="'+(vw-46)+'" y2="'+yFoot+'" stroke="var(--line2)"/>');
+  /* tabletop and seat rail, so it is recognisably a picnic table */
+  o.push('<rect x="'+(cx-170)+'" y="'+(yTop-20)+'" width="340" height="18" rx="2" fill="url(#face-lumber)" stroke="rgba(70,45,20,.35)"/>');
+  var ySeat=yCross+92, seatHalf=Math.tan(rad)*(ySeat-yCross)+64;
+  o.push('<rect x="'+(cx-seatHalf)+'" y="'+ySeat+'" width="'+(seatHalf*2)+'" height="14" rx="2"'
+    +' fill="url(#face-lumber)" stroke="rgba(70,45,20,.3)" opacity=".94"/>');
+  /* plumb, and the angle read off it */
+  o.push('<path d="M'+(cx+dTop)+' '+yTop+'v'+(yFoot-yTop)+'" stroke="var(--ink3)" stroke-dasharray="3 4" opacity=".6"/>');
+  o.push(label(cx+dTop+8,yTop+20,'plumb'));
+  o.push('<circle cx="'+cx+'" cy="'+yCross+'" r="5.5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>');
+  o.push('<path d="M'+(cx-9)+' '+yCross+'H'+(cx-96)+'" stroke="var(--ink3)" stroke-width="1" opacity=".5"/>');
+  o.push(label(cx-102,yCross+4,'they cross here','end'));
+  if(ang>0){
+    var r=58, a0=[cx+dTop,yFoot-r], a1=[cx+dTop-r*Math.sin(rad),yFoot-r*Math.cos(rad)];
+    o.push('<path d="M'+a0[0]+' '+a0[1]+'A'+r+' '+r+' 0 0 0 '+a1[0]+' '+a1[1]+'" fill="none"'
+      +' stroke="var(--accent)" stroke-width="1.6"/>');
+    o.push('<text x="'+(cx+dTop-r*0.62)+'" y="'+(yFoot-r*0.55)+'" text-anchor="middle" font-size="14"'
+      +' font-weight="700" fill="var(--accent2)" font-family="ui-sans-serif,sans-serif">'+fmt(ang)+'°</text>');
+  }
+  o.push('<text x="'+(cx-dFoot)+'" y="'+(yFoot+26)+'" text-anchor="middle" font-size="12" font-weight="700"'
+    +' fill="var(--accent2)" font-family="ui-sans-serif,sans-serif">THIS LEG</text>');
+  o.push('<text x="'+(cx+dFoot)+'" y="'+(yFoot+26)+'" text-anchor="middle" font-size="12" fill="var(--ink3)"'
+    +' font-family="ui-sans-serif,sans-serif">and its pair</text>');
+  if(!P.angleLocked)o.push(grip('ang',cx-dFoot,yFoot-24,false,'leg angle',fmt(ang)));
+  var tables=Number(P.quantity)/4;
+  o.push('<text x="'+(vw-46)+'" y="'+(vh-16)+'" text-anchor="end" font-size="11" fill="var(--ink3)"'
+    +' font-family="ui-sans-serif,sans-serif">'+Number(P.quantity)+' legs · '
+    +(tables===Math.round(tables)?tables+' table'+(tables===1?'':'s'):'not a whole number of tables')
+    +(P.angleLocked?' · the angle belongs to '+esc(P.angleSource||'the plan'):' · drag the foot to change the angle')
+    +'</text>');
+  o.push('</svg>');
+  return o.join('');
+}
+
+/* The boards she buys, with the legs nested into them at the real angle.
+   The first cut costs a triangle; after that every leg starts where the last
+   one finished. That is why an inch longer can still be the same two boards. */
+function drawNesting(P){
+  var plan=nestPlan(P), s=stock(P.stockClass);
+  var vw=760, ML=36, MR=36, IW=vw-ML-MR;
+  if(!plan){
+    return '<svg viewBox="0 0 '+vw+' 140" role="img" aria-label="no parent board">'
+      +'<text x="'+ML+'" y="76" font-size="14" fill="var(--ink3)" font-family="ui-sans-serif,sans-serif">'
+      +'No board Store Zero offers in this size is long enough. Shorten it, or pick a wider board.</text></svg>';
+  }
+  var r=plan.r, S=r.stockLengthIn, SC=IW/S, BH=clamp(s.w*7,46,80), gap=62, y=68, o=[];
+  var sk=plan.skew*SC;
+  o.push('<svg viewBox="0 0 '+vw+' 0" role="img" aria-label="your legs nested into the boards you buy">');
+  o.push('<text x="'+ML+'" y="24" font-size="11" font-weight="700" letter-spacing=".09em" fill="var(--ink3)"'
+    +' font-family="ui-sans-serif,sans-serif">'+r.quantity+' × '+esc(s.label)+' × '+S
+    +' IN — WHAT THE '+Number(P.quantity)+' LEGS COME OUT OF</text>');
+  plan.rows.forEach(function(rw,i){
+    var x0=ML, top=y, bot=y+BH;
+    o.push('<ellipse cx="'+(ML+IW/2)+'" cy="'+(bot+8)+'" rx="'+(IW/2)+'" ry="5" fill="url(#drop)" opacity=".5"/>');
+    o.push('<rect x="'+ML+'" y="'+top+'" width="'+IW+'" height="'+BH+'" rx="2"'
+      +' fill="rgba(150,118,72,.10)" stroke="var(--line2)" stroke-dasharray="4 4"/>');
+    /* the triangle the first cut throws away */
+    if(sk>0.6){
+      o.push('<path d="M'+ML+' '+top+'L'+(ML+sk)+' '+top+'L'+ML+' '+bot+'Z" fill="rgba(150,118,72,.20)"/>');
+      o.push('<path d="M'+(ML+sk)+' '+top+'L'+ML+' '+bot+'" stroke="var(--accent)" stroke-dasharray="2 3" opacity=".6"/>');
+    }
+    var c=0, tops=[];
+    rw.row.forEach(function(len,j){
+      var xb=ML+c*SC, xe=ML+(c+len)*SC;
+      var d='M'+(xb+sk)+' '+top+'L'+(xe+sk)+' '+top+'L'+xe+' '+bot+'L'+xb+' '+bot+'Z';
+      o.push('<path d="'+d+'" fill="url(#face-lumber)"/>');
+      o.push('<clipPath id="cn'+i+'-'+j+'"><path d="'+d+'"/></clipPath>');
+      o.push('<g clip-path="url(#cn'+i+'-'+j+')"><rect x="'+(xb-4)+'" y="'+top+'" width="'+(xe-xb+sk+8)
+        +'" height="'+BH+'" fill="url(#grain-lumber)" opacity=".85"/></g>');
+      o.push('<path d="'+d+'" fill="none" stroke="rgba(70,45,20,.36)"/>');
+      tops.push('<path d="M'+(xe+sk)+' '+(top-8)+'L'+xe+' '+(bot+8)+'" stroke="var(--accent)"'
+        +' stroke-dasharray="2 3" opacity=".65"/>');
+      if(xe-xb>62)o.push('<text x="'+((xb+xe)/2+sk/2)+'" y="'+(top+BH/2+4.5)+'" text-anchor="middle"'
+        +' font-size="12.5" font-weight="650" fill="rgba(60,38,16,.66)" font-family="ui-sans-serif,sans-serif">'
+        +fmt(len)+' in</text>');
+      c+=len;
+    });
+    o.push(tops.join(''));
+    var lw=rw.left*SC, lx=ML+c*SC+sk;
+    if(lw>0.6){
+      o.push('<text x="'+(lx+lw/2)+'" y="'+(top+BH/2+4)+'" text-anchor="middle" font-size="11" fill="var(--ink3)"'
+        +' font-family="ui-sans-serif,sans-serif">'
+        +(lw>78?eighths(rw.left)+' in left over':(lw>32?eighths(rw.left)+' in':''))+'</text>');
+    }
+    o.push('<text x="'+ML+'" y="'+(top-16)+'" font-size="10" font-weight="700" letter-spacing=".08em"'
+      +' fill="var(--ink3)" font-family="ui-sans-serif,sans-serif">BOARD '+(i+1)+' · '+rw.row.length+' LEGS</text>');
+    if(!rw.fits)
+      o.push('<text x="'+(ML+IW)+'" y="'+(top-16)+'" text-anchor="end" font-size="10.5" font-weight="700"'
+        +' fill="var(--accent2)" font-family="ui-sans-serif,sans-serif">DOES NOT FIT AT THIS ANGLE</text>');
+    y+=BH+gap;
+  });
+  var vh=y-gap+40;
+  o.push('<text x="'+ML+'" y="'+(vh-8)+'" font-size="11" fill="var(--ink3)" font-family="ui-sans-serif,sans-serif">'
+    +(plan.skew>0.05
+      ? 'Only the first cut costs a triangle. After that each leg starts where the last one ended.'
+      : 'Square ends, so the legs sit end to end.')+'</text>');
+  o[0]=o[0].replace('viewBox="0 0 '+vw+' 0"','viewBox="0 0 '+vw+' '+vh+'"');
+  o.push('</svg>');
+  return o.join('');
+}
+
+/* How far the slanted end reaches across the board. This is the number that
+   makes an angled cut cost more board than a square one — but only once. */
+function skewOf(P){
+  var s=stock(P.stockClass);
+  var W=(P.cutPlane==='bevel-thickness')?s.t:s.w;
+  return W*Math.tan((Number(P.angleDegrees)||0)*Math.PI/180);
+}
+/* Parallel angled ends nest: every leg after the first starts where the last
+   one finished, so the run is the sum of the lengths plus one triangle. The
+   shared resolver counts by finished length, which gets the board count right
+   and the offcut slightly generous — so the true run is checked here. */
+function nestPlan(P){
+  var r=resolveMaterial(P);
+  if(!r||r.status!=='MAPPED'||r.form!=='board')return null;
+  var sk=Number(r.endAllowanceIn);
+  if(!isFinite(sk))sk=skewOf(P);
+  var sourceRows=Array.isArray(r.rows)?r.rows:[];
+  var rows=sourceRows.map(function(row){
+    var count=Math.max(0,Number(row.parts)||0);
+    var parts=[];for(var i=0;i<count;i++)parts.push(Number(P.finishedLength));
+    var sum=Number(row.sum);if(!isFinite(sum))sum=count*Number(P.finishedLength);
+    var run=Number(row.run);if(!isFinite(run))run=sum+sk;
+    return {row:parts,sum:sum,run:run,left:r.stockLengthIn-run,fits:run<=r.stockLengthIn+1e-6};
+  });
+  return {r:r,skew:sk,rows:rows,fits:rows.length>0&&rows.every(function(x){return x.fits})};
+}
+
+/* ═══════════ 7 · THE NUMBERS ═══════════ */
+function cutTable(P){
+  var list=partsList(P), s=stock(P.stockClass);
+  return '<div class="panel"><h3>Cut list</h3><table class="cut"><thead><tr><th>Piece</th><th>Size</th>'
+    +'<th style="text-align:right">Qty</th></tr></thead><tbody>'
+    +list.map(function(p){
+      return '<tr><td class="n">'+esc(p.name)+'</td><td class="d">'+fmt(p.len)+' × '+fmt(p.wid)+' in</td>'
+        +'<td class="q">'+p.qty+'</td></tr>'}).join('')
+    +'</tbody></table>'
+    +'<p class="hint">Every leg is the same cut: '+fmt(P.angleDegrees)+'° '+words(P.cutPlane).toLowerCase()
+    +', '+words(P.endIdentity).toLowerCase()+', '+words(P.endRelation).toLowerCase()
+    +'. Saw kerf is not counted.</p></div>';
+}
+function buyPanel(P){
+  var a=storeAnswer(P), r=resolveMaterial(P), s=stock(P.stockClass);
+  if(!a){
+    var message=A.storePreviewPending
+      ? 'Checking this definition against Store Zero…'
+      : (A.storePreviewDiagnostic==='STORE_DEMAND_INCOMPLETE'
+          ? 'Finish defining the cut and its length datum before Store Zero can answer.'
+          : (A.storePreviewDiagnostic
+              ? 'Store Zero could not return a current answer · '+esc(A.storePreviewDiagnostic)+'.'
+              : 'No current Store answer for this definition.'));
+    return '<div class="panel"><h3>Store Zero</h3><p class="hint" style="margin:0">'+message+'</p></div>';
+  }
+  var ev=a.rawEvaluation||{}, cap=ev.capability||{}, est=a.rawEstimate||null;
+  if(!r||r.status!=='MAPPED')
+    return '<div class="panel"><h3>Store Zero</h3><p class="hint" style="margin:0">'
+      +'Material is unresolved'+(r&&r.code?' · '+esc(r.code):'')+'. Nothing is priced by assumption.</p></div>';
+  var plan=nestPlan(P);
+  var mat=est&&est.totals&&Number.isFinite(Number(est.totals.material))?Number(est.totals.material):Number(r.materialTotal);
+  var q=est&&est.totals&&Number.isFinite(Number(est.totals.Q))?Number(est.totals.Q):null;
+  var cyc=est&&est.cycle?est.cycle:null;
+  var support=ev.status||cap.status||'UNRESOLVED';
+  return '<div class="panel"><h3>Store Zero answer</h3>'
+    +'<div class="buy"><span class="w">'+r.quantity+' × '+esc(s.label)+' × '+r.stockLengthIn+' in'
+    +'<i>'+esc(r.storeSku)+' · '+money(r.unitPrice)+' each</i></span>'
+    +'<span class="p">'+money(mat)+'</span></div>'
+    +'<div class="total"><span>Current Store-derived value</span><b>'+(q==null?money(mat)+' + work unresolved':money(q))+'</b></div>'
+    +'<p class="hint"><b>Capability · '+esc(support)+'</b> · '+fmt(P.angleDegrees)+'° '+esc(words(P.cutPlane).toLowerCase())
+    +' · D-001 fixed downstroke miter/crosscut reference.</p>'
+    +(cyc?'<p class="hint"><b>Modeled work · '+fmt(cyc.T_job_min)+' min</b> · '+cyc.parentBoards+' parent boards · '+cyc.cutCount+' saw cuts. Modeled, not measured production time.</p>':'')
+    +(est&&est.economics&&est.economics.status?'<p class="hint"><b>'+esc(est.economics.status)+'</b> · '+esc(est.economics.reason||'No complete service recovery has been declared.')+'</p>':'')
+    +(plan&&plan.skew>0.05?'<p class="hint"><b>About '+eighths(plan.rows[0].left)+' in left on the end of each board.</b> The slanted ends nest, so only the first cut costs a triangle.</p>':'')
+    +'<p class="hint">'+CUT_CAVEAT+'</p>'
+    +'<p class="hint">Store source pin '+esc(String(a.storePin||'').slice(0,12))+'… · reference answer, not a commercial quote.</p></div>';
+}
+function eighths(v){return fmt(Math.floor(v*8+1e-6)/8)}
+function readoutHTML(P){
+  var bits=[];
+  bits.push('<b>'+esc(stock(P.stockClass).label)+'</b>');
+  bits.push('<b>'+fmt(P.finishedLength)+'</b> in long');
+  bits.push('<b>'+fmt(P.angleDegrees)+'°</b> '+esc(words(P.cutPlane).toLowerCase()));
+  bits.push('<b>'+esc(words(P.endIdentity).toLowerCase())+'</b>, '+esc(words(P.endRelation).toLowerCase()));
+  bits.push('<b>'+Number(P.quantity)+'</b> of them');
+  return bits.map(function(x){return '<span class="i">'+x+'</span>'}).join('<span class="sep">·</span>');
+}
+function specText(P,provenance){
+  var d=physicalDemand(P), r=resolveMaterial(P), s=stock(P.stockClass), L=[];
+  L.push('PICNIC TABLE LEG — '+definitionId(d));
+  L.push('');
+  L.push('  Stock        '+s.label+'  ('+fmt(s.t)+' × '+fmt(s.w)+' in actual)');
+  L.push('  Length       '+fmt(d.finishedLength)+' in   '+words(d.lengthDatum));
+  L.push('  Quantity     '+d.quantity);
+  L.push('  Ends         '+words(d.endIdentity)+', '+words(d.endRelation));
+  L.push('  Angle        '+fmt(d.angleDegrees)+'°   '+words(d.cutPlane));
+  L.push('  Angle known  '+words(d.angleReference));
+  L.push('  Holes        none');
+  L.push('');
+  L.push('BUY');
+  if(r&&r.status==='MAPPED')
+    L.push('  '+r.quantity+' × '+s.label+' × '+r.stockLengthIn+' in   '+r.storeSku+'   '+money(r.materialTotal));
+  else L.push('  unresolved');
+  L.push('');
+  L.push('PROVENANCE  '+provenance);
+  L.push('');
+  L.push('The cutting is not quoted. Saw kerf is not counted. Nothing is ordered.');
+  return L.join('\n');
+}
+
+/* ═══════════ 8 · THE BRIDGE ═══════════ */
+function buildBridge(cfg){
+  function def(){
+    var d=physicalDemand(cfg.part());
+    d.definitionId=definitionId(d);
+    d.sourceAuthority=cfg.sourceAuthority;
+    return JSON.parse(JSON.stringify(d));
+  }
+  function demand(){
+    var P=cfg.part(), d=physicalDemand(P), c=storeContract();
+    var base={protocol:'stb.store-handoff/0.1',projectId:cfg.projectId,projectClass:cfg.projectClass,
+      definitionId:definitionId(d),physicalDemand:d,sourceAuthority:cfg.sourceAuthority,
+      unresolvedConditions:unresolvedConditions(P)};
+    if(c&&typeof c.createComparisonHandoff==='function'){
+      try{return c.createComparisonHandoff(base)}catch(e){}
+    }
+    return base;
+  }
+  window.STBProjectBridge={
+    version:'stb.project-bridge/0.1',
+    projectId:cfg.projectId, projectClass:cfg.projectClass, sourceAuthority:cfg.sourceAuthority,
+    getDefinition:def, getDefinitionId:function(){return definitionId(physicalDemand(cfg.part()))},
+    getStoreDemand:demand,
+    getSnapshot:function(){
+      var P=cfg.part(), d=physicalDemand(P), r=resolveMaterial(P);
+      return {projectId:cfg.projectId, projectClass:cfg.projectClass, sourceAuthority:cfg.sourceAuthority,
+        screen:cfg.screen(), definitionId:definitionId(d), definition:def(),
+        confirmed:cfg.confirmed()?{definitionId:cfg.confirmed().id,payload:cfg.confirmed()}:null,
+        currentMatchesConfirmed:!!(cfg.confirmed()&&cfg.confirmed().id===definitionId(d)),
+        material:r&&r.status==='MAPPED'?{sku:r.storeSku,quantity:r.quantity,total:r.materialTotal}:null,
+        unresolvedConditions:unresolvedConditions(P),
+        storeDemand:demand()};
+    }
+  };
+  return window.STBProjectBridge;
+}
+function emitChanged(projectId,lastRef,cfg){
+  var id=definitionId(physicalDemand(cfg.part()));
+  if(id===lastRef.v)return;
+  lastRef.v=id;
+  if(projectId==='start-own'){
+    A.storePreviewPending=true;
+    A.storePreview=null;
+    A.storePreviewDefinitionId=null;
+    A.storePreviewDiagnostic=null;
+  }
+  var msg={type:'STB_PROJECT_DEFINITION_CHANGED',projectId:projectId,definitionId:id,
+    definition:window.STBProjectBridge?window.STBProjectBridge.getDefinition():null};
+  window.dispatchEvent(new CustomEvent('STB_PROJECT_DEFINITION_CHANGED',{detail:msg}));
+  if(window.self!==window.top)window.parent.postMessage(msg,window.location.origin);
+}
+function returnToLibrary(){
+  if(window.self!==window.top)window.parent.postMessage({type:'STB_PROOF_RETURN_LIBRARY'},window.location.origin);
+  else window.location.href='/';
+}
+function authorityLinks(anchor){
+  return '<div class="prooflinks">'
+    +'<a href="'+AUTH_PAGE+(anchor?'#'+anchor:'')+'" target="_blank" rel="noopener">Why these numbers? →</a>'
+    +'<a href="'+AUTH_PAGE+'" target="_blank" rel="noopener">Outdoor Authority 0.3 ↗</a>'
+    +'<a href="'+DECK_PAGE+'" target="_blank" rel="noopener">Build deck ↗</a>'
+    +'<a href="'+DOSSIER_PAGE+'" target="_blank" rel="noopener">Research dossier ↗</a>'
+    +'</div>';
+}
+var TICK='<span class="tick"><svg viewBox="0 0 24 24"><path d="M4 12.5l5.2 5.2L20 7"/></svg></span>';
+function railHTML(steps,at){
+  return '<div class="rail"><button class="back" id="lib">← Project library</button>'
+    +'<div class="steps">'+steps.map(function(s,i){
+      var cls=i<at?'s done':(i===at?'s on':'s');
+      return '<span class="'+cls+'"><i>'+(i<at?'✓':(i+1))+'</i>'+esc(s)+'</span>';
+    }).join('')+'</div></div>';
+}
+
+/* ═══════════ 9 · THE DRAG ENGINE ═══════════ */
+function svgRect(){
+  var st=$('stage'), sv=st?st.querySelector('svg'):null;
+  return sv&&sv.getBoundingClientRect?sv.getBoundingClientRect():null;
+}
+function applyDrag(cx,cy,redraw){
+  if(!grab||!GEO||!GEO.handles[grab])return;
+  var H=GEO.handles[grab], r=svgRect();
+  if(!r||!r.width||!r.height)return;
+  var v=H.axis==='x'
+    ? ((cx-r.left)*(GEO.vw/r.width)-H.o)/H.s
+    : ((cy-r.top)*(GEO.vh/r.height)-H.o)/H.s;
+  if(!isFinite(v))return;
+  H.set(clamp(v,H.min,H.max));
+  redraw();
+}
+function installDrag(redraw,commit){
+  function start(t,x,y){
+    grab=t.getAttribute('data-grab'); focusKey=grab;
+    /* deliberately no applyDrag here: touching a handle must never change a value */
+  }
+  document.addEventListener('mousedown',function(e){
+    var t=e.target.closest&&e.target.closest('[data-grab]'); if(!t)return;
+    e.preventDefault(); start(t,e.clientX,e.clientY);
+  });
+  document.addEventListener('mousemove',function(e){ if(grab)applyDrag(e.clientX,e.clientY,redraw) });
+  document.addEventListener('mouseup',function(){ if(grab){grab=null;commit()} });
+  document.addEventListener('touchstart',function(e){
+    var t=e.target.closest&&e.target.closest('[data-grab]'); if(!t)return;
+    e.preventDefault(); start(t,e.touches[0].clientX,e.touches[0].clientY);
+  },{passive:false});
+  document.addEventListener('touchmove',function(e){
+    if(!grab)return; e.preventDefault(); applyDrag(e.touches[0].clientX,e.touches[0].clientY,redraw);
+  },{passive:false});
+  document.addEventListener('touchend',function(){ if(grab){grab=null;commit()} });
+  document.addEventListener('keydown',function(e){
+    var t=e.target.closest&&e.target.closest('[data-grab]'); if(!t)return;
+    var k=t.getAttribute('data-grab'), H=GEO&&GEO.handles[k]; if(!H)return;
+    var dir=0;
+    if(e.key==='ArrowRight'||e.key==='ArrowUp')dir=1;
+    else if(e.key==='ArrowLeft'||e.key==='ArrowDown')dir=-1;
+    else return;
+    e.preventDefault();
+    if(!H.get)return;
+    var cur=H.get();
+    /* a quarter inch of length, half a degree of angle — shift gives four of them */
+    var span=H.max-H.min, step=(k==='ang'?span/90:0.25)*(e.shiftKey?4:1);
+    focusKey=k;
+    H.set(clamp(cur+dir*step,H.min,H.max));
+    commit();
+  });
+}
+function restoreFocus(){
+  if(!focusKey)return;
+  var el=document.querySelector('[data-grab="'+focusKey+'"]');
+  if(el&&el.focus)el.focus();
+}
+
+/* ── this journey ────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   PATH A · GRAB A BOARD
+   She has a broken leg and no plan. She measures the old one, puts a board on
+   the bench, and builds the definition herself. Provenance: USER-DEFINED.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var PROJECT_ID='start-own';
+var PROJECT_CLASS='USER_DEFINED_BOARD';
+var SOURCE_AUTHORITY={kind:'USER-DEFINED',artifact:'stb-start-own-picnic-leg-0.1.html',
+  basis:'measured off the customer’s own broken part',
+  donor:'Claude interaction prototype adapted behind the System Store membrane'};
+
+var A={
+  screen:'capture',
+  cameOff:'picnic-table',
+  measuredLen:32.75,
+  measuredAngle:30,
+  wantTaller:true,
+  quantity:8,
+  P:{stockClass:'2x8',finishedLength:33.75,quantity:8,angleDegrees:30,
+     angleReference:'measured-off-part',cutPlane:null,endIdentity:null,
+     endRelation:null,lengthDatum:null},
+  view:'leg', sent:null, lastId:{v:null},
+  storePreview:null, storePreviewDefinitionId:null, storePreviewPending:false, storePreviewDiagnostic:null
+};
+function part(){return A.P}
+var CAME_OFF={'picnic-table':'the picnic table','bench':'the bench','something-else':'it'};
+
+buildBridge({projectId:PROJECT_ID,projectClass:PROJECT_CLASS,sourceAuthority:SOURCE_AUTHORITY,
+  part:part,screen:function(){return A.screen},confirmed:function(){return A.sent}});
+
+/* ── her own sentence, carried from the capture page to everywhere after it ── */
+function herWords(){
+  var s=stock(A.P.stockClass);
+  return 'You measured <b>'+fmt(A.measuredLen)+' in</b> off a <b>'+esc(s.label)+'</b> that came off '
+    +esc(CAME_OFF[A.cameOff]||'it')+', with both ends cut at about <b>'+fmt(A.measuredAngle)+'°</b>'
+    +(A.wantTaller?', and you want them <b>an inch longer</b> because it always sat low':'')
+    +'. <b>'+A.quantity+'</b> of them.';
+}
+
+/* ═══════════ SCREEN 1 · CAPTURE ═══════════ */
+function renderCapture(){
+  var h=woodDefs();
+  h+=railHTML(['Measure it','Make it','Confirm it'],0);
+  h+='<p class="eyebrow">Scan-to-Build · start your own</p>';
+  h+='<h1>Something broke. <em>Make it again.</em></h1>';
+  h+='<p class="lede">Put the broken piece on the bench and measure it. We will work out what board it '
+    +'came from, what Store Zero can resolve about material and work, and exactly what to tell the Store. '
+    +'<b>Nothing here is ordered.</b></p>';
+
+  h+='<div class="step"><span class="n">1</span><h2>Measure the broken one</h2>'
+    +'<span class="sub">three things off the old piece</span></div>';
+  h+='<div class="stage">'+boardPortrait('weathered',true,true)+'</div>';
+  h+='<div class="readout" style="margin-bottom:18px"><b>The one that broke.</b>'
+    +'<span class="sep">·</span>Grey, split along the grain, and still the best measuring stick you have.</div>';
+  h+='<div class="grid3">';
+
+  h+='<div class="panel"><h3>How wide is it?</h3>'
+    +'<div class="pills" style="margin:0">'+STOCKS.map(function(s){
+      return '<button class="pill'+(A.P.stockClass===s.k?' on':'')+'" data-stock="'+s.k+'">'
+        +esc(s.label)+' · '+fmt(s.w)+' in</button>'}).join('')+'</div>'
+    +'<p class="hint">Measure the wide face. '+fmt(stock(A.P.stockClass).w)+' in across makes it a '
+    +esc(stock(A.P.stockClass).label)+'.</p></div>';
+
+  h+='<div class="panel"><h3>How long is it?</h3>'
+    +'<div class="dim"><span class="lab">End to end<i>along the longer edge</i></span>'
+    +stepper('mlen',A.measuredLen,'in',0.25)+'</div>'
+    +'<div class="pills">'+[28,30,32.75,34,36].map(function(v){
+      return '<button class="pill'+(Math.abs(A.measuredLen-v)<.001?' on':'')+'" data-set="mlen:'+v+'">'
+        +fmt(v)+' in</button>'}).join('')+'</div>'
+    +'<div class="exact" style="margin-top:10px"><label class="hint" style="margin:0 0 5px;display:block">'
+    +'or type it, fractions welcome</label><input data-exact="mlen" value="'+esc(fmt(A.measuredLen))
+    +'" inputmode="decimal" aria-label="Measured length"></div></div>';
+
+  h+='<div class="panel"><h3>What angle are the ends?</h3>'
+    +'<div class="dim"><span class="lab">Hold a bevel to it<i>0° would be a square cut</i></span>'
+    +stepper('mang',A.measuredAngle,'°',0.5)+'</div>'
+    +'<div class="pills">'+[0,10,15,25,30].map(function(v){
+      return '<button class="pill'+(Math.abs(A.measuredAngle-v)<.001?' on':'')+'" data-set="mang:'+v+'">'
+        +fmt(v)+'°</button>'}).join('')+'</div>'
+    +'<p class="hint">Near enough is fine here. You can nudge it on the bench and watch the leg change.</p></div>';
+  h+='</div>';
+
+  h+='<div class="step"><span class="n">2</span><h2>Say what you want</h2>'
+    +'<span class="sub">this is the part a plan cannot know</span></div>';
+  h+='<div class="grid2">';
+  h+='<div class="panel" style="margin:0"><h3>Where did it come off?</h3>'
+    +'<div class="tool"><div class="selwrap"><select data-sel="cameOff" aria-label="What it came off">'
+    +[['picnic-table','A picnic table'],['bench','A bench'],['something-else','Something else']].map(function(o){
+      return '<option value="'+o[0]+'"'+(A.cameOff===o[0]?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')
+    +'</select></div></div>'
+    +'<h3 style="margin-top:16px">How many do you want?</h3>'
+    +'<div class="pills" style="margin:0">'+[1,2,4,8].map(function(v){
+      return '<button class="pill'+(A.quantity===v?' on':'')+'" data-qty="'+v+'">'+v+'</button>'}).join('')+'</div>'
+    +'<p class="hint">'+(A.quantity===8
+      ? 'Eight. Four legs on the table, four on the one that matches it — while the saw is out.'
+      : (A.quantity===4?'Four. One table’s worth.':'Fewer than a table’s worth. That is allowed.'))
+    +'</p></div>';
+  h+='<button class="card plain'+(A.wantTaller?' on':'')+'" data-taller="1" style="margin:0">'+TICK
+    +'<span class="body" style="padding:18px 20px 20px">'
+    +'<b>Make them an inch longer</b>'
+    +'<span>It always sat a bit low. One more inch of leg, everything else the same. '
+    +'It changes what the leg is, so it goes on the record — and Store Zero answers the changed definition.</span></span></button>';
+  h+='</div>';
+
+  var target=A.measuredLen+(A.wantTaller?1:0);
+  h+='<div class="gobar"><div class="sum"><strong>A '+esc(stock(A.P.stockClass).label)+' at '+fmt(target)+' in, '
+    +A.quantity+' of them.</strong>'
+    +'The bench will draw it and ask the few things a measurement cannot tell it.</div>'
+    +'<button class="btn" id="go">Put a board on the bench →</button></div>';
+  h+='<p class="foot"><b>NO BLOOD ON WOOD.</b> This page measures and remembers. It does not order, '
+    +'reserve, price a quote, or release anything to a machine.</p>';
+
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('go').onclick=function(){
+    A.P.finishedLength=q4(A.measuredLen+(A.wantTaller?1:0));
+    A.P.angleDegrees=A.measuredAngle;
+    A.P.quantity=A.quantity;
+    A.P.angleReference='measured-off-part';
+    A.screen='bench'; render(); window.scrollTo(0,0);
+  };
+}
+
+/* ═══════════ SCREEN 2 · THE BENCH ═══════════ */
+function stepper(key,val,unit,step){
+  return '<div class="stepper"><button data-step="'+key+':'+(-step)+'" aria-label="less">−</button>'
+    +'<span class="v">'+fmt(val)+(unit?'<span style="font-weight:400;color:var(--ink3)"> '+unit+'</span>':'')+'</span>'
+    +'<button data-step="'+key+':'+step+'" aria-label="more">+</button></div>';
+}
+var OPENED={};
+function labelOf(opts,v){
+  for(var i=0;i<opts.length;i++)if(opts[i][0]===v)return opts[i][1];
+  return v;
+}
+/* Once a fact is answered it stops being a question and becomes a line you
+   can change. The panel gets shorter as the part gets more defined. */
+function fact(key,label,note,opts,cur){
+  if(cur&&!OPENED[key])
+    return '<div class="factdone"><span class="t"><b>'+esc(labelOf(opts,cur))+'</b>'
+      +'<i>'+esc(label)+'</i></span>'
+      +'<button class="chg" data-reopen="'+key+'">change</button></div>';
+  return dropdown(key,label,note,opts,cur);
+}
+function dropdown(key,label,note,opts,cur){
+  return '<div class="tool"><label for="sel-'+key+'">'+esc(label)
+    +(note?'<i>'+esc(note)+'</i>':'')+'</label><div class="selwrap">'
+    +'<select id="sel-'+key+'" data-fact="'+key+'">'
+    +'<option value=""'+(cur?'':' selected')+'>Choose…</option>'
+    +opts.map(function(o){
+      return '<option value="'+o[0]+'"'+(cur===o[0]?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')
+    +'</select></div></div>';
+}
+function drawing(){
+  return A.view==='frame'?drawFrame(A.P):(A.view==='boards'?drawNesting(A.P):drawLeg(A.P));
+}
+function controls(){
+  var P=A.P, h='';
+  h+='<div class="said"><b>What you told us.</b><span>'+herWords()+'</span></div>';
+
+  h+='<div class="panel"><h3>Size it</h3>'
+    +'<div class="dim"><span class="lab">Finished length<i>'+esc(words(P.lengthDatum||'long-long-outer-edge').toLowerCase())
+    +'</i></span>'+stepper('len',P.finishedLength,'in',0.25)+'</div>'
+    +'<div class="pills">'+[A.measuredLen,A.measuredLen+1,A.measuredLen+2].map(function(v){
+      v=q4(v);
+      return '<button class="pill'+(Math.abs(P.finishedLength-v)<.001?' on':'')+'" data-set="len:'+v+'">'
+        +fmt(v)+' in</button>'}).join('')
+    +'<button class="pill ghosted" data-set="len:'+A.measuredLen+'">back to as measured</button></div>'
+    +'<div class="exact" style="margin-top:10px"><input data-exact="len" value="'+esc(fmt(P.finishedLength))
+    +'" inputmode="decimal" aria-label="Finished length"></div>'
+    +(Math.abs(P.finishedLength-A.measuredLen)>.001
+      ? '<p class="hint"><b>'+fmt(P.finishedLength-A.measuredLen)+' in longer than the broken one.</b> '
+        +'That is a change you made, not a fact you measured, so it travels as yours.</p>':'')
+    +'<div class="dim" style="margin-top:14px"><span class="lab">How many<i>you decide this</i></span>'
+    +stepper('qty',P.quantity,'',1)+'</div>'
+    +'<div class="pills">'+[1,2,4,8].map(function(v){
+      return '<button class="pill'+(P.quantity===v?' on':'')+'" data-set="qty:'+v+'">'+v+'</button>'}).join('')+'</div>'
+    +'</div>';
+
+  h+='<div class="panel"><h3>The cut</h3>'
+    +'<div class="dim"><span class="lab">Angle<i>drag a corner on the drawing, or set it here</i></span>'
+    +stepper('ang',P.angleDegrees,'°',0.5)+'</div>'
+    +fact('cutPlane','Which way does the cut run?','a line across the wide face is not the same cut as one across the edge',
+        [['miter-face','Across the face'],['bevel-thickness','Across the thickness']],P.cutPlane)
+    +fact('endIdentity','Which ends are cut?','',
+        [['both','Both ends'],['first','One end only']],P.endIdentity)
+    +(P.endIdentity==='both'
+      ? fact('endRelation','Do the two ends match or mirror?','same angle, but it matters which way each one leans',
+          [['parallel','Parallel — same direction'],['opposed','Opposed — mirrored']],P.endRelation):'')
+    +fact('lengthDatum','Where is the length measured?','an angled end has a long point and a short point',
+        [['long-long-outer-edge','Long point to long point, along the outer edge'],
+         ['long-short','Long point to short point']],P.lengthDatum)
+    +fact('angleReference','How do you know the angle?','this is provenance, not geometry — it never changes the part',
+        [['measured-off-part','I measured it off the broken one'],['source-stated','A plan states it']],P.angleReference)
+    +'</div>';
+
+  return h;
+}
+function renderBench(){
+  var P=A.P, done=isComplete(P), miss=missingBits(P);
+  var h=woodDefs();
+  h+=railHTML(['Measure it','Make it','Confirm it'],1);
+  h+='<h1>The leg <span class="q">in '+esc(stock(P.stockClass).label)+'</span></h1>';
+  h+='<p class="lede" style="margin-bottom:22px">Drag the drawing or use the pickers. '
+    +'Both do the same thing, and the picture is what the Store is being told.</p>';
+  h+='<div class="viewseg">'
+    +'<button class="'+(A.view==='leg'?'on':'')+'" data-view="leg">One leg</button>'
+    +'<button class="'+(A.view==='frame'?'on':'')+'" data-view="frame">The end frame</button>'
+    +'<button class="'+(A.view==='boards'?'on':'')+'" data-view="boards">The boards you buy</button></div>';
+  h+='<div class="bench"><div><div class="stage" id="stage">'+drawing()+'</div>'
+    +'<div class="readout" id="read">'+readoutHTML(P)+'</div>'
+    +'<div class="results">'+cutTable(P)+buyPanel(P)+'</div>'
+    +'<div class="panel" style="margin-top:16px"><h3>The wood</h3><div class="pills" style="margin:0">'
+    +STOCKS.map(function(s){
+      return '<button class="pill'+(P.stockClass===s.k?' on':'')+'" data-stock="'+s.k+'">'
+        +esc(s.label)+' · '+fmt(s.w)+' in</button>'}).join('')+'</div>'
+    +'<p class="hint">'+esc(stock(P.stockClass).label)+' is '+fmt(stock(P.stockClass).t)+' × '
+    +fmt(stock(P.stockClass).w)+' in for real, and the cut runs across '
+    +(P.cutPlane==='bevel-thickness'?fmt(stock(P.stockClass).t):fmt(stock(P.stockClass).w))+' in of it.</p></div></div>'
+    +'<div id="controls">'+controls()+'</div></div>';
+  h+='<div class="gobar"><div class="sum">'
+    +(done?'<strong>That is a part.</strong>Every fact it needs is answered, and each one is yours.'
+          :'<strong>Nearly.</strong>Still to say: '+esc(miss.join(', '))+'.')
+    +'</div><button class="btn" id="go"'+(done?'':' disabled')+'>This is the part →</button></div>';
+  h+='<p class="foot"><b>NO BLOOD ON WOOD.</b> The drawing is a definition view. It is not a machine '
+    +'program, and nothing on this page orders, reserves or releases anything.</p>';
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('go').onclick=function(){ if(isComplete(A.P)){A.screen='confirm'; render(); window.scrollTo(0,0)} };
+  restoreFocus();
+}
+
+/* ═══════════ SCREEN 3 · CONFIRM ═══════════ */
+function renderConfirm(){
+  var P=A.P, d=physicalDemand(P), id=definitionId(d), r=resolveMaterial(P), s=stock(P.stockClass);
+  var changed=Math.abs(P.finishedLength-A.measuredLen)>.001;
+  var h=woodDefs();
+  h+=railHTML(['Measure it','Make it','Confirm it'],2);
+  h+='<h1>This is the leg. <em>All eight of them.</em></h1>';
+  h+='<p class="lede" style="margin-bottom:24px">You defined it yourself, off a broken one, with no plan. '
+    +'Here is exactly what that came to.</p>';
+  h+='<div class="stage" style="margin-bottom:20px">'+drawLeg(P)+'</div>';
+  h+='<section class="object"><p class="eye">The object</p>'
+    +'<h2>Picnic table leg · '+esc(s.label)+'</h2>'
+    +'<p class="idline">'+esc(id)+'</p>'
+    +'<div class="facts">'
+    +'<div'+(changed?' class="changed"':'')+'><b>Finished length</b><span>'+fmt(P.finishedLength)+' in</span></div>'
+    +'<div><b>Measured along</b><span>'+esc(words(P.lengthDatum))+'</span></div>'
+    +'<div><b>Quantity</b><span>'+P.quantity+'</span></div>'
+    +'<div><b>Angle</b><span>'+fmt(P.angleDegrees)+'° · '+esc(words(P.cutPlane).toLowerCase())+'</span></div>'
+    +'<div><b>Ends</b><span>'+esc(words(P.endIdentity))+' · '+esc(words(P.endRelation).toLowerCase())+'</span></div>'
+    +'<div><b>Holes</b><span>None</span></div>'
+    +'<div><b>Stock</b><span>'+esc(s.label)+' · '+fmt(s.t)+' × '+fmt(s.w)+' in actual</span></div>'
+    +'<div><b>How the angle is known</b><span>'+esc(words(P.angleReference))+'</span></div>'
+    +'</div>';
+  if(changed)
+    h+='<div class="note"><b>The inch is on the record as yours.</b> The broken one measured '
+      +fmt(A.measuredLen)+' in; this is '+fmt(P.finishedLength)+'. Nothing else moved — same angle, '
+      +'same ends, same datum. What a longer leg does to the finished table height depends on how the '
+      +'frame sits, and that is not something this page worked out, so it is not claimed.</div>';
+  h+='</section>';
+
+  h+='<div class="results" style="margin-top:20px">';
+  h+=buyPanel(P);
+  var plan=nestPlan(P);
+  if(plan){
+    h+='<div class="panel"><h3>Where the '+P.quantity+' came from</h3><div class="stage" style="padding:8px">'
+      +drawNesting(P)+'</div><p class="hint">'+plan.rows[0].row.length+' legs out of each board, and about '+eighths(plan.rows[0].left)+' in left on the end of the first one.</p></div>';
+  }
+  h+='</div>';
+
+  h+='<div class="crosslink"><div class="c"><b>The other way to this same leg.</b>'
+    +'Outdoor Build starts from the published plan instead of a tape measure. It reaches '
+    +esc(id)+' — the same eight letters — in about four taps, because the angle, the ends and the '
+    +'datum arrive already answered. The object is identical. Only who vouches for it changes.</div>'
+    +'<button class="btn ghost sm" id="outdoorLater">Back to Project Library</button></div>';
+
+  h+='<details class="fold"><summary>What gets carried forward</summary><div class="in">'
+    +'<p style="margin:0 0 12px"><b>'+esc(id)+'</b> carries the stock, the finished length and its datum, '
+    +'the quantity, the angle with its cut plane and end convention, and the material request. '
+    +'Provenance stays <b>USER-DEFINED</b>: you measured it, so you vouch for it. Confirming is not '
+    +'payment, allocation, production release, machine readiness or Cycle Start.</p>'
+    +'<pre class="spec">'+esc(specText(P,'USER-DEFINED · measured off the customer’s own broken part'))+'</pre>'
+    +'</div></details>';
+  h+='<div class="gobar"><div class="sum"><strong>Nothing has been ordered.</strong>'
+    +'This is a definition and the Store answer available for this version. No complete price is invented when work recovery is unresolved.</div>'
+    +'<button class="btn ghost sm" id="back">← back to the bench</button>'
+    +'<button class="btn" id="copy">Copy the spec</button></div>';
+  h+='<p class="foot"><b>NO BLOOD ON WOOD.</b> Confirmation identifies one exact version. It is not '
+    +'payment, allocation, production release, machine readiness or Cycle Start.</p>';
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('back').onclick=function(){A.screen='bench';render();window.scrollTo(0,0)};
+  if($('outdoorLater'))$('outdoorLater').onclick=returnToLibrary;
+  $('copy').onclick=function(){
+    var t=specText(P,'USER-DEFINED · measured off the customer’s own broken part');
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t);
+      else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();
+        document.execCommand('copy');document.body.removeChild(ta)}
+      flash('Spec copied');
+    }catch(e){flash('Open "What gets carried forward" and copy it from there')}
+  };
+  A.sent={id:id,definition:JSON.parse(JSON.stringify(d)),sourceAuthority:SOURCE_AUTHORITY,
+    storePreview:storeAnswer(P)?JSON.parse(JSON.stringify(storeAnswer(P))):null,
+    material:r&&r.status==='MAPPED'?{sku:r.storeSku,quantity:r.quantity,total:r.materialTotal}:null,
+    unresolvedConditions:unresolvedConditions(P)};
+  if(window.self!==window.top)
+    window.parent.postMessage({type:'STB_START_OWN_CONFIRMED',payload:JSON.parse(JSON.stringify(A.sent))},
+      window.location.origin);
+}
+
+window.currentDefinitionId=function(){return definitionId(physicalDemand(A.P))};
+window.addEventListener('message',function(event){
+  if(event.origin!==window.location.origin || event.source!==window.parent)return;
+  var data=event.data||{};
+  if(data.type!=='STB_START_OWN_STORE_PREVIEW')return;
+  var current=definitionId(physicalDemand(A.P));
+  if(data.childDefinitionId!==current)return;
+  A.storePreviewPending=false;
+  A.storePreviewDefinitionId=current;
+  A.storePreview=data.answer||null;
+  A.storePreviewDiagnostic=data.diagnostic||null;
+  render();
+});
+
+/* ═══════════ WIRING ═══════════ */
+function redraw(){
+  if($('stage'))$('stage').innerHTML=drawing();
+  if($('read'))$('read').innerHTML=readoutHTML(A.P);
+}
+function render(){
+  if(A.screen==='capture')renderCapture();
+  else if(A.screen==='bench')renderBench();
+  else renderConfirm();
+  emitChanged(PROJECT_ID,A.lastId,{part:part});
+}
+function setKey(k,v){
+  if(k==='len')A.P.finishedLength=clamp(q4(v),6,96);
+  else if(k==='qty')A.P.quantity=clamp(Math.round(v),1,48);
+  else if(k==='ang')A.P.angleDegrees=clamp(Math.round(v*2)/2,0,55);
+  else if(k==='mlen')A.measuredLen=clamp(q4(v),6,96);
+  else if(k==='mang')A.measuredAngle=clamp(Math.round(v*2)/2,0,55);
+}
+function currentOf(k){
+  return k==='len'?A.P.finishedLength:k==='qty'?A.P.quantity:k==='ang'?A.P.angleDegrees
+    :k==='mlen'?A.measuredLen:A.measuredAngle;
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('[data-stock],[data-view],[data-step],[data-set],[data-qty],[data-taller],[data-reopen]');
+  if(!t)return;
+  if(t.dataset.reopen){OPENED[t.dataset.reopen]=true;render();return}
+  if(t.dataset.stock)A.P.stockClass=t.dataset.stock;
+  else if(t.dataset.view)A.view=t.dataset.view;
+  else if(t.dataset.qty){A.quantity=+t.dataset.qty;A.P.quantity=+t.dataset.qty}
+  else if(t.dataset.taller!=null)A.wantTaller=!A.wantTaller;
+  else if(t.dataset.step){var a=t.dataset.step.split(':');setKey(a[0],currentOf(a[0])+ +a[1])}
+  else if(t.dataset.set){var b=t.dataset.set.split(':');setKey(b[0],+b[1])}
+  render();
+});
+document.addEventListener('change',function(e){
+  var sel=e.target.closest&&e.target.closest('[data-fact],[data-sel]');
+  if(sel){
+    if(sel.dataset.fact){
+      A.P[sel.dataset.fact]=sel.value||null;
+      OPENED[sel.dataset.fact]=false;
+      if(sel.dataset.fact==='endIdentity'&&sel.value!=='both')A.P.endRelation=null;
+    } else A[sel.dataset.sel]=sel.value;
+    render(); return;
+  }
+  var el=e.target.closest&&e.target.closest('[data-exact]');
+  if(!el)return;
+  var v=parseDimension(el.value);
+  if(v==null||!isFinite(v)){flash('Try a number like 32 3/4');render();return}
+  setKey(el.getAttribute('data-exact'),v); render();
+});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter')return;
+  var el=e.target.closest&&e.target.closest('[data-exact]'); if(!el)return;
+  e.preventDefault(); el.dispatchEvent(new Event('change',{bubbles:true}));
+});
+installDrag(redraw,function(){render()});
+window.A=A;
+render();
+
+</script>
+</body>
+</html>

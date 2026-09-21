@@ -63,6 +63,8 @@ npm run test:browser
 npm run test:boundaries
 STB_STORE_ZERO_ROOT=<exact-clean-s2.2-checkout> npm run test:store
 STB_STORE_ZERO_ROOT=<exact-clean-s2.2-checkout> npm run test:vertical
+STB_STORE_START_OWN_ROOT=<exact-clean-start-own-store-checkout> npm run test:start-own-store
+STB_STORE_START_OWN_ROOT=<exact-clean-start-own-store-checkout> npm run test:start-own-browser
 ```
 
 `npx playwright install chromium` is required only when the Playwright 1.63 Chromium headless shell is not already provisioned for this environment.
@@ -153,6 +155,20 @@ Bounded endpoints:
 The Store checkout is never statically served. Browser modules do not import Store implementation, the pricing engine, or the envelope. Support is evaluated before estimate. Raw Store evaluation and estimate remain separate. Transport and adapter errors are not Store dispositions.
 
 A complete committed Board revision schedules one BOARD_SQUARE_V1 evaluation after candidate persistence. Rerender, navigation, and reopen reuse that request. Changing 45 in to 46 in creates a new revision and therefore a new question. Unapplied edit-buffer values are not asked. Page 5 (`/project?id=&view=store`) is the existing Ask Store Zero page. Board compact and Page 5 consume the same presentation of offering, fixture stock, capability, budgetary Q, and inspectable basis. Q is a budgetary estimate copied from the Store total, not a quote. “Current” means revision applicability. Modeled time is not physical machine time. Retry creates a new attempt on the same request. Compact presentation identifies the answer as a Stage-2 reference evaluation; no order is placed.
+
+### Start Your Own / Grab a Board Store path
+
+The admitted Start Your Own child uses a separate bounded Store question. It does not widen or repin the accepted square-Board endpoint.
+
+Exact Store pin for this path:
+
+`c66363597ed9b5ed355220d5599e726730cd2802` (`GeorgePlattDemo/scan-to-build-store`)
+
+Supply a clean checkout through `STB_STORE_START_OWN_ROOT`. The wrapper verifies the exact pin and clean working tree before loading Store modules.
+
+The current proof slice carries the defined stock class, finished length, quantity, face-miter angle, end convention, and explicit angled-length datum to Store Zero. The default Claude Grab-a-Board definition resolves to 4 × 2×8×96 parent boards ($39.80 fixture material), 12 bounded saw cuts, and a SUPPORTABLE 30° face miter inside the declared ±45° D-001 downstroke envelope. Modeled work time is returned separately. A complete Store-derived total remains unavailable because no class-scoped dimensional-miter recovery model has yet been declared; the application must show that unresolved portion rather than invent a complete price.
+
+Configure may display the live reference answer for the current child definition. Confirmation causes a fresh Store question bound to the canonical System SHA-256 definition identity; only that answer may become the formal Store Answer snapshot. Neither preview nor formal answer places an order, reserves stock, authorizes fabrication, or creates Cycle Start authority.
 
 ## Review and result
 

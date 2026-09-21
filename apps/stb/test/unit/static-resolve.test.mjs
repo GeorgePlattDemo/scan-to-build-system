@@ -61,6 +61,10 @@ test('allowlisted paths resolve to known relative files', () => {
     'browser/integration/store-coordinator.mjs',
   );
   assert.equal(
+    resolveStaticAsset('/integration/start-own-store-preview.mjs').relativePath,
+    'browser/integration/start-own-store-preview.mjs',
+  );
+  assert.equal(
     resolveStaticAsset('/shared/contracts.mjs').relativePath,
     'shared/contracts.mjs',
   );
@@ -71,6 +75,14 @@ test('allowlisted paths resolve to known relative files', () => {
   assert.equal(
     resolveStaticAsset('/shared/store-wire.mjs').relativePath,
     'shared/store-wire.mjs',
+  );
+  assert.equal(
+    resolveStaticAsset('/shared/start-own-store-wire.mjs').relativePath,
+    'shared/start-own-store-wire.mjs',
+  );
+  assert.equal(
+    resolveStaticAsset('/project-children/stb-start-own-picnic-leg-0.1.html').relativePath,
+    'project-children/stb-start-own-picnic-leg-0.1.html',
   );
   assert.equal(
     resolveStaticAsset('/shared/store-present.mjs').relativePath,
@@ -171,11 +183,27 @@ test('allowlist is exact and finite', () => {
     '/domain/evidence.mjs',
     '/domain/observation.mjs',
     '/domain/picnic-engine.mjs',
+    '/domain/review-child.mjs',
     '/domain/review.mjs',
     '/index.html',
+    '/integration/start-own-store-preview.mjs',
     '/integration/store-client.mjs',
     '/integration/store-coordinator.mjs',
     '/project',
+    '/project-children/stb-start-own-picnic-leg-0.1.html',
+    '/review-donors/STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html',
+    '/review-donors/assets/project-tiles/plywood-curvilinear-shapes.webp',
+    '/review-donors/assets/project-tiles/start-your-own.webp',
+    '/review-donors/stb-canonical-journey.js',
+    '/review-donors/stb-outdoor-build-deck-0.1.html',
+    '/review-donors/stb-outdoor-build.html',
+    '/review-donors/stb-outdoor-reference-authority-0.3.html',
+    '/review-donors/stb-start-own-0.10.html',
+    '/review-donors/stb-start-own-0.11.html',
+    '/review-donors/stb-store-handoff-contract.js',
+    '/review-donors/stb-window-seat-space-utilization-0.7.4.html',
+    '/review-donors/store-zero-canonical-doctrine.js',
+    '/review-donors/system-build-base-8d8a9dd.html',
     '/shared/alcove-rule.mjs',
     '/shared/archive-format.mjs',
     '/shared/board-rule.mjs',
@@ -183,7 +211,10 @@ test('allowlist is exact and finite', () => {
     '/shared/class-config.mjs',
     '/shared/contracts.mjs',
     '/shared/picnic-rule.mjs',
+    '/shared/project-registry.mjs',
+    '/shared/review-child-identity.mjs',
     '/shared/review-digest.mjs',
+    '/shared/start-own-store-wire.mjs',
     '/shared/store-present.mjs',
     '/shared/store-wire.mjs',
     '/start/new',
@@ -191,6 +222,7 @@ test('allowlist is exact and finite', () => {
     '/start/returning',
     '/styles.css',
     '/ui/candidate-view.mjs',
+    '/ui/canonical-project-host.mjs',
     '/ui/future-chain.mjs',
     '/ui/narrative.mjs',
     '/ui/open-door.mjs',

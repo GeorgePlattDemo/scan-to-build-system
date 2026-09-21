@@ -1,4 +1,5 @@
 import { BOARD_DEFINITION, CLASS_REFERENCES, OWN_ENTRY } from '/shared/contracts.mjs';
+import { REVIEW_CHILD_CLASS_REFERENCES } from '/shared/project-registry.mjs';
 import {
   S001_CENTERED_ARCH_CLASS_ID,
   S001_CENTERED_ARCH_CLASS_VERSION,
@@ -6,6 +7,7 @@ import {
 } from '/shared/class-config.mjs';
 
 const INTERNAL_MAPPED_CLASSES = Object.freeze([
+  ...REVIEW_CHILD_CLASS_REFERENCES,
   Object.freeze({
     kind: 'mapped',
     classId: S001_CENTERED_ARCH_CLASS_ID,

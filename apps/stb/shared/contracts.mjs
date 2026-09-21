@@ -491,12 +491,15 @@ const JS = (relativePath) =>
     relativePath,
     contentType: 'text/javascript; charset=utf-8',
   });
+const HTML_FILE = (relativePath) => Object.freeze({ relativePath, contentType: 'text/html; charset=utf-8' });
+const WEBP = (relativePath) => Object.freeze({ relativePath, contentType: 'image/webp' });
 
 export const STATIC_ASSETS = Object.freeze({
   '/': HTML,
   '/index.html': HTML,
   '/integration/store-client.mjs': JS('browser/integration/store-client.mjs'),
   '/integration/store-coordinator.mjs': JS('browser/integration/store-coordinator.mjs'),
+  '/integration/start-own-store-preview.mjs': JS('browser/integration/start-own-store-preview.mjs'),
   '/begin': HTML,
   '/project': HTML,
   '/start/new': HTML,
@@ -539,14 +542,33 @@ export const STATIC_ASSETS = Object.freeze({
   '/ui/record-panel.mjs': JS('browser/ui/record-panel.mjs'),
   '/shared/contracts.mjs': JS('shared/contracts.mjs'),
   '/shared/canonical.mjs': JS('shared/canonical.mjs'),
+  '/shared/review-child-identity.mjs': JS('shared/review-child-identity.mjs'),
   '/shared/board-rule.mjs': JS('shared/board-rule.mjs'),
   '/shared/alcove-rule.mjs': JS('shared/alcove-rule.mjs'),
   '/shared/picnic-rule.mjs': JS('shared/picnic-rule.mjs'),
   '/shared/class-config.mjs': JS('shared/class-config.mjs'),
   '/shared/store-wire.mjs': JS('shared/store-wire.mjs'),
+  '/shared/start-own-store-wire.mjs': JS('shared/start-own-store-wire.mjs'),
   '/shared/store-present.mjs': JS('shared/store-present.mjs'),
   '/shared/review-digest.mjs': JS('shared/review-digest.mjs'),
   '/shared/archive-format.mjs': JS('shared/archive-format.mjs'),
+  '/shared/project-registry.mjs': JS('shared/project-registry.mjs'),
+  '/domain/review-child.mjs': JS('browser/domain/review-child.mjs'),
+  '/ui/canonical-project-host.mjs': JS('browser/ui/canonical-project-host.mjs'),
+  '/review-donors/system-build-base-8d8a9dd.html': HTML_FILE('review-donors/system-build-base-8d8a9dd.html'),
+  '/review-donors/stb-window-seat-space-utilization-0.7.4.html': HTML_FILE('review-donors/stb-window-seat-space-utilization-0.7.4.html'),
+  '/review-donors/stb-start-own-0.11.html': HTML_FILE('review-donors/stb-start-own-0.11.html'),
+  '/project-children/stb-start-own-picnic-leg-0.1.html': HTML_FILE('project-children/stb-start-own-picnic-leg-0.1.html'),
+  '/review-donors/stb-outdoor-build.html': HTML_FILE('review-donors/stb-outdoor-build.html'),
+  '/review-donors/stb-canonical-journey.js': JS('review-donors/stb-canonical-journey.js'),
+  '/review-donors/store-zero-canonical-doctrine.js': JS('review-donors/store-zero-canonical-doctrine.js'),
+  '/review-donors/stb-store-handoff-contract.js': JS('review-donors/stb-store-handoff-contract.js'),
+  '/review-donors/stb-outdoor-reference-authority-0.3.html': HTML_FILE('review-donors/stb-outdoor-reference-authority-0.3.html'),
+  '/review-donors/STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html': HTML_FILE('review-donors/STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html'),
+  '/review-donors/stb-outdoor-build-deck-0.1.html': HTML_FILE('review-donors/stb-outdoor-build-deck-0.1.html'),
+  '/review-donors/stb-start-own-0.10.html': HTML_FILE('review-donors/stb-start-own-0.10.html'),
+  '/review-donors/assets/project-tiles/start-your-own.webp': WEBP('review-donors/assets/project-tiles/start-your-own.webp'),
+  '/review-donors/assets/project-tiles/plywood-curvilinear-shapes.webp': WEBP('review-donors/assets/project-tiles/plywood-curvilinear-shapes.webp'),
   '/vendor/pdfjs/pdf.min.mjs': JS('browser/vendor/pdfjs/pdf.min.mjs'),
   '/vendor/pdfjs/pdf.worker.min.mjs': JS('browser/vendor/pdfjs/pdf.worker.min.mjs'),
 });
@@ -603,6 +625,8 @@ export function screenFromLocation(location) {
     ...screen,
     localRecordId: params.get('id'),
     view,
+    catalogProjectId: params.get('catalog'),
+    requestedStage: params.get('stage'),
     child: child && INTAKE_CARDS.some((card) => card.id === child) ? child : null,
   };
 }

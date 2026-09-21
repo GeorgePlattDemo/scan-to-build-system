@@ -63,6 +63,20 @@ import {
   setCurrentProject,
   setSessionActor,
 } from '/ui/view-state.mjs';
+import {
+  CANONICAL_PROJECT_STAGES,
+  canonicalProjectHref,
+  getProjectDefinition,
+  getProjectDefinitionByClassId,
+  resolveProjectStage,
+} from '/shared/project-registry.mjs';
+import {
+  activateCanonicalProjectHost,
+  canonicalProjectMain,
+  deactivateCanonicalProjectHost,
+  switchCanonicalProjectStage,
+} from '/ui/canonical-project-host.mjs';
+import { latestReviewChildSnapshot } from '/domain/review-child.mjs';
 
 function el(tag, options = {}, children = []) {
   const node = document.createElement(tag);
@@ -172,7 +186,62 @@ function orientationScreen(actor) {
   );
 }
 
-function primaryNav({ project, view, screenName } = {}) {
+
+const CANONICAL_STAGE_LABELS = Object.freeze({
+  'scan-evidence': 'Scan / Evidence',
+  configure: 'Configure',
+  'store-answer': 'Store Answer',
+  'accept-pay': 'Accept / Pay',
+  'store-yard': 'Store / Yard',
+  'handoff-record': 'Handoff / Record',
+});
+
+function canonicalStageFromView(view) {
+  return ({
+    hub: 'scan-evidence',
+    questions: 'configure',
+    store: 'store-answer',
+    confirm: 'accept-pay',
+    result: 'store-yard',
+    record: 'handoff-record',
+  })[view] ?? 'scan-evidence';
+}
+
+function nativeViewForCanonicalStage(stage) {
+  return ({
+    'scan-evidence': 'questions',
+    configure: 'questions',
+    'store-answer': 'store',
+    'accept-pay': 'confirm',
+    'store-yard': 'result',
+    'handoff-record': 'record',
+  })[stage] ?? 'questions';
+}
+
+function canonicalStageNav(project, definition, currentStage) {
+  return el(
+    'nav',
+    { className: 'primary-nav canonical-native-nav', attrs: { 'aria-label': 'Project stages' } },
+    CANONICAL_PROJECT_STAGES.map((stage) =>
+      el('button', {
+        className: stage === currentStage ? 'nav-current' : 'nav-link',
+        attrs: {
+          type: 'button',
+          'data-action': 'canonical-stage',
+          'data-canonical-stage': stage,
+          'data-canonical-project-id': definition.projectId,
+          ...(stage === currentStage ? { 'aria-current': 'page' } : {}),
+        },
+        text: CANONICAL_STAGE_LABELS[stage],
+      }),
+    ),
+  );
+}
+
+function primaryNav({ project, view, screenName, canonicalProject, canonicalStage } = {}) {
+  if (project && canonicalProject) {
+    return canonicalStageNav(project, canonicalProject, canonicalStage);
+  }
   return el(
     'nav',
     { className: 'primary-nav', attrs: { 'aria-label': 'Application pages' } },
@@ -231,7 +300,7 @@ function wrapShell(actor, inner, screenName, navContext = {}) {
       className: 'app-shell',
       attrs,
     },
-    [primaryNav({ ...navContext, screenName }), inner],
+    navContext.suppressNav ? [inner] : [primaryNav({ ...navContext, screenName }), inner],
   );
 }
 
@@ -331,6 +400,41 @@ async function renderInto(root) {
     if (!project) {
       content = wrapShell(actor, projectMissingMain(), 'begin');
     } else {
+      const canonicalProject = getProjectDefinitionByClassId(project.classId);
+      const candidateStage = screen.requestedStage
+        ?? canonicalStageFromView(screen.view);
+      const canonicalStage = canonicalProject && resolveProjectStage(canonicalProject.projectId, candidateStage)
+        ? candidateStage
+        : (canonicalProject ? 'scan-evidence' : null);
+
+      if (canonicalProject?.hostMode === 'review-child') {
+        const latestSnapshot = await latestReviewChildSnapshot(project.localRecordId);
+        if (seq !== renderSeq) {
+          return;
+        }
+        const childMain = canonicalProjectMain({
+          project,
+          definition: canonicalProject,
+          stage: canonicalStage,
+          latestSnapshot,
+        });
+        deactivateCanonicalProjectHost(root);
+        root.replaceChildren(wrapShell(actor, childMain, 'project', { suppressNav: true }));
+        activateCanonicalProjectHost(root, {
+          project,
+          definition: canonicalProject,
+          stage: canonicalStage,
+          latestSnapshot,
+        });
+        document.title = canonicalProject.displayName + ' — Scan-to-Build';
+        root.querySelector('#screen-heading')?.focus();
+        return;
+      }
+
+      const effectiveView = canonicalProject?.hostMode === 'system-native'
+        ? nativeViewForCanonicalStage(canonicalStage)
+        : screen.view;
+
       await recoverStoreOnOpen(project.localRecordId);
       if (seq !== renderSeq) {
         return;
@@ -353,7 +457,7 @@ async function renderInto(root) {
         candidateRevisionId: project.currentHead,
       });
       const storeHistory =
-        screen.view === 'store'
+        effectiveView === 'store'
           ? await loadStoreHistory(project.localRecordId, project.currentHead)
           : [];
       const evidence = await listProjectEvidence(project.localRecordId);
@@ -366,8 +470,8 @@ async function renderInto(root) {
       if (seq !== renderSeq) {
         return;
       }
-      const navContext = { project, view: screen.view };
-      if (screen.view === 'store') {
+      const navContext = { project, view: effectiveView, canonicalProject, canonicalStage };
+      if (effectiveView === 'store') {
         content = wrapShell(
           actor,
           page5Main({
@@ -378,7 +482,7 @@ async function renderInto(root) {
           'store',
           navContext,
         );
-      } else if (screen.view === 'confirm') {
+      } else if (effectiveView === 'confirm') {
         content = wrapShell(
           actor,
           page6Main({
@@ -389,7 +493,7 @@ async function renderInto(root) {
           'confirm',
           navContext,
         );
-      } else if (screen.view === 'result') {
+      } else if (effectiveView === 'result') {
         content = wrapShell(
           actor,
           page7Main({
@@ -399,7 +503,7 @@ async function renderInto(root) {
           'result',
           navContext,
         );
-      } else if (screen.view === 'record') {
+      } else if (effectiveView === 'record') {
         const recordPresentation = await loadRecordPresentation(project.localRecordId, {
           unapplied: boardDirty,
         });
@@ -422,7 +526,7 @@ async function renderInto(root) {
           page2Main({
             project,
             actor,
-            view: screen.view,
+            view: effectiveView,
             child: screen.child,
             evidence,
             observations,
@@ -452,6 +556,7 @@ async function renderInto(root) {
   if (seq !== renderSeq) {
     return;
   }
+  deactivateCanonicalProjectHost(root);
   root.replaceChildren(content);
   if (screen.name === 'project' && viewingId) {
     const viewHost = root.querySelector('[data-source-view]');
@@ -521,7 +626,14 @@ async function completeCreate(intent) {
     setCurrentProject(created.localRecordId);
     pendingSwitch = null;
     mappedOpen = false;
-    navigate(projectHref(created.localRecordId, destinationView(created.entryMode)));
+    const canonicalProject = intent.canonicalProjectId
+      ? getProjectDefinition(intent.canonicalProjectId)
+      : getProjectDefinitionByClassId(created.classId);
+    navigate(
+      canonicalProject
+        ? canonicalProjectHref(created.localRecordId, canonicalProject.projectId, 'scan-evidence')
+        : projectHref(created.localRecordId, destinationView(created.entryMode)),
+    );
   } finally {
     createInFlight = null;
   }
@@ -1040,6 +1152,21 @@ export function startShell(root) {
       render();
       return;
     }
+    if (action === 'start-canonical-project') {
+      const canonicalProject = getProjectDefinition(button.getAttribute('data-canonical-project-id'));
+      if (!canonicalProject) {
+        return;
+      }
+      const result = requestCreate({
+        entryMode: 'mapped',
+        classId: canonicalProject.systemClassId,
+        canonicalProjectId: canonicalProject.projectId,
+      });
+      if (result && result.needsRender) {
+        render();
+      }
+      return;
+    }
     if (action === 'choose-mapped') {
       const result = requestCreate({
         entryMode: 'mapped',
@@ -1075,7 +1202,30 @@ export function startShell(root) {
           render();
           return;
         }
-        navigate(projectHref(localRecordId, destinationView(project.entryMode)));
+        const canonicalProject = getProjectDefinitionByClassId(project.classId);
+        navigate(
+          canonicalProject
+            ? canonicalProjectHref(localRecordId, canonicalProject.projectId, 'scan-evidence')
+            : projectHref(localRecordId, destinationView(project.entryMode)),
+        );
+      });
+      return;
+    }
+    if (action === 'canonical-stage') {
+      const screen = screenFromLocation(window.location);
+      const stage = button.getAttribute('data-canonical-stage');
+      if (!screen.localRecordId || !stage) {
+        return;
+      }
+      projectIndex(screen.localRecordId).then((project) => {
+        if (!project) return;
+        const canonicalProject = getProjectDefinitionByClassId(project.classId);
+        if (!canonicalProject || !resolveProjectStage(canonicalProject.projectId, stage)) return;
+        if (canonicalProject.hostMode === 'review-child') {
+          switchCanonicalProjectStage(root, stage);
+          return;
+        }
+        navigate(canonicalProjectHref(project.localRecordId, canonicalProject.projectId, stage));
       });
       return;
     }
