@@ -345,7 +345,7 @@ export async function createStoreAdapter({
     };
   }
 
-  async async function handleUserDefinedBoardJob(envelope, jobPayload, options = {}) {
+  async function handleUserDefinedBoardJob(envelope, jobPayload, options = {}) {
     const runtimeCatalog = options.catalogOverride ?? catalog;
     const line = jobPayload.line;
     const storeSku = line.storeSku;
