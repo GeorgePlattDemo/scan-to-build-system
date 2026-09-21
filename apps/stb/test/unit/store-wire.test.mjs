@@ -86,14 +86,32 @@ test('job wire request validates pin, digest, and Board slice', async () => {
   assert.equal(request.expectedStorePin, STORE_PIN);
 });
 
-test('user-defined Board wire request preserves 60-in definition and explicit operations', async () => {
+test('user-defined Board wire preserves operation semantics without inventing spot drilling', async () => {
+  const unresolvedConditions = [
+    'MITER_LIMITED_NUMERIC_ANGLE_RANGE_STAGE2_UNRESOLVED',
+    'CENTER_SPOT_TOOLING_ENVELOPE_UNRESOLVED',
+  ];
   const payload = userDefinedBoardJobPayload({
     lineId: 'line-x',
     definedWorkpieceLengthCanonical: canonicalInchString(60),
     sawCuts: 3,
     sawAngleDeg: 30,
-    drillCycles: 2,
-    requiredOps: ['MITER_LIMITED', 'DRILL'],
+    drillCycles: 0,
+    requiredOps: ['MITER_LIMITED'],
+    cutPlane: 'miter-face',
+    endIdentity: 'both',
+    endRelation: 'parallel',
+    lengthDatum: 'long-long-outer-edge',
+    materialSource: 'STORE_ZERO',
+    spotDemand: {
+      required: true,
+      mode: 'SPOT_ON_LOCATION',
+      countPerPart: 1,
+      locationRule: 'CENTERED_ON_PART',
+      acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
+      toolingStatus: 'UNRESOLVED',
+    },
+    unresolvedConditions,
   });
   const request = await buildUserDefinedBoardRequest({
     requestId: 'req-x',
@@ -110,8 +128,17 @@ test('user-defined Board wire request preserves 60-in definition and explicit op
   assert.equal(validated.payload.line.definedWorkpieceLengthIn, 60);
   assert.equal(validated.payload.line.sawCuts, 3);
   assert.equal(validated.payload.line.sawAngleDeg, 30);
-  assert.equal(validated.payload.line.drillCycles, 2);
-  assert.deepEqual(validated.payload.line.requiredOps, ['MITER_LIMITED', 'DRILL']);
+  assert.equal(validated.payload.line.drillCycles, 0);
+  assert.equal(validated.payload.line.drillDepthIn, null);
+  assert.deepEqual(validated.payload.line.requiredOps, ['MITER_LIMITED']);
+  assert.equal(validated.payload.line.cutPlane, 'miter-face');
+  assert.equal(validated.payload.line.endIdentity, 'both');
+  assert.equal(validated.payload.line.endRelation, 'parallel');
+  assert.equal(validated.payload.line.lengthDatum, 'long-long-outer-edge');
+  assert.equal(validated.payload.line.materialSource, 'STORE_ZERO');
+  assert.equal(validated.payload.line.spotDemand.mode, 'SPOT_ON_LOCATION');
+  assert.equal(validated.payload.line.spotDemand.toolingStatus, 'UNRESOLVED');
+  assert.deepEqual(validated.payload.line.unresolvedConditions, unresolvedConditions);
 
   const badAngle = {
     ...payload,
@@ -130,6 +157,29 @@ test('user-defined Board wire request preserves 60-in definition and explicit op
   const rejected = await validateWireRequest(badAngleRequest);
   assert.equal(rejected.ok, false);
   assert.equal(rejected.code, ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE);
+
+  const drillWithoutDepth = {
+    ...payload,
+    line: {
+      ...payload.line,
+      requiredOps: ['MITER_LIMITED', 'DRILL'],
+      drillCycles: 2,
+      drillDepthIn: null,
+    },
+  };
+  const drillWithoutDepthRequest = await buildUserDefinedBoardRequest({
+    requestId: 'req-x3',
+    projectId: 'proj-x',
+    candidateRevisionId: 'cand-x3',
+    attemptId: 'att-x3',
+    attemptNumber: 1,
+    sentAt: '2026-09-21T00:00:00.000Z',
+    demandSignature: await userDefinedBoardDemandSignature(drillWithoutDepth),
+    payload: drillWithoutDepth,
+  });
+  const drillRejected = await validateWireRequest(drillWithoutDepthRequest);
+  assert.equal(drillRejected.ok, false);
+  assert.equal(drillRejected.code, ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE);
 });
 
 test('inspectStoreResponse quarantines wrong correlation and unknown aggregates', async () => {
