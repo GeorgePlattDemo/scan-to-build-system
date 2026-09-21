@@ -81,7 +81,7 @@ export async function boardJobBody({
   });
 }
 
-export async function userDefinedBoardJobBody({
+export async export async function userDefinedBoardJobBody({
   requestId = crypto.randomUUID(),
   projectId = crypto.randomUUID(),
   candidateRevisionId = crypto.randomUUID(),
@@ -92,8 +92,55 @@ export async function userDefinedBoardJobBody({
   definedWorkpieceLengthIn = 60,
   sawCuts = 3,
   sawAngleDeg = 30,
-  drillCycles = 2,
-  requiredOps = ['MITER_LIMITED', 'DRILL'],
+  drillCycles = 0,
+  drillDepthIn = null,
+  requiredOps = ['MITER_LIMITED'],
+  cutPlane = 'miter-face',
+  endIdentity = 'both',
+  endRelation = 'parallel',
+  lengthDatum = 'long-long-outer-edge',
+  spotDemand = {
+    required: true,
+    mode: 'SPOT_ON_LOCATION',
+    countPerPart: 1,
+    locationRule: 'CENTERED_ON_PART',
+    acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
+    toolingStatus: 'UNRESOLVED',
+  },
+  unresolvedConditions = [
+    'MITER_LIMITED_NUMERIC_ANGLE_RANGE_STAGE2_UNRESOLVED',
+    'CENTER_SPOT_TOOLING_ENVELOPE_UNRESOLVED',
+  ],
+  materialSource = 'STORE_ZERO',
+} = {}) {
+  const payload = userDefinedBoardJobPayload({
+    lineId,
+    storeSku,
+    definedWorkpieceLengthCanonical: canonicalInchString(definedWorkpieceLengthIn),
+    sawCuts,
+    sawAngleDeg,
+    drillCycles,
+    drillDepthIn,
+    requiredOps,
+    cutPlane,
+    endIdentity,
+    endRelation,
+    lengthDatum,
+    spotDemand,
+    unresolvedConditions,
+    materialSource,
+  });
+  const demandSignature = await userDefinedBoardDemandSignature(payload);
+  return buildUserDefinedBoardRequest({
+    requestId,
+    projectId,
+    candidateRevisionId,
+    attemptId,
+    attemptNumber,
+    sentAt: new Date().toISOString(),
+    demandSignature,
+    payload,
+  });
 } = {}) {
   const payload = userDefinedBoardJobPayload({
     lineId,
