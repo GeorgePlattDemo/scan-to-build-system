@@ -13,7 +13,9 @@ import {
   boardDemandSignature,
   buildJobRequest,
   buildOfferingRequest,
+  buildUserDefinedBoardRequest,
   inspectStoreResponse,
+  userDefinedBoardDemandSignature,
 } from '/shared/store-wire.mjs';
 import {
   commitPreparedAppend,
@@ -548,6 +550,19 @@ export async function issueStoreQuestion(input) {
       demandSignature,
       payload,
     });
+  } else if (requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
+    const demandSignature =
+      input.demandSignature ?? (await userDefinedBoardDemandSignature(payload));
+    wire = await buildUserDefinedBoardRequest({
+      requestId,
+      projectId,
+      candidateRevisionId,
+      attemptId,
+      attemptNumber: 1,
+      sentAt: createdAt,
+      demandSignature,
+      payload,
+    });
   } else {
     throw new Error('unsupported Store requestType');
   }
@@ -657,6 +672,17 @@ export async function retryStoreAttempt({ localRecordId, requestId, actionId, cl
       attemptId,
       attemptNumber,
       sentAt: createdAt,
+      payload,
+    });
+  } else if (request.payload.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
+    wire = await buildUserDefinedBoardRequest({
+      requestId,
+      projectId: project.projectId,
+      candidateRevisionId: request.payload.candidateRevisionId,
+      attemptId,
+      attemptNumber,
+      sentAt: createdAt,
+      demandSignature: request.payload.demandSignature,
       payload,
     });
   } else {

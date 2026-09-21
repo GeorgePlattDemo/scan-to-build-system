@@ -81,7 +81,7 @@ Build 8 acceptance counts at this closeout:
 
 `test:vertical` proves NEW USER, RETURNING USER, and PROFESSIONAL converge on one Board architecture; 45 in then 46 in against the real pinned Store; review binding; truthful Result; close/reopen versus inert import; keyboard and narrow-viewport operation; and the absence of commercial or physical authority.
 
-Exact Store pin: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` (`GeorgePlattDemo/scan-to-build-store`).
+Exact Store pin: `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a` (`GeorgePlattDemo/scan-to-build-store`).
 
 Build 8 application commits on `build/app-foundation-0.1`:
 
@@ -131,12 +131,12 @@ Store presentation reads durable Store records; it does not calculate Store pric
 
 ## Store
 
-Exact S2.2 pin: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` (`GeorgePlattDemo/scan-to-build-store`).
+Exact S2.2 pin: `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a` (`GeorgePlattDemo/scan-to-build-store`).
 
 Supply a clean checkout of that pin through `STB_STORE_ZERO_ROOT`. The path is not hardcoded. At startup the wrapper verifies:
 
 - the checkout exists
-- `HEAD` is exactly `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
+- `HEAD` is exactly `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a`
 - required modules and catalog/observation files exist
 - the checkout is clean
 - `findSku`, `offerMaterial`, `evaluateJob`, and `estimateJob` can be loaded from that checkout
@@ -148,7 +148,9 @@ Protocol: `stb-store-zero-http/1`
 Bounded endpoints:
 
 - `POST /api/store-zero/offering` (`OFFERING_LOOKUP`)
-- `POST /api/store-zero/job` (`BOARD_SQUARE_V1`)
+- `POST /api/store-zero/job` (`BOARD_SQUARE_V1` or `USER_DEFINED_BOARD_V1`)
+
+`BOARD_SQUARE_V1` remains the accepted square-Board path. `USER_DEFINED_BOARD_V1` is a separate bounded request for an already-defined 24–60 in Board workpiece with explicit supported operation demand. It does not redefine the project to the Store SKU. The current Start Your Own X-brace proof carries a 60 in workpiece, 3 modeled saw/miter cycles and 2 modeled drill/spot cycles; Store Zero owns the resulting BudgetaryEstimate/Q.
 
 The Store checkout is never statically served. Browser modules do not import Store implementation, the pricing engine, or the envelope. Support is evaluated before estimate. Raw Store evaluation and estimate remain separate. Transport and adapter errors are not Store dispositions.
 

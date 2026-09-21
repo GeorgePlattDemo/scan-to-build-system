@@ -45,7 +45,7 @@ function snapshot(overrides = {}) {
     estimateAssociationId: 'est-1',
     demandSignature: 'demand-1',
     payloadDigest: 'payload-1',
-    storePin: 'b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d',
+    storePin: 'c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a',
     storeDisposition: 'SUPPORTABLE',
     estimateStatus: 'BUDGETARY_ESTIMATE',
     estimateQ: 53.94,

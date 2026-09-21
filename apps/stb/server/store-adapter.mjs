@@ -3,6 +3,7 @@ import {
   PUBLISHED_BOARD_SKU,
   STORE_PIN,
   STORE_PROTOCOL_VERSION,
+  STORE_REQUEST_TYPES,
   WRAPPER_BUILD_ID,
 } from '../shared/contracts.mjs';
 import {
@@ -344,6 +345,119 @@ export async function createStoreAdapter({
     };
   }
 
+  async function handleUserDefinedBoardJob(envelope, jobPayload, options = {}) {
+    const runtimeCatalog = options.catalogOverride ?? catalog;
+    const line = jobPayload.line;
+    const storeSku = line.storeSku;
+    const item = loaded.modules.findSku(runtimeCatalog, storeSku);
+
+    if (item && storeSku !== PUBLISHED_BOARD_SKU) {
+      return {
+        status: 422,
+        body: adapterErrorBody(
+          ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+          'a known different offering is outside the current user-defined Board endpoint',
+          envelope,
+        ),
+      };
+    }
+
+    if (item && !offeringAttributesComplete(item)) {
+      return {
+        status: 422,
+        body: adapterErrorBody(
+          ADAPTER_ERROR_CODES.OFFERING_INCOMPLETE,
+          'selected offering is missing required Store attributes',
+          envelope,
+        ),
+      };
+    }
+
+    const title = `User-defined Board · ${line.definedWorkpieceLengthIn} in workpiece`;
+    const evaluateInput = {
+      title,
+      lines: [
+        {
+          storeSku,
+          qty: 1,
+          requiredOps: [...line.requiredOps],
+          keptLengthIn: line.definedWorkpieceLengthIn,
+        },
+      ],
+    };
+    const rawEvaluation = await runEvaluation(runtimeCatalog, evaluateInput);
+    const evaluateDigest = await digestCanonical(evaluateInput);
+    const offering = attributedOffering(item, runtimeCatalog, observations);
+
+    let rawEstimate = null;
+    let estimateInput = null;
+    let estimateDigest = null;
+    let estimateAssociationId = null;
+    let estimateError = null;
+
+    if (rawEvaluation.status === 'SUPPORTABLE' && item) {
+      const angleRadians = (line.sawAngleDeg * Math.PI) / 180;
+      const sawTraverseIn =
+        line.sawAngleDeg > 0 ? item.actualW / Math.cos(angleRadians) : item.actualW;
+      estimateInput = {
+        title,
+        classId: 'app.user-defined-board.v1',
+        pieces: [
+          {
+            storeSku: item.storeSku,
+            qty: 1,
+            keptLengthIn: line.definedWorkpieceLengthIn,
+            widthIn: item.actualW,
+            sawCuts: line.sawCuts,
+            sawTraverseIn,
+            holes: line.drillCycles,
+            depthIn: 0.75,
+          },
+        ],
+      };
+      try {
+        rawEstimate = await runEstimate(runtimeCatalog, estimateInput);
+        estimateDigest = await digestCanonical(estimateInput);
+        estimateAssociationId = opaqueId();
+      } catch (error) {
+        rawEstimate = null;
+        estimateError = {
+          code: ADAPTER_ERROR_CODES.ESTIMATE_FAILED,
+          details: error instanceof Error ? error.message : String(error),
+        };
+      }
+    }
+
+    return {
+      status: 200,
+      body: await successEnvelope(envelope, {
+        rawOffering: offering,
+        rawEvaluation,
+        rawEstimate,
+        estimateAssociationId,
+        estimateError,
+        mappedCallInputs: {
+          definition: {
+            definedWorkpieceLengthIn: line.definedWorkpieceLengthIn,
+            sawCuts: line.sawCuts,
+            sawAngleDeg: line.sawAngleDeg,
+            drillCycles: line.drillCycles,
+          },
+          evaluation: evaluateInput,
+          evaluationDigest: evaluateDigest,
+          estimate: estimateInput,
+          estimateDigest,
+        },
+        attributedBasis: storeBasis({
+          modules: loaded.modules,
+          offering,
+          evaluation: rawEvaluation,
+          estimate: rawEstimate,
+        }),
+      }),
+    };
+  }
+
   async function dispatch(body) {
     const validated = await validateWireRequest(body);
     if (!validated.ok) {
@@ -353,8 +467,11 @@ export async function createStoreAdapter({
         code: validated.code,
       };
     }
-    if (validated.requestType === 'OFFERING_LOOKUP') {
+    if (validated.requestType === STORE_REQUEST_TYPES.OFFERING_LOOKUP) {
       return handleOffering(validated.envelope, validated.payload);
+    }
+    if (validated.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
+      return handleUserDefinedBoardJob(validated.envelope, validated.payload);
     }
     return handleJob(validated.envelope, validated.payload);
   }
@@ -369,6 +486,8 @@ export async function createStoreAdapter({
     handleOffering: (envelope, payload, runtimeCatalog) =>
       handleOffering(envelope, payload, runtimeCatalog),
     handleJob: (envelope, payload, options) => handleJob(envelope, payload, options),
+    handleUserDefinedBoardJob: (envelope, payload, options) =>
+      handleUserDefinedBoardJob(envelope, payload, options),
     dispatch,
     diagnosticEvaluateJob(spec, runtimeCatalog = catalog) {
       return runEvaluation(runtimeCatalog, spec);

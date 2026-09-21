@@ -44,7 +44,7 @@ The Store owns its own:
 
 Current application Store reference:
 
-`GeorgePlattDemo/scan-to-build-store@b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
+`GeorgePlattDemo/scan-to-build-store@c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a`
 
 A Store result does not become governed acceptance, machine readiness, production authorization, or physical execution.
 

@@ -11,6 +11,7 @@ import {
   STORE_PROTOCOL_VERSION,
   STORE_REQUEST_TYPES,
   STORE_SCOPES,
+  USER_DEFINED_BOARD_DEFINITION,
   WRAPPER_BUILD_ID,
 } from './contracts.mjs';
 
@@ -230,6 +231,168 @@ function validateJobPayload(payload) {
   };
 }
 
+function validateUserDefinedBoardPayload(payload) {
+  if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'user-defined board payload must be an object');
+  }
+  const extra = Object.keys(payload).filter(
+    (key) => key !== 'line' && key !== 'definitionKind' && key !== 'ruleVersion',
+  );
+  if (extra.length > 0) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected user-defined board payload fields');
+  }
+  if (payload.definitionKind !== USER_DEFINED_BOARD_DEFINITION.kind) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'definitionKind must be user_defined_board.v1',
+    );
+  }
+  if (payload.ruleVersion !== USER_DEFINED_BOARD_DEFINITION.ruleVersion) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'ruleVersion must match the user-defined Board slice',
+    );
+  }
+  const line = payload.line;
+  if (line === null || typeof line !== 'object' || Array.isArray(line)) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'user-defined Board payload requires one line');
+  }
+  const allowedLine = new Set([
+    'lineId',
+    'storeSku',
+    'quantity',
+    'unit',
+    'requiredOps',
+    'definedWorkpieceLength',
+    'sawCuts',
+    'sawAngleDeg',
+    'drillCycles',
+  ]);
+  if (Object.keys(line).some((key) => !allowedLine.has(key))) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'unexpected user-defined Board line fields',
+    );
+  }
+  const lineIdError = requireNonemptyString('lineId', line.lineId);
+  if (lineIdError) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, lineIdError);
+  }
+  const skuError = requireNonemptyString('storeSku', line.storeSku);
+  if (skuError) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, skuError);
+  }
+  if (line.storeSku !== PUBLISHED_BOARD_SKU) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'user-defined Board request currently accepts only the published Store Board SKU',
+    );
+  }
+  if (line.quantity !== USER_DEFINED_BOARD_DEFINITION.quantity || line.unit !== 'ea') {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'user-defined Board quantity must be exactly 1 ea',
+    );
+  }
+  if (!Array.isArray(line.requiredOps) || line.requiredOps.length === 0) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'user-defined Board requiredOps must be a nonempty array',
+    );
+  }
+  const allowedOps = new Set(USER_DEFINED_BOARD_DEFINITION.allowedOps);
+  if (line.requiredOps.some((op) => !allowedOps.has(op))) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'user-defined Board requiredOps contain an unsupported operation name',
+    );
+  }
+  if (new Set(line.requiredOps).size !== line.requiredOps.length) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'user-defined Board requiredOps must not contain duplicates',
+    );
+  }
+  const workpiece = line.definedWorkpieceLength;
+  if (workpiece === null || typeof workpiece !== 'object' || Array.isArray(workpiece)) {
+    return fail(
+      ADAPTER_ERROR_CODES.MALFORMED_REQUEST,
+      'definedWorkpieceLength must be an object',
+    );
+  }
+  if (workpiece.unit !== USER_DEFINED_BOARD_DEFINITION.unit) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'definedWorkpieceLength.unit must be in',
+    );
+  }
+  const parsed = parseCanonicalInch(workpiece.value);
+  if (!parsed.ok) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, parsed.reason);
+  }
+  if (
+    parsed.value < USER_DEFINED_BOARD_DEFINITION.minWorkpieceInches ||
+    parsed.value > USER_DEFINED_BOARD_DEFINITION.maxWorkpieceInches
+  ) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'defined workpiece length must be 24–60 in inclusive',
+    );
+  }
+  if (!Number.isInteger(line.sawCuts) || line.sawCuts < 1 || line.sawCuts > 8) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'sawCuts must be an integer from 1 through 8',
+    );
+  }
+  if (
+    typeof line.sawAngleDeg !== 'number' ||
+    !Number.isFinite(line.sawAngleDeg) ||
+    line.sawAngleDeg < 0 ||
+    line.sawAngleDeg > 45
+  ) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'sawAngleDeg must be a finite number from 0 through 45',
+    );
+  }
+  if (!Number.isInteger(line.drillCycles) || line.drillCycles < 0 || line.drillCycles > 16) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'drillCycles must be an integer from 0 through 16',
+    );
+  }
+  if (line.sawAngleDeg > 0 && !line.requiredOps.includes('MITER_LIMITED')) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'angled user-defined Board work requires MITER_LIMITED',
+    );
+  }
+  if (line.drillCycles > 0 && !line.requiredOps.includes('DRILL')) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'drillCycles require DRILL',
+    );
+  }
+  return {
+    ok: true,
+    line: {
+      lineId: line.lineId,
+      storeSku: line.storeSku,
+      quantity: 1,
+      unit: 'ea',
+      requiredOps: [...line.requiredOps],
+      definedWorkpieceLength: { value: parsed.canonical, unit: 'in' },
+      definedWorkpieceLengthIn: parsed.value,
+      sawCuts: line.sawCuts,
+      sawAngleDeg: line.sawAngleDeg,
+      drillCycles: line.drillCycles,
+    },
+    definitionKind: USER_DEFINED_BOARD_DEFINITION.kind,
+    ruleVersion: USER_DEFINED_BOARD_DEFINITION.ruleVersion,
+  };
+}
+
 export async function validateWireRequest(body) {
   if (body === null || typeof body !== 'object' || Array.isArray(body)) {
     return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'request body must be a JSON object');
@@ -288,6 +451,26 @@ export async function validateWireRequest(body) {
       return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, queryError);
     }
     const payload = validateOfferingPayload(body.payload);
+    if (!payload.ok) {
+      return payload;
+    }
+    return { ok: true, requestType: body.requestType, payload, envelope: body };
+  }
+  if (body.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
+    if (body.scope !== STORE_SCOPES.USER_DEFINED_BOARD_V1) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'user-defined Board scope mismatch');
+    }
+    const demandError = requireNonemptyString('demandSignature', body.demandSignature);
+    if (demandError) {
+      return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, demandError);
+    }
+    if (body.querySignature !== null) {
+      return fail(
+        ADAPTER_ERROR_CODES.MALFORMED_REQUEST,
+        'user-defined Board querySignature must be null',
+      );
+    }
+    const payload = validateUserDefinedBoardPayload(body.payload);
     if (!payload.ok) {
       return payload;
     }
@@ -428,6 +611,79 @@ export async function buildJobRequest({
   };
 }
 
+export async function buildUserDefinedBoardRequest({
+  requestId,
+  projectId,
+  candidateRevisionId,
+  attemptId,
+  attemptNumber,
+  sentAt,
+  demandSignature,
+  payload,
+}) {
+  const payloadHash = await payloadDigest(payload);
+  return {
+    protocolVersion: STORE_PROTOCOL_VERSION,
+    requestId,
+    projectId,
+    candidateRevisionId,
+    requestType: STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1,
+    scope: STORE_SCOPES.USER_DEFINED_BOARD_V1,
+    demandSignature,
+    querySignature: null,
+    payloadDigest: payloadHash,
+    expectedStorePin: STORE_PIN,
+    attemptId,
+    attemptNumber,
+    sentAt,
+    payload,
+  };
+}
+
+export function userDefinedBoardJobPayload({
+  lineId,
+  storeSku = PUBLISHED_BOARD_SKU,
+  definedWorkpieceLengthCanonical,
+  sawCuts,
+  sawAngleDeg,
+  drillCycles,
+  requiredOps,
+}) {
+  return {
+    line: {
+      lineId,
+      storeSku,
+      quantity: 1,
+      unit: 'ea',
+      requiredOps: [...requiredOps],
+      definedWorkpieceLength: { value: definedWorkpieceLengthCanonical, unit: 'in' },
+      sawCuts,
+      sawAngleDeg,
+      drillCycles,
+    },
+    definitionKind: USER_DEFINED_BOARD_DEFINITION.kind,
+    ruleVersion: USER_DEFINED_BOARD_DEFINITION.ruleVersion,
+  };
+}
+
+export async function userDefinedBoardDemandSignature(payload) {
+  return digestCanonical({
+    definitionKind: payload.definitionKind,
+    ruleVersion: payload.ruleVersion,
+    requestType: STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1,
+    scope: STORE_SCOPES.USER_DEFINED_BOARD_V1,
+    lineId: payload.line.lineId,
+    storeSku: payload.line.storeSku,
+    quantity: payload.line.quantity,
+    unit: payload.line.unit,
+    requiredOps: payload.line.requiredOps,
+    definedWorkpieceLength: payload.line.definedWorkpieceLength,
+    sawCuts: payload.line.sawCuts,
+    sawAngleDeg: payload.line.sawAngleDeg,
+    drillCycles: payload.line.drillCycles,
+  });
+}
+
 export function boardJobPayload({ lineId, storeSku = PUBLISHED_BOARD_SKU, keptLengthCanonical }) {
   return {
     line: {
@@ -545,7 +801,10 @@ export function inspectStoreResponse(request, parsed, { httpStatus, byteLength }
   if (parsed.attemptNumber !== request.attemptNumber) {
     return mismatch('attemptNumber', parsed.attemptNumber ?? null);
   }
-  if (request.requestType === STORE_REQUEST_TYPES.BOARD_SQUARE_V1) {
+  if (
+    request.requestType === STORE_REQUEST_TYPES.BOARD_SQUARE_V1 ||
+    request.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1
+  ) {
     const status = parsed.rawEvaluation?.status;
     if (!isKnownJobStatus(status)) {
       return {

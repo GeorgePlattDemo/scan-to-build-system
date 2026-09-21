@@ -16,6 +16,9 @@ import {
   inspectStoreResponse,
   isJsonContentType,
   payloadDigest,
+  userDefinedBoardDemandSignature,
+  userDefinedBoardJobPayload,
+  buildUserDefinedBoardRequest,
   validateWireRequest,
 } from '../../shared/store-wire.mjs';
 
@@ -81,6 +84,52 @@ test('job wire request validates pin, digest, and Board slice', async () => {
   assert.equal(short.code, ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE);
   assert.equal(request.protocolVersion, STORE_PROTOCOL_VERSION);
   assert.equal(request.expectedStorePin, STORE_PIN);
+});
+
+test('user-defined Board wire request preserves 60-in definition and explicit operations', async () => {
+  const payload = userDefinedBoardJobPayload({
+    lineId: 'line-x',
+    definedWorkpieceLengthCanonical: canonicalInchString(60),
+    sawCuts: 3,
+    sawAngleDeg: 30,
+    drillCycles: 2,
+    requiredOps: ['MITER_LIMITED', 'DRILL'],
+  });
+  const request = await buildUserDefinedBoardRequest({
+    requestId: 'req-x',
+    projectId: 'proj-x',
+    candidateRevisionId: 'cand-x',
+    attemptId: 'att-x',
+    attemptNumber: 1,
+    sentAt: '2026-09-21T00:00:00.000Z',
+    demandSignature: await userDefinedBoardDemandSignature(payload),
+    payload,
+  });
+  const validated = await validateWireRequest(request);
+  assert.equal(validated.ok, true);
+  assert.equal(validated.payload.line.definedWorkpieceLengthIn, 60);
+  assert.equal(validated.payload.line.sawCuts, 3);
+  assert.equal(validated.payload.line.sawAngleDeg, 30);
+  assert.equal(validated.payload.line.drillCycles, 2);
+  assert.deepEqual(validated.payload.line.requiredOps, ['MITER_LIMITED', 'DRILL']);
+
+  const badAngle = {
+    ...payload,
+    line: { ...payload.line, sawAngleDeg: 50 },
+  };
+  const badAngleRequest = await buildUserDefinedBoardRequest({
+    requestId: 'req-x2',
+    projectId: 'proj-x',
+    candidateRevisionId: 'cand-x2',
+    attemptId: 'att-x2',
+    attemptNumber: 1,
+    sentAt: '2026-09-21T00:00:00.000Z',
+    demandSignature: await userDefinedBoardDemandSignature(badAngle),
+    payload: badAngle,
+  });
+  const rejected = await validateWireRequest(badAngleRequest);
+  assert.equal(rejected.ok, false);
+  assert.equal(rejected.code, ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE);
 });
 
 test('inspectStoreResponse quarantines wrong correlation and unknown aggregates', async () => {
