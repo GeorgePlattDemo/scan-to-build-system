@@ -147,7 +147,6 @@ export async function scheduleUserDefinedBoardStoreQuestion(
     requestType: STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1,
     payload: userDefinedBoardJobPayload({
       lineId,
-      storeSku: PUBLISHED_BOARD_SKU,
       definedWorkpieceLengthCanonical,
       sawCuts,
       sawAngleDeg,
