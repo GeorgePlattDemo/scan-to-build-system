@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 
 import { canonicalInchString } from '../../shared/canonical.mjs';
-import { PUBLISHED_BOARD_SKU, STORE_PATHS } from '../../shared/contracts.mjs';
+import { PUBLISHED_BOARD_SKU, STORE_PATHS, USER_DEFINED_BOARD_MATERIAL_DEMAND } from '../../shared/contracts.mjs';
 import {
   boardDemandSignature,
   boardJobPayload,
@@ -88,7 +88,7 @@ export async function userDefinedBoardJobBody({
   attemptId = crypto.randomUUID(),
   attemptNumber = 1,
   lineId = crypto.randomUUID(),
-  storeSku = PUBLISHED_BOARD_SKU,
+  materialDemand = USER_DEFINED_BOARD_MATERIAL_DEMAND,
   definedWorkpieceLengthIn = 60,
   sawCuts = 3,
   sawAngleDeg = 30,
@@ -105,17 +105,14 @@ export async function userDefinedBoardJobBody({
     countPerPart: 1,
     locationRule: 'CENTERED_ON_PART',
     acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
-    toolingStatus: 'UNRESOLVED',
+    totalCount: 2,
   },
-  unresolvedConditions = [
-    'MITER_LIMITED_NUMERIC_ANGLE_RANGE_STAGE2_UNRESOLVED',
-    'CENTER_SPOT_TOOLING_ENVELOPE_UNRESOLVED',
-  ],
+  unresolvedConditions = [],
   materialSource = 'STORE_ZERO',
 } = {}) {
   const payload = userDefinedBoardJobPayload({
     lineId,
-    storeSku,
+    materialDemand,
     definedWorkpieceLengthCanonical: canonicalInchString(definedWorkpieceLengthIn),
     sawCuts,
     sawAngleDeg,
