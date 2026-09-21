@@ -16,7 +16,7 @@ import {
   storeSubmissionReadiness,
 } from '../../shared/definition-contract.mjs';
 
-const STORE_PIN = 'b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d';
+const STORE_PIN = 'c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a';
 
 function row(overrides = {}) {
   return {
