@@ -679,7 +679,7 @@ export async function buildUserDefinedBoardRequest({
   };
 }
 
-export export function userDefinedBoardJobPayload({
+export function userDefinedBoardJobPayload({
   lineId,
   storeSku = PUBLISHED_BOARD_SKU,
   definedWorkpieceLengthCanonical,
@@ -737,7 +737,7 @@ export export function userDefinedBoardJobPayload({
   };
 }
 
-export async export async function userDefinedBoardDemandSignature(payload) {
+export async function userDefinedBoardDemandSignature(payload) {
   return digestCanonical({
     definitionKind: payload.definitionKind,
     ruleVersion: payload.ruleVersion,
