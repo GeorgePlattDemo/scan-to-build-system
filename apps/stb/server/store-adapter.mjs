@@ -398,7 +398,7 @@ export async function createStoreAdapter({
           lines: [],
           materialResolution,
           estimate: null,
-          not_claimed: ['live ERP', 'Cycle Start', 'physical stock allocation', 'commercial quote'],
+          not_claimed: ['live ERP', 'live equipment operation', 'physical stock allocation', 'commercial quote'],
         };
     const evaluateDigest = evaluateInput ? await digestCanonical(evaluateInput) : null;
     const offering = attributedOffering(item, runtimeCatalog, observations);
