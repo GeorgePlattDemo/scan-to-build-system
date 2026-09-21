@@ -81,7 +81,7 @@ Build 8 acceptance counts at this closeout:
 
 `test:vertical` proves NEW USER, RETURNING USER, and PROFESSIONAL converge on one Board architecture; 45 in then 46 in against the real pinned Store; review binding; truthful Result; close/reopen versus inert import; keyboard and narrow-viewport operation; and the absence of commercial or physical authority.
 
-Exact Store pin: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` (`GeorgePlattDemo/scan-to-build-store`).
+Exact Store pin: `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a` (`GeorgePlattDemo/scan-to-build-store`).
 
 Build 8 application commits on `build/app-foundation-0.1`:
 
@@ -131,12 +131,12 @@ Store presentation reads durable Store records; it does not calculate Store pric
 
 ## Store
 
-Exact S2.2 pin: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` (`GeorgePlattDemo/scan-to-build-store`).
+Exact S2.2 pin: `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a` (`GeorgePlattDemo/scan-to-build-store`).
 
 Supply a clean checkout of that pin through `STB_STORE_ZERO_ROOT`. The path is not hardcoded. At startup the wrapper verifies:
 
 - the checkout exists
-- `HEAD` is exactly `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
+- `HEAD` is exactly `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a`
 - required modules and catalog/observation files exist
 - the checkout is clean
 - `findSku`, `offerMaterial`, `evaluateJob`, and `estimateJob` can be loaded from that checkout
