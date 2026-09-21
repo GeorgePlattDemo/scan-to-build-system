@@ -20,6 +20,7 @@ import {
   postJob,
   postOffering,
   requireCleanPinnedStore,
+  userDefinedBoardJobBody,
 } from './helpers.mjs';
 
 async function withHost(t) {
@@ -109,6 +110,35 @@ test('BOARD_SQUARE_V1 45-in and 46-in invoke actual evaluate then estimate', asy
   assert.notEqual(body46.rawEstimate.cycle.T_job_min, cut001.cycle.T_job_min);
   assert.equal(adapter.instrumentation.evaluationCalls, 2);
   assert.equal(adapter.instrumentation.estimateCalls, 2);
+});
+
+test('USER_DEFINED_BOARD_V1 returns pinned Store modeled Q for the starting X-brace', async (t) => {
+  const { adapter } = await withHost(t);
+  adapter.instrumentation.evaluationCalls = 0;
+  adapter.instrumentation.estimateCalls = 0;
+
+  const request = await userDefinedBoardJobBody();
+  const response = await postJob(request);
+  assert.equal(response.status, 200);
+  const body = parseJson(response);
+  assert.equal(body.rawEvaluation.status, 'SUPPORTABLE');
+  assert.equal(body.mappedCallInputs.definition.definedWorkpieceLengthIn, 60);
+  assert.equal(body.mappedCallInputs.definition.sawCuts, 3);
+  assert.equal(body.mappedCallInputs.definition.sawAngleDeg, 30);
+  assert.equal(body.mappedCallInputs.definition.drillCycles, 2);
+  assert.deepEqual(body.mappedCallInputs.evaluation.lines[0].requiredOps, [
+    'MITER_LIMITED',
+    'DRILL',
+  ]);
+  assert.equal(body.rawEstimate.status, 'BUDGETARY_ESTIMATE');
+  assert.equal(body.rawEstimate.cycle.T_job_min, 10.077);
+  assert.equal(body.rawEstimate.totals.material, 3.13);
+  assert.equal(body.rawEstimate.totals.cell_recovery, 51.79);
+  assert.equal(body.rawEstimate.totals.Q, 54.92);
+  assert.equal(body.attributedBasis.pricingEngine.id, 'STB-STORE-ZERO-PRICE-1');
+  assert.equal(body.attributedBasis.cycleModel.id, 'STB-D001-CYCLE-MODEL-S2-0.1');
+  assert.equal(adapter.instrumentation.evaluationCalls, 1);
+  assert.equal(adapter.instrumentation.estimateCalls, 1);
 });
 
 test('support-before-estimate does not call estimate for unknown SKU', async (t) => {
