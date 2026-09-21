@@ -81,7 +81,7 @@ export async function boardJobBody({
   });
 }
 
-export async export async function userDefinedBoardJobBody({
+export async function userDefinedBoardJobBody({
   requestId = crypto.randomUUID(),
   projectId = crypto.randomUUID(),
   candidateRevisionId = crypto.randomUUID(),
@@ -129,27 +129,6 @@ export async export async function userDefinedBoardJobBody({
     spotDemand,
     unresolvedConditions,
     materialSource,
-  });
-  const demandSignature = await userDefinedBoardDemandSignature(payload);
-  return buildUserDefinedBoardRequest({
-    requestId,
-    projectId,
-    candidateRevisionId,
-    attemptId,
-    attemptNumber,
-    sentAt: new Date().toISOString(),
-    demandSignature,
-    payload,
-  });
-} = {}) {
-  const payload = userDefinedBoardJobPayload({
-    lineId,
-    storeSku,
-    definedWorkpieceLengthCanonical: canonicalInchString(definedWorkpieceLengthIn),
-    sawCuts,
-    sawAngleDeg,
-    drillCycles,
-    requiredOps,
   });
   const demandSignature = await userDefinedBoardDemandSignature(payload);
   return buildUserDefinedBoardRequest({
