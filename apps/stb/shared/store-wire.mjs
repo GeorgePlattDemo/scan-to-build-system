@@ -422,7 +422,7 @@ function validateUserDefinedBoardPayload(payload) {
     ok: true,
     line: {
       lineId: line.lineId,
-      storeSku: line.storeSku,
+      materialDemand: { ...line.materialDemand },
       quantity: 1,
       unit: 'ea',
       requiredOps: [...line.requiredOps],
