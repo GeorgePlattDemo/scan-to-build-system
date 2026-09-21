@@ -719,22 +719,6 @@ export function userDefinedBoardJobPayload({
     definitionKind: USER_DEFINED_BOARD_DEFINITION.kind,
     ruleVersion: USER_DEFINED_BOARD_DEFINITION.ruleVersion,
   };
-}) {
-  return {
-    line: {
-      lineId,
-      storeSku,
-      quantity: 1,
-      unit: 'ea',
-      requiredOps: [...requiredOps],
-      definedWorkpieceLength: { value: definedWorkpieceLengthCanonical, unit: 'in' },
-      sawCuts,
-      sawAngleDeg,
-      drillCycles,
-    },
-    definitionKind: USER_DEFINED_BOARD_DEFINITION.kind,
-    ruleVersion: USER_DEFINED_BOARD_DEFINITION.ruleVersion,
-  };
 }
 
 export async function userDefinedBoardDemandSignature(payload) {
