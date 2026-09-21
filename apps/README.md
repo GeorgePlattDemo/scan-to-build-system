@@ -46,7 +46,7 @@ Store identity is path-specific.
 ### Transferred Stage-2 Store Zero path
 
 ```text
-STB_STORE_ZERO_ROOT=<clean scan-to-build-store at b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d> npm start
+STB_STORE_ZERO_ROOT=<clean scan-to-build-store at c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a> npm start
 ```
 
 ### Accepted published-job / canonical S-001 proof path
