@@ -5,7 +5,13 @@ import { PUBLISHED_BOARD_SKU } from '../../shared/contracts.mjs';
 import { ADAPTER_ERROR_CODES } from '../../shared/store-wire.mjs';
 import { createStoreAdapter } from '../../server/store-adapter.mjs';
 import { startServer } from '../../server/main.mjs';
-import { boardJobBody, parseJson, postJob, requireCleanPinnedStore } from './helpers.mjs';
+import {
+  boardJobBody,
+  parseJson,
+  postJob,
+  requireCleanPinnedStore,
+  userDefinedBoardJobBody,
+} from './helpers.mjs';
 
 async function withAdapter(t, options = {}) {
   await requireCleanPinnedStore();
@@ -55,6 +61,31 @@ test('actual 45-in and 46-in Board HTTP invoke pinned evaluateJob and matching e
   assert.notEqual(body46.rawEstimate.cycle.T_job_min, cut001.cycle.T_job_min);
   assert.notEqual(body45.rawEstimate.totals.Q, 0);
   assert.notEqual(body46.rawEstimate.totals.Q, 0);
+});
+
+test('user-defined X-brace invokes pinned Store evaluation and sequence pricing', async (t) => {
+  const adapter = await withAdapter(t);
+  const body = parseJson(await postJob(await userDefinedBoardJobBody()));
+  assert.equal(body.rawEvaluation.status, 'SUPPORTABLE');
+  assert.deepEqual(body.mappedCallInputs.evaluation.lines[0].requiredOps, ['MITER_LIMITED', 'DRILL']);
+  assert.equal(body.mappedCallInputs.evaluation.lines[0].keptLengthIn, 60);
+  assert.equal(body.mappedCallInputs.definition.definedWorkpieceLengthIn, 60);
+  assert.equal(body.mappedCallInputs.definition.sawCuts, 3);
+  assert.equal(body.mappedCallInputs.definition.sawAngleDeg, 30);
+  assert.equal(body.mappedCallInputs.definition.drillCycles, 2);
+  assert.equal(body.mappedCallInputs.estimate.pieces[0].keptLengthIn, 60);
+  assert.equal(body.mappedCallInputs.estimate.pieces[0].sawCuts, 3);
+  assert.equal(body.mappedCallInputs.estimate.pieces[0].holes, 2);
+  assert.equal(body.mappedCallInputs.estimate.pieces[0].depthIn, 0.75);
+  assert.ok(body.mappedCallInputs.estimate.pieces[0].sawTraverseIn > 3.5);
+  assert.equal(body.rawEstimate.status, 'BUDGETARY_ESTIMATE');
+  assert.equal(body.rawEstimate.totals.material, 3.13);
+  assert.equal(body.rawEstimate.cycle.T_job_min, 10.077);
+  assert.equal(body.rawEstimate.totals.cell_recovery, 51.79);
+  assert.equal(body.rawEstimate.totals.Q, 54.92);
+  assert.equal(body.rawEstimate.cycle.model, 'STB-D001-CYCLE-MODEL-S2-0.1');
+  assert.equal(body.attributedBasis.pricingEngine.id, 'STB-STORE-ZERO-PRICE-1');
+  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.2');
 });
 
 test('unknown SKU through actual evaluateJob retains UNRESOLVED and raw NO_OFFERING/MISSING_PRICE', async (t) => {
