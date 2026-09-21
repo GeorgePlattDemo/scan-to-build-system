@@ -98,7 +98,79 @@ export async function scheduleUserDefinedBoardStoreQuestion(
     unresolvedConditions = [],
     materialSource = null,
     unapplied = false,
+  } = {},
+) {
+  if (!localRecordId || unapplied) {
+    return { status: 'skipped' };
   }
+  const project = await projectIndex(localRecordId);
+  if (!project) {
+    return { status: 'no-project' };
+  }
+  if (project.unknownClass === true) {
+    return { status: 'unknown-class' };
+  }
+  if (
+    !lineId ||
+    !definedWorkpieceLengthCanonical ||
+    !Number.isInteger(sawCuts) ||
+    !Number.isFinite(sawAngleDeg) ||
+    !Number.isInteger(drillCycles) ||
+    !Array.isArray(requiredOps) ||
+    requiredOps.length === 0
+  ) {
+    return { status: 'incomplete' };
+  }
+
+  const candidateRevisionId = project.currentHead;
+  const existing = await currentStoreAnswer(localRecordId, {
+    candidateRevisionId,
+    scope: STORE_SCOPES.USER_DEFINED_BOARD_V1,
+  });
+  if (existing?.request && existing.imported !== true && existing.request.imported !== true) {
+    return {
+      status: 'existing-request',
+      requestId: existing.request.id,
+      applicability: existing,
+    };
+  }
+
+  const key = scheduleKey(localRecordId, candidateRevisionId);
+  if (inFlight.has(key)) {
+    return inFlight.get(key);
+  }
+
+  const work = issueStoreQuestion({
+    localRecordId,
+    projectId: project.projectId,
+    candidateRevisionId,
+    requestType: STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1,
+    payload: userDefinedBoardJobPayload({
+      lineId,
+      storeSku: PUBLISHED_BOARD_SKU,
+      definedWorkpieceLengthCanonical,
+      sawCuts,
+      sawAngleDeg,
+      drillCycles,
+      drillDepthIn,
+      requiredOps,
+      cutPlane,
+      endIdentity,
+      endRelation,
+      lengthDatum,
+      spotDemand,
+      unresolvedConditions,
+      materialSource,
+    }),
+    background: true,
+  }).then((result) => {
+    inFlight.delete(key);
+    return result;
+  });
+  inFlight.set(key, work);
+  return work;
+}
+
 export async function retryCurrentStore(localRecordId, requestId) {
   if (!localRecordId || !requestId) {
     throw new Error('Store retry requires a request');
