@@ -56,12 +56,15 @@ These identities remain provenance. They are not competing current baselines.
 
 | Path / role | Store pin | Status |
 | --- | --- | --- |
-| transferred accepted-app / Stage-2 Store Zero path | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | ACCEPTED-APP REFERENCE PATH |
+| 2026-09-13 transferred accepted-app / Stage-2 Store Zero identity | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | ACCEPTED BASELINE HISTORY; SUPERSEDED FOR CURRENT STAGE-2 WORKING PATH |
+| current post-acceptance Stage-2 / `USER_DEFINED_BOARD_V1` path | `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a` | CURRENT WORKING STORE PIN |
 | PR #4 sheet Store path | `49d22ce40482a7c2e0169ac1e6df48e0f8384a6d` | SUPERSEDED CANDIDATE HISTORY |
 | PR #6 combined published-job candidate | `096e99d645d745b1670185f46c75de75f9e59661` | ACCEPTED ANCESTRY; SUPERSEDED FOR CURRENT S-001 PROOF |
 | published-job / canonical S-001 proof path accepted with the promoted tree | `4402abeb6b0299a5b6db2eec85ed04c3b0236bcc` | ACCEPTED EXACT STORE PROOF PIN |
 
 Do not substitute one pin for another because the jobs have similar names. The path determines the pin.
+
+The post-acceptance working-state lock for the current Start Your Own repair is [`docs/project/CURRENT-STATE-LOCK-2026-09-21.md`](docs/project/CURRENT-STATE-LOCK-2026-09-21.md). That lock does not rewrite the immutable 2026-09-13 acceptance identities above; it records later working truth separately.
 
 ## Current bounded capability status
 
