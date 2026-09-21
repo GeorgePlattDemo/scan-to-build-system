@@ -6,6 +6,7 @@ import {
   PUBLISHED_BOARD_SKU,
   STORE_PIN,
   STORE_PROTOCOL_VERSION,
+  USER_DEFINED_BOARD_MATERIAL_DEMAND,
 } from '../../shared/contracts.mjs';
 import {
   ADAPTER_ERROR_CODES,
@@ -86,11 +87,7 @@ test('job wire request validates pin, digest, and Board slice', async () => {
   assert.equal(request.expectedStorePin, STORE_PIN);
 });
 
-test('user-defined Board wire preserves operation semantics without inventing spot drilling', async () => {
-  const unresolvedConditions = [
-    'MITER_LIMITED_NUMERIC_ANGLE_RANGE_STAGE2_UNRESOLVED',
-    'CENTER_SPOT_TOOLING_ENVELOPE_UNRESOLVED',
-  ];
+test('user-defined Board wire preserves project demand and leaves machine limits to Store', async () => {
   const payload = userDefinedBoardJobPayload({
     lineId: 'line-x',
     definedWorkpieceLengthCanonical: canonicalInchString(60),
@@ -107,11 +104,12 @@ test('user-defined Board wire preserves operation semantics without inventing sp
       required: true,
       mode: 'SPOT_ON_LOCATION',
       countPerPart: 1,
+      totalCount: 2,
       locationRule: 'CENTERED_ON_PART',
+      locationAlongLengthIn: 8,
       acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
-      toolingStatus: 'UNRESOLVED',
     },
-    unresolvedConditions,
+    unresolvedConditions: [],
   });
   const request = await buildUserDefinedBoardRequest({
     requestId: 'req-x',
@@ -125,6 +123,8 @@ test('user-defined Board wire preserves operation semantics without inventing sp
   });
   const validated = await validateWireRequest(request);
   assert.equal(validated.ok, true);
+  assert.deepEqual(validated.payload.line.materialDemand, USER_DEFINED_BOARD_MATERIAL_DEMAND);
+  assert.equal(validated.payload.line.storeSku, undefined);
   assert.equal(validated.payload.line.definedWorkpieceLengthIn, 60);
   assert.equal(validated.payload.line.sawCuts, 3);
   assert.equal(validated.payload.line.sawAngleDeg, 30);
@@ -137,26 +137,44 @@ test('user-defined Board wire preserves operation semantics without inventing sp
   assert.equal(validated.payload.line.lengthDatum, 'long-long-outer-edge');
   assert.equal(validated.payload.line.materialSource, 'STORE_ZERO');
   assert.equal(validated.payload.line.spotDemand.mode, 'SPOT_ON_LOCATION');
-  assert.equal(validated.payload.line.spotDemand.toolingStatus, 'UNRESOLVED');
-  assert.deepEqual(validated.payload.line.unresolvedConditions, unresolvedConditions);
+  assert.equal(validated.payload.line.spotDemand.totalCount, 2);
+  assert.equal(validated.payload.line.spotDemand.toolingStatus, undefined);
+  assert.deepEqual(validated.payload.line.unresolvedConditions, []);
 
-  const badAngle = {
+  const fortySix = {
     ...payload,
-    line: { ...payload.line, sawAngleDeg: 50 },
+    line: { ...payload.line, sawAngleDeg: 46 },
   };
-  const badAngleRequest = await buildUserDefinedBoardRequest({
+  const fortySixRequest = await buildUserDefinedBoardRequest({
     requestId: 'req-x2',
     projectId: 'proj-x',
     candidateRevisionId: 'cand-x2',
     attemptId: 'att-x2',
     attemptNumber: 1,
     sentAt: '2026-09-21T00:00:00.000Z',
-    demandSignature: await userDefinedBoardDemandSignature(badAngle),
-    payload: badAngle,
+    demandSignature: await userDefinedBoardDemandSignature(fortySix),
+    payload: fortySix,
   });
-  const rejected = await validateWireRequest(badAngleRequest);
-  assert.equal(rejected.ok, false);
-  assert.equal(rejected.code, ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE);
+  const fortySixValidated = await validateWireRequest(fortySixRequest);
+  assert.equal(fortySixValidated.ok, true, '46 degrees is valid project demand; Store owns the 45-degree machine limit');
+
+  const invalidGeometry = {
+    ...payload,
+    line: { ...payload.line, sawAngleDeg: 90 },
+  };
+  const invalidGeometryRequest = await buildUserDefinedBoardRequest({
+    requestId: 'req-x90',
+    projectId: 'proj-x',
+    candidateRevisionId: 'cand-x90',
+    attemptId: 'att-x90',
+    attemptNumber: 1,
+    sentAt: '2026-09-21T00:00:00.000Z',
+    demandSignature: await userDefinedBoardDemandSignature(invalidGeometry),
+    payload: invalidGeometry,
+  });
+  const invalidGeometryResult = await validateWireRequest(invalidGeometryRequest);
+  assert.equal(invalidGeometryResult.ok, false);
+  assert.equal(invalidGeometryResult.code, ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE);
 
   const drillWithoutDepth = {
     ...payload,
