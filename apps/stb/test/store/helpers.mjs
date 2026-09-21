@@ -7,6 +7,9 @@ import {
   boardJobPayload,
   buildJobRequest,
   buildOfferingRequest,
+  buildUserDefinedBoardRequest,
+  userDefinedBoardDemandSignature,
+  userDefinedBoardJobPayload,
 } from '../../shared/store-wire.mjs';
 import { inspectStoreSource, storeRootFromEnv } from '../../server/store-source.mjs';
 import { postJson } from '../helpers/http.mjs';
@@ -67,6 +70,42 @@ export async function boardJobBody({
   });
   const demandSignature = await boardDemandSignature(payload);
   return buildJobRequest({
+    requestId,
+    projectId,
+    candidateRevisionId,
+    attemptId,
+    attemptNumber,
+    sentAt: new Date().toISOString(),
+    demandSignature,
+    payload,
+  });
+}
+
+export async function userDefinedBoardJobBody({
+  requestId = crypto.randomUUID(),
+  projectId = crypto.randomUUID(),
+  candidateRevisionId = crypto.randomUUID(),
+  attemptId = crypto.randomUUID(),
+  attemptNumber = 1,
+  lineId = crypto.randomUUID(),
+  storeSku = PUBLISHED_BOARD_SKU,
+  definedWorkpieceLengthIn = 60,
+  sawCuts = 3,
+  sawAngleDeg = 30,
+  drillCycles = 2,
+  requiredOps = ['MITER_LIMITED', 'DRILL'],
+} = {}) {
+  const payload = userDefinedBoardJobPayload({
+    lineId,
+    storeSku,
+    definedWorkpieceLengthCanonical: canonicalInchString(definedWorkpieceLengthIn),
+    sawCuts,
+    sawAngleDeg,
+    drillCycles,
+    requiredOps,
+  });
+  const demandSignature = await userDefinedBoardDemandSignature(payload);
+  return buildUserDefinedBoardRequest({
     requestId,
     projectId,
     candidateRevisionId,
