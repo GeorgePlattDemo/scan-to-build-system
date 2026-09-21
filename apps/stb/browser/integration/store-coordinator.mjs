@@ -80,7 +80,7 @@ export async function scheduleBoardStoreQuestion(localRecordId, { unapplied = fa
   return work;
 }
 
-export async export async function scheduleUserDefinedBoardStoreQuestion(
+export async function scheduleUserDefinedBoardStoreQuestion(
   localRecordId,
   {
     lineId,
