@@ -405,6 +405,18 @@ export const BOARD_DEFINITION = Object.freeze({
   occurrenceRole: 'desired-finished-board',
 });
 
+export const USER_DEFINED_BOARD_DEFINITION = Object.freeze({
+  kind: 'user_defined_board.v1',
+  ruleVersion: '0.1',
+  unit: 'in',
+  minWorkpieceInches: 24,
+  maxWorkpieceInches: 60,
+  quantity: 1,
+  quantityUnit: 'ea',
+  allowedOps: Object.freeze(['CROSSCUT', 'MITER_LIMITED', 'DRILL']),
+  occurrenceRole: 'user-defined-board-workpiece',
+});
+
 export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
   id: 'CUT-001',
   repository: 'GeorgePlattDemo/scan-to-build-store',
@@ -422,7 +434,7 @@ export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
 
 export const STORE_PROTOCOL_VERSION = 'stb-store-zero-http/1';
 export const STORE_REPOSITORY = 'GeorgePlattDemo/scan-to-build-store';
-export const STORE_PIN = 'b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d';
+export const STORE_PIN = 'c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a';
 export const WRAPPER_BUILD_ID = 'stb-app-build-5';
 export const APP_BUILD_ID = 'stb-app-build-7';
 export const PUBLISHED_BOARD_SKU = 'STB-ZERO-SPF-2X4-72-001';
@@ -436,10 +448,12 @@ export const BOARD_OFFERING_QUERY = Object.freeze({
 export const STORE_REQUEST_TYPES = Object.freeze({
   OFFERING_LOOKUP: 'OFFERING_LOOKUP',
   BOARD_SQUARE_V1: 'BOARD_SQUARE_V1',
+  USER_DEFINED_BOARD_V1: 'USER_DEFINED_BOARD_V1',
 });
 export const STORE_SCOPES = Object.freeze({
   OFFERING_LOOKUP: 'OFFERING_LOOKUP',
   BOARD_SQUARE_V1: 'BOARD_SQUARE_V1',
+  USER_DEFINED_BOARD_V1: 'USER_DEFINED_BOARD_V1',
 });
 export const STORE_JOB_STATUSES = Object.freeze([
   'SUPPORTABLE',
