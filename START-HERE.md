@@ -46,7 +46,7 @@ Launch instructions and path-specific Store pins: [`apps/README.md`](apps/README
 
 Do not use one Store pin as a universal project constant.
 
-- current post-acceptance Stage-2 / `USER_DEFINED_BOARD_V1` path: `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a`
+- current post-acceptance Stage-2 / `USER_DEFINED_BOARD_V1` path: `ab8a4c5d470c310f27fef82683611622ab976168`
 - accepted published-job / canonical S-001 proof path: `4402abeb6b0299a5b6db2eec85ed04c3b0236bcc`
 - 2026-09-13 accepted-baseline Stage-2 reference identity retained as provenance: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
 

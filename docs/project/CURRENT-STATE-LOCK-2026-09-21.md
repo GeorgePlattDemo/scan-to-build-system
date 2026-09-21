@@ -79,3 +79,24 @@ Do not revive an older behavior merely because it is more complete or easier to 
 - Do not merge or repoint the promoted build until the affected tests and protected-reference regressions are clean.
 
 **NO BLOOD ON WOOD.**
+
+
+## Post-repair outcome
+
+The sections above remain the frozen **before-state** for this repair. They are not rewritten retroactively.
+
+Current repaired working truth:
+
+- Store Zero Stage-2 authority for `USER_DEFINED_BOARD_V1`: `GeorgePlattDemo/scan-to-build-store@ab8a4c5d470c310f27fef82683611622ab976168`.
+- D-001 Stage-2 envelope: `D001-STAGE2-ENVELOPE-0.3`.
+- Store pricing engine: `STB-STORE-ZERO-PRICE-1 / 0.2.3`.
+- User 1 project truth begins with one **60 in defined workpiece**. A returned 72 in Store SKU may be a material/pricing reference; it does not redefine the project and does not create an automatic 72→60 preparation cut.
+- The defined User 1 production sequence remains three saw cuts: establish the 30° face-miter datum, cut part 1, cut part 2. With 0.125 in kerf the final retained remainder is 27.625 in, leaving 3.625 in above the 24 in retained-control minimum.
+- D-001 declares a downstroke, single-plane face-miter envelope from 0° through 45° inclusive. 30° and 45° are SUPPORTABLE when the rest of the demand fits; 46° is REFUSED by Store. The application does not own that machine limit.
+- The center mark is `SPOT_ON_LOCATION` using the declared fixed 3/16 in spot/pilot operation. It is not silently converted to a generic finished hole and does not require invented drill depth.
+- `UNRESOLVED` is reserved for genuinely missing facts needed to evaluate the demand. A defined demand inside the declared machine/cell envelope returns SUPPORTABLE; a defined demand outside it returns REFUSED.
+- SUPPORTABLE remains a Store/capability answer only. The machine is not commissioned here, physical execution remains unauthorized, and Cycle Start remains false.
+
+Protected paths remain unchanged in meaning: Alcove and Window Seat are verification-only, Outdoor remains separate, and S-001 retains its own Store identity.
+
+**NO BLOOD ON WOOD.**

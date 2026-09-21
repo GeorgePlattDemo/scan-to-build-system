@@ -154,6 +154,7 @@ export async function loadPinnedStoreModules(root) {
     const required = [
       [store, 'findSku'],
       [store, 'offerMaterial'],
+      [store, 'resolveBoardMaterial'],
       [store, 'evaluateJob'],
       [store, 'loadCatalog'],
       [store, 'loadObservations'],
@@ -186,6 +187,7 @@ export async function loadPinnedStoreModules(root) {
       modules: {
         findSku: store.findSku,
         offerMaterial: store.offerMaterial,
+        resolveBoardMaterial: store.resolveBoardMaterial,
         evaluateJob: store.evaluateJob,
         loadCatalog: store.loadCatalog,
         loadObservations: store.loadObservations,

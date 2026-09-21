@@ -2,7 +2,7 @@
 
 Current source root:
 
-`GeorgePlattDemo/scan-to-build-store@c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a`
+`GeorgePlattDemo/scan-to-build-store@ab8a4c5d470c310f27fef82683611622ab976168`
 
 ## Documentary sources
 
@@ -15,7 +15,7 @@ Current source root:
 | `STORE-JOB-001.md` | detailed worked Store/job reference | useful engineering/Store donor; not universal project truth |
 | `STORE-ASSET-TO-IMPLEMENTATION-MAP.md` | maps existing Store assets/gaps to implementation | reference/planning source |
 | `STB-STORE-CELL-STAGES-0.1.md` | current Stage 1–4 evidence vocabulary | copied exactly into this repo |
-| `D-001-STAGE2-ENVELOPE-0.1.md` | declared Stage-2 D-001 reference envelope | copied exactly into this repo; fixture/reference only |
+| `D-001-STAGE2-ENVELOPE-0.1.md` | declared Stage-2 D-001 reference envelope | local snapshot / provenance; current executable Store authority is the exact Store pin above |
 
 ## Stage-2 implementation sources
 

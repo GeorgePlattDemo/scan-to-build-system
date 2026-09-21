@@ -184,9 +184,9 @@ export function assertPinnedStoreAnswer(envelope, keptLength) {
   expect(envelope.rawOffering?.actualW).toBe(3.5);
   expect(envelope.rawEstimate?.status).toBe('BUDGETARY_ESTIMATE');
   expect(envelope.rawEstimate?.engine?.id).toBe('STB-STORE-ZERO-PRICE-1');
-  expect(envelope.rawEstimate?.engine?.version).toBe('0.2.2');
+  expect(envelope.rawEstimate?.engine?.version).toBe('0.2.3');
   expect(envelope.rawEstimate?.cycle?.model).toBe('STB-D001-CYCLE-MODEL-S2-0.1');
-  expect(envelope.attributedBasis?.envelope?.id).toBe('D001-STAGE2-ENVELOPE-0.2');
+  expect(envelope.attributedBasis?.envelope?.id).toBe('D001-STAGE2-ENVELOPE-0.3');
   expect(envelope.attributedBasis?.measured).toBe(false);
   expect(envelope.attributedBasis?.commissioned).toBe(false);
   expect(envelope.rawEstimate?.totals?.Q).not.toBe(0);

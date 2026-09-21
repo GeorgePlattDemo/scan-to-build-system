@@ -110,13 +110,13 @@ async function installMockTransport(page) {
             status: 'BUDGETARY_ESTIMATE',
             totals: { material: 3.13, cell_recovery: 50.81, Q: 53.94 },
             cycle: { model: 'STB-D001-CYCLE-MODEL-S2-0.1', T_job_min: 9.486, measured: false },
-            engine: { id: 'STB-STORE-ZERO-PRICE-1', version: '0.2.2' },
+            engine: { id: 'STB-STORE-ZERO-PRICE-1', version: '0.2.3' },
           }
         : extra.rawEstimate,
       attributedBasis: extra.attributedBasis ?? {
-        pricingEngine: { id: 'STB-STORE-ZERO-PRICE-1', version: '0.2.2' },
+        pricingEngine: { id: 'STB-STORE-ZERO-PRICE-1', version: '0.2.3' },
         cycleModel: { id: 'STB-D001-CYCLE-MODEL-S2-0.1' },
-        envelope: { id: 'D001-STAGE2-ENVELOPE-0.2' },
+        envelope: { id: 'D001-STAGE2-ENVELOPE-0.3' },
         sourceClock: '2026-09-10',
         measured: false,
         commissioned: false,
@@ -181,9 +181,9 @@ test('P5-01 valid committed 45 auto-asks once and Board/Page 5 copy the actual S
   await expect(full.locator('[data-store-material]')).toContainText('$3.13');
   await expect(full.locator('[data-store-minutes]')).toContainText('9.486 min');
   await expect(full.locator('[data-pricing-engine]')).toContainText('STB-STORE-ZERO-PRICE-1');
-  await expect(full.locator('[data-pricing-engine-version]')).toContainText('0.2.2');
+  await expect(full.locator('[data-pricing-engine-version]')).toContainText('0.2.3');
   await expect(full.locator('[data-cycle-model]')).toContainText('STB-D001-CYCLE-MODEL-S2-0.1');
-  await expect(full.locator('[data-envelope-id]')).toContainText('D001-STAGE2-ENVELOPE-0.2');
+  await expect(full.locator('[data-envelope-id]')).toContainText('D001-STAGE2-ENVELOPE-0.3');
   await expect(full.locator('[data-store-pin]')).toContainText(STORE_PIN);
   await expect(full.locator('[data-store-basis-line]')).toHaveText(COPY.storeBasisLine);
   await expect(full.getByText(COPY.storeNotQuote)).toBeVisible();
@@ -216,7 +216,7 @@ test('P5-06 45 to 46 invalidates the old Q immediately and keeps 45 historical',
               status: 'BUDGETARY_ESTIMATE',
               totals: { material: 3.13, cell_recovery: kept === '46' ? 50.99 : 50.81, Q: q },
               cycle: { model: 'STB-D001-CYCLE-MODEL-S2-0.1', T_job_min: minutes, measured: false },
-              engine: { id: 'STB-STORE-ZERO-PRICE-1', version: '0.2.2' },
+              engine: { id: 'STB-STORE-ZERO-PRICE-1', version: '0.2.3' },
             },
           }),
         ),

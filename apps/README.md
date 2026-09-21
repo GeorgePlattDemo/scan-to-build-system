@@ -43,10 +43,10 @@ The public page is an evaluation surface. The fixed local origin above is the ac
 
 Store identity is path-specific.
 
-### Transferred Stage-2 Store Zero path
+### Current Stage-2 Store Zero path
 
 ```text
-STB_STORE_ZERO_ROOT=<clean scan-to-build-store at c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a> npm start
+STB_STORE_ZERO_ROOT=<clean scan-to-build-store at ab8a4c5d470c310f27fef82683611622ab976168> npm start
 ```
 
 ### Accepted published-job / canonical S-001 proof path
@@ -66,7 +66,7 @@ Historical Store pins are listed in [`../provenance/SOURCE-PINS.md`](../provenan
 The accepted application includes bounded software support for:
 
 - D-001 / Board published-job evaluation;
-- a separate `USER_DEFINED_BOARD_V1` Store request carrying an already-defined Board workpiece plus explicit operation semantics, raw-stock lineage, resolved saw/drill demand, and named unresolved conditions into the pinned Store integration without converting unresolved spots into holes;
+- a separate `USER_DEFINED_BOARD_V1` Store request carrying the already-defined Board workpiece, material demand, exact miter semantics, and semantic `SPOT_ON_LOCATION` demand into the pinned Store integration; Store owns material selection and D-001 capability limits, while a returned Store SKU remains a pricing/material reference rather than project geometry;
 - rectangular sheet published-job evaluation;
 - canonical centered S-001 arched project;
 - durable S-001 Store request/attempt/response/review/result/record custody;
