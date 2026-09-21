@@ -12,6 +12,7 @@ import {
   STORE_REQUEST_TYPES,
   STORE_SCOPES,
   USER_DEFINED_BOARD_DEFINITION,
+  USER_DEFINED_BOARD_MATERIAL_DEMAND,
   WRAPPER_BUILD_ID,
 } from './contracts.mjs';
 
@@ -219,7 +220,7 @@ function validateJobPayload(payload) {
     ok: true,
     line: {
       lineId: line.lineId,
-      storeSku: line.storeSku,
+      materialDemand: { ...line.materialDemand },
       quantity: 1,
       unit: 'ea',
       requiredOps: ['CROSSCUT'],
@@ -259,7 +260,7 @@ function validateUserDefinedBoardPayload(payload) {
   }
   const allowedLine = new Set([
     'lineId',
-    'storeSku',
+    'materialDemand',
     'quantity',
     'unit',
     'requiredOps',
@@ -284,12 +285,24 @@ function validateUserDefinedBoardPayload(payload) {
   }
   const lineIdError = requireNonemptyString('lineId', line.lineId);
   if (lineIdError) return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, lineIdError);
-  const skuError = requireNonemptyString('storeSku', line.storeSku);
-  if (skuError) return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, skuError);
-  if (line.storeSku !== PUBLISHED_BOARD_SKU) {
+  if (line.materialDemand === null || typeof line.materialDemand !== 'object' || Array.isArray(line.materialDemand)) {
+    return fail(
+      ADAPTER_ERROR_CODES.MALFORMED_REQUEST,
+      'user-defined Board request requires materialDemand',
+    );
+  }
+  for (const key of ['species', 'form', 'nominalT', 'nominalW']) {
+    if (line.materialDemand[key] !== USER_DEFINED_BOARD_MATERIAL_DEMAND[key]) {
+      return fail(
+        ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+        'user-defined Board materialDemand must match the frozen User 1 SPF 2x4 demand',
+      );
+    }
+  }
+  if (Object.keys(line.materialDemand).some((key) => !Object.hasOwn(USER_DEFINED_BOARD_MATERIAL_DEMAND, key))) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'user-defined Board request currently accepts only the published Store Board SKU',
+      'user-defined Board materialDemand contains unexpected fields',
     );
   }
   if (line.quantity !== USER_DEFINED_BOARD_DEFINITION.quantity || line.unit !== 'ea') {
@@ -351,11 +364,11 @@ function validateUserDefinedBoardPayload(payload) {
     typeof line.sawAngleDeg !== 'number' ||
     !Number.isFinite(line.sawAngleDeg) ||
     line.sawAngleDeg < 0 ||
-    line.sawAngleDeg > 45
+    line.sawAngleDeg >= 90
   ) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'sawAngleDeg must be a finite number from 0 through 45',
+      'sawAngleDeg must be a finite single-plane angle from 0 up to but not including 90; Store owns machine limits',
     );
   }
   if (!Number.isInteger(line.drillCycles) || line.drillCycles < 0 || line.drillCycles > 16) {
@@ -681,7 +694,7 @@ export async function buildUserDefinedBoardRequest({
 
 export function userDefinedBoardJobPayload({
   lineId,
-  storeSku = PUBLISHED_BOARD_SKU,
+  materialDemand = USER_DEFINED_BOARD_MATERIAL_DEMAND,
   definedWorkpieceLengthCanonical,
   sawCuts,
   sawAngleDeg,
@@ -699,7 +712,7 @@ export function userDefinedBoardJobPayload({
   return {
     line: {
       lineId,
-      storeSku,
+      materialDemand: { ...materialDemand },
       quantity: 1,
       unit: 'ea',
       requiredOps: [...requiredOps],
@@ -728,7 +741,7 @@ export async function userDefinedBoardDemandSignature(payload) {
     requestType: STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1,
     scope: STORE_SCOPES.USER_DEFINED_BOARD_V1,
     lineId: payload.line.lineId,
-    storeSku: payload.line.storeSku,
+    materialDemand: payload.line.materialDemand,
     quantity: payload.line.quantity,
     unit: payload.line.unit,
     requiredOps: payload.line.requiredOps,
