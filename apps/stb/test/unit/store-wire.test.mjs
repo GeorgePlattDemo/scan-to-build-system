@@ -90,6 +90,8 @@ test('job wire request validates pin, digest, and Board slice', async () => {
 test('user-defined Board wire preserves project demand and leaves machine limits to Store', async () => {
   const payload = userDefinedBoardJobPayload({
     lineId: 'line-x',
+    configurationId: 'SYO-USER1-XBRACE',
+    configurationVersion: '0.1',
     definedWorkpieceLengthCanonical: canonicalInchString(60),
     sawCuts: 3,
     sawAngleDeg: 30,
@@ -125,6 +127,8 @@ test('user-defined Board wire preserves project demand and leaves machine limits
   assert.equal(validated.ok, true);
   assert.deepEqual(validated.payload.line.materialDemand, USER_DEFINED_BOARD_MATERIAL_DEMAND);
   assert.equal(validated.payload.line.storeSku, undefined);
+  assert.equal(validated.payload.line.configurationId, 'SYO-USER1-XBRACE');
+  assert.equal(validated.payload.line.configurationVersion, '0.1');
   assert.equal(validated.payload.line.definedWorkpieceLengthIn, 60);
   assert.equal(validated.payload.line.sawCuts, 3);
   assert.equal(validated.payload.line.sawAngleDeg, 30);
