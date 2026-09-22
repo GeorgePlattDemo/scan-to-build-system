@@ -8,6 +8,7 @@ import {
   STORE_JOB_STATUSES,
   STORE_PATHS,
   STORE_PIN,
+  STORE_FRESH_EVALUATION_RULE_ID,
   STORE_PROTOCOL_VERSION,
   STORE_REQUEST_TYPES,
   STORE_SCOPES,
@@ -997,6 +998,42 @@ export function inspectStoreResponse(request, parsed, { httpStatus, byteLength }
         diagnostic: APP_DIAGNOSTICS.APP_MALFORMED_RESPONSE,
         reason: 'unknown-aggregate',
         details: status ?? null,
+      };
+    }
+  }
+  if (request.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
+    const receipt = parsed.evaluationReceipt ?? parsed.rawEvaluation?.evaluationReceipt ?? null;
+    if (parsed.rawEvaluation?.freshEvaluation !== true) {
+      return {
+        ok: false,
+        current: false,
+        diagnostic: APP_DIAGNOSTICS.APP_MALFORMED_RESPONSE,
+        reason: 'store-evaluation-not-fresh',
+      };
+    }
+    if (!receipt || typeof receipt !== 'object' || Array.isArray(receipt)) {
+      return {
+        ok: false,
+        current: false,
+        diagnostic: APP_DIAGNOSTICS.APP_MALFORMED_RESPONSE,
+        reason: 'missing-evaluation-receipt',
+      };
+    }
+    if (receipt.requestId !== request.requestId) {
+      return mismatch('evaluationReceipt.requestId', receipt.requestId ?? null);
+    }
+    if (receipt.freshnessRule !== STORE_FRESH_EVALUATION_RULE_ID) {
+      return mismatch('evaluationReceipt.freshnessRule', receipt.freshnessRule ?? null);
+    }
+    if (receipt.authority?.storeRevision !== STORE_PIN) {
+      return mismatch('evaluationReceipt.storeRevision', receipt.authority?.storeRevision ?? null);
+    }
+    if (typeof receipt.receiptHash !== 'string' || receipt.receiptHash.length === 0) {
+      return {
+        ok: false,
+        current: false,
+        diagnostic: APP_DIAGNOSTICS.APP_MALFORMED_RESPONSE,
+        reason: 'missing-evaluation-receipt-hash',
       };
     }
   }
