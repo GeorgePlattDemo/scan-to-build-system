@@ -96,12 +96,40 @@ test('user-defined Board wire preserves project demand and leaves machine limits
     sawCuts: 3,
     sawAngleDeg: 30,
     drillCycles: 0,
-    requiredOps: ['MITER_LIMITED'],
+    requiredOps: ['MITER_LIMITED', 'SPOT_ON_LOCATION'],
     cutPlane: 'miter-face',
     endIdentity: 'both',
     endRelation: 'parallel',
     lengthDatum: 'long-long-outer-edge',
     materialSource: 'STORE_ZERO',
+    parts: [
+      {
+        partId: 'PART-1',
+        lengthIn: 16,
+        features: [
+          {
+            featureId: 'SPOT-1',
+            kind: 'SPOT_ON_LOCATION',
+            xIn: 8,
+            locationRule: 'CENTERED_ON_PART',
+            acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
+          },
+        ],
+      },
+      {
+        partId: 'PART-2',
+        lengthIn: 16,
+        features: [
+          {
+            featureId: 'SPOT-2',
+            kind: 'SPOT_ON_LOCATION',
+            xIn: 8,
+            locationRule: 'CENTERED_ON_PART',
+            acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
+          },
+        ],
+      },
+    ],
     spotDemand: {
       required: true,
       mode: 'SPOT_ON_LOCATION',
@@ -134,7 +162,10 @@ test('user-defined Board wire preserves project demand and leaves machine limits
   assert.equal(validated.payload.line.sawAngleDeg, 30);
   assert.equal(validated.payload.line.drillCycles, 0);
   assert.equal(validated.payload.line.drillDepthIn, null);
-  assert.deepEqual(validated.payload.line.requiredOps, ['MITER_LIMITED']);
+  assert.deepEqual(validated.payload.line.requiredOps, ['MITER_LIMITED', 'SPOT_ON_LOCATION']);
+  assert.equal(validated.payload.line.parts.length, 2);
+  assert.equal(validated.payload.line.parts[0].features[0].kind, 'SPOT_ON_LOCATION');
+  assert.equal(validated.payload.line.parts[0].features[0].xIn, 8);
   assert.equal(validated.payload.line.cutPlane, 'miter-face');
   assert.equal(validated.payload.line.endIdentity, 'both');
   assert.equal(validated.payload.line.endRelation, 'parallel');
