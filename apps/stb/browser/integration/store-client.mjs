@@ -569,7 +569,11 @@ export async function issueStoreQuestion(input) {
     throw new Error('unsupported Store requestType');
   }
 
-  if (!input.refresh) {
+  // A direct USER_DEFINED_BOARD_V1 issue is a formal Store submission.
+  // It must always create a new request. Automatic coordinators may decide not
+  // to issue at all when a current answer is already displayed, but once this
+  // function is called for Job 1 it cannot collapse the action to old history.
+  if (!input.refresh && requestType !== STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
     const duplicate = await findDuplicateRequest(
       localRecordId,
       candidateRevisionId,
