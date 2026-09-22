@@ -254,12 +254,15 @@ function validateUserDefinedBoardPayload(payload) {
       'ruleVersion must match the user-defined Board slice',
     );
   }
+
   const line = payload.line;
   if (line === null || typeof line !== 'object' || Array.isArray(line)) {
     return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'user-defined Board payload requires one line');
   }
   const allowedLine = new Set([
     'lineId',
+    'configurationId',
+    'configurationVersion',
     'materialDemand',
     'quantity',
     'unit',
@@ -273,6 +276,8 @@ function validateUserDefinedBoardPayload(payload) {
     'endIdentity',
     'endRelation',
     'lengthDatum',
+    'datumCMethod',
+    'parts',
     'spotDemand',
     'unresolvedConditions',
     'materialSource',
@@ -283,8 +288,12 @@ function validateUserDefinedBoardPayload(payload) {
       'unexpected user-defined Board line fields',
     );
   }
-  const lineIdError = requireNonemptyString('lineId', line.lineId);
-  if (lineIdError) return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, lineIdError);
+
+  for (const key of ['lineId', 'configurationId', 'configurationVersion']) {
+    const error = requireNonemptyString(key, line[key]);
+    if (error) return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, error);
+  }
+
   if (line.materialDemand === null || typeof line.materialDemand !== 'object' || Array.isArray(line.materialDemand)) {
     return fail(
       ADAPTER_ERROR_CODES.MALFORMED_REQUEST,
@@ -311,6 +320,7 @@ function validateUserDefinedBoardPayload(payload) {
       'user-defined Board quantity must be exactly 1 ea',
     );
   }
+
   if (!Array.isArray(line.requiredOps) || line.requiredOps.length === 0) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
@@ -330,6 +340,7 @@ function validateUserDefinedBoardPayload(payload) {
       'user-defined Board requiredOps must not contain duplicates',
     );
   }
+
   const workpiece = line.definedWorkpieceLength;
   if (workpiece === null || typeof workpiece !== 'object' || Array.isArray(workpiece)) {
     return fail(
@@ -354,6 +365,7 @@ function validateUserDefinedBoardPayload(payload) {
       'defined workpiece length must be 24–60 in inclusive',
     );
   }
+
   if (!Number.isInteger(line.sawCuts) || line.sawCuts < 1 || line.sawCuts > 8) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
@@ -380,13 +392,13 @@ function validateUserDefinedBoardPayload(payload) {
   if (line.sawAngleDeg > 0 && !line.requiredOps.includes('MITER_LIMITED')) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'nonzero saw angle requires MITER_LIMITED',
+      'nonzero saw angle requires MITER_LIMITED demand',
     );
   }
   if (line.drillCycles > 0 && !line.requiredOps.includes('DRILL')) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'positive drillCycles requires DRILL',
+      'positive drillCycles requires DRILL demand',
     );
   }
   if (line.drillCycles > 0 && !(Number.isFinite(line.drillDepthIn) && line.drillDepthIn > 0)) {
@@ -395,11 +407,21 @@ function validateUserDefinedBoardPayload(payload) {
       'positive drillCycles requires explicit positive drillDepthIn',
     );
   }
+
   for (const key of ['cutPlane', 'endIdentity', 'endRelation', 'lengthDatum', 'materialSource']) {
     if (line[key] != null && (typeof line[key] !== 'string' || line[key].trim() === '')) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, key + ' must be a nonempty string when supplied');
     }
   }
+
+  const allowedDatumCMethods = new Set(['REFERENCE_CUT', 'MECHANICAL_REFERENCE', 'SENSED_FACE']);
+  if (!allowedDatumCMethods.has(line.datumCMethod)) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'datumCMethod must name an admitted reference-establishment method',
+    );
+  }
+
   if (
     line.unresolvedConditions != null &&
     (!Array.isArray(line.unresolvedConditions) ||
@@ -410,6 +432,70 @@ function validateUserDefinedBoardPayload(payload) {
       'unresolvedConditions must be an array of nonempty strings when supplied',
     );
   }
+
+  if (!Array.isArray(line.parts) || line.parts.length === 0) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'user-defined Board requires identified parts and part-relative features',
+    );
+  }
+  const partIds = new Set();
+  let derivedSpotCount = 0;
+  const parts = [];
+  for (const rawPart of line.parts) {
+    if (rawPart === null || typeof rawPart !== 'object' || Array.isArray(rawPart)) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'each part must be an object');
+    }
+    const extraPart = Object.keys(rawPart).filter((key) => !['partId', 'lengthIn', 'features'].includes(key));
+    if (extraPart.length) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected part fields');
+    }
+    const partIdError = requireNonemptyString('partId', rawPart.partId);
+    if (partIdError || partIds.has(rawPart.partId)) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'partId must be nonempty and unique');
+    }
+    partIds.add(rawPart.partId);
+    if (!Number.isFinite(rawPart.lengthIn) || rawPart.lengthIn <= 0) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'part lengthIn must be positive and finite');
+    }
+    if (!Array.isArray(rawPart.features)) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'part features must be an array');
+    }
+    const features = [];
+    const featureIds = new Set();
+    for (const feature of rawPart.features) {
+      if (feature === null || typeof feature !== 'object' || Array.isArray(feature)) {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'each part feature must be an object');
+      }
+      const extraFeature = Object.keys(feature).filter(
+        (key) => !['featureId', 'kind', 'xIn', 'locationRule', 'acrossWidthRule'].includes(key),
+      );
+      if (extraFeature.length) {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected part feature fields');
+      }
+      const featureIdError = requireNonemptyString('featureId', feature.featureId);
+      if (featureIdError || featureIds.has(feature.featureId)) {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'featureId must be nonempty and unique within a part');
+      }
+      featureIds.add(feature.featureId);
+      if (feature.kind !== 'SPOT_ON_LOCATION') {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'only SPOT_ON_LOCATION is admitted on the User 1 feature contract');
+      }
+      if (!Number.isFinite(feature.xIn) || feature.xIn < 0 || feature.xIn > rawPart.lengthIn) {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'spot xIn must lie on its identified part');
+      }
+      if (feature.locationRule !== 'CENTERED_ON_PART') {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'spot locationRule must be CENTERED_ON_PART');
+      }
+      if (feature.acrossWidthRule !== 'CENTERED_ON_WIDE_FACE') {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'spot acrossWidthRule must be CENTERED_ON_WIDE_FACE');
+      }
+      derivedSpotCount += 1;
+      features.push({ ...feature });
+    }
+    parts.push({ partId: rawPart.partId, lengthIn: rawPart.lengthIn, features });
+  }
+
   if (line.spotDemand != null) {
     if (typeof line.spotDemand !== 'object' || Array.isArray(line.spotDemand)) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'spotDemand must be an object when supplied');
@@ -417,11 +503,20 @@ function validateUserDefinedBoardPayload(payload) {
     if (line.spotDemand.mode !== 'SPOT_ON_LOCATION') {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'spotDemand mode must be SPOT_ON_LOCATION');
     }
+    if (
+      Number.isFinite(Number(line.spotDemand.totalCount)) &&
+      Number(line.spotDemand.totalCount) !== derivedSpotCount
+    ) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'spotDemand totalCount must match identified part features');
+    }
   }
+
   return {
     ok: true,
     line: {
       lineId: line.lineId,
+      configurationId: line.configurationId,
+      configurationVersion: line.configurationVersion,
       materialDemand: { ...line.materialDemand },
       quantity: 1,
       unit: 'ea',
@@ -436,6 +531,8 @@ function validateUserDefinedBoardPayload(payload) {
       endIdentity: line.endIdentity ?? null,
       endRelation: line.endRelation ?? null,
       lengthDatum: line.lengthDatum ?? null,
+      datumCMethod: line.datumCMethod,
+      parts,
       spotDemand: line.spotDemand ?? null,
       unresolvedConditions: [...(line.unresolvedConditions ?? [])],
       materialSource: line.materialSource ?? null,
@@ -694,6 +791,8 @@ export async function buildUserDefinedBoardRequest({
 
 export function userDefinedBoardJobPayload({
   lineId,
+  configurationId,
+  configurationVersion,
   materialDemand = USER_DEFINED_BOARD_MATERIAL_DEMAND,
   definedWorkpieceLengthCanonical,
   sawCuts,
@@ -705,6 +804,8 @@ export function userDefinedBoardJobPayload({
   endIdentity = null,
   endRelation = null,
   lengthDatum = null,
+  datumCMethod = 'REFERENCE_CUT',
+  parts = [],
   spotDemand = null,
   unresolvedConditions = [],
   materialSource = null,
@@ -712,6 +813,8 @@ export function userDefinedBoardJobPayload({
   return {
     line: {
       lineId,
+      configurationId,
+      configurationVersion,
       materialDemand: { ...materialDemand },
       quantity: 1,
       unit: 'ea',
@@ -725,6 +828,8 @@ export function userDefinedBoardJobPayload({
       endIdentity,
       endRelation,
       lengthDatum,
+      datumCMethod,
+      parts: structuredClone(parts),
       spotDemand,
       unresolvedConditions: [...unresolvedConditions],
       materialSource,
@@ -741,6 +846,8 @@ export async function userDefinedBoardDemandSignature(payload) {
     requestType: STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1,
     scope: STORE_SCOPES.USER_DEFINED_BOARD_V1,
     lineId: payload.line.lineId,
+    configurationId: payload.line.configurationId,
+    configurationVersion: payload.line.configurationVersion,
     materialDemand: payload.line.materialDemand,
     quantity: payload.line.quantity,
     unit: payload.line.unit,
@@ -754,6 +861,8 @@ export async function userDefinedBoardDemandSignature(payload) {
     endIdentity: payload.line.endIdentity ?? null,
     endRelation: payload.line.endRelation ?? null,
     lengthDatum: payload.line.lengthDatum ?? null,
+    datumCMethod: payload.line.datumCMethod,
+    parts: payload.line.parts,
     spotDemand: payload.line.spotDemand ?? null,
     unresolvedConditions: payload.line.unresolvedConditions ?? [],
     materialSource: payload.line.materialSource ?? null,
