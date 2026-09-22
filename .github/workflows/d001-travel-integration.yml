@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: GeorgePlattDemo/scan-to-build-store
-          ref: f88ccaf9a2624899e255e66b51111e2b02309dad
+          ref: 289f6e8641f13093efbd6922cbd18749e9d9adc8
           path: store-zero
 
       - name: Setup Node
