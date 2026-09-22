@@ -73,3 +73,77 @@ jobs:
           test "$rc" -ne 0
           grep -q "acceptance fixture carries the independently specified 8-in spot location" "$RUNNER_TEMP/user1-before.log"
           grep -q "missing spot location stays unresolved and the concise adapter response preserves the Store reason" "$RUNNER_TEMP/user1-before.log"
+
+
+  fault-detection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-zero
+    steps:
+      - name: Checkout System candidate
+        uses: actions/checkout@v4
+
+      - name: Checkout exact Store authority
+        uses: actions/checkout@v4
+        with:
+          repository: GeorgePlattDemo/scan-to-build-store
+          ref: ab8a4c5d470c310f27fef82683611622ab976168
+          path: store-zero
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/stb/.node-version
+
+      - name: Install System dependencies
+        working-directory: apps/stb
+        run: npm ci --no-audit --no-fund
+
+      - name: Fault check — loss of complete fixture spot location is detected
+        run: |
+          rm -rf "$RUNNER_TEMP/fault-fixture"
+          mkdir -p "$RUNNER_TEMP/fault-fixture"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/fault-fixture"
+          ln -s "$GITHUB_WORKSPACE/apps/stb/node_modules" "$RUNNER_TEMP/fault-fixture/apps/stb/node_modules"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"fault-fixture/apps/stb/test/store/helpers.mjs"
+          s=p.read_text()
+          old="    locationAlongLengthIn: 8,\n"
+          assert old in s
+          p.write_text(s.replace(old,"",1))
+          PY
+          cd "$RUNNER_TEMP/fault-fixture/apps/stb"
+          set +e
+          node --test --test-concurrency=1 test/acceptance/user1-independent.test.mjs > "$RUNNER_TEMP/fault-fixture.log" 2>&1
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/fault-fixture.log"
+          test "$rc" -ne 0
+          grep -q "acceptance fixture carries the independently specified 8-in spot location" "$RUNNER_TEMP/fault-fixture.log"
+
+      - name: Fault check — loss of SPOT_LOCATION_REQUIRED from concise response is detected
+        run: |
+          rm -rf "$RUNNER_TEMP/fault-reason"
+          mkdir -p "$RUNNER_TEMP/fault-reason"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/fault-reason"
+          ln -s "$GITHUB_WORKSPACE/apps/stb/node_modules" "$RUNNER_TEMP/fault-reason/apps/stb/node_modules"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"fault-reason/apps/stb/server/store-adapter.mjs"
+          s=p.read_text()
+          old="    const materialUnresolved = collectMaterialResolutionUnresolved(materialResolution);"
+          assert old in s
+          p.write_text(s.replace(old,"    const materialUnresolved = [];",1))
+          PY
+          cd "$RUNNER_TEMP/fault-reason/apps/stb"
+          set +e
+          node --test --test-concurrency=1 test/acceptance/user1-independent.test.mjs > "$RUNNER_TEMP/fault-reason.log" 2>&1
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/fault-reason.log"
+          test "$rc" -ne 0
+          grep -q "missing spot location stays unresolved and the concise adapter response preserves the Store reason" "$RUNNER_TEMP/fault-reason.log"
