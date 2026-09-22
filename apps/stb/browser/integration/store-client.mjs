@@ -70,6 +70,8 @@ function comparableAnswer(payload) {
     rawOffering: payload.rawOffering ?? null,
     rawEvaluation: payload.rawEvaluation ?? null,
     rawEstimate: payload.rawEstimate ?? null,
+    evaluationReceipt:
+      payload.evaluationReceipt ?? payload.rawEvaluation?.evaluationReceipt ?? null,
   };
 }
 
