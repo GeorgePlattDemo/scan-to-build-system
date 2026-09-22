@@ -809,6 +809,14 @@ export function userDefinedBoardJobPayload({
   unresolvedConditions = [],
   materialSource = null,
 }) {
+  if (
+    typeof configurationId !== 'string' ||
+    configurationId.trim() === '' ||
+    typeof configurationVersion !== 'string' ||
+    configurationVersion.trim() === ''
+  ) {
+    throw new TypeError('User-defined Board payload requires configurationId and configurationVersion');
+  }
   return {
     line: {
       lineId,
