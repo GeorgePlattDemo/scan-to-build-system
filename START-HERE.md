@@ -46,7 +46,7 @@ Launch instructions and path-specific Store pins: [`apps/README.md`](apps/README
 
 Do not use one Store pin as a universal project constant.
 
-- current post-acceptance Stage-2 / `USER_DEFINED_BOARD_V1` path: `ab8a4c5d470c310f27fef82683611622ab976168`
+- current `build/d001-travel-standard-0.1` / `USER_DEFINED_BOARD_V1` candidate path: `f8373520a726090ed91eff82e5e720f4a9634615` — D-001 Travel Standard acceptance passed on this exact Store SHA
 - accepted published-job / canonical S-001 proof path: `4402abeb6b0299a5b6db2eec85ed04c3b0236bcc`
 - 2026-09-13 accepted-baseline Stage-2 reference identity retained as provenance: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
 
@@ -82,6 +82,8 @@ Do not start in `grok-file`, a public exhibit, or a new demo folder.
 
 - Promote a parallel or historical candidate by wording alone.
 - Invent a second app to try an idea.
+- Reimplement Store-owned dimensional capability, travel/time, economics, refusal, or Q in the application/configurator. For a complete dimensional answer, call the exact pinned Store evaluator and preserve its calculation identity.
+- Confirm a User-defined dimensional definition without a second Store evaluation and matching calculation identity. Unchanged governing inputs must return the same Store result or fail closed as `STORE_CALCULATION_DIVERGENCE`.
 - Widen an envelope so a trial passes.
 - Treat Store `SUPPORTABLE` as a physical cut.
 - Treat simulated or reference machine behavior as commissioned production.
