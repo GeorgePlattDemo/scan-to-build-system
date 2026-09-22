@@ -23,7 +23,6 @@ const AUTHORITY_TERMS = Object.freeze([
   'governed production authority',
   'physical execution recorded',
   'pickup-ready',
-  'cycle start',
   'g-code',
   'workpacket issued',
 ]);
@@ -52,6 +51,10 @@ test('V8-05 complete vertical still has no commercial or physical authority', as
   expect(reviewed.events.some((event) => /order|payment|reserv|fulfill/i.test(event.payload?.type ?? ''))).toBe(
     false,
   );
+  expect(
+    reviewed.events.some((event) => /cycle[_ -]?start/i.test(event.payload?.type ?? '')),
+    'no Cycle Start event may be minted by the application',
+  ).toBe(false);
   await expect(page.locator('[data-simulation-execution="false"]')).toBeVisible();
   await expect(page.locator('[data-cut001-reference="absent"]')).toBeVisible();
 });

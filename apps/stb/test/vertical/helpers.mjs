@@ -21,7 +21,6 @@ export const FORBIDDEN_PHYSICAL = Object.freeze([
   'work complete',
   'pickup ready',
   'machine authorized',
-  'cycle start',
   'g-code',
   'workpacket',
 ]);
@@ -245,6 +244,8 @@ export async function assertNoFabricatedAuthority(page) {
     expect(body, `result/record must not claim ${phrase}`).not.toContain(phrase);
   }
   expect(body).toContain('no physical fabrication recorded');
+  expect(body, 'Cycle Start may be explained only as a denied/local machine boundary')
+    .toMatch(/does not press cycle start|cycle start stay local/);
 }
 
 export function assertReviewBindsStore(review, candidate, store) {

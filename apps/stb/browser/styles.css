@@ -516,3 +516,144 @@ textarea:focus-visible,
   margin-top: 1.5rem;
 }
 
+
+
+/* Canonical five-project reconciliation host */
+.canonical-project-library {
+  margin: 1.25rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--line, #d8d2c8);
+  border-radius: 0.8rem;
+  background: var(--panel, #fff);
+}
+.library-kicker,
+.canonical-stage-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.canonical-project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.canonical-project-card {
+  min-height: 5.5rem;
+  text-align: left;
+  font-weight: 800;
+  padding: 0.9rem;
+}
+.legacy-reference-paths {
+  margin-top: 1.25rem;
+  padding: 0.85rem;
+  border: 1px dashed var(--line, #d8d2c8);
+  border-radius: 0.65rem;
+}
+.legacy-reference-paths > summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.canonical-project-host {
+  max-width: 1500px;
+  margin: 0 auto;
+}
+.canonical-project-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.canonical-project-nav,
+.canonical-native-nav {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+.canonical-project-nav button,
+.canonical-native-nav button {
+  white-space: nowrap;
+}
+.canonical-project-nav button.current,
+.canonical-native-nav .nav-current {
+  font-weight: 900;
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+}
+.canonical-stage-summary {
+  margin: 0.85rem 0;
+  padding: 1rem;
+  border: 1px solid var(--line, #d8d2c8);
+  border-radius: 0.7rem;
+}
+.canonical-stage-summary h2 {
+  margin-top: 0.15rem;
+}
+.canonical-stage-copy {
+  max-width: 78ch;
+}
+.canonical-authority-grid {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.8rem;
+}
+.canonical-authority-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) 1fr;
+  gap: 0.75rem;
+  border-top: 1px solid var(--line, #e3ddd4);
+  padding-top: 0.35rem;
+}
+.canonical-child-frame {
+  display: block;
+  width: 100%;
+  min-height: 78vh;
+  border: 1px solid var(--line, #d8d2c8);
+  border-radius: 0.7rem;
+  background: #fff;
+}
+.canonical-child-frame[hidden] {
+  display: none;
+}
+.canonical-snapshot-detail {
+  margin-top: 1rem;
+}
+.canonical-snapshot-detail pre {
+  max-height: 28rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.78rem;
+}
+.canonical-record-actions {
+  margin-top: 1rem;
+}
+@media (max-width: 720px) {
+  .canonical-project-heading {
+    display: block;
+  }
+  .canonical-project-heading > button {
+    margin-top: 0.75rem;
+  }
+  .canonical-authority-row {
+    grid-template-columns: 1fr;
+  }
+  .canonical-child-frame {
+    min-height: 70vh;
+  }
+}
+
+.canonical-applicability {
+  margin: 0.75rem 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line, #d8d2c8);
+  border-radius: 0.45rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.canonical-applicability.stale {
+  border-style: dashed;
+}
