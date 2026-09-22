@@ -43,10 +43,10 @@ The public page is an evaluation surface. The fixed local origin above is the ac
 
 Store identity is path-specific.
 
-### Current Stage-2 Store Zero path
+### Current dimensional Store Zero travel-standard path
 
 ```text
-STB_STORE_ZERO_ROOT=<clean scan-to-build-store at ab8a4c5d470c310f27fef82683611622ab976168> npm start
+STB_STORE_ZERO_ROOT=<clean scan-to-build-store at 95c639a1d0d4812df097ad1eb628594b38f921de> npm start
 ```
 
 ### Accepted published-job / canonical S-001 proof path
