@@ -6,9 +6,24 @@ const adapter = readFileSync(new URL('../../server/store-adapter.mjs', import.me
 const coordinator = readFileSync(new URL('../../browser/integration/store-coordinator.mjs', import.meta.url), 'utf8');
 const review = readFileSync(new URL('../../browser/domain/review.mjs', import.meta.url), 'utf8');
 
-test('System asks Store for dimensional economics instead of implementing a second pricing engine', () => {
-  assert.match(adapter, /evaluateDimensionalTravelJob/);
+test('System asks Store for a fresh dimensional evaluation instead of implementing a second pricing engine', () => {
+  assert.match(adapter, /runDimensionalStoreRequest/);
+  assert.match(adapter, /requestDimensionalStoreEvaluation/);
+  assert.match(adapter, /evaluateDimensionalStoreRequest/);
+  assert.match(adapter, /evaluationReceipt/);
   assert.match(adapter, /mappedCallInputs:\s*\{[\s\S]*travel:/);
+  const formalStart = adapter.indexOf('async function handleUserDefinedBoardJob');
+  const formalEnd = adapter.indexOf('async function dispatch', formalStart);
+  assert.ok(formalStart >= 0 && formalEnd > formalStart);
+  const formalHandler = adapter.slice(formalStart, formalEnd);
+  assert.match(formalHandler, /runDimensionalStoreRequest/);
+  assert.doesNotMatch(
+    formalHandler,
+    /evaluateDimensionalTravelJob/,
+    'formal USER_DEFINED_BOARD_V1 handler bypasses the fresh Store request API',
+  );
+  assert.match(formalHandler, /freshReceipt\?\.requestId === envelope\.requestId/);
+  assert.match(formalHandler, /STB-STORE-FRESH-EVALUATION-0\.1/);
   for (const forbidden of [
     'machineHourRate',
     'setupCharge',
