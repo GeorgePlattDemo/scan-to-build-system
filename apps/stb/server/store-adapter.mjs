@@ -30,12 +30,17 @@ function collectMaterialResolutionUnresolved(materialResolution) {
     if (typeof value === 'string' && value.length > 0) reasons.push(value);
   };
 
-  if (!materialResolution || materialResolution.status !== 'UNRESOLVED') {
+  if (!materialResolution) {
     return reasons;
   }
 
-  add(materialResolution.reason);
+  if (materialResolution.status === 'UNRESOLVED') {
+    add(materialResolution.reason);
+  }
   for (const value of materialResolution.unresolved ?? []) add(value);
+  for (const value of materialResolution.unresolvedConditions ?? []) add(value);
+  for (const value of materialResolution.plan?.unresolvedConditions ?? []) add(value);
+  for (const value of materialResolution.capability?.unresolved ?? []) add(value);
   for (const entry of materialResolution.considered ?? []) {
     for (const value of entry?.capability?.unresolved ?? []) add(value);
   }
