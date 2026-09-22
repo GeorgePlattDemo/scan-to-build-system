@@ -104,6 +104,7 @@ export async function userDefinedBoardJobBody({
     mode: 'SPOT_ON_LOCATION',
     countPerPart: 1,
     locationRule: 'CENTERED_ON_PART',
+    locationAlongLengthIn: 8,
     acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
     totalCount: 2,
   },
