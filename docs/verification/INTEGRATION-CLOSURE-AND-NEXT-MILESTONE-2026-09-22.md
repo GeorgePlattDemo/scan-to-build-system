@@ -48,13 +48,13 @@ This closure therefore proves identity mismatch detection and cross-project isol
 
 ## Closure working heads after verification hardening
 
-These are the reviewable unpromoted working heads after the closure pass:
+These are the reviewable unpromoted **verification heads**. The System branch may contain later documentation-only record commits after its verification head; no System application code was changed in this closure pass.
 
 - Store: `7303793620d0ceda509810a661d11e6c31c7d59f` — unchanged from the reviewed Store candidate; no closure-only Store commit was manufactured.
-- System: `b9ab8e38114dbdfc6ee8a733aa96881e7d14d30e` — closure documentation + `START-HERE.md` source-identity correction.
-- Review: `56f9741d7d86637652344ab10f433eb77443a0df` — verification hardening only: exact-source Window Seat parity, S-001 edit/recompute coverage, cross-project isolation, pinned browser-test environment, cause-specific fault checks.
+- System verification head: `b9ab8e38114dbdfc6ee8a733aa96881e7d14d30e` — closure documentation + `START-HERE.md` source-identity correction; no application code change.
+- Review verification head: `56f9741d7d86637652344ab10f433eb77443a0df` — verification hardening only: exact-source Window Seat parity, S-001 edit/recompute coverage, cross-project isolation, pinned browser-test environment, cause-specific fault checks.
 
-No `main` ref, promoted public link, deployment target, or physical authority was changed by this closure work.
+Post-closure ref verification confirmed all three `main` refs remained exactly at their starting identities: Store `ab8a4c5d470c310f27fef82683611622ab976168`, System `228e005d565ab918c5c3be52efc0bf3e99d2f5d7`, Review `740b510a9688c60e20af93179979dc83fe6b602f`. No promoted public link, deployment target, or physical authority was changed.
 
 ## Deferred Window Seat projection issue
 
