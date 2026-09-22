@@ -63,31 +63,40 @@ test('actual 45-in and 46-in Board HTTP invoke pinned evaluateJob and matching e
   assert.notEqual(body46.rawEstimate.totals.Q, 0);
 });
 
-test('user-defined X-brace keeps 60-in project truth and resolves against pinned Store', async (t) => {
+test('user-defined X-brace keeps project truth and uses the pinned Store as sole dimensional Q authority', async (t) => {
   const adapter = await withAdapter(t);
+  adapter.instrumentation.travelCalls = 0;
+  adapter.instrumentation.evaluationCalls = 0;
+  adapter.instrumentation.estimateCalls = 0;
+
   const body = parseJson(await postJob(await userDefinedBoardJobBody()));
   assert.equal(body.rawEvaluation.status, 'SUPPORTABLE');
-  assert.deepEqual(body.mappedCallInputs.evaluation.lines[0].requiredOps, ['MITER_LIMITED']);
-  assert.equal(body.mappedCallInputs.evaluation.lines[0].keptLengthIn, 60);
-  assert.equal(body.mappedCallInputs.evaluation.lines[0].sawAngleDeg, 30);
+  assert.equal(body.rawEstimate.complete, true);
 
   const definition = body.mappedCallInputs.definition;
   assert.equal(definition.materialSource, 'STORE_ZERO');
   assert.equal(definition.rawStockLengthIn, undefined);
-  assert.equal(definition.preparation, undefined);
   assert.equal(definition.definedWorkpieceLengthIn, 60);
   assert.equal(definition.productionSawCuts, 3);
-  assert.equal(definition.totalModeledSawCuts, 3);
   assert.equal(definition.sawAngleDeg, 30);
   assert.equal(definition.drillCycles, 0);
   assert.equal(definition.cutPlane, 'miter-face');
   assert.equal(definition.endIdentity, 'both');
   assert.equal(definition.endRelation, 'parallel');
   assert.equal(definition.lengthDatum, 'long-long-outer-edge');
-  assert.equal(definition.spotDemand.mode, 'SPOT_ON_LOCATION');
+  assert.equal(definition.datumCMethod, 'REFERENCE_CUT');
+  assert.equal(definition.parts.length, 2);
+  assert.equal(definition.parts[0].features[0].kind, 'SPOT_ON_LOCATION');
+  assert.equal(definition.parts[0].features[0].xIn, 8);
+  assert.equal(definition.parts[1].features[0].xIn, 8);
   assert.equal(definition.spotDemand.totalCount, 2);
-  assert.equal(definition.spotDemand.toolingStatus, undefined);
   assert.deepEqual(definition.unresolvedConditions, []);
+
+  const travel = body.mappedCallInputs.travel;
+  assert.deepEqual(travel.requiredOps, ['MITER_LIMITED', 'SPOT_ON_LOCATION']);
+  assert.equal(travel.definedWorkpieceLengthIn, 60);
+  assert.equal(travel.declaredSawCuts, 3);
+  assert.equal(travel.declaredSpotCount, 2);
 
   assert.equal(body.materialResolution.status, 'MAPPED');
   assert.equal(body.materialResolution.workpieceLengthIn, 60);
@@ -95,26 +104,27 @@ test('user-defined X-brace keeps 60-in project truth and resolves against pinned
   assert.equal(body.materialResolution.pricingReferenceStockLengthIn, 72);
   assert.equal(body.materialResolution.allocationClaimed, false);
 
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].keptLengthIn, 60);
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].sawCuts, 3);
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].holes, 0);
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].spots, 2);
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].depthIn, 0);
-  assert.ok(body.mappedCallInputs.estimate.pieces[0].sawTraverseIn > 3.5);
-
   assert.equal(body.rawEstimate.status, 'BUDGETARY_ESTIMATE');
   assert.equal(body.rawEstimate.totals.material, 3.13);
-  assert.equal(body.rawEstimate.cycle.T_job_min, 10.014);
-  assert.equal(body.rawEstimate.totals.cell_recovery, 51.69);
-  assert.equal(body.rawEstimate.totals.Q, 54.82);
-  assert.equal(body.priceCompleteness.status, 'COMPLETE_FOR_ENCODED_DEMAND');
+  assert.equal(body.rawEstimate.totals.machine_service, 5.89);
+  assert.equal(body.rawEstimate.totals.Q, 9.02);
+  assert.equal(body.rawEstimate.cycle.T_job_min, 1.4128);
+  assert.equal(body.rawEstimate.travel.derivedSawCuts, 3);
+  assert.equal(body.rawEstimate.travel.derivedSpotCount, 2);
+  assert.equal(body.priceCompleteness.status, 'COMPLETE_FOR_TRAVEL_STANDARD');
   assert.deepEqual(body.priceCompleteness.unresolvedConditions, []);
-  assert.equal(body.rawEstimate.cycle.model, 'STB-D001-CYCLE-MODEL-S2-0.1');
+  assert.equal(body.rawEstimate.cycle.model, 'STB-D001-DIMENSIONAL-TRAVEL-0.1');
   assert.equal(body.attributedBasis.pricingEngine.id, 'STB-STORE-ZERO-PRICE-1');
-  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.3');
-  assert.equal(body.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.3');
-});
+  assert.equal(body.attributedBasis.pricingEngine.version, '0.3.0');
+  assert.ok(body.calculationIdentity.inputHash);
+  assert.ok(body.calculationIdentity.resultHash);
 
+  const direct = adapter.modules.evaluateDimensionalTravelJob(adapter.catalog, travel);
+  assert.deepEqual(body.rawEvaluation, direct);
+  assert.equal(adapter.instrumentation.travelCalls, 1);
+  assert.equal(adapter.instrumentation.evaluationCalls, 0);
+  assert.equal(adapter.instrumentation.estimateCalls, 0);
+});
 test('user-defined miter boundary is Store-owned: 45 supports and 46 refuses', async (t) => {
   await withAdapter(t);
 
