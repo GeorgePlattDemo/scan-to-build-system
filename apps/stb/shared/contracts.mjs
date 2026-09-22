@@ -409,14 +409,11 @@ export const USER_DEFINED_BOARD_DEFINITION = Object.freeze({
   kind: 'user_defined_board.v1',
   ruleVersion: '0.2',
   unit: 'in',
-  minFinishedPartInches: 1,
-  maxFinishedPartInches: 60,
-  minQuantity: 1,
-  maxQuantity: 8,
   quantityUnit: 'ea',
   allowedOps: Object.freeze(['CROSSCUT', 'MITER_LIMITED', 'DRILL']),
   occurrenceRole: 'user-defined-finished-board-member',
   materialAuthority: 'STORE_SELECTED',
+  dimensionalAuthority: 'FINISHED_DEMAND_TO_STORE_RESOLUTION',
 });
 
 export const USER_DEFINED_BOARD_MATERIAL_DEMAND = Object.freeze({
