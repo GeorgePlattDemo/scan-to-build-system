@@ -414,11 +414,10 @@ function validateUserDefinedBoardPayload(payload) {
     }
   }
 
-  const allowedDatumCMethods = new Set(['REFERENCE_CUT', 'MECHANICAL_REFERENCE', 'SENSED_FACE']);
-  if (!allowedDatumCMethods.has(line.datumCMethod)) {
+  if (typeof line.datumCMethod !== 'string' || line.datumCMethod.trim() === '') {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'datumCMethod must name an admitted reference-establishment method',
+      'datumCMethod must be a nonempty project-supplied reference-establishment method; Store owns admissibility',
     );
   }
 
