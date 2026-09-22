@@ -85,6 +85,7 @@ test('user-defined X-brace keeps 60-in project truth and resolves against pinned
   assert.equal(definition.endRelation, 'parallel');
   assert.equal(definition.lengthDatum, 'long-long-outer-edge');
   assert.equal(definition.spotDemand.mode, 'SPOT_ON_LOCATION');
+  assert.equal(definition.spotDemand.locationAlongLengthIn, 8);
   assert.equal(definition.spotDemand.totalCount, 2);
   assert.equal(definition.spotDemand.toolingStatus, undefined);
   assert.deepEqual(definition.unresolvedConditions, []);
@@ -129,6 +130,39 @@ test('user-defined miter boundary is Store-owned: 45 supports and 46 refuses', a
   assert.equal(at46.rawEvaluation.status, 'REFUSED');
   assert.equal(at46.rawEstimate, null);
   assert.equal(at46.materialResolution.status, 'REFUSED');
+});
+
+test('missing User 1 spot location remains UNRESOLVED and concise response retains SPOT_LOCATION_REQUIRED', async (t) => {
+  await withAdapter(t);
+  const incompleteSpot = {
+    required: true,
+    mode: 'SPOT_ON_LOCATION',
+    countPerPart: 1,
+    totalCount: 2,
+    locationRule: 'CENTERED_ON_PART',
+    acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
+  };
+  const response = await postJob(await userDefinedBoardJobBody({ spotDemand: incompleteSpot }));
+  assert.equal(response.status, 200);
+  const body = parseJson(response);
+  assert.equal(body.rawEvaluation.status, 'UNRESOLVED');
+  assert.equal(body.rawEstimate, null);
+  assert.equal(body.materialResolution.status, 'UNRESOLVED');
+  assert.equal(body.materialResolution.reason, 'CAPABILITY_INPUT_UNRESOLVED');
+  assert.ok(body.materialResolution.unresolvedConditions.includes('SPOT_LOCATION_REQUIRED'));
+  assert.ok(body.priceCompleteness.unresolvedConditions.includes('SPOT_LOCATION_REQUIRED'));
+  assert.ok(body.mappedCallInputs.definition.unresolvedConditions.includes('SPOT_LOCATION_REQUIRED'));
+});
+
+test('User 1 with no spot request has no spot operation and no spot charge', async (t) => {
+  await withAdapter(t);
+  const response = await postJob(await userDefinedBoardJobBody({ spotDemand: null }));
+  assert.equal(response.status, 200);
+  const body = parseJson(response);
+  assert.equal(body.rawEvaluation.status, 'SUPPORTABLE');
+  assert.equal(body.mappedCallInputs.definition.spotDemand, null);
+  assert.equal(body.mappedCallInputs.estimate.pieces[0].spots, 0);
+  assert.equal(body.priceCompleteness.status, 'COMPLETE_FOR_ENCODED_DEMAND');
 });
 
 test('unknown SKU through actual evaluateJob retains UNRESOLVED and raw NO_OFFERING/MISSING_PRICE', async (t) => {
