@@ -2,7 +2,7 @@
 
 Current source root:
 
-`GeorgePlattDemo/scan-to-build-store@f8373520a726090ed91eff82e5e720f4a9634615`
+`GeorgePlattDemo/scan-to-build-store@95c639a1d0d4812df097ad1eb628594b38f921de`
 
 ## Documentary sources
 
@@ -39,7 +39,7 @@ The copied files under `docs/store/current/` are source evidence. New current St
 
 ## 2026-09-22 User 1 travel-standard checkpoint
 
-Exact Store SHA `f8373520a726090ed91eff82e5e720f4a9634615` passed workflow run `35752240345`.
+Exact Store SHA `95c639a1d0d4812df097ad1eb628594b38f921de` passed workflow run `35752240345`.
 
 Verified on that SHA:
 - User 1 resolves one 60 in defined SPF 2x4 workpiece against Store SKU `STB-ZERO-SPF-2X4-72-001` without redefining the project as 72 in.
