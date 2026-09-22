@@ -269,6 +269,7 @@ function validateUserDefinedBoardPayload(payload) {
     'unit',
     'requiredOps',
     'definedWorkpieceLength',
+    'workpiecePolicy',
     'sawCuts',
     'sawAngleDeg',
     'drillCycles',
@@ -364,6 +365,14 @@ function validateUserDefinedBoardPayload(payload) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
       'defined workpiece length must be 24–60 in inclusive',
+    );
+  }
+
+  const workpiecePolicy = String(line.workpiecePolicy || 'PRESERVE_DEFINED');
+  if (!['PRESERVE_DEFINED', 'GROW_TO_RETAINED_CONTROL'].includes(workpiecePolicy)) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'workpiecePolicy must be PRESERVE_DEFINED or GROW_TO_RETAINED_CONTROL',
     );
   }
 
@@ -523,6 +532,7 @@ function validateUserDefinedBoardPayload(payload) {
       requiredOps: [...line.requiredOps],
       definedWorkpieceLength: { value: parsed.canonical, unit: 'in' },
       definedWorkpieceLengthIn: parsed.value,
+      workpiecePolicy,
       sawCuts: line.sawCuts,
       sawAngleDeg: line.sawAngleDeg,
       drillCycles: line.drillCycles,
@@ -795,6 +805,7 @@ export function userDefinedBoardJobPayload({
   configurationVersion,
   materialDemand = USER_DEFINED_BOARD_MATERIAL_DEMAND,
   definedWorkpieceLengthCanonical,
+  workpiecePolicy = 'PRESERVE_DEFINED',
   sawCuts,
   sawAngleDeg,
   drillCycles = 0,
@@ -820,6 +831,7 @@ export function userDefinedBoardJobPayload({
       unit: 'ea',
       requiredOps: [...requiredOps],
       definedWorkpieceLength: { value: definedWorkpieceLengthCanonical, unit: 'in' },
+      workpiecePolicy,
       sawCuts,
       sawAngleDeg,
       drillCycles,
@@ -853,6 +865,7 @@ export async function userDefinedBoardDemandSignature(payload) {
     unit: payload.line.unit,
     requiredOps: payload.line.requiredOps,
     definedWorkpieceLength: payload.line.definedWorkpieceLength,
+    workpiecePolicy: payload.line.workpiecePolicy,
     sawCuts: payload.line.sawCuts,
     sawAngleDeg: payload.line.sawAngleDeg,
     drillCycles: payload.line.drillCycles,
