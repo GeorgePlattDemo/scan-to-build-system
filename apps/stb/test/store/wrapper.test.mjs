@@ -112,7 +112,7 @@ test('BOARD_SQUARE_V1 45-in and 46-in invoke actual evaluate then estimate', asy
   assert.equal(adapter.instrumentation.estimateCalls, 2);
 });
 
-test('USER_DEFINED_BOARD_V1 asks the governing Store travel evaluator once and preserves its answer', async (t) => {
+test('USER_DEFINED_BOARD_V1 re-evaluates every formal Store request and preserves a fresh receipt', async (t) => {
   const { adapter } = await withHost(t);
   adapter.instrumentation.evaluationCalls = 0;
   adapter.instrumentation.estimateCalls = 0;
@@ -177,10 +177,28 @@ test('USER_DEFINED_BOARD_V1 asks the governing Store travel evaluator once and p
   assert.ok(body.calculationIdentity.inputHash);
   assert.ok(body.calculationIdentity.resultHash);
   assert.deepEqual(body.calculationIdentity, body.rawEstimate.calculationIdentity);
+  assert.equal(body.rawEvaluation.freshEvaluation, true);
+  assert.equal(body.evaluationReceipt.requestId, request.requestId);
+  assert.equal(body.evaluationReceipt.freshnessRule, 'STB-STORE-FRESH-EVALUATION-0.1');
+  assert.equal(body.evaluationReceipt.authority.storeRevision, body.storePin);
+  assert.equal(body.mappedCallInputs.storeRequest.requestId, request.requestId);
 
   assert.equal(body.mappedCallInputs.estimate, undefined);
   assert.equal(body.mappedCallInputs.evaluation, undefined);
-  assert.equal(adapter.instrumentation.travelCalls, 1);
+
+  const secondRequest = await userDefinedBoardJobBody();
+  const secondResponse = await postJob(secondRequest);
+  assert.equal(secondResponse.status, 200);
+  const secondBody = parseJson(secondResponse);
+  assert.equal(secondBody.rawEvaluation.freshEvaluation, true);
+  assert.equal(secondBody.evaluationReceipt.requestId, secondRequest.requestId);
+  assert.notEqual(secondBody.evaluationReceipt.requestId, body.evaluationReceipt.requestId);
+  assert.notEqual(secondBody.evaluationReceipt.receiptHash, body.evaluationReceipt.receiptHash);
+  assert.equal(secondBody.rawEstimate.totals.Q, body.rawEstimate.totals.Q);
+  assert.equal(secondBody.calculationIdentity.inputHash, body.calculationIdentity.inputHash);
+  assert.equal(secondBody.calculationIdentity.resultHash, body.calculationIdentity.resultHash);
+
+  assert.equal(adapter.instrumentation.travelCalls, 2);
   assert.equal(adapter.instrumentation.evaluationCalls, 0);
   assert.equal(adapter.instrumentation.estimateCalls, 0);
 });
