@@ -100,3 +100,63 @@ Current repaired working truth:
 Protected paths remain unchanged in meaning: Alcove and Window Seat are verification-only, Outdoor remains separate, and S-001 retains its own Store identity.
 
 **NO BLOOD ON WOOD.**
+
+
+## 2026-09-22 dimensional travel-standard checkpoint
+
+This section is a later checkpoint. It does not rewrite the frozen 2026-09-21 before-state above.
+
+### Exact Store authority for this candidate
+
+- Store repository: `GeorgePlattDemo/scan-to-build-store`
+- Store branch used to develop the repair: `build/d001-travel-standard-0.1`
+- Exact tested Store SHA: `f8373520a726090ed91eff82e5e720f4a9634615`
+- Acceptance workflow run: `35752240345` — **SUCCESS**
+- Governing document: `DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md`
+- Governing evaluator: `evaluateDimensionalTravelJob()`
+- Pricing engine identity: `STB-STORE-ZERO-PRICE-1 / 0.3.0`
+- Travel model: `STB-D001-DIMENSIONAL-TRAVEL-0.1 / 0.1.0`
+
+### User 1 acceptance fixture
+
+The first Start Your Own proof is one 60 in defined SPF 2x4 workpiece with:
+- two 16 in identified parts;
+- 30° single-plane face-miter condition;
+- three derived saw operations: one Datum-C reference cut plus two part cutoffs;
+- two identified 3/16 `SPOT_ON_LOCATION` features at part-relative X = 8.000 in, centered on the wide face;
+- 27.625 in final retained remainder;
+- no unresolved Store facts for the accepted fixture.
+
+On the exact Store SHA above, the governing evaluator returns:
+- Store material reference: `STB-ZERO-SPF-2X4-72-001`;
+- material: **$3.13**;
+- modeled D-001 occupied time: **1.4128 min**;
+- modeled machine service: **$5.89**;
+- Stage-2 budgetary `Q`: **$9.02**;
+- calculation input hash: `caa7c91f1296c243a5abb05ed35a0c55b5b1f5d4dab32efd64cd2656d75f3036`;
+- calculation result hash: `15a8835dd50771136020190db7f5dbed1bd35b78930bf338be63bea8427353c2`.
+
+These economics are **DECLARED_STAGE2_MODEL**, measured=false, commissioned=false. They are an explicit modeled Store Zero scenario, not measured commercial machine economics.
+
+### Governing application rule
+
+For this candidate:
+
+1. Project/configurator owns the identified part definition and part-relative feature coordinates.
+2. System transports that demand to Store.
+3. System does **not** calculate machine motion, cycle time, Store rate, refusal, stock selection, machine service, or Q.
+4. Store returns the complete dimensional answer and calculation identity.
+5. Confirmation performs a second Store evaluation using the same request payload/evaluator.
+6. PASS A and PASS B must return the same input and result hashes for unchanged governing inputs.
+7. Any mismatch fails closed as `STORE_CALCULATION_DIVERGENCE`.
+8. Missing Store-owned authority is never replaced by a UI fallback, assistant guess, project-specific formula, or weakened test.
+
+### Migration boundary
+
+User 1 is the first complete dimensional project under this standard.
+
+Alcove, Window Seat, Picnic, and other dimensional project wrappers do **not** inherit User 1's geometry or economics by name. Each must emit its own identified physical demand through the same governing Store evaluator before it can regain a complete dimensional Q.
+
+Material/capability facts may remain preserved during migration. A material-only subtotal is not a complete Q.
+
+**No shortcuts. No surrogate Store. No second pricing engine.**
