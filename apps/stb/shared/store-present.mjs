@@ -146,9 +146,11 @@ function copyEstimate(envelope) {
   const q = typeof totals.Q === 'number' && Number.isFinite(totals.Q) ? totals.Q : null;
   const material = typeof totals.material === 'number' && Number.isFinite(totals.material) ? totals.material : null;
   const recovery =
-    typeof totals.cell_recovery === 'number' && Number.isFinite(totals.cell_recovery)
-      ? totals.cell_recovery
-      : null;
+    typeof totals.machine_service === 'number' && Number.isFinite(totals.machine_service)
+      ? totals.machine_service
+      : typeof totals.cell_recovery === 'number' && Number.isFinite(totals.cell_recovery)
+        ? totals.cell_recovery
+        : null;
   const hardware = typeof totals.hardware === 'number' && Number.isFinite(totals.hardware) ? totals.hardware : null;
   const minutes =
     typeof rawEstimate.cycle?.T_job_min === 'number' && Number.isFinite(rawEstimate.cycle.T_job_min)
@@ -173,6 +175,7 @@ function copyEstimate(envelope) {
     commissioned: rawEstimate.cycle?.commissioned === true,
     engineId: displayOrMissing(rawEstimate.engine?.id),
     engineVersion: displayOrMissing(rawEstimate.engine?.version),
+    calculationIdentity: rawEstimate.calculationIdentity ?? envelope?.calculationIdentity ?? null,
     estimateError,
   };
 }
