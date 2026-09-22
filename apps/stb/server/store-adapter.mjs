@@ -430,6 +430,23 @@ export async function createStoreAdapter({
       ' in finished member' +
       (line.quantity === 1 ? '' : 's');
     const capability = materialResolution?.capability ?? null;
+    const spot = loaded.modules.D001_STAGE2_ENVELOPE.spot;
+    const spotOperation = line.spotDemand
+      ? {
+          operation: spot.operation,
+          operationContract: spot.operationContract,
+          toolDefinitionId: spot.toolDefinitionId,
+          toolDiameterIn: spot.toolDiameterIn,
+          fullDiameterPenetrationIn: spot.fullDiameterPenetrationIn,
+          depthReference: spot.depthReference,
+          pointAngleDeg: spot.pointAngleDeg,
+          pointAxialLengthIn: spot.pointAxialLengthIn,
+          pointGeometryStatus: spot.pointGeometryStatus,
+          totalTipPenetrationIn: spot.totalTipPenetrationIn,
+          customerDepthProgrammingRequired: spot.customerDepthProgrammingRequired,
+        }
+      : null;
+    instrumentation.evaluationCalls += 1;
     const rawEvaluation = {
       title,
       stage: 2,
@@ -575,6 +592,7 @@ export async function createStoreAdapter({
             endRelation: line.endRelation,
             lengthDatum: line.lengthDatum,
             spotDemand: line.spotDemand,
+            spotOperation,
             selectedParentPlan: materialResolution?.plan ?? null,
             unresolvedConditions: priceUnresolved,
           },
