@@ -2,6 +2,7 @@ import {
   BOARD_DEFINITION,
   PUBLISHED_BOARD_SKU,
   STORE_PIN,
+  STORE_FRESH_EVALUATION_RULE_ID,
   STORE_PROTOCOL_VERSION,
   STORE_REQUEST_TYPES,
   WRAPPER_BUILD_ID,
@@ -483,7 +484,7 @@ export async function createStoreAdapter({
       storeResult?.status === 'SUPPORTABLE' &&
       storeResult?.freshEvaluation === true &&
       freshReceipt?.requestId === envelope.requestId &&
-      freshReceipt?.freshnessRule === 'STB-STORE-FRESH-EVALUATION-0.1' &&
+      freshReceipt?.freshnessRule === STORE_FRESH_EVALUATION_RULE_ID &&
       rawEstimate?.complete === true &&
       uniqueUnresolved.length === 0 &&
       rawEstimate?.calculationIdentity?.inputHash &&
