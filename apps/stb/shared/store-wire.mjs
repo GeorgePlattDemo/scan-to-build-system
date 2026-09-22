@@ -308,15 +308,10 @@ function validateUserDefinedBoardPayload(payload) {
     );
   }
 
-  if (
-    !Number.isInteger(line.quantity) ||
-    line.quantity < USER_DEFINED_BOARD_DEFINITION.minQuantity ||
-    line.quantity > USER_DEFINED_BOARD_DEFINITION.maxQuantity ||
-    line.unit !== 'ea'
-  ) {
+  if (!Number.isInteger(line.quantity) || line.quantity < 1 || line.unit !== 'ea') {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'user-defined Board quantity is outside the bounded finished-member range',
+      'user-defined Board quantity must be a positive integer in ea',
     );
   }
 
@@ -355,13 +350,10 @@ function validateUserDefinedBoardPayload(payload) {
   }
   const parsed = parseCanonicalInch(finishedPart.value);
   if (!parsed.ok) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, parsed.reason);
-  if (
-    parsed.value < USER_DEFINED_BOARD_DEFINITION.minFinishedPartInches ||
-    parsed.value > USER_DEFINED_BOARD_DEFINITION.maxFinishedPartInches
-  ) {
+  if (!(parsed.value > 0)) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'finished part length is outside the bounded User 1 range',
+      'finished part length must be greater than zero; Store owns stock and machine feasibility',
     );
   }
 
