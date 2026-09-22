@@ -160,15 +160,17 @@ test('USER_DEFINED_BOARD_V1 re-evaluates every formal Store request and preserve
   assert.equal(travel.parts[0].features[0].kind, 'SPOT_ON_LOCATION');
 
   assert.equal(body.materialResolution.status, 'MAPPED');
+  assert.equal(body.materialResolution.requestedDefinedWorkpieceLengthIn, 60);
   assert.equal(body.materialResolution.workpieceLengthIn, 60);
-  assert.equal(body.materialResolution.pricingReferenceSku, PUBLISHED_BOARD_SKU);
-  assert.equal(body.materialResolution.pricingReferenceStockLengthIn, 72);
+  assert.equal(body.materialResolution.pricingReferenceSku, 'STB-ZERO-SPF-2X4-60-001');
+  assert.equal(body.materialResolution.pricingReferenceStockLengthIn, 60);
+  assert.equal(body.materialResolution.selectionPolicy, 'SHORTEST_COMPLETE_STORE_OFFERING');
   assert.equal(body.materialResolution.allocationClaimed, false);
 
   assert.equal(body.rawEstimate.cycle.T_job_min, 1.4128);
-  assert.equal(body.rawEstimate.totals.material, 3.13);
+  assert.equal(body.rawEstimate.totals.material, 2.61);
   assert.equal(body.rawEstimate.totals.machine_service, 5.89);
-  assert.equal(body.rawEstimate.totals.Q, 9.02);
+  assert.equal(body.rawEstimate.totals.Q, 8.50);
   assert.equal(body.rawEstimate.travel.derivedSawCuts, 3);
   assert.equal(body.rawEstimate.travel.derivedSpotCount, 2);
   assert.equal(body.rawEstimate.travel.finalRemainderIn, 27.625);
@@ -202,6 +204,68 @@ test('USER_DEFINED_BOARD_V1 re-evaluates every formal Store request and preserve
   assert.equal(adapter.instrumentation.evaluationCalls, 0);
   assert.equal(adapter.instrumentation.estimateCalls, 0);
 });
+test('USER_DEFINED_BOARD_V1 18-in same-span demand preserves definition and receives Store 72', async (t) => {
+  const { adapter } = await withHost(t);
+  const sameSpanAngleDeg = Math.asin(8 / 18) * 180 / Math.PI;
+  const parts = [1, 2].map((number) => ({
+    partId: 'PART-' + number,
+    lengthIn: 18,
+    features: [{
+      featureId: 'SPOT-' + number,
+      kind: 'SPOT_ON_LOCATION',
+      xIn: 9,
+      locationRule: 'CENTERED_ON_PART',
+      acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
+    }],
+  }));
+
+  const response = await postJob(await userDefinedBoardJobBody({
+    configurationVersion: '0.2',
+    sawAngleDeg: sameSpanAngleDeg,
+    parts,
+  }));
+  assert.equal(response.status, 200);
+  const body = parseJson(response);
+
+  assert.equal(body.rawEvaluation.status, 'SUPPORTABLE');
+  assert.equal(body.rawEvaluation.freshEvaluation, true);
+  assert.equal(body.priceCompleteness.status, 'COMPLETE_FOR_TRAVEL_STANDARD');
+
+  // Definition truth remains what System submitted.
+  assert.equal(body.mappedCallInputs.definition.definedWorkpieceLengthIn, 60);
+  assert.equal(body.mappedCallInputs.definition.parts[0].lengthIn, 18);
+  assert.equal(body.mappedCallInputs.definition.parts[1].lengthIn, 18);
+  assert.equal(body.mappedCallInputs.definition.parts[0].features[0].xIn, 9);
+  assert.ok(Math.abs(body.mappedCallInputs.definition.sawAngleDeg - sameSpanAngleDeg) < 1e-9);
+
+  // Store owns stock resolution and returns the shortest complete offering.
+  assert.equal(body.materialResolution.requestedDefinedWorkpieceLengthIn, 60);
+  assert.equal(body.materialResolution.workpieceLengthIn, 72);
+  assert.equal(body.materialResolution.pricingReferenceSku, 'STB-ZERO-SPF-2X4-72-001');
+  assert.equal(body.materialResolution.pricingReferenceStockLengthIn, 72);
+  assert.equal(body.materialResolution.selectionPolicy, 'SHORTEST_COMPLETE_STORE_OFFERING');
+  assert.deepEqual(
+    body.materialResolution.consideredCandidates.slice(0, 2).map((entry) => [
+      entry.storeSku,
+      entry.stockLengthIn,
+      entry.candidateStatus,
+      entry.reason,
+    ]),
+    [
+      ['STB-ZERO-SPF-2X4-60-001', 60, 'REFUSED', 'LAST_REMAIN_BELOW_TWO_ROLLER_CONTROL'],
+      ['STB-ZERO-SPF-2X4-72-001', 72, 'SUPPORTABLE', null],
+    ],
+  );
+
+  assert.equal(body.rawEstimate.totals.material, 3.13);
+  assert.equal(body.rawEstimate.totals.Q, 9.03);
+  assert.equal(body.rawEstimate.travel.finalRemainderIn, 35.625);
+  assert.equal(body.evaluationReceipt.authority.storeRevision, STORE_PIN);
+  assert.equal(body.materialResolution.materialDemand.species, 'spf');
+  assert.equal(adapter.instrumentation.evaluationCalls, 0);
+  assert.equal(adapter.instrumentation.estimateCalls, 0);
+});
+
 test('USER_DEFINED_BOARD_V1 sends 46-degree demand to Store and receives REFUSED', async (t) => {
   const { adapter } = await withHost(t);
   adapter.instrumentation.evaluationCalls = 0;
