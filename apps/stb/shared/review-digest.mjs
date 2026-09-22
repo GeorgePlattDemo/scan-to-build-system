@@ -57,6 +57,8 @@ export function reviewDigestInput(snapshot) {
     storeDisposition: snapshot.storeDisposition ?? null,
     estimateStatus: snapshot.estimateStatus ?? null,
     estimateQ: snapshot.estimateQ ?? null,
+    calculationInputHash: snapshot.calculationInputHash ?? null,
+    calculationResultHash: snapshot.calculationResultHash ?? null,
     disclosures: sortedCopy(snapshot.disclosures ?? []),
     unresolvedConditions: sortedCopy(snapshot.unresolvedConditions ?? []),
   };
