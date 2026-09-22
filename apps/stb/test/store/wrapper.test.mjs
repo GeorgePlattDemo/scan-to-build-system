@@ -84,9 +84,9 @@ test('BOARD_SQUARE_V1 45-in and 46-in invoke actual evaluate then estimate', asy
   assert.equal(body45.rawEstimate.status, 'BUDGETARY_ESTIMATE');
   assert.ok(body45.estimateAssociationId);
   assert.equal(body45.rawEstimate.engine.id, 'STB-STORE-ZERO-PRICE-1');
-  assert.equal(body45.rawEstimate.engine.version, '0.2.3');
+  assert.equal(body45.rawEstimate.engine.version, '0.2.4');
   assert.equal(body45.rawEstimate.cycle.model, 'STB-D001-CYCLE-MODEL-S2-0.1');
-  assert.equal(body45.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.3');
+  assert.equal(body45.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.4');
   assert.equal(body45.attributedBasis.measured, false);
   assert.equal(body45.attributedBasis.commissioned, false);
 
@@ -112,68 +112,56 @@ test('BOARD_SQUARE_V1 45-in and 46-in invoke actual evaluate then estimate', asy
   assert.equal(adapter.instrumentation.estimateCalls, 2);
 });
 
-test('USER_DEFINED_BOARD_V1 models the frozen 60-in X-brace without raw-stock reinterpretation', async (t) => {
+test('USER_DEFINED_BOARD_V1 preserves 60-in truth while depth-defined spot stays partial', async (t) => {
   const { adapter } = await withHost(t);
   adapter.instrumentation.evaluationCalls = 0;
   adapter.instrumentation.estimateCalls = 0;
 
-  const request = await userDefinedBoardJobBody();
-  const response = await postJob(request);
+  const response = await postJob(await userDefinedBoardJobBody());
   assert.equal(response.status, 200);
   const body = parseJson(response);
-
-  assert.equal(body.rawEvaluation.status, 'SUPPORTABLE');
-  assert.deepEqual(body.mappedCallInputs.evaluation.lines[0].requiredOps, ['MITER_LIMITED']);
-  assert.equal(body.mappedCallInputs.evaluation.lines[0].keptLengthIn, 60);
+  assert.equal(body.rawEvaluation.status, 'UNRESOLVED');
 
   const definition = body.mappedCallInputs.definition;
-  assert.equal(definition.materialSource, 'STORE_ZERO');
   assert.equal(definition.rawStockLengthIn, undefined);
   assert.equal(definition.preparation, undefined);
   assert.equal(definition.definedWorkpieceLengthIn, 60);
-  assert.equal(definition.productionSawCuts, 3);
   assert.equal(definition.totalModeledSawCuts, 3);
-  assert.equal(definition.sawAngleDeg, 30);
-  assert.equal(definition.drillCycles, 0);
-  assert.equal(definition.drillDepthIn, null);
-  assert.equal(definition.cutPlane, 'miter-face');
-  assert.equal(definition.endIdentity, 'both');
-  assert.equal(definition.endRelation, 'parallel');
-  assert.equal(definition.lengthDatum, 'long-long-outer-edge');
-  assert.equal(definition.spotDemand.mode, 'SPOT_ON_LOCATION');
-  assert.equal(definition.spotDemand.totalCount, 2);
-  assert.equal(definition.spotDemand.toolingStatus, undefined);
-  assert.deepEqual(definition.unresolvedConditions, []);
+  assert.equal(definition.spotDemand.locationAlongLengthIn, 8);
+  assert.equal(definition.spotOperation.operationContract, 'SPOT_ON_LOCATION/0.2');
+  assert.equal(definition.spotOperation.fullDiameterPenetrationIn, 0.1875);
+  assert.equal(definition.spotOperation.pointGeometryStatus, 'UNRESOLVED');
+  assert.equal(definition.spotOperation.totalTipPenetrationIn, null);
 
-  assert.equal(body.materialResolution.status, 'MAPPED');
+  assert.equal(body.materialResolution.status, 'UNRESOLVED');
   assert.equal(body.materialResolution.workpieceLengthIn, 60);
   assert.equal(body.materialResolution.pricingReferenceSku, PUBLISHED_BOARD_SKU);
   assert.equal(body.materialResolution.pricingReferenceStockLengthIn, 72);
   assert.equal(body.materialResolution.allocationClaimed, false);
 
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].sawCuts, 3);
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].holes, 0);
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].spots, 2);
-  assert.equal(body.rawEstimate.status, 'BUDGETARY_ESTIMATE');
-  assert.equal(body.rawEstimate.cycle.T_job_min, 10.014);
+  assert.equal(body.mappedCallInputs.estimate.definedWorkpieceLengthIn, 60);
+  assert.equal(body.mappedCallInputs.estimate.sawCuts, 3);
+  assert.equal(body.mappedCallInputs.estimate.spotCycles, 2);
+  assert.equal(body.rawEstimate.status, 'PARTIAL_BUDGETARY_ESTIMATE');
+  assert.equal(body.rawEstimate.cycle.T_job_min, 9.694);
   assert.equal(body.rawEstimate.totals.material, 3.13);
-  assert.equal(body.rawEstimate.totals.cell_recovery, 51.69);
-  assert.equal(body.rawEstimate.totals.Q, 54.82);
-  assert.equal(body.priceCompleteness.status, 'COMPLETE_FOR_ENCODED_DEMAND');
-  assert.deepEqual(body.priceCompleteness.unresolvedConditions, []);
-  assert.equal(body.attributedBasis.pricingEngine.id, 'STB-STORE-ZERO-PRICE-1');
-  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.3');
-  assert.equal(body.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.3');
+  assert.equal(body.rawEstimate.totals.cell_recovery, 51.16);
+  assert.equal(body.rawEstimate.totals.Q, 54.29);
+  assert.equal(body.priceCompleteness.status, 'PARTIAL');
+  assert.ok(body.priceCompleteness.unresolvedConditions.includes('SPOT_TOOL_POINT_GEOMETRY_REQUIRED'));
+  assert.ok(body.priceCompleteness.unresolvedConditions.includes('SPOT_CYCLE_TIME_APPLICABILITY_UNRESOLVED'));
+  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.4');
+  assert.equal(body.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.4');
   assert.equal(adapter.instrumentation.evaluationCalls, 1);
   assert.equal(adapter.instrumentation.estimateCalls, 1);
 });
 
-test('USER_DEFINED_BOARD_V1 sends 46-degree demand to Store and receives REFUSED', async (t) => {
+test('USER_DEFINED_BOARD_V1 sends 46-degree miter-only demand to Store and receives REFUSED', async (t) => {
   const { adapter } = await withHost(t);
   adapter.instrumentation.evaluationCalls = 0;
   adapter.instrumentation.estimateCalls = 0;
 
-  const response = await postJob(await userDefinedBoardJobBody({ sawAngleDeg: 46 }));
+  const response = await postJob(await userDefinedBoardJobBody({ sawAngleDeg: 46, spotDemand: null }));
   assert.equal(response.status, 200);
   const body = parseJson(response);
   assert.equal(body.rawEvaluation.status, 'REFUSED');
@@ -182,6 +170,7 @@ test('USER_DEFINED_BOARD_V1 sends 46-degree demand to Store and receives REFUSED
   assert.equal(body.priceCompleteness.status, 'UNAVAILABLE');
   assert.equal(adapter.instrumentation.estimateCalls, 0);
 });
+
 
 test('support-before-estimate does not call estimate for unknown SKU', async (t) => {
   const { adapter } = await withHost(t);
