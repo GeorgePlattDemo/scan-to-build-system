@@ -134,6 +134,52 @@ test('user-defined X-brace keeps project truth and uses the pinned Store as sole
   assert.equal(adapter.instrumentation.evaluationCalls, 0);
   assert.equal(adapter.instrumentation.estimateCalls, 0);
 });
+test('bounded 18-in X-brace growth is resolved by Store without app-side SKU logic', async (t) => {
+  await withAdapter(t);
+
+  const fixedHorizontalSpanIn = 16 * Math.sin(30 * Math.PI / 180);
+  const sawAngleDeg = Math.asin(fixedHorizontalSpanIn / 18) * 180 / Math.PI;
+  const parts = [1, 2].map((number) => ({
+    partId: 'PART-' + number,
+    lengthIn: 18,
+    features: [{
+      featureId: 'SPOT-' + number,
+      kind: 'SPOT_ON_LOCATION',
+      xIn: 9,
+      locationRule: 'CENTERED_ON_PART',
+      acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
+    }],
+  }));
+
+  const body = parseJson(await postJob(await userDefinedBoardJobBody({
+    configurationVersion: '0.2',
+    workpiecePolicy: 'GROW_TO_RETAINED_CONTROL',
+    sawAngleDeg,
+    parts,
+  })));
+
+  assert.equal(body.rawEvaluation.status, 'SUPPORTABLE');
+  assert.equal(body.rawEvaluation.freshEvaluation, true);
+  assert.equal(body.mappedCallInputs.definition.definedWorkpieceLengthIn, 60);
+  assert.equal(body.mappedCallInputs.definition.workpiecePolicy, 'GROW_TO_RETAINED_CONTROL');
+  assert.equal(body.materialResolution.requestedDefinedWorkpieceLengthIn, 60);
+  assert.equal(body.materialResolution.requiredMinimumWorkpieceLengthIn, 60.375);
+  assert.equal(body.materialResolution.workpieceLengthIn, 60.375);
+  assert.equal(body.materialResolution.workpieceAdjusted, true);
+  assert.equal(body.materialResolution.pricingReferenceStockLengthIn, 72);
+  assert.equal(body.materialResolution.pricingReferenceSku, PUBLISHED_BOARD_SKU);
+  assert.equal(body.rawEstimate.travel.finalRemainderIn, 24);
+  assert.equal(body.rawEstimate.travel.parts[0].lengthIn, 18);
+  assert.equal(body.rawEstimate.travel.parts[0].features[0].xIn, 9);
+  assert.equal(body.rawEstimate.totals.material, 3.13);
+  assert.equal(body.rawEstimate.totals.machine_service, 5.9);
+  assert.equal(body.rawEstimate.totals.Q, 9.03);
+  assert.equal(body.rawEstimate.cycle.T_job_min, 1.4151);
+  assert.ok(Math.abs(body.mappedCallInputs.travel.sawAngleDeg - 26.3877999612) < 1e-9);
+  assert.equal(body.evaluationReceipt.requestId, body.requestId);
+  assert.equal(body.evaluationReceipt.authority.storeRevision, STORE_PIN);
+});
+
 test('user-defined miter boundary is Store-owned: 45 supports and 46 refuses', async (t) => {
   await withAdapter(t);
 
