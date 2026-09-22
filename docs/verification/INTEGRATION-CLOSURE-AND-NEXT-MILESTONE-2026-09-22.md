@@ -76,6 +76,38 @@ This is **not** being patched silently in `0.7.4`. Existing preservation tests i
 
 The current closure tests therefore exercise supported pre-confirm edits/recompute/confirmation without mutating frozen `0.7.4`.
 
+## 72-inch regression audit
+
+The closure pass rechecked the old 72-inch regression explicitly.
+
+Current project-boundary result:
+
+- the hosted Start Your Own artifact `three-frames.html` contains no 72-inch User 1 project value;
+- the visible System shell contains no 72-inch User 1 workpiece value;
+- System independent acceptance requires `definedWorkpieceLengthIn === 60`;
+- the same acceptance requires `rawStockLengthIn === undefined`;
+- the same acceptance requires `preparation === undefined`;
+- therefore the current User 1 definition does not contain a 72 → 60 preparation operation.
+
+Remaining 72-inch references are not all defects:
+
+1. Store catalog rows may legitimately contain 72-inch stock as procurement evidence.
+2. The D-001 Stage-2 fixture still declares a 72-inch base/station geometry and expressly states that this is not required stock length or project workpiece length.
+3. The generated full Store browser bundle still carries older helper/reference functions such as `estimateCut001` that use a 72-inch Store SKU with a 60-inch kept length. That helper is not the hosted User 1 project definition path.
+
+Do not delete catalog/fixture facts merely to remove the number 72. If the older `estimateCut001` helper is to be retired, do that as a separate Store cleanup only after proving no surviving proof, generator, or regression fixture depends on it. The current closure does not rewrite the generated Store source merely for cosmetic removal.
+
+## Verification evidence and limit
+
+The closure pass directly verified:
+
+- all modified Review JavaScript test files parse successfully;
+- the Review acceptance workflow retains the intended branch trigger, both acceptance/fault jobs, exact Node `22.23.2`, Playwright `1.63.0`, the clean unmodified control run, cross-project browser isolation, and cause-specific injected-fault markers;
+- Store, System, and Review `main` remained exactly at their starting commit identities;
+- the Store repair branch remained exactly at `7303793620d0ceda509810a661d11e6c31c7d59f`.
+
+The available repository connector does not expose push-triggered GitHub Actions runs, and no PR was created solely to manufacture a retrievable run. Therefore these static/direct checks are not to be described as a retrieved green CI run. Promotion remains contingent on reviewing the actual branch Actions result or running the equivalent acceptance suite in an environment that can execute it.
+
 ## Promotion checklist — not executed here
 
 1. **Store:** integrate the reviewed Store candidate and record the resulting Store commit.
