@@ -9,13 +9,13 @@ U.S. Patents 9,720,401 B2 and 10,768,609 B2
 
 ## Open Scan-to-Build
 
-<a href="https://georgeplattdemo.github.io/scan-to-build-review/system-build-current.html?v=b7e78b3a2c69a4afeb3594e5e36b919f5deed455"><kbd>▶ OPEN SYSTEM BUILD</kbd></a>
+<a href="https://georgeplattdemo.github.io/scan-to-build-review/system-build-current.html?v=7ccf3bcc154a419de1f340552ffe7f63a2201e3e"><kbd>▶ OPEN SYSTEM BUILD</kbd></a>
 
 **OPEN SYSTEM BUILD is the canonical human-visible current build.** A user-facing application change is not complete until it is visible through this button.
 
 The prior exact public HTML is retained as a versioned recovery base for rollback and provenance. That retained file is not a second current build.
 
-Where the visible build identifies reference, modeled, demonstration, planned, or unresolved behavior, those limits remain controlling. The visible build does not by itself establish live commerce or physical execution.
+Where the visible build identifies simulated, modeled, demonstration, planned, or unresolved behavior, those limits remain controlling. Job 1 now traverses the complete commercial and fulfillment event chain as a bounded simulation; the visible build does not process real payment or create live machine authority.
 
 Application entry source: [`apps/stb/browser/index.html`](apps/stb/browser/index.html).  
 Application operating notes: [`apps/README.md`](apps/README.md).
