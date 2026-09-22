@@ -1,0 +1,46 @@
+name: D-001 Travel Integration
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  user1-travel-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout System
+        uses: actions/checkout@v4
+
+      - name: Checkout exact tested Store
+        uses: actions/checkout@v4
+        with:
+          repository: GeorgePlattDemo/scan-to-build-store
+          ref: f8373520a726090ed91eff82e5e720f4a9634615
+          path: store-zero
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.23.2"
+
+      - name: Governing boundary tests
+        working-directory: apps/stb
+        run: >-
+          node --test --test-concurrency=1
+          test/unit/store-calculation-identity.test.mjs
+          test/unit/dimensional-store-governance.test.mjs
+
+      - name: User 1 pinned Store integration
+        working-directory: apps/stb
+        env:
+          STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-zero
+        run: >-
+          node --test --test-concurrency=1
+          --test-name-pattern="USER_DEFINED_BOARD_V1 asks the governing Store travel evaluator once and preserves its answer|user-defined X-brace keeps project truth and uses the pinned Store as sole dimensional Q authority|user-defined miter boundary is Store-owned"
+          test/store/wrapper.test.mjs
+          test/store/pinned.test.mjs
