@@ -141,9 +141,9 @@ jobs:
           from pathlib import Path
           p=Path(os.environ["RUNNER_TEMP"])/"fault-reason/apps/stb/server/store-adapter.mjs"
           s=p.read_text()
-          old="    const materialUnresolved = collectMaterialResolutionUnresolved(materialResolution);"
+          old="  return [...new Set(reasons)];"
           assert old in s
-          p.write_text(s.replace(old,"    const materialUnresolved = [];",1))
+          p.write_text(s.replace(old,"  return [...new Set(reasons)].filter((value) => value !== 'SPOT_LOCATION_REQUIRED');",1))
           PY
           cd "$RUNNER_TEMP/fault-reason/apps/stb"
           set +e
