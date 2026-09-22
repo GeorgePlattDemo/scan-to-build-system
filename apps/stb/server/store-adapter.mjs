@@ -383,6 +383,7 @@ export async function createStoreAdapter({
       classId: 'app.user-defined-board.v1',
       materialDemand: { ...line.materialDemand },
       definedWorkpieceLengthIn: line.definedWorkpieceLengthIn,
+      workpiecePolicy: line.workpiecePolicy,
       requiredOps: [...line.requiredOps],
       sawAngleDeg: line.sawAngleDeg,
       cutPlane: line.cutPlane,
@@ -443,6 +444,7 @@ export async function createStoreAdapter({
               materialSource: line.materialSource,
               materialDemand: { ...line.materialDemand },
               definedWorkpieceLengthIn: line.definedWorkpieceLengthIn,
+              workpiecePolicy: line.workpiecePolicy,
               productionSawCuts: line.sawCuts,
               sawAngleDeg: line.sawAngleDeg,
               drillCycles: line.drillCycles,
@@ -506,7 +508,7 @@ export async function createStoreAdapter({
           ? {
               ...materialResolution,
               materialDemand: { ...line.materialDemand },
-              workpieceLengthIn: line.definedWorkpieceLengthIn,
+              requestedWorkpieceLengthIn: line.definedWorkpieceLengthIn,
             }
           : null,
         rawEvaluation: storeResult,
@@ -523,6 +525,7 @@ export async function createStoreAdapter({
             materialSource: line.materialSource,
             materialDemand: { ...line.materialDemand },
             definedWorkpieceLengthIn: line.definedWorkpieceLengthIn,
+            workpiecePolicy: line.workpiecePolicy,
             productionSawCuts: line.sawCuts,
             sawAngleDeg: line.sawAngleDeg,
             drillCycles: line.drillCycles,
