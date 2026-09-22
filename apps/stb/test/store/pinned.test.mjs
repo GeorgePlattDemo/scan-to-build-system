@@ -130,7 +130,7 @@ test('user-defined miter boundary is Store-owned: 45 supports and 46 refuses', a
 
   const at45 = parseJson(await postJob(await userDefinedBoardJobBody({ sawAngleDeg: 45 })));
   assert.equal(at45.rawEvaluation.status, 'SUPPORTABLE');
-  assert.equal(at45.priceCompleteness.status, 'COMPLETE_FOR_ENCODED_DEMAND');
+  assert.equal(at45.priceCompleteness.status, 'COMPLETE_FOR_TRAVEL_STANDARD');
   assert.ok(at45.rawEstimate);
 
   const at46Response = await postJob(await userDefinedBoardJobBody({ sawAngleDeg: 46 }));
