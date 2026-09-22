@@ -96,7 +96,7 @@ export async function userDefinedBoardJobBody({
   sawAngleDeg = 30,
   drillCycles = 0,
   drillDepthIn = null,
-  requiredOps = ['MITER_LIMITED'],
+  requiredOps = ['MITER_LIMITED', 'SPOT_ON_LOCATION'],
   cutPlane = 'miter-face',
   endIdentity = 'both',
   endRelation = 'parallel',
