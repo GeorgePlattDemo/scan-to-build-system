@@ -566,6 +566,7 @@ export const STATIC_ASSETS = Object.freeze({
   '/shared/class-config.mjs': JS('shared/class-config.mjs'),
   '/shared/store-wire.mjs': JS('shared/store-wire.mjs'),
   '/shared/store-present.mjs': JS('shared/store-present.mjs'),
+  '/shared/store-calculation-identity.mjs': JS('shared/store-calculation-identity.mjs'),
   '/shared/review-digest.mjs': JS('shared/review-digest.mjs'),
   '/shared/archive-format.mjs': JS('shared/archive-format.mjs'),
   '/vendor/pdfjs/pdf.min.mjs': JS('browser/vendor/pdfjs/pdf.min.mjs'),
