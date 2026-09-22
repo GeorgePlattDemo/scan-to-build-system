@@ -275,6 +275,9 @@ async function persistReview({
       storeDisposition: snapshot.storeDisposition,
       estimateStatus: snapshot.estimateStatus,
       estimateQ: snapshot.estimateQ,
+      calculationInputHash: snapshot.calculationInputHash,
+      calculationResultHash: snapshot.calculationResultHash,
+      storeReconciliation: assembled.reconciliation ?? null,
       disclosures: [...snapshot.disclosures],
       unresolvedConditions: [...snapshot.unresolvedConditions],
       reviewDigest: snapshot.reviewDigest,
@@ -310,6 +313,8 @@ async function persistReview({
         action,
         candidateRevisionId: snapshot.candidateRevisionId,
         reviewDigest: snapshot.reviewDigest,
+        calculationResultHash: snapshot.calculationResultHash,
+        storeReconciliationStatus: assembled.reconciliation?.status ?? null,
         authority: false,
         commercial: false,
         physical: false,
@@ -318,6 +323,81 @@ async function persistReview({
   });
 
   return recoverReview(localRecordId, actionId, result);
+}
+
+async function reconcileConfirmedUserDefinedStore(localRecordId, assembled) {
+  if (assembled.snapshot?.definitionKind !== USER_DEFINED_BOARD_DEFINITION.kind) {
+    return assembled;
+  }
+
+  const passA = assembled.snapshot?.calculationInputHash && assembled.snapshot?.calculationResultHash
+    ? {
+        inputHash: assembled.snapshot.calculationInputHash,
+        resultHash: assembled.snapshot.calculationResultHash,
+      }
+    : null;
+  if (!passA || !assembled.snapshot?.requestId) {
+    throw new RepositoryError(
+      'store-calculation-divergence',
+      'Confirmed User-defined Board review requires a current Store calculation identity',
+    );
+  }
+
+  const retried = await retryStoreAttempt({
+    localRecordId,
+    requestId: assembled.snapshot.requestId,
+    background: false,
+  });
+  const passBEnvelope = retried?.response?.payload?.wrapperEnvelope ?? null;
+  const passB = calculationIdentityFromEnvelope(passBEnvelope);
+  const comparison = compareStoreCalculationIdentities(passA, passB);
+  if (!comparison.ok) {
+    throw new RepositoryError(
+      'store-calculation-divergence',
+      `Confirmed Store reconciliation failed closed: ${comparison.reason}`,
+    );
+  }
+
+  const refreshed = await assembleReviewSnapshot(localRecordId, { unapplied: assembled.unapplied });
+  if (!refreshed || refreshed.snapshot?.candidateRevisionId !== assembled.snapshot.candidateRevisionId) {
+    throw new RepositoryError(
+      'store-calculation-divergence',
+      'Candidate revision changed during confirmed Store reconciliation',
+    );
+  }
+  if (!refreshed.predicate.completeSupportedReviewAvailable) {
+    throw new RepositoryError(
+      'store-calculation-divergence',
+      'Confirmed Store reconciliation did not return a complete supported answer',
+    );
+  }
+
+  const refreshedIdentity =
+    refreshed.snapshot?.calculationInputHash && refreshed.snapshot?.calculationResultHash
+      ? {
+          inputHash: refreshed.snapshot.calculationInputHash,
+          resultHash: refreshed.snapshot.calculationResultHash,
+        }
+      : null;
+  const refreshedComparison = compareStoreCalculationIdentities(passA, refreshedIdentity);
+  if (!refreshedComparison.ok) {
+    throw new RepositoryError(
+      'store-calculation-divergence',
+      `Persisted confirmed Store answer diverged: ${refreshedComparison.reason}`,
+    );
+  }
+
+  refreshed.reconciliation = Object.freeze({
+    status: 'MATCH',
+    passA,
+    passB: refreshedIdentity,
+    requestId: refreshed.snapshot.requestId,
+    passAAttemptId: assembled.snapshot.attemptId,
+    passBAttemptId: refreshed.snapshot.attemptId,
+    passAResponseId: assembled.snapshot.responseId,
+    passBResponseId: refreshed.snapshot.responseId,
+  });
+  return refreshed;
 }
 
 export async function recordDefinitionReview(input) {
@@ -329,7 +409,7 @@ export async function recordDefinitionReview(input) {
   if (existingAction) {
     return recoverReview(localRecordId, actionId, { status: 'idempotent' });
   }
-  const assembled = await assembleReviewSnapshot(localRecordId, { unapplied });
+  let assembled = await assembleReviewSnapshot(localRecordId, { unapplied });
   if (!assembled) {
     throw new RepositoryError('not-found', 'Review requires a project');
   }
@@ -339,6 +419,7 @@ export async function recordDefinitionReview(input) {
       'A complete supported review is not available for this revision',
     );
   }
+  assembled = await reconcileConfirmedUserDefinedStore(localRecordId, assembled);
   return persistReview({
     localRecordId,
     actionId,
