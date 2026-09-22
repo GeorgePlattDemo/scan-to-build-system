@@ -90,8 +90,8 @@ test('job wire request validates pin, digest, and Board slice', async () => {
 test('user-defined Board wire preserves project demand and leaves machine limits to Store', async () => {
   const payload = userDefinedBoardJobPayload({
     lineId: 'line-x',
-    definedWorkpieceLengthCanonical: canonicalInchString(60),
-    sawCuts: 3,
+    finishedPartLengthCanonical: canonicalInchString(16),
+    quantity: 2,
     sawAngleDeg: 30,
     drillCycles: 0,
     requiredOps: ['MITER_LIMITED'],
@@ -99,7 +99,7 @@ test('user-defined Board wire preserves project demand and leaves machine limits
     endIdentity: 'both',
     endRelation: 'parallel',
     lengthDatum: 'long-long-outer-edge',
-    materialSource: 'STORE_ZERO',
+    materialSource: 'STORE_SELECTED',
     spotDemand: {
       required: true,
       mode: 'SPOT_ON_LOCATION',
@@ -125,8 +125,10 @@ test('user-defined Board wire preserves project demand and leaves machine limits
   assert.equal(validated.ok, true);
   assert.deepEqual(validated.payload.line.materialDemand, USER_DEFINED_BOARD_MATERIAL_DEMAND);
   assert.equal(validated.payload.line.storeSku, undefined);
-  assert.equal(validated.payload.line.definedWorkpieceLengthIn, 60);
-  assert.equal(validated.payload.line.sawCuts, 3);
+  assert.equal(validated.payload.line.finishedPartLengthIn, 16);
+  assert.equal(validated.payload.line.quantity, 2);
+  assert.equal(validated.payload.line.definedWorkpieceLengthIn, undefined);
+  assert.equal(validated.payload.line.sawCuts, undefined);
   assert.equal(validated.payload.line.sawAngleDeg, 30);
   assert.equal(validated.payload.line.drillCycles, 0);
   assert.equal(validated.payload.line.drillDepthIn, null);
@@ -135,7 +137,7 @@ test('user-defined Board wire preserves project demand and leaves machine limits
   assert.equal(validated.payload.line.endIdentity, 'both');
   assert.equal(validated.payload.line.endRelation, 'parallel');
   assert.equal(validated.payload.line.lengthDatum, 'long-long-outer-edge');
-  assert.equal(validated.payload.line.materialSource, 'STORE_ZERO');
+  assert.equal(validated.payload.line.materialSource, 'STORE_SELECTED');
   assert.equal(validated.payload.line.spotDemand.mode, 'SPOT_ON_LOCATION');
   assert.equal(validated.payload.line.spotDemand.totalCount, 2);
   assert.equal(validated.payload.line.spotDemand.toolingStatus, undefined);
