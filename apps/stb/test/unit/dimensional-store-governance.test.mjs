@@ -23,7 +23,7 @@ test('System asks Store for a fresh dimensional evaluation instead of implementi
     'formal USER_DEFINED_BOARD_V1 handler bypasses the fresh Store request API',
   );
   assert.match(formalHandler, /freshReceipt\?\.requestId === envelope\.requestId/);
-  assert.match(formalHandler, /STB-STORE-FRESH-EVALUATION-0\.1/);
+  assert.match(adapter, /STORE_FRESH_EVALUATION_RULE_ID/);
   for (const forbidden of [
     'machineHourRate',
     'setupCharge',
