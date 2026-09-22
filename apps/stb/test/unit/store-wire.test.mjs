@@ -5,6 +5,7 @@ import { canonicalInchString } from '../../shared/canonical.mjs';
 import {
   PUBLISHED_BOARD_SKU,
   STORE_PIN,
+  STORE_FRESH_EVALUATION_RULE_ID,
   STORE_PROTOCOL_VERSION,
   USER_DEFINED_BOARD_MATERIAL_DEMAND,
 } from '../../shared/contracts.mjs';
@@ -284,5 +285,116 @@ test('inspectStoreResponse quarantines wrong correlation and unknown aggregates'
     inspectStoreResponse(request, { adapterError: true, code: 'STORE_SOURCE_UNAVAILABLE' }, { httpStatus: 503 })
       .diagnostic,
     APP_DIAGNOSTICS.APP_ADAPTER_ERROR,
+  );
+});
+
+
+test('User-defined Board response is valid only with a fresh matching Store receipt', async () => {
+  const payload = userDefinedBoardJobPayload({
+    lineId: 'line-fresh',
+    configurationId: 'SYO-USER1-XBRACE',
+    configurationVersion: '0.1',
+    definedWorkpieceLengthCanonical: canonicalInchString(60),
+    sawCuts: 3,
+    sawAngleDeg: 30,
+    drillCycles: 0,
+    requiredOps: ['MITER_LIMITED', 'SPOT_ON_LOCATION'],
+    cutPlane: 'miter-face',
+    endIdentity: 'both',
+    endRelation: 'parallel',
+    lengthDatum: 'long-long-outer-edge',
+    materialSource: 'STORE_ZERO',
+    parts: [
+      { partId: 'PART-1', lengthIn: 16, features: [{ featureId: 'SPOT-1', kind: 'SPOT_ON_LOCATION', xIn: 8, locationRule: 'CENTERED_ON_PART', acrossWidthRule: 'CENTERED_ON_WIDE_FACE' }] },
+      { partId: 'PART-2', lengthIn: 16, features: [{ featureId: 'SPOT-2', kind: 'SPOT_ON_LOCATION', xIn: 8, locationRule: 'CENTERED_ON_PART', acrossWidthRule: 'CENTERED_ON_WIDE_FACE' }] },
+    ],
+    spotDemand: {
+      required: true,
+      mode: 'SPOT_ON_LOCATION',
+      countPerPart: 1,
+      totalCount: 2,
+      locationRule: 'CENTERED_ON_PART',
+      locationAlongLengthIn: 8,
+      acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
+    },
+    unresolvedConditions: [],
+  });
+  const request = await buildUserDefinedBoardRequest({
+    requestId: 'req-fresh',
+    projectId: 'proj-fresh',
+    candidateRevisionId: 'cand-fresh',
+    attemptId: 'att-fresh',
+    attemptNumber: 1,
+    sentAt: '2026-09-22T18:59:00.000Z',
+    demandSignature: await userDefinedBoardDemandSignature(payload),
+    payload,
+  });
+  const receipt = {
+    freshnessRule: STORE_FRESH_EVALUATION_RULE_ID,
+    requestId: request.requestId,
+    evaluatedAt: '2026-09-22T18:59:01.000Z',
+    authority: { storeRevision: STORE_PIN },
+    receiptHash: 'receipt-fresh-1',
+  };
+  const base = {
+    protocolVersion: STORE_PROTOCOL_VERSION,
+    storePin: STORE_PIN,
+    requestId: request.requestId,
+    projectId: request.projectId,
+    candidateRevisionId: request.candidateRevisionId,
+    requestType: request.requestType,
+    scope: request.scope,
+    demandSignature: request.demandSignature,
+    querySignature: request.querySignature,
+    payloadDigest: request.payloadDigest,
+    attemptId: request.attemptId,
+    attemptNumber: request.attemptNumber,
+    rawEvaluation: {
+      status: 'SUPPORTABLE',
+      freshEvaluation: true,
+      evaluationReceipt: receipt,
+    },
+    evaluationReceipt: receipt,
+  };
+
+  assert.equal(inspectStoreResponse(request, base, { httpStatus: 200 }).ok, true);
+
+  const noReceipt = structuredClone(base);
+  delete noReceipt.evaluationReceipt;
+  delete noReceipt.rawEvaluation.evaluationReceipt;
+  assert.equal(
+    inspectStoreResponse(request, noReceipt, { httpStatus: 200 }).reason,
+    'missing-evaluation-receipt',
+  );
+
+  const notFresh = structuredClone(base);
+  notFresh.rawEvaluation.freshEvaluation = false;
+  assert.equal(
+    inspectStoreResponse(request, notFresh, { httpStatus: 200 }).reason,
+    'store-evaluation-not-fresh',
+  );
+
+  const wrongRequest = structuredClone(base);
+  wrongRequest.evaluationReceipt.requestId = 'req-old';
+  wrongRequest.rawEvaluation.evaluationReceipt.requestId = 'req-old';
+  assert.equal(
+    inspectStoreResponse(request, wrongRequest, { httpStatus: 200 }).diagnostic,
+    APP_DIAGNOSTICS.APP_CORRELATION_ERROR,
+  );
+
+  const wrongRevision = structuredClone(base);
+  wrongRevision.evaluationReceipt.authority.storeRevision = '0'.repeat(40);
+  wrongRevision.rawEvaluation.evaluationReceipt.authority.storeRevision = '0'.repeat(40);
+  assert.equal(
+    inspectStoreResponse(request, wrongRevision, { httpStatus: 200 }).diagnostic,
+    APP_DIAGNOSTICS.APP_CORRELATION_ERROR,
+  );
+
+  const missingHash = structuredClone(base);
+  missingHash.evaluationReceipt.receiptHash = '';
+  missingHash.rawEvaluation.evaluationReceipt.receiptHash = '';
+  assert.equal(
+    inspectStoreResponse(request, missingHash, { httpStatus: 200 }).reason,
+    'missing-evaluation-receipt-hash',
   );
 });
