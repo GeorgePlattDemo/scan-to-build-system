@@ -63,10 +63,10 @@ test('actual 45-in and 46-in Board HTTP invoke pinned evaluateJob and matching e
   assert.notEqual(body46.rawEstimate.totals.Q, 0);
 });
 
-test('user-defined X-brace keeps 60-in project truth and resolves against pinned Store', async (t) => {
+test('user-defined X-brace keeps 60-in project truth and carries depth-defined spot answer', async (t) => {
   const adapter = await withAdapter(t);
   const body = parseJson(await postJob(await userDefinedBoardJobBody()));
-  assert.equal(body.rawEvaluation.status, 'SUPPORTABLE');
+  assert.equal(body.rawEvaluation.status, 'UNRESOLVED');
   assert.deepEqual(body.mappedCallInputs.evaluation.lines[0].requiredOps, ['MITER_LIMITED']);
   assert.equal(body.mappedCallInputs.evaluation.lines[0].keptLengthIn, 60);
   assert.equal(body.mappedCallInputs.evaluation.lines[0].sawAngleDeg, 30);
@@ -87,44 +87,55 @@ test('user-defined X-brace keeps 60-in project truth and resolves against pinned
   assert.equal(definition.spotDemand.mode, 'SPOT_ON_LOCATION');
   assert.equal(definition.spotDemand.locationAlongLengthIn, 8);
   assert.equal(definition.spotDemand.totalCount, 2);
-  assert.equal(definition.spotDemand.toolingStatus, undefined);
-  assert.deepEqual(definition.unresolvedConditions, []);
+  assert.equal(definition.spotOperation.operationContract, 'SPOT_ON_LOCATION/0.2');
+  assert.equal(definition.spotOperation.toolDefinitionId, 'D001-SPOT-3_16-TOOL-0.2');
+  assert.equal(definition.spotOperation.toolDiameterIn, 0.1875);
+  assert.equal(definition.spotOperation.fullDiameterPenetrationIn, 0.1875);
+  assert.equal(definition.spotOperation.depthReference, 'ENTRY_SURFACE_ALONG_DRILL_AXIS');
+  assert.equal(definition.spotOperation.pointGeometryStatus, 'UNRESOLVED');
+  assert.equal(definition.spotOperation.totalTipPenetrationIn, null);
+  assert.ok(definition.unresolvedConditions.includes('SPOT_TOOL_POINT_GEOMETRY_REQUIRED'));
+  assert.ok(definition.unresolvedConditions.includes('SPOT_CYCLE_TIME_APPLICABILITY_UNRESOLVED'));
 
-  assert.equal(body.materialResolution.status, 'MAPPED');
+  assert.equal(body.materialResolution.status, 'UNRESOLVED');
   assert.equal(body.materialResolution.workpieceLengthIn, 60);
   assert.equal(body.materialResolution.pricingReferenceSku, PUBLISHED_BOARD_SKU);
   assert.equal(body.materialResolution.pricingReferenceStockLengthIn, 72);
   assert.equal(body.materialResolution.allocationClaimed, false);
 
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].keptLengthIn, 60);
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].sawCuts, 3);
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].holes, 0);
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].spots, 2);
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].depthIn, 0);
-  assert.ok(body.mappedCallInputs.estimate.pieces[0].sawTraverseIn > 3.5);
+  assert.equal(body.mappedCallInputs.estimate.definedWorkpieceLengthIn, 60);
+  assert.equal(body.mappedCallInputs.estimate.sawCuts, 3);
+  assert.equal(body.mappedCallInputs.estimate.drillCycles, 0);
+  assert.equal(body.mappedCallInputs.estimate.spotCycles, 2);
 
-  assert.equal(body.rawEstimate.status, 'BUDGETARY_ESTIMATE');
+  assert.equal(body.rawEstimate.status, 'PARTIAL_BUDGETARY_ESTIMATE');
   assert.equal(body.rawEstimate.totals.material, 3.13);
-  assert.equal(body.rawEstimate.cycle.T_job_min, 10.014);
-  assert.equal(body.rawEstimate.totals.cell_recovery, 51.69);
-  assert.equal(body.rawEstimate.totals.Q, 54.82);
-  assert.equal(body.priceCompleteness.status, 'COMPLETE_FOR_ENCODED_DEMAND');
-  assert.deepEqual(body.priceCompleteness.unresolvedConditions, []);
-  assert.equal(body.rawEstimate.cycle.model, 'STB-D001-CYCLE-MODEL-S2-0.1');
+  assert.equal(body.rawEstimate.cycle.T_job_min, 9.694);
+  assert.equal(body.rawEstimate.totals.cell_recovery, 51.16);
+  assert.equal(body.rawEstimate.totals.Q, 54.29);
+  assert.equal(body.rawEstimate.totals.Q_basis, 'PARTIAL_CALCULATED');
+  assert.equal(body.priceCompleteness.status, 'PARTIAL');
+  assert.ok(body.priceCompleteness.unresolvedConditions.includes('SPOT_TOOL_POINT_GEOMETRY_REQUIRED'));
+  assert.ok(body.priceCompleteness.unresolvedConditions.includes('SPOT_CYCLE_TIME_APPLICABILITY_UNRESOLVED'));
   assert.equal(body.attributedBasis.pricingEngine.id, 'STB-STORE-ZERO-PRICE-1');
-  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.3');
-  assert.equal(body.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.3');
+  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.4');
+  assert.equal(body.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.4');
+  assert.equal(body.attributedBasis.envelope.spot.fullDiameterPenetrationIn, 0.1875);
 });
 
-test('user-defined miter boundary is Store-owned: 45 supports and 46 refuses', async (t) => {
+test('user-defined miter boundary remains Store-owned independently of unresolved spot tooling', async (t) => {
   await withAdapter(t);
 
-  const at45 = parseJson(await postJob(await userDefinedBoardJobBody({ sawAngleDeg: 45 })));
+  const at30 = parseJson(await postJob(await userDefinedBoardJobBody({ sawAngleDeg: 30, spotDemand: null })));
+  assert.equal(at30.rawEvaluation.status, 'SUPPORTABLE');
+  assert.equal(at30.priceCompleteness.status, 'COMPLETE_FOR_ENCODED_DEMAND');
+
+  const at45 = parseJson(await postJob(await userDefinedBoardJobBody({ sawAngleDeg: 45, spotDemand: null })));
   assert.equal(at45.rawEvaluation.status, 'SUPPORTABLE');
   assert.equal(at45.priceCompleteness.status, 'COMPLETE_FOR_ENCODED_DEMAND');
   assert.ok(at45.rawEstimate);
 
-  const at46Response = await postJob(await userDefinedBoardJobBody({ sawAngleDeg: 46 }));
+  const at46Response = await postJob(await userDefinedBoardJobBody({ sawAngleDeg: 46, spotDemand: null }));
   assert.equal(at46Response.status, 200, '46-degree project demand reaches Store instead of failing adapter scope');
   const at46 = parseJson(at46Response);
   assert.equal(at46.rawEvaluation.status, 'REFUSED');
@@ -132,7 +143,7 @@ test('user-defined miter boundary is Store-owned: 45 supports and 46 refuses', a
   assert.equal(at46.materialResolution.status, 'REFUSED');
 });
 
-test('missing User 1 spot location remains UNRESOLVED and concise response retains SPOT_LOCATION_REQUIRED', async (t) => {
+test('missing User 1 spot location remains UNRESOLVED and preserves both location and tooling reasons', async (t) => {
   await withAdapter(t);
   const incompleteSpot = {
     required: true,
@@ -146,11 +157,13 @@ test('missing User 1 spot location remains UNRESOLVED and concise response retai
   assert.equal(response.status, 200);
   const body = parseJson(response);
   assert.equal(body.rawEvaluation.status, 'UNRESOLVED');
-  assert.equal(body.rawEstimate, null);
+  assert.equal(body.rawEstimate.status, 'PARTIAL_BUDGETARY_ESTIMATE');
   assert.equal(body.materialResolution.status, 'UNRESOLVED');
   assert.equal(body.materialResolution.reason, 'CAPABILITY_INPUT_UNRESOLVED');
   assert.ok(body.materialResolution.unresolvedConditions.includes('SPOT_LOCATION_REQUIRED'));
+  assert.ok(body.materialResolution.unresolvedConditions.includes('SPOT_TOOL_POINT_GEOMETRY_REQUIRED'));
   assert.ok(body.priceCompleteness.unresolvedConditions.includes('SPOT_LOCATION_REQUIRED'));
+  assert.ok(body.priceCompleteness.unresolvedConditions.includes('SPOT_TOOL_POINT_GEOMETRY_REQUIRED'));
   assert.ok(body.mappedCallInputs.definition.unresolvedConditions.includes('SPOT_LOCATION_REQUIRED'));
 });
 
@@ -161,9 +174,11 @@ test('User 1 with no spot request has no spot operation and no spot charge', asy
   const body = parseJson(response);
   assert.equal(body.rawEvaluation.status, 'SUPPORTABLE');
   assert.equal(body.mappedCallInputs.definition.spotDemand, null);
-  assert.equal(body.mappedCallInputs.estimate.pieces[0].spots, 0);
+  assert.equal(body.mappedCallInputs.definition.spotOperation, null);
+  assert.equal(body.mappedCallInputs.estimate.spotCycles, 0);
   assert.equal(body.priceCompleteness.status, 'COMPLETE_FOR_ENCODED_DEMAND');
 });
+
 
 test('unknown SKU through actual evaluateJob retains UNRESOLVED and raw NO_OFFERING/MISSING_PRICE', async (t) => {
   const adapter = await withAdapter(t);
@@ -282,11 +297,11 @@ test('RIP diagnostic retains exact OP_NOT_ON_OFFERING:RIP', async (t) => {
 test('Store basis distinguishes pricing engine, cycle model, and envelope identity', async (t) => {
   const adapter = await withAdapter(t);
   assert.equal(adapter.modules.ENGINE.id, 'STB-STORE-ZERO-PRICE-1');
-  assert.equal(adapter.modules.ENGINE.version, '0.2.3');
+  assert.equal(adapter.modules.ENGINE.version, '0.2.4');
   assert.equal(adapter.modules.CYCLE_MODEL.id, 'STB-D001-CYCLE-MODEL-S2-0.1');
   assert.equal(adapter.modules.CYCLE_MODEL.measured, false);
   assert.equal(adapter.modules.CYCLE_MODEL.commissioned, false);
-  assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.id, 'D001-STAGE2-ENVELOPE-0.3');
+  assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.id, 'D001-STAGE2-ENVELOPE-0.4');
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.measured, false);
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.commissioned, false);
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.motion.Y_MILL_TRAVEL_MAX_IN, 14);
@@ -297,9 +312,9 @@ test('Store basis distinguishes pricing engine, cycle model, and envelope identi
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.stock.maxParentLengthWithoutExternalSupportIn, 96);
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.stock.minControlledLengthIn, 24);
   const body = parseJson(await postJob(await boardJobBody({ keptLengthIn: 45 })));
-  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.3');
+  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.4');
   assert.equal(body.attributedBasis.cycleModel.id, 'STB-D001-CYCLE-MODEL-S2-0.1');
-  assert.equal(body.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.3');
+  assert.equal(body.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.4');
 });
 
 test('missing selling price remains UNRESOLVED and never $0', async (t) => {
