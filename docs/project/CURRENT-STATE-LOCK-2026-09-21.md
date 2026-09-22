@@ -81,11 +81,11 @@ Do not revive an older behavior merely because it is more complete or easier to 
 **NO BLOOD ON WOOD.**
 
 
-## Post-repair outcome
+## Superseded intermediate repair outcome
 
 The sections above remain the frozen **before-state** for this repair. They are not rewritten retroactively.
 
-Current repaired working truth:
+The following was the repaired truth at that intermediate checkpoint and is retained as history. It is superseded by the dimensional travel-standard checkpoint below:
 
 - Store Zero Stage-2 authority for `USER_DEFINED_BOARD_V1`: `GeorgePlattDemo/scan-to-build-store@ab8a4c5d470c310f27fef82683611622ab976168`.
 - D-001 Stage-2 envelope: `D001-STAGE2-ENVELOPE-0.3`.
@@ -111,7 +111,7 @@ This section is a later checkpoint. It does not rewrite the frozen 2026-09-21 be
 - Store repository: `GeorgePlattDemo/scan-to-build-store`
 - Store branch used to develop the repair: `build/d001-travel-standard-0.1`
 - Exact tested Store SHA: `95c639a1d0d4812df097ad1eb628594b38f921de`
-- Acceptance workflow run: `35752240345` — **SUCCESS**
+- Acceptance workflow run: `35757052553` — **SUCCESS**
 - Governing document: `DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md`
 - Governing evaluator: `evaluateDimensionalTravelJob()`
 - Pricing engine identity: `STB-STORE-ZERO-PRICE-1 / 0.3.0`
@@ -133,10 +133,18 @@ On the exact Store SHA above, the governing evaluator returns:
 - modeled D-001 occupied time: **1.4128 min**;
 - modeled machine service: **$5.89**;
 - Stage-2 budgetary `Q`: **$9.02**;
-- calculation input hash: `caa7c91f1296c243a5abb05ed35a0c55b5b1f5d4dab32efd64cd2656d75f3036`;
-- calculation result hash: `15a8835dd50771136020190db7f5dbed1bd35b78930bf338be63bea8427353c2`.
+- calculation input hash: `5de0367b62087cb0174ef5f1e101e22ded3728ba71906868628a985afafa078b`;
+- calculation result hash: `9ad8d16a7c211d420b83e46ed8a8d224bd289e26a48764ff8d0389b6db698604`.
 
 These economics are **DECLARED_STAGE2_MODEL**, measured=false, commissioned=false. They are an explicit modeled Store Zero scenario, not measured commercial machine economics.
+
+### Promoted proof identities
+
+- Store proof SHA: `95c639a1d0d4812df097ad1eb628594b38f921de` · workflow run `35757052553` — **SUCCESS**
+- System Store-integration proof SHA: `900dbd13f079f8a5f8d76d49c723fd35279164e8` · workflow run `35757479179` — **SUCCESS**
+- Visible Review / Job 1 template SHA: `072f873539927da462313a16d7fdf03abc032b5d` · workflow run `35757751400` — **SUCCESS**
+- System main exposes the promoted visible Review through **OPEN SYSTEM BUILD**.
+- These proof identities govern Job 1. Older project wrappers remain unmigrated until they pass the same standard.
 
 ### Governing application rule
 
