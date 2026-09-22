@@ -4,6 +4,8 @@ import test from 'node:test';
 
 const adapter = readFileSync(new URL('../../server/store-adapter.mjs', import.meta.url), 'utf8');
 const coordinator = readFileSync(new URL('../../browser/integration/store-coordinator.mjs', import.meta.url), 'utf8');
+const storeClient = readFileSync(new URL('../../browser/integration/store-client.mjs', import.meta.url), 'utf8');
+const storeWire = readFileSync(new URL('../../shared/store-wire.mjs', import.meta.url), 'utf8');
 const review = readFileSync(new URL('../../browser/domain/review.mjs', import.meta.url), 'utf8');
 
 test('System asks Store for a fresh dimensional evaluation instead of implementing a second pricing engine', () => {
@@ -48,4 +50,19 @@ test('Confirmation invokes Store again and compares returned calculation identit
   assert.match(review, /compareStoreCalculationIdentities/);
   assert.match(review, /store-calculation-divergence/);
   assert.match(review, /storeReconciliation/);
+});
+
+
+test('Job 1 client cannot reuse an old request or accept a receiptless Store answer', () => {
+  assert.match(
+    storeClient,
+    /requestType !== STORE_REQUEST_TYPES\.USER_DEFINED_BOARD_V1/,
+    'a new Job 1 Store issue can still dedupe to old request history',
+  );
+  assert.match(storeClient, /evaluationReceipt:/);
+  assert.match(storeWire, /store-evaluation-not-fresh/);
+  assert.match(storeWire, /missing-evaluation-receipt/);
+  assert.match(storeWire, /evaluationReceipt\.requestId/);
+  assert.match(storeWire, /evaluationReceipt\.storeRevision/);
+  assert.match(storeWire, /missing-evaluation-receipt-hash/);
 });
