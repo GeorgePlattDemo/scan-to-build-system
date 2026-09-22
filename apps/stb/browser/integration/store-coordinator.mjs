@@ -84,6 +84,8 @@ export async function scheduleUserDefinedBoardStoreQuestion(
   localRecordId,
   {
     lineId,
+    configurationId = null,
+    configurationVersion = null,
     definedWorkpieceLengthCanonical,
     sawCuts,
     sawAngleDeg,
@@ -94,6 +96,8 @@ export async function scheduleUserDefinedBoardStoreQuestion(
     endIdentity = null,
     endRelation = null,
     lengthDatum = null,
+    datumCMethod = 'REFERENCE_CUT',
+    parts = [],
     spotDemand = null,
     unresolvedConditions = [],
     materialSource = null,
@@ -117,12 +121,16 @@ export async function scheduleUserDefinedBoardStoreQuestion(
     !Number.isFinite(sawAngleDeg) ||
     !Number.isInteger(drillCycles) ||
     !Array.isArray(requiredOps) ||
-    requiredOps.length === 0
+    requiredOps.length === 0 ||
+    !Array.isArray(parts) ||
+    parts.length === 0
   ) {
     return { status: 'incomplete' };
   }
 
   const candidateRevisionId = project.currentHead;
+  const effectiveConfigurationId = configurationId || project.projectId;
+  const effectiveConfigurationVersion = configurationVersion || candidateRevisionId;
   const existing = await currentStoreAnswer(localRecordId, {
     candidateRevisionId,
     scope: STORE_SCOPES.USER_DEFINED_BOARD_V1,
@@ -147,6 +155,8 @@ export async function scheduleUserDefinedBoardStoreQuestion(
     requestType: STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1,
     payload: userDefinedBoardJobPayload({
       lineId,
+      configurationId: effectiveConfigurationId,
+      configurationVersion: effectiveConfigurationVersion,
       definedWorkpieceLengthCanonical,
       sawCuts,
       sawAngleDeg,
@@ -157,6 +167,8 @@ export async function scheduleUserDefinedBoardStoreQuestion(
       endIdentity,
       endRelation,
       lengthDatum,
+      datumCMethod,
+      parts,
       spotDemand,
       unresolvedConditions,
       materialSource,
