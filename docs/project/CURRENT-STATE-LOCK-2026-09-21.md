@@ -169,3 +169,32 @@ Alcove, Window Seat, Picnic, and other dimensional project wrappers do **not** i
 Material/capability facts may remain preserved during migration. A material-only subtotal is not a complete Q.
 
 **No shortcuts. No surrogate Store. No second pricing engine.**
+
+
+## 2026-09-22 fresh Store-request hardening
+
+This is a later durability checkpoint. It does not rewrite the earlier frozen identities or first-passing provenance above.
+
+### Current promoted authority
+
+- Store main: `f88ccaf9a2624899e255e66b51111e2b02309dad` · D-001 Travel Standard Acceptance run `35768861705` — **SUCCESS**
+- Visible Review / Job 1: `19fc816d9bf1c9df040b2b2b805c559800182fd2` · Job 1 Operable Template run `35769418902` — **SUCCESS**
+- Job 1 budgetary result remains **$9.02** for the unchanged acceptance fixture.
+- Current calculation input hash: `e186df5ead47f0c3c233477b18d00206643d8e5e1adf03fdd6dabdc95a0a5168`
+- Current calculation result hash: `425af5de05fb614b87ca308696d0d19af0b2701ce2f3fd51c8a6c3ca84042f4f`
+
+### Durable freshness invariant
+
+1. Every explicit Store-submit action is a new Store evaluation request.
+2. Store reloads current Store state and executes the governing evaluator again for that request.
+3. Every formal request carries a request identity and receives a new evaluation receipt.
+4. The receipt identifies the Store revision and current catalog, machine-envelope, travel-standard, and economics authority.
+5. A prior Store answer, displayed Q, calculation identity, or receipt remains history only. It cannot authorize a later Store request.
+6. Repeating an unchanged Definition is allowed; silently replaying the prior Store evaluation is not.
+7. If Store authority changes, the static Review surface fails closed with `STORE_AUTHORITY_CHANGED`; it does not calculate a replacement price in the browser.
+8. If the current Store answer differs from the answer displayed before submission, downstream handoff stops and requires the current answer to be reviewed again.
+9. No app-side Store surrogate, cached-price shortcut, one-use confirmation guard, or second pricing engine may replace this rule.
+
+**Definition identity may remain durable. Store validity is re-established per request.**
+
+**No shortcuts. No surrogate Store. No silent fallback. No second pricing engine.**
