@@ -39,7 +39,7 @@ The copied files under `docs/store/current/` are source evidence. New current St
 
 ## 2026-09-22 User 1 travel-standard checkpoint
 
-Exact Store SHA `95c639a1d0d4812df097ad1eb628594b38f921de` passed workflow run `35752240345`.
+Exact Store SHA `95c639a1d0d4812df097ad1eb628594b38f921de` passed workflow run `35757052553`.
 
 Verified on that SHA:
 - User 1 resolves one 60 in defined SPF 2x4 workpiece against Store SKU `STB-ZERO-SPF-2X4-72-001` without redefining the project as 72 in.
