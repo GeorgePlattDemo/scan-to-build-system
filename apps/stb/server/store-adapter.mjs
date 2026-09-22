@@ -506,7 +506,7 @@ export async function createStoreAdapter({
           ? {
               ...materialResolution,
               materialDemand: { ...line.materialDemand },
-              workpieceLengthIn: line.definedWorkpieceLengthIn,
+              requestedDefinedWorkpieceLengthIn: line.definedWorkpieceLengthIn,
             }
           : null,
         rawEvaluation: storeResult,
