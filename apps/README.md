@@ -46,7 +46,7 @@ Store identity is path-specific.
 ### Current dimensional Store Zero travel-standard path
 
 ```text
-STB_STORE_ZERO_ROOT=<clean scan-to-build-store at 95c639a1d0d4812df097ad1eb628594b38f921de> npm start
+STB_STORE_ZERO_ROOT=<clean scan-to-build-store at f88ccaf9a2624899e255e66b51111e2b02309dad> npm start
 ```
 
 ### Accepted published-job / canonical S-001 proof path
@@ -57,7 +57,7 @@ Use a clean exact Store checkout at:
 
 with the published-job path / runner carried by the accepted application ancestry.
 
-Do not silently substitute the published-job Store pin for the Stage-2 Store Zero pin or vice versa.
+Do not silently substitute the published-job Store pin for the Stage-2 Store Zero pin or vice versa. Every formal dimensional Store request must be evaluated against current Store authority; a prior answer is history, not authority for a later request.
 
 Historical Store pins are listed in [`../provenance/SOURCE-PINS.md`](../provenance/SOURCE-PINS.md).
 
