@@ -26,12 +26,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: GeorgePlattDemo/scan-to-build-store
-          ref: bc1a77297df752e32fb3687acc883a629c0b5b13
+          ref: 34d4c6e7a2cb7e4bce428e396c7d7cbf228d20b7
           path: store-zero
 
       - name: Verify exact Store identity
         run: |
-          test "$(git -C "$STB_STORE_ZERO_ROOT" rev-parse HEAD)" = "bc1a77297df752e32fb3687acc883a629c0b5b13"
+          test "$(git -C "$STB_STORE_ZERO_ROOT" rev-parse HEAD)" = "34d4c6e7a2cb7e4bce428e396c7d7cbf228d20b7"
           test -z "$(git -C "$STB_STORE_ZERO_ROOT" status --porcelain)"
 
       - name: Setup Node
@@ -94,7 +94,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: GeorgePlattDemo/scan-to-build-store
-          ref: bc1a77297df752e32fb3687acc883a629c0b5b13
+          ref: 34d4c6e7a2cb7e4bce428e396c7d7cbf228d20b7
           path: store-zero
 
       - name: Setup Node
