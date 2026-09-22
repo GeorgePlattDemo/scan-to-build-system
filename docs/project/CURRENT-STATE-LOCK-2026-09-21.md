@@ -110,7 +110,7 @@ This section is a later checkpoint. It does not rewrite the frozen 2026-09-21 be
 
 - Store repository: `GeorgePlattDemo/scan-to-build-store`
 - Store branch used to develop the repair: `build/d001-travel-standard-0.1`
-- Exact tested Store SHA: `f8373520a726090ed91eff82e5e720f4a9634615`
+- Exact tested Store SHA: `95c639a1d0d4812df097ad1eb628594b38f921de`
 - Acceptance workflow run: `35752240345` — **SUCCESS**
 - Governing document: `DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md`
 - Governing evaluator: `evaluateDimensionalTravelJob()`
