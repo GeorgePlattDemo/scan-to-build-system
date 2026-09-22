@@ -441,8 +441,8 @@ export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
 
 export const STORE_PROTOCOL_VERSION = 'stb-store-zero-http/1';
 export const STORE_REPOSITORY = 'GeorgePlattDemo/scan-to-build-store';
-export const STORE_PIN = 'ab8a4c5d470c310f27fef82683611622ab976168';
-export const WRAPPER_BUILD_ID = 'stb-app-build-5';
+export const STORE_PIN = 'f8373520a726090ed91eff82e5e720f4a9634615';
+export const WRAPPER_BUILD_ID = 'stb-app-build-6';
 export const APP_BUILD_ID = 'stb-app-build-7';
 export const PUBLISHED_BOARD_SKU = 'STB-ZERO-SPF-2X4-72-001';
 export const BOARD_OFFERING_QUERY = Object.freeze({
