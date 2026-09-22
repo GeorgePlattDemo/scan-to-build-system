@@ -41,6 +41,6 @@ jobs:
           STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-zero
         run: >-
           node --test --test-concurrency=1
-          --test-name-pattern="USER_DEFINED_BOARD_V1 asks the governing Store travel evaluator once and preserves its answer|user-defined X-brace keeps project truth and uses the pinned Store as sole dimensional Q authority|user-defined miter boundary is Store-owned"
+          --test-name-pattern="USER_DEFINED_BOARD_V1 re-evaluates every formal Store request and preserves a fresh receipt|user-defined X-brace keeps project truth and uses the pinned Store as sole dimensional Q authority|user-defined miter boundary is Store-owned"
           test/store/wrapper.test.mjs
           test/store/pinned.test.mjs
