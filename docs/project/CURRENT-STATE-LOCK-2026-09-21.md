@@ -142,9 +142,10 @@ These economics are **DECLARED_STAGE2_MODEL**, measured=false, commissioned=fals
 
 - Store proof SHA: `95c639a1d0d4812df097ad1eb628594b38f921de` · workflow run `35757052553` — **SUCCESS**
 - System Store-integration proof SHA: `900dbd13f079f8a5f8d76d49c723fd35279164e8` · workflow run `35757479179` — **SUCCESS**
-- Visible Review / Job 1 template SHA: `b7e78b3a2c69a4afeb3594e5e36b919f5deed455` · workflow run `35761812740` — **SUCCESS**
+- Visible Review / Job 1 template SHA: `7ccf3bcc154a419de1f340552ffe7f63a2201e3e` · workflow run `35764320027` — **SUCCESS**
 - System main exposes the promoted visible Review through **OPEN SYSTEM BUILD**.
 - Navigation integrity is part of Job 1 acceptance: while Job 1 is active, stage buttons target Job 1 pages directly; Project Library is the explicit exit.
+- Full-gate Job 1 simulation now passes: Store review → offer/terms → customer acceptance → simulated purchase/settlement → allocation → release → queue → local readiness → simulated Cycle Start → modeled operations → inspection → labels → staging → READY → pickup/custody → closeout.
 - These proof identities govern Job 1. Older project wrappers remain unmigrated until they pass the same standard.
 
 ### Governing application rule
