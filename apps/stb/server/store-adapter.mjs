@@ -254,6 +254,17 @@ export async function createStoreAdapter({
     return loaded.modules.evaluateDimensionalTravelJob(runtimeCatalog, demand);
   }
 
+  async function runDimensionalStoreRequest(runtimeCatalog, demand, request, { reloadCurrentStore = true } = {}) {
+    instrumentation.travelCalls += 1;
+    if (typeof hooks.beforeTravel === 'function') {
+      await hooks.beforeTravel(demand);
+    }
+    if (reloadCurrentStore) {
+      return loaded.modules.requestDimensionalStoreEvaluation(demand, request);
+    }
+    return loaded.modules.evaluateDimensionalStoreRequest(runtimeCatalog, demand, request);
+  }
+
   async function handleJob(envelope, jobPayload, options = {}) {
     const runtimeCatalog = options.catalogOverride ?? catalog;
     const storeSku = jobPayload.line.storeSku;
@@ -358,9 +369,12 @@ export async function createStoreAdapter({
     const line = jobPayload.line;
     const title = `User-defined Board · ${line.definedWorkpieceLengthIn} in workpiece`;
 
-    // Governing anti-shortcut rule: System sends the identified physical demand
-    // to the Store once. It does not derive saw traverse, anonymous spot cycles,
-    // machine time, Store rate, or Q locally.
+    // Governing anti-shortcut rule: every formal HTTP Store submission is a new
+    // Store evaluation request. System sends the identified physical demand and
+    // request identity; Store reloads current Store state and evaluates again.
+    // System does not derive saw travel, spot cycles, machine time, Store rate,
+    // capability, refusal, or Q locally, and no prior Store answer authorizes
+    // this request.
     const travelInput = {
       title,
       configurationId: line.configurationId,
@@ -382,9 +396,21 @@ export async function createStoreAdapter({
       storeRevision: STORE_PIN,
     };
 
+    const storeRequest = {
+      requestId: envelope.requestId,
+      evaluatedAt: nowIso(),
+      storeRevision: STORE_PIN,
+    };
+    const reloadCurrentStore = catalogOverride === null && options.catalogOverride == null;
+
     let storeResult;
     try {
-      storeResult = await runDimensionalTravel(runtimeCatalog, travelInput);
+      storeResult = await runDimensionalStoreRequest(
+        runtimeCatalog,
+        travelInput,
+        storeRequest,
+        { reloadCurrentStore },
+      );
     } catch (error) {
       return {
         status: 200,
@@ -408,6 +434,7 @@ export async function createStoreAdapter({
             note: 'The governing Store travel evaluator did not return a result. No local fallback was used.',
           },
           calculationIdentity: null,
+          evaluationReceipt: null,
           mappedCallInputs: {
             definition: {
               configurationId: line.configurationId,
@@ -429,6 +456,7 @@ export async function createStoreAdapter({
               unresolvedConditions: [...(line.unresolvedConditions ?? [])],
             },
             travel: travelInput,
+            storeRequest,
           },
           attributedBasis: storeBasis({ modules: loaded.modules }),
         }),
@@ -450,8 +478,12 @@ export async function createStoreAdapter({
       ...(Array.isArray(line.unresolvedConditions) ? line.unresolvedConditions : []),
     ];
     const uniqueUnresolved = [...new Set(storeUnresolved)];
+    const freshReceipt = storeResult?.evaluationReceipt ?? null;
     const complete =
       storeResult?.status === 'SUPPORTABLE' &&
+      storeResult?.freshEvaluation === true &&
+      freshReceipt?.requestId === envelope.requestId &&
+      freshReceipt?.freshnessRule === 'STB-STORE-FRESH-EVALUATION-0.1' &&
       rawEstimate?.complete === true &&
       uniqueUnresolved.length === 0 &&
       rawEstimate?.calculationIdentity?.inputHash &&
@@ -482,6 +514,7 @@ export async function createStoreAdapter({
         estimateError: null,
         priceCompleteness,
         calculationIdentity: rawEstimate?.calculationIdentity ?? null,
+        evaluationReceipt: freshReceipt,
         mappedCallInputs: {
           definition: {
             configurationId: line.configurationId,
@@ -503,6 +536,7 @@ export async function createStoreAdapter({
             unresolvedConditions: uniqueUnresolved,
           },
           travel: travelInput,
+          storeRequest,
         },
         attributedBasis: storeBasis({
           modules: loaded.modules,
