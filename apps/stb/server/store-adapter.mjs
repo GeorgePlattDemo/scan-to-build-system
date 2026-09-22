@@ -24,6 +24,25 @@ function opaqueId() {
   return crypto.randomUUID();
 }
 
+function collectMaterialResolutionUnresolved(materialResolution) {
+  const reasons = [];
+  const add = (value) => {
+    if (typeof value === 'string' && value.length > 0) reasons.push(value);
+  };
+
+  if (!materialResolution || materialResolution.status !== 'UNRESOLVED') {
+    return reasons;
+  }
+
+  add(materialResolution.reason);
+  for (const value of materialResolution.unresolved ?? []) add(value);
+  for (const entry of materialResolution.considered ?? []) {
+    for (const value of entry?.capability?.unresolved ?? []) add(value);
+  }
+
+  return [...new Set(reasons)];
+}
+
 function offeringAttributesComplete(item) {
   if (!item || item.offered !== true) {
     return false;
@@ -450,7 +469,10 @@ export async function createStoreAdapter({
 
     const capabilityUnresolved =
       rawEvaluation?.lines?.flatMap((entry) => entry?.capability?.unresolved ?? []) ?? [];
-    const priceUnresolved = [...new Set([...unresolvedConditions, ...capabilityUnresolved])];
+    const materialUnresolved = collectMaterialResolutionUnresolved(materialResolution);
+    const priceUnresolved = [
+      ...new Set([...unresolvedConditions, ...materialUnresolved, ...capabilityUnresolved]),
+    ];
     const priceCompleteness = {
       status:
         rawEstimate && priceUnresolved.length === 0
@@ -471,6 +493,8 @@ export async function createStoreAdapter({
         rawOffering: offering,
         materialResolution: {
           status: materialResolution?.status ?? null,
+          reason: materialResolution?.reason ?? null,
+          unresolvedConditions: collectMaterialResolutionUnresolved(materialResolution),
           materialDemand: { ...line.materialDemand },
           pricingReferenceSku: materialResolution?.pricingReferenceSku ?? null,
           pricingReferenceStockLengthIn: materialResolution?.pricingReferenceStockLengthIn ?? null,
