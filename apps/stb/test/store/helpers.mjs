@@ -88,6 +88,8 @@ export async function userDefinedBoardJobBody({
   attemptId = crypto.randomUUID(),
   attemptNumber = 1,
   lineId = crypto.randomUUID(),
+  configurationId = 'SYO-USER1-XBRACE',
+  configurationVersion = '0.1',
   materialDemand = USER_DEFINED_BOARD_MATERIAL_DEMAND,
   definedWorkpieceLengthIn = 60,
   sawCuts = 3,
@@ -99,6 +101,31 @@ export async function userDefinedBoardJobBody({
   endIdentity = 'both',
   endRelation = 'parallel',
   lengthDatum = 'long-long-outer-edge',
+  datumCMethod = 'REFERENCE_CUT',
+  parts = [
+    {
+      partId: 'PART-1',
+      lengthIn: 16,
+      features: [{
+        featureId: 'SPOT-1',
+        kind: 'SPOT_ON_LOCATION',
+        xIn: 8,
+        locationRule: 'CENTERED_ON_PART',
+        acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
+      }],
+    },
+    {
+      partId: 'PART-2',
+      lengthIn: 16,
+      features: [{
+        featureId: 'SPOT-2',
+        kind: 'SPOT_ON_LOCATION',
+        xIn: 8,
+        locationRule: 'CENTERED_ON_PART',
+        acrossWidthRule: 'CENTERED_ON_WIDE_FACE',
+      }],
+    },
+  ],
   spotDemand = {
     required: true,
     mode: 'SPOT_ON_LOCATION',
@@ -112,6 +139,8 @@ export async function userDefinedBoardJobBody({
 } = {}) {
   const payload = userDefinedBoardJobPayload({
     lineId,
+    configurationId,
+    configurationVersion,
     materialDemand,
     definedWorkpieceLengthCanonical: canonicalInchString(definedWorkpieceLengthIn),
     sawCuts,
@@ -123,6 +152,8 @@ export async function userDefinedBoardJobBody({
     endIdentity,
     endRelation,
     lengthDatum,
+    datumCMethod,
+    parts,
     spotDemand,
     unresolvedConditions,
     materialSource,
