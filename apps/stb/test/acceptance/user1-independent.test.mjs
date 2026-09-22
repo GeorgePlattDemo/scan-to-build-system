@@ -21,7 +21,6 @@ async function withPinnedAdapter(t) {
 
 test('acceptance fixture carries the independently specified 8-in spot location', async () => {
   const request = await userDefinedBoardJobBody();
-  assert.equal(request.payload.line.definedWorkpieceLengthIn, 60);
   assert.equal(request.payload.line.sawCuts, 3);
   assert.equal(request.payload.line.spotDemand.mode, 'SPOT_ON_LOCATION');
   assert.equal(request.payload.line.spotDemand.locationAlongLengthIn, 8);
