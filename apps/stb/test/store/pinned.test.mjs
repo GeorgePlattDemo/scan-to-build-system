@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { PUBLISHED_BOARD_SKU } from '../../shared/contracts.mjs';
+import { PUBLISHED_BOARD_SKU, STORE_PIN } from '../../shared/contracts.mjs';
 import { ADAPTER_ERROR_CODES } from '../../shared/store-wire.mjs';
 import { createStoreAdapter } from '../../server/store-adapter.mjs';
 import { startServer } from '../../server/main.mjs';
@@ -118,9 +118,18 @@ test('user-defined X-brace keeps project truth and uses the pinned Store as sole
   assert.equal(body.attributedBasis.pricingEngine.version, '0.3.0');
   assert.ok(body.calculationIdentity.inputHash);
   assert.ok(body.calculationIdentity.resultHash);
+  assert.equal(body.rawEvaluation.freshEvaluation, true);
+  assert.equal(body.evaluationReceipt.requestId, body.requestId);
+  assert.equal(body.evaluationReceipt.freshnessRule, 'STB-STORE-FRESH-EVALUATION-0.1');
+  assert.equal(body.evaluationReceipt.authority.storeRevision, STORE_PIN);
+  assert.equal(body.rawEvaluation.evaluationReceipt.receiptHash, body.evaluationReceipt.receiptHash);
 
   const direct = adapter.modules.evaluateDimensionalTravelJob(adapter.catalog, travel);
-  assert.deepEqual(body.rawEvaluation, direct);
+  assert.equal(body.rawEvaluation.status, direct.status);
+  assert.deepEqual(body.rawEstimate, direct.estimate);
+  assert.deepEqual(body.materialResolution.storeSku, direct.materialResolution.storeSku);
+  assert.equal(body.calculationIdentity.inputHash, direct.calculationIdentity.inputHash);
+  assert.equal(body.calculationIdentity.resultHash, direct.calculationIdentity.resultHash);
   assert.equal(adapter.instrumentation.travelCalls, 1);
   assert.equal(adapter.instrumentation.evaluationCalls, 0);
   assert.equal(adapter.instrumentation.estimateCalls, 0);
