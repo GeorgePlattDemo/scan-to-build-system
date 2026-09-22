@@ -21,6 +21,7 @@ async function withPinnedAdapter(t) {
 
 test('acceptance fixture carries finished-member demand and independently specified 8-in spot location', async () => {
   const request = await userDefinedBoardJobBody();
+  assert.ok(request.payload.line.finishedPartLength, 'FAULT_TARGET_FINISHED_DEMAND_CONTRACT');
   assert.equal(request.payload.line.finishedPartLength.value, '16');
   assert.equal(request.payload.line.quantity, 2);
   assert.equal(request.payload.line.definedWorkpieceLength, undefined);
