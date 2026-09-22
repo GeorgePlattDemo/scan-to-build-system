@@ -34,6 +34,7 @@ jobs:
           node --test --test-concurrency=1
           test/unit/store-calculation-identity.test.mjs
           test/unit/dimensional-store-governance.test.mjs
+          test/unit/store-wire.test.mjs
 
       - name: User 1 pinned Store integration
         working-directory: apps/stb
