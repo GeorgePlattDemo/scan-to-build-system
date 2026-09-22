@@ -84,8 +84,8 @@ export async function scheduleUserDefinedBoardStoreQuestion(
   localRecordId,
   {
     lineId,
-    definedWorkpieceLengthCanonical,
-    sawCuts,
+    finishedPartLengthCanonical,
+    quantity,
     sawAngleDeg,
     drillCycles = 0,
     drillDepthIn = null,
@@ -96,7 +96,7 @@ export async function scheduleUserDefinedBoardStoreQuestion(
     lengthDatum = null,
     spotDemand = null,
     unresolvedConditions = [],
-    materialSource = null,
+    materialSource = 'STORE_SELECTED',
     unapplied = false,
   } = {},
 ) {
@@ -112,8 +112,9 @@ export async function scheduleUserDefinedBoardStoreQuestion(
   }
   if (
     !lineId ||
-    !definedWorkpieceLengthCanonical ||
-    !Number.isInteger(sawCuts) ||
+    !finishedPartLengthCanonical ||
+    !Number.isInteger(quantity) ||
+    quantity < 1 ||
     !Number.isFinite(sawAngleDeg) ||
     !Number.isInteger(drillCycles) ||
     !Array.isArray(requiredOps) ||
@@ -147,8 +148,8 @@ export async function scheduleUserDefinedBoardStoreQuestion(
     requestType: STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1,
     payload: userDefinedBoardJobPayload({
       lineId,
-      definedWorkpieceLengthCanonical,
-      sawCuts,
+      finishedPartLengthCanonical,
+      quantity,
       sawAngleDeg,
       drillCycles,
       drillDepthIn,

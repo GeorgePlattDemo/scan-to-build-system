@@ -254,6 +254,7 @@ function validateUserDefinedBoardPayload(payload) {
       'ruleVersion must match the user-defined Board slice',
     );
   }
+
   const line = payload.line;
   if (line === null || typeof line !== 'object' || Array.isArray(line)) {
     return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'user-defined Board payload requires one line');
@@ -264,8 +265,7 @@ function validateUserDefinedBoardPayload(payload) {
     'quantity',
     'unit',
     'requiredOps',
-    'definedWorkpieceLength',
-    'sawCuts',
+    'finishedPartLength',
     'sawAngleDeg',
     'drillCycles',
     'drillDepthIn',
@@ -283,8 +283,10 @@ function validateUserDefinedBoardPayload(payload) {
       'unexpected user-defined Board line fields',
     );
   }
+
   const lineIdError = requireNonemptyString('lineId', line.lineId);
   if (lineIdError) return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, lineIdError);
+
   if (line.materialDemand === null || typeof line.materialDemand !== 'object' || Array.isArray(line.materialDemand)) {
     return fail(
       ADAPTER_ERROR_CODES.MALFORMED_REQUEST,
@@ -305,12 +307,14 @@ function validateUserDefinedBoardPayload(payload) {
       'user-defined Board materialDemand contains unexpected fields',
     );
   }
-  if (line.quantity !== USER_DEFINED_BOARD_DEFINITION.quantity || line.unit !== 'ea') {
+
+  if (!Number.isInteger(line.quantity) || line.quantity < 1 || line.unit !== 'ea') {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'user-defined Board quantity must be exactly 1 ea',
+      'user-defined Board quantity must be a positive integer in ea',
     );
   }
+
   if (!Array.isArray(line.requiredOps) || line.requiredOps.length === 0) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
@@ -330,36 +334,29 @@ function validateUserDefinedBoardPayload(payload) {
       'user-defined Board requiredOps must not contain duplicates',
     );
   }
-  const workpiece = line.definedWorkpieceLength;
-  if (workpiece === null || typeof workpiece !== 'object' || Array.isArray(workpiece)) {
+
+  const finishedPart = line.finishedPartLength;
+  if (finishedPart === null || typeof finishedPart !== 'object' || Array.isArray(finishedPart)) {
     return fail(
       ADAPTER_ERROR_CODES.MALFORMED_REQUEST,
-      'definedWorkpieceLength must be an object',
+      'finishedPartLength must be an object',
     );
   }
-  if (workpiece.unit !== USER_DEFINED_BOARD_DEFINITION.unit) {
+  if (finishedPart.unit !== USER_DEFINED_BOARD_DEFINITION.unit) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'definedWorkpieceLength.unit must be in',
+      'finishedPartLength.unit must be in',
     );
   }
-  const parsed = parseCanonicalInch(workpiece.value);
+  const parsed = parseCanonicalInch(finishedPart.value);
   if (!parsed.ok) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, parsed.reason);
-  if (
-    parsed.value < USER_DEFINED_BOARD_DEFINITION.minWorkpieceInches ||
-    parsed.value > USER_DEFINED_BOARD_DEFINITION.maxWorkpieceInches
-  ) {
+  if (!(parsed.value > 0)) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'defined workpiece length must be 24–60 in inclusive',
+      'finished part length must be greater than zero; Store owns stock and machine feasibility',
     );
   }
-  if (!Number.isInteger(line.sawCuts) || line.sawCuts < 1 || line.sawCuts > 8) {
-    return fail(
-      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-      'sawCuts must be an integer from 1 through 8',
-    );
-  }
+
   if (
     typeof line.sawAngleDeg !== 'number' ||
     !Number.isFinite(line.sawAngleDeg) ||
@@ -395,10 +392,17 @@ function validateUserDefinedBoardPayload(payload) {
       'positive drillCycles requires explicit positive drillDepthIn',
     );
   }
-  for (const key of ['cutPlane', 'endIdentity', 'endRelation', 'lengthDatum', 'materialSource']) {
+
+  for (const key of ['cutPlane', 'endIdentity', 'endRelation', 'lengthDatum']) {
     if (line[key] != null && (typeof line[key] !== 'string' || line[key].trim() === '')) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, key + ' must be a nonempty string when supplied');
     }
+  }
+  if (line.materialSource !== USER_DEFINED_BOARD_DEFINITION.materialAuthority) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'user-defined Board materialSource must be STORE_SELECTED',
+    );
   }
   if (
     line.unresolvedConditions != null &&
@@ -418,17 +422,17 @@ function validateUserDefinedBoardPayload(payload) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'spotDemand mode must be SPOT_ON_LOCATION');
     }
   }
+
   return {
     ok: true,
     line: {
       lineId: line.lineId,
       materialDemand: { ...line.materialDemand },
-      quantity: 1,
+      quantity: line.quantity,
       unit: 'ea',
       requiredOps: [...line.requiredOps],
-      definedWorkpieceLength: { value: parsed.canonical, unit: 'in' },
-      definedWorkpieceLengthIn: parsed.value,
-      sawCuts: line.sawCuts,
+      finishedPartLength: { value: parsed.canonical, unit: 'in' },
+      finishedPartLengthIn: parsed.value,
       sawAngleDeg: line.sawAngleDeg,
       drillCycles: line.drillCycles,
       drillDepthIn: line.drillDepthIn ?? null,
@@ -438,7 +442,7 @@ function validateUserDefinedBoardPayload(payload) {
       lengthDatum: line.lengthDatum ?? null,
       spotDemand: line.spotDemand ?? null,
       unresolvedConditions: [...(line.unresolvedConditions ?? [])],
-      materialSource: line.materialSource ?? null,
+      materialSource: line.materialSource,
     },
     definitionKind: USER_DEFINED_BOARD_DEFINITION.kind,
     ruleVersion: USER_DEFINED_BOARD_DEFINITION.ruleVersion,
@@ -695,8 +699,8 @@ export async function buildUserDefinedBoardRequest({
 export function userDefinedBoardJobPayload({
   lineId,
   materialDemand = USER_DEFINED_BOARD_MATERIAL_DEMAND,
-  definedWorkpieceLengthCanonical,
-  sawCuts,
+  finishedPartLengthCanonical,
+  quantity,
   sawAngleDeg,
   drillCycles = 0,
   drillDepthIn = null,
@@ -707,17 +711,16 @@ export function userDefinedBoardJobPayload({
   lengthDatum = null,
   spotDemand = null,
   unresolvedConditions = [],
-  materialSource = null,
+  materialSource = USER_DEFINED_BOARD_DEFINITION.materialAuthority,
 }) {
   return {
     line: {
       lineId,
       materialDemand: { ...materialDemand },
-      quantity: 1,
+      quantity,
       unit: 'ea',
       requiredOps: [...requiredOps],
-      definedWorkpieceLength: { value: definedWorkpieceLengthCanonical, unit: 'in' },
-      sawCuts,
+      finishedPartLength: { value: finishedPartLengthCanonical, unit: 'in' },
       sawAngleDeg,
       drillCycles,
       drillDepthIn,
@@ -745,8 +748,7 @@ export async function userDefinedBoardDemandSignature(payload) {
     quantity: payload.line.quantity,
     unit: payload.line.unit,
     requiredOps: payload.line.requiredOps,
-    definedWorkpieceLength: payload.line.definedWorkpieceLength,
-    sawCuts: payload.line.sawCuts,
+    finishedPartLength: payload.line.finishedPartLength,
     sawAngleDeg: payload.line.sawAngleDeg,
     drillCycles: payload.line.drillCycles,
     drillDepthIn: payload.line.drillDepthIn ?? null,
@@ -756,7 +758,7 @@ export async function userDefinedBoardDemandSignature(payload) {
     lengthDatum: payload.line.lengthDatum ?? null,
     spotDemand: payload.line.spotDemand ?? null,
     unresolvedConditions: payload.line.unresolvedConditions ?? [],
-    materialSource: payload.line.materialSource ?? null,
+    materialSource: payload.line.materialSource,
   });
 }
 

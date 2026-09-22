@@ -407,14 +407,13 @@ export const BOARD_DEFINITION = Object.freeze({
 
 export const USER_DEFINED_BOARD_DEFINITION = Object.freeze({
   kind: 'user_defined_board.v1',
-  ruleVersion: '0.1',
+  ruleVersion: '0.2',
   unit: 'in',
-  minWorkpieceInches: 24,
-  maxWorkpieceInches: 60,
-  quantity: 1,
   quantityUnit: 'ea',
   allowedOps: Object.freeze(['CROSSCUT', 'MITER_LIMITED', 'DRILL']),
-  occurrenceRole: 'user-defined-board-workpiece',
+  occurrenceRole: 'user-defined-finished-board-member',
+  materialAuthority: 'STORE_SELECTED',
+  dimensionalAuthority: 'FINISHED_DEMAND_TO_STORE_RESOLUTION',
 });
 
 export const USER_DEFINED_BOARD_MATERIAL_DEMAND = Object.freeze({
@@ -441,7 +440,7 @@ export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
 
 export const STORE_PROTOCOL_VERSION = 'stb-store-zero-http/1';
 export const STORE_REPOSITORY = 'GeorgePlattDemo/scan-to-build-store';
-export const STORE_PIN = 'ab8a4c5d470c310f27fef82683611622ab976168';
+export const STORE_PIN = '01f9c5580cea262bd898a9f2c1ac2cd89d02845f';
 export const WRAPPER_BUILD_ID = 'stb-app-build-5';
 export const APP_BUILD_ID = 'stb-app-build-7';
 export const PUBLISHED_BOARD_SKU = 'STB-ZERO-SPF-2X4-72-001';

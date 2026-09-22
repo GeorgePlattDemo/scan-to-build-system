@@ -26,8 +26,8 @@ test('user-defined Board Store coordinator carries the semantic Store payload', 
 
   const body = source.slice(start, end);
   for (const field of [
-    'definedWorkpieceLengthCanonical',
-    'sawCuts',
+    'finishedPartLengthCanonical',
+    'quantity',
     'sawAngleDeg',
     'drillCycles',
     'drillDepthIn',

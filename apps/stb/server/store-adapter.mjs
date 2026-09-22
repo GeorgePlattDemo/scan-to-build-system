@@ -24,6 +24,30 @@ function opaqueId() {
   return crypto.randomUUID();
 }
 
+function collectMaterialResolutionUnresolved(materialResolution) {
+  const reasons = [];
+  const add = (value) => {
+    if (typeof value === 'string' && value.length > 0) reasons.push(value);
+  };
+
+  if (!materialResolution) {
+    return reasons;
+  }
+
+  if (materialResolution.status === 'UNRESOLVED') {
+    add(materialResolution.reason);
+  }
+  for (const value of materialResolution.unresolved ?? []) add(value);
+  for (const value of materialResolution.unresolvedConditions ?? []) add(value);
+  for (const value of materialResolution.plan?.unresolvedConditions ?? []) add(value);
+  for (const value of materialResolution.capability?.unresolved ?? []) add(value);
+  for (const entry of materialResolution.considered ?? []) {
+    for (const value of entry?.capability?.unresolved ?? []) add(value);
+  }
+
+  return [...new Set(reasons)];
+}
+
 function offeringAttributesComplete(item) {
   if (!item || item.offered !== true) {
     return false;
@@ -126,6 +150,24 @@ function storeBasis({ modules, offering, evaluation, estimate }) {
           basis: modules.D001_STAGE2_ENVELOPE.basis,
           measured: modules.D001_STAGE2_ENVELOPE.measured === true,
           commissioned: modules.D001_STAGE2_ENVELOPE.commissioned === true,
+          spot: modules.D001_STAGE2_ENVELOPE.spot
+            ? {
+                operation: modules.D001_STAGE2_ENVELOPE.spot.operation,
+                operationContract: modules.D001_STAGE2_ENVELOPE.spot.operationContract,
+                toolDefinitionId: modules.D001_STAGE2_ENVELOPE.spot.toolDefinitionId,
+                toolDiameterIn: modules.D001_STAGE2_ENVELOPE.spot.toolDiameterIn,
+                fullDiameterPenetrationIn:
+                  modules.D001_STAGE2_ENVELOPE.spot.fullDiameterPenetrationIn,
+                depthReference: modules.D001_STAGE2_ENVELOPE.spot.depthReference,
+                pointAngleDeg: modules.D001_STAGE2_ENVELOPE.spot.pointAngleDeg,
+                pointAxialLengthIn: modules.D001_STAGE2_ENVELOPE.spot.pointAxialLengthIn,
+                pointGeometryStatus: modules.D001_STAGE2_ENVELOPE.spot.pointGeometryStatus,
+                totalTipPenetrationIn:
+                  modules.D001_STAGE2_ENVELOPE.spot.totalTipPenetrationIn,
+                customerDepthProgrammingRequired:
+                  modules.D001_STAGE2_ENVELOPE.spot.customerDepthProgrammingRequired,
+              }
+            : null,
         }
       : envelope
         ? { id: envelope.envelope ?? envelope.id ?? null }
@@ -246,6 +288,17 @@ export async function createStoreAdapter({
     return loaded.modules.estimateJob(runtimeCatalog, spec);
   }
 
+  async function runBoardSequenceEstimate(runtimeCatalog, spec) {
+    instrumentation.estimateCalls += 1;
+    if (hooks.failEstimate) {
+      throw new Error('injected estimate failure');
+    }
+    if (typeof hooks.beforeEstimate === 'function') {
+      await hooks.beforeEstimate(spec);
+    }
+    return loaded.modules.estimateBoardSequence(runtimeCatalog, spec);
+  }
+
   async function handleJob(envelope, jobPayload, options = {}) {
     const runtimeCatalog = options.catalogOverride ?? catalog;
     const storeSku = jobPayload.line.storeSku;
@@ -351,11 +404,14 @@ export async function createStoreAdapter({
 
     const materialResolution = loaded.modules.resolveBoardMaterial(runtimeCatalog, {
       ...line.materialDemand,
-      definedWorkpieceLengthIn: line.definedWorkpieceLengthIn,
-      qty: 1,
+      finishedPartLengthIn: line.finishedPartLengthIn,
+      quantity: line.quantity,
       requiredOps: [...line.requiredOps],
       sawAngleDeg: line.sawAngleDeg,
       cutPlane: line.cutPlane,
+      endIdentity: line.endIdentity,
+      endRelation: line.endRelation,
+      lengthDatum: line.lengthDatum,
       spotDemand: line.spotDemand,
     });
     const item = materialResolution?.item ?? null;
@@ -371,36 +427,70 @@ export async function createStoreAdapter({
       };
     }
 
-    const title = `User-defined Board · ${line.definedWorkpieceLengthIn} in workpiece`;
-    const evaluateInput = item
+    const title =
+      'User-defined Board · ' +
+      line.quantity +
+      ' × ' +
+      line.finishedPartLengthIn +
+      ' in finished member' +
+      (line.quantity === 1 ? '' : 's');
+    const capability = materialResolution?.capability ?? null;
+    const spot = loaded.modules.D001_STAGE2_ENVELOPE.spot;
+    const spotOperation = line.spotDemand
       ? {
-          title,
-          lines: [
-            {
-              storeSku: item.storeSku,
-              qty: 1,
-              requiredOps: [...line.requiredOps],
-              keptLengthIn: line.definedWorkpieceLengthIn,
-              sawAngleDeg: line.sawAngleDeg,
-              cutPlane: line.cutPlane,
-              spotDemand: line.spotDemand,
-            },
-          ],
+          operation: spot.operation,
+          operationContract: spot.operationContract,
+          toolDefinitionId: spot.toolDefinitionId,
+          toolDiameterIn: spot.toolDiameterIn,
+          fullDiameterPenetrationIn: spot.fullDiameterPenetrationIn,
+          depthReference: spot.depthReference,
+          pointAngleDeg: spot.pointAngleDeg,
+          pointAxialLengthIn: spot.pointAxialLengthIn,
+          pointGeometryStatus: spot.pointGeometryStatus,
+          totalTipPenetrationIn: spot.totalTipPenetrationIn,
+          customerDepthProgrammingRequired: spot.customerDepthProgrammingRequired,
         }
       : null;
-    const rawEvaluation = evaluateInput
-      ? await runEvaluation(runtimeCatalog, evaluateInput)
-      : {
-          title,
-          stage: 2,
-          store: 'Store Zero',
-          status: materialResolution?.status ?? 'UNRESOLVED',
-          lines: [],
-          materialResolution,
-          estimate: null,
-          not_claimed: ['live ERP', 'live equipment operation', 'physical stock allocation', 'commercial quote'],
-        };
-    const evaluateDigest = evaluateInput ? await digestCanonical(evaluateInput) : null;
+    instrumentation.evaluationCalls += 1;
+    const rawEvaluation = {
+      title,
+      stage: 2,
+      store: 'Store Zero',
+      status:
+        materialResolution?.status === 'MAPPED'
+          ? capability?.status ?? 'UNRESOLVED'
+          : materialResolution?.status ?? 'UNRESOLVED',
+      lines: item
+        ? [
+            {
+              storeSku: item.storeSku,
+              qty: materialResolution.parentCount ?? materialResolution.plan?.selected?.parentCount ?? 1,
+              stock: materialResolution.stock ?? null,
+              price: materialResolution.price ?? null,
+              capability,
+            },
+          ]
+        : [],
+      materialResolution,
+      estimate: null,
+      not_claimed: ['live ERP', 'live equipment operation', 'physical stock allocation', 'commercial quote'],
+    };
+    const evaluateInput = {
+      title,
+      finishedPartDemand: {
+        lengthIn: line.finishedPartLengthIn,
+        quantity: line.quantity,
+        lengthDatum: line.lengthDatum,
+        sawAngleDeg: line.sawAngleDeg,
+        cutPlane: line.cutPlane,
+        endIdentity: line.endIdentity,
+        endRelation: line.endRelation,
+      },
+      materialDemand: { ...line.materialDemand },
+      requiredOps: [...line.requiredOps],
+      spotDemand: line.spotDemand,
+    };
+    const evaluateDigest = await digestCanonical(evaluateInput);
     const offering = attributedOffering(item, runtimeCatalog, observations);
     const unresolvedConditions = [...(line.unresolvedConditions ?? [])];
 
@@ -410,10 +500,11 @@ export async function createStoreAdapter({
     let estimateAssociationId = null;
     let estimateError = null;
 
-    if (rawEvaluation.status === 'SUPPORTABLE' && item) {
-      const angleRadians = (line.sawAngleDeg * Math.PI) / 180;
-      const sawTraverseIn =
-        line.sawAngleDeg > 0 ? item.actualW / Math.cos(angleRadians) : item.actualW;
+    if (
+      item &&
+      materialResolution?.plan &&
+      (rawEvaluation.status === 'SUPPORTABLE' || rawEvaluation.status === 'UNRESOLVED')
+    ) {
       const spotCycles =
         line.spotDemand && line.spotDemand.required !== false
           ? Number(line.spotDemand.totalCount ?? line.spotDemand.countPerPart ?? 0)
@@ -421,22 +512,16 @@ export async function createStoreAdapter({
       estimateInput = {
         title,
         classId: 'app.user-defined-board.v1',
-        pieces: [
-          {
-            storeSku: item.storeSku,
-            qty: 1,
-            keptLengthIn: line.definedWorkpieceLengthIn,
-            widthIn: item.actualW,
-            sawCuts: line.sawCuts,
-            sawTraverseIn,
-            holes: line.drillCycles,
-            spots: Number.isFinite(spotCycles) ? Math.max(0, spotCycles) : 0,
-            depthIn: line.drillCycles > 0 ? line.drillDepthIn : 0,
-          },
-        ],
+        plan: materialResolution.plan,
+        spotCycles: Number.isFinite(spotCycles) ? Math.max(0, spotCycles) : 0,
       };
+      instrumentation.estimateCalls += 1;
       try {
-        rawEstimate = await runEstimate(runtimeCatalog, estimateInput);
+        rawEstimate = loaded.modules.estimateResolvedBoardPlan(runtimeCatalog, materialResolution, {
+          title,
+          classId: 'app.user-defined-board.v1',
+          spotCycles: estimateInput.spotCycles,
+        });
         estimateDigest = await digestCanonical(estimateInput);
         estimateAssociationId = opaqueId();
       } catch (error) {
@@ -448,9 +533,19 @@ export async function createStoreAdapter({
       }
     }
 
-    const capabilityUnresolved =
-      rawEvaluation?.lines?.flatMap((entry) => entry?.capability?.unresolved ?? []) ?? [];
-    const priceUnresolved = [...new Set([...unresolvedConditions, ...capabilityUnresolved])];
+    const capabilityUnresolved = capability?.unresolved ?? [];
+    const materialUnresolved = collectMaterialResolutionUnresolved(materialResolution);
+    const estimateUnresolved = Array.isArray(rawEstimate?.unresolved)
+      ? rawEstimate.unresolved
+      : [];
+    const priceUnresolved = [
+      ...new Set([
+        ...unresolvedConditions,
+        ...materialUnresolved,
+        ...capabilityUnresolved,
+        ...estimateUnresolved,
+      ]),
+    ];
     const priceCompleteness = {
       status:
         rawEstimate && priceUnresolved.length === 0
@@ -461,8 +556,8 @@ export async function createStoreAdapter({
       unresolvedConditions: priceUnresolved,
       note:
         priceUnresolved.length > 0
-          ? 'The Store value models only the resolved encoded operations. Unresolved work is not silently converted into a priced operation.'
-          : 'The Store value models the encoded demand only. It is a Stage-2 BudgetaryEstimate, not a commercial quote.',
+          ? 'The Store value models only the resolved operations in the selected parent-stock plan. Unresolved work is not silently converted into a priced operation.'
+          : 'The Store value models the selected parent-stock plan for the encoded demand only. It is a Stage-2 BudgetaryEstimate, not a commercial quote.',
     };
 
     return {
@@ -471,11 +566,17 @@ export async function createStoreAdapter({
         rawOffering: offering,
         materialResolution: {
           status: materialResolution?.status ?? null,
+          reason: materialResolution?.reason ?? null,
+          unresolvedConditions: collectMaterialResolutionUnresolved(materialResolution),
           materialDemand: { ...line.materialDemand },
           pricingReferenceSku: materialResolution?.pricingReferenceSku ?? null,
           pricingReferenceStockLengthIn: materialResolution?.pricingReferenceStockLengthIn ?? null,
+          parentCount: materialResolution?.parentCount ?? null,
           allocationClaimed: materialResolution?.allocationClaimed === true,
-          workpieceLengthIn: line.definedWorkpieceLengthIn,
+          finishedPartLengthIn: line.finishedPartLengthIn,
+          finishedPartQuantity: line.quantity,
+          selectionPolicy: materialResolution?.selectionPolicy ?? null,
+          plan: materialResolution?.plan ?? null,
         },
         rawEvaluation,
         rawEstimate,
@@ -486,9 +587,8 @@ export async function createStoreAdapter({
           definition: {
             materialSource: line.materialSource,
             materialDemand: { ...line.materialDemand },
-            definedWorkpieceLengthIn: line.definedWorkpieceLengthIn,
-            productionSawCuts: line.sawCuts,
-            totalModeledSawCuts: line.sawCuts,
+            finishedPartLengthIn: line.finishedPartLengthIn,
+            finishedPartQuantity: line.quantity,
             sawAngleDeg: line.sawAngleDeg,
             drillCycles: line.drillCycles,
             drillDepthIn: line.drillDepthIn,
@@ -497,13 +597,17 @@ export async function createStoreAdapter({
             endRelation: line.endRelation,
             lengthDatum: line.lengthDatum,
             spotDemand: line.spotDemand,
+            spotOperation,
+            selectedParentPlan: materialResolution?.plan ?? null,
             unresolvedConditions: priceUnresolved,
           },
           materialResolution: {
             status: materialResolution?.status ?? null,
             pricingReferenceSku: materialResolution?.pricingReferenceSku ?? null,
             pricingReferenceStockLengthIn: materialResolution?.pricingReferenceStockLengthIn ?? null,
+            parentCount: materialResolution?.parentCount ?? null,
             allocationClaimed: materialResolution?.allocationClaimed === true,
+            selectionPolicy: materialResolution?.selectionPolicy ?? null,
           },
           evaluation: evaluateInput,
           evaluationDigest: evaluateDigest,

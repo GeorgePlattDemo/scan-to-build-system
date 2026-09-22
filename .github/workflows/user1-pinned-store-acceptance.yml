@@ -1,0 +1,155 @@
+name: User 1 exact Store acceptance
+
+on:
+  push:
+    branches:
+      - repair/demand-driven-stock-sequence-0.1
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-pinned-store:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-zero
+    steps:
+      - name: Checkout System candidate
+        uses: actions/checkout@v4
+
+      - name: Checkout exact Store authority
+        uses: actions/checkout@v4
+        with:
+          repository: GeorgePlattDemo/scan-to-build-store
+          ref: 01f9c5580cea262bd898a9f2c1ac2cd89d02845f
+          path: store-zero
+
+      - name: Verify exact Store identity
+        run: |
+          test "$(git -C "$STB_STORE_ZERO_ROOT" rev-parse HEAD)" = "01f9c5580cea262bd898a9f2c1ac2cd89d02845f"
+          test -z "$(git -C "$STB_STORE_ZERO_ROOT" status --porcelain)"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/stb/.node-version
+          cache: npm
+          cache-dependency-path: apps/stb/package-lock.json
+
+      - name: Install System dependencies
+        working-directory: apps/stb
+        run: npm ci --no-audit --no-fund
+
+      - name: Independent User 1 acceptance against exact Store
+        working-directory: apps/stb
+        run: node --test --test-concurrency=1 test/acceptance/user1-independent.test.mjs
+
+      - name: Repaired committed pinned-integration cases
+        working-directory: apps/stb
+        run: >-
+          node --test --test-concurrency=1
+          --test-name-pattern="user-defined X-brace|user-defined miter boundary|missing User 1 spot location|User 1 with no spot request"
+          test/store/pinned.test.mjs
+
+      - name: Checkout starting Store authority for before-state proof
+        uses: actions/checkout@v4
+        with:
+          repository: GeorgePlattDemo/scan-to-build-store
+          ref: ab8a4c5d470c310f27fef82683611622ab976168
+          path: store-zero-before
+
+      - name: Prove new acceptance catches the exact starting candidate
+        run: |
+          git fetch origin 37282a760b53e3959d8f18d72f37c068b206706a --depth=1
+          mkdir -p before-system
+          git archive 37282a760b53e3959d8f18d72f37c068b206706a | tar -x -C before-system
+          mkdir -p before-system/apps/stb/test/acceptance
+          cp apps/stb/test/acceptance/user1-independent.test.mjs before-system/apps/stb/test/acceptance/
+          cd before-system/apps/stb
+          npm ci --no-audit --no-fund >/dev/null
+          set +e
+          STB_STORE_ZERO_ROOT="$GITHUB_WORKSPACE/store-zero-before" node --test --test-concurrency=1 test/acceptance/user1-independent.test.mjs > "$RUNNER_TEMP/user1-before.log" 2>&1
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/user1-before.log"
+          test "$rc" -ne 0
+          grep -Fq "FAULT_TARGET_FINISHED_DEMAND_CONTRACT" "$RUNNER_TEMP/user1-before.log"
+
+
+  fault-detection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-zero
+    steps:
+      - name: Checkout System candidate
+        uses: actions/checkout@v4
+
+      - name: Checkout exact Store authority
+        uses: actions/checkout@v4
+        with:
+          repository: GeorgePlattDemo/scan-to-build-store
+          ref: 01f9c5580cea262bd898a9f2c1ac2cd89d02845f
+          path: store-zero
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/stb/.node-version
+
+      - name: Install System dependencies
+        working-directory: apps/stb
+        run: npm ci --no-audit --no-fund
+
+      - name: Fault check — loss of complete fixture spot location is detected
+        run: |
+          rm -rf "$RUNNER_TEMP/fault-fixture"
+          mkdir -p "$RUNNER_TEMP/fault-fixture"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/fault-fixture"
+          ln -s "$GITHUB_WORKSPACE/apps/stb/node_modules" "$RUNNER_TEMP/fault-fixture/apps/stb/node_modules"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"fault-fixture/apps/stb/test/store/helpers.mjs"
+          s=p.read_text()
+          old="    locationAlongLengthIn: 8,\n"
+          assert old in s
+          p.write_text(s.replace(old,"",1))
+          PY
+          cd "$RUNNER_TEMP/fault-fixture/apps/stb"
+          set +e
+          node --test --test-concurrency=1 test/acceptance/user1-independent.test.mjs > "$RUNNER_TEMP/fault-fixture.log" 2>&1
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/fault-fixture.log"
+          test "$rc" -ne 0
+          grep -q "acceptance fixture carries finished-member demand and independently specified 8-in spot location" "$RUNNER_TEMP/fault-fixture.log"
+
+      - name: Fault check — loss of SPOT_LOCATION_REQUIRED from concise response is detected
+        run: |
+          rm -rf "$RUNNER_TEMP/fault-reason"
+          mkdir -p "$RUNNER_TEMP/fault-reason"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/fault-reason"
+          ln -s "$GITHUB_WORKSPACE/apps/stb/node_modules" "$RUNNER_TEMP/fault-reason/apps/stb/node_modules"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"fault-reason/apps/stb/server/store-adapter.mjs"
+          s=p.read_text()
+          old="  return [...new Set(reasons)];"
+          assert old in s
+          p.write_text(s.replace(old,"  return [...new Set(reasons)].filter((value) => value !== 'SPOT_LOCATION_REQUIRED');",1))
+          PY
+          cd "$RUNNER_TEMP/fault-reason/apps/stb"
+          set +e
+          node --test --test-concurrency=1 test/acceptance/user1-independent.test.mjs > "$RUNNER_TEMP/fault-reason.log" 2>&1
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/fault-reason.log"
+          test "$rc" -ne 0
+          grep -q "missing spot location stays unresolved while Store-selected material and saw plan remain resolved" "$RUNNER_TEMP/fault-reason.log"

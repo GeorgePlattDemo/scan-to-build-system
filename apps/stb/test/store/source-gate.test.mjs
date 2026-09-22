@@ -83,10 +83,12 @@ test('exact clean pin loads required Store functions', async () => {
   assert.equal(typeof loaded.modules.resolveBoardMaterial, 'function');
   assert.equal(typeof loaded.modules.evaluateJob, 'function');
   assert.equal(typeof loaded.modules.estimateJob, 'function');
+  assert.equal(typeof loaded.modules.estimateBoardSequence, 'function');
+  assert.equal(typeof loaded.modules.spotEconomicsAssessment, 'function');
   assert.equal(typeof loaded.modules.envelopeCheck, 'function');
-  assert.equal(loaded.modules.ENGINE.version, '0.2.3');
+  assert.equal(loaded.modules.ENGINE.version, '0.2.4');
   assert.equal(loaded.modules.CYCLE_MODEL.id, 'STB-D001-CYCLE-MODEL-S2-0.1');
-  assert.equal(loaded.modules.D001_STAGE2_ENVELOPE.id, 'D001-STAGE2-ENVELOPE-0.3');
+  assert.equal(loaded.modules.D001_STAGE2_ENVELOPE.id, 'D001-STAGE2-ENVELOPE-0.4');
 });
 
 test('unavailable Store source leaves static host usable and Store endpoints diagnostic', async (t) => {
