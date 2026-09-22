@@ -178,6 +178,8 @@ test('bounded 18-in X-brace growth is resolved by Store without app-side SKU log
   assert.ok(Math.abs(body.mappedCallInputs.travel.sawAngleDeg - 26.3877999612) < 1e-9);
   assert.equal(body.evaluationReceipt.requestId, body.requestId);
   assert.equal(body.evaluationReceipt.authority.storeRevision, STORE_PIN);
+  console.log('bounded-18 inputHash', body.calculationIdentity.inputHash);
+  console.log('bounded-18 resultHash', body.calculationIdentity.resultHash);
 });
 
 test('user-defined miter boundary is Store-owned: 45 supports and 46 refuses', async (t) => {
