@@ -16,7 +16,7 @@ For current project status, read [`../STB-CURRENT-BASELINE.md`](../STB-CURRENT-B
 | Entry/intake contract | `GeorgePlattDemo/grok-file` | `plan/app-entry-intake-contract-0.1` | `2d80b5a7b0e7687c425e100bfa0ff3a833166d42` | Source contract; subject to current repository corrections |
 | Governed Reference | `GeorgePlattDemo/scan-to-build-governed-reference` | `main` | `18949f163718a937f072f4be3a654bb303e53160` | Governed reference identity |
 | Stage-2 Store Zero — accepted 2026-09-13 identity | `GeorgePlattDemo/scan-to-build-store` | `stage-2-store-zero-reference` | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | ACCEPTED BASELINE HISTORY; superseded for the current post-acceptance Stage-2 working path |
-| Stage-2 Store Zero — current post-acceptance working path | `GeorgePlattDemo/scan-to-build-store` | `main` | `ab8a4c5d470c310f27fef82683611622ab976168` | Current `USER_DEFINED_BOARD_V1` material/capability/economics source · D-001 envelope 0.3 · pricing engine 0.2.3 |
+| Stage-2 Store Zero — current dimensional travel-standard path | `GeorgePlattDemo/scan-to-build-store` | `main` | `95c639a1d0d4812df097ad1eb628594b38f921de` | Current `USER_DEFINED_BOARD_V1` material/capability/travel/economics source · pricing engine 0.3.0 · exact Store acceptance run 35757052553 |
 | Store documentary foundation | `GeorgePlattDemo/scan-to-build-store` | `main` | `3620b35369d70cf49733bbb0b62c0f3d9969b738` | Store boundary/background source |
 
 ## Accepted application ancestry / proof identities
@@ -35,7 +35,8 @@ For current project status, read [`../STB-CURRENT-BASELINE.md`](../STB-CURRENT-B
 
 | Subject | Pin | Current role |
 | --- | --- | --- |
-| Prior User 1 Stage-2 Store working pin | `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a` | SUPERSEDED by current User 1 Store authority `ab8a4c5d470c310f27fef82683611622ab976168` |
+| Prior User 1 Stage-2 Store working pin | `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a` | SUPERSEDED by later Store authorities; current User 1 authority is `95c639a1d0d4812df097ad1eb628594b38f921de` |
+| Intermediate User 1 Store authority | `ab8a4c5d470c310f27fef82683611622ab976168` | SUPERSEDED by the dimensional travel-standard authority `95c639a1d0d4812df097ad1eb628594b38f921de` |
 | PR #4 sheet Store path | `49d22ce40482a7c2e0169ac1e6df48e0f8384a6d` | SUPERSEDED candidate history |
 | PR #6 combined published-job Store candidate | `096e99d645d745b1670185f46c75de75f9e59661` | ACCEPTED ancestry; superseded for current S-001 proof |
 
