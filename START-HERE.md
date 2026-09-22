@@ -46,7 +46,7 @@ Launch instructions and path-specific Store pins: [`apps/README.md`](apps/README
 
 Do not use one Store pin as a universal project constant.
 
-- current `build/d001-travel-standard-0.1` / `USER_DEFINED_BOARD_V1` candidate path: `95c639a1d0d4812df097ad1eb628594b38f921de` — D-001 Travel Standard acceptance passed on this exact Store SHA
+- current dimensional / `USER_DEFINED_BOARD_V1` travel-standard path: `95c639a1d0d4812df097ad1eb628594b38f921de` — D-001 Travel Standard acceptance passed on this exact Store SHA
 - accepted published-job / canonical S-001 proof path: `4402abeb6b0299a5b6db2eec85ed04c3b0236bcc`
 - 2026-09-13 accepted-baseline Stage-2 reference identity retained as provenance: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
 
