@@ -5,9 +5,15 @@ import {
   REVIEW_KIND,
   REVIEW_RECORD_TYPES,
   STORE_SCOPES,
+  USER_DEFINED_BOARD_DEFINITION,
 } from '/shared/contracts.mjs';
 import { S001_CENTERED_ARCH_CLASS_ID } from '/shared/class-config.mjs';
 import { presentStoreAnswer } from '/shared/store-present.mjs';
+import {
+  calculationIdentityFromEnvelope,
+  compareStoreCalculationIdentities,
+} from '/shared/store-calculation-identity.mjs';
+import { retryStoreAttempt } from '/integration/store-client.mjs';
 import {
   collectDisclosures,
   collectUnresolvedConditions,
@@ -49,10 +55,18 @@ function opaqueId() {
   return crypto.randomUUID();
 }
 
-function storeScopeForProject(project) {
-  return project?.classId === S001_CENTERED_ARCH_CLASS_ID
-    ? 'SHEET_MODE2_ARCHED_APERTURE_V0'
-    : STORE_SCOPES.BOARD_SQUARE_V1;
+function storeScopeForProject(project, candidate, projection) {
+  if (project?.classId === S001_CENTERED_ARCH_CLASS_ID) {
+    return 'SHEET_MODE2_ARCHED_APERTURE_V0';
+  }
+  const definitionKind =
+    candidate?.payload?.definitionKind ??
+    projection?.payload?.definitionKind ??
+    null;
+  if (definitionKind === USER_DEFINED_BOARD_DEFINITION.kind) {
+    return STORE_SCOPES.USER_DEFINED_BOARD_V1;
+  }
+  return STORE_SCOPES.BOARD_SQUARE_V1;
 }
 
 function classReferenceSlice(candidate) {
@@ -83,10 +97,12 @@ function estimateIdentity(storeView, store) {
   const estimate = storeView?.estimate ?? null;
   const associationId =
     store?.response?.payload?.estimateAssociationId ?? envelope.estimateAssociationId ?? null;
+  const calculationIdentity = calculationIdentityFromEnvelope(envelope);
   return {
     estimateAssociationId: associationId,
     estimateStatus: estimate?.status ?? envelope.rawEstimate?.status ?? null,
     estimateQ: estimate?.available === true ? estimate.q : null,
+    calculationIdentity,
   };
 }
 
@@ -110,7 +126,7 @@ export async function assembleReviewSnapshot(localRecordId, { unapplied = false 
   const observations = await listProjectObservations(localRecordId);
   const store = await currentStoreAnswer(localRecordId, {
     candidateRevisionId: project.currentHead,
-    scope: storeScopeForProject(project),
+    scope: storeScopeForProject(project, candidate, projection),
   });
   const storeView = presentStoreAnswer(store, {
     unapplied,
@@ -158,6 +174,8 @@ export async function assembleReviewSnapshot(localRecordId, { unapplied = false 
     storeDisposition: storeView.dispositionEnum ?? null,
     estimateStatus: estimate.estimateStatus,
     estimateQ: estimate.estimateQ,
+    calculationInputHash: estimate.calculationIdentity?.inputHash ?? null,
+    calculationResultHash: estimate.calculationIdentity?.resultHash ?? null,
     disclosures: collectDisclosures({ projection, storeView, documentaryReference }),
     unresolvedConditions: collectUnresolvedConditions({
       projection,
