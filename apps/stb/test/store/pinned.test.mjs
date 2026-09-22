@@ -63,27 +63,34 @@ test('actual 45-in and 46-in Board HTTP invoke pinned evaluateJob and matching e
   assert.notEqual(body46.rawEstimate.totals.Q, 0);
 });
 
-test('user-defined X-brace keeps 60-in project truth and carries depth-defined spot answer', async (t) => {
-  const adapter = await withAdapter(t);
+test('user-defined X-brace resolves Store parent from finished demand and carries depth-defined spot answer', async (t) => {
+  await withAdapter(t);
   const body = parseJson(await postJob(await userDefinedBoardJobBody()));
   assert.equal(body.rawEvaluation.status, 'UNRESOLVED');
-  assert.deepEqual(body.mappedCallInputs.evaluation.lines[0].requiredOps, ['MITER_LIMITED']);
-  assert.equal(body.mappedCallInputs.evaluation.lines[0].keptLengthIn, 60);
-  assert.equal(body.mappedCallInputs.evaluation.lines[0].sawAngleDeg, 30);
+  assert.equal(body.materialResolution.status, 'MAPPED');
+  assert.equal(body.materialResolution.finishedPartLengthIn, 16);
+  assert.equal(body.materialResolution.finishedPartQuantity, 2);
+  assert.equal(body.materialResolution.pricingReferenceSku, PUBLISHED_BOARD_SKU);
+  assert.equal(body.materialResolution.pricingReferenceStockLengthIn, 72);
+  assert.equal(body.materialResolution.parentCount, 1);
+  assert.equal(body.materialResolution.plan.intermediateBlank, null);
+  assert.equal(body.materialResolution.plan.accounting.productionSawCuts, 3);
+  assert.equal(body.materialResolution.plan.accounting.preparationSawCuts, 0);
+  assert.equal(body.materialResolution.plan.parents[0].remainderIn, 39.625);
+  assert.equal(body.materialResolution.allocationClaimed, false);
 
   const definition = body.mappedCallInputs.definition;
-  assert.equal(definition.materialSource, 'STORE_ZERO');
-  assert.equal(definition.rawStockLengthIn, undefined);
-  assert.equal(definition.preparation, undefined);
-  assert.equal(definition.definedWorkpieceLengthIn, 60);
-  assert.equal(definition.productionSawCuts, 3);
-  assert.equal(definition.totalModeledSawCuts, 3);
+  assert.equal(definition.materialSource, 'STORE_SELECTED');
+  assert.equal(definition.definedWorkpieceLengthIn, undefined);
+  assert.equal(definition.finishedPartLengthIn, 16);
+  assert.equal(definition.finishedPartQuantity, 2);
   assert.equal(definition.sawAngleDeg, 30);
   assert.equal(definition.drillCycles, 0);
   assert.equal(definition.cutPlane, 'miter-face');
   assert.equal(definition.endIdentity, 'both');
   assert.equal(definition.endRelation, 'parallel');
   assert.equal(definition.lengthDatum, 'long-long-outer-edge');
+  assert.equal(definition.selectedParentPlan.selected.parentStockLengthIn, 72);
   assert.equal(definition.spotDemand.mode, 'SPOT_ON_LOCATION');
   assert.equal(definition.spotDemand.locationAlongLengthIn, 8);
   assert.equal(definition.spotDemand.totalCount, 2);
@@ -97,28 +104,24 @@ test('user-defined X-brace keeps 60-in project truth and carries depth-defined s
   assert.ok(definition.unresolvedConditions.includes('SPOT_TOOL_POINT_GEOMETRY_REQUIRED'));
   assert.ok(definition.unresolvedConditions.includes('SPOT_CYCLE_TIME_APPLICABILITY_UNRESOLVED'));
 
-  assert.equal(body.materialResolution.status, 'UNRESOLVED');
-  assert.equal(body.materialResolution.workpieceLengthIn, 60);
-  assert.equal(body.materialResolution.pricingReferenceSku, PUBLISHED_BOARD_SKU);
-  assert.equal(body.materialResolution.pricingReferenceStockLengthIn, 72);
-  assert.equal(body.materialResolution.allocationClaimed, false);
-
-  assert.equal(body.mappedCallInputs.estimate.definedWorkpieceLengthIn, 60);
-  assert.equal(body.mappedCallInputs.estimate.sawCuts, 3);
-  assert.equal(body.mappedCallInputs.estimate.drillCycles, 0);
+  assert.equal(body.mappedCallInputs.estimate.plan.selected.parentStockLengthIn, 72);
+  assert.equal(body.mappedCallInputs.estimate.plan.accounting.productionSawCuts, 3);
+  assert.equal(body.mappedCallInputs.estimate.plan.accounting.preparationSawCuts, 0);
+  assert.equal(body.mappedCallInputs.estimate.drillCycles, undefined);
   assert.equal(body.mappedCallInputs.estimate.spotCycles, 2);
 
   assert.equal(body.rawEstimate.status, 'PARTIAL_BUDGETARY_ESTIMATE');
+  assert.equal(body.rawEstimate.operationAccounting.totalModeledSawCuts, 3);
   assert.equal(body.rawEstimate.totals.material, 3.13);
-  assert.equal(body.rawEstimate.cycle.T_job_min, 9.694);
-  assert.equal(body.rawEstimate.totals.cell_recovery, 51.16);
-  assert.equal(body.rawEstimate.totals.Q, 54.29);
+  assert.equal(body.rawEstimate.cycle.T_job_min, 9.686);
+  assert.equal(body.rawEstimate.totals.cell_recovery, 51.14);
+  assert.equal(body.rawEstimate.totals.Q, 54.27);
   assert.equal(body.rawEstimate.totals.Q_basis, 'PARTIAL_CALCULATED');
   assert.equal(body.priceCompleteness.status, 'PARTIAL');
   assert.ok(body.priceCompleteness.unresolvedConditions.includes('SPOT_TOOL_POINT_GEOMETRY_REQUIRED'));
   assert.ok(body.priceCompleteness.unresolvedConditions.includes('SPOT_CYCLE_TIME_APPLICABILITY_UNRESOLVED'));
   assert.equal(body.attributedBasis.pricingEngine.id, 'STB-STORE-ZERO-PRICE-1');
-  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.4');
+  assert.equal(body.attributedBasis.pricingEngine.version, '0.3.0');
   assert.equal(body.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.4');
   assert.equal(body.attributedBasis.envelope.spot.fullDiameterPenetrationIn, 0.1875);
 });
@@ -158,8 +161,10 @@ test('missing User 1 spot location remains UNRESOLVED and preserves both locatio
   const body = parseJson(response);
   assert.equal(body.rawEvaluation.status, 'UNRESOLVED');
   assert.equal(body.rawEstimate.status, 'PARTIAL_BUDGETARY_ESTIMATE');
-  assert.equal(body.materialResolution.status, 'UNRESOLVED');
-  assert.equal(body.materialResolution.reason, 'CAPABILITY_INPUT_UNRESOLVED');
+  assert.equal(body.materialResolution.status, 'MAPPED');
+  assert.equal(body.materialResolution.reason, 'MAPPED_WITH_UNRESOLVED_OPERATION_DETAIL');
+  assert.equal(body.materialResolution.pricingReferenceSku, PUBLISHED_BOARD_SKU);
+  assert.equal(body.materialResolution.plan.accounting.productionSawCuts, 3);
   assert.ok(body.materialResolution.unresolvedConditions.includes('SPOT_LOCATION_REQUIRED'));
   assert.ok(body.materialResolution.unresolvedConditions.includes('SPOT_TOOL_POINT_GEOMETRY_REQUIRED'));
   assert.ok(body.priceCompleteness.unresolvedConditions.includes('SPOT_LOCATION_REQUIRED'));
