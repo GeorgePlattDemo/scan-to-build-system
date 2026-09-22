@@ -194,6 +194,9 @@ This is a later durability checkpoint. It does not rewrite the earlier frozen id
 7. If Store authority changes, the static Review surface fails closed with `STORE_AUTHORITY_CHANGED`; it does not calculate a replacement price in the browser.
 8. If the current Store answer differs from the answer displayed before submission, downstream handoff stops and requires the current answer to be reviewed again.
 9. No app-side Store surrogate, cached-price shortcut, one-use confirmation guard, or second pricing engine may replace this rule.
+10. The formal System `USER_DEFINED_BOARD_V1` HTTP handler must use the Store fresh-request API; direct use of the raw dimensional evaluator is diagnostic/test-only and cannot serve the formal request path.
+11. The browser must reject a Job 1 Store response unless it carries `freshEvaluation: true` and a matching fresh-evaluation receipt for the same request and current Store revision.
+12. A direct Job 1 Store issue may not deduplicate to an older request. Exact network retries may remain retry/idempotency-safe, but each actual Store attempt still executes the governing Store evaluation again.
 
 **Definition identity may remain durable. Store validity is re-established per request.**
 
