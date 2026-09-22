@@ -2,7 +2,7 @@
 
 Current source root:
 
-`GeorgePlattDemo/scan-to-build-store@95c639a1d0d4812df097ad1eb628594b38f921de`
+`GeorgePlattDemo/scan-to-build-store@f88ccaf9a2624899e255e66b51111e2b02309dad`
 
 ## Documentary sources
 
@@ -16,7 +16,7 @@ Current source root:
 | `STORE-ASSET-TO-IMPLEMENTATION-MAP.md` | maps existing Store assets/gaps to implementation | reference/planning source |
 | `STB-STORE-CELL-STAGES-0.1.md` | current Stage 1–4 evidence vocabulary | copied exactly into this repo |
 | `D-001-STAGE2-ENVELOPE-0.1.md` | declared Stage-2 D-001 reference envelope | local snapshot / provenance; current executable Store authority is the exact Store pin above |
-| `DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md` | governing dimensional Store chain: definition → capability → motion → time → price; same evaluator before and after confirmation | controlling rule for complete dimensional Q on the pinned User 1 candidate path |
+| `DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md` | governing dimensional Store chain: definition → capability → motion → time → price; same evaluator before and after confirmation | controlling rule for complete dimensional Q on the pinned User 1 path; every formal Store request reevaluates current Store state and receives a fresh evaluation receipt |
 
 ## Stage-2 implementation sources
 
@@ -39,7 +39,7 @@ The copied files under `docs/store/current/` are source evidence. New current St
 
 ## 2026-09-22 User 1 travel-standard checkpoint
 
-Exact Store SHA `95c639a1d0d4812df097ad1eb628594b38f921de` passed workflow run `35757052553`.
+Exact Store SHA `f88ccaf9a2624899e255e66b51111e2b02309dad` passed workflow run `35768861705`.
 
 Verified on that SHA:
 - User 1 resolves one 60 in defined SPF 2x4 workpiece against Store SKU `STB-ZERO-SPF-2X4-72-001` without redefining the project as 72 in.
