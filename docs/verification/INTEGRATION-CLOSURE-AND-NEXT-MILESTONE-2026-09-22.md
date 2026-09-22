@@ -46,6 +46,36 @@ The currently reviewed User 1 and Window Seat reference-evaluation routes are sy
 
 This closure therefore proves identity mismatch detection and cross-project isolation. A delayed-old-response concurrency test belongs only at a future Store boundary that actually introduces asynchronous transport. No asynchronous machinery is to be invented merely to claim such a test.
 
+## Closure working heads after verification hardening
+
+These are the reviewable unpromoted working heads after the closure pass:
+
+- Store: `7303793620d0ceda509810a661d11e6c31c7d59f` — unchanged from the reviewed Store candidate; no closure-only Store commit was manufactured.
+- System: `b9ab8e38114dbdfc6ee8a733aa96881e7d14d30e` — closure documentation + `START-HERE.md` source-identity correction.
+- Review: `56f9741d7d86637652344ab10f433eb77443a0df` — verification hardening only: exact-source Window Seat parity, S-001 edit/recompute coverage, cross-project isolation, pinned browser-test environment, cause-specific fault checks.
+
+No `main` ref, promoted public link, deployment target, or physical authority was changed by this closure work.
+
+## Deferred Window Seat projection issue
+
+Read-only inspection during the new edit/revision test exposed a narrow UI projection issue in frozen Window Seat `0.7.4`:
+
+- after a revision has been confirmed and the user returns to Guided Configure;
+- a consequential new edit correctly advances the underlying revision;
+- the live definition and Store reference recompute;
+- the prior held Store answer is correctly marked historical underneath;
+- but the Guided Configure review projection is not automatically rerendered while Guided mode remains active, so the old confirmed-button projection can remain visible until that projection is explicitly refreshed.
+
+This is **not** being patched silently in `0.7.4`. Existing preservation tests intentionally freeze the `0.7.4` artifact and its cache identity. If corrected, it should be an explicit Window Seat `0.7.5` change with:
+
+1. a single local projection-refresh correction;
+2. a new artifact/cache identity;
+3. the relevant preservation locks intentionally advanced;
+4. a browser test covering confirm → return to Configure → edit → reconfirm;
+5. no Store model, project geometry, actor order, or authority change.
+
+The current closure tests therefore exercise supported pre-confirm edits/recompute/confirmation without mutating frozen `0.7.4`.
+
 ## Promotion checklist — not executed here
 
 1. **Store:** integrate the reviewed Store candidate and record the resulting Store commit.
