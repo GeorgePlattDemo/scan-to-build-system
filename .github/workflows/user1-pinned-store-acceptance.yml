@@ -58,6 +58,7 @@ jobs:
 
       - name: Prove the acceptance catches the unrepaired checkpoint
         run: |
+          git fetch origin 228e005d565ab918c5c3be52efc0bf3e99d2f5d7 --depth=1
           mkdir -p before-system
           git archive 228e005d565ab918c5c3be52efc0bf3e99d2f5d7 | tar -x -C before-system
           mkdir -p before-system/apps/stb/test/acceptance
