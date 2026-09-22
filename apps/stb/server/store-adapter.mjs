@@ -145,6 +145,24 @@ function storeBasis({ modules, offering, evaluation, estimate }) {
           basis: modules.D001_STAGE2_ENVELOPE.basis,
           measured: modules.D001_STAGE2_ENVELOPE.measured === true,
           commissioned: modules.D001_STAGE2_ENVELOPE.commissioned === true,
+          spot: modules.D001_STAGE2_ENVELOPE.spot
+            ? {
+                operation: modules.D001_STAGE2_ENVELOPE.spot.operation,
+                operationContract: modules.D001_STAGE2_ENVELOPE.spot.operationContract,
+                toolDefinitionId: modules.D001_STAGE2_ENVELOPE.spot.toolDefinitionId,
+                toolDiameterIn: modules.D001_STAGE2_ENVELOPE.spot.toolDiameterIn,
+                fullDiameterPenetrationIn:
+                  modules.D001_STAGE2_ENVELOPE.spot.fullDiameterPenetrationIn,
+                depthReference: modules.D001_STAGE2_ENVELOPE.spot.depthReference,
+                pointAngleDeg: modules.D001_STAGE2_ENVELOPE.spot.pointAngleDeg,
+                pointAxialLengthIn: modules.D001_STAGE2_ENVELOPE.spot.pointAxialLengthIn,
+                pointGeometryStatus: modules.D001_STAGE2_ENVELOPE.spot.pointGeometryStatus,
+                totalTipPenetrationIn:
+                  modules.D001_STAGE2_ENVELOPE.spot.totalTipPenetrationIn,
+                customerDepthProgrammingRequired:
+                  modules.D001_STAGE2_ENVELOPE.spot.customerDepthProgrammingRequired,
+              }
+            : null,
         }
       : envelope
         ? { id: envelope.envelope ?? envelope.id ?? null }
@@ -263,6 +281,17 @@ export async function createStoreAdapter({
       await hooks.beforeEstimate(spec);
     }
     return loaded.modules.estimateJob(runtimeCatalog, spec);
+  }
+
+  async function runBoardSequenceEstimate(runtimeCatalog, spec) {
+    instrumentation.estimateCalls += 1;
+    if (hooks.failEstimate) {
+      throw new Error('injected estimate failure');
+    }
+    if (typeof hooks.beforeEstimate === 'function') {
+      await hooks.beforeEstimate(spec);
+    }
+    return loaded.modules.estimateBoardSequence(runtimeCatalog, spec);
   }
 
   async function handleJob(envelope, jobPayload, options = {}) {
@@ -429,10 +458,10 @@ export async function createStoreAdapter({
     let estimateAssociationId = null;
     let estimateError = null;
 
-    if (rawEvaluation.status === 'SUPPORTABLE' && item) {
-      const angleRadians = (line.sawAngleDeg * Math.PI) / 180;
-      const sawTraverseIn =
-        line.sawAngleDeg > 0 ? item.actualW / Math.cos(angleRadians) : item.actualW;
+    if (
+      item &&
+      (rawEvaluation.status === 'SUPPORTABLE' || rawEvaluation.status === 'UNRESOLVED')
+    ) {
       const spotCycles =
         line.spotDemand && line.spotDemand.required !== false
           ? Number(line.spotDemand.totalCount ?? line.spotDemand.countPerPart ?? 0)
@@ -440,22 +469,17 @@ export async function createStoreAdapter({
       estimateInput = {
         title,
         classId: 'app.user-defined-board.v1',
-        pieces: [
-          {
-            storeSku: item.storeSku,
-            qty: 1,
-            keptLengthIn: line.definedWorkpieceLengthIn,
-            widthIn: item.actualW,
-            sawCuts: line.sawCuts,
-            sawTraverseIn,
-            holes: line.drillCycles,
-            spots: Number.isFinite(spotCycles) ? Math.max(0, spotCycles) : 0,
-            depthIn: line.drillCycles > 0 ? line.drillDepthIn : 0,
-          },
-        ],
+        storeSku: item.storeSku,
+        qty: 1,
+        definedWorkpieceLengthIn: line.definedWorkpieceLengthIn,
+        sawCuts: line.sawCuts,
+        sawAngleDeg: line.sawAngleDeg,
+        drillCycles: line.drillCycles,
+        spotCycles: Number.isFinite(spotCycles) ? Math.max(0, spotCycles) : 0,
+        drillReferenceDepthIn: line.drillCycles > 0 ? line.drillDepthIn : 0,
       };
       try {
-        rawEstimate = await runEstimate(runtimeCatalog, estimateInput);
+        rawEstimate = await runBoardSequenceEstimate(runtimeCatalog, estimateInput);
         estimateDigest = await digestCanonical(estimateInput);
         estimateAssociationId = opaqueId();
       } catch (error) {
@@ -470,8 +494,16 @@ export async function createStoreAdapter({
     const capabilityUnresolved =
       rawEvaluation?.lines?.flatMap((entry) => entry?.capability?.unresolved ?? []) ?? [];
     const materialUnresolved = collectMaterialResolutionUnresolved(materialResolution);
+    const estimateUnresolved = Array.isArray(rawEstimate?.unresolved)
+      ? rawEstimate.unresolved
+      : [];
     const priceUnresolved = [
-      ...new Set([...unresolvedConditions, ...materialUnresolved, ...capabilityUnresolved]),
+      ...new Set([
+        ...unresolvedConditions,
+        ...materialUnresolved,
+        ...capabilityUnresolved,
+        ...estimateUnresolved,
+      ]),
     ];
     const priceCompleteness = {
       status:
@@ -521,6 +553,32 @@ export async function createStoreAdapter({
             endRelation: line.endRelation,
             lengthDatum: line.lengthDatum,
             spotDemand: line.spotDemand,
+            spotOperation:
+              line.spotDemand && loaded.modules.D001_STAGE2_ENVELOPE?.spot
+                ? {
+                    operation: loaded.modules.D001_STAGE2_ENVELOPE.spot.operation,
+                    operationContract:
+                      loaded.modules.D001_STAGE2_ENVELOPE.spot.operationContract,
+                    toolDefinitionId:
+                      loaded.modules.D001_STAGE2_ENVELOPE.spot.toolDefinitionId,
+                    toolDiameterIn:
+                      loaded.modules.D001_STAGE2_ENVELOPE.spot.toolDiameterIn,
+                    fullDiameterPenetrationIn:
+                      loaded.modules.D001_STAGE2_ENVELOPE.spot.fullDiameterPenetrationIn,
+                    depthReference:
+                      loaded.modules.D001_STAGE2_ENVELOPE.spot.depthReference,
+                    pointAngleDeg:
+                      loaded.modules.D001_STAGE2_ENVELOPE.spot.pointAngleDeg,
+                    pointAxialLengthIn:
+                      loaded.modules.D001_STAGE2_ENVELOPE.spot.pointAxialLengthIn,
+                    pointGeometryStatus:
+                      loaded.modules.D001_STAGE2_ENVELOPE.spot.pointGeometryStatus,
+                    totalTipPenetrationIn:
+                      loaded.modules.D001_STAGE2_ENVELOPE.spot.totalTipPenetrationIn,
+                    customerDepthProgrammingRequired:
+                      loaded.modules.D001_STAGE2_ENVELOPE.spot.customerDepthProgrammingRequired,
+                  }
+                : null,
             unresolvedConditions: priceUnresolved,
           },
           materialResolution: {
