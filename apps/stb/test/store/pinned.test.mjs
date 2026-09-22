@@ -194,6 +194,18 @@ test('user-defined 18-in same-span demand falls through 60 and selects Store 72'
   assert.equal(body.rawEstimate.travel.finalRemainderIn, 35.625);
   assert.equal(body.evaluationReceipt.authority.storeRevision, STORE_PIN);
   assert.equal(body.materialResolution.materialDemand.species, 'spf');
+  console.log('JOB1_18_DIAGNOSTIC', JSON.stringify({
+    storePin: body.evaluationReceipt.authority.storeRevision,
+    materialResolution: body.materialResolution,
+    cycle: body.rawEstimate.cycle,
+    totals: body.rawEstimate.totals,
+    travel: {
+      derivedSawCuts: body.rawEstimate.travel.derivedSawCuts,
+      derivedSpotCount: body.rawEstimate.travel.derivedSpotCount,
+      finalRemainderIn: body.rawEstimate.travel.finalRemainderIn
+    },
+    calculationIdentity: body.calculationIdentity
+  }));
   assert.equal(adapter.instrumentation.evaluationCalls, 0);
   assert.equal(adapter.instrumentation.estimateCalls, 0);
 });
