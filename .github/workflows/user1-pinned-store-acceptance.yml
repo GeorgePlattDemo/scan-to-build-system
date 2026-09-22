@@ -78,7 +78,7 @@ jobs:
           set -e
           cat "$RUNNER_TEMP/user1-before.log"
           test "$rc" -ne 0
-          grep -q "finished-member demand" "$RUNNER_TEMP/user1-before.log"
+          grep -Fq "FAULT_TARGET_FINISHED_DEMAND_CONTRACT" "$RUNNER_TEMP/user1-before.log"
 
 
   fault-detection:
