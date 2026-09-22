@@ -413,7 +413,7 @@ export const USER_DEFINED_BOARD_DEFINITION = Object.freeze({
   maxWorkpieceInches: 60,
   quantity: 1,
   quantityUnit: 'ea',
-  allowedOps: Object.freeze(['CROSSCUT', 'MITER_LIMITED', 'DRILL']),
+  allowedOps: Object.freeze(['CROSSCUT', 'MITER_LIMITED', 'SPOT_ON_LOCATION', 'DRILL']),
   occurrenceRole: 'user-defined-board-workpiece',
 });
 
