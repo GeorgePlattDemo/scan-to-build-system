@@ -54,10 +54,13 @@ test('Confirmation invokes Store again and compares returned calculation identit
 
 
 test('Job 1 client cannot reuse an old request or accept a receiptless Store answer', () => {
+  assert.match(storeClient, /const alwaysFresh =/);
+  assert.match(storeClient, /requestType === STORE_REQUEST_TYPES\.USER_DEFINED_BOARD_V1/);
+  assert.match(storeClient, /requestType === STORE_REQUEST_TYPES\.ALCOVE_INSERT_V1/);
   assert.match(
     storeClient,
-    /requestType !== STORE_REQUEST_TYPES\.USER_DEFINED_BOARD_V1/,
-    'a new Job 1 Store issue can still dedupe to old request history',
+    /if \(!input\.refresh && !alwaysFresh\)/,
+    'a formal Job 1 or Alcove Store issue can still dedupe to old request history',
   );
   assert.match(storeClient, /evaluationReceipt:/);
   assert.match(storeWire, /store-evaluation-not-fresh/);
