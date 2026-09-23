@@ -154,7 +154,7 @@ test('Alcove multi-line Store answer shows both board families and leaves Q unre
   await expect(page.locator('[data-store-line]')).toHaveCount(2);
   await expect(page.locator('[data-store-line="ALCOVE-UPRIGHT-PARENTS"]')).toContainText('STB-ZERO-PINE-1X6-72-001');
   await expect(page.locator('[data-store-line="ALCOVE-SHELF-PARENTS"]')).toContainText('STB-ZERO-PINE-1X6-96-001');
-  await expect(page.locator('[data-store-material]')).toHaveText('$272.86');
+  await expect(page.locator('[data-store-material]')).toHaveAttribute('data-store-material', '$272.86');
   await expect(page.locator('[data-store-q]')).toHaveAttribute('data-store-q', 'none');
 });
 
