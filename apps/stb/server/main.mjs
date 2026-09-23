@@ -167,7 +167,7 @@ async function readRequestBody(req, maxBytes) {
   return Buffer.concat(chunks);
 }
 
-async function handleStorePost(req, res, adapter) {
+export async function handleStorePost(req, res, adapter) {
   if (!isJsonContentType(req.headers['content-type'])) {
     try {
       await readRequestBody(req, MAX_STORE_REQUEST_BYTES);
