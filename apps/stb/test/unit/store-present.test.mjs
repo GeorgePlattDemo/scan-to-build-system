@@ -233,7 +233,7 @@ test('Alcove partial Store answer preserves both material lines and never invent
     rawOffering: null,
     rawEvaluation: {
       status: 'UNRESOLVED',
-      unresolvedConditions: ['ALCOVE_WHOLE_BOARD_TRAVEL_STANDARD_REQUIRED'],
+      unresolvedConditions: ['ALCOVE_COMPONENT_PROGRAMS_REQUIRED'],
       lines: [
         {
           requirementId: 'ALCOVE-UPRIGHT-PARENTS',
@@ -274,7 +274,7 @@ test('Alcove partial Store answer preserves both material lines and never invent
         machine_service: null,
         Q: null,
       },
-      unresolvedConditions: ['ALCOVE_WHOLE_BOARD_TRAVEL_STANDARD_REQUIRED'],
+      unresolvedConditions: ['ALCOVE_COMPONENT_PROGRAMS_REQUIRED'],
     },
   });
   const view = presentStoreAnswer(applicabilityFrom(env));
@@ -291,7 +291,7 @@ test('Alcove partial Store answer preserves both material lines and never invent
   assert.equal(view.estimate.hardwareDisplay, '$18.00');
   assert.equal(view.q, null);
   assert.equal(view.qDisplay, null);
-  assert.ok(view.reasons.includes('ALCOVE_WHOLE_BOARD_TRAVEL_STANDARD_REQUIRED'));
+  assert.ok(view.reasons.includes('ALCOVE_COMPONENT_PROGRAMS_REQUIRED'));
 });
 
 test('transport and adapter diagnostics are not Store job enums', () => {
