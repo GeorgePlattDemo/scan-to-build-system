@@ -1,0 +1,17 @@
+FROM node:22.23.2-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/scan-to-build/apps/stb
+
+COPY apps/stb/package.json apps/stb/package-lock.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
+
+COPY apps/stb ./
+
+ENV HOST=0.0.0.0
+EXPOSE 4317
+
+CMD ["npm", "run", "start:hosted-store"]
