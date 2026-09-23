@@ -62,6 +62,23 @@ const CANDIDATE_STATIC_ASSETS = Object.freeze({
 
 export { isAllowedHost, isAllowedOrigin };
 
+const REVIEW_STORE_ORIGIN = 'https://georgeplattdemo.github.io';
+
+function isReviewStoreOrigin(origin, pathname) {
+  return origin === REVIEW_STORE_ORIGIN && isStorePath(pathname);
+}
+
+function applyReviewStoreCors(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', REVIEW_STORE_ORIGIN);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Max-Age', '600');
+  res.setHeader('Vary', 'Origin, Access-Control-Request-Private-Network');
+  if (req.headers['access-control-request-private-network'] === 'true') {
+    res.setHeader('Access-Control-Allow-Private-Network', 'true');
+  }
+}
+
 export function resolveStaticAsset(requestUrl) {
   if (typeof requestUrl !== 'string' || requestUrl.length === 0) {
     return null;
@@ -256,13 +273,27 @@ async function handleRequest(req, res, adapter, publishedJobAdapter) {
     return;
   }
 
-  if (req.headers.origin !== undefined && !isAllowedOrigin(req.headers.origin)) {
+  const rawPath = extractRawPath(req.url ?? '');
+  const pathname = rawPath === null ? '' : rawPath.split('?')[0];
+  const reviewStoreOrigin = isReviewStoreOrigin(req.headers.origin, pathname);
+
+  if (
+    req.headers.origin !== undefined &&
+    !isAllowedOrigin(req.headers.origin) &&
+    !reviewStoreOrigin
+  ) {
     sendText(res, 403, 'Forbidden origin');
     return;
   }
 
-  const rawPath = extractRawPath(req.url ?? '');
-  const pathname = rawPath === null ? '' : rawPath.split('?')[0];
+  if (reviewStoreOrigin) {
+    applyReviewStoreCors(req, res);
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+  }
 
   if (pathname === PUBLISHED_JOB_PATH) {
     if (req.method === 'POST') {
