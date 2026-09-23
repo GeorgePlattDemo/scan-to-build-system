@@ -570,6 +570,7 @@ function validateAlcoveInsertPayload(payload) {
     'configurationVersion',
     'materialDemand',
     'boardRequirements',
+    'componentPrograms',
     'hardwareDemand',
     'spotDemand',
     'unresolvedConditions',
@@ -662,6 +663,115 @@ function validateAlcoveInsertPayload(payload) {
       requiredOps: [...raw.requiredOps],
       carriesSpotDemand: raw.carriesSpotDemand === true,
     });
+  }
+
+  const componentPrograms = [];
+  if (definition.componentPrograms != null) {
+    if (!Array.isArray(definition.componentPrograms)) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove componentPrograms must be an array');
+    }
+    const componentIds = new Set();
+    for (const raw of definition.componentPrograms) {
+      if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'each Alcove component program must be an object');
+      }
+      const allowedComponent = new Set([
+        'componentId',
+        'requirementId',
+        'finishedLengthIn',
+        'finishedWidthIn',
+        'features',
+      ]);
+      if (Object.keys(raw).some((key) => !allowedComponent.has(key))) {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected Alcove component program fields');
+      }
+      const componentIdError = requireNonemptyString('componentId', raw.componentId);
+      const requirementIdError = requireNonemptyString('component.requirementId', raw.requirementId);
+      if (componentIdError || requirementIdError || componentIds.has(raw.componentId)) {
+        return fail(
+          ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+          'Alcove componentId must be nonempty and unique and requirementId must be nonempty',
+        );
+      }
+      componentIds.add(raw.componentId);
+      if (!requirementIds.has(raw.requirementId)) {
+        return fail(
+          ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+          'Alcove component requirementId must refer to a declared board requirement',
+        );
+      }
+      if (!Number.isFinite(raw.finishedLengthIn) || raw.finishedLengthIn <= 0) {
+        return fail(
+          ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+          'Alcove component finishedLengthIn must be positive and finite',
+        );
+      }
+      if (!Number.isFinite(raw.finishedWidthIn) || raw.finishedWidthIn <= 0) {
+        return fail(
+          ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+          'Alcove component finishedWidthIn must be positive and finite',
+        );
+      }
+      if (!Array.isArray(raw.features)) {
+        return fail(
+          ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+          'Alcove component features must be an array',
+        );
+      }
+      const featureIds = new Set();
+      const componentFeatures = [];
+      for (const feature of raw.features) {
+        if (feature === null || typeof feature !== 'object' || Array.isArray(feature)) {
+          return fail(
+            ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+            'each Alcove component feature must be an object',
+          );
+        }
+        const allowedFeature = new Set([
+          'featureId',
+          'kind',
+          'pathLengthIn',
+          'yIn',
+          'totalDepthIn',
+        ]);
+        if (Object.keys(feature).some((key) => !allowedFeature.has(key))) {
+          return fail(
+            ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+            'unexpected Alcove component feature fields',
+          );
+        }
+        const featureIdError = requireNonemptyString('component featureId', feature.featureId);
+        if (featureIdError || featureIds.has(feature.featureId)) {
+          return fail(
+            ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+            'Alcove component featureId must be nonempty and unique within its component',
+          );
+        }
+        featureIds.add(feature.featureId);
+        if (feature.kind !== 'MILL_LONGITUDINAL_PROFILE') {
+          return fail(
+            ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+            'Alcove component features currently carry only MILL_LONGITUDINAL_PROFILE demand',
+          );
+        }
+        for (const key of ['pathLengthIn', 'yIn', 'totalDepthIn']) {
+          if (!Number.isFinite(feature[key]) || feature[key] <= 0) {
+            return fail(
+              ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+              'Alcove milling feature geometry must be positive and finite',
+            );
+          }
+        }
+        componentFeatures.push({ ...feature });
+      }
+      componentPrograms.push({
+        componentId: raw.componentId,
+        requirementId: raw.requirementId,
+        finishedLengthIn: raw.finishedLengthIn,
+        finishedWidthIn: raw.finishedWidthIn,
+        features: componentFeatures,
+      });
+    }
   }
 
   let hardwareDemand = null;
@@ -767,6 +877,7 @@ function validateAlcoveInsertPayload(payload) {
       configurationVersion: definition.configurationVersion,
       materialDemand: { ...material },
       boardRequirements,
+      componentPrograms,
       hardwareDemand,
       spotDemand,
       unresolvedConditions: [...(definition.unresolvedConditions ?? [])],
@@ -1042,6 +1153,7 @@ export function alcoveInsertJobPayload({
   configurationVersion,
   materialDemand,
   boardRequirements,
+  componentPrograms = [],
   hardwareDemand = null,
   spotDemand = null,
   unresolvedConditions = [],
@@ -1053,6 +1165,7 @@ export function alcoveInsertJobPayload({
       configurationVersion,
       materialDemand: structuredClone(materialDemand),
       boardRequirements: structuredClone(boardRequirements),
+      componentPrograms: structuredClone(componentPrograms),
       hardwareDemand: hardwareDemand == null ? null : structuredClone(hardwareDemand),
       spotDemand: spotDemand == null ? null : structuredClone(spotDemand),
       unresolvedConditions: [...unresolvedConditions],
