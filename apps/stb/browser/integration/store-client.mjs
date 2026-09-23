@@ -10,7 +10,9 @@ import {
 import { canonicalEqual, canonicalJson } from '/shared/canonical.mjs';
 import {
   APP_DIAGNOSTICS,
+  alcoveInsertDemandSignature,
   boardDemandSignature,
+  buildAlcoveInsertRequest,
   buildJobRequest,
   buildOfferingRequest,
   buildUserDefinedBoardRequest,
@@ -552,6 +554,19 @@ export async function issueStoreQuestion(input) {
       demandSignature,
       payload,
     });
+  } else if (requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1) {
+    const demandSignature =
+      input.demandSignature ?? (await alcoveInsertDemandSignature(payload));
+    wire = await buildAlcoveInsertRequest({
+      requestId,
+      projectId,
+      candidateRevisionId,
+      attemptId,
+      attemptNumber: 1,
+      sentAt: createdAt,
+      demandSignature,
+      payload,
+    });
   } else if (requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
     const demandSignature =
       input.demandSignature ?? (await userDefinedBoardDemandSignature(payload));
@@ -569,11 +584,13 @@ export async function issueStoreQuestion(input) {
     throw new Error('unsupported Store requestType');
   }
 
-  // A direct USER_DEFINED_BOARD_V1 issue is a formal Store submission.
-  // It must always create a new request. Automatic coordinators may decide not
-  // to issue at all when a current answer is already displayed, but once this
-  // function is called for Job 1 it cannot collapse the action to old history.
-  if (!input.refresh && requestType !== STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
+  // Direct dimensional and Alcove issues are formal Store submissions.
+  // They always create a fresh request because current material, stock, price,
+  // capability, and refusal state belong to Store at request time.
+  const alwaysFresh =
+    requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1 ||
+    requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1;
+  if (!input.refresh && !alwaysFresh) {
     const duplicate = await findDuplicateRequest(
       localRecordId,
       candidateRevisionId,
@@ -678,6 +695,17 @@ export async function retryStoreAttempt({ localRecordId, requestId, actionId, cl
       attemptId,
       attemptNumber,
       sentAt: createdAt,
+      payload,
+    });
+  } else if (request.payload.requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1) {
+    wire = await buildAlcoveInsertRequest({
+      requestId,
+      projectId: project.projectId,
+      candidateRevisionId: request.payload.candidateRevisionId,
+      attemptId,
+      attemptNumber,
+      sentAt: createdAt,
+      demandSignature: request.payload.demandSignature,
       payload,
     });
   } else if (request.payload.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
