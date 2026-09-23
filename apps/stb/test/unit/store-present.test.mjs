@@ -228,6 +228,72 @@ test('UNRESOLVED missing price never becomes a successful Q', () => {
   assert.equal(view.qDisplay, null);
 });
 
+test('Alcove partial Store answer preserves both material lines and never invents Q', () => {
+  const env = envelope({
+    rawOffering: null,
+    rawEvaluation: {
+      status: 'UNRESOLVED',
+      unresolvedConditions: ['ALCOVE_WHOLE_BOARD_TRAVEL_STANDARD_REQUIRED'],
+      lines: [
+        {
+          requirementId: 'ALCOVE-UPRIGHT-PARENTS',
+          role: 'UPRIGHTS',
+          status: 'SUPPORTABLE',
+          storeSku: 'STB-ZERO-PINE-1X6-72-001',
+          qty: 4,
+          demandedStockLengthIn: 72,
+          keptLengthIn: 65,
+          requiredOps: ['CROSSCUT'],
+          stock: { status: 'ON_HAND_SUFFICIENT', available: 27, qtyNeeded: 4 },
+          price: { status: 'STORE_ZERO_SELLING_PRICE', sellingPrice: 6.94 },
+          capability: { status: 'SUPPORTABLE' },
+          extension: 27.76,
+        },
+        {
+          requirementId: 'ALCOVE-SHELF-PARENTS',
+          role: 'SHELVES',
+          status: 'SUPPORTABLE',
+          storeSku: 'STB-ZERO-PINE-1X6-96-001',
+          qty: 10,
+          demandedStockLengthIn: 96,
+          keptLengthIn: 44,
+          requiredOps: ['CROSSCUT'],
+          stock: { status: 'ON_HAND_SUFFICIENT', available: 43, qtyNeeded: 10 },
+          price: { status: 'STORE_ZERO_SELLING_PRICE', sellingPrice: 24.51 },
+          capability: { status: 'SUPPORTABLE' },
+          extension: 245.10,
+        },
+      ],
+    },
+    rawEstimate: {
+      status: 'PARTIAL_BUDGETARY_ESTIMATE',
+      complete: false,
+      totals: {
+        material: 272.86,
+        hardware: 18,
+        machine_service: null,
+        Q: null,
+      },
+      unresolvedConditions: ['ALCOVE_WHOLE_BOARD_TRAVEL_STANDARD_REQUIRED'],
+    },
+  });
+  const view = presentStoreAnswer(applicabilityFrom(env));
+  assert.equal(view.dispositionEnum, 'UNRESOLVED');
+  assert.equal(view.lines.length, 2);
+  assert.deepEqual(
+    view.lines.map((line) => [line.role, line.storeSku, line.qty, line.extensionDisplay]),
+    [
+      ['UPRIGHTS', 'STB-ZERO-PINE-1X6-72-001', 4, '$27.76'],
+      ['SHELVES', 'STB-ZERO-PINE-1X6-96-001', 10, '$245.10'],
+    ],
+  );
+  assert.equal(view.estimate.materialDisplay, '$272.86');
+  assert.equal(view.estimate.hardwareDisplay, '$18.00');
+  assert.equal(view.q, null);
+  assert.equal(view.qDisplay, null);
+  assert.ok(view.reasons.includes('ALCOVE_WHOLE_BOARD_TRAVEL_STANDARD_REQUIRED'));
+});
+
 test('transport and adapter diagnostics are not Store job enums', () => {
   const transport = presentStoreAnswer({
     status: APP_DIAGNOSTICS.APP_TRANSPORT_ERROR,
