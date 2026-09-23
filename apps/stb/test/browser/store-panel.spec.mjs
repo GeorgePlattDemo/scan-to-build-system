@@ -109,7 +109,7 @@ test('Alcove multi-line Store answer shows both board families and leaves Q unre
   applicability.response.payload.wrapperEnvelope.rawOffering = null;
   applicability.response.payload.wrapperEnvelope.rawEvaluation = {
     status: 'UNRESOLVED',
-    unresolvedConditions: ['ALCOVE_WHOLE_BOARD_TRAVEL_STANDARD_REQUIRED'],
+    unresolvedConditions: ['ALCOVE_COMPONENT_PROGRAMS_REQUIRED'],
     lines: [
       {
         requirementId: 'ALCOVE-UPRIGHT-PARENTS',
@@ -145,7 +145,7 @@ test('Alcove multi-line Store answer shows both board families and leaves Q unre
     status: 'PARTIAL_BUDGETARY_ESTIMATE',
     complete: false,
     totals: { material: 272.86, hardware: 18, machine_service: null, Q: null },
-    unresolvedConditions: ['ALCOVE_WHOLE_BOARD_TRAVEL_STANDARD_REQUIRED'],
+    unresolvedConditions: ['ALCOVE_COMPONENT_PROGRAMS_REQUIRED'],
   };
 
   await renderPanel(page, applicability);
