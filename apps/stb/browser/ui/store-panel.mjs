@@ -135,6 +135,44 @@ function compactEstimate(view) {
   return null;
 }
 
+function materialLinesSection(view) {
+  const lines = Array.isArray(view.lines) ? view.lines : [];
+  if (lines.length === 0) {
+    return null;
+  }
+  return el(
+    'section',
+    {
+      className: 'store-section',
+      attrs: { 'data-store-section': 'material-lines', 'aria-labelledby': 'store-lines-heading' },
+    },
+    [
+      el('h3', { attrs: { id: 'store-lines-heading' }, text: 'Store material lines' }),
+      ...lines.map((line) =>
+        el('article', {
+          className: 'store-material-line',
+          attrs: {
+            'data-store-line': line.requirementId ?? '',
+            'data-store-line-status': line.status ?? '',
+          },
+        }, [
+          fact('Role', line.role),
+          fact('Store SKU', line.storeSku),
+          fact('Quantity', line.qty),
+          fact('Demanded stock length', line.demandedStockLengthIn),
+          fact('Kept length', line.keptLengthIn),
+          fact('Required operations', line.requiredOps?.join(' · ')),
+          fact('Stock status', line.stock?.status),
+          fact('Available', line.stock?.available),
+          fact('Price / ea', line.price?.sellingPriceDisplay),
+          fact('Line extension', line.extensionDisplay),
+          fact('Capability', line.capability?.status),
+        ]),
+      ),
+    ],
+  );
+}
+
 function offeringSection(view) {
   const offering = view.offering;
   return el(
@@ -353,6 +391,7 @@ function fullBody(view) {
       : null,
     ...headlineBlock(view),
     retryControl(view),
+    showFacts ? materialLinesSection(view) : null,
     showFacts ? offeringSection(view) : null,
     showFacts ? stockSection(view) : null,
     showFacts ? capabilitySection(view) : null,
