@@ -567,6 +567,7 @@ export async function createStoreAdapter({
       configurationVersion: definition.configurationVersion,
       materialDemand: structuredClone(definition.materialDemand),
       boardRequirements: structuredClone(definition.boardRequirements),
+      componentPrograms: structuredClone(definition.componentPrograms ?? []),
       hardwareDemand: definition.hardwareDemand == null ? null : structuredClone(definition.hardwareDemand),
       spotDemand: definition.spotDemand == null ? null : structuredClone(definition.spotDemand),
       unresolvedConditions: [...(definition.unresolvedConditions ?? [])],
