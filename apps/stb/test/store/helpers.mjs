@@ -174,6 +174,55 @@ export async function userDefinedBoardJobBody({
   });
 }
 
+function alcoveComponentPrograms({
+  heightIn = 65,
+  depthIn = 14,
+  spanIn = 44,
+  shelfCount = 5,
+} = {}) {
+  const stockWidthIn = 5.5;
+  const across = Math.ceil(depthIn / stockWidthIn);
+  const programs = [];
+
+  for (let index = 0; index < 4; index += 1) {
+    programs.push({
+      componentId: 'ALCOVE-UPRIGHT-' + String(index + 1).padStart(2, '0'),
+      requirementId: 'ALCOVE-UPRIGHT-PARENTS',
+      finishedLengthIn: heightIn,
+      finishedWidthIn: stockWidthIn,
+      features: [],
+    });
+  }
+
+  for (let shelf = 0; shelf < shelfCount; shelf += 1) {
+    for (let strip = 0; strip < across; strip += 1) {
+      const remaining = depthIn - stockWidthIn * strip;
+      const finishedWidthIn = Math.min(stockWidthIn, Math.max(0, remaining));
+      const needsMill = finishedWidthIn < stockWidthIn - 1e-9;
+      programs.push({
+        componentId:
+          'ALCOVE-SHELF-' + String(shelf + 1).padStart(2, '0') +
+          '-STRIP-' + String(strip + 1).padStart(2, '0'),
+        requirementId: 'ALCOVE-SHELF-PARENTS',
+        finishedLengthIn: spanIn,
+        finishedWidthIn,
+        features: needsMill
+          ? [{
+              featureId:
+                'ALCOVE-SHELF-' + String(shelf + 1).padStart(2, '0') +
+                '-STRIP-' + String(strip + 1).padStart(2, '0') + '-RIP',
+              kind: 'MILL_LONGITUDINAL_PROFILE',
+              pathLengthIn: spanIn,
+              yIn: finishedWidthIn,
+              totalDepthIn: 0.75,
+            }]
+          : [],
+      });
+    }
+  }
+  return programs;
+}
+
 export async function alcoveInsertJobBody({
   requestId = crypto.randomUUID(),
   projectId = crypto.randomUUID(),
@@ -186,6 +235,8 @@ export async function alcoveInsertJobBody({
   heightIn = 65,
   shelfCount = 5,
   depthIn = 14,
+  spanIn = 44,
+  withPrograms = false,
   pilot = false,
   unresolvedConditions = [
     'FLOOR_SLOPE_RECORDED',
@@ -248,12 +299,15 @@ export async function alcoveInsertJobBody({
         requirementId: 'ALCOVE-SHELF-PARENTS',
         role: 'SHELVES',
         stockLengthIn: 96,
-        keptLengthIn: 44,
+        keptLengthIn: spanIn,
         qty: shelfParentQty,
         requiredOps: ['CROSSCUT'],
         carriesSpotDemand: false,
       },
     ],
+    componentPrograms: withPrograms
+      ? alcoveComponentPrograms({ heightIn, depthIn, spanIn, shelfCount })
+      : [],
     hardwareDemand: {
       storeSku: 'STB-ZERO-HW-ALCOVE-PACK-001',
       qty: 1,
