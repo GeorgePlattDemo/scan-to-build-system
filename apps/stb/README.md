@@ -81,7 +81,7 @@ Build 8 acceptance counts at this closeout:
 
 `test:vertical` proves NEW USER, RETURNING USER, and PROFESSIONAL converge on one Board architecture; 45 in then 46 in against the real pinned Store; review binding; truthful Result; close/reopen versus inert import; keyboard and narrow-viewport operation; and the absence of commercial or physical authority.
 
-Exact Store pin for this candidate branch: `0224e99f96dc65759bd7d3761d99e0708ad23e4a` (`GeorgePlattDemo/scan-to-build-store`, Store PR #9). Repin to the promoted Store main SHA before this System branch is merged.
+Exact Store pin for this candidate branch: `39a1b318063f62220c9c20c42200389098e0c687` (`GeorgePlattDemo/scan-to-build-store`, Store PR #9). Repin to the promoted Store main SHA before this System branch is merged.
 
 Build 8 application commits on `build/app-foundation-0.1`:
 
@@ -131,7 +131,7 @@ Store presentation reads durable Store records; it does not calculate Store pric
 
 ## Store
 
-Exact Store pin for this candidate branch: `0224e99f96dc65759bd7d3761d99e0708ad23e4a` (`GeorgePlattDemo/scan-to-build-store`, Store PR #9).
+Exact Store pin for this candidate branch: `39a1b318063f62220c9c20c42200389098e0c687` (`GeorgePlattDemo/scan-to-build-store`, Store PR #9).
 
 Supply a clean checkout of that pin through `STB_STORE_ZERO_ROOT`. The path is not hardcoded. At startup the wrapper verifies:
 

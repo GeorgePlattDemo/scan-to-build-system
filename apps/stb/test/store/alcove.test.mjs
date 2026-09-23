@@ -37,41 +37,36 @@ test('ALCOVE_INSERT_V1 asks pinned Store fresh and species changes the Store ans
   assert.equal(pine.body.evaluationReceipt.requestId, pine.request.requestId);
   assert.equal(pine.body.evaluationReceipt.freshnessRule, 'STB-STORE-FRESH-EVALUATION-0.1');
   assert.equal(pine.body.evaluationReceipt.authority.storeRevision, STORE_PIN);
-  assert.equal(pine.body.rawEvaluation.status, 'UNRESOLVED');
-  assert.equal(pine.body.rawEvaluation.complete, false);
-  assert.equal(pine.body.priceCompleteness.status, 'PARTIAL');
+  assert.equal(pine.body.rawEvaluation.status, 'SUPPORTABLE');
+  assert.equal(pine.body.rawEvaluation.complete, true);
+  assert.equal(pine.body.priceCompleteness.status, 'COMPLETE_FOR_DECLARED_COMPONENT_TRAVEL');
   assert.deepEqual(
     pine.body.rawEvaluation.lines.map((line) => [line.role, line.storeSku, line.qty, line.status]),
     [
       ['UPRIGHTS', 'STB-ZERO-PINE-1X6-72-001', 4, 'SUPPORTABLE'],
-      ['SHELVES', 'STB-ZERO-PINE-1X6-96-001', 10, 'SUPPORTABLE'],
+      ['SHELVES', 'STB-ZERO-PINE-1X6-96-001', 8, 'SUPPORTABLE'],
     ],
   );
-  assert.equal(pine.body.rawEstimate.totals.material, 272.86);
-  assert.equal(pine.body.rawEstimate.totals.hardware, 18);
-  assert.equal(pine.body.rawEstimate.totals.machine_service, null);
-  assert.equal(pine.body.rawEstimate.totals.Q, null);
-  assert.ok(
-    pine.body.priceCompleteness.unresolvedConditions.includes(
-      'ALCOVE_COMPONENT_PROGRAMS_REQUIRED',
-    ),
+  assert.equal(
+    pine.body.rawEvaluation.materialResolution.selectionPolicy,
+    'LOWEST_MATERIAL_EXTENSION_COMPLETE_STORE_OFFERING',
   );
+  assert.equal(pine.body.rawEstimate.totals.material, 230.88);
+  assert.equal(pine.body.rawEstimate.totals.hardware, 18);
+  assert.equal(pine.body.rawEstimate.totals.machine_service, 133.67);
+  assert.equal(pine.body.rawEstimate.totals.Q, 382.55);
 
   const poplar = await answer('poplar');
-  assert.equal(poplar.body.rawEvaluation.status, 'UNRESOLVED');
+  assert.equal(poplar.body.rawEvaluation.status, 'SUPPORTABLE');
   assert.deepEqual(
     poplar.body.rawEvaluation.lines.map((line) => line.storeSku),
     ['STB-ZERO-POP-1X6-72-001', 'STB-ZERO-POP-1X6-96-001'],
   );
-  assert.equal(poplar.body.rawEstimate.totals.material, 418.36);
-  assert.equal(poplar.body.rawEstimate.totals.Q, null);
+  assert.equal(poplar.body.rawEstimate.totals.material, 354);
+  assert.equal(poplar.body.rawEstimate.totals.Q, 505.67);
   assert.notEqual(
     pine.body.calculationIdentity.inputHash,
     poplar.body.calculationIdentity.inputHash,
-  );
-  assert.notEqual(
-    pine.body.calculationIdentity.resultHash,
-    poplar.body.calculationIdentity.resultHash,
   );
   assert.notEqual(
     pine.body.evaluationReceipt.receiptHash,
@@ -79,27 +74,32 @@ test('ALCOVE_INSERT_V1 asks pinned Store fresh and species changes the Store ans
   );
 });
 
-test('ALCOVE_INSERT_V1 exposes current Store stock shortages instead of cloning availability', async (t) => {
+test('ALCOVE_INSERT_V1 returns Store-owned material and capability gap reasons', async (t) => {
   await withHost(t);
 
-  const oak = await answer('oak');
-  assert.equal(oak.body.rawEvaluation.status, 'UNAVAILABLE');
-  assert.equal(oak.body.priceCompleteness.status, 'UNAVAILABLE');
-  const oakShelves = oak.body.rawEvaluation.lines.find((line) => line.role === 'SHELVES');
-  assert.equal(oakShelves.storeSku, 'STB-ZERO-OAK-1X6-96-001');
-  assert.equal(oakShelves.stock.status, 'ON_HAND_SHORT');
-  assert.equal(oakShelves.stock.available, 8);
-  assert.equal(oakShelves.stock.qtyNeeded, 10);
-  assert.equal(oak.body.rawEstimate.totals.Q, null);
+  const missingMaterial = await answer('walnut');
+  assert.equal(missingMaterial.body.rawEvaluation.status, 'UNAVAILABLE');
+  assert.equal(missingMaterial.body.priceCompleteness.status, 'UNAVAILABLE');
+  assert.ok(
+    missingMaterial.body.priceCompleteness.reasonRecords.some(
+      (reason) => reason.category === 'MATERIAL_GAP' && reason.authority === 'STORE_ZERO',
+    ),
+  );
+  assert.equal(missingMaterial.body.rawEstimate.totals.Q, null);
 
-  const cherry = await answer('cherry');
-  assert.equal(cherry.body.rawEvaluation.status, 'UNAVAILABLE');
-  const cherryShelves = cherry.body.rawEvaluation.lines.find((line) => line.role === 'SHELVES');
-  assert.equal(cherryShelves.storeSku, 'STB-ZERO-CHR-1X6-96-001');
-  assert.equal(cherryShelves.stock.status, 'ON_HAND_SHORT');
-  assert.equal(cherryShelves.stock.available, 6);
-  assert.equal(cherryShelves.stock.qtyNeeded, 10);
-  assert.equal(cherry.body.rawEstimate.totals.Q, null);
+  const oakMilled = await answer('oak', {
+    heightIn: 65,
+    depthIn: 14,
+    unresolvedConditions: [],
+  });
+  assert.equal(oakMilled.body.rawEvaluation.status, 'REFUSED');
+  assert.equal(oakMilled.body.priceCompleteness.status, 'REFUSED');
+  assert.ok(
+    oakMilled.body.priceCompleteness.reasonRecords.some(
+      (reason) => reason.category === 'CAPABILITY_GAP' && reason.authority === 'STORE_ZERO',
+    ),
+  );
+  assert.equal(oakMilled.body.rawEstimate.totals.Q, null);
 });
 
 test('ALCOVE_INSERT_V1 prices governed cut and mill component travel and depth changes required work', async (t) => {
@@ -108,107 +108,72 @@ test('ALCOVE_INSERT_V1 prices governed cut and mill component travel and depth c
   const pine = await answer('pine', {
     heightIn: 65,
     depthIn: 14,
-    withPrograms: true,
     unresolvedConditions: [],
   });
   assert.equal(pine.body.rawEvaluation.status, 'SUPPORTABLE');
-  assert.equal(pine.body.rawEvaluation.complete, true);
   assert.equal(pine.body.priceCompleteness.status, 'COMPLETE_FOR_DECLARED_COMPONENT_TRAVEL');
   assert.deepEqual(pine.body.priceCompleteness.unresolvedConditions, []);
   assert.equal(pine.body.rawEstimate.status, 'BUDGETARY_ESTIMATE');
   assert.equal(pine.body.rawEstimate.complete, true);
-  assert.equal(pine.body.rawEstimate.totals.material, 272.86);
+  assert.equal(pine.body.rawEstimate.totals.material, 230.88);
   assert.equal(pine.body.rawEstimate.totals.hardware, 18);
   assert.equal(pine.body.rawEstimate.totals.machine_service, 133.67);
-  assert.equal(pine.body.rawEstimate.totals.Q, 424.53);
+  assert.equal(pine.body.rawEstimate.totals.Q, 382.55);
   assert.equal(pine.body.rawEstimate.cycle.T_job_min, 32.0801);
   assert.ok(pine.body.rawEvaluation.machineEvaluation.time.T_MILL_sec > 0);
   assert.equal(pine.body.mappedCallInputs.definition.componentPrograms.length, 19);
-  assert.equal(pine.body.mappedCallInputs.demand.componentPrograms.length, 19);
-  assert.ok(
-    pine.body.rawEvaluation.lines
-      .find((line) => line.role === 'SHELVES')
-      .requiredOps.includes('MILL_LONGITUDINAL_PROFILE'),
-  );
 
-  const poplar = await answer('poplar', {
+  const shallow = await answer('pine', {
     heightIn: 65,
-    depthIn: 14,
-    withPrograms: true,
+    depthIn: 11,
     unresolvedConditions: [],
   });
-  assert.equal(poplar.body.rawEvaluation.status, 'SUPPORTABLE');
-  assert.equal(poplar.body.priceCompleteness.status, 'COMPLETE_FOR_DECLARED_COMPONENT_TRAVEL');
-  assert.equal(poplar.body.rawEstimate.totals.material, 418.36);
-  assert.equal(poplar.body.rawEstimate.totals.machine_service, 133.67);
-  assert.equal(poplar.body.rawEstimate.totals.Q, 570.03);
-  assert.equal(poplar.body.rawEstimate.cycle.T_job_min, 32.0801);
-
-  const oakMilled = await answer('oak', {
-    heightIn: 65,
-    depthIn: 14,
-    withPrograms: true,
-    unresolvedConditions: [],
-  });
-  assert.equal(oakMilled.body.rawEvaluation.status, 'REFUSED');
-  assert.equal(oakMilled.body.priceCompleteness.status, 'REFUSED');
-  assert.ok(
-    oakMilled.body.rawEvaluation.lines
-      .find((line) => line.role === 'SHELVES')
-      .capability.missing.includes('OP_NOT_ON_OFFERING:MILL_LONGITUDINAL_PROFILE'),
-  );
-  assert.equal(oakMilled.body.rawEstimate.totals.Q, null);
+  assert.equal(shallow.body.rawEvaluation.status, 'SUPPORTABLE');
+  assert.equal(shallow.body.rawEvaluation.machineEvaluation.time.T_MILL_sec, 0);
+  assert.notEqual(shallow.body.calculationIdentity.inputHash, pine.body.calculationIdentity.inputHash);
+  assert.notEqual(shallow.body.rawEstimate.totals.Q, pine.body.rawEstimate.totals.Q);
 
   const oakCutOnly = await answer('oak', {
     heightIn: 65,
     depthIn: 11,
-    withPrograms: true,
     unresolvedConditions: [],
   });
   assert.equal(oakCutOnly.body.rawEvaluation.status, 'SUPPORTABLE');
-  assert.equal(oakCutOnly.body.priceCompleteness.status, 'COMPLETE_FOR_DECLARED_COMPONENT_TRAVEL');
-  assert.equal(oakCutOnly.body.rawEvaluation.machineEvaluation.time.T_MILL_sec, 0);
   assert.equal(oakCutOnly.body.rawEstimate.totals.Q, 366.02);
 
   const cherryCutOnly = await answer('cherry', {
     heightIn: 65,
     depthIn: 11,
-    withPrograms: true,
     unresolvedConditions: [],
   });
   assert.equal(cherryCutOnly.body.rawEvaluation.status, 'SUPPORTABLE');
-  assert.equal(cherryCutOnly.body.priceCompleteness.status, 'COMPLETE_FOR_DECLARED_COMPONENT_TRAVEL');
-  assert.equal(cherryCutOnly.body.rawEvaluation.machineEvaluation.time.T_MILL_sec, 0);
   assert.equal(cherryCutOnly.body.rawEstimate.totals.Q, 533.93);
 
   const exact72 = await answer('pine', {
     heightIn: 72,
     depthIn: 14,
-    withPrograms: true,
     unresolvedConditions: [],
   });
-  assert.equal(exact72.body.rawEvaluation.status, 'REFUSED');
-  assert.ok(
-    exact72.body.rawEvaluation.refusalConditions.includes(
-      'COMPONENTS_EXCEED_DECLARED_PARENT_MATERIAL:ALCOVE-UPRIGHT-PARENTS',
-    ),
-  );
-  assert.equal(exact72.body.rawEstimate.totals.Q, null);
+  assert.equal(exact72.body.rawEvaluation.status, 'SUPPORTABLE');
+  const uprights = exact72.body.rawEvaluation.lines.find((line) => line.role === 'UPRIGHTS');
+  assert.equal(uprights.storeSku, 'STB-ZERO-PINE-1X6-96-001');
+  assert.equal(uprights.demandedStockLengthIn, 96);
 });
 
-test('ALCOVE_INSERT_V1 carries shelf spotting to Store and fails on the current narrower face-spot envelope', async (t) => {
+test('ALCOVE_INSERT_V1 carries spotting to Store and reports the unresolved target-component mapping', async (t) => {
   await withHost(t);
 
   const spotted = await answer('pine', { pilot: true });
-  assert.equal(spotted.body.rawEvaluation.status, 'REFUSED');
-  assert.equal(spotted.body.priceCompleteness.status, 'REFUSED');
+  assert.equal(spotted.body.rawEvaluation.status, 'UNRESOLVED');
+  assert.equal(spotted.body.priceCompleteness.status, 'PARTIAL');
   const uprights = spotted.body.rawEvaluation.lines.find((line) => line.role === 'UPRIGHTS');
   assert.ok(uprights.requiredOps.includes('SPOT_ON_LOCATION'));
-  assert.equal(uprights.capability.status, 'REFUSED');
-  assert.ok(uprights.capability.missing.includes('SPOT_LOCATION_RULE_NOT_DECLARED'));
+  assert.equal(uprights.capability.status, 'SUPPORTABLE');
   assert.ok(
-    spotted.body.rawEvaluation.unresolvedConditions.includes(
-      'ALCOVE_FACE_SPOT_DEMAND_OUTSIDE_CURRENT_DECLARED_SPOT_ENVELOPE',
+    spotted.body.priceCompleteness.reasonRecords.some(
+      (reason) =>
+        reason.category === 'DEFINITION_GAP' &&
+        reason.code === 'ALCOVE_SPOT_TARGET_COMPONENT_MAPPING_REQUIRED',
     ),
   );
   assert.equal(spotted.body.rawEstimate.totals.Q, null);

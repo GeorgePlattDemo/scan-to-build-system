@@ -620,11 +620,9 @@ function validateAlcoveInsertPayload(payload) {
     const allowed = new Set([
       'requirementId',
       'role',
-      'stockLengthIn',
-      'keptLengthIn',
-      'qty',
       'requiredOps',
       'carriesSpotDemand',
+      'selectionAuthority',
     ]);
     if (Object.keys(raw).some((key) => !allowed.has(key))) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected Alcove board requirement fields');
@@ -635,14 +633,11 @@ function validateAlcoveInsertPayload(payload) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove requirementId must be nonempty and unique and role must be nonempty');
     }
     requirementIds.add(raw.requirementId);
-    if (!Number.isFinite(raw.stockLengthIn) || raw.stockLengthIn <= 0) {
-      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove stockLengthIn must be positive and finite');
-    }
-    if (!Number.isFinite(raw.keptLengthIn) || raw.keptLengthIn <= 0) {
-      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove keptLengthIn must be positive and finite');
-    }
-    if (!Number.isInteger(raw.qty) || raw.qty < 1 || raw.qty > 100) {
-      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove requirement qty must be an integer from 1 through 100');
+    if (raw.selectionAuthority != null && raw.selectionAuthority !== 'STORE_ZERO') {
+      return fail(
+        ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+        'Alcove parent-stock selectionAuthority must be STORE_ZERO when supplied',
+      );
     }
     if (!Array.isArray(raw.requiredOps) || raw.requiredOps.length === 0) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove requiredOps must be a nonempty array');
@@ -657,11 +652,9 @@ function validateAlcoveInsertPayload(payload) {
     boardRequirements.push({
       requirementId: raw.requirementId,
       role: raw.role,
-      stockLengthIn: raw.stockLengthIn,
-      keptLengthIn: raw.keptLengthIn,
-      qty: raw.qty,
       requiredOps: [...raw.requiredOps],
       carriesSpotDemand: raw.carriesSpotDemand === true,
+      selectionAuthority: raw.selectionAuthority ?? 'STORE_ZERO',
     });
   }
 
@@ -780,14 +773,40 @@ function validateAlcoveInsertPayload(payload) {
     if (typeof hardware !== 'object' || Array.isArray(hardware)) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'hardwareDemand must be an object when supplied');
     }
-    if (Object.keys(hardware).some((key) => !['storeSku', 'qty'].includes(key))) {
-      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected hardwareDemand fields');
+    const allowedHardware = new Set(['requirementId', 'description', 'qty', 'selectionAuthority']);
+    if (Object.keys(hardware).some((key) => !allowedHardware.has(key))) {
+      return fail(
+        ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+        'unexpected hardwareDemand fields; project definitions may not supply a Store SKU',
+      );
     }
-    const hardwareSkuError = requireNonemptyString('hardwareDemand.storeSku', hardware.storeSku);
-    if (hardwareSkuError || !Number.isInteger(hardware.qty) || hardware.qty < 1 || hardware.qty > 20) {
-      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'hardwareDemand requires Store SKU and positive integer qty');
+    const requirementError = requireNonemptyString('hardwareDemand.requirementId', hardware.requirementId);
+    if (
+      requirementError ||
+      !Number.isInteger(hardware.qty) ||
+      hardware.qty < 1 ||
+      hardware.qty > 20
+    ) {
+      return fail(
+        ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+        'hardwareDemand requires a functional requirementId and positive integer qty',
+      );
     }
-    hardwareDemand = { storeSku: hardware.storeSku, qty: hardware.qty };
+    if (hardware.description != null && (typeof hardware.description !== 'string' || hardware.description.trim() === '')) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'hardwareDemand.description must be nonempty when supplied');
+    }
+    if (hardware.selectionAuthority != null && hardware.selectionAuthority !== 'STORE_ZERO') {
+      return fail(
+        ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+        'hardware selectionAuthority must be STORE_ZERO when supplied',
+      );
+    }
+    hardwareDemand = {
+      requirementId: hardware.requirementId,
+      description: hardware.description ?? null,
+      qty: hardware.qty,
+      selectionAuthority: hardware.selectionAuthority ?? 'STORE_ZERO',
+    };
   }
 
   let spotDemand = null;
