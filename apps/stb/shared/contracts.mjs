@@ -450,7 +450,7 @@ export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
 
 export const STORE_PROTOCOL_VERSION = 'stb-store-zero-http/1';
 export const STORE_REPOSITORY = 'GeorgePlattDemo/scan-to-build-store';
-export const STORE_PIN = '0224e99f96dc65759bd7d3761d99e0708ad23e4a';
+export const STORE_PIN = '58f8019bc7502edade5c79871a4962898df3304c';
 export const STORE_FRESH_EVALUATION_RULE_ID = 'STB-STORE-FRESH-EVALUATION-0.1';
 export const WRAPPER_BUILD_ID = 'stb-app-build-6';
 export const APP_BUILD_ID = 'stb-app-build-7';

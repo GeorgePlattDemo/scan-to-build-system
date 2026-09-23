@@ -627,6 +627,14 @@ export async function createStoreAdapter({
       ...(Array.isArray(definition.unresolvedConditions) ? definition.unresolvedConditions : []),
     ];
     const uniqueUnresolved = [...new Set(unresolvedConditions)];
+    const refusalConditions = [
+      ...(Array.isArray(storeResult?.refusalConditions) ? storeResult.refusalConditions : []),
+      ...(Array.isArray(rawEstimate?.refusalConditions) ? rawEstimate.refusalConditions : []),
+    ];
+    const uniqueRefusals = [...new Set(refusalConditions)];
+    const reasonRecords = Array.isArray(storeResult?.reasonRecords)
+      ? structuredClone(storeResult.reasonRecords)
+      : [];
     const partialMaterialKnown =
       rawEstimate?.totals &&
       Number.isFinite(Number(rawEstimate.totals.material)) &&
@@ -649,6 +657,8 @@ export async function createStoreAdapter({
                 ? 'PARTIAL'
                 : 'UNAVAILABLE',
       unresolvedConditions: uniqueUnresolved,
+      refusalConditions: uniqueRefusals,
+      reasonRecords,
       note:
         storeResult?.status === 'REFUSED'
           ? 'Store refused at least one Alcove demand condition. No local fallback was used.'

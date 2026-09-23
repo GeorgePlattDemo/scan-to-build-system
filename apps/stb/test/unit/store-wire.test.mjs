@@ -239,7 +239,7 @@ test('user-defined Board wire preserves project demand and leaves machine limits
   assert.equal(drillRejected.code, ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE);
 });
 
-test('Alcove wire preserves project demand, Store SKU authority, and fresh evaluation identity', async () => {
+test('Alcove wire preserves finished demand, rejects project Store choices, and keeps fresh evaluation identity', async () => {
   const payload = alcoveInsertJobPayload({
     configurationId: 'ALCOVE-USER1',
     configurationVersion: '1',
@@ -254,20 +254,16 @@ test('Alcove wire preserves project demand, Store SKU authority, and fresh evalu
       {
         requirementId: 'ALCOVE-UPRIGHT-PARENTS',
         role: 'UPRIGHTS',
-        stockLengthIn: 72,
-        keptLengthIn: 65,
-        qty: 4,
         requiredOps: ['CROSSCUT'],
         carriesSpotDemand: true,
+        selectionAuthority: 'STORE_ZERO',
       },
       {
         requirementId: 'ALCOVE-SHELF-PARENTS',
         role: 'SHELVES',
-        stockLengthIn: 96,
-        keptLengthIn: 44,
-        qty: 10,
         requiredOps: ['CROSSCUT'],
         carriesSpotDemand: false,
+        selectionAuthority: 'STORE_ZERO',
       },
     ],
     componentPrograms: [
@@ -294,7 +290,7 @@ test('Alcove wire preserves project demand, Store SKU authority, and fresh evalu
         ],
       },
     ],
-    hardwareDemand: { storeSku: 'STB-ZERO-HW-ALCOVE-PACK-001', qty: 1 },
+    hardwareDemand: { requirementId: 'ALCOVE-PINS-AND-SCREWS', description: 'pins + screws', qty: 1, selectionAuthority: 'STORE_ZERO' },
     spotDemand: {
       enabled: false,
       mode: 'SPOT_ON_LOCATION',
@@ -330,15 +326,27 @@ test('Alcove wire preserves project demand, Store SKU authority, and fresh evalu
   assert.deepEqual(
     validated.payload.definition.boardRequirements.map((line) => [
       line.role,
-      line.stockLengthIn,
-      line.keptLengthIn,
-      line.qty,
+      line.selectionAuthority,
     ]),
     [
-      ['UPRIGHTS', 72, 65, 4],
-      ['SHELVES', 96, 44, 10],
+      ['UPRIGHTS', 'STORE_ZERO'],
+      ['SHELVES', 'STORE_ZERO'],
     ],
   );
+  assert.equal(validated.payload.definition.boardRequirements[0].stockLengthIn, undefined);
+  assert.equal(validated.payload.definition.boardRequirements[0].qty, undefined);
+  assert.equal(validated.payload.definition.hardwareDemand.storeSku, undefined);
+  assert.equal(validated.payload.definition.hardwareDemand.requirementId, 'ALCOVE-PINS-AND-SCREWS');
+
+  const forbiddenStock = structuredClone(request);
+  forbiddenStock.payload.definition.boardRequirements[0].stockLengthIn = 72;
+  forbiddenStock.payloadDigest = await payloadDigest(forbiddenStock.payload);
+  assert.equal((await validateWireRequest(forbiddenStock)).ok, false);
+
+  const forbiddenSku = structuredClone(request);
+  forbiddenSku.payload.definition.hardwareDemand.storeSku = 'STB-ZERO-HW-ALCOVE-PACK-001';
+  forbiddenSku.payloadDigest = await payloadDigest(forbiddenSku.payload);
+  assert.equal((await validateWireRequest(forbiddenSku)).ok, false);
 
   const receipt = {
     freshnessRule: STORE_FRESH_EVALUATION_RULE_ID,
