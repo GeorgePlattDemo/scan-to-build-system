@@ -1,5 +1,6 @@
 import { canonicalInchString, canonicalJson, sha256Hex } from './canonical.mjs';
 import {
+  ALCOVE_INSERT_DEFINITION,
   BOARD_DEFINITION,
   BOARD_OFFERING_QUERY,
   MAX_STORE_RESPONSE_BYTES,
@@ -542,6 +543,240 @@ function validateUserDefinedBoardPayload(payload) {
   };
 }
 
+
+function validateAlcoveInsertPayload(payload) {
+  if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'Alcove payload must be an object');
+  }
+  const extra = Object.keys(payload).filter(
+    (key) => key !== 'definition' && key !== 'definitionKind' && key !== 'ruleVersion',
+  );
+  if (extra.length) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected Alcove payload fields');
+  }
+  if (payload.definitionKind !== ALCOVE_INSERT_DEFINITION.kind) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'definitionKind must be alcove_insert.v1');
+  }
+  if (payload.ruleVersion !== ALCOVE_INSERT_DEFINITION.ruleVersion) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'ruleVersion must match the Alcove slice');
+  }
+
+  const definition = payload.definition;
+  if (definition === null || typeof definition !== 'object' || Array.isArray(definition)) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'Alcove payload requires one definition');
+  }
+  const allowedDefinition = new Set([
+    'configurationId',
+    'configurationVersion',
+    'materialDemand',
+    'boardRequirements',
+    'hardwareDemand',
+    'spotDemand',
+    'unresolvedConditions',
+    'materialSource',
+  ]);
+  if (Object.keys(definition).some((key) => !allowedDefinition.has(key))) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected Alcove definition fields');
+  }
+  for (const key of ['configurationId', 'configurationVersion']) {
+    const error = requireNonemptyString(key, definition[key]);
+    if (error) return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, error);
+  }
+
+  const material = definition.materialDemand;
+  if (material === null || typeof material !== 'object' || Array.isArray(material)) {
+    return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'Alcove definition requires materialDemand');
+  }
+  const allowedMaterial = new Set(['species', 'form', 'nominalT', 'nominalW', 'grade']);
+  if (Object.keys(material).some((key) => !allowedMaterial.has(key))) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected Alcove materialDemand fields');
+  }
+  const speciesError = requireNonemptyString('materialDemand.species', material.species);
+  if (speciesError) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, speciesError);
+  if (
+    material.form !== ALCOVE_INSERT_DEFINITION.materialForm ||
+    material.nominalT !== ALCOVE_INSERT_DEFINITION.nominalT ||
+    material.nominalW !== ALCOVE_INSERT_DEFINITION.nominalW
+  ) {
+    return fail(
+      ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+      'Alcove materialDemand must remain a nominal 1x6 board class; Store owns the SKU answer',
+    );
+  }
+  if (material.grade != null && (typeof material.grade !== 'string' || material.grade.trim() === '')) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'materialDemand.grade must be a nonempty string when supplied');
+  }
+
+  if (!Array.isArray(definition.boardRequirements) || definition.boardRequirements.length === 0) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove requires project-derived boardRequirements');
+  }
+  const requirementIds = new Set();
+  const boardRequirements = [];
+  for (const raw of definition.boardRequirements) {
+    if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'each Alcove board requirement must be an object');
+    }
+    const allowed = new Set([
+      'requirementId',
+      'role',
+      'stockLengthIn',
+      'keptLengthIn',
+      'qty',
+      'requiredOps',
+      'carriesSpotDemand',
+    ]);
+    if (Object.keys(raw).some((key) => !allowed.has(key))) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected Alcove board requirement fields');
+    }
+    const requirementIdError = requireNonemptyString('requirementId', raw.requirementId);
+    const roleError = requireNonemptyString('role', raw.role);
+    if (requirementIdError || roleError || requirementIds.has(raw.requirementId)) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove requirementId must be nonempty and unique and role must be nonempty');
+    }
+    requirementIds.add(raw.requirementId);
+    if (!Number.isFinite(raw.stockLengthIn) || raw.stockLengthIn <= 0) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove stockLengthIn must be positive and finite');
+    }
+    if (!Number.isFinite(raw.keptLengthIn) || raw.keptLengthIn <= 0) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove keptLengthIn must be positive and finite');
+    }
+    if (!Number.isInteger(raw.qty) || raw.qty < 1 || raw.qty > 100) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove requirement qty must be an integer from 1 through 100');
+    }
+    if (!Array.isArray(raw.requiredOps) || raw.requiredOps.length === 0) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove requiredOps must be a nonempty array');
+    }
+    const allowedOps = new Set(['CROSSCUT', 'SPOT_ON_LOCATION']);
+    if (raw.requiredOps.some((op) => !allowedOps.has(op)) || new Set(raw.requiredOps).size !== raw.requiredOps.length) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove requiredOps must use unique declared project operation names');
+    }
+    if (raw.carriesSpotDemand != null && typeof raw.carriesSpotDemand !== 'boolean') {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'carriesSpotDemand must be boolean when supplied');
+    }
+    boardRequirements.push({
+      requirementId: raw.requirementId,
+      role: raw.role,
+      stockLengthIn: raw.stockLengthIn,
+      keptLengthIn: raw.keptLengthIn,
+      qty: raw.qty,
+      requiredOps: [...raw.requiredOps],
+      carriesSpotDemand: raw.carriesSpotDemand === true,
+    });
+  }
+
+  let hardwareDemand = null;
+  if (definition.hardwareDemand != null) {
+    const hardware = definition.hardwareDemand;
+    if (typeof hardware !== 'object' || Array.isArray(hardware)) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'hardwareDemand must be an object when supplied');
+    }
+    if (Object.keys(hardware).some((key) => !['storeSku', 'qty'].includes(key))) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected hardwareDemand fields');
+    }
+    const hardwareSkuError = requireNonemptyString('hardwareDemand.storeSku', hardware.storeSku);
+    if (hardwareSkuError || !Number.isInteger(hardware.qty) || hardware.qty < 1 || hardware.qty > 20) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'hardwareDemand requires Store SKU and positive integer qty');
+    }
+    hardwareDemand = { storeSku: hardware.storeSku, qty: hardware.qty };
+  }
+
+  let spotDemand = null;
+  if (definition.spotDemand != null) {
+    const spot = definition.spotDemand;
+    if (typeof spot !== 'object' || Array.isArray(spot)) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'spotDemand must be an object when supplied');
+    }
+    const allowedSpot = new Set(['enabled', 'mode', 'toolDiameterIn', 'source', 'features']);
+    if (Object.keys(spot).some((key) => !allowedSpot.has(key))) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected Alcove spotDemand fields');
+    }
+    if (typeof spot.enabled !== 'boolean' || spot.mode !== 'SPOT_ON_LOCATION') {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove spotDemand must declare enabled and SPOT_ON_LOCATION');
+    }
+    if (!Number.isFinite(spot.toolDiameterIn) || spot.toolDiameterIn <= 0) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove spot toolDiameterIn must be positive and finite');
+    }
+    const sourceError = requireNonemptyString('spotDemand.source', spot.source);
+    if (sourceError) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, sourceError);
+    if (!Array.isArray(spot.features)) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove spotDemand.features must be an array');
+    }
+    const featureIds = new Set();
+    const features = [];
+    for (const feature of spot.features) {
+      if (feature === null || typeof feature !== 'object' || Array.isArray(feature)) {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'each Alcove spot feature must be an object');
+      }
+      const allowedFeature = new Set([
+        'featureId',
+        'targetRole',
+        'kind',
+        'xIn',
+        'partRelativeXIn',
+        'reference',
+        'acrossWidthRule',
+        'toolDiameterIn',
+        'basis',
+      ]);
+      if (Object.keys(feature).some((key) => !allowedFeature.has(key))) {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'unexpected Alcove spot feature fields');
+      }
+      const featureIdError = requireNonemptyString('featureId', feature.featureId);
+      const targetRoleError = requireNonemptyString('targetRole', feature.targetRole);
+      const referenceError = requireNonemptyString('reference', feature.reference);
+      if (featureIdError || targetRoleError || referenceError || featureIds.has(feature.featureId)) {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove spot feature identity, targetRole, and reference are required and featureId must be unique');
+      }
+      featureIds.add(feature.featureId);
+      if (
+        feature.kind !== 'SPOT_ON_LOCATION' ||
+        feature.acrossWidthRule !== 'CENTERED_ON_WIDE_FACE' ||
+        !Number.isFinite(feature.xIn) ||
+        feature.xIn < 0 ||
+        !Number.isFinite(feature.partRelativeXIn) ||
+        feature.partRelativeXIn < 0
+      ) {
+        return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove spot feature geometry is malformed');
+      }
+      features.push({ ...feature });
+    }
+    spotDemand = {
+      enabled: spot.enabled,
+      mode: spot.mode,
+      toolDiameterIn: spot.toolDiameterIn,
+      source: spot.source,
+      features,
+    };
+  }
+
+  if (
+    definition.unresolvedConditions != null &&
+    (!Array.isArray(definition.unresolvedConditions) ||
+      definition.unresolvedConditions.some((value) => typeof value !== 'string' || value.trim() === ''))
+  ) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove unresolvedConditions must be nonempty strings');
+  }
+  if (definition.materialSource != null && (typeof definition.materialSource !== 'string' || definition.materialSource.trim() === '')) {
+    return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove materialSource must be a nonempty string when supplied');
+  }
+
+  return {
+    ok: true,
+    definition: {
+      configurationId: definition.configurationId,
+      configurationVersion: definition.configurationVersion,
+      materialDemand: { ...material },
+      boardRequirements,
+      hardwareDemand,
+      spotDemand,
+      unresolvedConditions: [...(definition.unresolvedConditions ?? [])],
+      materialSource: definition.materialSource ?? null,
+    },
+    definitionKind: ALCOVE_INSERT_DEFINITION.kind,
+    ruleVersion: ALCOVE_INSERT_DEFINITION.ruleVersion,
+  };
+}
+
 export async function validateWireRequest(body) {
   if (body === null || typeof body !== 'object' || Array.isArray(body)) {
     return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'request body must be a JSON object');
@@ -603,6 +838,19 @@ export async function validateWireRequest(body) {
     if (!payload.ok) {
       return payload;
     }
+    return { ok: true, requestType: body.requestType, payload, envelope: body };
+  }
+  if (body.requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1) {
+    if (body.scope !== STORE_SCOPES.ALCOVE_INSERT_V1) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove scope mismatch');
+    }
+    const demandError = requireNonemptyString('demandSignature', body.demandSignature);
+    if (demandError) return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, demandError);
+    if (body.querySignature !== null) {
+      return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'Alcove querySignature must be null');
+    }
+    const payload = validateAlcoveInsertPayload(body.payload);
+    if (!payload.ok) return payload;
     return { ok: true, requestType: body.requestType, payload, envelope: body };
   }
   if (body.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
@@ -758,6 +1006,71 @@ export async function buildJobRequest({
     sentAt,
     payload,
   };
+}
+
+export async function buildAlcoveInsertRequest({
+  requestId,
+  projectId,
+  candidateRevisionId,
+  attemptId,
+  attemptNumber,
+  sentAt,
+  demandSignature,
+  payload,
+}) {
+  const payloadHash = await payloadDigest(payload);
+  return {
+    protocolVersion: STORE_PROTOCOL_VERSION,
+    requestId,
+    projectId,
+    candidateRevisionId,
+    requestType: STORE_REQUEST_TYPES.ALCOVE_INSERT_V1,
+    scope: STORE_SCOPES.ALCOVE_INSERT_V1,
+    demandSignature,
+    querySignature: null,
+    payloadDigest: payloadHash,
+    expectedStorePin: STORE_PIN,
+    attemptId,
+    attemptNumber,
+    sentAt,
+    payload,
+  };
+}
+
+export function alcoveInsertJobPayload({
+  configurationId,
+  configurationVersion,
+  materialDemand,
+  boardRequirements,
+  hardwareDemand = null,
+  spotDemand = null,
+  unresolvedConditions = [],
+  materialSource = null,
+}) {
+  return {
+    definition: {
+      configurationId,
+      configurationVersion,
+      materialDemand: structuredClone(materialDemand),
+      boardRequirements: structuredClone(boardRequirements),
+      hardwareDemand: hardwareDemand == null ? null : structuredClone(hardwareDemand),
+      spotDemand: spotDemand == null ? null : structuredClone(spotDemand),
+      unresolvedConditions: [...unresolvedConditions],
+      materialSource,
+    },
+    definitionKind: ALCOVE_INSERT_DEFINITION.kind,
+    ruleVersion: ALCOVE_INSERT_DEFINITION.ruleVersion,
+  };
+}
+
+export async function alcoveInsertDemandSignature(payload) {
+  return digestCanonical({
+    definitionKind: payload.definitionKind,
+    ruleVersion: payload.ruleVersion,
+    requestType: STORE_REQUEST_TYPES.ALCOVE_INSERT_V1,
+    scope: STORE_SCOPES.ALCOVE_INSERT_V1,
+    definition: payload.definition,
+  });
 }
 
 export async function buildUserDefinedBoardRequest({
@@ -988,7 +1301,8 @@ export function inspectStoreResponse(request, parsed, { httpStatus, byteLength }
   }
   if (
     request.requestType === STORE_REQUEST_TYPES.BOARD_SQUARE_V1 ||
-    request.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1
+    request.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1 ||
+    request.requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1
   ) {
     const status = parsed.rawEvaluation?.status;
     if (!isKnownJobStatus(status)) {
@@ -1001,7 +1315,10 @@ export function inspectStoreResponse(request, parsed, { httpStatus, byteLength }
       };
     }
   }
-  if (request.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
+  if (
+    request.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1 ||
+    request.requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1
+  ) {
     const receipt = parsed.evaluationReceipt ?? parsed.rawEvaluation?.evaluationReceipt ?? null;
     if (parsed.rawEvaluation?.freshEvaluation !== true) {
       return {
