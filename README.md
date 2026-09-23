@@ -9,7 +9,7 @@ U.S. Patents 9,720,401 B2 and 10,768,609 B2
 
 ## Open Scan-to-Build
 
-<a href="https://georgeplattdemo.github.io/scan-to-build-review/system-build-current.html?v=4fbf6c892a97b773b3c6cdbf6866dd2deb939532"><kbd>▶ OPEN SYSTEM BUILD</kbd></a>
+<a href="https://georgeplattdemo.github.io/scan-to-build-review/system-build-current.html?v=417f6632242bf808d54b51a1e5fe3613d0239a5d"><kbd>▶ OPEN SYSTEM BUILD</kbd></a>
 
 **OPEN SYSTEM BUILD is the canonical human-visible current build.** A user-facing application change is not complete until it is visible through this button.
 
