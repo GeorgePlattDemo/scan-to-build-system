@@ -100,6 +100,31 @@ function copyPrice(line) {
   };
 }
 
+function copyEvaluationLine(line) {
+  if (!line || typeof line !== 'object' || Array.isArray(line)) {
+    return null;
+  }
+  return {
+    requirementId: displayOrMissing(line.requirementId),
+    role: displayOrMissing(line.role),
+    status: displayOrMissing(line.status),
+    storeSku: displayOrMissing(line.storeSku),
+    description: displayOrMissing(line.description),
+    qty: displayOrMissing(line.qty),
+    demandedStockLengthIn: displayOrMissing(line.demandedStockLengthIn),
+    keptLengthIn: displayOrMissing(line.keptLengthIn),
+    requiredOps: Array.isArray(line.requiredOps) ? [...line.requiredOps] : [],
+    stock: copyStock(line),
+    capability: copyCapability(line),
+    price: copyPrice(line),
+    extension:
+      typeof line.extension === 'number' && Number.isFinite(line.extension)
+        ? line.extension
+        : null,
+    extensionDisplay: formatReturnedAmount(line.extension),
+  };
+}
+
 function copyEstimate(envelope) {
   const rawEstimate = envelope?.rawEstimate ?? null;
   const estimateError = envelope?.estimateError ?? null;
@@ -273,6 +298,7 @@ function emptyView(overrides) {
     attemptId: null,
     responseId: null,
     offering: null,
+    lines: [],
     stock: null,
     capability: null,
     price: null,
@@ -346,6 +372,9 @@ export function presentStoreAnswer(applicability, options = {}) {
 
   const evaluation = envelope?.rawEvaluation ?? null;
   const jobStatus = isKnownJobStatus(evaluation?.status) ? evaluation.status : null;
+  const lines = Array.isArray(evaluation?.lines)
+    ? evaluation.lines.map(copyEvaluationLine).filter(Boolean)
+    : [];
   const line = Array.isArray(evaluation?.lines) ? evaluation.lines[0] ?? null : null;
   const offering = copyOffering(envelope?.rawOffering);
   const stock = copyStock(line);
@@ -354,13 +383,15 @@ export function presentStoreAnswer(applicability, options = {}) {
   const estimate = copyEstimate(envelope);
   const basis = copyBasis(envelope);
   basis.receivedAt = displayOrMissing(applicability.response?.payload?.receivedAt);
-  const reasons = capability?.missing?.length
-    ? capability.missing
-    : capability?.reason
-      ? [capability.reason]
-      : price?.reason
-        ? [price.reason]
-        : [];
+  const lineReasons = lines.flatMap((entry) => [
+    ...(entry.capability?.missing ?? []),
+    ...(entry.capability?.reason ? [entry.capability.reason] : []),
+    ...(entry.price?.reason ? [entry.price.reason] : []),
+  ]);
+  const evaluationReasons = Array.isArray(evaluation?.unresolvedConditions)
+    ? evaluation.unresolvedConditions.filter((item) => typeof item === 'string')
+    : [];
+  const reasons = [...new Set([...lineReasons, ...evaluationReasons])];
   const current = applicability.current === true && jobStatus !== null;
   const historical = current ? false : applicability.historical === true || historicalUsable;
 
@@ -381,6 +412,7 @@ export function presentStoreAnswer(applicability, options = {}) {
     attemptId: applicability.attempt?.id ?? envelope?.attemptId ?? null,
     responseId: applicability.response?.id ?? envelope?.responseId ?? null,
     offering,
+    lines,
     stock,
     capability,
     price,
