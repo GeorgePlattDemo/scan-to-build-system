@@ -631,6 +631,11 @@ export async function createStoreAdapter({
       rawEstimate?.totals &&
       Number.isFinite(Number(rawEstimate.totals.material)) &&
       Number.isFinite(Number(rawEstimate.totals.hardware));
+    const completeQ =
+      storeResult?.status === 'SUPPORTABLE' &&
+      rawEstimate?.complete === true &&
+      Number.isFinite(Number(rawEstimate?.totals?.machine_service)) &&
+      Number.isFinite(Number(rawEstimate?.totals?.Q));
 
     const priceCompleteness = {
       status:
@@ -638,16 +643,20 @@ export async function createStoreAdapter({
           ? 'REFUSED'
           : storeResult?.status === 'UNAVAILABLE'
             ? 'UNAVAILABLE'
-            : partialMaterialKnown
-              ? 'PARTIAL'
-              : 'UNAVAILABLE',
+            : completeQ
+              ? 'COMPLETE_FOR_DECLARED_COMPONENT_TRAVEL'
+              : partialMaterialKnown
+                ? 'PARTIAL'
+                : 'UNAVAILABLE',
       unresolvedConditions: uniqueUnresolved,
       note:
         storeResult?.status === 'REFUSED'
           ? 'Store refused at least one Alcove demand condition. No local fallback was used.'
           : storeResult?.status === 'UNAVAILABLE'
             ? 'Current Store stock cannot satisfy the complete Alcove material demand.'
-            : 'Current Store material, stock, price and declared capability are returned. Complete machine service and Q remain unresolved until the Alcove whole-board travel standard exists.',
+            : completeQ
+              ? 'Store returned current material, declared D-001 cut/mill component travel, modeled machine service, and complete budgetary Q. This is not a commercial quote or physical authorization.'
+              : 'Current Store material, stock, price and declared capability are returned. Complete machine service and Q remain unresolved until the component travel record is complete.',
     };
 
     return {
