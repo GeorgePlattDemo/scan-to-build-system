@@ -1,4 +1,5 @@
 import {
+  ALCOVE_INSERT_DEFINITION,
   BOARD_DEFINITION,
   PUBLISHED_BOARD_SKU,
   STORE_PIN,
@@ -264,6 +265,13 @@ export async function createStoreAdapter({
       return loaded.modules.requestDimensionalStoreEvaluation(demand, request);
     }
     return loaded.modules.evaluateDimensionalStoreRequest(runtimeCatalog, demand, request);
+  }
+
+  async function runAlcoveStoreRequest(runtimeCatalog, demand, request, { reloadCurrentStore = true } = {}) {
+    if (reloadCurrentStore) {
+      return loaded.modules.requestAlcoveStoreEvaluation(demand, request);
+    }
+    return loaded.modules.evaluateAlcoveStoreRequest(runtimeCatalog, demand, request);
   }
 
   async function handleJob(envelope, jobPayload, options = {}) {
@@ -549,6 +557,135 @@ export async function createStoreAdapter({
     };
   }
 
+  async function handleAlcoveInsertJob(envelope, jobPayload, options = {}) {
+    const runtimeCatalog = options.catalogOverride ?? catalog;
+    const definition = jobPayload.definition;
+    const demand = {
+      title: 'Alcove insert',
+      classId: ALCOVE_INSERT_DEFINITION.classId,
+      configurationId: definition.configurationId,
+      configurationVersion: definition.configurationVersion,
+      materialDemand: structuredClone(definition.materialDemand),
+      boardRequirements: structuredClone(definition.boardRequirements),
+      componentPrograms: structuredClone(definition.componentPrograms ?? []),
+      hardwareDemand: definition.hardwareDemand == null ? null : structuredClone(definition.hardwareDemand),
+      spotDemand: definition.spotDemand == null ? null : structuredClone(definition.spotDemand),
+      unresolvedConditions: [...(definition.unresolvedConditions ?? [])],
+      materialSource: definition.materialSource,
+      storeRevision: STORE_PIN,
+    };
+    const storeRequest = {
+      requestId: envelope.requestId,
+      evaluatedAt: nowIso(),
+      storeRevision: STORE_PIN,
+    };
+    const reloadCurrentStore = catalogOverride === null && options.catalogOverride == null;
+
+    let storeResult;
+    try {
+      storeResult = await runAlcoveStoreRequest(
+        runtimeCatalog,
+        demand,
+        storeRequest,
+        { reloadCurrentStore },
+      );
+    } catch (error) {
+      return {
+        status: 200,
+        body: await successEnvelope(envelope, {
+          rawOffering: null,
+          rawEvaluation: {
+            status: 'UNRESOLVED',
+            complete: false,
+            reason: ADAPTER_ERROR_CODES.ESTIMATE_FAILED,
+          },
+          rawEstimate: null,
+          materialResolution: null,
+          estimateAssociationId: null,
+          estimateError: {
+            code: ADAPTER_ERROR_CODES.ESTIMATE_FAILED,
+            details: error instanceof Error ? error.message : String(error),
+          },
+          priceCompleteness: {
+            status: 'UNAVAILABLE',
+            unresolvedConditions: ['STORE_ALCOVE_EVALUATION_FAILED'],
+            note: 'The governing Store Alcove evaluator did not return a result. No local fallback was used.',
+          },
+          calculationIdentity: null,
+          evaluationReceipt: null,
+          mappedCallInputs: { definition: structuredClone(definition), demand, storeRequest },
+          attributedBasis: storeBasis({ modules: loaded.modules }),
+        }),
+      };
+    }
+
+    const rawEstimate = storeResult?.estimate ?? null;
+    const freshReceipt = storeResult?.evaluationReceipt ?? null;
+    const unresolvedConditions = [
+      ...(Array.isArray(storeResult?.unresolvedConditions) ? storeResult.unresolvedConditions : []),
+      ...(Array.isArray(rawEstimate?.unresolvedConditions) ? rawEstimate.unresolvedConditions : []),
+      ...(Array.isArray(definition.unresolvedConditions) ? definition.unresolvedConditions : []),
+    ];
+    const uniqueUnresolved = [...new Set(unresolvedConditions)];
+    const partialMaterialKnown =
+      rawEstimate?.totals &&
+      Number.isFinite(Number(rawEstimate.totals.material)) &&
+      Number.isFinite(Number(rawEstimate.totals.hardware));
+    const completeQ =
+      storeResult?.status === 'SUPPORTABLE' &&
+      rawEstimate?.complete === true &&
+      Number.isFinite(Number(rawEstimate?.totals?.machine_service)) &&
+      Number.isFinite(Number(rawEstimate?.totals?.Q));
+
+    const priceCompleteness = {
+      status:
+        storeResult?.status === 'REFUSED'
+          ? 'REFUSED'
+          : storeResult?.status === 'UNAVAILABLE'
+            ? 'UNAVAILABLE'
+            : completeQ
+              ? 'COMPLETE_FOR_DECLARED_COMPONENT_TRAVEL'
+              : partialMaterialKnown
+                ? 'PARTIAL'
+                : 'UNAVAILABLE',
+      unresolvedConditions: uniqueUnresolved,
+      note:
+        storeResult?.status === 'REFUSED'
+          ? 'Store refused at least one Alcove demand condition. No local fallback was used.'
+          : storeResult?.status === 'UNAVAILABLE'
+            ? 'Current Store stock cannot satisfy the complete Alcove material demand.'
+            : completeQ
+              ? 'Store returned current material, declared D-001 cut/mill component travel, modeled machine service, and complete budgetary Q. This is not a commercial quote or physical authorization.'
+              : 'Current Store material, stock, price and declared capability are returned. Complete machine service and Q remain unresolved until the component travel record is complete.',
+    };
+
+    return {
+      status: 200,
+      body: await successEnvelope(envelope, {
+        rawOffering: null,
+        rawEvaluation: storeResult,
+        rawEstimate,
+        materialResolution: storeResult?.materialResolution ?? null,
+        estimateAssociationId: storeResult?.calculationIdentity?.resultHash ?? null,
+        estimateError: null,
+        priceCompleteness,
+        calculationIdentity: storeResult?.calculationIdentity ?? null,
+        evaluationReceipt: freshReceipt,
+        mappedCallInputs: {
+          definition: structuredClone(definition),
+          demand,
+          storeRequest,
+        },
+        attributedBasis: storeBasis({
+          modules: loaded.modules,
+          offering: null,
+          evaluation: storeResult,
+          estimate: rawEstimate,
+        }),
+      }),
+    };
+  }
+
   async function dispatch(body) {
     const validated = await validateWireRequest(body);
     if (!validated.ok) {
@@ -560,6 +697,9 @@ export async function createStoreAdapter({
     }
     if (validated.requestType === STORE_REQUEST_TYPES.OFFERING_LOOKUP) {
       return handleOffering(validated.envelope, validated.payload);
+    }
+    if (validated.requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1) {
+      return handleAlcoveInsertJob(validated.envelope, validated.payload);
     }
     if (validated.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
       return handleUserDefinedBoardJob(validated.envelope, validated.payload);
@@ -577,6 +717,8 @@ export async function createStoreAdapter({
     handleOffering: (envelope, payload, runtimeCatalog) =>
       handleOffering(envelope, payload, runtimeCatalog),
     handleJob: (envelope, payload, options) => handleJob(envelope, payload, options),
+    handleAlcoveInsertJob: (envelope, payload, options) =>
+      handleAlcoveInsertJob(envelope, payload, options),
     handleUserDefinedBoardJob: (envelope, payload, options) =>
       handleUserDefinedBoardJob(envelope, payload, options),
     dispatch,

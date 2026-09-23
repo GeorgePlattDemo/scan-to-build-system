@@ -104,6 +104,60 @@ test('compact and full panels agree on current identity and Q', async ({ page })
   await expect(page.getByRole('button', { name: COPY.storeInspect })).toBeVisible();
 });
 
+test('Alcove multi-line Store answer shows both board families and leaves Q unresolved', async ({ page }) => {
+  const applicability = supportableApplicability();
+  applicability.response.payload.wrapperEnvelope.rawOffering = null;
+  applicability.response.payload.wrapperEnvelope.rawEvaluation = {
+    status: 'UNRESOLVED',
+    unresolvedConditions: ['ALCOVE_COMPONENT_PROGRAMS_REQUIRED'],
+    lines: [
+      {
+        requirementId: 'ALCOVE-UPRIGHT-PARENTS',
+        role: 'UPRIGHTS',
+        status: 'SUPPORTABLE',
+        storeSku: 'STB-ZERO-PINE-1X6-72-001',
+        qty: 4,
+        demandedStockLengthIn: 72,
+        keptLengthIn: 65,
+        requiredOps: ['CROSSCUT'],
+        stock: { status: 'ON_HAND_SUFFICIENT', available: 27, qtyNeeded: 4 },
+        price: { sellingPrice: 6.94 },
+        capability: { status: 'SUPPORTABLE' },
+        extension: 27.76,
+      },
+      {
+        requirementId: 'ALCOVE-SHELF-PARENTS',
+        role: 'SHELVES',
+        status: 'SUPPORTABLE',
+        storeSku: 'STB-ZERO-PINE-1X6-96-001',
+        qty: 10,
+        demandedStockLengthIn: 96,
+        keptLengthIn: 44,
+        requiredOps: ['CROSSCUT'],
+        stock: { status: 'ON_HAND_SUFFICIENT', available: 43, qtyNeeded: 10 },
+        price: { sellingPrice: 24.51 },
+        capability: { status: 'SUPPORTABLE' },
+        extension: 245.10,
+      },
+    ],
+  };
+  applicability.response.payload.wrapperEnvelope.rawEstimate = {
+    status: 'PARTIAL_BUDGETARY_ESTIMATE',
+    complete: false,
+    totals: { material: 272.86, hardware: 18, machine_service: null, Q: null },
+    unresolvedConditions: ['ALCOVE_COMPONENT_PROGRAMS_REQUIRED'],
+  };
+
+  await renderPanel(page, applicability);
+  await expect(page.locator('[data-store-disposition]')).toHaveText('UNRESOLVED');
+  await expect(page.locator('[data-store-section="material-lines"]')).toBeVisible();
+  await expect(page.locator('[data-store-line]')).toHaveCount(2);
+  await expect(page.locator('[data-store-line="ALCOVE-UPRIGHT-PARENTS"]')).toContainText('STB-ZERO-PINE-1X6-72-001');
+  await expect(page.locator('[data-store-line="ALCOVE-SHELF-PARENTS"]')).toContainText('STB-ZERO-PINE-1X6-96-001');
+  await expect(page.locator('[data-store-material]')).toHaveAttribute('data-store-material', '$272.86');
+  await expect(page.locator('[data-store-q]')).toHaveAttribute('data-store-q', 'none');
+});
+
 test('pending shows frozen copy and no earlier Q', async ({ page }) => {
   await renderPanel(page, {
     status: 'pending',

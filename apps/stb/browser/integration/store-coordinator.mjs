@@ -1,5 +1,5 @@
 import { PUBLISHED_BOARD_SKU, STORE_REQUEST_TYPES, STORE_SCOPES } from '/shared/contracts.mjs';
-import { boardJobPayload, userDefinedBoardJobPayload } from '/shared/store-wire.mjs';
+import { alcoveInsertJobPayload, boardJobPayload, userDefinedBoardJobPayload } from '/shared/store-wire.mjs';
 import {
   issueStoreQuestion,
   recoverInterruptedAttempts,
@@ -169,6 +169,85 @@ export async function scheduleUserDefinedBoardStoreQuestion(
       lengthDatum,
       datumCMethod,
       parts,
+      spotDemand,
+      unresolvedConditions,
+      materialSource,
+    }),
+    background: true,
+  }).then((result) => {
+    inFlight.delete(key);
+    return result;
+  });
+  inFlight.set(key, work);
+  return work;
+}
+
+export async function scheduleAlcoveInsertStoreQuestion(
+  localRecordId,
+  {
+    configurationId = null,
+    configurationVersion = null,
+    materialDemand,
+    boardRequirements,
+    componentPrograms = [],
+    hardwareDemand = null,
+    spotDemand = null,
+    unresolvedConditions = [],
+    materialSource = 'STORE_ZERO',
+    unapplied = false,
+  } = {},
+) {
+  if (!localRecordId || unapplied) {
+    return { status: 'skipped' };
+  }
+  const project = await projectIndex(localRecordId);
+  if (!project) {
+    return { status: 'no-project' };
+  }
+  if (project.unknownClass === true) {
+    return { status: 'unknown-class' };
+  }
+  if (
+    !materialDemand ||
+    !Array.isArray(boardRequirements) ||
+    boardRequirements.length === 0
+  ) {
+    return { status: 'incomplete' };
+  }
+
+  const candidateRevisionId = project.currentHead;
+  const effectiveConfigurationId = configurationId || project.projectId;
+  const effectiveConfigurationVersion = configurationVersion || candidateRevisionId;
+
+  const existing = await currentStoreAnswer(localRecordId, {
+    candidateRevisionId,
+    scope: STORE_SCOPES.ALCOVE_INSERT_V1,
+  });
+  if (existing?.request && existing.imported !== true && existing.request.imported !== true) {
+    return {
+      status: 'existing-request',
+      requestId: existing.request.id,
+      applicability: existing,
+    };
+  }
+
+  const key = scheduleKey(localRecordId, candidateRevisionId);
+  if (inFlight.has(key)) {
+    return inFlight.get(key);
+  }
+
+  const work = issueStoreQuestion({
+    localRecordId,
+    projectId: project.projectId,
+    candidateRevisionId,
+    requestType: STORE_REQUEST_TYPES.ALCOVE_INSERT_V1,
+    payload: alcoveInsertJobPayload({
+      configurationId: effectiveConfigurationId,
+      configurationVersion: effectiveConfigurationVersion,
+      materialDemand,
+      boardRequirements,
+      componentPrograms,
+      hardwareDemand,
       spotDemand,
       unresolvedConditions,
       materialSource,

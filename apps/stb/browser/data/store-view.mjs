@@ -4,9 +4,10 @@ import { currentProjection, currentStoreAnswer, listStoreRequests } from '/data/
 
 export async function loadStorePresentation(localRecordId, options = {}) {
   const projection = await currentProjection(localRecordId);
+  const scope = options.scope ?? STORE_SCOPES.BOARD_SQUARE_V1;
   const applicability = await currentStoreAnswer(localRecordId, {
     candidateRevisionId: options.candidateRevisionId,
-    scope: STORE_SCOPES.BOARD_SQUARE_V1,
+    scope,
   });
   return presentStoreAnswer(applicability, {
     unapplied: options.unapplied === true,
@@ -15,7 +16,8 @@ export async function loadStorePresentation(localRecordId, options = {}) {
   });
 }
 
-export async function loadStoreHistory(localRecordId, currentCandidateRevisionId) {
+export async function loadStoreHistory(localRecordId, currentCandidateRevisionId, options = {}) {
+  const scope = options.scope ?? STORE_SCOPES.BOARD_SQUARE_V1;
   const requests = await listStoreRequests(localRecordId);
   const seen = new Set();
   const history = [];
@@ -27,7 +29,7 @@ export async function loadStoreHistory(localRecordId, currentCandidateRevisionId
     seen.add(revisionId);
     const applicability = await currentStoreAnswer(localRecordId, {
       candidateRevisionId: revisionId,
-      scope: STORE_SCOPES.BOARD_SQUARE_V1,
+      scope,
     });
     if (!applicability?.request) {
       continue;

@@ -97,6 +97,25 @@ test('unavailable Store source leaves static host usable and Store endpoints dia
   const page = await rawRequest({ path: '/' });
   assert.equal(page.status, 200);
   assert.match(page.body, /Scan-to-Build/);
+  const reviewPreflight = await rawRequest({
+    path: STORE_PATHS.job,
+    method: 'OPTIONS',
+    headers: {
+      Origin: 'https://georgeplattdemo.github.io',
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'content-type',
+      'Access-Control-Request-Private-Network': 'true',
+    },
+  });
+  assert.equal(reviewPreflight.status, 204);
+  assert.equal(reviewPreflight.headers['access-control-allow-origin'], 'https://georgeplattdemo.github.io');
+  assert.match(reviewPreflight.headers['access-control-allow-methods'] ?? '', /POST/);
+  assert.equal(reviewPreflight.headers['access-control-allow-private-network'], 'true');
+  const reviewOriginOutsideStore = await rawRequest({
+    path: '/',
+    headers: { Origin: 'https://georgeplattdemo.github.io' },
+  });
+  assert.equal(reviewOriginOutsideStore.status, 403);
   const body = await offeringLookupBody();
   const offering = await postJson(STORE_PATHS.offering, body);
   assert.equal(offering.status, 503);

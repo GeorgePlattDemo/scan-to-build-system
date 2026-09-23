@@ -11,6 +11,7 @@ const execFileAsync = promisify(execFile);
 
 export const REQUIRED_STORE_FILES = Object.freeze([
   'store-zero-stage2-store.mjs',
+  'alcove-store-evaluator.mjs',
   'store-zero-pricing-engine.mjs',
   'd001-stage2-envelope.mjs',
   'd001-travel-standard.mjs',
@@ -145,10 +146,12 @@ export async function loadPinnedStoreModules(root) {
 
   try {
     const storeUrl = pathToFileURL(path.join(root, 'store-zero-stage2-store.mjs')).href;
+    const alcoveUrl = pathToFileURL(path.join(root, 'alcove-store-evaluator.mjs')).href;
     const pricingUrl = pathToFileURL(path.join(root, 'store-zero-pricing-engine.mjs')).href;
     const envelopeUrl = pathToFileURL(path.join(root, 'd001-stage2-envelope.mjs')).href;
-    const [store, pricing, envelope] = await Promise.all([
+    const [store, alcove, pricing, envelope] = await Promise.all([
       import(storeUrl),
+      import(alcoveUrl),
       import(pricingUrl),
       import(envelopeUrl),
     ]);
@@ -164,6 +167,10 @@ export async function loadPinnedStoreModules(root) {
       [store, 'STORE_EVALUATION_FRESHNESS'],
       [store, 'loadCatalog'],
       [store, 'loadObservations'],
+      [alcove, 'evaluateAlcoveJob'],
+      [alcove, 'evaluateAlcoveStoreRequest'],
+      [alcove, 'requestAlcoveStoreEvaluation'],
+      [alcove, 'ALCOVE_STORE_STANDARD'],
       [pricing, 'estimateJob'],
       [pricing, 'ENGINE'],
       [pricing, 'CYCLE_MODEL'],
@@ -201,6 +208,10 @@ export async function loadPinnedStoreModules(root) {
         STORE_EVALUATION_FRESHNESS: store.STORE_EVALUATION_FRESHNESS,
         loadCatalog: store.loadCatalog,
         loadObservations: store.loadObservations,
+        evaluateAlcoveJob: alcove.evaluateAlcoveJob,
+        evaluateAlcoveStoreRequest: alcove.evaluateAlcoveStoreRequest,
+        requestAlcoveStoreEvaluation: alcove.requestAlcoveStoreEvaluation,
+        ALCOVE_STORE_STANDARD: alcove.ALCOVE_STORE_STANDARD,
         estimateJob: pricing.estimateJob,
         ENGINE: pricing.ENGINE,
         CYCLE_MODEL: pricing.CYCLE_MODEL,

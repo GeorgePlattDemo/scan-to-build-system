@@ -424,6 +424,15 @@ export const USER_DEFINED_BOARD_MATERIAL_DEMAND = Object.freeze({
   nominalW: 4,
 });
 
+export const ALCOVE_INSERT_DEFINITION = Object.freeze({
+  kind: 'alcove_insert.v1',
+  ruleVersion: '0.1',
+  classId: 'alcove.insert.square_shelves',
+  materialForm: 'board',
+  nominalT: 1,
+  nominalW: 6,
+});
+
 export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
   id: 'CUT-001',
   repository: 'GeorgePlattDemo/scan-to-build-store',
@@ -441,7 +450,7 @@ export const CUT001_DOCUMENTARY_REFERENCE = Object.freeze({
 
 export const STORE_PROTOCOL_VERSION = 'stb-store-zero-http/1';
 export const STORE_REPOSITORY = 'GeorgePlattDemo/scan-to-build-store';
-export const STORE_PIN = '140217b0aed64725d26b0d9332e3bf7b5d4396e0';
+export const STORE_PIN = '0224e99f96dc65759bd7d3761d99e0708ad23e4a';
 export const STORE_FRESH_EVALUATION_RULE_ID = 'STB-STORE-FRESH-EVALUATION-0.1';
 export const WRAPPER_BUILD_ID = 'stb-app-build-6';
 export const APP_BUILD_ID = 'stb-app-build-7';
@@ -457,11 +466,13 @@ export const STORE_REQUEST_TYPES = Object.freeze({
   OFFERING_LOOKUP: 'OFFERING_LOOKUP',
   BOARD_SQUARE_V1: 'BOARD_SQUARE_V1',
   USER_DEFINED_BOARD_V1: 'USER_DEFINED_BOARD_V1',
+  ALCOVE_INSERT_V1: 'ALCOVE_INSERT_V1',
 });
 export const STORE_SCOPES = Object.freeze({
   OFFERING_LOOKUP: 'OFFERING_LOOKUP',
   BOARD_SQUARE_V1: 'BOARD_SQUARE_V1',
   USER_DEFINED_BOARD_V1: 'USER_DEFINED_BOARD_V1',
+  ALCOVE_INSERT_V1: 'ALCOVE_INSERT_V1',
 });
 export const STORE_JOB_STATUSES = Object.freeze([
   'SUPPORTABLE',
