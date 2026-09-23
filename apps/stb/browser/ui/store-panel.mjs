@@ -137,7 +137,7 @@ function compactEstimate(view) {
 
 function materialLinesSection(view) {
   const lines = Array.isArray(view.lines) ? view.lines : [];
-  if (lines.length === 0) {
+  if (lines.length <= 1) {
     return null;
   }
   return el(
