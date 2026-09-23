@@ -270,6 +270,30 @@ test('Alcove wire preserves project demand, Store SKU authority, and fresh evalu
         carriesSpotDemand: false,
       },
     ],
+    componentPrograms: [
+      {
+        componentId: 'ALCOVE-UPRIGHT-01',
+        requirementId: 'ALCOVE-UPRIGHT-PARENTS',
+        finishedLengthIn: 65,
+        finishedWidthIn: 5.5,
+        features: [],
+      },
+      {
+        componentId: 'ALCOVE-SHELF-01-STRIP-03',
+        requirementId: 'ALCOVE-SHELF-PARENTS',
+        finishedLengthIn: 44,
+        finishedWidthIn: 3,
+        features: [
+          {
+            featureId: 'ALCOVE-SHELF-01-STRIP-03-RIP',
+            kind: 'MILL_LONGITUDINAL_PROFILE',
+            pathLengthIn: 44,
+            yIn: 3,
+            totalDepthIn: 0.75,
+          },
+        ],
+      },
+    ],
     hardwareDemand: { storeSku: 'STB-ZERO-HW-ALCOVE-PACK-001', qty: 1 },
     spotDemand: {
       enabled: false,
@@ -297,6 +321,12 @@ test('Alcove wire preserves project demand, Store SKU authority, and fresh evalu
   assert.equal(validated.payload.definition.materialDemand.species, 'pine');
   assert.equal(validated.payload.definition.materialDemand.sku, undefined);
   assert.equal(validated.payload.definition.boardRequirements.length, 2);
+  assert.equal(validated.payload.definition.componentPrograms.length, 2);
+  assert.equal(
+    validated.payload.definition.componentPrograms[1].features[0].kind,
+    'MILL_LONGITUDINAL_PROFILE',
+  );
+  assert.equal(validated.payload.definition.componentPrograms[1].finishedWidthIn, 3);
   assert.deepEqual(
     validated.payload.definition.boardRequirements.map((line) => [
       line.role,
