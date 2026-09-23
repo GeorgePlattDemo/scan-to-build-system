@@ -12,8 +12,11 @@ import {
 import {
   ADAPTER_ERROR_CODES,
   APP_DIAGNOSTICS,
+  alcoveInsertDemandSignature,
+  alcoveInsertJobPayload,
   boardDemandSignature,
   boardJobPayload,
+  buildAlcoveInsertRequest,
   buildJobRequest,
   inspectStoreResponse,
   isJsonContentType,
@@ -234,6 +237,115 @@ test('user-defined Board wire preserves project demand and leaves machine limits
   const drillRejected = await validateWireRequest(drillWithoutDepthRequest);
   assert.equal(drillRejected.ok, false);
   assert.equal(drillRejected.code, ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE);
+});
+
+test('Alcove wire preserves project demand, Store SKU authority, and fresh evaluation identity', async () => {
+  const payload = alcoveInsertJobPayload({
+    configurationId: 'ALCOVE-USER1',
+    configurationVersion: '1',
+    materialDemand: {
+      species: 'pine',
+      form: 'board',
+      nominalT: 1,
+      nominalW: 6,
+      grade: 'select',
+    },
+    boardRequirements: [
+      {
+        requirementId: 'ALCOVE-UPRIGHT-PARENTS',
+        role: 'UPRIGHTS',
+        stockLengthIn: 72,
+        keptLengthIn: 65,
+        qty: 4,
+        requiredOps: ['CROSSCUT'],
+        carriesSpotDemand: true,
+      },
+      {
+        requirementId: 'ALCOVE-SHELF-PARENTS',
+        role: 'SHELVES',
+        stockLengthIn: 96,
+        keptLengthIn: 44,
+        qty: 10,
+        requiredOps: ['CROSSCUT'],
+        carriesSpotDemand: false,
+      },
+    ],
+    hardwareDemand: { storeSku: 'STB-ZERO-HW-ALCOVE-PACK-001', qty: 1 },
+    spotDemand: {
+      enabled: false,
+      mode: 'SPOT_ON_LOCATION',
+      toolDiameterIn: 0.1875,
+      source: 'SHELF_ELEVATIONS',
+      features: [],
+    },
+    unresolvedConditions: ['ORDERED_SIZE_ADJUSTMENT_NOT_ESTABLISHED'],
+    materialSource: 'STORE_ZERO',
+  });
+  const request = await buildAlcoveInsertRequest({
+    requestId: 'req-alcove',
+    projectId: 'proj-alcove',
+    candidateRevisionId: 'cand-alcove',
+    attemptId: 'att-alcove',
+    attemptNumber: 1,
+    sentAt: '2026-09-23T00:00:00.000Z',
+    demandSignature: await alcoveInsertDemandSignature(payload),
+    payload,
+  });
+
+  const validated = await validateWireRequest(request);
+  assert.equal(validated.ok, true);
+  assert.equal(validated.payload.definition.materialDemand.species, 'pine');
+  assert.equal(validated.payload.definition.materialDemand.sku, undefined);
+  assert.equal(validated.payload.definition.boardRequirements.length, 2);
+  assert.deepEqual(
+    validated.payload.definition.boardRequirements.map((line) => [
+      line.role,
+      line.stockLengthIn,
+      line.keptLengthIn,
+      line.qty,
+    ]),
+    [
+      ['UPRIGHTS', 72, 65, 4],
+      ['SHELVES', 96, 44, 10],
+    ],
+  );
+
+  const receipt = {
+    freshnessRule: STORE_FRESH_EVALUATION_RULE_ID,
+    requestId: request.requestId,
+    evaluatedAt: '2026-09-23T00:00:01.000Z',
+    authority: { storeRevision: STORE_PIN },
+    receiptHash: 'alcove-receipt-hash',
+  };
+  const response = {
+    protocolVersion: STORE_PROTOCOL_VERSION,
+    storePin: STORE_PIN,
+    requestId: request.requestId,
+    projectId: request.projectId,
+    candidateRevisionId: request.candidateRevisionId,
+    requestType: request.requestType,
+    scope: request.scope,
+    demandSignature: request.demandSignature,
+    querySignature: request.querySignature,
+    payloadDigest: request.payloadDigest,
+    attemptId: request.attemptId,
+    attemptNumber: request.attemptNumber,
+    rawEvaluation: {
+      status: 'UNRESOLVED',
+      freshEvaluation: true,
+      evaluationReceipt: receipt,
+      lines: [],
+    },
+    evaluationReceipt: receipt,
+  };
+  assert.equal(inspectStoreResponse(request, response, { httpStatus: 200 }).ok, true);
+
+  const stale = structuredClone(response);
+  stale.rawEvaluation.freshEvaluation = false;
+  assert.equal(
+    inspectStoreResponse(request, stale, { httpStatus: 200 }).reason,
+    'store-evaluation-not-fresh',
+  );
 });
 
 test('inspectStoreResponse quarantines wrong correlation and unknown aggregates', async () => {
