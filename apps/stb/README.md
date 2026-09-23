@@ -81,7 +81,7 @@ Build 8 acceptance counts at this closeout:
 
 `test:vertical` proves NEW USER, RETURNING USER, and PROFESSIONAL converge on one Board architecture; 45 in then 46 in against the real pinned Store; review binding; truthful Result; close/reopen versus inert import; keyboard and narrow-viewport operation; and the absence of commercial or physical authority.
 
-Exact Store pin: `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a` (`GeorgePlattDemo/scan-to-build-store`).
+Exact Store pin for this candidate branch: `5112031324a8f8d287175a89c573c301ec92050a` (`GeorgePlattDemo/scan-to-build-store`, Store PR #9). Repin to the promoted Store main SHA before this System branch is merged.
 
 Build 8 application commits on `build/app-foundation-0.1`:
 
@@ -131,7 +131,7 @@ Store presentation reads durable Store records; it does not calculate Store pric
 
 ## Store
 
-Exact S2.2 pin: `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a` (`GeorgePlattDemo/scan-to-build-store`).
+Exact Store pin for this candidate branch: `5112031324a8f8d287175a89c573c301ec92050a` (`GeorgePlattDemo/scan-to-build-store`, Store PR #9).
 
 Supply a clean checkout of that pin through `STB_STORE_ZERO_ROOT`. The path is not hardcoded. At startup the wrapper verifies:
 
@@ -148,9 +148,13 @@ Protocol: `stb-store-zero-http/1`
 Bounded endpoints:
 
 - `POST /api/store-zero/offering` (`OFFERING_LOOKUP`)
-- `POST /api/store-zero/job` (`BOARD_SQUARE_V1` or `USER_DEFINED_BOARD_V1`)
+- `POST /api/store-zero/job` (`BOARD_SQUARE_V1`, `USER_DEFINED_BOARD_V1`, or `ALCOVE_INSERT_V1`)
 
 `BOARD_SQUARE_V1` remains the accepted square-Board path. `USER_DEFINED_BOARD_V1` is a separate bounded request for an already-defined 24–60 in Board workpiece with explicit operation meaning carried at the application/Store boundary. It does not redefine the project to the Store SKU. For the current Start Your Own X-brace proof, Store Zero supplies a 72 in raw SKU while the identified project workpiece remains 60 in. The integration accounts for one raw-stock preparation cut plus the three defined saw/miter cycles. The requested centered spot remains `SPOT_ON_LOCATION` with unresolved tooling and is not silently priced as a generic 0.75 in drilled hole. Store Zero still owns the Stage-2 modeled BudgetaryEstimate for the resolved encoded operations; while unresolved operation conditions remain, the application presents that value as partial rather than as a complete commercial total.
+
+`ALCOVE_INSERT_V1` is the bounded Store boundary for Sarah's solid-board Alcove path. The project carries material class/species, project-derived 72/96 in parent demand, kept lengths, quantities, required operations, optional shelf-spot demand, hardware demand, and unresolved project conditions. It does not nominate Store board SKUs or calculate Store prices. Store returns the current species-specific SKUs, stock state, selling price, declared D-001 capability/refusal, calculation identity, and fresh evaluation receipt. Complete Alcove machine service and Q remain unresolved until Store owns a whole-board Alcove travel/economics standard. Shelf-elevation `FROM_BASE` face spotting currently fails closed because the Stage-2 spot envelope has not yet declared that location rule.
+
+This branch intentionally does not repurpose the older `alcove-shelf-blanks` System class, which is a separate sheet/blank reference experiment. Sarah's current Alcove remains a separate Store request contract so existing project semantics are not silently rewritten.
 
 The Store checkout is never statically served. Browser modules do not import Store implementation, the pricing engine, or the envelope. Support is evaluated before estimate. Raw Store evaluation and estimate remain separate. Transport and adapter errors are not Store dispositions.
 
