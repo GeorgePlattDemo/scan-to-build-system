@@ -236,17 +236,10 @@ export async function alcoveInsertJobBody({
   shelfCount = 5,
   depthIn = 14,
   spanIn = 44,
-  withPrograms = false,
+  withPrograms = true,
   pilot = false,
-  unresolvedConditions = [
-    'FLOOR_SLOPE_RECORDED',
-    'WALL_BOW_RECORDED',
-    'ORDERED_SIZE_ADJUSTMENT_NOT_ESTABLISHED',
-  ],
+  unresolvedConditions = [],
 } = {}) {
-  const across = Math.ceil(depthIn / 5.5);
-  const boardsPerShelf = Math.ceil(across / 2);
-  const shelfParentQty = boardsPerShelf * shelfCount;
   const shelfElevations = [12, 24, 36, 45, 65].slice(0, shelfCount);
   const features = pilot
     ? shelfElevations.flatMap((xIn, index) => [
@@ -289,28 +282,26 @@ export async function alcoveInsertJobBody({
       {
         requirementId: 'ALCOVE-UPRIGHT-PARENTS',
         role: 'UPRIGHTS',
-        stockLengthIn: 72,
-        keptLengthIn: heightIn,
-        qty: 4,
         requiredOps: ['CROSSCUT'],
         carriesSpotDemand: true,
+        selectionAuthority: 'STORE_ZERO',
       },
       {
         requirementId: 'ALCOVE-SHELF-PARENTS',
         role: 'SHELVES',
-        stockLengthIn: 96,
-        keptLengthIn: spanIn,
-        qty: shelfParentQty,
         requiredOps: ['CROSSCUT'],
         carriesSpotDemand: false,
+        selectionAuthority: 'STORE_ZERO',
       },
     ],
     componentPrograms: withPrograms
       ? alcoveComponentPrograms({ heightIn, depthIn, spanIn, shelfCount })
       : [],
     hardwareDemand: {
-      storeSku: 'STB-ZERO-HW-ALCOVE-PACK-001',
+      requirementId: 'ALCOVE-PINS-AND-SCREWS',
+      description: 'pins + screws',
       qty: 1,
+      selectionAuthority: 'STORE_ZERO',
     },
     spotDemand: {
       enabled: pilot,
