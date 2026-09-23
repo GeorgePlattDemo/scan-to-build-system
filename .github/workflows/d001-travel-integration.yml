@@ -35,6 +35,7 @@ jobs:
           test/unit/store-calculation-identity.test.mjs
           test/unit/dimensional-store-governance.test.mjs
           test/unit/store-wire.test.mjs
+          test/unit/alcove-current-demand-readiness.test.mjs
 
       - name: User 1 pinned Store integration
         working-directory: apps/stb
