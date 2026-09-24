@@ -1,4 +1,4 @@
-import { COPY } from '/shared/contracts.mjs';
+import { COPY, USER_DEFINED_BOARD_DEFINITION } from '/shared/contracts.mjs';
 import { renderProjectProjection } from '/ui/project-renderer.mjs';
 
 function el(tag, options = {}, children = []) {
@@ -181,11 +181,84 @@ export function renderBoardSchematic(projection, { selectedOccurrenceId } = {}) 
   );
 }
 
+function renderUserDefinedBoardView(projection) {
+  const payload = projection.payload;
+  const derived = payload.derived ?? {};
+  const workpiece = derived.definedWorkpieceLengthIn?.canonical ?? payload.geometry?.lengthCanonical ?? '—';
+  const angle = Number(derived.angleDeg);
+  const angleLabel = Number.isFinite(angle) ? String(Number(angle.toFixed(3))) : '—';
+  const parts = Array.isArray(payload.parts) ? payload.parts : [];
+  return el(
+    'section',
+    {
+      className: 'candidate-view candidate-view-user-defined-board',
+      attrs: {
+        'data-candidate-view': 'true',
+        'data-view': 'shared',
+        'data-projection-id': projection.id,
+        'data-definition-kind': payload.definitionKind,
+        'data-valid': payload.valid ? 'true' : 'false',
+        'data-store-request-complete': payload.request?.complete ? 'true' : 'false',
+      },
+    },
+    [
+      el('h3', { text: payload.summary?.title ?? 'User-defined Board' }),
+      el('p', {
+        attrs: { 'data-user1-workpiece': workpiece },
+        text: `Defined workpiece minimum request: ${workpiece} in.`,
+      }),
+      el('p', {
+        attrs: { 'data-user1-angle': angleLabel },
+        text: `Face-miter demand: ${angleLabel}° · 3 saw cuts · cut 2 shared.`,
+      }),
+      el(
+        'ul',
+        { attrs: { 'data-user1-parts': String(parts.length) } },
+        parts.map((part) => {
+          const spot = part.features?.find((feature) => feature.kind === 'SPOT_ON_LOCATION');
+          const spotText = Number.isFinite(Number(spot?.xIn)) ? `${spot.xIn} in centered spot` : 'spot unresolved';
+          return el('li', {
+            attrs: { 'data-user1-part': part.partId ?? '' },
+            text: `${part.partId ?? 'PART'} · ${part.lengthIn ?? '—'} in · ${spotText}`,
+          });
+        }),
+      ),
+      el('p', {
+        text: 'Ends: both · parallel · cut plane: miter-face · length datum: long-long-outer-edge.',
+      }),
+      el('p', {
+        className: 'hint',
+        attrs: { 'data-summary-provenance': 'true' },
+        text: payload.summary?.provenance
+          ?? 'Project definition only. Store owns stock, capability, modeled work, remnant, and Q.',
+      }),
+      payload.occurrenceId
+        ? el('p', {
+            className: 'identity-line',
+            attrs: { 'data-occurrence-inspector': 'true' },
+            text: `occurrence ${payload.occurrenceId}`,
+          })
+        : null,
+      payload.definitionRevisionId
+        ? el('p', {
+            className: 'identity-line',
+            attrs: { 'data-definition-inspector': 'true' },
+            text: `definition ${payload.definitionRevisionId}`,
+          })
+        : null,
+    ],
+  );
+}
+
 export function renderSharedCandidateView(projection, options = {}) {
   if (!projection) {
     return el('section', { className: 'candidate-view', attrs: { 'data-candidate-view': 'empty' } }, [
       el('p', { className: 'hint', text: COPY.boardBlank }),
     ]);
+  }
+
+  if (projection.payload?.definitionKind === USER_DEFINED_BOARD_DEFINITION.kind) {
+    return renderUserDefinedBoardView(projection);
   }
 
   if (isMappedProjectProjection(projection)) {

@@ -51,7 +51,10 @@ test('Alcove browser plumbing carries demand to Store without a browser-side Sto
   assert.match(storeCoordinator, /scheduleAlcoveInsertStoreQuestion/);
   assert.match(storeCoordinator, /STORE_REQUEST_TYPES\.ALCOVE_INSERT_V1/);
   assert.match(storeCoordinator, /alcoveInsertJobPayload/);
-  assert.match(storeView, /options\.scope \?\? STORE_SCOPES\.BOARD_SQUARE_V1/);
+  assert.match(storeView, /storeScopeForDefinitionKind/);
+  assert.match(storeView, /USER_DEFINED_BOARD_DEFINITION\.kind[\s\S]*STORE_SCOPES\.USER_DEFINED_BOARD_V1/);
+  assert.match(storeView, /ALCOVE_INSERT_DEFINITION\.kind[\s\S]*STORE_SCOPES\.ALCOVE_INSERT_V1/);
+  assert.match(storeView, /request\.payload\?\.scope/);
   assert.match(storeClient, /buildAlcoveInsertRequest/);
   for (const forbidden of [
     'STORE_FIXTURE',
