@@ -110,7 +110,7 @@ test('Page 6 and Page 7 are existing project views, not new pathnames', () => {
   assert.equal(COPY.reviewHeading, 'Review your definition');
   assert.equal(COPY.reviewConfirm, 'Confirm this definition');
   assert.equal(COPY.reviewUnresolved, 'Save unresolved definition');
-  assert.equal(COPY.resultRetained, 'Definition retained; no physical fabrication recorded.');
+  assert.equal(COPY.resultRetained, 'Your definition is retained.');
 });
 
 test('Page 8 is the existing Record view, not a ninth primary page', () => {
