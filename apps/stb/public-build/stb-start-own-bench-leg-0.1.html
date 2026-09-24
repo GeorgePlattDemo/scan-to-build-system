@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scan-to-Build · Start Your Own · Bench leg 0.1</title>
+<meta name="description" content="Grab a board, bring it to the bench, and build a physical part contract with your own hands. Start Your Own on-ramp to Scan-to-Build.">
+<style>
+:root{
+  --paper:#F5F0E6; --paper2:#FBF7EF; --surface:#FFFDF8; --stage:#EFE7D8;
+  --ink:#2A1E13; --ink2:#6E5C48; --ink3:#9C8A75;
+  --line:#E7DCC9; --line2:#D5C5A9;
+  --accent:#A85A2A; --accent2:#8A4520; --tint:#F7E9D6;
+  --good:#5C7A45; --goodtint:#EDF1E4;
+  --warn:#8A5A20; --warntint:#F6EBDA;
+  --shadow:0 1px 2px rgba(60,40,20,.05),0 8px 24px -12px rgba(60,40,20,.18);
+  --lift:0 2px 4px rgba(60,40,20,.06),0 18px 40px -16px rgba(60,40,20,.28);
+  --r:16px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#14110D; --paper2:#1A1612; --surface:#211C16; --stage:#241E17;
+    --ink:#F4EDE1; --ink2:#BDAC97; --ink3:#8B7B68;
+    --line:#332B21; --line2:#4A3E2F;
+    --accent:#E09A5F; --accent2:#F2B47C; --tint:#2B2118;
+    --good:#8FB06B; --goodtint:#1E2418;
+    --warn:#D9A362; --warntint:#2A2118;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+    --lift:0 2px 6px rgba(0,0,0,.5),0 22px 46px -18px rgba(0,0,0,.85);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:16px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  background-image:radial-gradient(1100px 520px at 10% -10%,rgba(168,90,42,.055),transparent 60%),
+                   radial-gradient(900px 440px at 94% 2%,rgba(120,90,50,.05),transparent 62%);
+  background-attachment:fixed}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1140px;margin:0 auto;padding:24px 22px 76px}
+
+/* rail */
+.rail{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 22px}
+.rail .back{font-size:13.5px;color:var(--ink2);background:none;border:0;cursor:pointer;
+  padding:7px 11px;border-radius:9px;font-weight:600;transition:.15s}
+.rail .back:hover{background:var(--surface);color:var(--ink)}
+.rail .back:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rail .who{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:5px 11px;border-radius:999px;border:1px solid var(--accent);color:var(--accent2);background:var(--tint)}
+.rail .steps{display:flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:wrap}
+.rail .s{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink3);
+  border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px 4px 5px}
+.rail .s i{width:18px;height:18px;border-radius:50%;background:var(--line);color:var(--surface);
+  font-style:normal;font-size:10.5px;font-weight:700;display:grid;place-items:center;line-height:1}
+.rail .s.on{border-color:var(--accent);color:var(--accent2);background:var(--tint);font-weight:650}
+.rail .s.on i{background:var(--accent);color:#fff}
+.rail .s.done i{background:var(--good);color:#fff}
+@media (prefers-color-scheme:dark){.rail .s.on i,.rail .s.done i{color:#1a1208}}
+
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin:0 0 14px}
+h1{font-size:clamp(28px,4.4vw,42px);line-height:1.06;letter-spacing:-.026em;margin:0 0 12px;font-weight:640}
+h1 em{font-style:normal;color:var(--accent)}
+h1 .q{color:var(--ink3);font-weight:400}
+.lede{font-size:clamp(15.5px,1.8vw,18px);line-height:1.55;color:var(--ink2);max-width:58ch;margin:0}
+.lede b{color:var(--ink);font-weight:650}
+.step{display:flex;align-items:center;gap:12px;margin:34px 0 14px}
+.step .n{width:26px;height:26px;flex:none;border-radius:50%;background:var(--accent);color:#fff;
+  font-size:12.5px;font-weight:700;display:grid;place-items:center;line-height:1}
+.step h2{font-size:19px;letter-spacing:-.014em;margin:0;font-weight:650}
+@media (prefers-color-scheme:dark){.step .n{color:#1a1208}}
+
+/* cards */
+.grid3,.grid2{display:grid;gap:15px}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{position:relative;display:block;width:100%;text-align:left;cursor:pointer;padding:0;font:inherit;color:inherit;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);
+  transition:transform .2s cubic-bezier(.2,.7,.3,1),box-shadow .2s,border-color .2s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--lift);border-color:var(--line2)}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.card.on{border-color:var(--accent);box-shadow:var(--lift),inset 0 0 0 1px var(--accent)}
+.card .pic{display:block;width:100%;height:auto;background:linear-gradient(170deg,var(--paper2),var(--stage))}
+.card .body{padding:13px 15px 15px}
+.card .body b{display:block;font-size:16px;font-weight:650;letter-spacing:-.012em;margin-bottom:3px}
+.card .body span{display:block;font-size:13px;line-height:1.45;color:var(--ink3)}
+.card .tick{position:absolute;top:11px;right:11px;width:26px;height:26px;border-radius:50%;
+  background:var(--accent);display:none;place-items:center;box-shadow:0 2px 9px -2px rgba(0,0,0,.4)}
+.card.on .tick{display:grid}
+.card .tick svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+@media (prefers-color-scheme:dark){.card .tick svg{stroke:#1a1208}}
+.card .flag{position:absolute;top:11px;left:11px;font-size:10px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;padding:5px 9px;border-radius:999px;background:var(--surface);
+  border:1px solid var(--line2);color:var(--ink3)}
+.card .flag.warm{border-color:var(--accent);color:var(--accent2);background:var(--tint)}
+
+/* buttons */
+.btn{font:inherit;font-size:15px;font-weight:650;padding:12px 24px;border-radius:12px;cursor:pointer;
+  border:1px solid var(--accent);background:var(--accent);color:#fff;min-height:46px;
+  box-shadow:0 2px 10px -2px rgba(168,90,42,.55);transition:.16s}
+.btn:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+.btn:disabled{background:var(--surface);color:var(--ink3);border-color:var(--line);box-shadow:none;cursor:not-allowed;transform:none;filter:none}
+@media (prefers-color-scheme:dark){.btn{color:#1a1208}}
+.btn.ghost{background:transparent;color:var(--ink2);border-color:var(--line);box-shadow:none;font-weight:550}
+.btn.ghost:hover{border-color:var(--line2);color:var(--ink);filter:none}
+.btn.sm{font-size:13.5px;padding:9px 16px;border-radius:10px;min-height:40px}
+.gobar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:30px 0 0;padding:17px 19px;
+  border-radius:var(--r);border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow)}
+.gobar .sum{flex:1;min-width:230px;font-size:14px;color:var(--ink2)}
+.gobar .sum strong{display:block;color:var(--ink);font-weight:650;font-size:15.5px;margin-bottom:2px}
+
+/* bench */
+.bench{display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:20px;align-items:start}
+.stage{background:var(--stage);border:1px solid var(--line);border-radius:var(--r);padding:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);overflow:hidden}
+@media (prefers-color-scheme:dark){.stage{box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}}
+.stage svg{width:100%;display:block}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:15px 16px;margin:0 0 14px;box-shadow:var(--shadow)}
+.panel h3{font-size:11px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);margin:0 0 12px;
+  display:flex;align-items:center;gap:8px}
+.panel h3 .badge{margin-left:auto;font-size:9.5px;letter-spacing:.06em;padding:3px 7px;border-radius:5px;
+  border:1px solid var(--line2);color:var(--ink3);font-weight:700}
+.panel h3 .badge.src{border-color:var(--good);color:var(--good);background:var(--goodtint)}
+.panel h3 .badge.open{border-color:var(--warn);color:var(--warn);background:var(--warntint)}
+.dim{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.dim .lab{flex:1;min-width:0;font-size:14px}
+.dim .lab i{display:block;font-style:normal;font-size:11.5px;color:var(--ink3);margin-top:1px}
+.stepper{display:inline-flex;align-items:center;gap:2px;background:var(--paper2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.stepper button{width:34px;height:34px;border:0;background:transparent;color:var(--ink2);cursor:pointer;
+  font-size:17px;line-height:1;border-radius:7px;transition:.13s;font-family:inherit}
+.stepper button:hover{background:var(--surface);color:var(--accent)}
+.stepper button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.stepper .v{min-width:70px;text-align:center;font-size:14px;font-weight:650;font-variant-numeric:tabular-nums}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 0}
+.pill{font:inherit;font-size:12.5px;padding:8px 11px;min-height:40px;border-radius:9px;cursor:pointer;
+  border:1px solid var(--line);background:var(--paper2);color:var(--ink2);transition:.13s}
+.pill:hover{border-color:var(--line2);color:var(--ink)}
+.pill:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.pill.on{border-color:var(--accent);background:var(--tint);color:var(--accent2);font-weight:650}
+.pill.off{opacity:.55;cursor:not-allowed}
+.exact input{width:100%;max-width:170px;font:inherit;font-size:13.5px;font-variant-numeric:tabular-nums;
+  padding:10px;border:1px solid var(--line2);border-radius:9px;background:var(--paper2);color:var(--ink);min-height:42px}
+.exact input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px var(--tint)}
+.tools{display:flex;gap:7px;flex-wrap:wrap;margin:0}
+.tool{flex:1;min-width:104px;border:1px solid var(--line);background:var(--paper2);border-radius:11px;
+  padding:9px 8px 10px;cursor:pointer;color:var(--ink2);text-align:center;transition:.14s}
+.tool:hover{border-color:var(--line2);color:var(--ink)}
+.tool:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.tool.on{border-color:var(--accent);background:var(--tint);color:var(--accent2)}
+.tool svg{display:block;width:100%;height:auto;margin-bottom:5px}
+.tool b{display:block;font-size:12.5px;font-weight:650}
+.tool i{display:block;font-style:normal;font-size:10.5px;color:var(--ink3);margin-top:1px}
+.tool.on i{color:var(--accent2)}
+.hint{font-size:12.5px;line-height:1.55;color:var(--ink3);margin:9px 0 0}
+.hint b{color:var(--ink2)}
+.note{margin:13px 0 0;padding:12px 14px;border:1px dashed var(--line2);border-radius:12px;background:var(--paper2);
+  font-size:13px;line-height:1.55;color:var(--ink2)}
+.note b{color:var(--ink)}
+.note.warn{border-style:solid;border-color:var(--warn);background:var(--warntint)}
+.note.good{border-style:solid;border-color:var(--good);background:var(--goodtint)}
+
+/* intent card */
+.intent{margin:0 0 16px;padding:14px 16px;border-radius:13px;border:1px solid var(--line2);background:var(--paper2)}
+.intent .t{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin:0 0 8px}
+.intent ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px}
+.intent li{color:var(--ink2)}
+.intent li b{color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums}
+.intent .why{margin:9px 0 0;font-size:12px;color:var(--ink3)}
+
+/* definition / provenance */
+.defrow{display:flex;align-items:flex-start;gap:8px 10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;flex-wrap:wrap}
+.defrow:last-child{border-bottom:0}
+.defrow .k{flex:none;width:118px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);padding-top:2px}
+.defrow .v{flex:1 1 110px;min-width:0;font-weight:600}
+.defrow .v i{display:block;font-style:normal;font-size:11.5px;font-weight:400;color:var(--ink3);margin-top:1px}
+.defrow .v.open{color:var(--warn)}
+.prov{flex:none;margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.05em;padding:3px 7px;border-radius:5px;
+  border:1px solid var(--line2);color:var(--ink3);background:var(--surface);white-space:nowrap;margin-top:1px}
+.prov.user{border-color:var(--accent);color:var(--accent2);background:var(--tint)}
+.prov.derived{border-color:var(--line2);color:var(--ink2);background:var(--paper2)}
+.prov.open{border-color:var(--warn);color:var(--warn);background:var(--warntint)}
+.ops{margin:0;padding:0 0 0 20px;font-size:13px;line-height:1.75;color:var(--ink2)}
+.ops li::marker{color:var(--ink3);font-variant-numeric:tabular-nums}
+
+/* contract */
+.object{margin:0;padding:20px 22px;border-radius:var(--r);border:1px solid var(--line2);background:var(--surface);box-shadow:var(--lift)}
+.object .eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin:0 0 7px}
+.object h2{margin:0 0 5px;font-size:25px;letter-spacing:-.02em;font-weight:650}
+.object .idline{font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent2);margin:0 0 16px}
+.fold{margin:15px 0 0;border:1px solid var(--line);border-radius:12px;background:var(--paper2);overflow:hidden}
+.fold summary{cursor:pointer;list-style:none;padding:12px 14px;font-size:13.5px;font-weight:650;color:var(--ink2);
+  display:flex;align-items:center;gap:9px}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary:before{content:"";width:7px;height:7px;border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);
+  transform:rotate(-45deg);transition:transform .18s;flex:none;margin-left:2px}
+.fold[open] summary:before{transform:rotate(45deg)}
+.fold .in{padding:0 14px 14px;font-size:12.5px;line-height:1.65;color:var(--ink2)}
+pre.spec{margin:0;padding:14px 15px;border-radius:10px;background:var(--surface);border:1px solid var(--line);
+  font:11.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink2);white-space:pre-wrap;max-height:320px;overflow:auto}
+.flash{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);opacity:0;
+  background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:999px;font-size:14px;font-weight:600;
+  pointer-events:none;transition:.22s;z-index:50}
+.flash.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{margin:46px 0 0;font-size:12px;line-height:1.7;color:var(--ink3);max-width:76ch}
+.foot b{color:var(--ink2)}
+@media (max-width:980px){.bench,.grid3,.grid2{grid-template-columns:1fr}}
+@media (max-width:560px){.wrap{padding:18px 14px 56px}.defrow{flex-wrap:wrap}.defrow .k{width:100%}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="flash" id="flash"></div>
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCAN-TO-BUILD · START YOUR OWN · BENCH LEG 0.1
+
+   projectId        start-own
+   displayName      Start Your Own / Grab a Board
+   projectClass     USER_DEFINED_BOARD
+   confirmation     STB_START_OWN_CONFIRMED
+   Store adapter    start-own-store-http/1  (host-owned; not pinned in this child)
+
+   The on-ramp to Scan-to-Build. No plan, no bounded project — a customer with a
+   need, a board, and a bench. Every physical fact here is USER-MEASURED,
+   USER-DEFINED or USER-DECLARED. Nothing is carried from a source, because there
+   is no source. This is one route only: there is no path chooser, no second
+   project identity, and no self-comparison against another child.
+
+   This file DEFINES work. It does not price it, order it, allocate it, release
+   it, ready a machine, emit controller output, or drive anything. Store answers
+   arrive from the System host. NO BLOOD ON WOOD.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?'':s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function clamp(v,a,b){return v<a?a:(v>b?b:v)}
+function q4(v){return Math.round(v*4)/4}
+function fmt(v){
+  if(v==null||!isFinite(v))return '—';
+  var n=Math.abs(v)<1e-10?0:v, n32=Math.round(n*32)/32;
+  if(Math.abs(n-n32)<1e-8){
+    var sg=n32<0?'-':'', a=Math.abs(n32), w=Math.floor(a), e=Math.round((a-w)*32), d=32;
+    if(e===0)return sg+w;
+    if(e===32)return sg+(w+1);
+    while(e%2===0){e/=2;d/=2}
+    return sg+(w?w+' ':'')+e+'/'+d;
+  }
+  return String(Math.round(n*10000)/10000);
+}
+function hash32(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}
+  return ('00000000'+(h>>>0).toString(16).toUpperCase()).slice(-8)}
+function parseDim(raw){
+  var x=(''+raw).trim().toLowerCase().replace(/\s*(?:in|inch|inches|deg|degrees|°|")\s*$/,'').trim();
+  if(!x)return null;
+  if(/^\d+(?:\.\d+)?$/.test(x))return +x;
+  var m=x.match(/^(\d+)\s+(\d+)\/(\d+)$/)||x.match(/^(\d+)-(\d+)\/(\d+)$/);
+  if(m){var d=+m[3];return d?(+m[1]+(+m[2]/d)):null}
+  m=x.match(/^(\d+)\/(\d+)$/);
+  if(m){var d2=+m[2];return d2?(+m[1]/d2):null}
+  return null;
+}
+function near(v){return fmt(Math.round(v*16)/16)}
+function flash(msg){var f=$('flash');if(!f)return;f.textContent=msg;f.classList.add('show');
+  clearTimeout(flash._t);flash._t=setTimeout(function(){f.classList.remove('show')},1800)}
+
+/* ═══════════ 1 · BOUNDED STOCK AND THE CURRENT SERVICE CELL ═══════════
+   The angled-end service is currently offered on nominal 2×4 only. That is a
+   service boundary declared by this bounded cell — NOT a claim about what a saw
+   can physically cut. Size keys and the angle/length/qty envelope mirror
+   apps/stb/shared/start-own-store-wire.mjs as reflected in the approved
+   convergence reference. (Verify against the wire module at admission.) */
+var STOCK=[
+  {k:'2x4',label:'2×4',t:1.5,w:3.5, angled:true },
+  {k:'2x6',label:'2×6',t:1.5,w:5.5, angled:false},
+  {k:'2x8',label:'2×8',t:1.5,w:7.25,angled:false},
+  {k:'4x4',label:'4×4',t:3.5,w:3.5, angled:false}
+];
+function stk(k){for(var i=0;i<STOCK.length;i++)if(STOCK[i].k===k)return STOCK[i];return null}
+var ANGLE_MIN=0, ANGLE_MAX=55;   /* wire: angleDeg 0–55 */
+var LEN_MIN=6,  LEN_MAX=96;      /* wire: finishedLengthIn 6–96 */
+var QTY_MIN=1,  QTY_MAX=48;      /* wire: partQty integer 1–48 */
+
+/* ═══════════ 2 · PLAIN WORDS FOR EVERY STORED VALUE ═══════════ */
+var WORDS={
+  'miter-face':'Angle runs across the wide face',
+  'bevel-thickness':'Angle runs through the thickness',
+  'both':'Both ends',
+  'first':'One end only',
+  'parallel':'Parallel — same direction',
+  'opposed':'Mirrored — opposite directions',
+  'long-long-outer-edge':'Long point to long point, along the outer edge',
+  'long-short':'Long point to short point'
+};
+function words(v){return WORDS[v]||(v==null?'not set':String(v))}
+var TECH={
+  'miter-face':'MITER / FACE',
+  'bevel-thickness':'BEVEL / THICKNESS',
+  'both':'BOTH ENDS','first':'FIRST END',
+  'parallel':'PARALLEL','opposed':'OPPOSED',
+  'long-long-outer-edge':'LONG-LONG / OUTER REFERENCE EDGE',
+  'long-short':'LONG POINT → SHORT POINT'
+};
+function tech(v){return TECH[v]||''}
+
+/* Provenance vocabulary for THIS route: everything the customer establishes.
+   Never mixed into physical identity. Start Your Own has no SOURCE-BACKED. */
+var PROV={
+  measured :{cls:'user',   label:'USER-MEASURED'},
+  user     :{cls:'user',   label:'USER-DEFINED'},
+  declared :{cls:'user',   label:'USER-DECLARED'},
+  open     :{cls:'open',   label:'UNRESOLVED'}
+};
+
+/* ═══════════ 3 · STATE ═══════════ */
+function blankPart(){
+  return {sizeKey:null,finishedLengthIn:null,partQty:null,angleDeg:null,
+          cutPlane:null,endIdentity:null,endRelation:null,lengthDatum:null};
+}
+var S={
+  screen:'intent',
+  intent:{oldLen:null,oldAngle:null,delta:0,qty:1,note:''},
+  P:blankPart(), prov:{}, ops:[],
+  confirmed:null,
+  storePreview:null, storePreviewDefinitionId:null,
+  storePreviewPending:false, storePreviewDiagnostic:null,
+  lastId:null
+};
+function targetLen(){var a=Number(S.intent.oldLen),d=Number(S.intent.delta||0);return Number.isFinite(a)?q4(a+d):null}
+
+/* ═══════════ 4 · PHYSICAL IDENTITY ═══════════
+   Exactly the eight fields validateStartOwnPayload() admits, in fixed order.
+   No provenance, no project id, no source, no UI state, no narrative. Two
+   identical parts are identical however each fact came to be known. This is the
+   shared schema both Scan-to-Build children normalize to. */
+var DEMAND_KEYS=['sizeKey','finishedLengthIn','partQty','angleDeg',
+                 'cutPlane','endIdentity','endRelation','lengthDatum'];
+function physicalDemand(P){
+  return {
+    sizeKey:P.sizeKey,
+    finishedLengthIn:P.finishedLengthIn==null?null:Number(P.finishedLengthIn),
+    partQty:P.partQty==null?null:Number(P.partQty),
+    angleDeg:P.angleDeg==null?null:Number(P.angleDeg),
+    cutPlane:P.cutPlane,
+    endIdentity:P.endIdentity,
+    endRelation:P.endRelation==null?null:P.endRelation,
+    lengthDatum:P.lengthDatum
+  };
+}
+function canonicalDemand(d){
+  var out=[];
+  for(var i=0;i<DEMAND_KEYS.length;i++){
+    var k=DEMAND_KEYS[i], v=d[k];
+    out.push(k+'='+(v==null?'∅':(typeof v==='number'?v.toFixed(4):String(v))));
+  }
+  return out.join('|');
+}
+/* CHILD-LOCAL, PREVIEW-ONLY display id. NOT the System canonical review-child
+   id. The System host owns canonical identity through its own machinery from
+   getDefinition(); this string only names the physical contract inside this
+   file so a reviewer can see it change. */
+function localPreviewId(d){return 'BL-'+hash32(canonicalDemand(d))+' · local preview'}
+
+/* ═══════════ 5 · FAIL CLOSED ═══════════ */
+function openPoints(P){
+  var a=[], s=stk(P.sizeKey);
+  if(!P.sizeKey)a.push({k:'stock',t:'Pick the board'});
+  if(P.finishedLengthIn==null)a.push({k:'len',t:'Set the finished length'});
+  if(P.partQty==null)a.push({k:'qty',t:'Say how many'});
+  if(P.angleDeg==null)a.push({k:'ends',t:'Say how the ends are cut'});
+  if(P.angleDeg!=null&&P.angleDeg>0){
+    if(!P.cutPlane)a.push({k:'plane',t:'Say where the angle runs'});
+    if(!P.endIdentity)a.push({k:'ends',t:'Say which ends are cut'});
+    if(P.endIdentity==='both'&&!P.endRelation)a.push({k:'ends',t:'Say whether the ends run parallel or mirrored'});
+  }
+  if(!P.lengthDatum)a.push({k:'datum',t:'Establish the finished-length datum'});
+  if(P.angleDeg!=null&&P.angleDeg>0&&s&&!s.angled)
+    a.push({k:'cell',t:'This cell offers the angled end on 2×4 only'});
+  return a;
+}
+function isComplete(P){return openPoints(P).length===0}
+/* A through-thickness bevel is a legitimate definition. It is NOT the current
+   face-miter service and is never silently routed to it. */
+function bevelDeferred(P){return P.angleDeg>0 && P.cutPlane==='bevel-thickness'}
+
+/* ═══════════ 6 · DRAWINGS ═══════════ */
+var GR={f1:'#EFE0BC',f2:'#E0CCA2',top:'#F3E7C8',end:'#D8C49B',
+        line:'rgba(150,118,70,.34)',dark:'#B79D72',knot:'#AE8A54'};
+function woodDefs(){
+  return '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>'
+    +'<linearGradient id="face" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0" stop-color="'+GR.f1+'"/><stop offset="1" stop-color="'+GR.f2+'"/></linearGradient>'
+    +'<linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0" stop-color="'+GR.top+'"/><stop offset="1" stop-color="'+GR.end+'"/></linearGradient>'
+    +'<pattern id="grain" width="46" height="13" patternUnits="userSpaceOnUse">'
+    +'<path d="M0 3 Q12 1.2 23 3.2 T46 2.6" fill="none" stroke="'+GR.line+'" stroke-width="1"/>'
+    +'<path d="M0 8.4 Q14 10.2 26 8 T46 9" fill="none" stroke="'+GR.line+'" stroke-width=".8" opacity=".75"/>'
+    +'</pattern>'
+    +'<radialGradient id="drop" cx=".5" cy=".5" r=".5">'
+    +'<stop offset="0" stop-color="rgba(70,45,20,.30)"/><stop offset="1" stop-color="rgba(70,45,20,0)"/>'
+    +'</radialGradient></defs></svg>';
+}
+function txt(x,y,s,o){o=o||{};
+  return '<text x="'+x+'" y="'+y+'"'+(o.anchor?' text-anchor="'+o.anchor+'"':'')
+    +' font-size="'+(o.size||11.5)+'"'+(o.weight?' font-weight="'+o.weight+'"':'')
+    +(o.ls?' letter-spacing="'+o.ls+'"':'')
+    +' fill="'+(o.fill||'var(--ink3)')+'" font-family="ui-sans-serif,sans-serif">'+esc(s)+'</text>';
+}
+function dimH(x1,x2,y,label,col){
+  col=col||'var(--accent)';
+  var m=(x1+x2)/2, w=String(label).length*6.5+14;
+  return '<g><path d="M'+x1+' '+(y-5)+'v10M'+x2+' '+(y-5)+'v10" stroke="'+col+'" opacity=".6"/>'
+    +'<path d="M'+x1+' '+y+'H'+(m-w/2)+'M'+(m+w/2)+' '+y+'H'+x2+'" stroke="'+col+'" opacity=".6"/>'
+    +txt(m,y+4.5,label,{anchor:'middle',size:12.5,weight:650,fill:'var(--accent2)'})+'</g>';
+}
+function angleMark(ax,ay,deg,dir,down,r){
+  if(!(deg>0))return '';
+  r=r||38; dir=dir||1; var rad=deg*Math.PI/180, sy=down?1:-1;
+  var sqx=ax, sqy=ay+sy*r;
+  var enx=ax-dir*r*Math.sin(rad), eny=ay+sy*r*Math.cos(rad);
+  var sweep=(sy>0)?(dir>0?1:0):(dir>0?0:1);
+  return '<g><path d="M'+ax+' '+ay+'L'+sqx+' '+sqy+'" stroke="var(--ink3)" stroke-dasharray="3 3"/>'
+    +'<path d="M'+ax+' '+ay+'L'+enx+' '+eny+'" stroke="var(--accent)" stroke-width="1.3" opacity=".85"/>'
+    +'<path d="M'+sqx+' '+sqy+'A'+r+' '+r+' 0 0 '+sweep+' '+enx+' '+eny+'" fill="none" stroke="var(--accent)" stroke-width="1.6"/>'
+    +txt(ax-dir*r*0.62,ay+sy*r*0.86,fmt(deg)+'°',{anchor:'middle',size:12.5,weight:700,fill:'var(--accent2)'})
+    +'</g>';
+}
+
+/* THE BOARD ON THE BENCH — both views of the same stick, always. Wide face on
+   top, edge below. An angle can only live on one of them, so the customer can
+   SEE which one it landed on instead of trusting a word. Nothing is drawn as
+   cut until the customer asks for it. */
+function drawBoard(P){
+  var s=stk(P.sizeKey)||stk('2x4');
+  var L=(P.finishedLengthIn!=null?P.finishedLengthIn:24);
+  var a=(P.angleDeg!=null?P.angleDeg:0);
+  var plane=P.cutPlane, ends=P.endIdentity, rel=P.endRelation;
+  var angled=a>0 && ends!=null;
+  var vw=760, ML=118, MR=272, MT=58;
+  var skFace=angled&&plane==='miter-face' ? s.w*Math.tan(a*Math.PI/180) : 0;
+  var skEdge=angled&&plane==='bevel-thickness' ? s.t*Math.tan(a*Math.PI/180) : 0;
+  var maxSk=Math.max(skFace,skEdge);
+  var SC=(vw-ML-MR)/(L+maxSk+0.01);
+  var lPx=L*SC, fH=s.w*SC, eH=s.t*SC;
+  var yF=MT, yFb=yF+fH, yE=yFb+64, yEb=yE+eH;
+  var vh=yEb+112;
+  var o=['<svg viewBox="0 0 '+vw+' '+vh+'" role="img" aria-label="the board as currently defined">'];
+
+  function shape(y0,y1,sk){
+    var skL=0, skR=0;
+    if(angled&&sk>0){
+      if(ends==='both'){ skL=sk; skR=(rel==='opposed')?-sk:sk; }
+      else { skL=sk; skR=0; }
+    }
+    var x0=ML+Math.max(0,-Math.min(skL,skR));
+    return {BL:[x0,y1],BR:[x0+lPx,y1],TR:[x0+lPx+skR,y0],TL:[x0+skL,y0],skL:skL,skR:skR,x0:x0};
+  }
+  function drawView(y0,y1,sk,fill,label,dimLabel,live){
+    var c=shape(y0,y1,sk), g=[];
+    var d='M'+c.TL[0]+' '+c.TL[1]+'L'+c.TR[0]+' '+c.TR[1]+'L'+c.BR[0]+' '+c.BR[1]+'L'+c.BL[0]+' '+c.BL[1]+'Z';
+    g.push('<ellipse cx="'+(c.x0+lPx/2)+'" cy="'+(y1+7)+'" rx="'+(lPx/2)+'" ry="5" fill="url(#drop)" opacity=".5"/>');
+    g.push('<path d="'+d+'" fill="url(#'+fill+')"/>');
+    g.push('<clipPath id="clip-'+label.replace(/\W/g,'')+'"><path d="'+d+'"/></clipPath>');
+    g.push('<g clip-path="url(#clip-'+label.replace(/\W/g,'')+')"><rect x="'+(c.x0-30)+'" y="'+y0
+      +'" width="'+(lPx+120)+'" height="'+(y1-y0)+'" fill="url(#grain)" opacity=".9"/></g>');
+    g.push('<path d="'+d+'" fill="none" stroke="rgba(70,45,20,.45)" stroke-width="1.2"/>');
+    if(angled&&sk>0){
+      g.push('<path d="M'+c.TL[0]+' '+c.TL[1]+'L'+c.BL[0]+' '+c.BL[1]+'" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round"/>');
+      if(ends==='both')
+        g.push('<path d="M'+c.TR[0]+' '+c.TR[1]+'L'+c.BR[0]+' '+c.BR[1]+'" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round"/>');
+    }
+    g.push(txt(ML-12,(y0+y1)/2+4,label,{anchor:'end',size:11.5,weight:700,fill:live?'var(--accent2)':'var(--ink3)'}));
+    g.push(txt(ML-12,(y0+y1)/2+18,dimLabel,{anchor:'end',size:10.5}));
+    return {g:g.join(''),c:c};
+  }
+
+  o.push(txt(ML,26,'THE BOARD ON THE BENCH \u00b7 DRAWN TO SCALE',{size:11,weight:700,ls:'.09em'}));
+  o.push(txt(vw-MR+10,26,esc(s.label),{anchor:'end',size:11,weight:700,ls:'.06em',fill:'var(--accent2)'}));
+
+  var face=drawView(yF,yFb,skFace,'face','WIDE FACE',fmt(s.w)+' in',plane==='miter-face');
+  var edge=drawView(yE,yEb,skEdge,'edge','EDGE',fmt(s.t)+' in',plane==='bevel-thickness');
+  o.push(face.g); o.push(edge.g);
+
+  if(angled&&skFace>0) o.push(angleMark(face.c.BL[0],face.c.BL[1],a,-1,true,36));
+  if(angled&&skEdge>0) o.push(angleMark(edge.c.BL[0],edge.c.BL[1],a,-1,true,30));
+
+  /* the cut exists the moment you ask for it, before its angle or orientation
+     is known. Dashed, indicative, committing to nothing. */
+  var pendingAngle=(ends!=null&&P.angleDeg==null);
+  if(pendingAngle){
+    var ind=12*Math.PI/180;
+    [[face.c,yF,yFb,s.w],[edge.c,yE,yEb,s.t]].forEach(function(p){
+      var c=p[0], gsk=p[3]*Math.tan(ind)*SC;
+      o.push('<path d="M'+(c.BL[0]+gsk)+' '+p[1]+'L'+c.BL[0]+' '+p[2]+'" stroke="var(--warn)" stroke-width="2.4" stroke-dasharray="5 4"/>');
+      if(ends==='both')
+        o.push('<path d="M'+(c.BR[0]+gsk)+' '+p[1]+'L'+c.BR[0]+' '+p[2]+'" stroke="var(--warn)" stroke-width="2.4" stroke-dasharray="5 4"/>');
+    });
+    o.push(txt(vw/2-70,vh-16,'A cut on '+(ends==='both'?'each end':'one end')+'. Set the angle, then say where it runs.',
+      {anchor:'middle',size:12,weight:650,fill:'var(--warn)'}));
+  }
+  /* angle set but orientation not chosen: ghost on both, commit to neither */
+  if(a>0&&ends!=null&&!plane){
+    [[face.c,yF,yFb,s.w],[edge.c,yE,yEb,s.t]].forEach(function(p){
+      var c=p[0], gsk=p[3]*Math.tan(a*Math.PI/180)*SC;
+      o.push('<path d="M'+(c.BL[0]+gsk)+' '+p[1]+'L'+c.BL[0]+' '+p[2]+'" stroke="var(--warn)" stroke-width="2" stroke-dasharray="4 4"/>');
+      if(ends==='both')
+        o.push('<path d="M'+(c.BR[0]+gsk)+' '+p[1]+'L'+c.BR[0]+' '+p[2]+'" stroke="var(--warn)" stroke-width="2" stroke-dasharray="4 4"/>');
+    });
+    o.push(txt(vw/2-70,vh-16,'The angle has to run across one of these two. Say which, and the drawing commits.',
+      {anchor:'middle',size:12,weight:650,fill:'var(--warn)'}));
+  }
+
+  var c=face.c, dy=yEb+46;
+  if(P.finishedLengthIn==null){
+    o.push(dimH(c.BL[0],c.BR[0],dy,'finished length not set'));
+  } else if(P.lengthDatum==='long-short'&&skFace>0){
+    var lo=c.BL[0]+Math.max(0,c.skL), hi=c.BR[0]+Math.min(0,c.skR);
+    o.push(dimH(lo,hi,dy,fmt(L)+' in'));
+    o.push('<circle cx="'+lo+'" cy="'+yF+'" r="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>');
+    o.push('<circle cx="'+hi+'" cy="'+yFb+'" r="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>');
+    o.push(txt(vw/2,dy+26,'long point → short point',{anchor:'middle',size:11.5}));
+  } else {
+    o.push(dimH(c.BL[0],c.BR[0],dy,fmt(L)+' in'));
+    o.push('<circle cx="'+c.BL[0]+'" cy="'+yFb+'" r="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>');
+    o.push('<circle cx="'+c.BR[0]+'" cy="'+yFb+'" r="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>');
+    o.push(txt(vw/2,dy+26,P.lengthDatum?'measured along the outer edge, tip to tip':'datum not established yet',
+      {anchor:'middle',size:11.5,fill:P.lengthDatum?'var(--ink3)':'var(--warn)'}));
+  }
+  o.push(endDetail(P,vw-244,MT-26,220,146));
+  if(P.partQty!=null)
+    o.push(txt(vw-MR+10,44,'× '+P.partQty+' of them',{anchor:'end',size:11.5,fill:'var(--ink2)'}));
+  o.push('</svg>');
+  return o.join('');
+}
+
+function endDetail(P,bx,by,bw,bh){
+  var s=stk(P.sizeKey)||stk('2x4'), a=P.angleDeg;
+  if(!(a>0)||!P.cutPlane||!P.endIdentity)return '';
+  var across=(P.cutPlane==='miter-face')?s.w:s.t;
+  var label=(P.cutPlane==='miter-face')?'WIDE FACE \u00b7 3\u00bd in':'EDGE \u00b7 1\u00bd in';
+  var SC=(bh-58)/across, sk=across*Math.tan(a*Math.PI/180)*SC;
+  var run=Math.max(30,Math.min(bw-46-sk, 2.4*SC));
+  var x0=bx+24, yT=by+36, yB=yT+across*SC;
+  var o=['<g>'];
+  o.push('<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" rx="11" fill="var(--paper2)" stroke="var(--line2)"/>');
+  o.push(txt(bx+13,by+20,'END DETAIL \u00b7 '+label,{size:9.5,weight:700,ls:'.07em'}));
+  var d='M'+(x0+sk)+' '+yT+'L'+(x0+sk+run)+' '+yT+'L'+(x0+run)+' '+yB+'L'+x0+' '+yB+'Z';
+  o.push('<path d="'+d+'" fill="url(#face)"/>');
+  o.push('<path d="'+d+'" fill="none" stroke="rgba(70,45,20,.45)"/>');
+  o.push('<path d="M'+x0+' '+yT+'v'+(yB-yT)+'" stroke="var(--ink3)" stroke-dasharray="3 3"/>');
+  o.push(txt(x0-6,yB+12,'square',{anchor:'middle',size:9.5}));
+  o.push('<path d="M'+(x0+sk)+' '+yT+'L'+x0+' '+yB+'" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/>');
+  o.push(angleMark(x0,yB,a,-1,false,Math.min(32,(yB-yT)*0.74)));
+  o.push('<circle cx="'+x0+'" cy="'+yB+'" r="3.4" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>');
+  o.push('<circle cx="'+(x0+sk)+'" cy="'+yT+'" r="3.4" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>');
+  o.push(txt(bx+bw/2,by+bh-11,'long and short point, '+near(across*Math.tan(a*Math.PI/180))+' in apart',
+    {anchor:'middle',size:9.5}));
+  o.push('</g>');
+  return o.join('');
+}
+
+function toolArt(kind){
+  var W=96,H=34,x0=8,x1=88,yT=8,yB=26,sk=9;
+  function box(tl,tr,br,bl,hi){
+    return '<path d="M'+tl+' '+yT+'L'+tr+' '+yT+'L'+br+' '+yB+'L'+bl+' '+yB+'Z" fill="url(#face)"'
+      +' stroke="'+(hi?'var(--accent)':'rgba(70,45,20,.4)')+'" stroke-width="'+(hi?1.6:1)+'"/>';
+  }
+  var s='<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true">';
+  if(kind==='square')      s+=box(x0,x1,x1,x0,0);
+  else if(kind==='one')    s+=box(x0+sk,x1,x1,x0,1);
+  else if(kind==='both')   s+=box(x0+sk,x1+sk,x1,x0,1);
+  else if(kind==='parallel')s+=box(x0+sk,x1+sk,x1,x0,1);
+  else if(kind==='opposed') s+=box(x0+sk,x1-sk,x1,x0,1);
+  else if(kind==='face'){
+    s+='<path d="M'+(x0+sk)+' 5L'+(x1+sk)+' 5L'+x1+' 23L'+x0+' 23Z" fill="url(#face)" stroke="var(--accent)" stroke-width="1.6"/>';
+    s+='<path d="M'+x0+' 26L'+x1+' 26L'+x1+' 32L'+x0+' 32Z" fill="url(#edge)" stroke="rgba(70,45,20,.35)"/>';
+  } else if(kind==='thickness'){
+    s+='<path d="M'+x0+' 5L'+x1+' 5L'+x1+' 23L'+x0+' 23Z" fill="url(#face)" stroke="rgba(70,45,20,.35)"/>';
+    s+='<path d="M'+(x0+5)+' 26L'+(x1+5)+' 26L'+x1+' 32L'+x0+' 32Z" fill="url(#edge)" stroke="var(--accent)" stroke-width="1.6"/>';
+  } else if(kind==='edgeDatum'){
+    s+=box(x0+sk,x1+sk,x1,x0,0);
+    s+='<path d="M'+x0+' 31H'+x1+'" stroke="var(--accent)" stroke-width="2"/>'
+      +'<circle cx="'+x0+'" cy="31" r="2.6" fill="var(--accent)"/><circle cx="'+x1+'" cy="31" r="2.6" fill="var(--accent)"/>';
+  } else if(kind==='shortDatum'){
+    s+=box(x0+sk,x1+sk,x1,x0,0);
+    s+='<path d="M'+(x0+sk)+' 31H'+x1+'" stroke="var(--accent)" stroke-width="2"/>'
+      +'<circle cx="'+(x0+sk)+'" cy="31" r="2.6" fill="var(--accent)"/><circle cx="'+x1+'" cy="31" r="2.6" fill="var(--accent)"/>';
+  }
+  return s+'</svg>';
+}
+
+/* stock portrait, drawn to its actual proportion so the board looks like a board */
+function stockPortrait(s){
+  return '<svg class="pic" viewBox="0 0 340 120" aria-hidden="true">'
+    +'<ellipse cx="170" cy="96" rx="120" ry="7" fill="url(#drop)" opacity=".45"/>'
+    +'<rect x="50" y="'+(78-s.w*7)+'" width="240" height="'+(s.w*7)+'" rx="1.5" fill="url(#face)" stroke="rgba(70,45,20,.42)"/>'
+    +'<rect x="50" y="'+(78-s.w*7)+'" width="240" height="'+(s.w*7)+'" rx="1.5" fill="url(#grain)" opacity=".85"/>'
+    +txt(170,110,fmt(s.t)+' × '+fmt(s.w)+' in actual',{anchor:'middle',size:11})
+    +'</svg>';
+}
+
+/* ═══════════ 7 · SHARED FURNITURE ═══════════ */
+var TICK='<span class="tick"><svg viewBox="0 0 24 24"><path d="M4 12.5l5.2 5.2L20 7"/></svg></span>';
+function railHTML(steps,at){
+  return '<div class="rail"><button class="back" id="lib">← Project library</button>'
+    +'<span class="who">Start Your Own · grab a board</span>'
+    +'<div class="steps">'+steps.map(function(s,i){
+      var c=i<at?'s done':(i===at?'s on':'s');
+      return '<span class="'+c+'"><i>'+(i<at?'✓':(i+1))+'</i>'+esc(s)+'</span>';
+    }).join('')+'</div></div>';
+}
+var STEPS=['What you want','Grab a board','The bench','Contract'];
+function intentCard(){
+  var I=S.intent;
+  return '<div class="intent"><p class="t">What you told us · not a definition</p><ul>'
+    +'<li>'+esc(I.note)+'</li>'
+    +'<li>Old part <b>'+fmt(I.oldLen)+' in</b></li>'
+    +'<li>Observed angle <b>about '+fmt(I.oldAngle)+'°</b></li>'
+    +'<li>Change <b>+'+fmt(I.delta)+' in</b></li>'
+    +'<li>Target <b>'+fmt(targetLen())+' in</b></li>'
+    +'<li>Quantity <b>'+I.qty+'</b></li>'
+    +'</ul><p class="why">Context only. Nothing here has created geometry, and none of it is '
+    +'manufacturing truth until you build it into a definition below.</p></div>';
+}
+function stepper(key,val,unit,step,placeholder){
+  return '<div class="stepper"><button data-step="'+key+':'+(-step)+'" aria-label="less">−</button>'
+    +'<span class="v">'+(val==null?'<span style="color:var(--warn)">'+esc(placeholder||'not set')+'</span>'
+      :fmt(val)+(unit?'<span style="font-weight:400;color:var(--ink3)"> '+unit+'</span>':''))+'</span>'
+    +'<button data-step="'+key+':'+step+'" aria-label="more">+</button></div>';
+}
+function toolBtn(act,val,art,title,sub,on,off){
+  return '<button class="tool'+(on?' on':'')+(off?' off':'')+'" data-act="'+act+'" data-val="'+esc(val)+'"'
+    +(off?' disabled':'')+'>'+toolArt(art)+'<b>'+esc(title)+'</b><i>'+esc(sub)+'</i></button>';
+}
+function provChip(k){var p=PROV[k];return p?'<span class="prov '+p.cls+'">'+p.label+'</span>':''}
+function defRow(k,label,value,provKey,note){
+  var open=(value==null||value==='');
+  return '<div class="defrow"><span class="k">'+esc(label)+'</span>'
+    +'<span class="v'+(open?' open':'')+'">'+(open?'UNRESOLVED':esc(value))
+    +(note?'<i>'+esc(note)+'</i>':'')+'</span>'
+    +provChip(open?'open':provKey)+'</div>';
+}
+function definitionPanel(P){
+  var s=stk(P.sizeKey), pr=S.prov;
+  var h='<div class="panel"><h3>What you have defined'
+    +(isComplete(P)?'<span class="badge src">COMPLETE</span>':'<span class="badge open">INCOMPLETE</span>')+'</h3>';
+  h+=defRow('size','Stock',s?s.label:null,pr.sizeKey,s?fmt(s.t)+' × '+fmt(s.w)+' in actual':'');
+  h+=defRow('len','Finished length',P.finishedLengthIn==null?null:fmt(P.finishedLengthIn)+' in',pr.finishedLengthIn);
+  h+=defRow('ang','Angle',P.angleDeg==null?null:(P.angleDeg===0?'Square ends':fmt(P.angleDeg)+'° off square'),pr.angleDeg);
+  if(P.angleDeg>0){
+    h+=defRow('plane','Cut plane',P.cutPlane?words(P.cutPlane):null,pr.cutPlane,tech(P.cutPlane));
+    h+=defRow('ends','Ends',P.endIdentity?words(P.endIdentity):null,pr.endIdentity);
+    if(P.endIdentity==='both')
+      h+=defRow('rel','End relation',P.endRelation?words(P.endRelation):null,pr.endRelation);
+  }
+  h+=defRow('datum','Length datum',P.lengthDatum?words(P.lengthDatum):null,pr.lengthDatum,tech(P.lengthDatum));
+  h+=defRow('qty','Quantity',P.partQty==null?null:String(P.partQty),pr.partQty);
+  if(S.ops.length)
+    h+='<details class="fold" style="margin-top:12px"><summary>How this was built · '+S.ops.length+' definition operations</summary>'
+      +'<div class="in"><ol class="ops">'+S.ops.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ol>'
+      +'<p style="margin:10px 0 0">These are definition operations — not controller commands, saw '
+      +'coordinates or a machine work plan.</p></div></details>';
+  h+='</div>';
+  return h;
+}
+function storePanel(P){
+  var a=(S.storePreview&&S.storePreviewDefinitionId===canonicalDemand(physicalDemand(P)))?S.storePreview:null;
+  var h='<div class="panel"><h3>Store boundary</h3>';
+  if(a){
+    var ev=a.rawEvaluation||{}, cap=ev.capability||{}, mat=ev.materialResolution||{};
+    var est=ev.estimate||{}, tot=est.totals||{};
+    h+='<p class="hint" style="margin:0 0 8px"><b>Store answered this exact definition.</b> '
+      +'Capability · '+esc(ev.status||cap.status||'UNRESOLVED')+'.</p>';
+    if(mat.status==='MAPPED'){
+      h+='<p class="hint"><b>Material '+esc(String(mat.storeSku||''))+' × '+esc(String(mat.quantity||0))
+        +' · $'+esc(Number(mat.materialTotal||0).toFixed(2))+'.</b></p>';
+    }
+    if(tot.material!=null){
+      h+='<p class="hint">Reference basis $'+esc(Number(tot.material||0).toFixed(2));
+      if(tot.cell_recovery!=null) h+=' + recovery $'+esc(Number(tot.cell_recovery).toFixed(2));
+      else h+=' · fulfillment recovery not published for this class';
+      h+='. Not a commercial quote.</p>';
+    }
+    if(ev.parentLegality){
+      h+='<p class="hint">Parents: '+ev.parentLegality.map(function(row){
+        return row.stockLengthIn+' in '+(row.oneStick?'LEGAL one-stick':(row.legal?'LEGAL multi-stick':'NOT LEGAL'));
+      }).join(' · ')+'.</p>';
+    }
+    if(mat.code){
+      h+='<p class="hint"><b>'+esc(mat.code)+'</b> is why a complete combined value is withheld.</p>';
+    }
+    h+='<p class="hint">Physical execution authorised: '+String(a.physicalExecutionAuthorized===true)+'.</p>';
+  } else {
+    h+='<p class="hint" style="margin:0"><b>STORE ANSWER COMES FROM THE SYSTEM HOST.</b> '
+      +(S.storePreviewPending?'A request for this definition is in flight.'
+        :(S.storePreviewDiagnostic?'Last attempt: '+esc(S.storePreviewDiagnostic)+'.'
+          :'Opened on its own, this artifact has no Store. Nothing is priced by assumption.'))+'</p>';
+  }
+  h+='<p class="hint">This file builds Store demand. It holds no catalogue, pricing engine, machine model '
+    +'or total, and no Store source pin of its own. Store says whether its declared capability can do what '
+    +'the part requires.</p>';
+  h+='</div>';
+  return h;
+}
+
+/* ═══════════ 8 · SETTING FACTS ═══════════ */
+function setFact(field,value,provKey,opText){
+  S.P[field]=value;
+  if(provKey!==undefined){ if(provKey===null)delete S.prov[field]; else S.prov[field]=provKey; }
+  if(opText)S.ops.push(opText);
+}
+function dropOps(prefix){S.ops=S.ops.filter(function(x){return x.indexOf(prefix)!==0})}
+
+/* ═══════════ 9 · SCREEN · INTENT ═══════════ */
+function renderIntent(){
+  var I=S.intent;
+  var h=woodDefs();
+  h+=railHTML(STEPS,0);
+  h+='<p class="eyebrow">Scan-to-Build · Start Your Own · bench leg 0.1</p>';
+  h+='<h1>You know what you need. <em>You just don’t have a plan.</em></h1>';
+  h+='<p class="lede">That is exactly what this is for. Tell us what you want, <b>grab a board, and build '
+    +'the part on the bench</b> with your own hands. Nothing on this screen creates geometry.</p>';
+  h+='<div class="bench" style="margin-top:26px"><div><div class="stage">'+drawBoard(blankPart())+'</div>'
+    +'<p class="hint" style="margin-top:12px">An empty bench. The board arrives when you pick it, and every '
+    +'cut on it will be one you asked for.</p></div><div>';
+  h+='<div class="panel"><h3>The old part you’re replacing</h3>'
+    +'<div class="dim"><span class="lab">It measures<i>end to end along the edge</i></span>'+stepper('oldLen',I.oldLen,'in',0.25)+'</div>'
+    +'<div class="pills">'+[14,15.5,16,18].map(function(v){
+      return '<button class="pill'+(Math.abs(I.oldLen-v)<.001?' on':'')+'" data-set="oldLen:'+v+'">'+fmt(v)+' in</button>'}).join('')+'</div>'
+    +'<div class="dim" style="margin-top:14px"><span class="lab">The ends look angled<i>hold a bevel to it</i></span>'
+    +stepper('oldAngle',I.oldAngle,'°',0.5)+'</div>'
+    +'<div class="pills">'+[0,5,10,15].map(function(v){
+      return '<button class="pill'+(Math.abs(I.oldAngle-v)<.001?' on':'')+'" data-set="oldAngle:'+v+'">'+fmt(v)+'°</button>'}).join('')+'</div>'
+    +'<p class="hint">An observation, near enough. It does not tell the system which way the cut runs, and '
+    +'it will not be allowed to pretend that it does.</p></div>';
+  h+='<div class="panel"><h3>What you want changed</h3>'
+    +'<div class="dim"><span class="lab">Longer by<i>your call</i></span>'+stepper('delta',I.delta,'in',0.25)+'</div>'
+    +'<div class="pills">'+[0,0.5,1,2].map(function(v){
+      return '<button class="pill'+(Math.abs(I.delta-v)<.001?' on':'')+'" data-set="delta:'+v+'">+'+fmt(v)+' in</button>'}).join('')+'</div>'
+    +'<p class="hint" style="margin-top:10px"><b>Target '+fmt(targetLen())+' in.</b></p>'
+    +'<div class="dim" style="margin-top:12px"><span class="lab">How many<i>you declare this</i></span>'+stepper('qty',I.qty,'',1)+'</div>'
+    +'<div class="pills">'+[2,4,6,8].map(function(v){
+      return '<button class="pill'+(I.qty===v?' on':'')+'" data-set="qty:'+v+'">'+v+'</button>'}).join('')+'</div>'
+    +'<p class="hint">Quantity is your call. Nothing here establishes it for you.</p></div>';
+  h+='</div></div>';
+  h+='<div class="gobar"><div class="sum"><strong>'+esc(I.note)+' · '+fmt(targetLen())+' in · '+I.qty+' of them.</strong>'
+    +'Next you pick a board. It arrives square, and you cut it yourself.</div>'
+    +'<button class="btn" id="go">Grab a board →</button></div>';
+  h+='<p class="foot"><b>NO BLOOD ON WOOD.</b> Your intent travels with the project as evidence. It becomes '
+    +'physical truth only when you construct the corresponding definition.</p>';
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('go').onclick=function(){S.screen='pick';render();window.scrollTo(0,0)};
+}
+
+/* ═══════════ 10 · GRAB A BOARD ═══════════ */
+function renderPick(){
+  var h=woodDefs();
+  h+=railHTML(STEPS,1);
+  h+='<h1>Pick a board. <em>Take it to the bench.</em></h1>';
+  h+='<p class="lede">Nothing is shaped yet. The board is a board, and every cut on it will be one you '
+    +'asked for. <b>Construction lumber 2×4</b> is the stock this bounded cell offers the angled end on.</p>';
+  h+=intentCard();
+  h+='<div class="grid2" style="margin-top:4px">'+STOCK.map(function(s){
+    return '<button class="card'+(S.P.sizeKey===s.k?' on':'')+'" data-act="size" data-val="'+s.k+'">'+TICK
+      +'<span class="flag'+(s.angled?' warm':'')+'">'+(s.angled?'angled end offered':'square cuts only')+'</span>'
+      +stockPortrait(s)
+      +'<span class="body"><b>'+esc(s.label)+'</b><span>'
+      +(s.angled?'Square cuts and the angled end. This is the bounded path.'
+                :'CURRENT CELL — straight / square cuts only for this stock.')
+      +'</span></span></button>';
+  }).join('')+'</div>';
+  var s=stk(S.P.sizeKey);
+  if(s&&!s.angled)
+    h+='<div class="note warn"><b>'+esc(s.label)+' · straight / square cuts only in this cell.</b> '
+      +'This is a current service boundary declared by this bounded dimensional cell — not a claim about '
+      +'what a saw can physically cut. The angled-end workflow is offered on nominal 2×4 here, and it will '
+      +'not be opened on this stock by routing it somewhere it does not belong.</div>';
+  h+='<div class="gobar"><div class="sum">'
+    +(s?'<strong>'+esc(s.label)+' on the bench.</strong>'+(s.angled
+        ?'You will cut it yourself. Nothing is pre-shaped.'
+        :'You can still define square dimensional cuts on it.')
+      :'<strong>Pick a board.</strong>2×4 is the one this proof follows.')
+    +'</div><button class="btn" id="go"'+(s?'':' disabled')+'>Take it to the bench →</button></div>';
+  h+='<p class="foot"><b>NO BLOOD ON WOOD.</b> Picking stock is not a definition, an order or an allocation.</p>';
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('go').onclick=function(){if(stk(S.P.sizeKey)){S.screen='bench';render();window.scrollTo(0,0)}};
+}
+
+/* ═══════════ 11 · THE BENCH ═══════════ */
+function benchTools(){
+  var P=S.P, s=stk(P.sizeKey), a=P.angleDeg, h='';
+  var cellOK=s&&s.angled;
+
+  h+='<div class="panel"><h3>1 · The ends</h3><div class="tools">'
+    +toolBtn('ends','square','square','Square ends','no angle',a===0,false)
+    +toolBtn('ends','one','one','Angle one end','first end',P.endIdentity==='first'&&a!==0,!cellOK)
+    +toolBtn('ends','both','both','Angle both ends','both ends',P.endIdentity==='both'&&a!==0,!cellOK)
+    +'</div>'
+    +(!cellOK?'<p class="hint"><b>'+esc(s?s.label:'This stock')+' takes square cuts only in this cell.</b> '
+      +'A current service boundary, not a statement about saws.</p>'
+      :'<p class="hint">Pick a tool and the drawing changes. Nothing was cut before you said so.</p>')+'</div>';
+
+  if(cellOK&&P.endIdentity==='both'&&a!==0){
+    h+='<div class="panel"><h3>2 · How do the two ends run?</h3><div class="tools">'
+      +toolBtn('rel','parallel','parallel','Parallel','same direction',P.endRelation==='parallel',false)
+      +toolBtn('rel','opposed','opposed','Mirrored','opposite directions',P.endRelation==='opposed',false)
+      +'</div><p class="hint">Same angle, different part. The drawing shows which one you have.</p></div>';
+  }
+  if(cellOK&&P.endIdentity&&a!==0){
+    h+='<div class="panel"><h3>3 · Where does the angle run?</h3><div class="tools">'
+      +toolBtn('plane','miter-face','face','Across the wide face','3½ in · miter / face',P.cutPlane==='miter-face',false)
+      +toolBtn('plane','bevel-thickness','thickness','Through the thickness','1½ in · bevel / thickness',P.cutPlane==='bevel-thickness',false)
+      +'</div>'
+      +'<p class="hint">Two physically different parts. Watch the wide face and the edge in the drawing — '
+      +'the slant can only land on one of them.</p>'
+      +(bevelDeferred(P)?'<div class="note warn" style="margin-top:10px"><b>A through-thickness bevel is a '
+        +'legitimate definition, and it is not the current face-miter service.</b> It stays on the record as '
+        +'a bevel and is not routed to the miter capability. Store answers whether its declared capability '
+        +'covers it.</div>':'')
+      +'</div>';
+    h+='<div class="panel"><h3>4 · The angle</h3>'
+      +'<div class="dim"><span class="lab">Degrees off square<i>this cell declares 0–'+ANGLE_MAX+'°</i></span>'
+      +stepper('angle',a,'°',0.5,'not set')+'</div>'
+      +'<div class="pills">'+[5,10,15,22.5,30,45].map(function(v){
+        return '<button class="pill'+(a===v?' on':'')+'" data-set="angle:'+v+'">'+fmt(v)+'°</button>'}).join('')+'</div>'
+      +'<div class="exact" style="margin-top:10px"><input data-exact="angle" value="'+(a==null?'':esc(fmt(a)))
+      +'" inputmode="decimal" placeholder="exact, e.g. 10" aria-label="Angle in degrees"></div>'
+      +'<p class="hint">The angle alone never completes the definition. It has to have somewhere to run and '
+      +'something to measure from.</p></div>';
+  }
+  var sk=(a>0&&P.cutPlane==='miter-face')?s.w*Math.tan(a*Math.PI/180)
+        :(a>0&&P.cutPlane==='bevel-thickness'?s.t*Math.tan(a*Math.PI/180):0);
+  var L=P.finishedLengthIn;
+  h+='<div class="panel"><h3>'+(cellOK&&a>0?'5':'2')+' · Where is the length measured?</h3><div class="tools">'
+    +toolBtn('datum','long-long-outer-edge','edgeDatum','Along the outer edge','tip to tip',P.lengthDatum==='long-long-outer-edge',false)
+    +toolBtn('datum','long-short','shortDatum','Long → short point','across the point',P.lengthDatum==='long-short',false)
+    +'</div>'
+    +(sk>0.01&&L!=null
+      ? '<p class="hint"><b>On this stick they are different numbers.</b> Along the outer edge: '
+        +fmt(L)+' in. Long point to short point: about '+near(Math.max(0,L-sk))+' in. Pick the one you measured.</p>'
+      : '<p class="hint">With square ends both readings are the same. The datum still has to be stated, '
+        +'because an angled end would make them differ.</p>')
+    +'</div>';
+  return h;
+}
+function lengthPanel(){
+  var P=S.P, L=P.finishedLengthIn, h='';
+  h+='<div class="panel"><h3>Finished length and quantity</h3>'
+    +'<div class="dim"><span class="lab">Finished length<i>'+(P.lengthDatum?esc(tech(P.lengthDatum)):'state the datum first')+'</i></span>'
+    +stepper('len',L,'in',0.25,'not set')+'</div>'
+    +'<div class="pills">'+[S.intent.oldLen,targetLen(),18,24].map(function(v){v=q4(v);
+      return '<button class="pill'+(L!=null&&Math.abs(L-v)<.001?' on':'')+'" data-set="len:'+v+'">'+fmt(v)+' in</button>'}).join('')+'</div>'
+    +'<div class="exact" style="margin-top:10px"><input data-exact="len" value="'+(L==null?'':esc(fmt(L)))
+    +'" inputmode="decimal" placeholder="exact, e.g. 16 1/2" aria-label="Finished length"></div>'
+    +'<div class="dim" style="margin-top:14px"><span class="lab">How many<i>customer-declared</i></span>'
+    +stepper('qty2',P.partQty,'',1,'not set')+'</div>'
+    +'<div class="pills">'+[2,4,6,8].map(function(v){
+      return '<button class="pill'+(P.partQty===v?' on':'')+'" data-set="qty2:'+v+'">'+v+'</button>'}).join('')+'</div>'
+    +'<div style="margin-top:16px"><b style="font-size:13px">Holes</b>'
+    +'<div class="tools" style="margin-top:9px">'
+    +'<button class="tool'+(S.holes.on?'':' on')+'" data-act="holes" data-val="off"><b>No holes</b><i>leave the face unmarked</i></button>'
+    +'<button class="tool'+(S.holes.on?' on':'')+'" data-act="holes" data-val="on"><b>Spot drill</b><i>mark stations, do not invent bolts</i></button>'
+    +'</div>'
+    +(S.holes.on
+      ? '<div class="dim" style="margin-top:10px"><span class="lab">First mark<i>down from the TOP long-point</i></span>'+stepper('h1',S.holes.h1,'in',0.25)+'</div>'
+        +'<div class="dim"><span class="lab">Second mark<i>optional</i></span>'+stepper('h2',S.holes.h2,'in',0.25,'none')+'</div>'
+        +'<p class="hint">These are locations you are asking to be spotted. Bolt size and pattern stay UNKNOWN unless you state them.</p>'
+      : '<p class="hint">Crossing-leg bolt stations are not in the source. Do not invent them.</p>')
+    +'</div>'
+    +'</div>';
+  return h;
+}
+function renderBench(){
+  var P=S.P, open=openPoints(P);
+  var h=woodDefs();
+  h+=railHTML(STEPS,2);
+  h+='<h1>The bench <span class="q">· '+esc(stk(P.sizeKey).label)+'</span></h1>';
+  h+='<p class="lede" style="margin-bottom:20px">Buttons, not a CAD program. Each one is a cut you asked '
+    +'for, and the drawing shows what it did.</p>';
+  h+=intentCard();
+  h+='<div class="bench"><div><div class="stage" id="stage">'+drawBoard(P)+'</div>'
+    +'<div style="height:14px"></div>'+lengthPanel()
+    +definitionPanel(P)+storePanel(P)+'</div><div id="tools">'+benchTools()+'</div></div>';
+  h+='<div class="gobar"><div class="sum">'
+    +(open.length
+      ? '<strong>Not a contract yet.</strong>Still open: '+esc(open.map(function(x){return x.t}).join(' · '))+'.'
+      : '<strong>That is a complete physical contract.</strong>Every fact it needs is answered, and every '
+        +'one of them is yours.')
+    +'</div><button class="btn" id="go"'+(open.length?' disabled':'')+'>Review the contract →</button></div>';
+  h+='<p class="foot"><b>NO BLOOD ON WOOD.</b> The drawing is a definition view — not a machine program, '
+    +'G-code, saw coordinates, a PLC command or Cycle Start.</p>';
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('go').onclick=function(){if(isComplete(S.P)){S.screen='contract';render();window.scrollTo(0,0)}};
+}
+
+/* ═══════════ 12 · CONTRACT ═══════════ */
+function specText(){
+  var d=physicalDemand(S.P), L=[];
+  L.push('BENCH LEG — PHYSICAL PART CONTRACT');
+  L.push(localPreviewId(d));
+  L.push('');
+  L.push('PHYSICAL DEMAND  (the eight fields the Store wire admits)');
+  DEMAND_KEYS.forEach(function(k){
+    L.push('  '+k.padEnd(18,' ')+(d[k]===null?'null':JSON.stringify(d[k])));
+  });
+  L.push('');
+  L.push('PROVENANCE  (separate custody — never part of physical identity)');
+  DEMAND_KEYS.forEach(function(k){
+    var p=PROV[S.prov[k]];
+    L.push('  '+k.padEnd(18,' ')+(p?p.label:'—'));
+  });
+  L.push('');
+  L.push('ROUTE            START YOUR OWN · user-measured / user-defined');
+  L.push('projectId        start-own');
+  L.push('projectClass     USER_DEFINED_BOARD');
+  L.push('');
+  L.push('DEFINITION OPERATIONS');
+  S.ops.forEach(function(x,i){L.push('  '+(i+1)+'. '+x)});
+  L.push('');
+  L.push('Store answer comes from the System host. No price, machine time or');
+  L.push('controller output is produced here. The System host computes the');
+  L.push('canonical review-child identity; the id above is a local preview.');
+  L.push('NO BLOOD ON WOOD.');
+  return L.join('\n');
+}
+function renderContract(){
+  var P=S.P, d=physicalDemand(P), s=stk(P.sizeKey);
+  var h=woodDefs();
+  h+=railHTML(STEPS,3);
+  h+='<h1>The physical contract.</h1>';
+  h+='<p class="lede" style="margin-bottom:20px">This is what the part requires. Whether the declared Store '
+    +'capability can do it is the Store’s answer, not this file’s.</p>';
+  h+='<div class="stage" style="margin-bottom:18px">'+drawBoard(P)+'</div>';
+  h+='<section class="object"><p class="eye">Physical part contract</p>'
+    +'<h2>Bench leg · '+esc(s.label)+'</h2><p class="idline">'+esc(localPreviewId(d))+'</p>';
+  h+=defRow('c1','Stock',s.label,S.prov.sizeKey,fmt(s.t)+' × '+fmt(s.w)+' in actual');
+  h+=defRow('c2','Finished length',fmt(P.finishedLengthIn)+' in',S.prov.finishedLengthIn,tech(P.lengthDatum));
+  h+=defRow('c3','Angle',P.angleDeg===0?'Square ends':fmt(P.angleDeg)+'° off square',S.prov.angleDeg);
+  if(P.angleDeg>0){
+    h+=defRow('c4','Cut plane',words(P.cutPlane),S.prov.cutPlane,tech(P.cutPlane));
+    h+=defRow('c5','Ends',words(P.endIdentity),S.prov.endIdentity);
+    if(P.endIdentity==='both')h+=defRow('c6','End relation',words(P.endRelation),S.prov.endRelation);
+  }
+  h+=defRow('c7','Length datum',words(P.lengthDatum),S.prov.lengthDatum,tech(P.lengthDatum));
+  h+=defRow('c8','Quantity',String(P.partQty),S.prov.partQty);
+  h+=(bevelDeferred(P)
+    ? '<div class="note warn"><b>This definition asks for a through-thickness bevel.</b> That is not the '
+      +'current face-miter service in this bounded cell. The definition stands and is not converted; Store '
+      +'answers whether its declared capability covers it.</div>' : '');
+  h+='</section>';
+  h+=(S.confirmed?'<div class="note good" style="margin-top:16px"><b>Confirmed version sent.</b> '
+    +'The System host takes it from here — it builds the Store request envelope, obtains the formal Store '
+    +'answer for this exact version, and owns the canonical record identity.</div>':'');
+  h+='<div class="gobar"><div class="sum"><strong>One route, one identity.</strong>'
+    +'Start Your Own carries user provenance only. There is nothing to compare it against inside this '
+    +'file — convergence, if any, is proven by the System from the two canonical records.</div>'
+    +'<button class="btn ghost sm" id="copy">Copy the contract</button>'
+    +'<button class="btn" id="confirm">Confirm this version →</button></div>';
+  h+='<details class="fold"><summary>Store demand and provenance, as it leaves this file</summary><div class="in">'
+    +'<p style="margin:0 0 10px">The eight fields below are exactly what <code>validateStartOwnPayload()</code> '
+    +'admits — no more, no less. Provenance travels beside them, never inside the physical identity.</p>'
+    +'<pre class="spec">'+esc(specText())+'</pre></div></details>';
+  h+='<p class="foot"><b>NO BLOOD ON WOOD.</b> Confirmation is not an order, payment, allocation, production '
+    +'release, machine readiness, physical execution authorisation, controller output or Cycle Start. The '
+    +'application defines work; the commissioned machine site retains physical execution authority.</p>';
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('copy').onclick=function(){
+    var t=specText();
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t);
+      else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();
+        document.execCommand('copy');document.body.removeChild(ta)}
+      flash('Contract copied');
+    }catch(e){flash('Open the fold below and copy it from there')}
+  };
+  $('confirm').onclick=confirmVersion;
+}
+
+/* ═══════════ 13 · CONFIRMATION ═══════════ */
+function confirmVersion(){
+  if(!isComplete(S.P)){flash('The contract is not complete');return}
+  var d=physicalDemand(S.P);
+  var payload={
+    localPreviewId:localPreviewId(d),
+    definition:bridgeDefinition(),
+    physicalDemand:d,
+    provenance:JSON.parse(JSON.stringify(S.prov)),
+    operations:S.ops.slice(),
+    intent:JSON.parse(JSON.stringify(S.intent)),
+    sourceAuthority:sourceAuthority(),
+    storeDemand:storeDemand()
+  };
+  S.confirmed=payload;
+  if(window.self!==window.top)
+    window.parent.postMessage({type:'STB_START_OWN_CONFIRMED',payload:JSON.parse(JSON.stringify(payload))},window.location.origin);
+  flash(window.self!==window.top?'Sent to the System host':'Confirmed · no host attached in review mode');
+  render();
+}
+
+/* ═══════════ 14 · THE SYSTEM BOUNDARY ═══════════
+   Field names here mirror payloadFromDefinition() in
+   apps/stb/browser/integration/start-own-store-preview.mjs as reflected in the
+   approved reference. getStoreDemand() returns the wire payload shape. This
+   file signs nothing and pins nothing; the host owns the envelope and the
+   canonical identity. */
+function sourceAuthority(){
+  return {kind:'USER-DEFINED', artifact:'stb-start-own-bench-leg-0.1.html', projectId:'start-own',
+          basis:'measured off the customer’s own broken part; no bounded source'};
+}
+function bridgeDefinition(){
+  var P=S.P, s=stk(P.sizeKey), d=physicalDemand(P);
+  return {
+    part:'bench-leg',
+    stockClass:P.sizeKey,
+    actualThickness:s?s.t:null, actualWidth:s?s.w:null,
+    finishedLength:P.finishedLengthIn,
+    quantity:P.partQty,
+    angleDegrees:P.angleDeg,
+    endCondition:(P.angleDeg!=null&&P.angleDeg>0)?'angled':'square',
+    straightCut:true,
+    cutPlane:P.cutPlane, endIdentity:P.endIdentity, endRelation:P.endRelation,
+    lengthDatum:P.lengthDatum,
+    holeRequirement:S.holes.on?'SPOT':'NONE', datum:S.holes.on?'TOP':null, holes:S.holes.on?[{down:S.holes.h1,cross:'CENTERLINE'}].concat(S.holes.h2!=null?[{down:S.holes.h2,cross:'CENTERLINE'}]:[]):[],
+    physicalDemand:d,
+    provenance:JSON.parse(JSON.stringify(S.prov))
+  };
+}
+function storeDemand(){
+  return {
+    protocolVersion:'stb-store-zero-start-own-http/1',
+    requestType:'USER_DEFINED_BOARD_V1',
+    scope:'USER_DEFINED_BOARD_REFERENCE',
+    projectId:'start-own',
+    payload:physicalDemand(S.P)
+  };
+}
+function installBridge(){
+  window.STBProjectBridge={
+    version:'stb.project-bridge/0.1',
+    projectId:'start-own',
+    projectClass:'USER_DEFINED_BOARD',
+    sourceAuthority:sourceAuthority(),
+    getDefinition:function(){return JSON.parse(JSON.stringify(bridgeDefinition()))},
+    getStoreDemand:function(){return JSON.parse(JSON.stringify(storeDemand()))},
+    getLocalPreviewId:function(){return localPreviewId(physicalDemand(S.P))},
+    getSnapshot:function(){
+      return {projectId:'start-own', projectClass:'USER_DEFINED_BOARD',
+        sourceAuthority:sourceAuthority(), screen:S.screen,
+        localPreviewId:localPreviewId(physicalDemand(S.P)),
+        definition:JSON.parse(JSON.stringify(bridgeDefinition())),
+        physicalDemand:physicalDemand(S.P),
+        complete:isComplete(S.P),
+        openPoints:openPoints(S.P).map(function(x){return x.t}),
+        provenance:JSON.parse(JSON.stringify(S.prov)),
+        confirmed:S.confirmed?JSON.parse(JSON.stringify(S.confirmed)):null,
+        storeDemand:storeDemand()};
+    }
+  };
+  return window.STBProjectBridge;
+}
+function emitChanged(){
+  var key=canonicalDemand(physicalDemand(S.P));
+  if(key===S.lastId)return;
+  S.lastId=key;
+  /* a changed definition invalidates any Store answer held against the old one */
+  S.storePreviewPending=isComplete(S.P);
+  S.storePreview=null; S.storePreviewDefinitionId=null; S.storePreviewDiagnostic=null;
+  var msg={type:'STB_PROJECT_DEFINITION_CHANGED', projectId:'start-own',
+    definition:window.STBProjectBridge?window.STBProjectBridge.getDefinition():null};
+  window.dispatchEvent(new CustomEvent('STB_PROJECT_DEFINITION_CHANGED',{detail:msg}));
+  if(window.self!==window.top)window.parent.postMessage(msg,window.location.origin);
+}
+function returnToLibrary(){
+  if(window.self!==window.top)window.parent.postMessage({type:'STB_CHILD_RETURN_LIBRARY',projectId:'start-own'},window.location.origin);
+  else{S.screen='intent';S.P=blankPart();S.prov={};S.ops=[];S.confirmed=null;render();window.scrollTo(0,0)}
+}
+/* live Store preview from the current host (Start Own has the dedicated path) */
+window.addEventListener('message',function(e){
+  if(e.origin!==window.location.origin)return;
+  var data=e.data||{};
+  if(data.type!=='STB_START_OWN_STORE_PREVIEW')return;
+  var cur=canonicalDemand(physicalDemand(S.P));
+  if(data.childDefinitionKey&&data.childDefinitionKey!==cur)return;
+  S.storePreviewPending=false;
+  S.storePreviewDefinitionId=cur;
+  S.storePreview=data.answer||null;
+  S.storePreviewDiagnostic=data.diagnostic||null;
+  render();
+});
+
+/* ═══════════ 15 · WIRING ═══════════ */
+function setKey(k,v){
+  if(k==='oldLen')       S.intent.oldLen=clamp(q4(v),1,LEN_MAX);
+  else if(k==='oldAngle')S.intent.oldAngle=clamp(Math.round(v*2)/2,0,ANGLE_MAX);
+  else if(k==='delta')   S.intent.delta=clamp(q4(v),0,12);
+  else if(k==='qty')     S.intent.qty=clamp(Math.round(v),QTY_MIN,QTY_MAX);
+  else if(k==='angle'){
+    var a=clamp(Math.round(v*2)/2,ANGLE_MIN,ANGLE_MAX);
+    dropOps('Set the angle'); setFact('angleDeg',a,'measured','Set the angle · '+fmt(a)+'° off square');
+  }
+  else if(k==='len'){
+    var L=clamp(q4(v),LEN_MIN,LEN_MAX);
+    dropOps('Set the finished length');
+    setFact('finishedLengthIn',L,'user','Set the finished length · '+fmt(L)+' in');
+  }
+  else if(k==='h1'){ S.holes.h1=clamp(q4(v),0.5,LEN_MAX); }
+  else if(k==='h2'){ S.holes.h2=clamp(q4(v),0.5,LEN_MAX); }
+  else if(k==='qty2'){
+    var q=clamp(Math.round(v),QTY_MIN,QTY_MAX);
+    dropOps('Declare quantity'); setFact('partQty',q,'declared','Declare quantity '+q);
+  }
+}
+function currentOf(k){
+  return k==='oldLen'?S.intent.oldLen : k==='oldAngle'?S.intent.oldAngle
+       : k==='delta'?S.intent.delta   : k==='qty'?S.intent.qty
+       : k==='h1'?S.holes.h1 : k==='h2'?(S.holes.h2==null?3.5:S.holes.h2)
+       : k==='angle'?(S.P.angleDeg==null?0:S.P.angleDeg)
+       : k==='len'?(S.P.finishedLengthIn==null?targetLen()-0.25:S.P.finishedLengthIn)
+       : (S.P.partQty==null?S.intent.qty-1:S.P.partQty);
+}
+function act(name,val){
+  var P=S.P;
+  if(name==='holes'){ S.holes.on=(val==='on'); return; }
+  if(name==='size'){
+    var s=stk(val); if(!s)return;
+    setFact('sizeKey',val,'user');
+    dropOps('Start with'); S.ops.unshift('Start with '+s.label);
+    if(!s.angled&&P.angleDeg>0){ setFact('angleDeg',0,'user'); setFact('cutPlane',null,null); setFact('endRelation',null,null);
+      setFact('endIdentity','both','user'); dropOps('Angle'); dropOps('Run the angle'); dropOps('Set the angle'); }
+  }
+  else if(name==='ends'){
+    dropOps('Angle'); dropOps('Square'); dropOps('Run the angle'); dropOps('Set the angle'); dropOps('Keep the ends');
+    if(val==='square'){
+      setFact('angleDeg',0,'user'); setFact('endIdentity','both','user');
+      setFact('endRelation',null,null); setFact('cutPlane',null,null);
+      S.ops.push('Square ends · no angle');
+    } else {
+      setFact('endIdentity',val==='one'?'first':'both','user');
+      if(val==='one')setFact('endRelation',null,null);
+      if(P.angleDeg===0||P.angleDeg==null)setFact('angleDeg',null,null);
+      S.ops.push(val==='one'?'Angle one end':'Angle both ends');
+    }
+  }
+  else if(name==='rel'){ dropOps('Keep the ends');
+    setFact('endRelation',val,'user','Keep the ends '+(val==='parallel'?'parallel':'mirrored')); }
+  else if(name==='plane'){ dropOps('Run the angle');
+    setFact('cutPlane',val,'user','Run the angle '+(val==='miter-face'?'across the wide face':'through the thickness')); }
+  else if(name==='datum'){ dropOps('Establish the');
+    setFact('lengthDatum',val,'user','Establish the length datum · '+tech(val)); }
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('[data-act],[data-step],[data-set]');
+  if(!t||t.disabled)return;
+  if(t.dataset.act){ act(t.dataset.act,t.dataset.val); render(); return; }
+  if(t.dataset.step){ var a=t.dataset.step.split(':'); setKey(a[0],currentOf(a[0])+ +a[1]); render(); return; }
+  if(t.dataset.set){ var b=t.dataset.set.split(':'); setKey(b[0],+b[1]); render(); }
+});
+document.addEventListener('change',function(e){
+  var el=e.target.closest&&e.target.closest('[data-exact]'); if(!el)return;
+  var v=parseDim(el.value);
+  if(v==null||!isFinite(v)){flash('Try a number like 16 1/2');render();return}
+  setKey(el.getAttribute('data-exact'),v); render();
+});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter')return;
+  var el=e.target.closest&&e.target.closest('[data-exact]'); if(!el)return;
+  e.preventDefault(); el.dispatchEvent(new Event('change',{bubbles:true}));
+});
+
+function render(){
+  installBridge();
+  if(S.screen==='intent')       renderIntent();
+  else if(S.screen==='pick')    renderPick();
+  else if(S.screen==='bench')   renderBench();
+  else                          renderContract();
+  emitChanged();
+}
+(function boot(){ installBridge(); render(); })();
+window.S=S;
+window.currentDefinitionKey=function(){return canonicalDemand(physicalDemand(S.P))};
+</script>
+</body>
+</html>

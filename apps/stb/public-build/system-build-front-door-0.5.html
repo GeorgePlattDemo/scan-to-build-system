@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scan-to-Build — System Build</title>
+<meta name="stb-canonical-build" content="front-door-0.6">
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
+#stb-current{display:block;width:100%;height:100%;border:0;background:#faf9f7}
+</style>
+</head>
+<body>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-base-8d8a9dd.html?v=72e0d5db"></iframe>
+<script>
+(() => {
+  const frame = document.getElementById('stb-current');
+  frame.addEventListener('load', () => {
+    const win = frame.contentWindow;
+    const doc = win.document;
+    const wrap = doc.querySelector('.wrap');
+    if (!wrap) return;
+
+    const style = doc.createElement('style');
+    style.textContent = `
+      .recovery-nav{align-items:center}
+      .recovery-nav .canonical-nav-spacer{flex:1}
+      .recovery-nav .canonical-user-label{display:flex;align-items:center;gap:6px;margin-left:auto;color:var(--text2);font-size:10px;font-weight:600;letter-spacing:.03em}
+      .recovery-nav .canonical-user-label select{font:inherit;font-size:10px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;background:var(--surface);color:var(--text)}
+      #projects>.demo-active-account,#projects>#demo-empty-projects{display:none!important}
+      .canonical-use-project{display:block;margin:3px 0 0;font-size:8.5px;line-height:1.2;font-weight:700;letter-spacing:.05em;color:var(--accent)}
+      .canonical-contextbar{margin:0 0 14px;padding:10px 12px;border:1px solid var(--border-accent);border-radius:8px;background:var(--tint);font-size:11.5px;color:var(--text2)}
+      .canonical-contextbar b{display:block;color:var(--text);font-size:11px;letter-spacing:.04em;margin-bottom:2px}
+      .canonical-contextbar .btns{margin-top:9px}
+      .canonical-contextbar button{font-size:10.5px;padding:5px 9px}
+      .canonical-saved-list{display:grid;gap:8px;margin:14px 0}
+      .canonical-saved-row{display:block;width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);text-align:left}
+      .canonical-saved-row b,.canonical-saved-row span{display:block}
+      .canonical-saved-row span{margin-top:2px;color:var(--text2);font-size:11px}
+      .s001-play-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(300px,1.1fr);gap:16px;align-items:start;margin:14px 0}
+      .s001-card{border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:14px}
+      .s001-card h3{margin:0 0 6px;font-size:13px;letter-spacing:.03em}
+      .s001-card p{margin:5px 0;line-height:1.45}
+      .s001-source-art,.s001-sheet-art{width:100%;height:auto;display:block;background:#f4efe7;border-radius:8px}
+      .s001-source-note{margin-top:9px;font-size:11px;color:var(--text2)}
+      .s001-fixed{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0 12px}
+      .s001-fixed div{padding:7px 8px;border:1px solid var(--border);border-radius:7px;background:var(--surface2,#faf8f4)}
+      .s001-fixed b,.s001-fixed span{display:block}
+      .s001-fixed b{font-size:9px;letter-spacing:.05em;color:var(--text2)}
+      .s001-fixed span{margin-top:2px;font-size:11.5px}
+      .s001-control{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;padding:8px 0;border-top:1px solid var(--border)}
+      .s001-control:first-of-type{border-top:0}
+      .s001-control label{font-size:11.5px;font-weight:650}
+      .s001-control output{font-size:11px;font-weight:700}
+      .s001-control input[type="range"]{grid-column:1 / -1;width:100%;accent-color:var(--accent)}
+      .s001-status{margin:10px 0 0;padding:8px 10px;border-left:4px solid #557b58;background:var(--tint);font-size:11px;font-weight:650}
+      .s001-data{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:7px;margin:12px 0}
+      .s001-data .row{border:1px solid var(--border);border-radius:8px;padding:9px;background:var(--surface)}
+      .s001-data .row b,.s001-data .row span{display:block}
+      .s001-data .row b{font-size:9px;letter-spacing:.05em;color:var(--text2)}
+      .s001-data .row span{margin-top:3px;font-size:11.5px}
+      .s001-boundary{margin:12px 0;padding:10px 12px;border-left:4px solid #a98255;background:var(--tint);font-size:11px;line-height:1.45}
+      @media(max-width:820px){.s001-play-grid{grid-template-columns:1fr}}
+    `;
+    doc.head.append(style);
+
+    const recovery = doc.querySelector('.recovery-nav');
+    if (recovery) {
+      const homeButton = recovery.querySelector('[data-go="projects"]');
+      if (homeButton) homeButton.textContent = 'Home';
+    }
+
+    function makePage(id, mainHtml, railHtml) {
+      const section = doc.createElement('section');
+      section.className = 'page';
+      section.id = id;
+      section.innerHTML = '<div class="main">' + mainHtml + '</div><aside class="rail"><p class="hd">BUILD GUIDE</p>' + railHtml + '</aside>';
+      wrap.append(section);
+      return section;
+    }
+
+    makePage('my-projects',
+      '<h1>MY PROJECTS</h1><p class="sub" id="canonical-my-projects-intro"></p><div id="canonical-my-projects-body"></div><div class="btns"><button type="button" data-canonical-go="projects">+ START ANOTHER PROJECT</button><button type="button" data-canonical-go="projects">HOME</button></div>',
+      '<p class="goal">Your chute</p><div class="row"><b>Account-scoped</b><span>This is the active user’s own working list, separate from the shared Home library.</span></div><div class="row"><b>Affirmative save</b><span>Looking at a library project does not put it here. Save is a separate act.</span></div>'
+    );
+
+    makePage('archive',
+      '<h1>COMPLETED PROJECTS / RECORDS</h1><p class="sub" id="canonical-archive-intro"></p><div id="canonical-archive-body"></div><div class="btns"><button type="button" data-canonical-go="my-projects">RETURN TO MY PROJECTS</button><button type="button" data-canonical-go="projects">HOME</button></div>',
+      '<p class="goal">Your records</p><div class="row"><b>Account-scoped</b><span>Changing the demo user changes whose private records are shown.</span></div><div class="row"><b>No invented history</b><span>An empty demo account stays empty until a record actually exists.</span></div>'
+    );
+
+    makePage('playhouse-s001',
+      '<h1>PLAYHOUSE ARCHED WINDOW</h1><p class="sub">Sarah wants a large arched window opening in a small outdoor playhouse wall panel. This uses the existing bounded S-001 sheet project — not a new machine claim.</p>' +
+      '<div class="s001-play-grid">' +
+        '<section class="s001-card"><h3>EXAMPLE SOURCE · SARAH</h3>' +
+          '<svg class="s001-source-art" viewBox="0 0 420 300" role="img" aria-label="Simple outdoor playhouse with a large arched window marked on the front wall">' +
+            '<rect x="0" y="0" width="420" height="300" fill="#eee7da"/>' +
+            '<path d="M75 125 L210 42 L345 125" fill="none" stroke="#766652" stroke-width="8" stroke-linejoin="round"/>' +
+            '<rect x="92" y="122" width="236" height="145" rx="2" fill="#d7b785" stroke="#766652" stroke-width="5"/>' +
+            '<rect x="118" y="177" width="58" height="90" fill="#8d6a46" opacity=".72"/>' +
+            '<path d="M206 236 L206 179 Q206 137 250 137 Q294 137 294 179 L294 236 Z" fill="#f5f1e9" stroke="#5d5041" stroke-width="5" stroke-dasharray="7 5"/>' +
+            '<line x1="206" y1="248" x2="294" y2="248" stroke="#5d5041" stroke-width="2"/>' +
+            '<text x="250" y="265" text-anchor="middle" font-size="13" fill="#4c443b">36 in opening</text>' +
+            '<text x="302" y="190" font-size="12" fill="#4c443b">24 in straight</text>' +
+            '<text x="252" y="128" text-anchor="middle" font-size="12" fill="#4c443b">12 in rise</text>' +
+          '</svg>' +
+          '<p class="s001-source-note">Example capture only. The playhouse gives the geometry a reason to exist; it does not establish structure, child safety, installation, weatherproofing, or code suitability.</p>' +
+          '<div class="s001-fixed"><div><b>PARENT SHEET</b><span>48 × 96 in · 1/2 in plywood</span></div><div><b>WORK FIELD</b><span>centered 48 × 36 in</span></div><div><b>PROJECT CLASS</b><span>S001_CENTERED_ARCHED_SHEET_V0</span></div><div><b>OPERATION</b><span>ROUTE_PROFILE · retained tabs</span></div></div>' +
+        '</section>' +
+        '<section class="s001-card"><h3>PLAY WITH THE BOUNDED SHAPE</h3><p class="dim">These controls only change the three inputs already admitted by the canonical project. They stay inside the current software/reference field.</p>' +
+          '<svg class="s001-sheet-art" viewBox="0 0 960 480" role="img" aria-label="Full 48 by 96 sheet, centered 48 by 36 work field, and adjustable arched opening">' +
+            '<rect x="8" y="8" width="944" height="464" rx="5" fill="#eee7da" stroke="#5d5041" stroke-width="4"/>' +
+            '<rect x="240" y="60" width="480" height="360" fill="#f8f5ef" stroke="#8a7459" stroke-width="4" stroke-dasharray="12 8"/>' +
+            '<path id="s001-opening-path" d="" fill="#fff" stroke="#3f3a34" stroke-width="5"/>' +
+            '<text x="480" y="31" text-anchor="middle" font-size="19" fill="#4c443b">96 in parent</text>' +
+            '<text x="480" y="87" text-anchor="middle" font-size="17" fill="#6b5d4c">centered 48 × 36 work field</text>' +
+            '<text id="s001-opening-label" x="480" y="405" text-anchor="middle" font-size="16" fill="#4c443b"></text>' +
+          '</svg>' +
+          '<div class="s001-control"><label for="s001-opening-width">Opening width</label><output id="s001-opening-width-out">36 in</output><input id="s001-opening-width" data-s001-control type="range" min="1" max="48" step="0.5" value="36"></div>' +
+          '<div class="s001-control"><label for="s001-straight-height">Straight side height</label><output id="s001-straight-height-out">24 in</output><input id="s001-straight-height" data-s001-control type="range" min="1" max="35" step="0.5" value="24"></div>' +
+          '<div class="s001-control"><label for="s001-arch-rise">Arch rise</label><output id="s001-arch-rise-out">12 in</output><input id="s001-arch-rise" data-s001-control type="range" min="1" max="12" step="0.5" value="12"></div>' +
+          '<div class="btns"><button type="button" data-s001-control id="s001-reset">RESET TO SARAH\'S 36 / 24 / 12</button></div>' +
+          '<div class="s001-status" id="s001-field-status">INSIDE CURRENT 48 × 36 SOFTWARE / REFERENCE FIELD</div>' +
+          '<p class="dim" id="s001-geometry-summary"></p>' +
+        '</section>' +
+      '</div>' +
+      '<div class="s001-boundary">The drawing is a view of the definition. It is not a toolpath, controller program, Cycle Start, fabrication release, or claim that a physical S-001 machine has been commissioned.</div>' +
+      '<div class="btns"><button type="button" data-canonical-go="projects">BACK TO HOME</button><button type="button" data-canonical-go="playhouse-store">ASK STORE ZERO →</button></div>',
+      '<p class="goal">One bounded sheet example</p><div class="row"><b>Sarah’s starting values</b><span>36 in wide · 24 in straight side · 12 in arch rise.</span></div><div class="row"><b>Current field</b><span>48 × 36 in, centered on the 48 × 96 sheet.</span></div><div class="row"><b>First sheet research candidate</b><span>Routed profile with retained tabs. Drilling is not admitted in this round.</span></div>'
+    );
+
+    makePage('playhouse-store',
+      '<h1>STORE ZERO · SHEET CHECK</h1><p class="sub">The same bounded project definition reaches the Store reference path. Store evaluates supportability; it does not create machine authority.</p>' +
+      '<div class="s001-data"><div class="row"><b>MATERIAL</b><span>STB-ZERO-PLY-050-48X96-001</span></div><div class="row"><b>REQUEST</b><span>SHEET_MODE2_ARCHED_APERTURE_V0</span></div><div class="row"><b>ENVELOPE</b><span>S001-MODE2-ARCHED-APERTURE-V0</span></div><div class="row"><b>DISPOSITION</b><span id="s001-store-disposition">SUPPORTABLE · REFERENCE</span></div><div class="row"><b>OPENING</b><span id="s001-store-opening"></span></div><div class="row"><b>DERIVED CURVE</b><span id="s001-store-radius"></span></div><div class="row"><b>RETENTION</b><span>4 requested tabs · Store proof planned 5 · NOT MEASURED physically</span></div><div class="row"><b>REFERENCE AMOUNT</b><span>$26.55 material-only · process Q unresolved</span></div></div>' +
+      '<div class="s001-boundary">Reference/software support only. Commissioned = false. Controller output = false. Physical execution authority = false. The material-only amount is not a complete fabrication price or binding quote.</div>' +
+      '<div class="btns"><button type="button" data-canonical-go="playhouse-s001">BACK TO PROJECT</button><button type="button" data-canonical-go="playhouse-review">REVIEW THIS DEFINITION →</button></div>',
+      '<p class="goal">Store answers its question</p><div class="row"><b>What Store sees</b><span>Material/form, bounded geometry, operation class, envelope and refusal conditions.</span></div><div class="row"><b>What Store does not own</b><span>Machine coordinates, controller program, local safety implementation, or Cycle Start.</span></div>'
+    );
+
+    makePage('playhouse-review',
+      '<h1>REVIEW SARAH\'S DEFINITION</h1><p class="sub">Review keeps the user definition, Store answer, and remaining physical unknowns separate.</p>' +
+      '<div class="s001-data"><div class="row"><b>PROJECT</b><span>Playhouse arched window</span></div><div class="row"><b>OPENING WIDTH</b><span id="s001-review-width"></span></div><div class="row"><b>STRAIGHT SIDE</b><span id="s001-review-straight"></span></div><div class="row"><b>ARCH RISE</b><span id="s001-review-rise"></span></div><div class="row"><b>TOTAL OPENING HEIGHT</b><span id="s001-review-total"></span></div><div class="row"><b>STORE</b><span>SUPPORTABLE · reference/software path</span></div></div>' +
+      '<div class="s001-boundary">Confirming this definition is not an order, payment, reservation, production release, machine readiness statement, or physical fabrication authorization.</div>' +
+      '<div class="btns"><button type="button" data-canonical-go="playhouse-store">BACK TO STORE</button><button type="button" data-canonical-go="playhouse-result">CONFIRM DEFINITION →</button></div>',
+      '<p class="goal">Definition before execution</p><div class="row"><b>Known</b><span>The project geometry and Store reference disposition.</span></div><div class="row"><b>Still unresolved physically</b><span>Installed sheet support, workholding, tooling, control, safety, tab retention, measured cycle behavior and commissioning.</span></div>'
+    );
+
+    makePage('playhouse-result',
+      '<h1>RESULT · DEFINITION RETAINED</h1><p class="sub">The bounded definition has a Store reference answer. No physical fabrication event is recorded.</p>' +
+      '<div class="s001-data"><div class="row"><b>CLASS</b><span>S001_CENTERED_ARCHED_SHEET_V0</span></div><div class="row"><b>GEOMETRY</b><span id="s001-result-geometry"></span></div><div class="row"><b>STORE STATUS</b><span>SUPPORTABLE · REFERENCE</span></div><div class="row"><b>PHYSICAL STATUS</b><span>NOT CLAIMED / NOT AUTHORIZED</span></div><div class="row"><b>FIRST PHYSICAL RESEARCH TARGET</b><span>Preserve sheet reference and produce one bounded routed profile under local control.</span></div></div>' +
+      '<div class="btns"><button type="button" data-canonical-go="playhouse-review">BACK TO REVIEW</button><button type="button" data-canonical-go="playhouse-record">OPEN PROJECT RECORD →</button></div>',
+      '<p class="goal">No invented event</p><div class="row"><b>Recorded here</b><span>Definition and reference Store consequence.</span></div><div class="row"><b>Not recorded</b><span>No cut, no machine cycle, no inspection, no staging, no pickup.</span></div>'
+    );
+
+    makePage('playhouse-record',
+      '<h1>SARAH · PLAYHOUSE PROJECT RECORD</h1><p class="sub">A compact demonstration record tying the use case back to the bounded S-001 definition.</p>' +
+      '<div class="s001-data"><div class="row"><b>SOURCE STORY</b><span>Outdoor playhouse wall panel · large arched window opening</span></div><div class="row"><b>PROJECT CLASS</b><span>S001_CENTERED_ARCHED_SHEET_V0</span></div><div class="row"><b>STORE REQUEST</b><span>SHEET_MODE2_ARCHED_APERTURE_V0</span></div><div class="row"><b>STORE PIN</b><span>4402abeb6b0299a5b6db2eec85ed04c3b0236bcc</span></div><div class="row"><b>CURRENT GEOMETRY</b><span id="s001-record-geometry"></span></div><div class="row"><b>AUTHORITY</b><span>controller output false · physical execution false</span></div></div>' +
+      '<div class="s001-boundary">This visible shell is a demonstration surface. The accepted system repository carries the durable S-001 request / response / Review / Result / Record lineage; this page does not replace that record implementation.</div>' +
+      '<div class="btns"><button type="button" data-canonical-go="playhouse-s001">RETURN TO PROJECT</button><button type="button" data-canonical-go="projects">HOME</button></div>',
+      '<p class="goal">Traceable, not inflated</p><div class="row"><b>Project meaning</b><span>Owned upstream.</span></div><div class="row"><b>Store answer</b><span>Reference supportability only.</span></div><div class="row"><b>Physical evidence</b><span>Still absent until a real guarded and commissioned test earns it.</span></div>'
+    );
+
+    const allowed = ['Sarah','Tom','Dick','Harry'];
+    const projectCatalog = {
+      'alcove-capture': { key:'alcove', title:'Critical fit · Shelf insert', rootId:'alcove-capture' },
+      'window-parts': { key:'plywood', title:'Playhouse arched window', rootId:'playhouse-s001' },
+      'window-intake': { key:'window-seat', title:'Space utilization · Window seat', rootId:'window-intake' },
+      'picnic-chooser': { key:'picnic', title:'Outdoor build · Picnic table', rootId:'picnic-chooser' }
+    };
+    const savedKey = 'stb-canonical-saved-projects-v1';
+    let savedByUser = {};
+    try { savedByUser = JSON.parse(localStorage.getItem(savedKey) || '{}') || {}; } catch { savedByUser = {}; }
+    let activeUser = 'Sarah';
+    let preview = null;
+    let ownedOpen = null;
+    let restoringState = false;
+    const userSelect = doc.getElementById('canonical-demo-user');
+
+    const plywoodTile = doc.querySelector('#projects .tile[data-go="window-parts"]');
+    if (plywoodTile) {
+      plywoodTile.title = 'Playhouse arched window · bounded S-001 sheet project';
+      const t1 = plywoodTile.querySelector('.t1');
+      const t2 = plywoodTile.querySelector('.t2');
+      if (t1) t1.textContent = 'Playhouse arched window';
+      if (t2) t2.textContent = 'Sheet opening · S-001';
+    }
+
+    doc.querySelectorAll('#projects .tile[data-go]').forEach(tile => {
+      const target = tile.getAttribute('data-go');
+      if (target === 'start-own' || target === 'alcove-capture' || tile.querySelector('.canonical-use-project')) return;
+      const small = doc.createElement('span');
+      small.className = 'canonical-use-project';
+      small.textContent = 'USE THIS PROJECT';
+      tile.append(small);
+    });
+
+    function fmtIn(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return '—';
+      return n.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+    }
+
+    function readS001() {
+      const width = Number(doc.getElementById('s001-opening-width')?.value ?? 36);
+      const straight = Number(doc.getElementById('s001-straight-height')?.value ?? 24);
+      const rise = Number(doc.getElementById('s001-arch-rise')?.value ?? 12);
+      const total = straight + rise;
+      const radius = rise > 0 ? (width * width) / (8 * rise) + rise / 2 : null;
+      return { width, straight, rise, total, radius };
+    }
+
+    function syncS001Playhouse() {
+      const widthInput = doc.getElementById('s001-opening-width');
+      const straightInput = doc.getElementById('s001-straight-height');
+      const riseInput = doc.getElementById('s001-arch-rise');
+      if (!widthInput || !straightInput || !riseInput) return;
+
+      let width = Math.max(1, Math.min(48, Number(widthInput.value) || 36));
+      let straight = Math.max(1, Math.min(35, Number(straightInput.value) || 24));
+      let rise = Math.max(1, Number(riseInput.value) || 12);
+      const maxRise = Math.max(1, 36 - straight);
+      riseInput.max = String(maxRise);
+      if (rise > maxRise) rise = maxRise;
+      widthInput.value = String(width);
+      straightInput.value = String(straight);
+      riseInput.value = String(rise);
+
+      const g = readS001();
+      const set = (id, text) => { const el = doc.getElementById(id); if (el) el.textContent = text; };
+      set('s001-opening-width-out', fmtIn(g.width) + ' in');
+      set('s001-straight-height-out', fmtIn(g.straight) + ' in');
+      set('s001-arch-rise-out', fmtIn(g.rise) + ' in');
+
+      const px = 10;
+      const centerX = 480;
+      const fieldTop = 60;
+      const fieldHeight = 360;
+      const openingW = g.width * px;
+      const openingH = g.total * px;
+      const bottom = fieldTop + (fieldHeight + openingH) / 2;
+      const top = bottom - openingH;
+      const springY = bottom - g.straight * px;
+      const left = centerX - openingW / 2;
+      const right = centerX + openingW / 2;
+      const path = `M ${left} ${bottom} L ${left} ${springY} Q ${centerX} ${top} ${right} ${springY} L ${right} ${bottom} Z`;
+      const pathEl = doc.getElementById('s001-opening-path');
+      if (pathEl) pathEl.setAttribute('d', path);
+      set('s001-opening-label', `${fmtIn(g.width)} wide · ${fmtIn(g.straight)} straight + ${fmtIn(g.rise)} rise = ${fmtIn(g.total)} high`);
+      set('s001-geometry-summary', `Opening ${fmtIn(g.width)} × ${fmtIn(g.total)} in overall · straight side ${fmtIn(g.straight)} in · arch rise ${fmtIn(g.rise)} in · derived circular-segment radius ${fmtIn(g.radius)} in.`);
+      set('s001-store-opening', `${fmtIn(g.width)} in wide × ${fmtIn(g.total)} in overall`);
+      set('s001-store-radius', `circular segment · ${fmtIn(g.radius)} in radius`);
+      set('s001-review-width', `${fmtIn(g.width)} in`);
+      set('s001-review-straight', `${fmtIn(g.straight)} in`);
+      set('s001-review-rise', `${fmtIn(g.rise)} in`);
+      set('s001-review-total', `${fmtIn(g.total)} in`);
+      set('s001-result-geometry', `${fmtIn(g.width)} wide · ${fmtIn(g.straight)} straight · ${fmtIn(g.rise)} rise · ${fmtIn(g.total)} total height`);
+      set('s001-record-geometry', `${fmtIn(g.width)} wide · ${fmtIn(g.straight)} straight · ${fmtIn(g.rise)} rise`);
+    }
+
+    [doc.getElementById('s001-opening-width'), doc.getElementById('s001-straight-height'), doc.getElementById('s001-arch-rise')].forEach(input => {
+      input?.addEventListener('input', syncS001Playhouse);
+    });
+    doc.getElementById('s001-reset')?.addEventListener('click', () => {
+      doc.getElementById('s001-opening-width').value = '36';
+      doc.getElementById('s001-straight-height').value = '24';
+      doc.getElementById('s001-arch-rise').value = '12';
+      syncS001Playhouse();
+    });
+    syncS001Playhouse();
+
+    function captureState() {
+      const controls = {};
+      doc.querySelectorAll('.page input[id],.page select[id],.page textarea[id]').forEach(el => {
+        controls[el.id] = { value: el.value, checked: !!el.checked };
+      });
+      const heights = [...doc.querySelectorAll('[data-height-index]')].map(el => ({ index: el.getAttribute('data-height-index'), value: el.value }));
+      const material = doc.querySelector('[data-material].on')?.getAttribute('data-material') || null;
+      const picnicMaterial = doc.querySelector('[data-pmat].on')?.getAttribute('data-pmat') || null;
+      const picnicTitle = doc.getElementById('picnic-title')?.textContent || null;
+      const format = doc.getElementById('fmt')?.textContent || null;
+      const pills = [...doc.querySelectorAll('#decisionRows .rowline')].map(row => row.querySelector('.pill.on')?.textContent || null);
+      const stock = doc.querySelector('.pick.on')?.getAttribute('data-stock') || null;
+      return { controls, heights, material, picnicMaterial, picnicTitle, format, pills, stock };
+    }
+
+    function unlockPreviewControls() {
+      doc.querySelectorAll('[data-canonical-preview-lock]').forEach(el => {
+        if ('disabled' in el) el.disabled = el.getAttribute('data-canonical-was-disabled') === 'true';
+        el.style.pointerEvents = el.getAttribute('data-canonical-was-pointer') || '';
+        el.removeAttribute('aria-disabled');
+        el.removeAttribute('data-canonical-preview-lock');
+        el.removeAttribute('data-canonical-was-disabled');
+        el.removeAttribute('data-canonical-was-pointer');
+      });
+    }
+
+    function restoreState(state) {
+      if (!state) return;
+      unlockPreviewControls();
+      restoringState = true;
+      try {
+        Object.entries(state.controls || {}).forEach(([id, saved]) => {
+          const el = doc.getElementById(id);
+          if (!el) return;
+          if (el.type === 'checkbox' || el.type === 'radio') el.checked = !!saved.checked;
+          else el.value = saved.value;
+        });
+
+        const fmt = doc.getElementById('fmt');
+        if (fmt && state.format && fmt.textContent !== state.format) fmt.click();
+        if (typeof win.renderHeights === 'function') win.renderHeights();
+        (state.heights || []).forEach(saved => {
+          const el = doc.querySelector('[data-height-index="' + saved.index + '"]');
+          if (!el) return;
+          el.value = saved.value;
+          el.dispatchEvent(new Event('change', { bubbles:true }));
+        });
+
+        if (state.material) {
+          const button = doc.querySelector('[data-material="' + state.material + '"]');
+          if (button && !button.classList.contains('on')) button.click();
+        }
+
+        if (state.picnicTitle) {
+          const parts = state.picnicTitle.split(' · ');
+          if (parts.length >= 2) {
+            const form = parts[0];
+            const scope = parts.slice(1).join(' · ');
+            const button = [...doc.querySelectorAll('[data-pform][data-pscope]')].find(el => el.getAttribute('data-pform') === form && el.getAttribute('data-pscope') === scope);
+            if (button && doc.getElementById('picnic-title')?.textContent !== state.picnicTitle) button.click();
+          }
+        }
+
+        if (state.picnicMaterial) {
+          const button = doc.querySelector('[data-pmat="' + state.picnicMaterial + '"]');
+          if (button && !button.classList.contains('on')) button.click();
+        }
+
+        [...doc.querySelectorAll('#decisionRows .rowline')].forEach((row, index) => {
+          const wanted = state.pills?.[index];
+          if (!wanted) return;
+          row.querySelectorAll('.pill').forEach(button => button.classList.toggle('on', button.textContent === wanted));
+        });
+        if (state.stock) doc.querySelectorAll('.pick').forEach(el => el.classList.toggle('on', el.getAttribute('data-stock') === state.stock));
+
+        doc.querySelectorAll('.page input[id],.page select[id],.page textarea[id]').forEach(el => {
+          if (Object.prototype.hasOwnProperty.call(state.controls || {}, el.id)) el.dispatchEvent(new Event('input', { bubbles:true }));
+        });
+        if (typeof win.syncAlcove === 'function') win.syncAlcove();
+        if (typeof win.syncPicnic === 'function') win.syncPicnic();
+        if (typeof win.syncTransaction === 'function') win.syncTransaction();
+        syncS001Playhouse();
+      } finally {
+        restoringState = false;
+      }
+    }
+
+    const publishedBaseline = captureState();
+
+    function persistSaved() {
+      localStorage.setItem(savedKey, JSON.stringify(savedByUser));
+    }
+
+    function renderMyProjects() {
+      const intro = doc.getElementById('canonical-my-projects-intro');
+      const body = doc.getElementById('canonical-my-projects-body');
+      if (!intro || !body) return;
+      intro.textContent = activeUser.toUpperCase() + ' · previous / working projects';
+      if (activeUser === 'Sarah') {
+        body.innerHTML = '<p class="dim">Sarah’s current project list is the full project set shown on Home.</p>';
+        return;
+      }
+      const items = savedByUser[activeUser] || [];
+      if (!items.length) {
+        body.innerHTML = '<p><b>' + activeUser.toUpperCase() + '</b> has no previous or saved private projects in this demonstration yet.</p><p class="dim">Opening a library project does not create one. Use HOME, inspect a bounded project, and save it affirmatively if you want it here.</p>';
+        return;
+      }
+      body.innerHTML = '<div class="canonical-saved-list">' + items.map(item => '<button class="canonical-saved-row" type="button" data-owned-project-id="' + item.id + '"><b>' + item.title + '</b><span>' + (item.changed ? 'Saved with your changes' : 'Saved from the bounded project as shown') + ' · based on library project</span></button>').join('') + '</div>';
+    }
+
+    function renderArchive() {
+      const intro = doc.getElementById('canonical-archive-intro');
+      const body = doc.getElementById('canonical-archive-body');
+      if (!intro || !body) return;
+      intro.textContent = activeUser.toUpperCase() + ' · private demo archive';
+      if (activeUser === 'Sarah') {
+        body.innerHTML = '<div class="reviewbox"><p style="font-weight:600;margin-bottom:6px">Alcove insert · frozen reference record</p><p class="dim">Open the retained record path for the current bounded-project demonstration.</p><button type="button" data-canonical-go="record">OPEN RECORD</button></div>';
+      } else {
+        body.innerHTML = '<p><b>' + activeUser.toUpperCase() + '</b> has no completed records in this demonstration.</p><p class="dim">Switching users does not expose Sarah’s private demo record.</p>';
+      }
+    }
+
+    function keepHomeShared() {
+      const projects = doc.getElementById('projects');
+      if (!projects) return;
+      const split = projects.querySelector(':scope > .split');
+      if (split) split.hidden = false;
+      const empty = doc.getElementById('demo-empty-projects');
+      if (empty) empty.hidden = true;
+    }
+
+    function renderAccount(name) {
+      if (!allowed.includes(name)) name = 'Sarah';
+      activeUser = name;
+      if (userSelect) userSelect.value = name;
+      keepHomeShared();
+      renderMyProjects();
+      renderArchive();
+    }
+
+    function removeContextBars() {
+      doc.querySelectorAll('.canonical-contextbar').forEach(node => node.remove());
+      unlockPreviewControls();
+    }
+
+    function lockPageForPreview(page) {
+      if (!preview || preview.editing) return;
+      const selector = 'input,select,textarea,[data-material],[data-pform],[data-pmat],[data-len],#fmt,.pill,.pick,#confirm-alcove,#confirm-picnic,[data-s001-control]';
+      page.querySelectorAll(selector).forEach(el => {
+        if (el.closest('.canonical-contextbar')) return;
+        el.setAttribute('data-canonical-preview-lock', 'true');
+        if ('disabled' in el) {
+          el.setAttribute('data-canonical-was-disabled', el.disabled ? 'true' : 'false');
+          el.disabled = true;
+        } else {
+          el.setAttribute('data-canonical-was-pointer', el.style.pointerEvents || '');
+          el.style.pointerEvents = 'none';
+          el.setAttribute('aria-disabled', 'true');
+        }
+      });
+    }
+
+    function contextHost(page) {
+      return page.querySelector(':scope > .main') || page.querySelector(':scope > .split > .body') || page.querySelector(':scope > .split > .ribbonbody') || page.querySelector('.main') || page.querySelector('.body');
+    }
+
+    function renderContextBar(page) {
+      removeContextBars();
+      if (preview) {
+        const host = contextHost(page);
+        if (!host) return;
+        const bar = doc.createElement('div');
+        bar.className = 'canonical-contextbar';
+        if (preview.editing) {
+          bar.innerHTML = '<b>WORKING COPY · ' + activeUser.toUpperCase() + '</b><span>You may change the available controls. The published library project is still unchanged. Nothing is added to MY PROJECTS until you save.</span><div class="btns"><button type="button" data-canonical-preview-action="save-changes">SAVE MY CHANGES</button></div>';
+        } else {
+          bar.innerHTML = '<b>LIBRARY PROJECT · READ ONLY</b><span>Look through this project without taking ownership of it. Back or Home leaves without saving.</span><div class="btns"><button type="button" data-canonical-preview-action="save">SAVE THIS PROJECT</button><button type="button" data-canonical-preview-action="edit">MAKE CHANGES</button></div>';
+        }
+        host.prepend(bar);
+        lockPageForPreview(page);
+      } else if (ownedOpen) {
+        const host = contextHost(page);
+        if (!host) return;
+        const bar = doc.createElement('div');
+        bar.className = 'canonical-contextbar';
+        bar.innerHTML = '<b>MY PROJECT · ' + activeUser.toUpperCase() + '</b><span>This is your saved copy, based on the bounded library project. The library source remains unchanged.</span>';
+        host.prepend(bar);
+      }
+    }
+
+    function discardPreview(restore = true) {
+      const old = preview;
+      preview = null;
+      removeContextBars();
+      if (restore && old) restoreState(publishedBaseline);
+    }
+
+    function startLibraryPreview(rootId) {
+      const project = projectCatalog[rootId];
+      if (!project) return;
+      ownedOpen = null;
+      restoreState(publishedBaseline);
+      if (project.key === 'alcove') {
+        preview = null;
+        canonicalShow(project.rootId);
+        return;
+      }
+      preview = { project, editing:false, visited:new Set([project.rootId]) };
+      canonicalShow(project.rootId);
+    }
+
+    function savePreview(changed) {
+      if (!preview) return;
+      const project = preview.project;
+      const state = changed ? captureState() : publishedBaseline;
+      const item = {
+        id: project.key + '-' + Date.now(),
+        key: project.key,
+        title: project.title,
+        rootId: project.rootId,
+        changed: !!changed,
+        state
+      };
+      if (!savedByUser[activeUser]) savedByUser[activeUser] = [];
+      savedByUser[activeUser].push(item);
+      persistSaved();
+      preview = null;
+      restoreState(publishedBaseline);
+      renderMyProjects();
+      canonicalShow('my-projects', false);
+    }
+
+    function openOwnedProject(id) {
+      const item = (savedByUser[activeUser] || []).find(project => project.id === id);
+      if (!item) return;
+      discardPreview(false);
+      restoreState(publishedBaseline);
+      restoreState(item.state);
+      ownedOpen = item;
+      canonicalShow(item.rootId);
+    }
+
+    // Front-door contract: landing -> new-user -> projects.
+    // Front-door contract: landing -> returning -> projects via START SOMETHING NEW.
+    // Front-door contract: landing -> professional -> projects via SHARED HOME.
+    doc.querySelectorAll('#new-user .demo-account-gate,#returning .demo-account-gate,#professional .demo-account-gate').forEach(node => node.remove());
+
+    function replaceEntryHomeButton(button, label) {
+      if (!button) return;
+      const clean = button.cloneNode(true);
+      clean.type = 'button';
+      clean.textContent = label;
+      clean.removeAttribute('disabled');
+      clean.removeAttribute('data-go');
+      clean.removeAttribute('onclick');
+      clean.setAttribute('data-canonical-go', 'projects');
+      button.replaceWith(clean);
+    }
+
+    const newUserMain = doc.querySelector('#new-user .main');
+    if (newUserMain && !newUserMain.querySelector('[data-new-user-home]')) {
+      const next = doc.createElement('div');
+      next.className = 'door-next';
+      next.setAttribute('data-new-user-home', 'true');
+      next.innerHTML = '<div class="btns"><button type="button" data-canonical-go="projects">NEXT → HOME</button></div>';
+      newUserMain.append(next);
+    }
+
+    const returningStart = [...doc.querySelectorAll('#returning .btns button')].find(button => /START SOMETHING NEW/i.test(button.textContent));
+    replaceEntryHomeButton(returningStart, 'START SOMETHING NEW');
+
+    const professionalRow = doc.querySelector('#professional .door-preview');
+    if (professionalRow && !professionalRow.querySelector('[data-professional-shared-home]')) {
+      const sharedHome = doc.createElement('button');
+      sharedHome.type = 'button';
+      sharedHome.textContent = 'SHARED HOME';
+      sharedHome.setAttribute('data-professional-shared-home', 'true');
+      sharedHome.setAttribute('data-canonical-go', 'projects');
+      professionalRow.append(sharedHome);
+    }
+
+    const entryPages = ['landing','new-user','returning','professional'];
+    let currentId = doc.querySelector('.page.on')?.id || 'landing';
+    let requestedView = currentId;
+    const navStack = [];
+
+    function canonicalShow(requestedId, push = true) {
+      if (restoringState) push = false;
+      if (!restoringState && preview && ['projects','my-projects','landing','archive'].includes(requestedId)) discardPreview(true);
+      if (!restoringState && ownedOpen && ['projects','my-projects','landing','archive'].includes(requestedId)) {
+        ownedOpen = null;
+        restoreState(publishedBaseline);
+      }
+
+      requestedView = requestedId;
+      let id = requestedId;
+      if (id === 'my-projects' && activeUser === 'Sarah') id = 'projects';
+      const next = doc.getElementById(id);
+      if (!next) return;
+      if (push && currentId && currentId !== id) navStack.push(currentId);
+      doc.querySelectorAll('.page').forEach(page => page.classList.remove('on'));
+      next.classList.add('on');
+      currentId = id;
+      if (preview && id !== 'projects' && id !== 'my-projects') preview.visited.add(id);
+      if (id === 'projects') keepHomeShared();
+      if (recovery) recovery.hidden = entryPages.includes(id);
+      try { win.scrollTo({top:0,behavior:'instant'}); } catch { win.scrollTo(0,0); }
+      if (id.startsWith('alcove') && typeof win.syncAlcove === 'function') win.syncAlcove();
+      if (id.startsWith('picnic') && typeof win.syncPicnic === 'function') win.syncPicnic();
+      if (id.startsWith('playhouse')) syncS001Playhouse();
+      if (typeof win.syncTransaction === 'function') win.syncTransaction();
+      renderContextBar(next);
+      try { win.history.replaceState(null, '', '#' + id); } catch {}
+      const currentTarget = requestedId === 'my-projects' ? 'my-projects' : id;
+      doc.querySelectorAll('.recovery-nav button').forEach(button => {
+        const target = button.getAttribute('data-go') || button.getAttribute('data-canonical-go');
+        if (target === currentTarget) button.setAttribute('aria-current','step');
+        else button.removeAttribute('aria-current');
+      });
+    }
+
+    if (userSelect) {
+      userSelect.addEventListener('change', () => {
+        if (preview) discardPreview(true);
+        if (ownedOpen) {
+          ownedOpen = null;
+          restoreState(publishedBaseline);
+        }
+        renderAccount(userSelect.value);
+        if (requestedView === 'my-projects') canonicalShow('my-projects', false);
+        else if (currentId === 'projects') canonicalShow('projects', false);
+      });
+    }
+
+    function canonicalBack() {
+      if (preview) {
+        discardPreview(true);
+        canonicalShow('projects', false);
+        return;
+      }
+      canonicalShow(navStack.pop() || 'landing', false);
+    }
+
+    win.show = canonicalShow;
+    win.back = canonicalBack;
+
+    doc.addEventListener('click', event => {
+      const action = event.target.closest('[data-canonical-preview-action]');
+      if (action) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const kind = action.getAttribute('data-canonical-preview-action');
+        if (kind === 'save') savePreview(false);
+        if (kind === 'edit' && preview) {
+          preview.editing = true;
+          renderContextBar(doc.getElementById(currentId));
+        }
+        if (kind === 'save-changes') savePreview(true);
+        return;
+      }
+
+      const owned = event.target.closest('[data-owned-project-id]');
+      if (owned) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openOwnedProject(owned.getAttribute('data-owned-project-id'));
+        return;
+      }
+
+      if (preview) {
+        const backTarget = event.target.closest('[data-back],button.back,button[data-go]');
+        if (backTarget && (backTarget.hasAttribute('data-back') || /^back\b/i.test(backTarget.textContent.trim()))) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          discardPreview(true);
+          canonicalShow('projects', false);
+          return;
+        }
+      }
+
+      const tile = event.target.closest('#projects .tile[data-go]');
+      if (tile && tile.getAttribute('data-go') !== 'start-own') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        startLibraryPreview(tile.getAttribute('data-go'));
+        return;
+      }
+
+      const target = event.target.closest('[data-canonical-go]');
+      if (!target) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      canonicalShow(target.getAttribute('data-canonical-go'));
+    }, true);
+
+    keepHomeShared();
+    if (recovery) recovery.hidden = entryPages.includes(currentId);
+  });
+})();
+</script>
+</body>
+</html>

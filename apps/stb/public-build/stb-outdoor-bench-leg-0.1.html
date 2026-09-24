@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scan-to-Build · Outdoor Build · Bench leg 0.1</title>
+<meta name="description" content="Enter a bounded outdoor project, find the bench leg, carry the facts the source legitimately established, and resolve only what is genuinely missing.">
+<style>
+:root{
+  --paper:#F5F0E6; --paper2:#FBF7EF; --surface:#FFFDF8; --stage:#EFE7D8;
+  --ink:#2A1E13; --ink2:#6E5C48; --ink3:#9C8A75;
+  --line:#E7DCC9; --line2:#D5C5A9;
+  --accent:#A85A2A; --accent2:#8A4520; --tint:#F7E9D6;
+  --good:#5C7A45; --goodtint:#EDF1E4;
+  --warn:#8A5A20; --warntint:#F6EBDA;
+  --src:#3C6E71; --srctint:#E4EEEE;
+  --shadow:0 1px 2px rgba(60,40,20,.05),0 8px 24px -12px rgba(60,40,20,.18);
+  --lift:0 2px 4px rgba(60,40,20,.06),0 18px 40px -16px rgba(60,40,20,.28);
+  --r:16px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#14110D; --paper2:#1A1612; --surface:#211C16; --stage:#241E17;
+    --ink:#F4EDE1; --ink2:#BDAC97; --ink3:#8B7B68;
+    --line:#332B21; --line2:#4A3E2F;
+    --accent:#E09A5F; --accent2:#F2B47C; --tint:#2B2118;
+    --good:#8FB06B; --goodtint:#1E2418;
+    --warn:#D9A362; --warntint:#2A2118;
+    --src:#6FB2B5; --srctint:#16201F;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+    --lift:0 2px 6px rgba(0,0,0,.5),0 22px 46px -18px rgba(0,0,0,.85);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:16px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  background-image:radial-gradient(1100px 520px at 10% -10%,rgba(60,110,113,.06),transparent 60%),
+                   radial-gradient(900px 440px at 94% 2%,rgba(120,90,50,.05),transparent 62%);
+  background-attachment:fixed}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1140px;margin:0 auto;padding:24px 22px 76px}
+
+/* rail */
+.rail{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 22px}
+.rail .back{font-size:13.5px;color:var(--ink2);background:none;border:0;cursor:pointer;
+  padding:7px 11px;border-radius:9px;font-weight:600;transition:.15s}
+.rail .back:hover{background:var(--surface);color:var(--ink)}
+.rail .back:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rail .who{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:5px 11px;border-radius:999px;border:1px solid var(--src);color:var(--src);background:var(--srctint)}
+.rail .steps{display:flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:wrap}
+.rail .s{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink3);
+  border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px 4px 5px}
+.rail .s i{width:18px;height:18px;border-radius:50%;background:var(--line);color:var(--surface);
+  font-style:normal;font-size:10.5px;font-weight:700;display:grid;place-items:center;line-height:1}
+.rail .s.on{border-color:var(--src);color:var(--src);background:var(--srctint);font-weight:650}
+.rail .s.on i{background:var(--src);color:#fff}
+.rail .s.done i{background:var(--good);color:#fff}
+@media (prefers-color-scheme:dark){.rail .s.on i,.rail .s.done i{color:#0e1614}}
+
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin:0 0 14px}
+h1{font-size:clamp(27px,4.2vw,40px);line-height:1.07;letter-spacing:-.025em;margin:0 0 12px;font-weight:640}
+h1 em{font-style:normal;color:var(--src)}
+h1 .q{color:var(--ink3);font-weight:400}
+.lede{font-size:clamp(15.5px,1.8vw,18px);line-height:1.55;color:var(--ink2);max-width:60ch;margin:0}
+.lede b{color:var(--ink);font-weight:650}
+.crumb{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:12.5px;color:var(--ink3);margin:0 0 18px}
+.crumb b{color:var(--ink2);font-weight:650}
+.crumb .sep{color:var(--line2)}
+.crumb .here{color:var(--src);font-weight:700}
+.step{display:flex;align-items:center;gap:12px;margin:32px 0 14px}
+.step .n{width:26px;height:26px;flex:none;border-radius:50%;background:var(--src);color:#fff;
+  font-size:12.5px;font-weight:700;display:grid;place-items:center;line-height:1}
+.step h2{font-size:19px;letter-spacing:-.014em;margin:0;font-weight:650}
+@media (prefers-color-scheme:dark){.step .n{color:#0e1614}}
+
+/* cards */
+.grid3,.grid2{display:grid;gap:15px}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{position:relative;display:block;width:100%;text-align:left;cursor:pointer;padding:0;font:inherit;color:inherit;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);
+  transition:transform .2s cubic-bezier(.2,.7,.3,1),box-shadow .2s,border-color .2s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--lift);border-color:var(--line2)}
+.card:focus-visible{outline:2px solid var(--src);outline-offset:3px}
+.card.on{border-color:var(--src);box-shadow:var(--lift),inset 0 0 0 1px var(--src)}
+.card.ghost{opacity:.62;cursor:not-allowed}
+.card.ghost:hover{transform:none;box-shadow:var(--shadow);border-color:var(--line)}
+.card .pic{display:block;width:100%;height:auto;background:linear-gradient(170deg,var(--paper2),var(--stage))}
+.card .body{padding:13px 15px 15px}
+.card .body b{display:block;font-size:16px;font-weight:650;letter-spacing:-.012em;margin-bottom:3px}
+.card .body span{display:block;font-size:13px;line-height:1.45;color:var(--ink3)}
+.card .tick{position:absolute;top:11px;right:11px;width:26px;height:26px;border-radius:50%;
+  background:var(--src);display:none;place-items:center;box-shadow:0 2px 9px -2px rgba(0,0,0,.4)}
+.card.on .tick{display:grid}
+.card .tick svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+@media (prefers-color-scheme:dark){.card .tick svg{stroke:#0e1614}}
+.card .flag{position:absolute;top:11px;left:11px;font-size:10px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;padding:5px 9px;border-radius:999px;background:var(--surface);
+  border:1px solid var(--line2);color:var(--ink3)}
+.card .flag.active{border-color:var(--src);color:var(--src);background:var(--srctint)}
+.card .flag.future{border-color:var(--line2);color:var(--ink3)}
+
+/* buttons */
+.btn{font:inherit;font-size:15px;font-weight:650;padding:12px 24px;border-radius:12px;cursor:pointer;
+  border:1px solid var(--src);background:var(--src);color:#fff;min-height:46px;
+  box-shadow:0 2px 10px -2px rgba(60,110,113,.5);transition:.16s}
+.btn:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn:focus-visible{outline:2px solid var(--src);outline-offset:2px}
+.btn:disabled{background:var(--surface);color:var(--ink3);border-color:var(--line);box-shadow:none;cursor:not-allowed;transform:none;filter:none}
+@media (prefers-color-scheme:dark){.btn{color:#0e1614}}
+.btn.warm{border-color:var(--accent);background:var(--accent);box-shadow:0 2px 10px -2px rgba(168,90,42,.5)}
+@media (prefers-color-scheme:dark){.btn.warm{color:#1a1208}}
+.btn.ghost{background:transparent;color:var(--ink2);border-color:var(--line);box-shadow:none;font-weight:550}
+.btn.ghost:hover{border-color:var(--line2);color:var(--ink);filter:none}
+.btn.sm{font-size:13.5px;padding:9px 16px;border-radius:10px;min-height:40px}
+.gobar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:30px 0 0;padding:17px 19px;
+  border-radius:var(--r);border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow)}
+.gobar .sum{flex:1;min-width:230px;font-size:14px;color:var(--ink2)}
+.gobar .sum strong{display:block;color:var(--ink);font-weight:650;font-size:15.5px;margin-bottom:2px}
+
+/* bench / panels */
+.bench{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+.stage{background:var(--stage);border:1px solid var(--line);border-radius:var(--r);padding:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);overflow:hidden}
+@media (prefers-color-scheme:dark){.stage{box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}}
+.stage svg{width:100%;display:block}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:15px 16px;margin:0 0 14px;box-shadow:var(--shadow)}
+.panel h3{font-size:11px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);margin:0 0 12px;
+  display:flex;align-items:center;gap:8px}
+.panel h3 .badge{margin-left:auto;font-size:9.5px;letter-spacing:.06em;padding:3px 7px;border-radius:5px;
+  border:1px solid var(--line2);color:var(--ink3);font-weight:700}
+.panel h3 .badge.src{border-color:var(--src);color:var(--src);background:var(--srctint)}
+.panel h3 .badge.open{border-color:var(--warn);color:var(--warn);background:var(--warntint)}
+.panel h3 .badge.ok{border-color:var(--good);color:var(--good);background:var(--goodtint)}
+.panel .cat{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin:14px 0 8px;
+  display:flex;align-items:center;gap:8px}
+.panel .cat:first-of-type{margin-top:0}
+.panel .cat.src{color:var(--src)} .panel .cat.user{color:var(--accent2)} .panel .cat.open{color:var(--warn)}
+.panel .cat .ln{flex:1;height:1px;background:currentColor;opacity:.25}
+.dim{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.dim .lab{flex:1;min-width:0;font-size:14px}
+.dim .lab i{display:block;font-style:normal;font-size:11.5px;color:var(--ink3);margin-top:1px}
+.stepper{display:inline-flex;align-items:center;gap:2px;background:var(--paper2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.stepper button{width:34px;height:34px;border:0;background:transparent;color:var(--ink2);cursor:pointer;
+  font-size:17px;line-height:1;border-radius:7px;transition:.13s;font-family:inherit}
+.stepper button:hover{background:var(--surface);color:var(--src)}
+.stepper button:focus-visible{outline:2px solid var(--src);outline-offset:1px}
+.stepper .v{min-width:70px;text-align:center;font-size:14px;font-weight:650;font-variant-numeric:tabular-nums}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 0}
+.pill{font:inherit;font-size:12.5px;padding:8px 11px;min-height:40px;border-radius:9px;cursor:pointer;
+  border:1px solid var(--line);background:var(--paper2);color:var(--ink2);transition:.13s}
+.pill:hover{border-color:var(--line2);color:var(--ink)}
+.pill:focus-visible{outline:2px solid var(--src);outline-offset:1px}
+.pill.on{border-color:var(--src);background:var(--srctint);color:var(--src);font-weight:650}
+.exact input{width:100%;max-width:180px;font:inherit;font-size:13.5px;font-variant-numeric:tabular-nums;
+  padding:10px;border:1px solid var(--line2);border-radius:9px;background:var(--paper2);color:var(--ink);min-height:42px}
+.exact input:focus{border-color:var(--src);outline:none;box-shadow:0 0 0 2px var(--srctint)}
+.tools{display:flex;gap:7px;flex-wrap:wrap;margin:0}
+.tool{flex:1;min-width:104px;border:1px solid var(--line);background:var(--paper2);border-radius:11px;
+  padding:9px 8px 10px;cursor:pointer;color:var(--ink2);text-align:center;transition:.14s}
+.tool:hover{border-color:var(--line2);color:var(--ink)}
+.tool:focus-visible{outline:2px solid var(--src);outline-offset:1px}
+.tool.on{border-color:var(--src);background:var(--srctint);color:var(--src)}
+.tool svg{display:block;width:100%;height:auto;margin-bottom:5px}
+.tool b{display:block;font-size:12.5px;font-weight:650}
+.tool i{display:block;font-style:normal;font-size:10.5px;color:var(--ink3);margin-top:1px}
+.tool.on i{color:var(--src)}
+.hint{font-size:12.5px;line-height:1.55;color:var(--ink3);margin:9px 0 0}
+.hint b{color:var(--ink2)}
+.note{margin:13px 0 0;padding:12px 14px;border:1px dashed var(--line2);border-radius:12px;background:var(--paper2);
+  font-size:13px;line-height:1.55;color:var(--ink2)}
+.note b{color:var(--ink)}
+.note.warn{border-style:solid;border-color:var(--warn);background:var(--warntint)}
+.note.good{border-style:solid;border-color:var(--good);background:var(--goodtint)}
+.note.src{border-style:solid;border-color:var(--src);background:var(--srctint)}
+
+/* source dossier */
+.dossier{margin:0 0 16px;padding:15px 17px;border-radius:13px;border:1px solid var(--src);background:var(--srctint)}
+.dossier .t{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--src);margin:0 0 8px;
+  display:flex;align-items:center;gap:8px}
+.dossier ul{margin:0;padding:0;list-style:none;display:grid;gap:5px 18px;grid-template-columns:1fr 1fr;font-size:13px}
+.dossier li{color:var(--ink2)}
+.dossier li b{color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums}
+.dossier .links{margin:10px 0 0;font-size:12px}
+.dossier .links a{color:var(--src);font-weight:600;text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:1px}
+.dossier .links a:hover{opacity:.8}
+.dossier .why{margin:9px 0 0;font-size:12px;color:var(--ink3)}
+@media (max-width:560px){.dossier ul{grid-template-columns:1fr}}
+
+/* definition / provenance */
+.defrow{display:flex;align-items:flex-start;gap:8px 10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;flex-wrap:wrap}
+.defrow:last-child{border-bottom:0}
+.defrow .k{flex:none;width:120px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);padding-top:2px}
+.defrow .v{flex:1 1 110px;min-width:0;font-weight:600}
+.defrow .v i{display:block;font-style:normal;font-size:11.5px;font-weight:400;color:var(--ink3);margin-top:1px}
+.defrow .v.open{color:var(--warn)}
+.prov{flex:none;margin-left:auto;font-size:9px;font-weight:700;letter-spacing:.04em;padding:3px 7px;border-radius:5px;
+  border:1px solid var(--line2);color:var(--ink3);background:var(--surface);white-space:nowrap;margin-top:1px}
+.prov.src{border-color:var(--src);color:var(--src);background:var(--srctint)}
+.prov.derived{border-color:var(--src);color:var(--src);background:var(--srctint);opacity:.85}
+.prov.user{border-color:var(--accent);color:var(--accent2);background:var(--tint)}
+.prov.evidence{border-color:var(--good);color:var(--good);background:var(--goodtint)}
+.prov.declared{border-color:var(--accent);color:var(--accent2);background:var(--tint)}
+.prov.open{border-color:var(--warn);color:var(--warn);background:var(--warntint)}
+.ops{margin:0;padding:0 0 0 20px;font-size:13px;line-height:1.75;color:var(--ink2)}
+.ops li::marker{color:var(--ink3);font-variant-numeric:tabular-nums}
+
+/* contract */
+.object{margin:0;padding:20px 22px;border-radius:var(--r);border:1px solid var(--line2);background:var(--surface);box-shadow:var(--lift)}
+.object .eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin:0 0 7px}
+.object h2{margin:0 0 5px;font-size:25px;letter-spacing:-.02em;font-weight:650}
+.object .idline{font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--src);margin:0 0 16px}
+.fold{margin:15px 0 0;border:1px solid var(--line);border-radius:12px;background:var(--paper2);overflow:hidden}
+.fold summary{cursor:pointer;list-style:none;padding:12px 14px;font-size:13.5px;font-weight:650;color:var(--ink2);
+  display:flex;align-items:center;gap:9px}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary:before{content:"";width:7px;height:7px;border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);
+  transform:rotate(-45deg);transition:transform .18s;flex:none;margin-left:2px}
+.fold[open] summary:before{transform:rotate(45deg)}
+.fold .in{padding:0 14px 14px;font-size:12.5px;line-height:1.65;color:var(--ink2)}
+pre.spec{margin:0;padding:14px 15px;border-radius:10px;background:var(--surface);border:1px solid var(--line);
+  font:11.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink2);white-space:pre-wrap;max-height:340px;overflow:auto}
+.flash{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);opacity:0;
+  background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:999px;font-size:14px;font-weight:600;
+  pointer-events:none;transition:.22s;z-index:50}
+.flash.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{margin:46px 0 0;font-size:12px;line-height:1.7;color:var(--ink3);max-width:76ch}
+.foot b{color:var(--ink2)}
+@media (max-width:980px){.bench,.grid3,.grid2{grid-template-columns:1fr}}
+@media (max-width:560px){.wrap{padding:18px 14px 56px}.defrow{flex-wrap:wrap}.defrow .k{width:100%}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="flash" id="flash"></div>
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCAN-TO-BUILD · OUTDOOR BUILD · BENCH LEG 0.1
+
+   projectId        outdoor
+   displayName      Outdoor Build
+   projectClass     BOUNDED_SOURCE_BACKED
+   confirmation     STB_OUTDOOR_CONFIRMED
+   Store adapter    review-store-handoff/0.5  (host-owned; NOT the Start Own path)
+
+   The other end of Scan-to-Build. The customer enters a bounded project where a
+   source has already established legitimate facts, isolates one real part, and
+   resolves only what is genuinely missing. Provenance here is layered:
+   SOURCE-BACKED, USER-DEFINED MODIFICATION, DERIVED FROM SOURCE + USER CHANGE,
+   USER / REVIEWED EVIDENCE CONFIRMATION, USER-DECLARED — never flattened.
+
+   HARD TRUTH LIMITS at this checkpoint. The bounded outdoor source establishes:
+   nominal 2×4 · 15.5 in reference length · 10° · both ends · outdoor-bench
+   context. It does NOT establish: cut-plane orientation (face-miter vs
+   thickness-bevel) · finished-length datum · quantity. Those are left
+   UNRESOLVED and require explicit resolution. Nothing is filled from memory,
+   from woodworking convention, or from any older contaminated assertion (no
+   2×8 / 32¾ in / 30° A-frame table leg; no assumed double-bevel; no assumed
+   long-long datum; no assumed quantity).
+
+   This child does NOT use the live Start Own Store preview path. It emits
+   STB_PROJECT_DEFINITION_CHANGED (projectId "outdoor") and confirms with
+   STB_OUTDOOR_CONFIRMED; the System host persists the confirmed snapshot and
+   owns canonical identity + any Store evaluation. NO BLOOD ON WOOD.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?'':s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function clamp(v,a,b){return v<a?a:(v>b?b:v)}
+function q4(v){return Math.round(v*4)/4}
+function fmt(v){
+  if(v==null||!isFinite(v))return '—';
+  var n=Math.abs(v)<1e-10?0:v, n32=Math.round(n*32)/32;
+  if(Math.abs(n-n32)<1e-8){
+    var sg=n32<0?'-':'', a=Math.abs(n32), w=Math.floor(a), e=Math.round((a-w)*32), d=32;
+    if(e===0)return sg+w;
+    if(e===32)return sg+(w+1);
+    while(e%2===0){e/=2;d/=2}
+    return sg+(w?w+' ':'')+e+'/'+d;
+  }
+  return String(Math.round(n*10000)/10000);
+}
+function hash32(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}
+  return ('00000000'+(h>>>0).toString(16).toUpperCase()).slice(-8)}
+function parseDim(raw){
+  var x=(''+raw).trim().toLowerCase().replace(/\s*(?:in|inch|inches|deg|degrees|°|")\s*$/,'').trim();
+  if(!x)return null;
+  if(/^\d+(?:\.\d+)?$/.test(x))return +x;
+  var m=x.match(/^(\d+)\s+(\d+)\/(\d+)$/)||x.match(/^(\d+)-(\d+)\/(\d+)$/);
+  if(m){var d=+m[3];return d?(+m[1]+(+m[2]/d)):null}
+  m=x.match(/^(\d+)\/(\d+)$/);
+  if(m){var d2=+m[2];return d2?(+m[1]/d2):null}
+  return null;
+}
+function near(v){return fmt(Math.round(v*16)/16)}
+function flash(msg){var f=$('flash');if(!f)return;f.textContent=msg;f.classList.add('show');
+  clearTimeout(flash._t);flash._t=setTimeout(function(){f.classList.remove('show')},1800)}
+
+/* ═══════════ 1 · BOUNDED STOCK AND SERVICE CELL ═══════════
+   Identical dimensional model and identical angled-service boundary as the
+   Start Own child. Shared so System-level convergence is possible. The angled
+   end is a current service of THIS bounded cell on nominal 2×4 only — a service
+   boundary, not a statement about saws. */
+var STOCK=[
+  {k:'2x4',label:'2×4',t:1.5,w:3.5, angled:true },
+  {k:'2x6',label:'2×6',t:1.5,w:5.5, angled:false},
+  {k:'2x8',label:'2×8',t:1.5,w:7.25,angled:false},
+  {k:'4x4',label:'4×4',t:3.5,w:3.5, angled:false}
+];
+function stk(k){for(var i=0;i<STOCK.length;i++)if(STOCK[i].k===k)return STOCK[i];return null}
+var ANGLE_MIN=0, ANGLE_MAX=55, LEN_MIN=6, LEN_MAX=96, QTY_MIN=1, QTY_MAX=48;
+
+/* ═══════════ 2 · THE BOUNDED SOURCE ═══════════
+   What the bounded outdoor project legitimately carries — and, just as
+   importantly, what it does NOT. Read this as the single authority for
+   SOURCE-BACKED facts. Anything absent here is NOT source-backed. */
+var SOURCE={
+  projectName:'Outdoor Build',
+  family:'Table + Separate Benches',
+  assembly:'Bench',
+  part:'Leg',
+  occurrence:'BENCH · LEG (×carried qty unresolved)',
+  /* established facts */
+  sizeKey:'2x4',
+  referenceLengthIn:15.5,
+  angleDeg:10,
+  endIdentity:'both',
+  context:'outdoor-bench',
+  /* NOT established by the source — must not be presented as SOURCE-BACKED */
+  establishes:{sizeKey:true,referenceLengthIn:true,angleDeg:true,endIdentity:true,
+               cutPlane:false,lengthDatum:false,partQty:false,endRelation:false},
+  authorityRef:'stb-outdoor-reference-authority-0.3',
+  researchRef:'STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1'
+};
+
+/* ═══════════ 3 · PLAIN WORDS ═══════════ */
+var WORDS={
+  'miter-face':'Angle runs across the wide face',
+  'bevel-thickness':'Angle runs through the thickness',
+  'both':'Both ends','first':'One end only',
+  'parallel':'Parallel — same direction','opposed':'Mirrored — opposite directions',
+  'long-long-outer-edge':'Long point to long point, along the outer edge',
+  'long-short':'Long point to short point'
+};
+function words(v){return WORDS[v]||(v==null?'not set':String(v))}
+var TECH={
+  'miter-face':'MITER / FACE','bevel-thickness':'BEVEL / THICKNESS',
+  'both':'BOTH ENDS','first':'FIRST END','parallel':'PARALLEL','opposed':'OPPOSED',
+  'long-long-outer-edge':'LONG-LONG / OUTER REFERENCE EDGE','long-short':'LONG POINT → SHORT POINT'
+};
+function tech(v){return TECH[v]||''}
+
+/* Layered provenance vocabulary for the Outdoor route. Never mixed into
+   physical identity. */
+var PROV={
+  src      :{cls:'src',     label:'SOURCE-BACKED'},
+  derived  :{cls:'derived', label:'DERIVED FROM SOURCE + USER CHANGE'},
+  usermod  :{cls:'user',    label:'USER-DEFINED MODIFICATION'},
+  evidence :{cls:'evidence',label:'USER / REVIEWED EVIDENCE CONFIRMATION'},
+  declared :{cls:'declared',label:'USER-DECLARED'},
+  open     :{cls:'open',    label:'UNRESOLVED'}
+};
+
+/* ═══════════ 4 · STATE ═══════════ */
+function blankPart(){
+  return {sizeKey:null,finishedLengthIn:null,partQty:null,angleDeg:null,
+          cutPlane:null,endIdentity:null,endRelation:null,lengthDatum:null};
+}
+var S={
+  screen:'intent',
+  nav:{family:null,assembly:null,need:null,part:null},
+  intent:{note:'Replace a broken outdoor bench leg',delta:1,qty:8},
+  P:blankPart(), prov:{}, ops:[],
+  legLoaded:false,
+  confirmed:null,
+  lastId:null
+};
+function targetLen(){return q4(SOURCE.referenceLengthIn+S.intent.delta)}
+
+/* ═══════════ 5 · CARRY THE SOURCE ═══════════
+   When the leg is isolated, carry ONLY what the source establishes, tagged with
+   the correct provenance. Everything the source does not establish stays null
+   and UNRESOLVED. The customer change is applied as a modification; the target
+   length is derived from source + change. */
+function loadLeg(){
+  if(S.legLoaded)return;
+  S.P=blankPart(); S.prov={}; S.ops=[];
+  /* source-backed physical facts */
+  setFact('sizeKey',SOURCE.sizeKey,'src','Carried by source · nominal '+stk(SOURCE.sizeKey).label);
+  setFact('angleDeg',SOURCE.angleDeg,'src','Carried by source · '+fmt(SOURCE.angleDeg)+'° off square');
+  setFact('endIdentity',SOURCE.endIdentity,'src','Carried by source · both ends cut');
+  /* derived length: reference + user change */
+  setFact('finishedLengthIn',targetLen(),'derived',
+    'Reference '+fmt(SOURCE.referenceLengthIn)+' in (source) + '+fmt(S.intent.delta)+' in (user) = '+fmt(targetLen())+' in');
+  /* quantity: user-declared, NOT source */
+  setFact('partQty',S.intent.qty,'declared','User-declared quantity '+S.intent.qty);
+  /* deliberately UNRESOLVED: cutPlane, endRelation, lengthDatum */
+  S.legLoaded=true;
+}
+
+/* ═══════════ 6 · PHYSICAL IDENTITY ═══════════
+   Exactly the same eight fields, order and null behavior as the Start Own child.
+   This is the shared schema that lets the System later prove convergence. No
+   provenance, no project id, no source, no narrative, no UI state. */
+var DEMAND_KEYS=['sizeKey','finishedLengthIn','partQty','angleDeg',
+                 'cutPlane','endIdentity','endRelation','lengthDatum'];
+function physicalDemand(P){
+  return {
+    sizeKey:P.sizeKey,
+    finishedLengthIn:P.finishedLengthIn==null?null:Number(P.finishedLengthIn),
+    partQty:P.partQty==null?null:Number(P.partQty),
+    angleDeg:P.angleDeg==null?null:Number(P.angleDeg),
+    cutPlane:P.cutPlane,
+    endIdentity:P.endIdentity,
+    endRelation:P.endRelation==null?null:P.endRelation,
+    lengthDatum:P.lengthDatum
+  };
+}
+function canonicalDemand(d){
+  var out=[];
+  for(var i=0;i<DEMAND_KEYS.length;i++){
+    var k=DEMAND_KEYS[i], v=d[k];
+    out.push(k+'='+(v==null?'∅':(typeof v==='number'?v.toFixed(4):String(v))));
+  }
+  return out.join('|');
+}
+/* CHILD-LOCAL, PREVIEW-ONLY id. NOT the System canonical review-child id, which
+   the host owns through its own identity machinery. */
+function localPreviewId(d){return 'BL-'+hash32(canonicalDemand(d))+' · local preview'}
+
+/* ═══════════ 7 · FAIL CLOSED ═══════════ (identical rules to Start Own) */
+function openPoints(P){
+  var a=[], s=stk(P.sizeKey);
+  if(!P.sizeKey)a.push({k:'stock',t:'Stock class'});
+  if(P.finishedLengthIn==null)a.push({k:'len',t:'Finished length'});
+  if(P.partQty==null)a.push({k:'qty',t:'Quantity'});
+  if(P.angleDeg==null)a.push({k:'ends',t:'Angle'});
+  if(P.angleDeg!=null&&P.angleDeg>0){
+    if(!P.cutPlane)a.push({k:'plane',t:'Cut-plane orientation'});
+    if(!P.endIdentity)a.push({k:'ends',t:'Which ends are cut'});
+    if(P.endIdentity==='both'&&!P.endRelation)a.push({k:'rel',t:'End relation'});
+  }
+  if(!P.lengthDatum)a.push({k:'datum',t:'Finished-length datum'});
+  if(P.angleDeg!=null&&P.angleDeg>0&&s&&!s.angled)
+    a.push({k:'cell',t:'Angled end is offered on 2×4 only in this cell'});
+  return a;
+}
+function isComplete(P){return openPoints(P).length===0}
+function bevelDeferred(P){return P.angleDeg>0 && P.cutPlane==='bevel-thickness'}
+/* the three facts the source did not establish; used to drive the resolution UI */
+function unresolvedSourceGaps(){
+  var g=[];
+  if(!S.P.cutPlane)g.push('cutPlane');
+  if(S.P.endIdentity==='both'&&!S.P.endRelation)g.push('endRelation');
+  if(!S.P.lengthDatum)g.push('lengthDatum');
+  return g;
+}
+
+/* ═══════════ 8 · DRAWINGS ═══════════ */
+var GR={f1:'#EFE0BC',f2:'#E0CCA2',top:'#F3E7C8',end:'#D8C49B',
+        line:'rgba(150,118,70,.34)'};
+function woodDefs(){
+  return '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>'
+    +'<linearGradient id="face" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0" stop-color="'+GR.f1+'"/><stop offset="1" stop-color="'+GR.f2+'"/></linearGradient>'
+    +'<linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0" stop-color="'+GR.top+'"/><stop offset="1" stop-color="'+GR.end+'"/></linearGradient>'
+    +'<pattern id="grain" width="46" height="13" patternUnits="userSpaceOnUse">'
+    +'<path d="M0 3 Q12 1.2 23 3.2 T46 2.6" fill="none" stroke="'+GR.line+'" stroke-width="1"/>'
+    +'<path d="M0 8.4 Q14 10.2 26 8 T46 9" fill="none" stroke="'+GR.line+'" stroke-width=".8" opacity=".75"/>'
+    +'</pattern>'
+    +'<radialGradient id="drop" cx=".5" cy=".5" r=".5">'
+    +'<stop offset="0" stop-color="rgba(70,45,20,.30)"/><stop offset="1" stop-color="rgba(70,45,20,0)"/>'
+    +'</radialGradient></defs></svg>';
+}
+function txt(x,y,s,o){o=o||{};
+  return '<text x="'+x+'" y="'+y+'"'+(o.anchor?' text-anchor="'+o.anchor+'"':'')
+    +' font-size="'+(o.size||11.5)+'"'+(o.weight?' font-weight="'+o.weight+'"':'')
+    +(o.ls?' letter-spacing="'+o.ls+'"':'')
+    +' fill="'+(o.fill||'var(--ink3)')+'" font-family="ui-sans-serif,sans-serif">'+esc(s)+'</text>';
+}
+function dimH(x1,x2,y,label,col){
+  col=col||'var(--src)';
+  var m=(x1+x2)/2, w=String(label).length*6.5+14;
+  return '<g><path d="M'+x1+' '+(y-5)+'v10M'+x2+' '+(y-5)+'v10" stroke="'+col+'" opacity=".6"/>'
+    +'<path d="M'+x1+' '+y+'H'+(m-w/2)+'M'+(m+w/2)+' '+y+'H'+x2+'" stroke="'+col+'" opacity=".6"/>'
+    +txt(m,y+4.5,label,{anchor:'middle',size:12.5,weight:650,fill:col})+'</g>';
+}
+function angleMark(ax,ay,deg,dir,down,r,col){
+  if(!(deg>0))return '';
+  r=r||36; dir=dir||1; col=col||'var(--accent)'; var rad=deg*Math.PI/180, sy=down?1:-1;
+  var sqx=ax, sqy=ay+sy*r;
+  var enx=ax-dir*r*Math.sin(rad), eny=ay+sy*r*Math.cos(rad);
+  var sweep=(sy>0)?(dir>0?1:0):(dir>0?0:1);
+  return '<g><path d="M'+ax+' '+ay+'L'+sqx+' '+sqy+'" stroke="var(--ink3)" stroke-dasharray="3 3"/>'
+    +'<path d="M'+sqx+' '+sqy+'A'+r+' '+r+' 0 0 '+sweep+' '+enx+' '+eny+'" fill="none" stroke="'+col+'" stroke-width="1.6"/>'
+    +txt(ax-dir*r*0.62,ay+sy*r*0.86,fmt(deg)+'°',{anchor:'middle',size:12.5,weight:700,fill:col})
+    +'</g>';
+}
+
+/* THE CORRECTED SOURCE-EVIDENCE LEG DRAWING.
+   The source establishes 2×4, both ends, 10°. It does NOT establish which
+   physical plane the angle runs in. So while cutPlane is UNRESOLVED we must NOT
+   draw a definitive face-miter. We draw BOTH candidate orientations as ghosts
+   on their respective views and put a callout saying orientation is not yet
+   established. Only once cutPlane is resolved does the committed geometry appear
+   on the correct single view. This is the fix the brief requires. */
+function drawLeg(P){
+  var s=stk(P.sizeKey)||stk('2x4');
+  var L=(P.finishedLengthIn!=null?P.finishedLengthIn:15.5);
+  var a=(P.angleDeg!=null?P.angleDeg:0);
+  var plane=P.cutPlane, ends=P.endIdentity, rel=P.endRelation;
+  var resolved=(a>0&&plane&&ends);
+  var vw=760, ML=118, MR=210, MT=58;
+  var skFace=(resolved&&plane==='miter-face') ? s.w*Math.tan(a*Math.PI/180) : 0;
+  var skEdge=(resolved&&plane==='bevel-thickness') ? s.t*Math.tan(a*Math.PI/180) : 0;
+  var ghostSkFace=s.w*Math.tan((a||10)*Math.PI/180);
+  var maxSk=Math.max(skFace,skEdge,(!plane&&a>0?ghostSkFace:0));
+  var SC=(vw-ML-MR)/(L+maxSk+0.01);
+  var lPx=L*SC, fH=s.w*SC, eH=s.t*SC;
+  var yF=MT, yFb=yF+fH, yE=yFb+62, yEb=yE+eH;
+  var vh=yEb+(!plane&&a>0?128:104);
+  var o=['<svg viewBox="0 0 '+vw+' '+vh+'" role="img" aria-label="the source leg, with unresolved facts shown as unresolved">'];
+
+  function shape(y0,y1,sk){
+    var skL=0, skR=0;
+    if(resolved&&sk>0){
+      if(ends==='both'){ skL=sk; skR=(rel==='opposed')?-sk:sk; }
+      else { skL=sk; skR=0; }
+    }
+    var x0=ML+Math.max(0,-Math.min(skL,skR));
+    return {BL:[x0,y1],BR:[x0+lPx,y1],TR:[x0+lPx+skR,y0],TL:[x0+skL,y0],skL:skL,skR:skR,x0:x0};
+  }
+  function drawView(y0,y1,sk,fill,label,dimLabel,live){
+    var c=shape(y0,y1,sk);
+    var d='M'+c.TL[0]+' '+c.TL[1]+'L'+c.TR[0]+' '+c.TR[1]+'L'+c.BR[0]+' '+c.BR[1]+'L'+c.BL[0]+' '+c.BL[1]+'Z';
+    var g=[];
+    g.push('<ellipse cx="'+(c.x0+lPx/2)+'" cy="'+(y1+7)+'" rx="'+(lPx/2)+'" ry="5" fill="url(#drop)" opacity=".5"/>');
+    g.push('<path d="'+d+'" fill="url(#'+fill+')"/>');
+    g.push('<clipPath id="clip-'+label.replace(/\W/g,'')+'"><path d="'+d+'"/></clipPath>');
+    g.push('<g clip-path="url(#clip-'+label.replace(/\W/g,'')+')"><rect x="'+(c.x0-30)+'" y="'+y0
+      +'" width="'+(lPx+120)+'" height="'+(y1-y0)+'" fill="url(#grain)" opacity=".9"/></g>');
+    g.push('<path d="'+d+'" fill="none" stroke="rgba(70,45,20,.45)" stroke-width="1.2"/>');
+    if(resolved&&sk>0){
+      g.push('<path d="M'+c.TL[0]+' '+c.TL[1]+'L'+c.BL[0]+' '+c.BL[1]+'" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round"/>');
+      if(ends==='both')
+        g.push('<path d="M'+c.TR[0]+' '+c.TR[1]+'L'+c.BR[0]+' '+c.BR[1]+'" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round"/>');
+    }
+    g.push(txt(ML-12,(y0+y1)/2+4,label,{anchor:'end',size:11.5,weight:700,fill:live?'var(--accent2)':'var(--ink3)'}));
+    g.push(txt(ML-12,(y0+y1)/2+18,dimLabel,{anchor:'end',size:10.5}));
+    return {g:g.join(''),c:c};
+  }
+
+  o.push(txt(ML,26,'THE LEG FROM THE SOURCE · DRAWN TO SCALE',{size:11,weight:700,ls:'.09em'}));
+  o.push(txt(vw-MR+8,26,esc(s.label)+' · outdoor bench',{anchor:'end',size:11,weight:700,ls:'.05em',fill:'var(--src)'}));
+
+  var face=drawView(yF,yFb,skFace,'face','WIDE FACE',fmt(s.w)+' in',plane==='miter-face');
+  var edge=drawView(yE,yEb,skEdge,'edge','EDGE',fmt(s.t)+' in',plane==='bevel-thickness');
+  o.push(face.g); o.push(edge.g);
+
+  if(resolved&&skFace>0) o.push(angleMark(face.c.BL[0],face.c.BL[1],a,-1,true,34));
+  if(resolved&&skEdge>0) o.push(angleMark(edge.c.BL[0],edge.c.BL[1],a,-1,true,28));
+
+  /* THE FIX: angle known from source, orientation NOT established.
+     Ghost the same angle on BOTH candidate views. Commit to neither. */
+  if(a>0&&ends&&!plane){
+    [[face.c,yF,yFb,s.w,'across the wide face'],[edge.c,yE,yEb,s.t,'through the thickness']].forEach(function(p){
+      var c=p[0], gsk=p[3]*Math.tan(a*Math.PI/180)*SC;
+      o.push('<path d="M'+(c.BL[0]+gsk)+' '+p[1]+'L'+c.BL[0]+' '+p[2]+'" stroke="var(--warn)" stroke-width="2.4" stroke-dasharray="6 4"/>');
+      if(ends==='both')
+        o.push('<path d="M'+(c.BR[0]+gsk)+' '+p[1]+'L'+c.BR[0]+' '+p[2]+'" stroke="var(--warn)" stroke-width="2.4" stroke-dasharray="6 4"/>');
+      o.push(txt(c.BL[0]+gsk/2+10,(p[1]+p[2])/2+4,'? '+p[4],{size:10,weight:650,fill:'var(--warn)'}));
+    });
+    o.push('<rect x="'+(ML)+'" y="'+(vh-58)+'" width="'+(vw-ML-MR+40)+'" height="40" rx="9" fill="var(--warntint)" stroke="var(--warn)"/>');
+    o.push(txt(ML+13,vh-38,'ORIENTATION NOT YET ESTABLISHED',{size:11,weight:700,ls:'.06em',fill:'var(--warn)'}));
+    o.push(txt(ML+13,vh-22,'The source proved a '+fmt(a)+'° cut on both ends — not which plane it runs in. Both are shown as candidates.',
+      {size:11,fill:'var(--warn)'}));
+  } else if(a>0&&ends&&plane){
+    o.push(txt(ML,vh-20,'Orientation resolved · '+esc(words(plane))+'. The committed geometry is drawn on the correct view only.',
+      {size:11,weight:600,fill:'var(--good)'}));
+  }
+
+  var c=face.c, dy=yEb+42;
+  if(!P.lengthDatum){
+    o.push(dimH(c.BL[0],c.BR[0],dy,fmt(L)+' in · datum unresolved','var(--warn)'));
+    o.push(txt(vw/2,dy+22,'length carried, but which points it is measured between is not yet established',
+      {anchor:'middle',size:11,fill:'var(--warn)'}));
+  } else if(P.lengthDatum==='long-short'&&skFace>0){
+    var lo=c.BL[0]+Math.max(0,c.skL), hi=c.BR[0]+Math.min(0,c.skR);
+    o.push(dimH(lo,hi,dy,fmt(L)+' in'));
+    o.push(txt(vw/2,dy+22,'long point → short point',{anchor:'middle',size:11}));
+  } else {
+    o.push(dimH(c.BL[0],c.BR[0],dy,fmt(L)+' in'));
+    o.push(txt(vw/2,dy+22,'along the outer edge, tip to tip',{anchor:'middle',size:11}));
+  }
+  if(P.partQty!=null)
+    o.push(txt(vw-MR+8,44,'× '+P.partQty+' declared',{anchor:'end',size:11,fill:'var(--ink2)'}));
+  o.push('</svg>');
+  return o.join('');
+}
+
+function toolArt(kind){
+  var W=96,H=34,x0=8,x1=88,yT=8,yB=26,sk=9;
+  function box(tl,tr,br,bl,hi){
+    return '<path d="M'+tl+' '+yT+'L'+tr+' '+yT+'L'+br+' '+yB+'L'+bl+' '+yB+'Z" fill="url(#face)"'
+      +' stroke="'+(hi?'var(--src)':'rgba(70,45,20,.4)')+'" stroke-width="'+(hi?1.6:1)+'"/>';
+  }
+  var s='<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true">';
+  if(kind==='parallel')   s+=box(x0+sk,x1+sk,x1,x0,1);
+  else if(kind==='opposed')s+=box(x0+sk,x1-sk,x1,x0,1);
+  else if(kind==='face'){
+    s+='<path d="M'+(x0+sk)+' 5L'+(x1+sk)+' 5L'+x1+' 23L'+x0+' 23Z" fill="url(#face)" stroke="var(--src)" stroke-width="1.6"/>';
+    s+='<path d="M'+x0+' 26L'+x1+' 26L'+x1+' 32L'+x0+' 32Z" fill="url(#edge)" stroke="rgba(70,45,20,.35)"/>';
+  } else if(kind==='thickness'){
+    s+='<path d="M'+x0+' 5L'+x1+' 5L'+x1+' 23L'+x0+' 23Z" fill="url(#face)" stroke="rgba(70,45,20,.35)"/>';
+    s+='<path d="M'+(x0+5)+' 26L'+(x1+5)+' 26L'+x1+' 32L'+x0+' 32Z" fill="url(#edge)" stroke="var(--src)" stroke-width="1.6"/>';
+  } else if(kind==='edgeDatum'){
+    s+=box(x0+sk,x1+sk,x1,x0,0);
+    s+='<path d="M'+x0+' 31H'+x1+'" stroke="var(--src)" stroke-width="2"/>'
+      +'<circle cx="'+x0+'" cy="31" r="2.6" fill="var(--src)"/><circle cx="'+x1+'" cy="31" r="2.6" fill="var(--src)"/>';
+  } else if(kind==='shortDatum'){
+    s+=box(x0+sk,x1+sk,x1,x0,0);
+    s+='<path d="M'+(x0+sk)+' 31H'+x1+'" stroke="var(--src)" stroke-width="2"/>'
+      +'<circle cx="'+(x0+sk)+'" cy="31" r="2.6" fill="var(--src)"/><circle cx="'+x1+'" cy="31" r="2.6" fill="var(--src)"/>';
+  }
+  return s+'</svg>';
+}
+
+/* small illustrations for family / assembly / part browsing */
+function famArt(kind){
+  var s='<svg class="pic" viewBox="0 0 340 150" aria-hidden="true">';
+  s+='<ellipse cx="170" cy="132" rx="130" ry="8" fill="url(#drop)" opacity=".4"/>';
+  if(kind==='aframe'){
+    s+='<path d="M60 120 L110 40 L120 40 L78 120 Z" fill="url(#face)" stroke="rgba(70,45,20,.4)"/>';
+    s+='<path d="M280 120 L230 40 L220 40 L262 120 Z" fill="url(#face)" stroke="rgba(70,45,20,.4)"/>';
+    s+='<rect x="70" y="66" width="200" height="12" rx="2" fill="url(#edge)" stroke="rgba(70,45,20,.4)"/>';
+    s+='<rect x="55" y="52" width="230" height="14" rx="2" fill="url(#face)" stroke="rgba(70,45,20,.4)"/>';
+    s+=txt(170,146,'benches attached to the frame',{anchor:'middle',size:10.5});
+  } else if(kind==='separate'){
+    s+='<rect x="95" y="46" width="150" height="14" rx="2" fill="url(#face)" stroke="rgba(70,45,20,.4)"/>';
+    s+='<rect x="112" y="60" width="10" height="46" fill="url(#edge)" stroke="rgba(70,45,20,.4)"/>';
+    s+='<rect x="218" y="60" width="10" height="46" fill="url(#edge)" stroke="rgba(70,45,20,.4)"/>';
+    s+='<rect x="40" y="112" width="90" height="10" rx="2" fill="url(#face)" stroke="rgba(70,45,20,.4)"/>';
+    s+='<rect x="210" y="112" width="90" height="10" rx="2" fill="url(#face)" stroke="rgba(70,45,20,.4)"/>';
+    s+='<rect x="50" y="122" width="8" height="22" fill="url(#edge)" stroke="rgba(70,45,20,.4)"/>';
+    s+='<rect x="112" y="122" width="8" height="22" fill="url(#edge)" stroke="rgba(70,45,20,.4)"/>';
+    s+=txt(170,20,'table + two free-standing benches',{anchor:'middle',size:10.5});
+  } else if(kind==='bench'){
+    s+='<rect x="60" y="60" width="220" height="16" rx="2" fill="url(#face)" stroke="rgba(70,45,20,.4)"/>';
+    s+='<rect x="78" y="76" width="12" height="52" fill="url(#edge)" stroke="rgba(70,45,20,.4)"/>';
+    s+='<rect x="250" y="76" width="12" height="52" fill="url(#edge)" stroke="rgba(70,45,20,.4)"/>';
+    s+=txt(170,146,'one free-standing bench',{anchor:'middle',size:10.5});
+  } else if(kind==='leg'){
+    s+='<rect x="150" y="30" width="40" height="100" rx="2" fill="url(#face)" stroke="var(--src)" stroke-width="1.6"/>';
+    s+='<rect x="150" y="30" width="40" height="100" fill="url(#grain)" opacity=".8"/>';
+    s+=txt(170,146,'the part we are defining',{anchor:'middle',size:10.5,fill:'var(--src)'});
+  } else if(kind==='seat'){
+    s+='<rect x="70" y="66" width="200" height="16" rx="2" fill="url(#face)" stroke="rgba(70,45,20,.4)"/>';
+    s+=txt(170,146,'future part',{anchor:'middle',size:10.5});
+  } else if(kind==='stretcher'){
+    s+='<rect x="70" y="90" width="200" height="10" rx="2" fill="url(#edge)" stroke="rgba(70,45,20,.4)"/>';
+    s+=txt(170,146,'future part',{anchor:'middle',size:10.5});
+  }
+  return s+'</svg>';
+}
+
+/* ═══════════ 9 · SHARED FURNITURE ═══════════ */
+var TICK='<span class="tick"><svg viewBox="0 0 24 24"><path d="M4 12.5l5.2 5.2L20 7"/></svg></span>';
+function railHTML(steps,at){
+  return '<div class="rail"><button class="back" id="lib">← Project library</button>'
+    +'<span class="who">Outdoor Build · bounded source</span>'
+    +'<div class="steps">'+steps.map(function(s,i){
+      var c=i<at?'s done':(i===at?'s on':'s');
+      return '<span class="'+c+'"><i>'+(i<at?'✓':(i+1))+'</i>'+esc(s)+'</span>';
+    }).join('')+'</div></div>';
+}
+var STEPS=['Intent','Family','Bench','Part','Resolve','Contract'];
+function crumb(){
+  var n=S.nav, parts=[['Outdoor Build',true]];
+  if(n.family)parts.push([SOURCE.family,false]);
+  if(n.assembly)parts.push([SOURCE.assembly,false]);
+  if(n.need)parts.push([n.need==='parts'?'Parts':'Whole bench',false]);
+  if(n.part)parts.push([SOURCE.part,true]);
+  return '<div class="crumb">'+parts.map(function(p,i){
+    return (i?'<span class="sep">›</span>':'')+'<span class="'+(p[1]&&i===parts.length-1?'here':'')+'">'+(i===0?'<b>'+esc(p[0])+'</b>':esc(p[0]))+'</span>';
+  }).join('')+'</div>';
+}
+function intentCard(){
+  var I=S.intent;
+  return '<div class="dossier" style="border-color:var(--line2);background:var(--paper2)">'
+    +'<p class="t" style="color:var(--ink3)">Customer intent · not a definition</p><ul>'
+    +'<li>'+esc(I.note)+'</li>'
+    +'<li>Reference part <b>'+fmt(SOURCE.referenceLengthIn)+' in</b></li>'
+    +'<li>Wants it longer by <b>+'+fmt(I.delta)+' in</b></li>'
+    +'<li>Target <b>'+fmt(targetLen())+' in</b></li>'
+    +'<li>Quantity <b>'+I.qty+'</b> (their call)</li>'
+    +'<li>Observed old angle <b>about '+fmt(SOURCE.angleDeg)+'°</b></li>'
+    +'</ul><p class="why">Intent travels as evidence. It does not become physical truth until the '
+    +'source carries it or the customer resolves it explicitly.</p></div>';
+}
+function stepper(key,val,unit,step,placeholder){
+  return '<div class="stepper"><button data-step="'+key+':'+(-step)+'" aria-label="less">−</button>'
+    +'<span class="v">'+(val==null?'<span style="color:var(--warn)">'+esc(placeholder||'not set')+'</span>'
+      :fmt(val)+(unit?'<span style="font-weight:400;color:var(--ink3)"> '+unit+'</span>':''))+'</span>'
+    +'<button data-step="'+key+':'+step+'" aria-label="more">+</button></div>';
+}
+function toolBtn(act,val,art,title,sub,on){
+  return '<button class="tool'+(on?' on':'')+'" data-act="'+act+'" data-val="'+esc(val)+'">'
+    +toolArt(art)+'<b>'+esc(title)+'</b><i>'+esc(sub)+'</i></button>';
+}
+function provChip(k){var p=PROV[k];return p?'<span class="prov '+p.cls+'">'+p.label+'</span>':''}
+function defRow(label,value,provKey,note){
+  var open=(value==null||value==='');
+  return '<div class="defrow"><span class="k">'+esc(label)+'</span>'
+    +'<span class="v'+(open?' open':'')+'">'+(open?'UNRESOLVED':esc(value))
+    +(note?'<i>'+esc(note)+'</i>':'')+'</span>'
+    +provChip(open?'open':provKey)+'</div>';
+}
+
+/* ═══════════ 10 · SCREENS ═══════════ */
+function renderIntent(){
+  var h=woodDefs();
+  h+=railHTML(STEPS,0);
+  h+='<p class="eyebrow">Scan-to-Build · Outdoor Build · bench leg 0.1</p>';
+  h+='<h1>You already have a project. <em>Let it carry what it knows.</em></h1>';
+  h+='<p class="lede">You are replacing a leg on an outdoor bench that came from a bounded build. '
+    +'Somebody already established real facts about that part. <b>We carry those forward, and you resolve '
+    +'only what is genuinely still open</b> — nothing is invented to fill a gap.</p>';
+  h+='<div style="margin-top:24px">'+intentCard()+'</div>';
+  h+='<div class="panel"><h3>Your change</h3>'
+    +'<div class="dim"><span class="lab">Make the replacement longer by<i>applied to the reference part</i></span>'
+    +stepper('delta',S.intent.delta,'in',0.25)+'</div>'
+    +'<div class="pills">'+[0,0.5,1,2].map(function(v){
+      return '<button class="pill'+(Math.abs(S.intent.delta-v)<.001?' on':'')+'" data-set="delta:'+v+'">+'+fmt(v)+' in</button>'}).join('')+'</div>'
+    +'<p class="hint" style="margin-top:10px"><b>Reference '+fmt(SOURCE.referenceLengthIn)+' in → target '+fmt(targetLen())+' in.</b> '
+    +'The reference length is source-backed; the change is yours; the target is derived from both.</p>'
+    +'<div class="dim" style="margin-top:14px"><span class="lab">How many<i>your call — the source does not fix this</i></span>'
+    +stepper('qty',S.intent.qty,'',1)+'</div>'
+    +'<div class="pills">'+[2,4,6,8].map(function(v){
+      return '<button class="pill'+(S.intent.qty===v?' on':'')+'" data-set="qty:'+v+'">'+v+'</button>'}).join('')+'</div>'
+    +'</div>';
+  h+='<div class="gobar"><div class="sum"><strong>'+esc(S.intent.note)+' · target '+fmt(targetLen())+' in · '+S.intent.qty+' of them.</strong>'
+    +'Next, enter the bounded project and find the part.</div>'
+    +'<button class="btn" id="go">Enter the project →</button></div>';
+  h+='<p class="foot"><b>NO BLOOD ON WOOD.</b> This route defines work; it does not price, order, allocate, '
+    +'release or drive anything.</p>';
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('go').onclick=function(){S.screen='family';render();window.scrollTo(0,0)};
+}
+
+function renderFamily(){
+  var h=woodDefs();
+  h+=railHTML(STEPS,1);
+  h+=crumb();
+  h+='<h1>What are you working on?</h1>';
+  h+='<p class="lede">Two named families live under Outdoor Build. Only one is active for this proof — the '
+    +'other is here so you can see how a future bounded plug-in would slot in. <b>This is not a full '
+    +'catalog.</b></p>';
+  h+='<div class="grid2" style="margin-top:22px">';
+  h+='<button class="card ghost" data-act="fam" data-val="aframe" aria-disabled="true">'
+    +'<span class="flag future">Context · future integration</span>'+famArt('aframe')
+    +'<span class="body"><b>A-Frame Picnic Table</b><span>A different named family, with its own parts and '
+    +'its own source facts. Visible for context — not configured here, and none of its parts are carried '
+    +'into this proof.</span></span></button>';
+  h+='<button class="card'+(S.nav.family?' on':'')+'" data-act="fam" data-val="separate">'+TICK
+    +'<span class="flag active">Active family</span>'+famArt('separate')
+    +'<span class="body"><b>Table + Separate Benches</b><span>Free-standing benches. This is the bounded '
+    +'family that carries the bench leg we are replacing.</span></span></button>';
+  h+='</div>';
+  h+='<div class="note"><b>The A-Frame family is not this project.</b> Its table legs are a different part '
+    +'with different facts, and none of them are pulled into this bench-leg contract.</div>';
+  h+='<div class="gobar"><div class="sum">'
+    +(S.nav.family?'<strong>Table + Separate Benches.</strong>Now isolate the bench.'
+      :'<strong>Pick the active family.</strong>Table + Separate Benches carries this part.')
+    +'</div><button class="btn" id="go"'+(S.nav.family?'':' disabled')+'>Go to the bench →</button></div>';
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('go').onclick=function(){if(S.nav.family){S.screen='assembly';render();window.scrollTo(0,0)}};
+}
+
+function renderAssembly(){
+  var h=woodDefs();
+  h+=railHTML(STEPS,2);
+  h+=crumb();
+  h+='<h1>The bench <span class="q">· '+esc(SOURCE.family)+'</span></h1>';
+  h+='<p class="lede">Inside this family there is a table and its benches. <b>We are not configuring the '
+    +'table.</b> Isolate the bench, then decide whether you need the whole thing or a part.</p>';
+  h+='<div class="grid2" style="margin-top:22px">';
+  h+='<button class="card'+(S.nav.assembly?' on':'')+'" data-act="asm" data-val="bench">'+TICK
+    +'<span class="flag active">Isolate this</span>'+famArt('bench')
+    +'<span class="body"><b>Bench</b><span>One free-standing bench from the set. This holds the leg.</span></span></button>';
+  h+='<div class="card ghost"><span class="flag future">Not in this proof</span>'+famArt('separate')
+    +'<span class="body"><b>Table</b><span>The table is part of the family but out of scope here. It is not '
+    +'configured, and its parts are not carried.</span></span></div>';
+  h+='</div>';
+  if(S.nav.assembly){
+    h+='<div class="step"><span class="n">?</span><h2>What do you need?</h2></div>';
+    h+='<div class="grid2">';
+    h+='<div class="card ghost"><span class="flag future">Future / context</span>'+famArt('bench')
+      +'<span class="body"><b>Whole bench</b><span>Define every part of the bench as an assembly. Out of '
+      +'scope for this integration proof.</span></span></div>';
+    h+='<button class="card'+(S.nav.need==='parts'?' on':'')+'" data-act="need" data-val="parts">'+TICK
+      +'<span class="flag active">Active</span>'+famArt('leg')
+      +'<span class="body"><b>Parts</b><span>Go straight to an individual part. This is the route for the '
+      +'proof.</span></span></button>';
+    h+='</div>';
+  }
+  h+='<div class="gobar"><div class="sum">'
+    +(S.nav.need==='parts'?'<strong>Bench · Parts.</strong>Now pick the part.'
+      :S.nav.assembly?'<strong>Bench isolated.</strong>Choose Parts to reach the leg.'
+      :'<strong>Isolate the bench.</strong>')
+    +'</div><button class="btn" id="go"'+(S.nav.need==='parts'?'':' disabled')+'>Choose the part →</button></div>';
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('go').onclick=function(){if(S.nav.need==='parts'){S.screen='parts';render();window.scrollTo(0,0)}};
+}
+
+function renderParts(){
+  var h=woodDefs();
+  h+=railHTML(STEPS,3);
+  h+=crumb();
+  h+='<h1>Bench parts</h1>';
+  h+='<p class="lede">Only one part is live for this proof — the <b>leg</b>. The others are shown ghosted to '
+    +'suggest how a bounded plug-in would expand, not because a full parts catalog exists.</p>';
+  h+='<div class="grid3" style="margin-top:22px">';
+  h+='<button class="card'+(S.nav.part?' on':'')+'" data-act="part" data-val="leg">'+TICK
+    +'<span class="flag active">Active part</span>'+famArt('leg')
+    +'<span class="body"><b>Leg</b><span>The part we are replacing. It carries real source facts.</span></span></button>';
+  h+='<div class="card ghost"><span class="flag future">Future</span>'+famArt('seat')
+    +'<span class="body"><b>Seat board</b><span>Not defined in this proof.</span></span></div>';
+  h+='<div class="card ghost"><span class="flag future">Future</span>'+famArt('stretcher')
+    +'<span class="body"><b>Stretcher</b><span>Not defined in this proof.</span></span></div>';
+  h+='</div>';
+  h+='<div class="note">Ghosted parts have no fabricated facts behind them. Selecting the leg is what pulls '
+    +'the bounded source into the definition.</div>';
+  h+='<div class="gobar"><div class="sum">'
+    +(S.nav.part?'<strong>Leg selected.</strong>The source carries what it legitimately knows; you resolve the rest.'
+      :'<strong>Select the leg.</strong>')
+    +'</div><button class="btn" id="go"'+(S.nav.part?'':' disabled')+'>Open the leg →</button></div>';
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('go').onclick=function(){if(S.nav.part){loadLeg();S.screen='resolve';render();window.scrollTo(0,0)}};
+}
+
+/* ═══════════ 11 · RESOLVE — carry source, expose gaps, resolve only the missing ═══════════ */
+function carriedPanel(){
+  var P=S.P, s=stk(P.sizeKey);
+  var h='<div class="panel"><h3>What the leg is<span class="badge src">bounded source</span></h3>';
+  h+='<p class="cat src"><span>Carried by source</span><span class="ln"></span></p>';
+  h+=defRow('Stock',s.label,'src',fmt(s.t)+' × '+fmt(s.w)+' in actual');
+  h+=defRow('Angle',fmt(P.angleDeg)+'° off square','src','both ends carry this angle');
+  h+=defRow('Ends',words(P.endIdentity),'src','both ends are cut');
+  h+='<p class="cat user"><span>Customer intent applied</span><span class="ln"></span></p>';
+  h+=defRow('Length change','+'+fmt(S.intent.delta)+' in','usermod','your requested modification');
+  h+=defRow('Finished length',fmt(P.finishedLengthIn)+' in','derived',
+    fmt(SOURCE.referenceLengthIn)+' in source + '+fmt(S.intent.delta)+' in change');
+  h+=defRow('Quantity',String(P.partQty),'declared','the source does not fix this');
+  h+='<p class="hint">These are already established. You will not be re-asked for them — that is the point of '
+    +'a bounded source.</p></div>';
+  return h;
+}
+function resolvePanel(){
+  var P=S.P, s=stk(P.sizeKey), a=P.angleDeg, h='';
+  var gaps=unresolvedSourceGaps();
+  h+='<div class="panel"><h3>Still needs resolution'
+    +(gaps.length?'<span class="badge open">'+gaps.length+' open</span>':'<span class="badge ok">resolved</span>')+'</h3>';
+  h+='<p class="cat open"><span>Not established by the source</span><span class="ln"></span></p>';
+  h+='<p class="hint" style="margin-top:0">The source proved a '+fmt(a)+'° cut on both ends. It did '
+    +'<b>not</b> prove which plane the angle runs in, how the two ends relate, or which points the length is '
+    +'measured between. You (or reviewed evidence) resolve these — they are marked '
+    +'<b>USER / REVIEWED EVIDENCE CONFIRMATION</b>, never source-backed.</p>';
+
+  /* orientation */
+  h+='<div style="margin-top:14px"><b style="font-size:13px">Where does the angle run?</b>'
+    +'<div class="tools" style="margin-top:9px">'
+    +toolBtn('plane','miter-face','face','Across the wide face','3½ in · miter / face',P.cutPlane==='miter-face')
+    +toolBtn('plane','bevel-thickness','thickness','Through the thickness','1½ in · bevel / thickness',P.cutPlane==='bevel-thickness')
+    +'</div>'
+    +(bevelDeferred(P)?'<div class="note warn" style="margin-top:10px"><b>A through-thickness bevel is a '
+      +'legitimate definition and is not the current face-miter service.</b> It stays on the record as a '
+      +'bevel; it is not converted to a miter. Store answers whether its declared capability covers it.</div>'
+      :'<p class="hint">Until you choose, the drawing shows both candidates and commits to neither.</p>')
+    +'</div>';
+
+  /* end relation — only when both ends and angled */
+  if(P.endIdentity==='both'&&a>0){
+    h+='<div style="margin-top:16px"><b style="font-size:13px">How do the two ends run?</b>'
+      +'<div class="tools" style="margin-top:9px">'
+      +toolBtn('rel','parallel','parallel','Parallel','same direction',P.endRelation==='parallel')
+      +toolBtn('rel','opposed','opposed','Mirrored','opposite directions',P.endRelation==='opposed')
+      +'</div><p class="hint">The source says both ends are cut at '+fmt(a)+'°, not whether they run the '
+      +'same way. Do not assume parallel.</p></div>';
+  }
+
+  /* length datum */
+  h+='<div style="margin-top:16px"><b style="font-size:13px">Where is the length measured?</b>'
+    +'<div class="tools" style="margin-top:9px">'
+    +toolBtn('datum','long-long-outer-edge','edgeDatum','Along the outer edge','tip to tip',P.lengthDatum==='long-long-outer-edge')
+    +toolBtn('datum','long-short','shortDatum','Long → short point','across the point',P.lengthDatum==='long-short')
+    +'</div><p class="hint">With an angled end these are different numbers. The source carried the length '
+    +'value, not the datum. Pick the one the fabrication needs.</p></div>';
+
+  h+='<div class="exact" style="margin-top:16px"><b style="font-size:13px;display:block;margin-bottom:7px">Adjust the finished length</b>'
+    +'<input data-exact="len" value="'+esc(fmt(P.finishedLengthIn))+'" inputmode="decimal" aria-label="Finished length in inches">'
+    +'<p class="hint">Prefilled from source + your change ('+fmt(targetLen())+' in). Editing it keeps the '
+    +'derived provenance and records the new value.</p></div>';
+  h+='</div>';
+  return h;
+}
+function renderResolve(){
+  var P=S.P;
+  var h=woodDefs();
+  h+=railHTML(STEPS,4);
+  h+=crumb();
+  h+='<h1>The leg <span class="q">· carried and unresolved</span></h1>';
+  h+='<p class="lede" style="margin-bottom:18px">The source facts are already here. Resolve only what it '
+    +'genuinely did not establish. The drawing refuses to answer an open question for you.</p>';
+  h+=intentCard();
+  h+='<div class="bench"><div><div class="stage" id="stage">'+drawLeg(P)+'</div>'
+    +'<div style="height:14px"></div>'+carriedPanel()+'</div><div id="resolve">'+resolvePanel()+'</div></div>';
+  var open=openPoints(P);
+  h+='<div class="gobar"><div class="sum">'
+    +(open.length
+      ? '<strong>Not a contract yet.</strong>Still open: '+esc(open.map(function(x){return x.t}).join(' · '))+'.'
+      : '<strong>Complete physical contract.</strong>Source-backed where the source knew, resolved where it '
+        +'did not — and the two are still labeled differently.')
+    +'</div><button class="btn" id="go"'+(open.length?' disabled':'')+'>Review the contract →</button></div>';
+  h+='<p class="foot"><b>NO BLOOD ON WOOD.</b> The drawing is a definition view, not a machine program. No '
+    +'orientation, datum or relation was assumed on your behalf.</p>';
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('go').onclick=function(){if(isComplete(S.P)){S.screen='contract';render();window.scrollTo(0,0)}};
+}
+
+/* ═══════════ 12 · CONTRACT ═══════════ */
+function specText(){
+  var d=physicalDemand(S.P), L=[];
+  L.push('BENCH LEG — PHYSICAL PART CONTRACT');
+  L.push(localPreviewId(d));
+  L.push('');
+  L.push('PHYSICAL DEMAND  (the eight fields; identical schema to Start Own)');
+  DEMAND_KEYS.forEach(function(k){
+    L.push('  '+k.padEnd(18,' ')+(d[k]===null?'null':JSON.stringify(d[k])));
+  });
+  L.push('');
+  L.push('PROVENANCE  (layered; separate custody — never part of physical identity)');
+  DEMAND_KEYS.forEach(function(k){
+    var p=PROV[S.prov[k]];
+    L.push('  '+k.padEnd(18,' ')+(p?p.label:'—'));
+  });
+  L.push('');
+  L.push('ROUTE            OUTDOOR BUILD · bounded source-backed');
+  L.push('projectId        outdoor');
+  L.push('projectClass     BOUNDED_SOURCE_BACKED');
+  L.push('source           '+SOURCE.family+' › '+SOURCE.assembly+' › '+SOURCE.part);
+  L.push('authorityRef     '+SOURCE.authorityRef);
+  L.push('researchRef      '+SOURCE.researchRef);
+  L.push('');
+  L.push('DEFINITION OPERATIONS');
+  S.ops.forEach(function(x,i){L.push('  '+(i+1)+'. '+x)});
+  L.push('');
+  L.push('Store answer comes from the System host (adapter review-store-handoff/0.5).');
+  L.push('This child does NOT use the Start Own live Store preview path. The System');
+  L.push('host computes canonical review-child identity; the id above is a local');
+  L.push('preview. NO BLOOD ON WOOD.');
+  return L.join('\n');
+}
+function renderContract(){
+  var P=S.P, d=physicalDemand(P), s=stk(P.sizeKey);
+  var h=woodDefs();
+  h+=railHTML(STEPS,5);
+  h+=crumb();
+  h+='<h1>The physical contract.</h1>';
+  h+='<p class="lede" style="margin-bottom:18px">Same eight fields as any other route — but the provenance '
+    +'says exactly how each fact came to be known. Store capability is the host’s answer, not this file’s.</p>';
+  h+='<div class="stage" style="margin-bottom:18px">'+drawLeg(P)+'</div>';
+  h+='<section class="object"><p class="eye">Physical part contract · Outdoor Build</p>'
+    +'<h2>Bench leg · '+esc(s.label)+'</h2><p class="idline">'+esc(localPreviewId(d))+'</p>';
+  h+=defRow('Stock',s.label,S.prov.sizeKey,fmt(s.t)+' × '+fmt(s.w)+' in actual');
+  h+=defRow('Finished length',fmt(P.finishedLengthIn)+' in',S.prov.finishedLengthIn,tech(P.lengthDatum));
+  h+=defRow('Angle',fmt(P.angleDeg)+'° off square',S.prov.angleDeg);
+  h+=defRow('Cut plane',words(P.cutPlane),S.prov.cutPlane,tech(P.cutPlane));
+  h+=defRow('Ends',words(P.endIdentity),S.prov.endIdentity);
+  h+=defRow('End relation',words(P.endRelation),S.prov.endRelation);
+  h+=defRow('Length datum',words(P.lengthDatum),S.prov.lengthDatum,tech(P.lengthDatum));
+  h+=defRow('Quantity',String(P.partQty),S.prov.partQty);
+  h+=(bevelDeferred(P)
+    ? '<div class="note warn"><b>This definition asks for a through-thickness bevel.</b> Not the current '
+      +'face-miter service; the definition stands and is not converted. Store answers whether its declared '
+      +'capability covers it.</div>' : '');
+  h+='</section>';
+  h+=(S.confirmed?'<div class="note good" style="margin-top:16px"><b>Confirmed version sent.</b> '
+    +'The System host persists this Outdoor snapshot (STB_OUTDOOR_CONFIRMED) and advances to the Store '
+    +'answer through its own adapter. It owns the canonical record identity.</div>':'');
+  h+='<div class="gobar"><div class="sum"><strong>Same contract, different evidence path.</strong>'
+    +'This leg can reach the identical eight-field demand a Start Your Own leg reaches — while carrying '
+    +'source-backed provenance the other route can never have. Convergence, if any, is proven by the System '
+    +'from the two canonical records, not inside this file.</div>'
+    +'<button class="btn ghost sm" id="copy">Copy the contract</button>'
+    +'<button class="btn warm" id="confirm">Confirm this version →</button></div>';
+  h+='<details class="fold"><summary>Physical demand and layered provenance, as it leaves this file</summary><div class="in">'
+    +'<p style="margin:0 0 10px">The eight fields below use the same names and null behavior as the Start Own '
+    +'child. Provenance travels beside them, layered, never inside the physical identity.</p>'
+    +'<pre class="spec">'+esc(specText())+'</pre></div></details>';
+  h+='<p class="foot"><b>NO BLOOD ON WOOD.</b> Confirmation is not an order, payment, allocation, production '
+    +'release, machine readiness, physical execution authorisation, controller output or Cycle Start. The '
+    +'application defines work; the commissioned machine site retains physical execution authority.</p>';
+  $('app').innerHTML=h;
+  $('lib').onclick=returnToLibrary;
+  $('copy').onclick=function(){
+    var t=specText();
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t);
+      else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();
+        document.execCommand('copy');document.body.removeChild(ta)}
+      flash('Contract copied');
+    }catch(e){flash('Open the fold below and copy it from there')}
+  };
+  $('confirm').onclick=confirmVersion;
+}
+
+/* ═══════════ 13 · CONFIRMATION ═══════════ */
+function confirmVersion(){
+  if(!isComplete(S.P)){flash('The contract is not complete');return}
+  var payload=cleanOutdoorPayload();
+  S.confirmed=payload;
+  if(window.self!==window.top)
+    window.parent.postMessage({type:'STB_OUTDOOR_CONFIRMED',payload:JSON.parse(JSON.stringify(payload))},window.location.origin);
+  flash(window.self!==window.top?'Sent to the System host':'Confirmed · no host attached in review mode');
+  render();
+}
+function cleanOutdoorPayload(){
+  var d=physicalDemand(S.P);
+  return {
+    localPreviewId:localPreviewId(d),
+    definition:bridgeDefinition(),
+    physicalDemand:d,
+    provenance:JSON.parse(JSON.stringify(S.prov)),
+    intent:JSON.parse(JSON.stringify(S.intent)),
+    sourceAuthority:sourceAuthority(),
+    operations:S.ops.slice()
+  };
+}
+
+/* ═══════════ 14 · THE SYSTEM BOUNDARY ═══════════
+   Outdoor does NOT own or fake a live Store path. It exposes normalized physical
+   demand and its bounded source authority through STBProjectBridge, emits
+   STB_PROJECT_DEFINITION_CHANGED with projectId "outdoor", and confirms with
+   STB_OUTDOOR_CONFIRMED. The host persists the snapshot and advances to Store
+   Answer via its own adapter (review-store-handoff/0.5). */
+function sourceAuthority(){
+  return {kind:'BOUNDED_SOURCE_BACKED',
+    projectId:'outdoor', family:SOURCE.family, assembly:SOURCE.assembly, part:SOURCE.part,
+    establishes:{sizeKey:SOURCE.sizeKey,referenceLengthIn:SOURCE.referenceLengthIn,
+                 angleDeg:SOURCE.angleDeg,endIdentity:SOURCE.endIdentity,context:SOURCE.context},
+    doesNotEstablish:['cutPlane','endRelation','lengthDatum','partQty'],
+    authorityRef:SOURCE.authorityRef, researchRef:SOURCE.researchRef,
+    artifact:'stb-outdoor-bench-leg-0.1.html'};
+}
+function bridgeDefinition(){
+  var P=S.P, s=stk(P.sizeKey), d=physicalDemand(P);
+  return {
+    part:'bench-leg',
+    stockClass:P.sizeKey,
+    actualThickness:s?s.t:null, actualWidth:s?s.w:null,
+    finishedLength:P.finishedLengthIn,
+    quantity:P.partQty,
+    angleDegrees:P.angleDeg,
+    endCondition:(P.angleDeg!=null&&P.angleDeg>0)?'angled':'square',
+    straightCut:true,
+    cutPlane:P.cutPlane, endIdentity:P.endIdentity, endRelation:P.endRelation,
+    lengthDatum:P.lengthDatum,
+    holeRequirement:'NONE', datum:null, holes:[],
+    physicalDemand:d,
+    provenance:JSON.parse(JSON.stringify(S.prov)),
+    sourceAuthority:sourceAuthority()
+  };
+}
+function installBridge(){
+  window.STBProjectBridge={
+    version:'stb.project-bridge/0.1',
+    projectId:'outdoor',
+    projectClass:'BOUNDED_SOURCE_BACKED',
+    sourceAuthority:sourceAuthority(),
+    getDefinition:function(){return JSON.parse(JSON.stringify(bridgeDefinition()))},
+    getLocalPreviewId:function(){return localPreviewId(physicalDemand(S.P))},
+    getSnapshot:function(){
+      return {projectId:'outdoor', projectClass:'BOUNDED_SOURCE_BACKED',
+        sourceAuthority:sourceAuthority(), screen:S.screen,
+        localPreviewId:localPreviewId(physicalDemand(S.P)),
+        definition:JSON.parse(JSON.stringify(bridgeDefinition())),
+        physicalDemand:physicalDemand(S.P),
+        complete:isComplete(S.P),
+        openPoints:openPoints(S.P).map(function(x){return x.t}),
+        unresolvedSourceGaps:unresolvedSourceGaps(),
+        provenance:JSON.parse(JSON.stringify(S.prov)),
+        confirmed:S.confirmed?JSON.parse(JSON.stringify(S.confirmed)):null};
+    }
+  };
+  return window.STBProjectBridge;
+}
+function emitChanged(){
+  var key=canonicalDemand(physicalDemand(S.P));
+  if(key===S.lastId)return;
+  S.lastId=key;
+  var msg={type:'STB_PROJECT_DEFINITION_CHANGED', projectId:'outdoor',
+    definition:window.STBProjectBridge?window.STBProjectBridge.getDefinition():null};
+  window.dispatchEvent(new CustomEvent('STB_PROJECT_DEFINITION_CHANGED',{detail:msg}));
+  if(window.self!==window.top)window.parent.postMessage(msg,window.location.origin);
+}
+function returnToLibrary(){
+  if(window.self!==window.top)window.parent.postMessage({type:'STB_CHILD_RETURN_LIBRARY',projectId:'outdoor'},window.location.origin);
+  else{S.screen='intent';S.nav={family:null,assembly:null,need:null,part:null};
+    S.P=blankPart();S.prov={};S.ops=[];S.legLoaded=false;S.confirmed=null;render();window.scrollTo(0,0)}
+}
+
+/* ═══════════ 15 · SETTING FACTS + WIRING ═══════════ */
+function setFact(field,value,provKey,opText){
+  S.P[field]=value;
+  if(provKey!==undefined){ if(provKey===null)delete S.prov[field]; else S.prov[field]=provKey; }
+  if(opText)S.ops.push(opText);
+}
+function dropOps(prefix){S.ops=S.ops.filter(function(x){return x.indexOf(prefix)!==0})}
+
+function setKey(k,v){
+  if(k==='delta'){
+    S.intent.delta=clamp(q4(v),0,12);
+    if(S.legLoaded){ /* re-derive length, keep derived provenance */
+      dropOps('Reference '); dropOps('Apply +');
+      setFact('finishedLengthIn',targetLen(),'derived',
+        'Reference '+fmt(SOURCE.referenceLengthIn)+' in (source) + '+fmt(S.intent.delta)+' in (user) = '+fmt(targetLen())+' in');
+    }
+  }
+  else if(k==='qty'){
+    S.intent.qty=clamp(Math.round(v),QTY_MIN,QTY_MAX);
+    if(S.legLoaded){ dropOps('User-declared quantity'); setFact('partQty',S.intent.qty,'declared','User-declared quantity '+S.intent.qty); }
+  }
+  else if(k==='len'){
+    var L=clamp(q4(v),LEN_MIN,LEN_MAX);
+    dropOps('Reference '); dropOps('Confirm the finished length');
+    var pk=(Math.abs(L-targetLen())<1e-6)?'derived':'usermod';
+    setFact('finishedLengthIn',L,pk,
+      pk==='derived'
+        ? 'Reference '+fmt(SOURCE.referenceLengthIn)+' in (source) + '+fmt(S.intent.delta)+' in (user) = '+fmt(L)+' in'
+        : 'Confirm the finished length · '+fmt(L)+' in (user-set, off the derived value)');
+  }
+}
+function currentOf(k){
+  return k==='delta'?S.intent.delta : k==='qty'?S.intent.qty
+       : (S.P.finishedLengthIn==null?targetLen():S.P.finishedLengthIn);
+}
+function act(name,val){
+  if(name==='fam'){ if(val==='separate')S.nav.family='separate'; return; }
+  if(name==='asm'){ if(val==='bench')S.nav.assembly='bench'; return; }
+  if(name==='need'){ if(val==='parts')S.nav.need='parts'; return; }
+  if(name==='part'){ if(val==='leg')S.nav.part='leg'; return; }
+  /* resolution facts — all USER / REVIEWED EVIDENCE CONFIRMATION */
+  if(name==='plane'){ dropOps('Resolve orientation');
+    setFact('cutPlane',val,'evidence','Resolve orientation · '+(val==='miter-face'?'across the wide face (miter/face)':'through the thickness (bevel/thickness)')); }
+  else if(name==='rel'){ dropOps('Resolve end relation');
+    setFact('endRelation',val,'evidence','Resolve end relation · '+(val==='parallel'?'parallel':'mirrored')); }
+  else if(name==='datum'){ dropOps('Resolve length datum');
+    setFact('lengthDatum',val,'evidence','Resolve length datum · '+tech(val)); }
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('[data-act],[data-step],[data-set]');
+  if(!t||t.disabled||t.getAttribute('aria-disabled')==='true')return;
+  if(t.dataset.act){ act(t.dataset.act,t.dataset.val); render(); return; }
+  if(t.dataset.step){ var a=t.dataset.step.split(':'); setKey(a[0],currentOf(a[0])+ +a[1]); render(); return; }
+  if(t.dataset.set){ var b=t.dataset.set.split(':'); setKey(b[0],+b[1]); render(); }
+});
+document.addEventListener('change',function(e){
+  var el=e.target.closest&&e.target.closest('[data-exact]'); if(!el)return;
+  var v=parseDim(el.value);
+  if(v==null||!isFinite(v)){flash('Try a number like 16 1/2');render();return}
+  setKey(el.getAttribute('data-exact'),v); render();
+});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter')return;
+  var el=e.target.closest&&e.target.closest('[data-exact]'); if(!el)return;
+  e.preventDefault(); el.dispatchEvent(new Event('change',{bubbles:true}));
+});
+
+function render(){
+  installBridge();
+  if(S.screen==='intent')        renderIntent();
+  else if(S.screen==='family')   renderFamily();
+  else if(S.screen==='assembly') renderAssembly();
+  else if(S.screen==='parts')    renderParts();
+  else if(S.screen==='resolve')  renderResolve();
+  else                           renderContract();
+  emitChanged();
+}
+(function boot(){ installBridge(); render(); })();
+window.S=S;
+window.currentDefinitionKey=function(){return canonicalDemand(physicalDemand(S.P))};
+</script>
+</body>
+</html>
