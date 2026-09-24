@@ -31,3 +31,14 @@ Preserved files:
 - `contractor.md`
 
 Related architecture references are preserved under `../application-current/architecture/`.
+
+
+## Public demonstration provenance
+
+The duplicated local snapshot of `GeorgePlattDemo/Scan-to-Build` was removed from System.
+
+Historical public-demo identity retained for provenance:
+
+`GeorgePlattDemo/Scan-to-Build@ea17feeac299fc359c6776f85019b242ffffc085`
+
+The public repository remains the source. No current System code depends on a copied snapshot here.

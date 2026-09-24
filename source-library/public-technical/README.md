@@ -1,13 +1,13 @@
-# Public technical source library
+# Public technical sources
 
-This bucket contains a complete pinned snapshot of the public `scan-to-build-review` repository.
+The full copied snapshot of `GeorgePlattDemo/scan-to-build-review` was removed from System after donor mining.
 
-- source: `GeorgePlattDemo/scan-to-build-review`
-- pin: `ab3e35e54d022928d0dd64aae58679fd893f65d2`
-- disposition: **REFERENCE / DONOR — NOT CURRENT AUTHORITY AS A WHOLE**
+Current public source:
 
-The snapshot is preserved because it contains substantial useful prior work: architecture, continuous engineering, patent-to-architecture mapping, machine/kinematic ontology, material/labor ontology, WorkPacket examples, operational roadmap, institutional/research material, public demonstrations, and review artifacts.
+- repository: `GeorgePlattDemo/scan-to-build-review`
+- retained historical pin for the earlier System snapshot: `ab3e35e54d022928d0dd64aae58679fd893f65d2`
+- current role: public review/demo surface; not the cross-repository semantic authority
 
-Current owner-layer documents in the system repository control where language, authority, capability, or workflow evolved later. In particular, machine/control claims, packet semantics, Store semantics, and old stage language must be reconciled before reuse.
+System no longer carries a duplicate local copy of that public repository.
 
-Preservation here is not admission as current architecture.
+If a specific historical Review file is needed, retrieve it from the retained public repository at the identified pin. Current shared definitions/governance belong to Program; current application behavior belongs to System; current Store behavior belongs to Store.

@@ -187,9 +187,16 @@ The early Sarah chain was intentionally a toy/research demonstration and crosses
 
 ### Public review and public demo wholesale
 
-**Disposition:** pending item-level review or archive placement.
+**Disposition:** external retained public sources; duplicate System snapshots removed.
 
-Public review and demo snapshots are preserved in `source-library/public-technical/` and `source-library/journey-donors/`. Preservation is not wholesale admission as current. Public mechanical ontology has the donor disposition above.
+The public repositories remain available at their own locations:
+
+- `GeorgePlattDemo/scan-to-build-review`
+- `GeorgePlattDemo/Scan-to-Build`
+
+System no longer carries full copied HTML/PDF/document snapshots merely for preservation. Historical source pins remain in provenance records and can be retrieved from the original public repositories when needed.
+
+This deletion changes no current application behavior and does not alter the retained public repositories.
 
 ### Transfer Staging / rejected candidates
 
