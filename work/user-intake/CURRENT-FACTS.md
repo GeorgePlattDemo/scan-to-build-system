@@ -14,4 +14,4 @@ Current accepted app facts relevant to intake:
 - unsupported/missing units remain unresolved;
 - candidate changes create new definition revisions rather than silently mutating history.
 
-These are implementation facts at app pin `4595b4785a2686486e477ce2e70fb3f476285a8d`.
+These are current System implementation facts; current identity is `START-HERE.md`, `STB-CURRENT-BASELINE.md`, and the current `apps/stb/` tree. `GeorgePlattDemo/grok-file@4595b4785a2686486e477ce2e70fb3f476285a8d` is transferred-app provenance only.
