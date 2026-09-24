@@ -3,6 +3,13 @@
 
 # Scan-to-Build (`apps/stb`)
 
+## Current visible-build preservation checkpoint
+
+The exact public Review composition currently opened by **OPEN SYSTEM BUILD** is preserved under [`public-build/`](public-build/) from Review commit `7b26dfc45c9832271840d134426e096787156a04`.
+
+This is a custody/reconciliation checkpoint, not a second application architecture and not a runtime switch. Its source manifest and unit test prove byte identity before any Review → System reconciliation work.
+
+
 <a href="https://georgeplattdemo.github.io/scan-to-build-review/working-app.html"><kbd>← BACK TO WORKING APP</kbd></a>
 
 Local application subtree.
