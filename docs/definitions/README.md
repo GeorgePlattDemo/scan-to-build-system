@@ -1,47 +1,48 @@
 # Definitions and Language Discipline
 
-This directory is the future home of current Scan-to-Build definitions.
+Shared cross-repository definitions now live in the public Program repository:
 
-It is intentionally small at foundation time. The project recently completed substantial application-language reconciliation. This repository should preserve that cleanup rather than reconstruct an older vocabulary from demonstrations or prototypes.
+`GeorgePlattDemo/3d-solutions-program/governance/definitions.md`
+
+That Program page is the semantic arbiter for words shared by Program, System, and Store.
+
+This System directory is therefore **not** a competing glossary. Keep only System-local implementation terminology, durable wire identifiers, adapters, and notes required to explain executable behavior.
 
 ## Admission rule for terminology
 
-A legacy term is not adopted merely because it appears repeatedly in earlier material.
+A local term is justified here only when at least one of these is true:
 
-Before an older term or definition becomes current, determine:
+1. it is an executable System identifier or record type;
+2. it is narrower than the Program term and needed to explain System behavior;
+3. compatibility requires a durable identifier whose ordinary-English wording could mislead;
+4. a current System test/adapter depends on the exact vocabulary.
 
-1. what layer owns the concept;
-2. whether the current system still uses the concept;
-3. whether its meaning changed;
-4. whether the old wording transfers authority incorrectly;
-5. whether a durable identifier must remain unchanged even when explanatory language improves.
+If a term is shared across Program/System/Store, define it in Program and point to it from System.
 
-## Protected distinctions already established
+## Protected distinctions
 
-- candidate definition ≠ canonical governed WorkPacket;
-- Store `SUPPORTABLE` ≠ governed reference-node `accept`;
-- Store evaluation ≠ commercial submission;
-- Store evaluation ≠ fabrication authorization;
-- `DefinitionReviewRecorded` ≠ purchase, Store commercial acceptance, payment, reservation, governed authorization, machine readiness, or Cycle Start;
+Current System behavior must preserve Program's semantic boundaries, including:
+
+- candidate definition ≠ WorkPacket;
+- Store `SUPPORTABLE` ≠ fabrication authorization;
+- Store evaluation ≠ commercial assent;
+- `DefinitionReviewRecorded` ≠ purchase/payment/reservation/production authority;
 - `UnresolvedDefinitionAcknowledged` ≠ support or resolution;
-- `BudgetaryEstimate` / Q ≠ commercial quotation or payable total;
-- fixture stock ≠ live inventory, reservation, or allocation;
+- `BudgetaryEstimate` / Q ≠ automatically a binding commercial quote;
+- fixture stock ≠ live inventory;
 - modeled cycle time ≠ measured production time;
-- application receipt time ≠ Store source time;
-- current/applicable ≠ live or commercially fresh;
+- current/applicable ≠ automatically live/fresh;
 - simulation ≠ physical execution;
-- network presence ≠ permission for remote Cycle Start.
+- network presence ≠ permission for Cycle Start.
 
 ## Durable identifiers
 
-Current wire names, enums, record types, selectors, and governed identifiers should not be casually renamed for prose improvement. Where a durable identifier has a narrower or different meaning than ordinary English, explanatory text should define the scope rather than mutate the identifier.
+Current wire names, enums, record types, selectors, and durable identifiers should not be casually renamed for prose improvement.
 
-## Sarah / early-demo caution
+Where a durable identifier has a narrower meaning than ordinary English, preserve compatibility and document the scoped meaning.
 
-Early Sarah and research-demo material predates important language and ownership cleanup.
+## Donor vocabulary
 
-Treat its terms as donor vocabulary only. Recover useful behavior or explanation after reconciliation; do not use early Sarah wording to fill a current definition gap.
+Grok, Governed Reference, Sarah/demo material, and other donor sources remain provenance.
 
-## Next work
-
-Add definitions only when a real cross-layer ambiguity or implementation need requires them. This is not a decorative glossary and should not duplicate owner specifications.
+Do not use donor wording to fill a current definition gap when Program already owns the shared term.
