@@ -31,6 +31,16 @@ A source pin preserves identity. It does not make the pinned donor current.
 
 **Disposition:** current System operational architecture. Historical `COLD` / `PLACE` / `CONTRACTOR` labels remain provenance; current product-facing labels may differ without creating a second truth model.
 
+## Information custody
+
+- current operational owner: `GeorgePlattDemo/scan-to-build-system`
+- current rule: `docs/application/INFORMATION-CUSTODY-BOUNDARY.md`
+- implementation/evidence: `apps/stb/` local evidence/record/archive behavior and tests
+- historical lineage: Governed Reference custody/disclosure/external-processing notes
+- broader secondary-use / aggregation / participant / provider-policy questions: Program `governance/information-custody-and-processing.md`
+
+**Disposition:** System owns current application custody and any future operational disclosure interface. Program retains broader research/policy questions and decision rationale.
+
 ## Program research / decision / migration record
 
 - repository: `GeorgePlattDemo/3d-solutions-program`
