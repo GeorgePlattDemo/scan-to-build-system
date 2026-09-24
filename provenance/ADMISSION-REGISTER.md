@@ -96,7 +96,7 @@ Reason: the locked intake/evidence principles remain useful, but the source docu
 - source: transferred app pin, `docs/architecture/STB-SEMANTIC-BOUNDARIES-0.1.md`
 - disposition: `HISTORICAL SEMANTIC RECONCILIATION SOURCE`
 
-Current shared meaning is owned by Program `governance/definitions.md`. System's implementation summary is `docs/application/SEMANTIC-GUARDRAILS.md`. The exact donor copy remains at [`source-library/application-current/STB-SEMANTIC-BOUNDARIES-0.1.md`](../source-library/application-current/STB-SEMANTIC-BOUNDARIES-0.1.md) as provenance.
+Current shared operational meaning is owned by System at `docs/definitions/README.md` and the identified executable contracts under `apps/stb/shared/`. `docs/application/SEMANTIC-GUARDRAILS.md` is the current human-readable implementation summary. Program retains research/decision vocabulary and reconciliation provenance. The exact donor copy remains at [`source-library/application-current/STB-SEMANTIC-BOUNDARIES-0.1.md`](../source-library/application-current/STB-SEMANTIC-BOUNDARIES-0.1.md) as provenance.
 
 ### Stabilization / source-map / structure guidance
 
