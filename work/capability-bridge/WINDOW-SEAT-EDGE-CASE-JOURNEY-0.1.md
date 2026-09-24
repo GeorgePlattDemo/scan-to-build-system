@@ -2,7 +2,7 @@
 
 **Status:** candidate experience / architecture bridge  
 **Purpose:** preserve the useful window-seat story without promoting a historical demo into current production authority.  
-**Current shared definitions/governance:** `GeorgePlattDemo/3d-solutions-program`.  
+**Current shared operational definitions:** `GeorgePlattDemo/scan-to-build-system/docs/definitions/README.md` plus identified executable contracts under `apps/stb/shared/`. Program remains the research/evidence/decision record.  
 **Historical governed source:** `GeorgePlattDemo/scan-to-build-governed-reference@18949f163718a937f072f4be3a654bb303e53160`.  
 **Historical donor:** the earlier Sarah / alcove-window-seat demonstration retained in the source library.  
 
