@@ -1,4 +1,9 @@
-import { PUBLISHED_BOARD_SKU, STORE_REQUEST_TYPES, STORE_SCOPES } from '/shared/contracts.mjs';
+import {
+  PUBLISHED_BOARD_SKU,
+  STORE_REQUEST_TYPES,
+  STORE_SCOPES,
+  USER_DEFINED_BOARD_DEFINITION,
+} from '/shared/contracts.mjs';
 import { alcoveInsertJobPayload, boardJobPayload, userDefinedBoardJobPayload } from '/shared/store-wire.mjs';
 import {
   issueStoreQuestion,
@@ -259,6 +264,24 @@ export async function scheduleAlcoveInsertStoreQuestion(
   });
   inFlight.set(key, work);
   return work;
+}
+
+export async function scheduleProjectStoreQuestion(localRecordId, { unapplied = false } = {}) {
+  if (!localRecordId || unapplied) {
+    return { status: 'skipped' };
+  }
+  const projection = await currentProjection(localRecordId);
+  if (projection?.payload?.definitionKind === USER_DEFINED_BOARD_DEFINITION.kind) {
+    const demand = projection.payload.storeDemand ?? null;
+    if (!demand) {
+      return { status: 'incomplete' };
+    }
+    return scheduleUserDefinedBoardStoreQuestion(localRecordId, {
+      ...demand,
+      unapplied,
+    });
+  }
+  return scheduleBoardStoreQuestion(localRecordId, { unapplied });
 }
 
 export async function retryCurrentStore(localRecordId, requestId) {
