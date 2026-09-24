@@ -1,6 +1,12 @@
-# Machine Work Surface
+# Machine Work Surface — transitional System index
 
-This directory separates **what capability must be demonstrated** from **how the iron is actually built**.
+**Current machine-development research owner:** `GeorgePlattDemo/3d-solutions-program/research/machine-development/`.
+
+The original Machine Build Program and research-cell planning surfaces have been relocated to Program. This System directory temporarily retains dimensional/sheet staging and detailed engineering documents while they are reclassified. Their presence here does not make System the owner of machine-development research.
+
+System retains application/shared operational contracts, interfaces, records, adapters, tests, and historical provenance. Store retains Store-local capability/economics.
+
+The remaining directory still separates **what capability is being evidenced** from **candidate physical engineering**, but no current file here may silently expand System or Store authority.
 
 ## `staging/`
 
