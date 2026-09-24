@@ -12,7 +12,7 @@ The current application implementation is owned here:
 
 The application was originally transferred from `GeorgePlattDemo/grok-file@4595b4785a2686486e477ce2e70fb3f476285a8d`. That identity is **provenance**, not the current application authority.
 
-Shared cross-repository terminology and governance are owned by `GeorgePlattDemo/3d-solutions-program`, including `governance/definitions.md`. System owns the executable application behavior that implements or consumes those meanings.
+Shared operational terminology and semantic boundaries are owned here in System; start at [`../definitions/README.md`](../definitions/README.md). Program owns research, experiments, evidence, reviewed decisions/adoption records, partnerships/economic/business work, and migration/retirement records. Store owns its local facts, capability, economics, and answers.
 
 ## Current application truth
 
@@ -26,13 +26,13 @@ It remains software/reference behavior. It does not by documentation alone estab
 
 1. [`apps/stb/README.md`](../../apps/stb/README.md)
 2. [`../project/SOURCE-AUTHORITY.md`](../project/SOURCE-AUTHORITY.md)
-3. [Program canonical definitions](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/governance/definitions.md)
+3. [`../definitions/README.md`](../definitions/README.md) — canonical operational definitions and executable-source map
 4. [`../../work/user-intake/README.md`](../../work/user-intake/README.md) for current intake work
 5. [`CONTROLLING-SOURCE-POINTERS.md`](CONTROLLING-SOURCE-POINTERS.md) for current owner pointers plus historical application provenance
 
 ## Application semantic rule
 
-Application work must preserve the shared meanings owned by Program and the executable contracts owned by System.
+Application work must preserve the shared operational meanings and executable contracts owned by System.
 
 Protected distinctions include:
 
