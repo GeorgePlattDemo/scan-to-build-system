@@ -1,27 +1,32 @@
-# Definitions and Language Discipline
+# Canonical Operational Definitions
 
-Shared cross-repository definitions now live in the public Program repository:
+**Status:** current shared operational semantic authority.  
+**Owner:** `GeorgePlattDemo/scan-to-build-system`.  
+**Scope:** job/project meaning, application records, shared application ↔ Store interface terms, and executable definition contracts.
 
-`GeorgePlattDemo/3d-solutions-program/governance/definitions.md`
+System owns what an identified job means. This does **not** make System the owner of Store facts, Store capability, Store economics, research conclusions, experimental machine results, or physical execution authority.
 
-That Program page is the semantic arbiter for words shared by Program, System, and Store.
+## Canonical sources
 
-This System directory is therefore **not** a competing glossary. Keep only System-local implementation terminology, durable wire identifiers, adapters, and notes required to explain executable behavior.
+The operational definition layer already exists beneath the application:
 
-## Admission rule for terminology
+1. [`apps/stb/shared/contracts.mjs`](../../apps/stb/shared/contracts.mjs) — durable application, project, Store-interface, review, record, and archive identifiers.
+2. [`apps/stb/shared/definition-contract.mjs`](../../apps/stb/shared/definition-contract.mjs) — closed responsibility status / owner / boundary vocabulary and readiness evaluation.
+3. The identified rule modules under [`apps/stb/shared/`](../../apps/stb/shared/) — project/class rules and bounded definition semantics.
+4. [`docs/application/SEMANTIC-GUARDRAILS.md`](../application/SEMANTIC-GUARDRAILS.md) — human-readable distinctions that current application work must preserve.
 
-A local term is justified here only when at least one of these is true:
+This page is the ownership and navigation authority for shared operational definitions. The executable sources above describe current runtime behavior. If prose and executable behavior disagree, the mismatch is a System defect to reconcile deliberately; neither a Program document nor a Store-local definition silently rewrites System behavior.
 
-1. it is an executable System identifier or record type;
-2. it is narrower than the Program term and needed to explain System behavior;
-3. compatibility requires a durable identifier whose ordinary-English wording could mislead;
-4. a current System test/adapter depends on the exact vocabulary.
+## Ownership rule
 
-If a term is shared across Program/System/Store, define it in Program and point to it from System.
+- **System** owns shared operational definitions and semantic boundaries required to identify a job and carry it through the application / Store interface.
+- **Store** may define narrower Store-local vocabulary and owns its catalog, stock, admitted capability, modeled work/time, economics, and answers. Store-local language must not redefine the shared job meaning.
+- **3D Solutions Program** owns research, experiments, evidence, machine-development questions/findings, reviewed decisions/adoption records, partnership/economic/business work, and migration/retirement records. Program may propose a semantic change; adoption into operational meaning requires a deliberate System change.
+- Historical Governed Reference and Grok material remain provenance unless a current owner deliberately admits a specific item.
 
 ## Protected distinctions
 
-Current System behavior must preserve Program's semantic boundaries, including:
+Current System behavior must preserve at least these distinctions:
 
 - candidate definition ≠ WorkPacket;
 - Store `SUPPORTABLE` ≠ fabrication authorization;
@@ -37,12 +42,20 @@ Current System behavior must preserve Program's semantic boundaries, including:
 
 ## Durable identifiers
 
-Current wire names, enums, record types, selectors, and durable identifiers should not be casually renamed for prose improvement.
+Current wire names, enums, record types, selectors, and durable identifiers are compatibility surfaces. Do not rename them casually for prose improvement.
 
-Where a durable identifier has a narrower meaning than ordinary English, preserve compatibility and document the scoped meaning.
+Where ordinary English is broader than the executable meaning, preserve the identifier and document the narrower scope.
+
+## Adoption path
+
+A research or machine-development proposal does not become operational capability by documentation alone.
+
+**proposal / research → evidence → reviewed decision → versioned Store capability where applicable → tested System adoption**
+
+The owning repository must change deliberately at each boundary. A new Program finding cannot silently widen a Store envelope, and a Store capability change cannot silently rewrite a System project definition.
 
 ## Donor vocabulary
 
-Grok, Governed Reference, Sarah/demo material, and other donor sources remain provenance.
+Grok, Governed Reference, Review-era material, transfer staging, and other donor sources remain provenance.
 
-Do not use donor wording to fill a current definition gap when Program already owns the shared term.
+Do not revive donor wording as current operational authority merely because it is older, more detailed, or still recoverable.
