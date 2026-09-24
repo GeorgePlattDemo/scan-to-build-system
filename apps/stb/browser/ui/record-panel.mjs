@@ -89,6 +89,11 @@ export function page8Main({ project, presentation, status }) {
       heading(COPY.recordHeading),
       el('p', { className: 'project-name', text: project.title ?? 'Untitled project' }),
       el('p', {
+        className: 'record-payoff',
+        attrs: { 'data-record-payoff': 'true' },
+        text: 'The definition, Store answer, and retained events stay together. Read the story first; the IDs below are the proof.',
+      }),
+      el('p', {
         className: 'hint',
         attrs: { 'data-record-local': 'true' },
         text: COPY.recordLocalOnly,
