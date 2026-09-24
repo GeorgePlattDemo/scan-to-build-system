@@ -42,6 +42,10 @@ jobs:
       - name: Boundary tests
         run: npm run test:boundaries
 
+      - name: Public-build tests (copied from Review)
+        working-directory: apps/stb/public-build
+        run: node --test --test-concurrency=1 tests/*.test.mjs
+
       # This workflow intentionally has no cross-repository Store checkout.
       # Exercise the source gate in the state CI actually has instead of pretending
       # the pinned integration suite can run without STB_STORE_ZERO_ROOT.
