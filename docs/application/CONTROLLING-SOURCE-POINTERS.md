@@ -22,6 +22,15 @@ A source pin preserves identity. It does not make the pinned donor current.
 
 **Disposition:** current shared operational semantic owner.
 
+## Common entry architecture
+
+- current owner: `GeorgePlattDemo/scan-to-build-system`
+- current rule: `docs/application/COMMON-ENTRY-ARCHITECTURE.md`
+- implementation/tests: `apps/stb/` and current browser/application test suites
+- historical lineage: Governed Reference `docs/architecture/common-entry-contexts.md` at `18949f163718a937f072f4be3a654bb303e53160`
+
+**Disposition:** current System operational architecture. Historical `COLD` / `PLACE` / `CONTRACTOR` labels remain provenance; current product-facing labels may differ without creating a second truth model.
+
 ## Program research / decision / migration record
 
 - repository: `GeorgePlattDemo/3d-solutions-program`
