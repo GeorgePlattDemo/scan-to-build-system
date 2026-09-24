@@ -15,7 +15,7 @@ All four sources below are in `GeorgePlattDemo/grok-file` at accepted app pin:
 | `docs/atlas/STB-ATLAS-05-ENVELOPE-LADDER-0.1.md` | Bounded capability-family comparison; dimensional versus sheet; intro-to-advanced envelope thinking | `KEEP-DONOR`; not adopted field survey |
 | `docs/atlas/STB-ATLAS-06-IRON-0.1.md` | Off-the-shelf controller/drive/I/O/workholding/safety families | `KEEP-DONOR`; not adopted field survey |
 
-Read them through `../../work/machines/engineering/README.md`.
+Read them through Program `research/machine-development/engineering/README.md`. The old System engineering path is a compatibility pointer.
 
 ## Why these four matter
 
@@ -44,7 +44,7 @@ The Cell spine ties detailed dimensional and sheet functions to patent correspon
 - Pin: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
 - File: `STB-STORE-CELL-STAGES-0.1.md`
 
-This file controls the current Stage 1–4 evidence vocabulary. See `../../work/machines/staging/README.md`.
+This Store file controls the current Stage 1–4 evidence vocabulary. Program machine-development staging consumes that vocabulary at `research/machine-development/staging/README.md`; the old System staging path is a compatibility pointer.
 
 ## Older public mechanical ontology
 
@@ -56,7 +56,7 @@ This file controls the current Stage 1–4 evidence vocabulary. See `../../work/
 
 It contains substantial machine labels, safety thinking, patent-derived callouts, states and mechanical concepts, but predates the current subject-specific authority split. It must not become current merely because it is detailed.
 
-Useful content can later be mined into the post-app engineering documents when it passes the current layer, language, capability and evidence tests.
+Useful content can later be mined into Program machine-development research when it passes the current layer, language, capability and evidence tests. Any operational System/Store adoption remains a separate owner-specific change.
 
 ## Patent source posture
 

@@ -1,13 +1,12 @@
-# Stage Vocabulary Guardrail
+# Stage Vocabulary Guardrail — relocated
 
-`Stage 1` through `Stage 4` in current Scan-to-Build work refer to the Store/cell evidence stages defined by `STB-STORE-CELL-STAGES-0.1.md` unless another phrase is explicitly qualified.
+**Current owner:** `GeorgePlattDemo/3d-solutions-program`  
+**Current location:** `research/machine-development/staging/STAGE-VOCABULARY-GUARDRAIL.md`
 
-For physical engineering, prefer names such as:
+The substantive machine-development research/planning body was preserved and moved to Program under the September 24, 2026 ownership freeze. This System path remains as a compatibility pointer for existing links and provenance.
 
-- Machine Build Phase 1
-- Machine Build Phase 2
-- prototype iteration
-- dimensional-machine increment
-- sheet-machine increment
+System retains application/shared operational definitions, interfaces, records, adapters, and tests. Store retains Store-local capability/economics. Program research does not silently expand either owner.
 
-Do not call a physical pilot “Stage 2” if the intended meaning is the existing Store/cell evidence vocabulary. Under that vocabulary, physical commissioning and measured behavior belong to Stage 3 evidence.
+[Open the current Program document](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/research/machine-development/staging/STAGE-VOCABULARY-GUARDRAIL.md)
+
+**NO BLOOD ON WOOD.**

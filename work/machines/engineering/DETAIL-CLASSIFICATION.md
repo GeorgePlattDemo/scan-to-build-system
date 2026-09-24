@@ -1,15 +1,12 @@
-# Engineering Detail Classification
+# Engineering Detail Classification — relocated
 
-When detailed machine material is added, classify each important statement as one of:
+**Current owner:** `GeorgePlattDemo/3d-solutions-program`  
+**Current location:** `research/machine-development/engineering/DETAIL-CLASSIFICATION.md`
 
-- `PATENT CORRESPONDENCE`
-- `CURRENT SOURCE RULE`
-- `CANDIDATE ENGINEERING`
-- `SELECTED FOR PROTOTYPE`
-- `INSTALLED FACT`
-- `COMMISSIONED FACT`
-- `MEASURED RESULT`
-- `STORE-VISIBLE CAPABILITY`
-- `UNRESOLVED`
+The substantive machine-development research/planning body was preserved and moved to Program under the September 24, 2026 ownership freeze. This System path remains as a compatibility pointer for existing links and provenance.
 
-This prevents a detailed drawing, catalog page, patent feature or research recommendation from being mistaken for installed capability.
+System retains application/shared operational definitions, interfaces, records, adapters, and tests. Store retains Store-local capability/economics. Program research does not silently expand either owner.
+
+[Open the current Program document](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/research/machine-development/engineering/DETAIL-CLASSIFICATION.md)
+
+**NO BLOOD ON WOOD.**

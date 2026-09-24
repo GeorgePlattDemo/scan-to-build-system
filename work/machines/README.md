@@ -2,11 +2,11 @@
 
 **Current machine-development research owner:** `GeorgePlattDemo/3d-solutions-program/research/machine-development/`.
 
-The original Machine Build Program and research-cell planning surfaces have been relocated to Program. This System directory temporarily retains dimensional/sheet staging and detailed engineering documents while they are reclassified. Their presence here does not make System the owner of machine-development research.
+The Machine Build Program, research-cell planning, dimensional/sheet staging, and detailed candidate engineering have been relocated to Program. This System directory now retains compatibility pointers at the old work paths so existing links do not break.
 
 System retains application/shared operational contracts, interfaces, records, adapters, tests, and historical provenance. Store retains Store-local capability/economics.
 
-The remaining directory still separates **what capability is being evidenced** from **candidate physical engineering**, but no current file here may silently expand System or Store authority.
+The Program research tree separates **what capability is being evidenced** from **candidate physical engineering**. No compatibility pointer or historical source here may silently expand System or Store authority.
 
 ## `staging/`
 
