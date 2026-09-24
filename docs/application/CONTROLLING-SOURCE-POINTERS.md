@@ -1,85 +1,76 @@
-# Application Controlling Source Pointers
+# Application Source and Authority Pointers
 
-This file records the application sources that matter to the post-app working baseline.
+This file separates **current authority** from **historical application provenance**.
 
-A pointer preserves source identity. It does not automatically admit every historical statement inside a source.
+A source pin preserves identity. It does not make the pinned donor current.
 
-## Accepted implementation
+## Current implementation
 
-- Repository: `GeorgePlattDemo/grok-file`
-- Branch: `build/app-foundation-0.1`
-- Pin: `4595b4785a2686486e477ce2e70fb3f476285a8d`
-- App: `apps/stb/`
-- App status document: `apps/stb/README.md`
-- Semantic boundaries: `docs/architecture/STB-SEMANTIC-BOUNDARIES-0.1.md`
+- repository: `GeorgePlattDemo/scan-to-build-system`
+- application subtree: [`apps/stb/`](../../apps/stb/)
+- application status: [`apps/stb/README.md`](../../apps/stb/README.md)
+- accepted/current-state records: [`../../STB-CURRENT-BASELINE.md`](../../STB-CURRENT-BASELINE.md) and [`../project/CURRENT-STATE.md`](../project/CURRENT-STATE.md)
 
-**Disposition:** current implementation / current application language.
+**Disposition:** current executable application owner.
 
-## Frozen application roadmap
+## Shared definitions and governance
 
-- Repository: `GeorgePlattDemo/grok-file`
-- Branch: `plan/app-master-roadmap-0.1`
-- Freeze commit: `985db87a707bd454d7c58419e2cf4d884f00cded`
-- File: `docs/app/STB-APP-MASTER-ROADMAP-0.1.md`
+- repository: `GeorgePlattDemo/3d-solutions-program`
+- canonical vocabulary: `governance/definitions.md`
+- authority register: `governance/authority.md`
+- enduring Governed Reference rulings: `governance/governed-reference-rulings.md`
+- common-entry architecture: `governance/common-entry-architecture.md`
 
-**Disposition:** current application build/page/source roadmap. Read through the later semantic-boundary interpretation where wording such as confirm, quote, offer, or current is ambiguous.
+**Disposition:** current shared semantic/governance owner.
 
-## Entry / intake contract
+These Program documents do not silently change System runtime behavior. A conflict requires a deliberate System change and tests.
 
-- Repository: `GeorgePlattDemo/grok-file`
-- Branch: `plan/app-entry-intake-contract-0.1`
-- Pin: `2d80b5a7b0e7687c425e100bfa0ff3a833166d42`
-- File: `docs/app/STB-ENTRY-INTAKE-CONTRACT-0.1.md`
+## Current intake surface
 
-**Disposition:** `ADMIT AFTER REWRITE`.
+The current reconciled intake work surface is:
 
-The locked evidence/intake principles remain useful. The document contains an embedded Stage-2 Store pin (`8713b76a...`) that predates the Store pin consumed by the accepted app (`b40cdc60...`). Do not copy the stale dependency into new current work. The reconciled working intake surface is `../../work/user-intake/README.md`.
+[`../../work/user-intake/README.md`](../../work/user-intake/README.md)
 
-## Application build contract
+Historical entry/intake source:
 
-At accepted app pin `4595b4785a2686486e477ce2e70fb3f476285a8d`:
+- donor: `GeorgePlattDemo/grok-file`
+- branch: `plan/app-entry-intake-contract-0.1`
+- pin: `2d80b5a7b0e7687c425e100bfa0ff3a833166d42`
 
+**Disposition:** provenance / donor history. Do not restore its stale Store dependency as current.
+
+## Historical transferred application source
+
+- donor: `GeorgePlattDemo/grok-file`
+- branch: `build/app-foundation-0.1`
+- pin: `4595b4785a2686486e477ce2e70fb3f476285a8d`
+- historical subtree: `apps/stb/`
+
+**Disposition:** transferred application provenance. The current app is the System copy and its accepted descendants.
+
+## Historical roadmap and build documents
+
+The following Grok documents are planning/build ancestry, not current controlling instructions:
+
+- `plan/app-master-roadmap-0.1@985db87a707bd454d7c58419e2cf4d884f00cded`
 - `docs/app/STB-APP-BUILD-0.1.md`
-
-**Disposition:** current guidance / implementation lineage. Particularly useful for layer responsibilities, bounded-machine posture, User 1 transition, machine/controller horizon, and what prior demo behavior not to carry forward.
-
-## Application source map
-
-At accepted app pin:
-
 - `docs/app/STB-APP-SOURCE-MAP-0.1.md`
-
-**Disposition:** provenance/reference. Its authority-order rule remains useful; newer accepted app/Store pins control where they differ.
-
-## Application stabilization report
-
-At accepted app pin:
-
 - `docs/app/STB-APP-STABILIZATION-0.1.md`
-
-**Disposition:** current reconciliation history / donor decisions. Important for known public-demo and Sarah exclusions, unresolved machine R-04, and prior-work keep/discard decisions.
-
-## Application structure plan
-
-At accepted app pin:
-
 - `docs/app/STB-APP-STRUCTURE-0.1.md`
+- Sarah/front-door prototypes
 
-**Disposition:** current implementation-planning reference. Use only to the extent consistent with the accepted Build-8 implementation and later semantic-boundary cleanup.
+Use them only as explicitly identified lineage or recovery evidence. Current System code, current Store contracts, and Program definitions/governance control their own subjects.
 
-## Machine / Cell guidance embedded in app source
+## Machine / Cell donor material
 
-At accepted app pin:
+Historical Grok Cell/Atlas documents remain research/provenance unless a current Program/System/Store record has explicitly admitted the relevant question or requirement.
 
-- `docs/cell/STB-CELL-0.1.md`
-- `docs/atlas/STB-ATLAS-04-NEUTRAL-OPS-TO-MACHINE-0.1.md`
-- `docs/atlas/STB-ATLAS-05-ENVELOPE-LADDER-0.1.md`
-- `docs/atlas/STB-ATLAS-06-IRON-0.1.md`
+Current unresolved machine-site research is recorded in Program at `research/machine-site-convergence.md`.
 
-These are indexed in `../machine/POST-APP-MECHANICAL-SOURCE-MAP.md` and `../../work/machines/engineering/README.md`.
+No donor machine document establishes commissioned capability, controller acceptance, or production authority.
 
-## Historical implementation ancestor
+## Preservation rule
 
-`prototype/sarah-alcove-tour` remains donor/provenance only.
+Do not erase historical source pins merely because a donor is archived.
 
-Do not use it to supply current application semantics, Store behavior, WorkPacket authority, material facts or machine capability.
+Do remove or correct wording that makes a historical donor appear to be the current application or governance authority.
