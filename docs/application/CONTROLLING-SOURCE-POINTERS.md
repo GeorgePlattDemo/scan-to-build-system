@@ -13,17 +13,25 @@ A source pin preserves identity. It does not make the pinned donor current.
 
 **Disposition:** current executable application owner.
 
-## Shared definitions and governance
+## Shared operational definitions
+
+- repository: `GeorgePlattDemo/scan-to-build-system`
+- canonical definition index: `docs/definitions/README.md`
+- executable contracts/rules: `apps/stb/shared/`
+- application semantic guardrails: `docs/application/SEMANTIC-GUARDRAILS.md`
+
+**Disposition:** current shared operational semantic owner.
+
+## Program research / decision / migration record
 
 - repository: `GeorgePlattDemo/3d-solutions-program`
-- canonical vocabulary: `governance/definitions.md`
-- authority register: `governance/authority.md`
-- enduring Governed Reference rulings: `governance/governed-reference-rulings.md`
-- common-entry architecture: `governance/common-entry-architecture.md`
+- authority/destination register: `governance/authority.md`
+- reviewed Governed Reference rulings and research provenance: Program governance/research records
+- donor migration/retirement records: `migration/`
 
-**Disposition:** current shared semantic/governance owner.
+**Disposition:** current Program record owner, not the operational definition owner.
 
-These Program documents do not silently change System runtime behavior. A conflict requires a deliberate System change and tests.
+Program documents may supply research basis, evidence, and reviewed adoption decisions. A conflict with current operational behavior requires a deliberate System change and tests.
 
 ## Current intake surface
 
