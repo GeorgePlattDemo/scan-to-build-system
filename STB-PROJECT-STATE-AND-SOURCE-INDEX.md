@@ -84,7 +84,8 @@ Earlier demos, donor branches, public exhibits, and historical repositories rema
 | accepted promotion base | `build/app-configurator-engine-0.1@8730c801d3cd2df193d8647b3de1e78fffeea62a` | accepted ancestry base |
 | PR #10 branch head | `build/global-completion-path-0.1@b0caba518aa0e152fa107fe89267ab48ee81296f` | accepted ancestry |
 | latest fully checked code in accepted ancestry | `dee4a307cf0866ac0985da92dfb5f74045ee90f9` | code proof identity |
-| Governed Reference | `scan-to-build-governed-reference/main@18949f163718a937f072f4be3a654bb303e53160` | governed reference |
+| Program shared definitions/governance | `3d-solutions-program/main` | CURRENT SHARED SEMANTIC / GOVERNANCE OWNER |
+| Governed Reference | `scan-to-build-governed-reference/main@18949f163718a937f072f4be3a654bb303e53160` | HISTORICAL GOVERNANCE / REFERENCE PROVENANCE |
 | Stage-2 Store Zero | `scan-to-build-store@b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | transferred accepted-app / Stage-2 path |
 | accepted published-job / canonical S-001 Store | `scan-to-build-store@4402abeb6b0299a5b6db2eec85ed04c3b0236bcc` | accepted exact Store proof path |
 | parallel machine-safety candidate | `build/machine-controller-sim-safety-0.1@b23b2a95f71c89347bdf5c465369b7399b75e834` | PARALLEL CANDIDATE |
@@ -177,7 +178,8 @@ Current project documents do not establish:
 
 - **Application:** user interaction, evidence custody, configuration, revisions, Store-result presentation, review, records, completion/closeout state admitted in the accepted software baseline.
 - **Store:** offerings, availability/inventory facts, bounded capability evaluation, Store economics, sourcing, and fulfillment facts.
-- **Governed layer:** governed semantics, unresolved conditions, refusal, protected transitions, authorization boundaries, and governed provenance.
+- **Program:** shared semantics/governance, unresolved/refusal meaning, research and reviewed Program decisions. Program does not silently alter runtime behavior.
+- **System executable contracts:** application-specific protected transitions, records, adapters and tests.
 - **Machine / cell:** demonstrated physical capability, local operating limits, controls, readiness, and measured physical behavior.
 - **Research:** questions, comparisons, evidence, and future possibilities.
 - **Issued patents:** primary technical/patent-lineage sources; not present capability or safety evidence.
