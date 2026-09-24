@@ -9,6 +9,12 @@ import { renderSharedCandidateView } from '/ui/candidate-view.mjs';
 import { renderStorePanel } from '/ui/store-panel.mjs';
 import { presentStoreAnswer } from '/shared/store-present.mjs';
 import { renderInlineReview } from '/ui/review-panel.mjs';
+import {
+  USER1_XBRACE_CONFIGURATION_KIND,
+  USER1_XBRACE_MAX_PART_LENGTH_IN,
+  USER1_XBRACE_MIN_PART_LENGTH_IN,
+  USER1_XBRACE_STEP_IN,
+} from '/shared/user1-xbrace-rule.mjs';
 
 function el(tag, options = {}, children = []) {
   const node = document.createElement(tag);
@@ -339,12 +345,96 @@ function childBody(child, {
   takeoffBuffer,
   correctingId,
   boardBuffer,
+  user1Buffer,
+  candidate,
   projection,
   selectedOccurrenceId,
   storeView,
   reviewPresentation,
 }) {
   if (child === 'board') {
+    const user1Active =
+      candidate?.payload?.configuration?.kind === USER1_XBRACE_CONFIGURATION_KIND;
+    if (user1Active) {
+      const configuration = candidate.payload.configuration;
+      const derived = projection?.payload?.derived ?? null;
+      const rawPartLength =
+        user1Buffer?.raw !== undefined && user1Buffer.raw !== ''
+          ? user1Buffer.raw
+          : String(configuration.partLengthIn ?? USER1_XBRACE_MIN_PART_LENGTH_IN);
+      const angleDeg = Number(derived?.angleDeg);
+      const spotIn = Number(derived?.centerSpotIn?.value);
+      const angleLabel = Number.isFinite(angleDeg)
+        ? String(Number(angleDeg.toFixed(3)))
+        : '—';
+      const spotLabel = Number.isFinite(spotIn)
+        ? String(Number(spotIn.toFixed(3)))
+        : '—';
+      return [
+        el('p', {
+          className: 'hint',
+          attrs: {
+            'data-child-status': 'job1-xbrace',
+            'data-user1-configure': 'true',
+          },
+          text: 'Job 1 · X-brace. The definition is the source of Store demand; Store remains the source of stock, capability, modeled work, remnant, and Q.',
+        }),
+        el('p', {
+          text: 'Store-origin SPF 2×4 · one 60 in defined workpiece · two parts · parallel face-miter ends.',
+        }),
+        el('label', {
+          attrs: { for: 'user1-part-length' },
+          text: 'Part length (16–18 in)',
+        }),
+        el('input', {
+          attrs: {
+            id: 'user1-part-length',
+            name: 'user1-part-length',
+            type: 'number',
+            min: String(USER1_XBRACE_MIN_PART_LENGTH_IN),
+            max: String(USER1_XBRACE_MAX_PART_LENGTH_IN),
+            step: String(USER1_XBRACE_STEP_IN),
+            'data-field': 'user1-part-length',
+            value: rawPartLength,
+            autocomplete: 'off',
+          },
+        }),
+        el('p', {
+          className: 'hint',
+          attrs: { 'data-unapplied': 'user1', hidden: 'true' },
+          text: COPY.unappliedChanges,
+        }),
+        el('ul', { attrs: { 'data-user1-project-facts': 'true' } }, [
+          el('li', { text: 'Defined workpiece: 60 in minimum request; Store selects the offered stock that satisfies the demand.' }),
+          el('li', { text: `Parts: 2 × ${rawPartLength || '—'} in` }),
+          el('li', { text: `Face-miter angle: ${angleLabel}° · fixed horizontal span: 8 in` }),
+          el('li', { text: 'Saw demand: 3 cuts · cut 2 shared · datum method REFERENCE_CUT' }),
+          el('li', { text: `Spot demand: one SPOT_ON_LOCATION per part · centered at ${spotLabel} in · centered on wide face` }),
+          el('li', { text: 'Ends: both · parallel · cut plane: miter-face · length datum: long-long-outer-edge' }),
+        ]),
+        el('div', { className: 'actions' }, [
+          el('button', {
+            attrs: { type: 'button', 'data-action': 'apply-user1-xbrace' },
+            text: 'UPDATE DEFINITION',
+          }),
+          el('button', {
+            attrs: { type: 'button', 'data-action': 'clear-user1-xbrace' },
+            text: 'BACK TO BOARD INPUT',
+          }),
+        ]),
+        renderStorePanel(
+          storeView
+            ?? presentStoreAnswer(
+              { status: 'none' },
+              { projectionValid: projection?.payload?.valid === true },
+            ),
+          { mode: 'compact' },
+        ),
+        reviewPresentation ? renderInlineReview(reviewPresentation) : null,
+        renderSharedCandidateView(projection, { selectedOccurrenceId }),
+      ];
+    }
+
     const buffer = boardBuffer ?? { raw: '', unit: 'in' };
     const reason = projection?.payload?.unresolvedReason ?? null;
     const unresolvedText =
@@ -400,6 +490,10 @@ function childBody(child, {
           el('button', {
             attrs: { type: 'button', 'data-action': 'apply-cut001' },
             text: COPY.boardCut001,
+          }),
+          el('button', {
+            attrs: { type: 'button', 'data-action': 'start-user1-xbrace' },
+            text: 'TAKE THIS 2×4 TO THE BENCH',
           }),
         ]),
       ]),
@@ -769,6 +863,7 @@ export function page2Main({
   takeoffBuffer,
   correctingId,
   boardBuffer,
+  user1Buffer,
   projection,
   selectedOccurrenceId,
   storeView,
@@ -828,6 +923,8 @@ export function page2Main({
               takeoffBuffer,
               correctingId,
               boardBuffer,
+              user1Buffer,
+              candidate,
               projection,
               selectedOccurrenceId,
               storeView,
