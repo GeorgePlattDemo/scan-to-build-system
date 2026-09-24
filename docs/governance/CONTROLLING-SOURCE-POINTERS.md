@@ -11,7 +11,7 @@ This filename is retained temporarily for link compatibility. The sources below 
 
 | Historical document | Current handling |
 | --- | --- |
-| STB-REF-0.2.5 | Exact historical specification remains source/archive evidence. Shared still-valid meanings were reconciled into Program `governance/definitions.md`. Current executable contracts belong to System or Store. |
+| STB-REF-0.2.5 | Exact historical specification remains source/archive evidence. Still-valid shared operational meanings are admitted into System's canonical definition layer; Store-local meanings remain with Store. Program retains research, evidence, and reviewed decision/adoption records. |
 | STB-PLAN-0.2.5 | Historical activation/build plan. It does not control current Program/System/Store organization. |
 | Common Entry Contexts | Durable architecture reconciled into Program `governance/common-entry-architecture.md`. Historical COLD/PLACE/CONTRACTOR identifiers remain provenance. |
 | Demand Architecture Traceability | Historical REF/PLAN traceability matrix. Do not carry it forward as a current implementation map. |
@@ -24,4 +24,4 @@ This filename is retained temporarily for link compatibility. The sources below 
 
 Do not copy the full historical specification stack into current System merely to make a donor retireable.
 
-Program owns the current shared meaning. System and Store own current executable contracts. The archived donor preserves the exact historical source.
+System owns current shared operational meaning and executable application contracts. Store owns Store-local facts and contracts. Program owns research/evidence/decision and migration records. The archived donor preserves the exact historical source.
