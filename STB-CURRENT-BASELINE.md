@@ -57,7 +57,7 @@ These identities remain provenance. They are not competing current baselines.
 | Path / role | Store pin | Status |
 | --- | --- | --- |
 | 2026-09-13 transferred accepted-app / Stage-2 Store Zero identity | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | ACCEPTED BASELINE HISTORY; SUPERSEDED FOR CURRENT STAGE-2 WORKING PATH |
-| current dimensional / `USER_DEFINED_BOARD_V1` travel-standard path | `f88ccaf9a2624899e255e66b51111e2b02309dad` | CURRENT WORKING STORE PIN · `DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1` · pricing engine 0.3.0 · fresh-evaluation invariant · exact Store acceptance run 35768861705 |
+| current tested dimensional + Alcove Store source | `39a1b318063f62220c9c20c42200389098e0c687` | CURRENT TESTED SOURCE consumed by System for `USER_DEFINED_BOARD_V1` and `ALCOVE_INSERT_V1`; Store main `1f9f1a217d91686ef21848508b20e605e7cc6bc1` has the identical Git tree; no runtime repin implied |
 | PR #4 sheet Store path | `49d22ce40482a7c2e0169ac1e6df48e0f8384a6d` | SUPERSEDED CANDIDATE HISTORY |
 | PR #6 combined published-job candidate | `096e99d645d745b1670185f46c75de75f9e59661` | ACCEPTED ANCESTRY; SUPERSEDED FOR CURRENT S-001 PROOF |
 | published-job / canonical S-001 proof path accepted with the promoted tree | `4402abeb6b0299a5b6db2eec85ed04c3b0236bcc` | ACCEPTED EXACT STORE PROOF PIN |
