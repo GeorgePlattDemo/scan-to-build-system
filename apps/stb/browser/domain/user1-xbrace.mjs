@@ -1,4 +1,4 @@
-import { RepositoryError, getProject } from '/data/repository.mjs';
+import { RepositoryError, getProject, getRecord } from '/data/repository.mjs';
 import { commitCandidateChange, successorCandidatePayload } from '/domain/candidate.mjs';
 import {
   USER1_XBRACE_CONFIGURATION_KIND,
@@ -39,6 +39,14 @@ export async function applyUser1XBraceConfiguration(input) {
   if (!evaluation.valid) {
     throw new RepositoryError('invalid-argument', evaluation.unresolvedReason);
   }
+  const current = await getRecord(localRecordId, 'candidate', expectedHead);
+  const currentConfiguration = current?.payload?.configuration ?? null;
+  if (
+    currentConfiguration?.kind === USER1_XBRACE_CONFIGURATION_KIND
+    && Number(currentConfiguration.partLengthIn) === evaluation.input.partLengthIn.value
+  ) {
+    return { status: 'noop', localRecordId, candidateRevisionId: expectedHead };
+  }
 
   return commitCandidateChange({
     localRecordId,
@@ -72,6 +80,10 @@ export async function clearUser1XBraceConfiguration(input) {
   const actionId = requireString('actionId', input.actionId);
   const createdAt = requireString('createdAt', input.createdAt);
   await requireOwnProject(localRecordId);
+  const current = await getRecord(localRecordId, 'candidate', expectedHead);
+  if (current?.payload?.configuration?.kind !== USER1_XBRACE_CONFIGURATION_KIND) {
+    return { status: 'noop', localRecordId, candidateRevisionId: expectedHead };
+  }
 
   return commitCandidateChange({
     localRecordId,
