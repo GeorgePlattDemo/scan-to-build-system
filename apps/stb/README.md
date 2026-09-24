@@ -88,7 +88,7 @@ Build 8 acceptance counts at this closeout:
 
 `test:vertical` proves NEW USER, RETURNING USER, and PROFESSIONAL converge on one Board architecture; 45 in then 46 in against the real pinned Store; review binding; truthful Result; close/reopen versus inert import; keyboard and narrow-viewport operation; and the absence of commercial or physical authority.
 
-Exact Store source currently consumed by this System runtime: `39a1b318063f62220c9c20c42200389098e0c687`. Store main `1f9f1a217d91686ef21848508b20e605e7cc6bc1` contains the identical Git tree. Runtime remains pinned to the tested source until a separate, deliberate Store-pin promotion is verified.
+Exact Store source currently consumed by this System runtime: `39a1b318063f62220c9c20c42200389098e0c687`. Store main is now `ead5fb182eb05e7081e89c103ff74458654502ae`; changes from the prior evaluator-identical main `1f9f1a217d91686ef21848508b20e605e7cc6bc1` to `ead5fb182eb05e7081e89c103ff74458654502ae` are documentation/authority-only. Runtime remains pinned to the tested source `39a1b318063f62220c9c20c42200389098e0c687`; no evaluator-tree or runtime-pin promotion is implied.
 
 Build 8 application commits on `build/app-foundation-0.1`:
 
@@ -138,7 +138,7 @@ Store presentation reads durable Store records; it does not calculate Store pric
 
 ## Store
 
-Exact Store source currently consumed by this System runtime: `39a1b318063f62220c9c20c42200389098e0c687`. Store main `1f9f1a217d91686ef21848508b20e605e7cc6bc1` contains the identical Git tree; this document does not promote or repin it.
+Exact Store source currently consumed by this System runtime: `39a1b318063f62220c9c20c42200389098e0c687`. Store main is now `ead5fb182eb05e7081e89c103ff74458654502ae`; changes from the prior evaluator-identical main `1f9f1a217d91686ef21848508b20e605e7cc6bc1` to `ead5fb182eb05e7081e89c103ff74458654502ae` are documentation/authority-only. This document does not promote the evaluator tree or repin the runtime from `39a1b318063f62220c9c20c42200389098e0c687`.
 
 Supply a clean checkout of that pin through `STB_STORE_ZERO_ROOT`. The path is not hardcoded. At startup the wrapper verifies:
 
