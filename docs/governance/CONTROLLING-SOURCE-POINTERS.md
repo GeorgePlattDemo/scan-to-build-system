@@ -13,7 +13,7 @@ This filename is retained temporarily for link compatibility. The sources below 
 | --- | --- |
 | STB-REF-0.2.5 | Exact historical specification remains source/archive evidence. Still-valid shared operational meanings are admitted into System's canonical definition layer; Store-local meanings remain with Store. Program retains research, evidence, and reviewed decision/adoption records. |
 | STB-PLAN-0.2.5 | Historical activation/build plan. It does not control current Program/System/Store organization. |
-| Common Entry Contexts | Durable architecture reconciled into Program `governance/common-entry-architecture.md`. Historical COLD/PLACE/CONTRACTOR identifiers remain provenance. |
+| Common Entry Contexts | Durable operational architecture now lives in System `docs/application/COMMON-ENTRY-ARCHITECTURE.md`. Historical COLD/PLACE/CONTRACTOR identifiers remain provenance. |
 | Demand Architecture Traceability | Historical REF/PLAN traceability matrix. Do not carry it forward as a current implementation map. |
 | North Carolina Wood: Demand as Architecture 0.3 | Full private source remains private provenance. Current admitted research propositions are in Program `research/demand-as-architecture.md`. |
 | Governed Reference ADRs / governance notes | Enduring rulings reconciled into Program `governance/governed-reference-rulings.md`; exact source copies remain historical evidence. |
