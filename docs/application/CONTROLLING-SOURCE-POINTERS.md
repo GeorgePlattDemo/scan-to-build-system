@@ -59,7 +59,7 @@ The following Grok documents are planning/build ancestry, not current controllin
 - `docs/app/STB-APP-STRUCTURE-0.1.md`
 - Sarah/front-door prototypes
 
-Use them only as explicitly identified lineage or recovery evidence. Current System code, current Store contracts, and Program definitions/governance control their own subjects.
+Use them only as explicitly identified lineage or recovery evidence. Current System operational definitions/code, current Store contracts/facts, and Program research/evidence/decision records control their own subjects.
 
 ## Machine / Cell donor material
 
