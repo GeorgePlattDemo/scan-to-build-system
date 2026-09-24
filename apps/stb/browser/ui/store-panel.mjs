@@ -380,9 +380,45 @@ function compactBody(view) {
   ];
 }
 
+function plainStoreAnswer(view) {
+  if (view.kind !== 'store' || view.current !== true) return null;
+  if (view.dispositionEnum === 'SUPPORTABLE') {
+    return el('p', {
+      className: 'store-answer-lead',
+      attrs: { 'data-store-answer-lead': 'true' },
+      text: view.qDisplay
+        ? `The Store can support this version. Budgetary estimate: ${view.qDisplay}.`
+        : 'The Store can support this version. A complete budgetary estimate is not available.',
+    });
+  }
+  if (view.dispositionEnum === 'REFUSED') {
+    return el('p', {
+      className: 'store-answer-lead',
+      attrs: { 'data-store-answer-lead': 'true' },
+      text: 'The Store says no to this version. The reasons are below.',
+    });
+  }
+  if (view.dispositionEnum === 'UNRESOLVED') {
+    return el('p', {
+      className: 'store-answer-lead',
+      attrs: { 'data-store-answer-lead': 'true' },
+      text: 'The Store needs more information before it can finish this answer.',
+    });
+  }
+  if (view.dispositionEnum === 'UNAVAILABLE') {
+    return el('p', {
+      className: 'store-answer-lead',
+      attrs: { 'data-store-answer-lead': 'true' },
+      text: 'The Store cannot cover this version from the represented stock.',
+    });
+  }
+  return null;
+}
+
 function fullBody(view) {
   const showFacts = view.kind === 'store';
   return [
+    plainStoreAnswer(view),
     el('p', { className: 'store-prompt', text: COPY.storeAskPrompt }),
     view.candidateRevisionId
       ? fact('Candidate revision', view.candidateRevisionId, {
