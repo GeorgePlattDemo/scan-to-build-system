@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "status": "exact preservation checkpoint; not yet the canonical System runtime root",
+  "sourceRepository": "GeorgePlattDemo/scan-to-build-review",
+  "sourceCommit": "7b26dfc45c9832271840d134426e096787156a04",
+  "importedInto": "GeorgePlattDemo/scan-to-build-system",
+  "importedDirectory": "apps/stb/public-build",
+  "purpose": "Bring the exact current human-visible Review composition under System ownership before any reconciliation, simplification, or publication rerouting.",
+  "rules": [
+    "Every listed source file is copied byte-for-byte from the pinned Review commit.",
+    "This import does not modify the public Review repository.",
+    "This import does not replace apps/stb/browser or change runtime routing by itself.",
+    "No Store answer, pricing rule, project definition, machine capability, or physical authority is changed by this checkpoint."
+  ],
+  "files": [
+    {
+      "path": "system-build-current.html",
+      "sourceBlobSha": "fe7c1688b316299ead4efff3e276112e9b2fd729",
+      "bytes": 217916
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "sourceBlobSha": "2966b2d86cb157b5c174a48c78dfdef7a822b499",
+      "bytes": 41500
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "sourceBlobSha": "2575e35b662b7de2e4905e3bd7b2b8624e2e354a",
+      "bytes": 132198
+    },
+    {
+      "path": "stb-canonical-journey.js",
+      "sourceBlobSha": "e0619841d245b392b4065d5aa5770fe7feaeb7eb",
+      "bytes": 3775
+    },
+    {
+      "path": "stb-store-handoff-contract.js",
+      "sourceBlobSha": "82c7dcf37230b0d97376c84359986939a0efefc7",
+      "bytes": 51874
+    },
+    {
+      "path": "stb-user-defined-board-store.js",
+      "sourceBlobSha": "0b7d90c2989dec5e6d66fae02f47f39fbabc4002",
+      "bytes": 8919
+    },
+    {
+      "path": "stb-user-defined-board-runtime-bridge.js",
+      "sourceBlobSha": "132f12663d07dae647ddfdcbdcf60bf29a8ddc9b",
+      "bytes": 8366
+    },
+    {
+      "path": "store-zero-canonical-doctrine.js",
+      "sourceBlobSha": "653663671f61dd77e0dae73917d33b8a8e896fd2",
+      "bytes": 12627
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "sourceBlobSha": "ff069973346cdd5075eaad8c58c29e1c24d4ff4d",
+      "bytes": 14296
+    },
+    {
+      "path": "three-frames.html",
+      "sourceBlobSha": "8fbe454224e38fcc705ad99815a30f6f52555580",
+      "bytes": 88414
+    },
+    {
+      "path": "stb-outdoor-bench-leg-0.1.html",
+      "sourceBlobSha": "cbe96b599085bfa0bcffebd6f544e2718220e47a",
+      "bytes": 71279
+    },
+    {
+      "path": "stb-window-seat-space-utilization-0.7.4.html",
+      "sourceBlobSha": "e6be8170d2fe1e4b81796b30491566ce76bfb8e3",
+      "bytes": 497759
+    },
+    {
+      "path": "stb-start-own-bench-leg-0.1.html",
+      "sourceBlobSha": "4ca2cb591b98b8d6f1621fc7b9ea7d3fd1788590",
+      "bytes": 70244
+    },
+    {
+      "path": "stb-store-runtime.json",
+      "sourceBlobSha": "30f8f1dec78fe06b230fa9c548978f2c4cbe4b0a",
+      "bytes": 95
+    },
+    {
+      "path": "stb-alcove-store-bridge.js",
+      "sourceBlobSha": "eef955677329df7867f6db758ad48737901136c5",
+      "bytes": 4998
+    },
+    {
+      "path": "assets/project-tiles/start-your-own.webp",
+      "sourceBlobSha": "d7696f41ba26c6ed7c08fee1ded33e01e151f09a",
+      "bytes": 4584
+    },
+    {
+      "path": "assets/project-tiles/plywood-curvilinear-shapes.webp",
+      "sourceBlobSha": "677334bf55d6ed8adc61d3028f90beef22bad34b",
+      "bytes": 3380
+    }
+  ],
+  "knownSourceLimitations": [
+    {
+      "from": "stb-window-seat-space-utilization-0.7.4.html",
+      "reference": "elevation-windowseat.png",
+      "status": "referenced but absent from source Review commit",
+      "handling": "not invented or substituted during preservation import"
+    }
+  ]
+}
