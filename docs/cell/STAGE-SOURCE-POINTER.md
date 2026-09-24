@@ -7,6 +7,6 @@ Current controlling evidence-stage source:
 - commit: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
 - file: `STB-STORE-CELL-STAGES-0.1.md`
 
-The reconciled working navigation is `../../work/machines/staging/README.md`.
+The current research/evidence-staging navigation is `GeorgePlattDemo/3d-solutions-program/research/machine-development/staging/README.md`. The old System staging path is a compatibility pointer.
 
 Do not redefine Stage 1–4 casually. These are evidence levels, not release marketing or internal machine-build phase numbers.
