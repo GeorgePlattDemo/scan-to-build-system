@@ -81,7 +81,7 @@ Build 8 acceptance counts at this closeout:
 
 `test:vertical` proves NEW USER, RETURNING USER, and PROFESSIONAL converge on one Board architecture; 45 in then 46 in against the real pinned Store; review binding; truthful Result; close/reopen versus inert import; keyboard and narrow-viewport operation; and the absence of commercial or physical authority.
 
-Exact Store pin for this candidate branch: `39a1b318063f62220c9c20c42200389098e0c687` (`GeorgePlattDemo/scan-to-build-store`, Store PR #9). Repin to the promoted Store main SHA before this System branch is merged.
+Exact Store source currently consumed by this System runtime: `39a1b318063f62220c9c20c42200389098e0c687`. Store main `1f9f1a217d91686ef21848508b20e605e7cc6bc1` contains the identical Git tree. Runtime remains pinned to the tested source until a separate, deliberate Store-pin promotion is verified.
 
 Build 8 application commits on `build/app-foundation-0.1`:
 
@@ -131,12 +131,12 @@ Store presentation reads durable Store records; it does not calculate Store pric
 
 ## Store
 
-Exact Store pin for this candidate branch: `39a1b318063f62220c9c20c42200389098e0c687` (`GeorgePlattDemo/scan-to-build-store`, Store PR #9).
+Exact Store source currently consumed by this System runtime: `39a1b318063f62220c9c20c42200389098e0c687`. Store main `1f9f1a217d91686ef21848508b20e605e7cc6bc1` contains the identical Git tree; this document does not promote or repin it.
 
 Supply a clean checkout of that pin through `STB_STORE_ZERO_ROOT`. The path is not hardcoded. At startup the wrapper verifies:
 
 - the checkout exists
-- `HEAD` is exactly `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a`
+- `HEAD` is exactly `39a1b318063f62220c9c20c42200389098e0c687`
 - required modules and catalog/observation files exist
 - the checkout is clean
 - `findSku`, `offerMaterial`, `evaluateJob`, and `estimateJob` can be loaded from that checkout
@@ -150,7 +150,7 @@ Bounded endpoints:
 - `POST /api/store-zero/offering` (`OFFERING_LOOKUP`)
 - `POST /api/store-zero/job` (`BOARD_SQUARE_V1`, `USER_DEFINED_BOARD_V1`, or `ALCOVE_INSERT_V1`)
 
-`BOARD_SQUARE_V1` remains the accepted square-Board path. `USER_DEFINED_BOARD_V1` is a separate bounded request for an already-defined 24–60 in Board workpiece with explicit operation meaning carried at the application/Store boundary. It does not redefine the project to the Store SKU. For the current Start Your Own X-brace proof, Store Zero supplies a 72 in raw SKU while the identified project workpiece remains 60 in. The integration accounts for one raw-stock preparation cut plus the three defined saw/miter cycles. The requested centered spot remains `SPOT_ON_LOCATION` with unresolved tooling and is not silently priced as a generic 0.75 in drilled hole. Store Zero still owns the Stage-2 modeled BudgetaryEstimate for the resolved encoded operations; while unresolved operation conditions remain, the application presents that value as partial rather than as a complete commercial total.
+`BOARD_SQUARE_V1` remains the accepted square-Board path. `USER_DEFINED_BOARD_V1` is a separate bounded request for an already-defined 24–60 in Board workpiece with explicit operation meaning carried at the application/Store boundary. It does not redefine the project to the Store SKU. For the current Start Your Own X-brace proof, the identified project workpiece remains 60 in and Store owns parent-stock resolution. The 16 in baseline resolves to the Store 60 in SPF 2x4 offering; the 18 in same-span variant rejects that 60 in candidate under the retained-control rule and resolves to the 72 in offering. The defined baseline production sequence remains three saw cuts; there is no automatic 72→60 preparation cut. Centered point work remains `SPOT_ON_LOCATION`, not a generic drilled hole. The current tested Store source prices the existing unqualified spot model; newer explicit diameter/depth/edge qualifiers remain separate machine-definition work and are not silently implied.
 
 `ALCOVE_INSERT_V1` is the bounded Store boundary for Sarah's solid-board Alcove path. The project carries material class/species, project-derived parent demand, kept lengths, quantities, component finished length/width, required operations, optional shelf-spot demand, hardware demand, and unresolved project conditions. It does not nominate Store board SKUs or calculate Store prices. A component may carry `MILL_LONGITUDINAL_PROFILE` geometry (`pathLengthIn`, finished-width `yIn`, and `totalDepthIn`), so depth can change actual Store work rather than only board count. At 14 in depth the third 1x6 shelf strip is a residual-width component and therefore asks Store for longitudinal milling; at 11 in depth two full 5.5 in strips require no longitudinal mill. Store returns current species-specific SKUs, stock state, selling price, declared D-001 capability/refusal, modeled cut/mill component travel, machine service, Q when complete, calculation identity, and a fresh evaluation receipt. Pine and Poplar currently declare the longitudinal-mill operation; Oak and Cherry do not, so the same 14 in geometry can legitimately refuse by species while an 11 in cut-only configuration can proceed if stock is sufficient. Shelf-elevation `FROM_BASE` face spotting still fails closed because the Stage-2 spot envelope has not yet declared that location rule. A finished 72 in upright against a declared 72 in parent also fails the present reference-cut material-capacity model rather than silently growing the parent.
 
