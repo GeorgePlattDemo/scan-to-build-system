@@ -172,7 +172,7 @@ Review actions use unique `actionId` receipts. The same action identity is idemp
 
 Inline Board review and full Page 6 use the same handlers. Unapplied consequential edits disable review until Apply.
 
-Page 7 states “Definition retained; no physical fabrication recorded.” Store evaluation, review records, and physical outcome remain distinct. No fabricated, in-production, pickup-ready, reserved, ordered, paid, or delivered claim is inferred from `SUPPORTABLE`, Q, or review. CUT-001 remains a documentary reference. Lowering and physical outcome stay unavailable.
+Page 7 now leads with “Your definition is retained.” and one concise boundary: “This build stops before physical fabrication or pickup.” Store evaluation, review records, and physical outcome remain distinct. No fabricated, in-production, pickup-ready, reserved, ordered, paid, or delivered claim is inferred from `SUPPORTABLE`, Q, or review. CUT-001 remains a documentary reference. Lowering and physical outcome stay unavailable.
 
 ## Owner record
 
