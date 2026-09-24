@@ -1,22 +1,31 @@
 # Application Current Source Summary
 
-The accepted application is the post-app datum.
+## Current application home
 
-Exact identity:
+The current application is owned by this repository:
+
+`GeorgePlattDemo/scan-to-build-system/apps/stb/`
+
+Use [`../../STB-CURRENT-BASELINE.md`](../../STB-CURRENT-BASELINE.md), [`../project/CURRENT-STATE.md`](../project/CURRENT-STATE.md), and [`../../apps/stb/README.md`](../../apps/stb/README.md) for accepted/current System status.
+
+## Transferred source provenance
+
+The application was originally transferred from:
 
 `GeorgePlattDemo/grok-file@4595b4785a2686486e477ce2e70fb3f476285a8d`
 
-At that baseline:
+That pin remains historical provenance for the transferred first vertical. It is **not** the current application identity.
 
-- Builds 0–8 are recorded complete;
-- the first bounded vertical is accepted against Stage-2 Store Zero;
-- entry, evidence custody, observations/corrections, Board definition/revision, Store evaluation, review, result and owner-record continuity exist;
-- Store Q is budgetary, not quote;
-- Store support is not fabrication authorization;
-- import/reopen does not reactivate old Store/review authority;
-- order/payment/fulfillment/physical execution remain absent.
+At that historical baseline the source recorded:
 
-Exact test counts recorded by the source README:
+- Builds 0–8 complete;
+- a first bounded vertical against Stage-2 Store Zero;
+- entry, evidence custody, observations/corrections, Board definition/revision, Store evaluation, review, result and owner-record continuity;
+- Store Q as budgetary rather than quote;
+- Store support as distinct from fabrication authorization;
+- import/reopen not reactivating old Store/review authority.
+
+Historical test counts recorded by that donor README were:
 
 - unit: 58 pass / 0 fail
 - browser: 137 pass / 0 fail
@@ -24,4 +33,12 @@ Exact test counts recorded by the source README:
 - Store: 22 pass / 0 fail
 - vertical: 6 pass / 0 fail
 
-These are recorded acceptance results at the source baseline, not tests rerun by this consolidation repository.
+Those counts are provenance for that exact donor baseline, not current System test results.
+
+## Current shared meaning
+
+Shared terminology/governance is owned by:
+
+`GeorgePlattDemo/3d-solutions-program`
+
+System owns the executable application behavior that implements or consumes those meanings.
