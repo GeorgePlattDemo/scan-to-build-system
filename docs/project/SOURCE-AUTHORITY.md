@@ -8,9 +8,23 @@ A source may be current and still control only one layer or question. No documen
 
 Words do not transfer authority between layers.
 
-## Application
+## Program — shared meaning and governance
 
-The application owns:
+`GeorgePlattDemo/3d-solutions-program` owns:
+
+- shared cross-repository definitions and semantic boundaries;
+- cross-repository governance;
+- research questions and experiment records;
+- reviewed Program decisions;
+- donor migration/retirement records.
+
+Canonical shared vocabulary is in Program `governance/definitions.md`.
+
+Program documentation does not silently rewrite System or Store runtime behavior.
+
+## Application / System
+
+`GeorgePlattDemo/scan-to-build-system` owns:
 
 - user-facing interaction;
 - entry and routing;
@@ -20,51 +34,29 @@ The application owns:
 - bounded configuration and revisions;
 - presentation of attributed Store results;
 - application review records;
-- owner-record continuity.
+- owner-record continuity;
+- executable application contracts and tests.
 
-The application does **not** own Store runtime truth, governed authorization, commercial contract formation, machine readiness, or physical execution.
+Current implementation: [`../../apps/stb/`](../../apps/stb/).
 
-Current application sources:
+The original Grok application pin `4595b4785a2686486e477ce2e70fb3f476285a8d` remains transferred-source provenance only.
 
-- accepted implementation: `GeorgePlattDemo/grok-file@4595b4785a2686486e477ce2e70fb3f476285a8d`;
-- frozen roadmap: `985db87a707bd454d7c58419e2cf4d884f00cded`;
-- entry/intake contract: `2d80b5a7b0e7687c425e100bfa0ff3a833166d42`;
-- semantic-boundaries document contained in the accepted application baseline.
+The application does **not** own Store runtime truth, commercial contract formation, machine readiness, controller acceptance, or physical execution.
 
 ## Store
 
-The Store owns its own:
+`GeorgePlattDemo/scan-to-build-store` owns its own:
 
 - material/product offerings;
-- Store inventory/availability assertions;
-- Store capability evaluation;
+- inventory/availability assertions;
+- capability evaluation;
 - Store-owned economic results;
 - sourcing facts;
 - fulfillment facts when those capabilities exist.
 
-Current application Store reference:
+System must consume the Store source/pin required by each current path. Do not substitute one Store pin merely because another project looks similar.
 
-`GeorgePlattDemo/scan-to-build-store@c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a`
-
-A Store result does not become governed acceptance, machine readiness, production authorization, or physical execution.
-
-## Governed layer
-
-The governed layer owns:
-
-- governed semantics;
-- unresolved conditions;
-- refusal;
-- protected transitions;
-- governed authority boundaries;
-- governed provenance;
-- canonical governed meanings such as WorkPacket and simulation/production authorization.
-
-Current baseline:
-
-`GeorgePlattDemo/scan-to-build-governed-reference@18949f163718a937f072f4be3a654bb303e53160`
-
-The current governed baseline does not issue production execution authorization.
+A Store result does not become machine readiness, production authorization, or physical execution.
 
 ## Machine / cell
 
@@ -75,10 +67,24 @@ The physical machine/cell layer owns actual:
 - workholding and machine-local constraints;
 - physical controls and interlocks;
 - readiness;
-- safe local execution;
+- local Cycle Start authority where eventually commissioned;
 - measured machine behavior and physical outcomes.
 
-Documentation or Store support cannot substitute for physical evidence.
+Program owns the research questions. Store may declare the admitted machine/cell capability on which its model relies. System may present attributed results. None of those creates physical capability by documentation alone.
+
+## Historical Governed Reference
+
+`GeorgePlattDemo/scan-to-build-governed-reference@18949f163718a937f072f4be3a654bb303e53160` is historical governance/reference provenance.
+
+Its enduring shared meanings/rulings have been reconciled into Program. Its M1 runtime, fixtures, schemas, tests, and audits remain historical executable evidence unless a current owner deliberately admits a specific requirement/test.
+
+It is no longer the current cross-repository semantic authority.
+
+## Historical Grok
+
+Grok pins remain provenance for transferred application ancestry, planning, prototypes, and research.
+
+Grok is not the current application, semantic, Store, or machine authority.
 
 ## Research
 
@@ -86,16 +92,8 @@ Research owns questions and evidence collection.
 
 Research may identify patterns, compare options, expose refusals, or suggest future architecture. It does not silently activate a capability, change a safety boundary, expand an envelope, or create execution authority.
 
-## Historical and donor material
-
-Earlier public demonstrations, Sarah prototypes, review packages, staging repositories, and superseded planning are source evidence.
-
-They may contain highly useful content. They do not govern the current system unless a specific item is admitted through the post-app admission process.
-
-When an old source conflicts with a current owner on that owner's subject, the current owner controls unless a later explicit reconciliation says otherwise.
-
 ## Safety
 
 **NO BLOOD ON WOOD.**
 
-No commercial, research, application, or Store state overrides demonstrated physical safety requirements.
+No commercial, research, application, Program, or Store state overrides demonstrated physical safety requirements.
