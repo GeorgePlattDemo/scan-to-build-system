@@ -38,10 +38,10 @@ Exact historical admissions remain in [`../../provenance/ADMISSION-REGISTER.md`]
 | Application guidance | [`../../docs/application/README.md`](../../docs/application/README.md) |
 | Store navigation | [`../../docs/store/`](../../docs/store/) |
 | Machine source map | [`../../docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md`](../../docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md) |
-| Physical program | [`../machines/MACHINE-BUILD-PROGRAM-0.1.md`](../machines/MACHINE-BUILD-PROGRAM-0.1.md) |
+| Machine-development program | [Program machine development](https://github.com/GeorgePlattDemo/3d-solutions-program/tree/main/research/machine-development) |
 | Dimensional staging | [`../machines/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md`](../machines/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md) |
 | Sheet staging | [`../machines/staging/SHEET-MACHINE-STAGING-0.1.md`](../machines/staging/SHEET-MACHINE-STAGING-0.1.md) |
-| Cell staging | [`../cell/RESEARCH-CELL-STAGING-0.1.md`](../cell/RESEARCH-CELL-STAGING-0.1.md) |
+| Research-cell staging | [Program research-cell staging](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/research/machine-development/cell/RESEARCH-CELL-STAGING-0.1.md) |
 | Atlas donor copies | [`../../source-library/atlas-research/`](../../source-library/atlas-research/) |
 | Patent sources | [PATENTS.md](PATENTS.md) |
 
