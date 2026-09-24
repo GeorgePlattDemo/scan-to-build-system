@@ -188,7 +188,7 @@ test('review records do not mint commercial or physical authority', () => {
   assert.equal(REVIEW_RECORD_TYPES.DefinitionReviewRecorded, 'DefinitionReviewRecorded');
   assert.equal(REVIEW_RECORD_TYPES.UnresolvedDefinitionAcknowledged, 'UnresolvedDefinitionAcknowledged');
   assert.equal(COPY.reviewNoOrder.includes('order'), true);
-  assert.equal(COPY.resultRetained.includes('physical fabrication'), true);
+  assert.equal(COPY.resultPhysicalAbsent.includes('physical fabrication'), true);
   assert.match(COPY.reviewMeaningBody, /does not place an order/);
   assert.equal(APP_BUILD_ID, 'stb-app-build-7');
   const disclosures = collectDisclosures({});

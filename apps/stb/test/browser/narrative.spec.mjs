@@ -62,7 +62,10 @@ test('review, Store, result, and record pages expose authority boundaries withou
   await page.locator('[data-nav-page="result"]').click();
   await expect(page.locator('main[data-screen="result"]')).toBeVisible();
   await expect(page.locator('[data-future-chain="true"]')).toContainText(
-    'What happens next — architecture, not a live order',
+    'From confirmation to motion',
+  );
+  await expect(page.locator('[data-confirmation-to-motion]')).toContainText(
+    'No per-job redraw. No tape layout. No programmer reconstructing the customer’s intent.',
   );
   await expect(page.locator('[data-future-chain="true"]')).toContainText(
     'Linked domains, not one giant status',

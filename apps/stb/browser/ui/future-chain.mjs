@@ -37,7 +37,10 @@ function addStyle() {
   style.textContent = `
     .future-chain{border:1px solid #d8d1c7;border-radius:12px;padding:15px 16px;margin:14px 0;background:#fff}
     .future-chain h2{margin:0 0 5px;font-size:18px}
-    .future-chain .future-status{margin:0 0 14px;font-size:12px;color:#7a7168;font-weight:650;letter-spacing:.04em;text-transform:uppercase}
+    .future-chain .future-status{margin:0 0 10px;font-size:12px;color:#7a7168;font-weight:650;letter-spacing:.04em;text-transform:uppercase}
+    .future-motion{margin:0 0 14px;padding:11px 12px;border:1px solid #e3ded7;border-radius:9px;background:#fbfaf8}
+    .future-motion p{margin:0 0 7px;font-size:12.5px;line-height:1.5;color:#514b44}
+    .future-motion p:last-child{margin-bottom:0}
     .future-steps{display:grid;gap:8px;margin:0 0 16px}
     .future-step{border-left:3px solid #d9c3a2;padding:6px 0 6px 11px}
     .future-step b{display:block;font-size:13px;margin-bottom:2px}
@@ -50,7 +53,8 @@ function addStyle() {
     @media (prefers-color-scheme: dark){
       .future-chain{background:#181613;border-color:#3c352c}
       .future-step span,.future-domain span,.future-chain-note{color:#c8c0b5}
-      .future-domain{background:#201d18;border-color:#3c352c}
+      .future-domain,.future-motion{background:#201d18;border-color:#3c352c}
+      .future-motion p{color:#d4ccc1}
     }
   `;
   document.head.append(style);
@@ -58,8 +62,13 @@ function addStyle() {
 
 function buildChain() {
   return node('section', { className: 'future-chain', attrs: { 'data-future-chain': 'true' } }, [
-    node('h2', { text: 'What happens next — architecture, not a live order' }),
-    node('p', { className: 'future-status', text: 'Only the current application record / Store evaluation / review behavior is implemented here' }),
+    node('h2', { text: 'From confirmation to motion' }),
+    node('p', { className: 'future-status', text: 'The specialist intermediary chain is absent by architecture.' }),
+    node('div', { className: 'future-motion', attrs: { 'data-confirmation-to-motion': 'true' } }, [
+      node('p', { text: 'The confirmed definition is not redrawn, retyped, or handed to someone to reinterpret for the machine.' }),
+      node('p', { text: 'The local-cell contract contributes registered tools, stations, datums, limits, and machine configuration. The job contributes the identified parts and required operations. Controller-specific lowering stays local.' }),
+      node('p', { text: 'No per-job redraw. No tape layout. No programmer reconstructing the customer’s intent.' }),
+    ]),
     node('div', { className: 'future-steps' }, STEPS.map(([title, body]) =>
       node('div', { className: 'future-step' }, [
         node('b', { text: title }),
@@ -75,7 +84,7 @@ function buildChain() {
     )),
     node('p', {
       className: 'future-chain-note',
-      text: 'These state names are narrative scaffolding for later implementation and research. They are not a final state machine, legal conclusion, payment integration, inventory commitment, production authorization, or machine-control interface.',
+      text: 'Current build proves the record and Store path. Commerce and physical motion remain later work.',
     }),
   ]);
 }

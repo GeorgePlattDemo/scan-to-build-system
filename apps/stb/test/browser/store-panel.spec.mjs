@@ -80,6 +80,9 @@ function supportableApplicability() {
 test('full panel shows offering stock capability estimate and copied Q', async ({ page }) => {
   await renderPanel(page, supportableApplicability());
   await expect(page.locator('[data-store-panel="full"]')).toHaveAttribute('data-current', 'true');
+  await expect(page.locator('[data-store-answer-lead]')).toHaveText(
+    'The Store can support this version. Budgetary estimate: $53.94.',
+  );
   await expect(page.locator('[data-store-disposition]')).toHaveText('SUPPORTABLE');
   await expect(page.locator('[data-store-sku]').first()).toContainText(PUBLISHED_BOARD_SKU);
   await expect(page.locator('[data-store-q]')).toHaveAttribute('data-store-q', '$53.94');
@@ -203,6 +206,9 @@ test('REFUSED shows exact raw reason and no Q', async ({ page }) => {
   applicability.response.payload.wrapperEnvelope.rawEstimate = null;
   await renderPanel(page, applicability);
   await expect(page.locator('[data-store-disposition]')).toHaveText('REFUSED');
+  await expect(page.locator('[data-store-answer-lead]')).toHaveText(
+    'The Store says no to this version. The reasons are below.',
+  );
   await expect(page.locator('[data-raw-reason]').first()).toHaveText(
     'STOCK_WIDTH_EXCEEDS_D001_STAGE2_ENVELOPE',
   );

@@ -354,9 +354,11 @@ export function page7Main({ project, presentation }) {
         attrs: { 'data-result-retained': 'true' },
         text: COPY.resultRetained,
       }),
-      el('p', { className: 'hint', attrs: { 'data-physical-absent': 'true' }, text: COPY.resultPhysicalAbsent }),
-      el('p', { className: 'hint', attrs: { 'data-pickup-absent': 'true' }, text: COPY.resultPickupAbsent }),
-      el('p', { className: 'hint', text: COPY.resultNoProduction }),
+      el('p', {
+        className: 'hint',
+        attrs: { 'data-physical-absent': 'true', 'data-pickup-absent': 'true' },
+        text: COPY.resultPhysicalAbsent,
+      }),
       current
         ? el('p', {
             className: 'review-current',
