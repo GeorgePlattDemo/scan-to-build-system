@@ -22,6 +22,8 @@ It remains software/reference behavior. It does not by documentation alone estab
 
 ## Reading order
 
+0. [`CURRENT-VISIBLE-BUILD-RECONCILIATION-0.1.md`](CURRENT-VISIBLE-BUILD-RECONCILIATION-0.1.md) — current Review → System custody/ownership reconciliation; start here before moving visible-build behavior.
+
 1. [`apps/stb/README.md`](../../apps/stb/README.md)
 2. [`../project/SOURCE-AUTHORITY.md`](../project/SOURCE-AUTHORITY.md)
 3. [Program canonical definitions](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/governance/definitions.md)
