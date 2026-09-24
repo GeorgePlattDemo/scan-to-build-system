@@ -17,4 +17,4 @@ The Cell spine retains its source status: **descriptive working artifact**. Cand
 
 The full issued patent PDFs are separately retained under `docs/patents/source/` and control over summaries where exact patent wording matters.
 
-For current machine-build direction, use `work/machines/MACHINE-BUILD-PROGRAM-0.1.md`. This source library preserves prior detailed engineering work without rewriting it.
+For current machine-development direction, use `GeorgePlattDemo/3d-solutions-program/research/machine-development/`. The old System Machine Build Program path is a compatibility pointer. This source library preserves prior detailed engineering work as provenance without making System the machine-research owner.

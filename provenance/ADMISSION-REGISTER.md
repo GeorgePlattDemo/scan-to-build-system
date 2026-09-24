@@ -109,10 +109,11 @@ Use for reconciliation history, owner boundaries, keep/discard decisions, unreso
 
 ### Machine Build Program 0.1
 
-- path: `work/machines/MACHINE-BUILD-PROGRAM-0.1.md`
-- disposition: `CURRENT POST-APP PROGRAM`
+- historical System path: `work/machines/MACHINE-BUILD-PROGRAM-0.1.md`
+- current owner/location: `GeorgePlattDemo/3d-solutions-program/research/machine-development/MACHINE-BUILD-PROGRAM-0.1.md`
+- disposition: `RELOCATED TO PROGRAM; SYSTEM PATH IS COMPATIBILITY POINTER`
 
-This document now controls the physical machine/research sequence:
+The relocated Program document controls the machine-development research sequence:
 
 - control case — manual radial-arm saw, eyes, tape measure, pencil and operator judgment;
 - Machine Build 1 — Digital Bridge Proof;
@@ -146,7 +147,7 @@ It does not overwrite Store/Cell evidence Stage 1–4 vocabulary; it gives the p
 - disposition: `KEEP-DONOR`
 - source status retained: not adopted; field survey only.
 
-These sources are indexed from `docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md` and may inform current machine engineering only through the current Machine Build Program and patent-alignment gate.
+These sources are indexed from `docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md` and may inform machine-development research only through the current Program Machine Build record and the applicable patent-alignment/source rules.
 
 ### Public Machine Function & Kinematic Ontology
 
@@ -164,18 +165,11 @@ Reason: substantial useful mechanical/patent/safety detail, but it predates the 
 
 Its Stage 1–4 meanings remain an evidence vocabulary. They are not the same numbering as Machine Build 1–4.
 
-Directional relationship is documented in `work/machines/MACHINE-BUILD-PROGRAM-0.1.md`.
+Directional relationship is documented in Program `research/machine-development/MACHINE-BUILD-PROGRAM-0.1.md`; the old System path is a compatibility pointer.
 
 ## New post-app working documents
 
-The following are repository-created current work surfaces:
-
-- `work/machines/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md`
-- `work/machines/staging/SHEET-MACHINE-STAGING-0.1.md`
-- `work/cell/RESEARCH-CELL-STAGING-0.1.md`
-- `work/machines/MACHINE-BUILD-PROGRAM-0.1.md`
-
-They are planning/status surfaces, not automatic capability declarations.
+The first-pass System work surfaces included the dimensional/sheet staging documents plus research-cell and Machine Build planning. The Machine Build Program and research-cell planning/staging have now been relocated to Program. Dimensional/sheet staging and deeper engineering remain under separate reclassification review. None is an automatic capability declaration.
 
 ## Explicitly not admitted as current
 
