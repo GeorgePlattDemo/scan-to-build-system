@@ -2,7 +2,8 @@
 
 **Status:** candidate experience / architecture bridge  
 **Purpose:** preserve the useful window-seat story without promoting a historical demo into current production authority.  
-**Current governed source:** `GeorgePlattDemo/scan-to-build-governed-reference` at `18949f163718a937f072f4be3a654bb303e53160`.  
+**Current shared definitions/governance:** `GeorgePlattDemo/3d-solutions-program`.  
+**Historical governed source:** `GeorgePlattDemo/scan-to-build-governed-reference@18949f163718a937f072f4be3a654bb303e53160`.  
 **Historical donor:** the earlier Sarah / alcove-window-seat demonstration retained in the source library.  
 
 **This document is not structural approval, code approval, a commercial offer, production release, machine commissioning, or evidence that a physical cell ran this job.**
@@ -58,7 +59,7 @@ A number on a drawing is evidence. It is not automatically an as-built measureme
 
 ### 4. Let use change the questions — not the owner’s words
 
-Once intended human seating is part of the candidate, the seating family becomes relevant. The current governed Project B model requires more than opening geometry. It activates, as applicable:
+Once intended human seating is part of the candidate, the seating family becomes relevant. The historical Governed Reference Project B model requires more than opening geometry. It activates, as applicable:
 
 - human seating load;
 - seat span / deflection;
@@ -152,7 +153,7 @@ This is the point where the historical demonstration and the current governed sy
 
 The historical Sarah demonstration portrayed the resolved alcove/window-seat definition as a dual-stream fabrication package for dimensional and sheet work. That is a valuable **story and capability donor**: it shows why a mixed job can be decomposed into bounded work while preserving one project identity.
 
-The current governed v0.2 reference is deliberately stricter. It is simulation-only and does **not** make production `execution_authorized` reachable. A current project must not be described as physically approved, production released, machine ready, or run merely because the old demonstration depicted a dual-stream packet.
+The historical governed v0.2 reference is deliberately stricter. It is simulation-only and does **not** make production `execution_authorized` reachable. A current project must not be described as physically approved, production released, machine ready, or run merely because the old demonstration depicted a dual-stream packet.
 
 The future full chain remains:
 
