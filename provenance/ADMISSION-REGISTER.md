@@ -43,25 +43,26 @@ Current build work touching patented subject matter uses `docs/patents/PATENT-AL
 
 The patents are not a substitute for current capability, commissioning, safety evidence, production authorization, or legal analysis.
 
-## Governed Reference admitted as-is
+## Governed Reference historical admission
 
 Source identity:
 
 - repository: `GeorgePlattDemo/scan-to-build-governed-reference`
 - pin: `18949f163718a937f072f4be3a654bb303e53160`
-- admission: `ADMIT AS-IS`
+- historical admission: `ADMIT AS-IS` at the time of consolidation
+- current cross-repository authority: `GeorgePlattDemo/3d-solutions-program`
 
-Current source snapshots admitted under `docs/governance/` include the governed README, M1 build guidance, governance/review/security/threat-model material, architecture and authority notes, custody/disclosure/external-processing guidance, fixture/identifier guidance, reference-node explanation, I0 correction, ADR-0008 through ADR-0020, change/validation history, module inventory and selected legal/provenance guidance.
+Historical source snapshots admitted under `docs/governance/` include the governed README, M1 build guidance, governance/review/security/threat-model material, architecture and authority notes, custody/disclosure/external-processing guidance, fixture/identifier guidance, reference-node explanation, I0 correction, ADR-0008 through ADR-0020, change/validation history, module inventory and selected legal/provenance guidance.
 
 Copying them here does not broaden their original status. Informative/planned source text remains informative/planned.
 
-### Large governed documents still pinned, pending byte-exact transfer
+### Large governed historical sources retained by pin
 
 - `specs/STB-REF-0.2.5.md`
 - `plans/STB-PLAN-0.2.5.md`
 - `docs/architecture/common-entry-contexts.md`
 - `docs/architecture/demand-architecture-traceability.md`
-- `foundations/NC_Wood_Demand_as_Architecture_ss1-12_0.3.md` — research/foundation admission still deferred
+- `foundations/NC_Wood_Demand_as_Architecture_ss1-12_0.3.md` — full private historical source; current admitted research proposition is in Program
 
 See `docs/governance/CONTROLLING-SOURCE-POINTERS.md`.
 
@@ -71,16 +72,17 @@ See `docs/governance/CONTROLLING-SOURCE-POINTERS.md`.
 
 - source: `GeorgePlattDemo/grok-file`, `build/app-foundation-0.1`
 - pin: `4595b4785a2686486e477ce2e70fb3f476285a8d`
-- disposition: `KEEP-CURRENT` / current implementation datum
+- historical disposition: transferred implementation datum
+- current implementation owner: `GeorgePlattDemo/scan-to-build-system/apps/stb/`
 
-The accepted application tree is present in [`apps/stb/`](../apps/stb/). See [`APP-TRANSFER.md`](APP-TRANSFER.md) for the transfer record and [`apps/README.md`](../apps/README.md) for launch instructions. `docs/application/` and `work/user-intake/` provide current navigation and reconciled working guidance.
+The transferred application tree is present in [`apps/stb/`](../apps/stb/) and has continued under System ownership. See [`APP-TRANSFER.md`](APP-TRANSFER.md) for provenance and [`apps/README.md`](../apps/README.md) for current launch/status guidance.
 
 ### Frozen application roadmap
 
 - source pin: `985db87a707bd454d7c58419e2cf4d884f00cded`
-- disposition: `KEEP-CURRENT`
+- disposition: `HISTORICAL PLANNING ANCESTRY`
 
-Pending mechanical transfer of the complete roadmap file.
+The roadmap remains provenance. It is not the current application build order.
 
 ### Entry/intake contract
 
@@ -91,10 +93,10 @@ Reason: the locked intake/evidence principles remain useful, but the source docu
 
 ### Application semantic boundaries
 
-- source: accepted app pin, `docs/architecture/STB-SEMANTIC-BOUNDARIES-0.1.md`
-- disposition: `KEEP-CURRENT`
+- source: transferred app pin, `docs/architecture/STB-SEMANTIC-BOUNDARIES-0.1.md`
+- disposition: `HISTORICAL SEMANTIC RECONCILIATION SOURCE`
 
-Current meaning is summarized in `docs/application/SEMANTIC-GUARDRAILS.md`; the source document is preserved at [`source-library/application-current/STB-SEMANTIC-BOUNDARIES-0.1.md`](../source-library/application-current/STB-SEMANTIC-BOUNDARIES-0.1.md). Relocation does not change its authority.
+Current shared meaning is owned by Program `governance/definitions.md`. System's implementation summary is `docs/application/SEMANTIC-GUARDRAILS.md`. The exact donor copy remains at [`source-library/application-current/STB-SEMANTIC-BOUNDARIES-0.1.md`](../source-library/application-current/STB-SEMANTIC-BOUNDARIES-0.1.md) as provenance.
 
 ### Stabilization / source-map / structure guidance
 
