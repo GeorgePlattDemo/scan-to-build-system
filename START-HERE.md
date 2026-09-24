@@ -46,7 +46,7 @@ Launch instructions and path-specific Store pins: [`apps/README.md`](apps/README
 
 Do not use one Store pin as a universal project constant.
 
-- current dimensional / `USER_DEFINED_BOARD_V1` travel-standard path: `f88ccaf9a2624899e255e66b51111e2b02309dad` — D-001 Travel Standard acceptance plus per-request Store freshness acceptance passed on this exact Store SHA (run `35768861705`)
+- current tested Store source for dimensional `USER_DEFINED_BOARD_V1` and Alcove `ALCOVE_INSERT_V1`: `39a1b318063f62220c9c20c42200389098e0c687` — this is the exact source consumed by current System code and the D-001 integration workflow. Store main `1f9f1a217d91686ef21848508b20e605e7cc6bc1` has the same Git tree; this housekeeping pass does not repin runtime authority.
 - accepted published-job / canonical S-001 proof path: `4402abeb6b0299a5b6db2eec85ed04c3b0236bcc`
 - 2026-09-13 accepted-baseline Stage-2 reference identity retained as provenance: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
 

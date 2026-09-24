@@ -5,7 +5,7 @@
 3D Solutions LLC · Greensboro, North Carolina  
 U.S. Patents 9,720,401 B2 and 10,768,609 B2
 
-**Private working repository**
+**Public working repository**
 
 ## Open Scan-to-Build
 
