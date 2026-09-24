@@ -108,7 +108,7 @@ test('P7-01 / M2-15/O01 confirming a supported board records no physical outcome
   await expect(page.locator('[data-page="page7"]')).toBeVisible();
   await expect(page.locator('[data-result-retained]')).toHaveText(COPY.resultRetained);
   await expect(page.locator('[data-physical-absent]')).toHaveText(COPY.resultPhysicalAbsent);
-  await expect(page.locator('[data-pickup-absent]')).toHaveText(COPY.resultPickupAbsent);
+  await expect(page.locator('[data-pickup-absent]')).toHaveText(COPY.resultPhysicalAbsent);
   await expect(page.locator('[data-physical-outcome]')).toHaveAttribute(
     'data-physical-outcome',
     'absent',
