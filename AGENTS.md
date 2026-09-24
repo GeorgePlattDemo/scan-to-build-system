@@ -4,14 +4,14 @@ You are working in `GeorgePlattDemo/scan-to-build-system`.
 
 Read [`START-HERE.md`](START-HERE.md) first. Then the capability-bridge bench. Then the trial protocol.
 
-## Rules
-
 ## Ownership
 
 - System: application source, operational job meaning, application behavior, application tests, release composition.
 - Store (`scan-to-build-store`): catalog, machine envelope, material resolution, modeled time, economics.
 - Program (`3d-solutions-program`): research, experimental machine development, decisions, business planning.
 - Review (`scan-to-build-review`): frozen public demonstration. Read only. No agent writes to it.
+
+## Rules
 
 - This repository is the working surface. Other repos are pins and donors.
 - Current names only: User 1, Store 1, Machine Build *n* written in full, Board, alcove class, fixture, pin.
