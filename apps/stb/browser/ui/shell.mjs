@@ -26,6 +26,10 @@ import {
   applyCut001DocumentaryReference,
 } from '/domain/board.mjs';
 import {
+  applyUser1XBraceConfiguration,
+  clearUser1XBraceConfiguration,
+} from '/domain/user1-xbrace.mjs';
+import {
   blobCustody,
   currentCandidate,
   currentProjection,
@@ -44,7 +48,7 @@ import { loadRecordPresentation } from '/data/record-view.mjs';
 import {
   recoverStoreOnOpen,
   retryCurrentStore,
-  scheduleBoardStoreQuestion,
+  scheduleProjectStoreQuestion,
 } from '/integration/store-coordinator.mjs';
 import {
   acknowledgeUnresolvedDefinition,
@@ -262,6 +266,8 @@ let measurementBuffer = { raw: '', unit: '', role: '' };
 let takeoffBuffer = { label: '', quantity: '', unit: '', dimensions: '', material: '' };
 let boardBuffer = { raw: '', unit: 'in' };
 let boardDirty = false;
+let user1Buffer = { raw: '' };
+let user1Dirty = false;
 let lastBoardCommitSignature = null;
 let selectedOccurrenceId = null;
 let pendingReviewActionId = null;
@@ -274,6 +280,10 @@ function resolveActor(screen) {
     return screen.actor;
   }
   return currentActor();
+}
+
+function definitionDirty() {
+  return boardDirty || user1Dirty;
 }
 
 function followStoreWork(root, scheduled) {
@@ -337,8 +347,8 @@ async function renderInto(root) {
       }
       let scheduled = { status: 'skipped' };
       try {
-        scheduled = await scheduleBoardStoreQuestion(project.localRecordId, {
-          unapplied: boardDirty,
+        scheduled = await scheduleProjectStoreQuestion(project.localRecordId, {
+          unapplied: definitionDirty(),
         });
       } catch (error) {
         pageStatus = `Save failed: ${error.message}`;
@@ -349,7 +359,7 @@ async function renderInto(root) {
       }
       followStoreWork(root, scheduled);
       const storeView = await loadStorePresentation(project.localRecordId, {
-        unapplied: boardDirty,
+        unapplied: definitionDirty(),
         candidateRevisionId: project.currentHead,
       });
       const storeHistory =
@@ -361,7 +371,7 @@ async function renderInto(root) {
       const candidate = await currentCandidate(project.localRecordId);
       const projection = await currentProjection(project.localRecordId);
       const reviewPresentation = await loadReviewPresentation(project.localRecordId, {
-        unapplied: boardDirty,
+        unapplied: definitionDirty(),
       });
       if (seq !== renderSeq) {
         return;
@@ -401,7 +411,7 @@ async function renderInto(root) {
         );
       } else if (screen.view === 'record') {
         const recordPresentation = await loadRecordPresentation(project.localRecordId, {
-          unapplied: boardDirty,
+          unapplied: definitionDirty(),
         });
         if (seq !== renderSeq) {
           return;
@@ -435,6 +445,7 @@ async function renderInto(root) {
             measurementBuffer,
             takeoffBuffer,
             boardBuffer,
+            user1Buffer,
             correctingId,
             selectedOccurrenceId,
             storeView,
@@ -658,6 +669,8 @@ function discardBuffers() {
   takeoffBuffer = { label: '', quantity: '', unit: '', dimensions: '', material: '' };
   boardBuffer = { raw: '', unit: 'in' };
   boardDirty = false;
+  user1Buffer = { raw: '' };
+  user1Dirty = false;
   typedText = '';
   takeoffText = '';
   correctingId = null;
@@ -879,6 +892,84 @@ async function commitCut001(root) {
   }
 }
 
+function readUser1Buffer(root, fallback = null) {
+  const field = root.querySelector('[data-field="user1-part-length"]');
+  const raw = field?.value ?? user1Buffer.raw ?? (fallback == null ? '' : String(fallback));
+  user1Buffer = { raw: String(raw) };
+  return user1Buffer;
+}
+
+async function commitUser1XBrace(root, { partLengthIn = null } = {}) {
+  const screen = screenFromLocation(window.location);
+  if (!screen.localRecordId || observationInFlight) {
+    return;
+  }
+  if (partLengthIn == null) {
+    readUser1Buffer(root);
+  } else {
+    user1Buffer = { raw: String(partLengthIn) };
+  }
+  const parsed = Number(user1Buffer.raw);
+  if (!Number.isFinite(parsed)) {
+    pageStatus = 'Job 1 part length must be a number from 16 to 18 in.';
+    renderInto(root);
+    return;
+  }
+  const project = await projectIndex(screen.localRecordId);
+  if (!project) {
+    return;
+  }
+  observationInFlight = applyUser1XBraceConfiguration({
+    localRecordId: project.localRecordId,
+    expectedHead: project.currentHead,
+    actionId: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    partLengthIn: parsed,
+    basis: 'customer-configure',
+  });
+  try {
+    await observationInFlight;
+    user1Dirty = false;
+    boardDirty = false;
+    pageStatus = `Job 1 definition updated for ${parsed} in parts. A fresh Store answer is required for this revision.`;
+    renderInto(root);
+  } catch (error) {
+    pageStatus = `Save failed: ${error.message}`;
+    renderInto(root);
+  } finally {
+    observationInFlight = null;
+  }
+}
+
+async function clearUser1XBrace(root) {
+  const screen = screenFromLocation(window.location);
+  if (!screen.localRecordId || observationInFlight) {
+    return;
+  }
+  const project = await projectIndex(screen.localRecordId);
+  if (!project) {
+    return;
+  }
+  observationInFlight = clearUser1XBraceConfiguration({
+    localRecordId: project.localRecordId,
+    expectedHead: project.currentHead,
+    actionId: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+  });
+  try {
+    await observationInFlight;
+    user1Buffer = { raw: '' };
+    user1Dirty = false;
+    pageStatus = 'Job 1 bench definition cleared. Generic Board input is active.';
+    renderInto(root);
+  } catch (error) {
+    pageStatus = `Save failed: ${error.message}`;
+    renderInto(root);
+  } finally {
+    observationInFlight = null;
+  }
+}
+
 function archiveInput(root) {
   return root.querySelector('[data-archive-input]');
 }
@@ -964,6 +1055,15 @@ export function startShell(root) {
   const render = () => renderInto(root);
 
   root.addEventListener('change', async (event) => {
+    if (event.target?.getAttribute?.('data-field') === 'user1-part-length') {
+      readUser1Buffer(root);
+      user1Dirty = true;
+      markUnapplied(root, 'user1', true);
+      markUnapplied(root, 'store', true);
+      applyUnappliedReviewLock(root);
+      await commitUser1XBrace(root);
+      return;
+    }
     const archive = event.target.closest('[data-archive-input]');
     if (archive && archive.files && archive.files.length > 0) {
       const file = archive.files[0];
@@ -1174,7 +1274,7 @@ export function startShell(root) {
         localRecordId: screen.localRecordId,
         actionId,
         createdAt: new Date().toISOString(),
-        unapplied: boardDirty,
+        unapplied: definitionDirty(),
       });
       observationInFlight
         .then(() => {
@@ -1242,6 +1342,18 @@ export function startShell(root) {
     }
     if (action === 'submit-takeoff-row') {
       commitTakeoffRow(root);
+      return;
+    }
+    if (action === 'start-user1-xbrace') {
+      commitUser1XBrace(root, { partLengthIn: 16 });
+      return;
+    }
+    if (action === 'apply-user1-xbrace') {
+      commitUser1XBrace(root);
+      return;
+    }
+    if (action === 'clear-user1-xbrace') {
+      clearUser1XBrace(root);
       return;
     }
     if (action === 'apply-board-length') {
@@ -1414,6 +1526,12 @@ export function startShell(root) {
       markUnapplied(root, 'board', true);
       markUnapplied(root, 'store', true);
       applyUnappliedReviewLock(root);
+    } else if (field === 'user1-part-length') {
+      user1Buffer.raw = value;
+      user1Dirty = true;
+      markUnapplied(root, 'user1', true);
+      markUnapplied(root, 'store', true);
+      applyUnappliedReviewLock(root);
     }
   });
 
@@ -1427,6 +1545,7 @@ export function startShell(root) {
         || takeoffBuffer.quantity
         || boardBuffer.raw
         || boardDirty
+        || user1Dirty
         || correctingId
       ) {
         event.preventDefault();
@@ -1448,6 +1567,11 @@ export function startShell(root) {
     if (field.startsWith('measurement-')) {
       event.preventDefault();
       commitMeasurement(root);
+      return;
+    }
+    if (field === 'user1-part-length') {
+      event.preventDefault();
+      commitUser1XBrace(root);
       return;
     }
     if (field.startsWith('board-')) {
