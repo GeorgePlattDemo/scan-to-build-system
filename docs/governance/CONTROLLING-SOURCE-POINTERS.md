@@ -17,7 +17,7 @@ This filename is retained temporarily for link compatibility. The sources below 
 | Demand Architecture Traceability | Historical REF/PLAN traceability matrix. Do not carry it forward as a current implementation map. |
 | North Carolina Wood: Demand as Architecture 0.3 | Full private source remains private provenance. Current admitted research propositions are in Program `research/demand-as-architecture.md`. |
 | Governed Reference ADRs / governance notes | Enduring rulings reconciled into Program `governance/governed-reference-rulings.md`; exact source copies remain historical evidence. |
-| Information-custody / external-processing notes | Reconciled into Program `governance/information-custody-and-processing.md`. |
+| Information-custody / external-processing notes | Current application/evidence/record custody boundary is System `docs/application/INFORMATION-CUSTODY-BOUNDARY.md`. Broader secondary-use, aggregation, participant, provider-policy, and commercial-sensitivity questions remain Program `governance/information-custody-and-processing.md`. |
 | M1/reference-node runtime, schemas, fixtures, tests and audits | Historical executable evidence. Port only a specific requirement/test when a current owner demonstrates need. |
 
 ## Rule
