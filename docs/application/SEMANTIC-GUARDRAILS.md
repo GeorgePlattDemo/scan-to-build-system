@@ -1,14 +1,14 @@
 # Application Semantic Guardrails
 
-This page is the **System implementation summary** of shared semantic distinctions. It is not the cross-repository vocabulary authority.
+This page is the **System implementation summary** of the canonical operational distinctions owned by System.
 
 ## Current shared authority
 
-Canonical shared definitions:
+Canonical operational definition index:
 
-`GeorgePlattDemo/3d-solutions-program/governance/definitions.md`
+[`../definitions/README.md`](../definitions/README.md)
 
-System owns executable application contracts and may use narrower implementation terms, but it must not silently redefine a shared Program term.
+System owns the shared operational meaning and the executable application contracts beneath it. Program may record research vocabulary, evidence, and adoption decisions; Store may define narrower Store-local terms. Neither silently redefines the System job meaning.
 
 ## Application guardrails
 
@@ -27,4 +27,4 @@ The earlier semantic-boundary document came from:
 
 `GeorgePlattDemo/grok-file@4595b4785a2686486e477ce2e70fb3f476285a8d/docs/architecture/STB-SEMANTIC-BOUNDARIES-0.1.md`
 
-That pin remains provenance for the reconciliation history. It is no longer the current semantic authority.
+That pin remains provenance for the reconciliation history. It is no longer current operational semantic authority.

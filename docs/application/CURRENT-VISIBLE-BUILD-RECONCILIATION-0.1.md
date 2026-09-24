@@ -19,8 +19,8 @@ The preservation checkpoint remains unchanged while this reconciliation proceeds
 
 ## Controlling ownership
 
-- **Program** — shared definitions, governance, research, evidence and reviewed cross-repository decisions.
-- **System** — application behavior, project state, project-specific definitions/configuration, user interaction, Store request/response custody, records, executable application contracts and tests.
+- **Program** — research, experiments, evidence, machine-development questions/findings, reviewed decisions/adoption records, partnerships/economic/business work, and migration/retirement records.
+- **System** — canonical shared operational definitions, application behavior, project state, project-specific definitions/configuration, user interaction, Store request/response custody, records, executable application contracts and tests.
 - **Store** — catalog/material facts, stock, admitted capability, modeled travel/time, Store economics, fulfillment facts and Store answers.
 - **Review** — public review/presentation surface. It may display System and Store results but must not remain the only home of current application behavior.
 

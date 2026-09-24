@@ -9,7 +9,7 @@ Use this file to find the current owner first and historical source second.
 
 | Subject | Current owner / source | Role here |
 | --- | --- | --- |
-| Shared definitions / governance / Program research | `GeorgePlattDemo/3d-solutions-program` | Current public Program authority |
+| Canonical shared operational definitions / application contracts | `GeorgePlattDemo/scan-to-build-system` | Current System operational-semantic authority |
 | Application | `GeorgePlattDemo/scan-to-build-system` → [`apps/stb/`](../../apps/stb/) | Current executable application owner |
 | Store | `GeorgePlattDemo/scan-to-build-store` | Current Store-owned material, stock, capability, economics and fulfillment authority |
 | Full public proof/review surface | `GeorgePlattDemo/scan-to-build-review` | Review/demo surface; not the semantic owner |
@@ -26,7 +26,7 @@ Exact historical admissions remain in [`../../provenance/ADMISSION-REGISTER.md`]
 | Grok transferred application | `grok-file/build/app-foundation-0.1@4595b4785a2686486e477ce2e70fb3f476285a8d` | Provenance for the application transfer; not current app authority |
 | Grok roadmap | `grok-file/plan/app-master-roadmap-0.1@985db87a707bd454d7c58419e2cf4d884f00cded` | Historical planning ancestry |
 | Grok intake contract | `grok-file/plan/app-entry-intake-contract-0.1@2d80b5a7b0e7687c425e100bfa0ff3a833166d42` | Historical donor; current intake is reconciled in System |
-| Governed Reference | `scan-to-build-governed-reference/main@18949f163718a937f072f4be3a654bb303e53160` | Historical governance/reference implementation; enduring meaning moved to Program |
+| Governed Reference | `scan-to-build-governed-reference/main@18949f163718a937f072f4be3a654bb303e53160` | Historical governance/reference implementation; still-valid operational meaning must be admitted by the current System/Store owner |
 | Transfer Staging | `scan-to-build-transfer-staging/main@4e9a50218679e05801e84f34eea99830db0779a0` | Failed Candidate.2 transfer/recovery history; do not build from |
 
 ## In-repo working buckets
@@ -54,7 +54,7 @@ Exact historical admissions remain in [`../../provenance/ADMISSION-REGISTER.md`]
 - Store answers stale; a new consequential revision asks again.
 - Owner archive is an inert snapshot.
 - Donor/Atlas terms do not mint current governed objects.
-- Program definitions govern shared meaning; System and Store own their executable implementation.
+- System definitions govern shared operational meaning; Store owns Store-local facts/contracts; Program owns research/evidence/decision and migration records.
 
 ## Retirement rule
 

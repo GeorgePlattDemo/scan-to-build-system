@@ -1,6 +1,14 @@
 # Start here
 
-This is the working repository. Other Scan-to-Build repositories are provenance until a current source document says otherwise.
+This is the working **application** repository.
+
+Repository roles are intentionally separate:
+
+- **3D Solutions Program** — research, experiments, evidence, machine-development questions/findings, reviewed decisions/adoption records, partnerships/economic/business work, and migration/retirement records.
+- **Scan-to-Build System** — application, canonical shared operational definitions, project-definition classes, records/custody, customer → Store → Yard journey, adapters/integration, and application tests.
+- **Scan-to-Build Store** — Store-specific vocabulary, catalog/SKUs, material resolution, stock, admitted capability, modeled operations/time, economics, Store answers/refusals/deferrals, and Store-side tests.
+
+Program investigates and records why. System defines what the job means. Store determines what this Store can provide for that job.
 
 ## First read
 
@@ -73,7 +81,7 @@ Do not start in `grok-file`, a public exhibit, or a new demo folder.
 | App | `apps/stb/` |
 | Trial protocol | `work/capability-bridge/TRIAL-PROTOCOL.md` |
 | Dimensional / sheet / Store evidence surface | `work/capability-bridge/` |
-| Machine research / engineering | `work/machines/` |
+| Current System machine interfaces / implementation evidence | `work/machines/` — retain only System-owned implementation material; broader research belongs in Program |
 | Issued patents | `docs/patents/source/` |
 | Atlas originals | `source-library/atlas-research/` (donor) |
 | Detailed project/source index | `STB-PROJECT-STATE-AND-SOURCE-INDEX.md` |

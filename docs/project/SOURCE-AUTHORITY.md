@@ -8,24 +8,23 @@ A source may be current and still control only one layer or question. No documen
 
 Words do not transfer authority between layers.
 
-## Program — shared meaning and governance
+## Program — research, evidence, decisions, and migration
 
 `GeorgePlattDemo/3d-solutions-program` owns:
 
-- shared cross-repository definitions and semantic boundaries;
-- cross-repository governance;
-- research questions and experiment records;
-- reviewed Program decisions;
+- research questions and experimental protocols;
+- experimental evidence and machine-development findings;
+- reviewed Program decisions and adoption records;
+- partnership, economic, and business-development work;
 - donor migration/retirement records.
 
-Canonical shared vocabulary is in Program `governance/definitions.md`.
-
-Program documentation does not silently rewrite System or Store runtime behavior.
+Program may propose changes to operational meaning or capability. A Program document does not make that proposal current in System or Store.
 
 ## Application / System
 
 `GeorgePlattDemo/scan-to-build-system` owns:
 
+- canonical shared operational definitions and semantic boundaries;
 - user-facing interaction;
 - entry and routing;
 - local project/application state;
@@ -76,7 +75,7 @@ Program owns the research questions. Store may declare the admitted machine/cell
 
 `GeorgePlattDemo/scan-to-build-governed-reference@18949f163718a937f072f4be3a654bb303e53160` is historical governance/reference provenance.
 
-Its enduring shared meanings/rulings have been reconciled into Program. Its M1 runtime, fixtures, schemas, tests, and audits remain historical executable evidence unless a current owner deliberately admits a specific requirement/test.
+Its still-valid operational meanings must be admitted by the current operational owner, principally System for shared job/application semantics or Store for Store-local facts. Research, evidence, and reviewed program decisions may be reconciled into Program. Its M1 runtime, fixtures, schemas, tests, and audits remain historical executable evidence unless a current owner deliberately admits a specific requirement/test.
 
 It is no longer the current cross-repository semantic authority.
 
@@ -84,7 +83,7 @@ It is no longer the current cross-repository semantic authority.
 
 Grok pins remain provenance for transferred application ancestry, planning, prototypes, and research.
 
-Grok is not the current application, semantic, Store, or machine authority.
+Grok is not the current application, operational-semantic, Store, or machine authority.
 
 ## Research
 

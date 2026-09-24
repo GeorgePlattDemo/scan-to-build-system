@@ -1,6 +1,6 @@
 # Scan-to-Build System
 
-**Current working repository for the Scan-to-Build application, Store integration, machine/cell research, architecture, definitions, provenance, and verified project state.**
+**Current working repository for the Scan-to-Build application, canonical shared operational definitions, Store integration, records, adapters, tests, provenance, and verified application/project state.**
 
 3D Solutions LLC · Greensboro, North Carolina  
 U.S. Patents 9,720,401 B2 and 10,768,609 B2
@@ -55,7 +55,7 @@ Acceptance does not establish physical production, controller-in-loop validation
 
 ## Purpose
 
-This repository is the current working surface for Scan-to-Build.
+This repository is the current working surface for the Scan-to-Build **application and shared operational definition layer**. Program and Store retain their separate ownership described in [`START-HERE.md`](START-HERE.md).
 
 Earlier repositories, demonstrations, prototypes, planning documents, research, and implementation experiments remain valuable source material, but they are not automatically current.
 
@@ -116,7 +116,7 @@ Reference and simulated D-001/S-001 behavior is not commissioned physical produc
 
 Physical capability must be demonstrated before it is claimed.
 
-Machine research and engineering live under [`work/machines/`](work/machines/).
+System-specific machine interfaces, implementation evidence, and historical engineering material may remain under [`work/machines/`](work/machines/). Broad machine research, candidate technologies, experiments, and machine-development questions/findings belong in `GeorgePlattDemo/3d-solutions-program`; relocation is a separate preservation-checked cleanup task.
 
 ---
 

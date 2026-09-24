@@ -8,7 +8,7 @@
 This file is the only Atlas text allowed to steer the application and Store surfaces.
 Original part files stay donors. Atlas part numbers are not architecture, Store types, Cell objects, or runtime states.
 
-Authority if this file conflicts with an owner: Governed Reference → Store → admitted application semantics → this rewrite.
+Authority if this file conflicts with an owner: System canonical operational definitions → Store-local facts/capability → Program research/evidence for its own questions → this rewrite. Historical Governed Reference material is provenance, not current authority.
 
 ## 0. Borrow-first (app layer)
 
