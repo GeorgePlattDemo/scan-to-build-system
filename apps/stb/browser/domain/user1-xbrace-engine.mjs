@@ -1,12 +1,12 @@
-import { canonicalEqual } from '/shared/canonical.mjs';
+import { canonicalEqual } from '../../shared/canonical.mjs';
 import {
   USER_DEFINED_BOARD_DEFINITION,
   USER_DEFINED_BOARD_MATERIAL_DEMAND,
-} from '/shared/contracts.mjs';
+} from '../../shared/contracts.mjs';
 import {
   USER1_XBRACE_RULE_VERSION,
   evaluateUser1XBraceConfiguration,
-} from '/shared/user1-xbrace-rule.mjs';
+} from '../../shared/user1-xbrace-rule.mjs';
 
 function opaqueId() {
   return crypto.randomUUID();
