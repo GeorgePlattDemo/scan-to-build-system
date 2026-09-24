@@ -29,6 +29,7 @@ async function installCaptureTransport(page) {
     const {
       STORE_PIN,
       STORE_PROTOCOL_VERSION,
+      STORE_FRESH_EVALUATION_RULE_ID,
       WRAPPER_BUILD_ID,
     } = await import('/shared/contracts.mjs');
     window.__user1StoreCalls = [];
@@ -55,6 +56,13 @@ async function installCaptureTransport(page) {
         rawOffering: null,
         rawEvaluation: {
           status: 'SUPPORTABLE',
+          freshEvaluation: true,
+          evaluationReceipt: {
+            requestId: wire.requestId,
+            freshnessRule: STORE_FRESH_EVALUATION_RULE_ID,
+            authority: { storeRevision: STORE_PIN },
+            receiptHash: `test-receipt-${wire.requestId}`,
+          },
           lines: [{
             lineId: line.lineId ?? null,
             status: 'SUPPORTABLE',
