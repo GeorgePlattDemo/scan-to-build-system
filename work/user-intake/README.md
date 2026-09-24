@@ -113,13 +113,8 @@ Sarah remains a donor/prototype source only. No missing current requirement is t
 
 ## Sources
 
-Primary current sources are indexed in `../../docs/application/CONTROLLING-SOURCE-POINTERS.md`.
+Current readers start with `../../docs/application/CONTROLLING-SOURCE-POINTERS.md` and the current System application tree at `../../apps/stb/`.
 
-Most relevant:
-
-- accepted application README and implementation at `4595b4785a2686486e477ce2e70fb3f476285a8d`;
-- `STB-SEMANTIC-BOUNDARIES-0.1.md` at that accepted app pin;
-- frozen application roadmap at `985db87a707bd454d7c58419e2cf4d884f00cded`;
-- entry/intake contract at `2d80b5a7b0e7687c425e100bfa0ff3a833166d42`, **ADMIT AFTER REWRITE** because its embedded Store pin is stale relative to the accepted app.
+Historical source: transferred app `GeorgePlattDemo/grok-file@4595b4785a2686486e477ce2e70fb3f476285a8d`; `STB-SEMANTIC-BOUNDARIES-0.1.md` at that transferred-app pin; frozen application roadmap `985db87a707bd454d7c58419e2cf4d884f00cded`; entry/intake contract `2d80b5a7b0e7687c425e100bfa0ff3a833166d42` (**ADMIT AFTER REWRITE** because its embedded Store pin is stale relative to the accepted app). These are provenance/history, not current System authority.
 
 **NO BLOOD ON WOOD.**
