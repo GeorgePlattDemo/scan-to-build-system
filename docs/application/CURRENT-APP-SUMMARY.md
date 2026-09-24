@@ -35,10 +35,11 @@ Historical test counts recorded by that donor README were:
 
 Those counts are provenance for that exact donor baseline, not current System test results.
 
-## Current shared meaning
+## Current shared operational meaning
 
-Shared terminology/governance is owned by:
+Canonical shared operational definitions are owned by this System repository:
 
-`GeorgePlattDemo/3d-solutions-program`
+- `docs/definitions/README.md` — ownership/precedence and human-readable definition index;
+- `apps/stb/shared/` — identified executable contracts and rules.
 
-System owns the executable application behavior that implements or consumes those meanings.
+Program owns research, evidence, reviewed decisions/adoption records, and migration history. Store owns Store-local facts, capability, economics, and answers.
