@@ -28,8 +28,9 @@ It remains software/reference behavior. It does not by documentation alone estab
 2. [`../project/SOURCE-AUTHORITY.md`](../project/SOURCE-AUTHORITY.md)
 3. [`../definitions/README.md`](../definitions/README.md) — canonical operational definitions and executable-source map
 4. [`COMMON-ENTRY-ARCHITECTURE.md`](COMMON-ENTRY-ARCHITECTURE.md) — canonical multiple-entry / one-truth-model application rule
-5. [`../../work/user-intake/README.md`](../../work/user-intake/README.md) for current intake work
-6. [`CONTROLLING-SOURCE-POINTERS.md`](CONTROLLING-SOURCE-POINTERS.md) for current owner pointers plus historical application provenance
+5. [`INFORMATION-CUSTODY-BOUNDARY.md`](INFORMATION-CUSTODY-BOUNDARY.md) — current project/evidence/owner-record custody and future disclosure boundary
+6. [`../../work/user-intake/README.md`](../../work/user-intake/README.md) for current intake work
+7. [`CONTROLLING-SOURCE-POINTERS.md`](CONTROLLING-SOURCE-POINTERS.md) for current owner pointers plus historical application provenance
 
 ## Application semantic rule
 
