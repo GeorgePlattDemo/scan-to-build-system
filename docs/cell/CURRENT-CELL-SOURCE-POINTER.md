@@ -12,9 +12,10 @@ This file preserves the historical Cell source identity while the current machin
 
 ## Current homes
 
-- Program research: `GeorgePlattDemo/3d-solutions-program/research/machine-site-convergence.md`
-- System machine-development work: [`../../work/machines/`](../../work/machines/)
-- System mechanical source map: [`../machine/POST-APP-MECHANICAL-SOURCE-MAP.md`](../machine/POST-APP-MECHANICAL-SOURCE-MAP.md)
+- Program machine-development research: `GeorgePlattDemo/3d-solutions-program/research/machine-development/`
+- Program machine-site research: `GeorgePlattDemo/3d-solutions-program/research/machine-site-convergence.md`
+- System mechanical source map/provenance: [`../machine/POST-APP-MECHANICAL-SOURCE-MAP.md`](../machine/POST-APP-MECHANICAL-SOURCE-MAP.md)
+- System retains current application/interface contracts and tests; deeper System machine/staging documents remain under separate reclassification review
 - Store-owned admitted capability remains in `GeorgePlattDemo/scan-to-build-store`
 
 Candidate machine/cell objects remain candidate until separately accepted by their owner.
