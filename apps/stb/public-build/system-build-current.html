@@ -11,7 +11,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=48518c32"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=38aa6688"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
 <script src="stb-store-handoff-contract.js?v=82c7dcf3"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
@@ -116,6 +116,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       .seat-guided-stage .close{border-top:1px solid var(--border-accent);margin-top:16px;padding-top:14px}
       .seat-guided-stage .close p{margin:0 0 9px;color:var(--text2)}
       @media(max-width:820px){.s001-v2-intent-grid,.s001-v2-machine-grid{grid-template-columns:1fr}.seat-guided-stage .ws-journey-grid{grid-template-columns:1fr}}
+      .alcove-chain{margin:0 0 18px;padding:14px 16px;border:1px solid var(--border-accent,var(--border));border-radius:10px;background:var(--surface,#fff)}.alcove-chain .chainhd{margin:0 0 10px;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--accent,#8a5a2b)}.alcove-chain code{font:10.5px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all;color:var(--text)}.alcove-chain .chainpair{display:grid;gap:10px;margin:0 0 12px}.alcove-chain .chainpair div{padding:10px 12px;border-radius:8px;background:var(--tint,#f6efe6)}.alcove-chain .chainpair b{display:block;margin:0 0 4px;font-size:10px;letter-spacing:.07em;color:var(--text2)}.alcove-chain .chainpair code{font-size:12px}.alcove-chain .chainlinks{margin:0;padding:0;list-style:none;display:grid;gap:8px}.alcove-chain .chainlinks li{padding:8px 10px;border-left:3px solid var(--border-accent,var(--border));background:var(--bg)}.alcove-chain .chainstep{margin:0 0 4px;font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--text2)}.alcove-chain .chainrow{display:grid;grid-template-columns:128px 1fr;gap:8px;font-size:11px;padding:1px 0}.alcove-chain .chainrow span{color:var(--text2)}.alcove-chain .chainhistory{margin:0;padding-left:16px;font-size:11px}
     `;
     doc.head.append(style);
 
@@ -1443,7 +1444,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
     function syncAlcoveCommercialSurface() {
       const pairs = {
-        'alcove-order-version':'Version 1 · confirmed',
+        'alcove-order-version':'Version '+(alcoveCurrentVersion()?.n || 1)+' · confirmed',
         'alcove-order-geometry':textOf('p-h')+' H × '+textOf('p-w')+' W × '+textOf('p-d')+' D',
         'alcove-order-span':textOf('p-span')+' nominal interior span',
         'alcove-order-shelves':textOf('p-shelves')+' shelves · '+textOf('p-heights'),
@@ -1475,6 +1476,101 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         const el = doc.getElementById(id);
         if (el) el.textContent = value;
       });
+      renderAlcoveChain();
+    }
+
+    // ── Alcove version chain ──────────────────────────────────────────────
+    // SENT (your definition) → ARRIVED (Store Zero receipt) → ANSWERED → YOUR CALL → FINAL VERSION.
+    // Links 1–3 are read from the Store Zero answer. Links 4–5 are hashed here (simulated commercial layer).
+    const alcoveChainState = { version:null, decision:null, order:null };
+    function alcoveCurrentVersion() {
+      const list = win.STBAlcoveVersions || [];
+      return list.length ? list[list.length - 1] : null;
+    }
+    function alcoveCanonical(value) {
+      if (Array.isArray(value)) return '[' + value.map(alcoveCanonical).join(',') + ']';
+      if (value && typeof value === 'object') return '{' + Object.keys(value).sort().map(k => JSON.stringify(k) + ':' + alcoveCanonical(value[k])).join(',') + '}';
+      return JSON.stringify(value === undefined ? null : value);
+    }
+    async function alcoveSha256(value) {
+      const bytes = new TextEncoder().encode(alcoveCanonical(value));
+      const digest = await win.crypto.subtle.digest('SHA-256', bytes);
+      return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    function alcoveChainFacts() {
+      const answer = win.STBAlcoveStoreAnswer || null;
+      const receipt = answer?.evaluationReceipt || {};
+      const authority = receipt.authority || {};
+      const version = alcoveCurrentVersion();
+      if (alcoveChainState.version !== (version?.n || null)) {
+        alcoveChainState.version = version?.n || null;
+        alcoveChainState.decision = null;
+        alcoveChainState.order = null;
+      }
+      return { answer, receipt, authority, version };
+    }
+    function alcoveHashLine(label, value) {
+      return '<div class="chainrow"><span>' + label + '</span><code>' + (value || '—') + '</code></div>';
+    }
+    function alcoveChainHtml(pageId) {
+      const { answer, receipt, authority, version } = alcoveChainFacts();
+      if (!answer || !version) return '';
+      const vLabel = 'v' + version.n;
+      const status = receipt.status || answer.priceCompleteness?.status || '—';
+      const price = textOf('p-price');
+      const decision = alcoveChainState.decision;
+      const order = alcoveChainState.order;
+      const pair = pageId === 'store'
+        ? '<div class="chainpair"><div><b>YOUR DEFINITION · SENT · ' + vLabel + '</b><code>' + (answer.payloadDigest || '—') + '</code></div>'
+          + '<div><b>STORE ZERO · ARRIVAL RECEIPT</b><code>' + (receipt.receiptHash || '—') + '</code></div></div>'
+        : '';
+      const history = (win.STBAlcoveVersions || []).filter(v => v.exchange).map(v =>
+        '<li><b>v' + v.n + '</b> · sent ' + (v.exchange.payloadDigest || '—').slice(0, 16) + '… · receipt ' + (v.exchange.receiptHash || '—').slice(0, 16) + '… · ' + (v.exchange.status || '—') + (v.n === version.n ? ' · current' : ' · kept, not edited') + '</li>').join('');
+      return '<div class="alcove-chain" data-alcove-chain="' + pageId + '">'
+        + '<p class="chainhd">VERSION CHAIN · ALCOVE ' + vLabel + '</p>' + pair
+        + '<ol class="chainlinks">'
+        + '<li><p class="chainstep">1 · SENT</p>' + alcoveHashLine('Version', vLabel + ' · ' + (answer.candidateRevisionId || '—')) + alcoveHashLine('Sent', win.STBAlcoveLastSentAt || version.confirmedAt) + alcoveHashLine('Sent hash', answer.payloadDigest) + alcoveHashLine('Demand signature', answer.demandSignature) + '</li>'
+        + '<li><p class="chainstep">2 · ARRIVED AT STORE ZERO</p>' + alcoveHashLine('Receipt hash', receipt.receiptHash) + alcoveHashLine('Request', receipt.requestId) + alcoveHashLine('Received', receipt.evaluatedAt) + alcoveHashLine('Store revision', authority.storeRevision) + alcoveHashLine('Catalog', authority.catalogHash) + alcoveHashLine('Machine envelope', (authority.machineEnvelope?.id || '') + ' · ' + (authority.machineEnvelope?.hash || '—')) + alcoveHashLine('Economics', (authority.economics?.id || '') + ' · ' + (authority.economics?.hash || '—')) + '</li>'
+        + '<li><p class="chainstep">3 · ANSWERED</p>' + alcoveHashLine('Status', status + ' · ' + price) + alcoveHashLine('Input hash', answer.calculationIdentity?.inputHash) + alcoveHashLine('Result hash', answer.calculationIdentity?.resultHash) + '</li>'
+        + '<li><p class="chainstep">4 · YOUR CALL</p>' + (decision ? alcoveHashLine(decision.decision, decision.hash) + alcoveHashLine('At', decision.at) : alcoveHashLine('Waiting', 'acknowledge or decline this answer')) + '</li>'
+        + '<li><p class="chainstep">5 · FINAL VERSION</p>' + (order ? alcoveHashLine('Order hash', order.hash) + alcoveHashLine('At', order.at + ' · simulated · no money moved') : alcoveHashLine('Waiting', 'continue after acknowledging')) + '</li>'
+        + '</ol>'
+        + (history ? '<p class="chainstep">VERSION HISTORY</p><ul class="chainhistory">' + history + '</ul>' : '')
+        + '</div>';
+    }
+    function renderAlcoveChain() {
+      if (activeJourneyProject !== 'alcove') return;
+      ['store', 'request', 'yard', 'record'].forEach(pageId => {
+        const main = doc.querySelector('#' + pageId + ' .main');
+        if (!main) return;
+        let box = main.querySelector(':scope > .alcove-chain-slot');
+        const html = alcoveChainHtml(pageId);
+        if (!html) { if (box) box.remove(); return; }
+        if (!box) {
+          box = doc.createElement('div');
+          box.className = 'alcove-chain-slot';
+          main.prepend(box);
+        }
+        box.innerHTML = html;
+      });
+    }
+    async function recordAlcoveDecision(kind) {
+      const { answer, receipt, version } = alcoveChainFacts();
+      if (!answer || !version) return;
+      const at = new Date().toISOString();
+      const hash = await alcoveSha256({ kind:'ALCOVE_DECISION', decision:kind, version:version.n, receiptHash:receipt.receiptHash || null, resultHash:answer.calculationIdentity?.resultHash || null, at });
+      alcoveChainState.decision = { decision:kind, hash, at };
+      alcoveChainState.order = null;
+      renderAlcoveChain();
+    }
+    async function recordAlcoveOrder() {
+      const { answer, receipt, version } = alcoveChainFacts();
+      const decision = alcoveChainState.decision;
+      if (!answer || !version || !decision || decision.decision !== 'ACKNOWLEDGED' || alcoveChainState.order) return;
+      const at = new Date().toISOString();
+      const hash = await alcoveSha256({ kind:'ALCOVE_FINAL_VERSION', version:version.n, decisionHash:decision.hash, receiptHash:receipt.receiptHash || null, resultHash:answer.calculationIdentity?.resultHash || null, amount:textOf('p-price'), packaging:selectedDecision('Packaging'), handoff:selectedDecision('Handoff'), collector:selectedDecision('Who collects'), at });
+      alcoveChainState.order = { hash, at };
+      renderAlcoveChain();
     }
 
     function reconcileAlcoveCommercialJourney() {
@@ -1708,6 +1804,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         if (acceptance) acceptance.textContent = 'DECLINED · REFERENCE';
         if (note) note.textContent = 'Reference offer declined. Definition remains intact; no settlement or downstream authority was created.';
         if (continueButton) continueButton.disabled = true;
+        recordAlcoveDecision('DECLINED');
         return;
       }
       if (action === 'accept') {
@@ -1715,6 +1812,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         if (acceptance) acceptance.textContent = 'NOT ESTABLISHED · NO COMMERCIAL OFFER';
         if (note) note.textContent = 'Reference Store answer acknowledged. Commercial acceptance and settlement / payment remain NOT ESTABLISHED.';
         if (continueButton) continueButton.disabled = false;
+        recordAlcoveDecision('ACKNOWLEDGED');
         return;
       }
       if (action === 'store') {
@@ -1724,6 +1822,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       }
       if (action === 'yard') {
         if (doc.documentElement.dataset.alcoveReferenceDecision !== 'acknowledged') return;
+        recordAlcoveOrder();
         originalShow.call(win,'yard');
         setTimeout(syncAlcoveCommercialSurface,0);
         return;
