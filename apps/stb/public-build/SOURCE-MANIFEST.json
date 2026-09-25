@@ -111,24 +111,24 @@
   "systemEdits": [
     {
       "path": "system-build-base-8d8a9dd.html",
-      "pass": "alcove-trail-wiring",
-      "blobSha": "88703fb6c921746233987687e1d50e682e9a5d9c",
-      "bytes": 131957,
-      "reason": "Alcove wired to the trail rules: Alcove uses the same six-step nav function as Start your own (from its own stage map); reaching the Shared Home or Landing by any route leaves a rule-bound project; Alcove asks the Store only while an Alcove page is showing and reuses a complete answer for an identical definition on confirm; the record page Start button returns to the project library. No page copy changed."
+      "pass": "alcove-version-chain",
+      "blobSha": "7c377b72ea606a632675801416fd1081adfc6bb3",
+      "bytes": 135189,
+      "reason": "Alcove version chain: confirmed definitions get version numbers (a change makes a new version, old versions kept); the Store, Your call, Yard and Record pages show one chain card (SENT, ARRIVED with the Store Zero receipt hash, ANSWERED, YOUR CALL hashed, FINAL VERSION order hash, simulated) with full-length hashes; Configure shows the running modeled cell time (cutting, milling, spot drilling, handling, total) from the Store answer. Existing page copy unchanged."
     },
     {
       "path": "system-build-front-door-0.5.html",
-      "pass": "alcove-trail-wiring",
-      "blobSha": "48518c3226359bb242d819a7300426815d2dc662",
+      "pass": "alcove-version-chain",
+      "blobSha": "38aa668842c296f60d8683157ce33bee6ed9136e",
       "bytes": 39691,
-      "reason": "Alcove wired to the trail rules: Alcove uses the same six-step nav function as Start your own (from its own stage map); reaching the Shared Home or Landing by any route leaves a rule-bound project; Alcove asks the Store only while an Alcove page is showing and reuses a complete answer for an identical definition on confirm; the record page Start button returns to the project library. No page copy changed."
+      "reason": "Alcove version chain: confirmed definitions get version numbers (a change makes a new version, old versions kept); the Store, Your call, Yard and Record pages show one chain card (SENT, ARRIVED with the Store Zero receipt hash, ANSWERED, YOUR CALL hashed, FINAL VERSION order hash, simulated) with full-length hashes; Configure shows the running modeled cell time (cutting, milling, spot drilling, handling, total) from the Store answer. Existing page copy unchanged."
     },
     {
       "path": "system-build-current.html",
-      "pass": "alcove-trail-wiring",
-      "blobSha": "bc86199826d32106823e94ec93c9e524c574db4c",
-      "bytes": 218699,
-      "reason": "Alcove wired to the trail rules: Alcove uses the same six-step nav function as Start your own (from its own stage map); reaching the Shared Home or Landing by any route leaves a rule-bound project; Alcove asks the Store only while an Alcove page is showing and reuses a complete answer for an identical definition on confirm; the record page Start button returns to the project library. No page copy changed."
+      "pass": "alcove-version-chain",
+      "blobSha": "e5ef3229198db08768271f84247bccbb2bb6c767",
+      "bytes": 227072,
+      "reason": "Alcove version chain: confirmed definitions get version numbers (a change makes a new version, old versions kept); the Store, Your call, Yard and Record pages show one chain card (SENT, ARRIVED with the Store Zero receipt hash, ANSWERED, YOUR CALL hashed, FINAL VERSION order hash, simulated) with full-length hashes; Configure shows the running modeled cell time (cutting, milling, spot drilling, handling, total) from the Store answer. Existing page copy unchanged."
     },
     {
       "path": "stb-build-guide-spec.js",
