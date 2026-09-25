@@ -111,24 +111,24 @@
   "systemEdits": [
     {
       "path": "system-build-base-8d8a9dd.html",
-      "pass": "front-door-phase-0",
-      "blobSha": "a10def93c387bee7c45f95514458345e9f02f910",
-      "bytes": 131665,
-      "reason": "Front door Phase 0: each door shows one row of buttons after Back, with exactly one live button, last in the row, going to the Shared Home (New user: LATER, browse without an account; Returning and Professional: SHARED HOME →). Future buttons shown inert, marked COMING, listed under Build later in the Dev Guide (Professional: configured later with contractor adapters). Demo-account buttons and wrapper-layer button surgery removed."
+      "pass": "alcove-trail-wiring",
+      "blobSha": "88703fb6c921746233987687e1d50e682e9a5d9c",
+      "bytes": 131957,
+      "reason": "Alcove wired to the trail rules: Alcove uses the same six-step nav function as Start your own (from its own stage map); reaching the Shared Home or Landing by any route leaves a rule-bound project; Alcove asks the Store only while an Alcove page is showing and reuses a complete answer for an identical definition on confirm; the record page Start button returns to the project library. No page copy changed."
     },
     {
       "path": "system-build-front-door-0.5.html",
-      "pass": "front-door-phase-0",
-      "blobSha": "e1835d3f276627e7160e54f7a146de5186d2d5ac",
+      "pass": "alcove-trail-wiring",
+      "blobSha": "48518c3226359bb242d819a7300426815d2dc662",
       "bytes": 39691,
-      "reason": "Front door Phase 0: each door shows one row of buttons after Back, with exactly one live button, last in the row, going to the Shared Home (New user: LATER, browse without an account; Returning and Professional: SHARED HOME →). Future buttons shown inert, marked COMING, listed under Build later in the Dev Guide (Professional: configured later with contractor adapters). Demo-account buttons and wrapper-layer button surgery removed."
+      "reason": "Alcove wired to the trail rules: Alcove uses the same six-step nav function as Start your own (from its own stage map); reaching the Shared Home or Landing by any route leaves a rule-bound project; Alcove asks the Store only while an Alcove page is showing and reuses a complete answer for an identical definition on confirm; the record page Start button returns to the project library. No page copy changed."
     },
     {
       "path": "system-build-current.html",
-      "pass": "front-door-phase-0",
-      "blobSha": "ef0af7b49a32ebae5c12319bebd11408d00a38a3",
-      "bytes": 217914,
-      "reason": "Front door Phase 0: each door shows one row of buttons after Back, with exactly one live button, last in the row, going to the Shared Home (New user: LATER, browse without an account; Returning and Professional: SHARED HOME →). Future buttons shown inert, marked COMING, listed under Build later in the Dev Guide (Professional: configured later with contractor adapters). Demo-account buttons and wrapper-layer button surgery removed."
+      "pass": "alcove-trail-wiring",
+      "blobSha": "bc86199826d32106823e94ec93c9e524c574db4c",
+      "bytes": 218699,
+      "reason": "Alcove wired to the trail rules: Alcove uses the same six-step nav function as Start your own (from its own stage map); reaching the Shared Home or Landing by any route leaves a rule-bound project; Alcove asks the Store only while an Alcove page is showing and reuses a complete answer for an identical definition on confirm; the record page Start button returns to the project library. No page copy changed."
     },
     {
       "path": "stb-build-guide-spec.js",
