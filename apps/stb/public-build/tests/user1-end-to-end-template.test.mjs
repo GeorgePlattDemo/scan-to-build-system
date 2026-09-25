@@ -10,10 +10,9 @@ const sandbox={window:{}};
 vm.runInNewContext(contractSource,sandbox,{filename:'stb-store-handoff-contract.js'});
 const contract=sandbox.window.STBStoreHandoffContract;
 
-const STORE_SHA='140217b0aed64725d26b0d9332e3bf7b5d4396e0';
-const SYSTEM_SHA='59a9c0326c1afea7af3767e1ed89bf6465a4b809';
-const INPUT_HASH='f0918ff545e3d77d8d5ec33055d7279bb01dbe172bb4e6cc4d498469d66b2e82';
-const RESULT_HASH='2abe991dbd5331f7fa3762018fed9cc707b637d4512ba62f7fc8fe1e4e28587a';
+const STORE_SHA='aa59dd92dde8db139081542f2102f035120fa097';
+const INPUT_HASH='e4b0f53f331ecff901f3e4999decd5ebb2a5382dcc40c46721aa4278bc445f54';
+const RESULT_HASH='8fee8be931b05f506d22f198e3a935ae8c9a1b255dabcfb2af17c93332ba3b47';
 
 const exactDemand={
   configurationId:'SYO-USER1-XBRACE',
@@ -38,13 +37,13 @@ const storeAnswer=contract.resolveUser1StoreReference(exactDemand);
 assert.equal(storeAnswer.complete,true,'Job 1 did not obtain a complete Store answer');
 assert.equal(storeAnswer.status,'MATCHED_STORE_REFERENCE');
 assert.equal(storeAnswer.source.storePin,STORE_SHA);
-assert.equal(storeAnswer.source.systemIntegrationPin,SYSTEM_SHA);
+assert.equal(storeAnswer.source.systemIntegrationPin,null);
 assert.equal(storeAnswer.calculationIdentity.inputHash,INPUT_HASH);
 assert.equal(storeAnswer.calculationIdentity.resultHash,RESULT_HASH);
 assert.equal(storeAnswer.material,2.61);
-assert.equal(storeAnswer.machineService,5.89);
-assert.equal(storeAnswer.combinedValue,8.50);
-assert.equal(storeAnswer.estimate.cycle.T_job_min,1.4128);
+assert.equal(storeAnswer.machineService,5.93);
+assert.equal(storeAnswer.combinedValue,8.54);
+assert.equal(storeAnswer.estimate.cycle.T_job_min,1.4227);
 assert.equal(storeAnswer.materialResolution.pricingReferenceSku,'STB-ZERO-SPF-2X4-60-001');
 assert.equal(storeAnswer.materialResolution.pricingReferenceStockLengthIn,60);
 assert.equal(storeAnswer.materialResolution.selectionPolicy,'SHORTEST_COMPLETE_STORE_OFFERING');
@@ -98,7 +97,7 @@ assert.match(shell,/source:'start-own'/);
 assert.match(shell,/storeReference:freshStoreReference/);
 assert.match(shell,/stb-proof-handoff-job1/);
 assert.match(shell,/originalShow\.call\(win,'proof-store'\)/);
-assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=132f1266/);
+assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=e486df26/);
 assert.match(shell,/const requestId = nextStoreRequestId\(definition\)/);
 assert.match(shell,/user1RuntimeBridge\.request\(definition\.storeDemand/);
 assert.match(shell,/freshEvaluation\?\.freshEvaluation === true/);
@@ -218,7 +217,7 @@ assert.match(shell,/no live motion or controller command/);
 // Template authority: Review points to the tested Store and System candidates.
 assert.equal(contract.storeAuthority('startOwn').economicsPin,STORE_SHA);
 assert.equal(contract.user1StoreReference.source.storePin,STORE_SHA);
-assert.equal(contract.user1StoreReference.source.systemIntegrationPin,SYSTEM_SHA);
+assert.equal(contract.user1StoreReference.source.systemIntegrationPin,null);
 assert.equal(contract.user1StoreReference.estimate.calculationIdentity.inputHash,INPUT_HASH);
 assert.equal(contract.user1StoreReference.estimate.calculationIdentity.resultHash,RESULT_HASH);
 
@@ -255,12 +254,12 @@ assert.deepEqual(
   ]
 );
 assert.equal(storeAnswer18.material,3.13);
-assert.equal(storeAnswer18.machineService,5.90);
-assert.equal(storeAnswer18.combinedValue,9.03);
-assert.equal(storeAnswer18.estimate.cycle.T_job_min,1.4151);
+assert.equal(storeAnswer18.machineService,5.94);
+assert.equal(storeAnswer18.combinedValue,9.07);
+assert.equal(storeAnswer18.estimate.cycle.T_job_min,1.425);
 assert.equal(storeAnswer18.estimate.travel.finalRemainderIn,35.625);
-assert.equal(storeAnswer18.calculationIdentity.inputHash,'4b3b498d86177ed5a13c2662778f232b2c11cfafa7f626a689b3823b6872a4cc');
-assert.equal(storeAnswer18.calculationIdentity.resultHash,'59c9988c42ffd2520f6c1931d735a31e07848d72ac602182c510a17c20b89e88');
+assert.equal(storeAnswer18.calculationIdentity.inputHash,'e7c31d6d71a3110484d30c602737615caea418d4a5019c2ab9e14f5097e1a2a2');
+assert.equal(storeAnswer18.calculationIdentity.resultHash,'f5606519d95e7d95aca9aae55fbcfdd8ba46ce76bdc21f7960a51627c2e8570f');
 assert.equal(shell.includes('candidateReference'),false);
 assert.equal(shell.includes('CANDIDATE STORE PIN'),false);
 
