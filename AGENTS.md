@@ -10,6 +10,7 @@ Read [`START-HERE.md`](START-HERE.md) first. Then the capability-bridge bench. T
 - Store (`scan-to-build-store`): catalog, machine envelope, material resolution, modeled time, economics.
 - Program (`3d-solutions-program`): research, experimental machine development, decisions, business planning.
 - Review (`scan-to-build-review`): frozen public demonstration. Read only. No agent writes to it.
+- Live Store is the System pin (`STORE_PIN` in `apps/stb/shared/contracts.mjs`); Review is historical. Never run a second hosted Store for Review.
 
 ## Rules
 

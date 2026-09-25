@@ -41,9 +41,9 @@ assert.equal(exact.status,'MATCHED_STORE_REFERENCE');
 assert.equal(exact.complete,true);
 assert.equal(exact.capabilityStatus,'SUPPORTABLE');
 assert.equal(exact.material,2.61);
-assert.equal(exact.machineService,5.89);
-assert.equal(exact.combinedValue,8.50);
-assert.equal(exact.estimate.cycle.T_job_min,1.4128);
+assert.equal(exact.machineService,5.93);
+assert.equal(exact.combinedValue,8.54);
+assert.equal(exact.estimate.cycle.T_job_min,1.4227);
 assert.equal(exact.estimate.travel.derivedSawCuts,3);
 assert.equal(exact.estimate.travel.derivedSpotCount,2);
 assert.equal(exact.estimate.travel.finalRemainderIn,27.625);
@@ -51,11 +51,11 @@ assert.equal(exact.materialResolution.pricingReferenceSku,'STB-ZERO-SPF-2X4-60-0
 assert.equal(exact.materialResolution.pricingReferenceStockLengthIn,60);
 assert.equal(exact.materialResolution.workpieceLengthIn,60);
 assert.equal(exact.materialResolution.selectionPolicy,'SHORTEST_COMPLETE_STORE_OFFERING');
-assert.equal(exact.source.storePin,'140217b0aed64725d26b0d9332e3bf7b5d4396e0');
-assert.equal(exact.source.workflowRun,'35791021805');
-assert.equal(exact.source.systemIntegrationPin,'59a9c0326c1afea7af3767e1ed89bf6465a4b809');
-assert.equal(exact.calculationIdentity.inputHash,'f0918ff545e3d77d8d5ec33055d7279bb01dbe172bb4e6cc4d498469d66b2e82');
-assert.equal(exact.calculationIdentity.resultHash,'2abe991dbd5331f7fa3762018fed9cc707b637d4512ba62f7fc8fe1e4e28587a');
+assert.equal(exact.source.storePin,'aa59dd92dde8db139081542f2102f035120fa097');
+assert.equal(exact.source.workflowRun,'36173019688');
+assert.equal(exact.source.systemIntegrationPin,null);
+assert.equal(exact.calculationIdentity.inputHash,'e4b0f53f331ecff901f3e4999decd5ebb2a5382dcc40c46721aa4278bc445f54');
+assert.equal(exact.calculationIdentity.resultHash,'8fee8be931b05f506d22f198e3a935ae8c9a1b255dabcfb2af17c93332ba3b47');
 assert.equal(exact.freshEvaluation,false);
 assert.equal(exact.evaluationReceipt,null);
 
@@ -82,9 +82,9 @@ const exact18 = contract.resolveUser1StoreReference(exactDemand18);
 assert.equal(exact18.status,'MATCHED_STORE_REFERENCE');
 assert.equal(exact18.complete,true);
 assert.equal(exact18.material,3.13);
-assert.equal(exact18.machineService,5.90);
-assert.equal(exact18.combinedValue,9.03);
-assert.equal(exact18.estimate.cycle.T_job_min,1.4151);
+assert.equal(exact18.machineService,5.94);
+assert.equal(exact18.combinedValue,9.07);
+assert.equal(exact18.estimate.cycle.T_job_min,1.425);
 assert.equal(exact18.estimate.travel.finalRemainderIn,35.625);
 assert.equal(exact18.materialResolution.requestedDefinedWorkpieceLengthIn,60);
 assert.equal(exact18.materialResolution.workpieceLengthIn,72);
@@ -97,19 +97,19 @@ assert.deepEqual(
     ['STB-ZERO-SPF-2X4-72-001',72,'SUPPORTABLE',null]
   ]
 );
-assert.equal(exact18.source.storePin,'140217b0aed64725d26b0d9332e3bf7b5d4396e0');
-assert.equal(exact18.source.systemIntegrationPin,'59a9c0326c1afea7af3767e1ed89bf6465a4b809');
-assert.equal(exact18.calculationIdentity.inputHash,'4b3b498d86177ed5a13c2662778f232b2c11cfafa7f626a689b3823b6872a4cc');
-assert.equal(exact18.calculationIdentity.resultHash,'59c9988c42ffd2520f6c1931d735a31e07848d72ac602182c510a17c20b89e88');
+assert.equal(exact18.source.storePin,'aa59dd92dde8db139081542f2102f035120fa097');
+assert.equal(exact18.source.systemIntegrationPin,null);
+assert.equal(exact18.calculationIdentity.inputHash,'e7c31d6d71a3110484d30c602737615caea418d4a5019c2ab9e14f5097e1a2a2');
+assert.equal(exact18.calculationIdentity.resultHash,'f5606519d95e7d95aca9aae55fbcfdd8ba46ce76bdc21f7960a51627c2e8570f');
 
 const formal18 = contract.requestUser1StoreEvaluation(exactDemand18,{
   requestId:'JOB1-18-PROMOTED',
-  currentStorePin:'140217b0aed64725d26b0d9332e3bf7b5d4396e0',
+  currentStorePin:'aa59dd92dde8db139081542f2102f035120fa097',
   checkedAt:'2026-09-22T20:47:00.000Z'
 });
 assert.equal(formal18.complete,true);
 assert.equal(formal18.freshEvaluation,true);
-assert.equal(formal18.evaluationReceipt.currentStorePin,'140217b0aed64725d26b0d9332e3bf7b5d4396e0');
+assert.equal(formal18.evaluationReceipt.currentStorePin,'aa59dd92dde8db139081542f2102f035120fa097');
 assert.equal(contract.sameUser1StoreAnswerIdentity(exact18,formal18),true);
 
 const intermediate = contract.resolveUser1StoreReference({
@@ -127,12 +127,12 @@ assert.equal(intermediate.complete,false);
 
 const formalA = contract.requestUser1StoreEvaluation(exactDemand,{
   requestId:'JOB1-FRESH-A',
-  currentStorePin:'140217b0aed64725d26b0d9332e3bf7b5d4396e0',
+  currentStorePin:'aa59dd92dde8db139081542f2102f035120fa097',
   checkedAt:'2026-09-22T18:45:00.000Z'
 });
 const formalB = contract.requestUser1StoreEvaluation(exactDemand,{
   requestId:'JOB1-FRESH-B',
-  currentStorePin:'140217b0aed64725d26b0d9332e3bf7b5d4396e0',
+  currentStorePin:'aa59dd92dde8db139081542f2102f035120fa097',
   checkedAt:'2026-09-22T18:46:00.000Z'
 });
 assert.equal(formalA.status,'CURRENT_STORE_REFERENCE_REVALIDATED');
@@ -141,7 +141,7 @@ assert.equal(formalA.freshEvaluation,true);
 assert.equal(formalA.evaluationReceipt.requestId,'JOB1-FRESH-A');
 assert.equal(formalB.evaluationReceipt.requestId,'JOB1-FRESH-B');
 assert.notEqual(formalA.evaluationReceipt.requestId,formalB.evaluationReceipt.requestId);
-assert.equal(formalA.evaluationReceipt.currentStorePin,'140217b0aed64725d26b0d9332e3bf7b5d4396e0');
+assert.equal(formalA.evaluationReceipt.currentStorePin,'aa59dd92dde8db139081542f2102f035120fa097');
 assert.equal(formalA.evaluationReceipt.currentStoreMatchesReference,true);
 assert.equal(formalA.evaluationReceipt.machineEnvelopeId,'D001-STAGE2-ENVELOPE-0.3');
 assert.equal(formalA.evaluationReceipt.travelStandardId,'STB-D001-DIMENSIONAL-TRAVEL-0.1');
@@ -222,7 +222,7 @@ for (const forbidden of [
   assert.equal(syncBlock.includes(forbidden),false,'visible configurator reclaimed Store authority: '+forbidden);
 }
 
-assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=132f1266/);
+assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=e486df26/);
 assert.match(shell,/const user1RuntimeBridge = window\.STBUserDefinedBoardRuntimeBridge \|\| null/);
 assert.match(shell,/nextStoreRequestId/);
 assert.match(shell,/user1RuntimeBridge\.request\(definition\.storeDemand/);

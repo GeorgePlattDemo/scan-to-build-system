@@ -88,7 +88,7 @@ Build 8 acceptance counts at this closeout:
 
 `test:vertical` proves NEW USER, RETURNING USER, and PROFESSIONAL converge on one Board architecture; 45 in then 46 in against the real pinned Store; review binding; truthful Result; close/reopen versus inert import; keyboard and narrow-viewport operation; and the absence of commercial or physical authority.
 
-Exact Store source currently consumed by this System runtime: `39a1b318063f62220c9c20c42200389098e0c687`. Store main is now `ead5fb182eb05e7081e89c103ff74458654502ae`; changes from the prior evaluator-identical main `1f9f1a217d91686ef21848508b20e605e7cc6bc1` to `ead5fb182eb05e7081e89c103ff74458654502ae` are documentation/authority-only. Runtime remains pinned to the tested source `39a1b318063f62220c9c20c42200389098e0c687`; no evaluator-tree or runtime-pin promotion is implied.
+Exact Store source currently consumed by this System runtime: `aa59dd92dde8db139081542f2102f035120fa097` (Store main). Live Store is the System pin; Review is historical.
 
 Build 8 application commits on `build/app-foundation-0.1`:
 
@@ -138,12 +138,12 @@ Store presentation reads durable Store records; it does not calculate Store pric
 
 ## Store
 
-Exact Store source currently consumed by this System runtime: `39a1b318063f62220c9c20c42200389098e0c687`. Store main is now `ead5fb182eb05e7081e89c103ff74458654502ae`; changes from the prior evaluator-identical main `1f9f1a217d91686ef21848508b20e605e7cc6bc1` to `ead5fb182eb05e7081e89c103ff74458654502ae` are documentation/authority-only. This document does not promote the evaluator tree or repin the runtime from `39a1b318063f62220c9c20c42200389098e0c687`.
+Exact Store source currently consumed by this System runtime: `aa59dd92dde8db139081542f2102f035120fa097` (Store main). Live Store is the System pin; Review is historical.
 
 Supply a clean checkout of that pin through `STB_STORE_ZERO_ROOT`. The path is not hardcoded. At startup the wrapper verifies:
 
 - the checkout exists
-- `HEAD` is exactly `39a1b318063f62220c9c20c42200389098e0c687`
+- `HEAD` is exactly `aa59dd92dde8db139081542f2102f035120fa097`
 - required modules and catalog/observation files exist
 - the checkout is clean
 - `findSku`, `offerMaterial`, `evaluateJob`, and `estimateJob` can be loaded from that checkout

@@ -37,16 +37,16 @@
     startOwn: Object.freeze({
       projectId:'start-own',
       projectClass:'USER_DEFINED_BOARD',
-      materialCatalogPin:'140217b0aed64725d26b0d9332e3bf7b5d4396e0',
+      materialCatalogPin:'aa59dd92dde8db139081542f2102f035120fa097',
       capabilityBasis:'STB-D001-DIMENSIONAL-TRAVEL-0.1',
-      capabilityPin:'140217b0aed64725d26b0d9332e3bf7b5d4396e0',
+      capabilityPin:'aa59dd92dde8db139081542f2102f035120fa097',
       economicsModel:'STB-STORE-ZERO-PRICE-1',
       economicsVersion:'0.3.0',
       economicsStatus:'PINNED_STORE_ISSUED_REFERENCE',
-      economicsPin:'140217b0aed64725d26b0d9332e3bf7b5d4396e0',
+      economicsPin:'aa59dd92dde8db139081542f2102f035120fa097',
       governingStandard:'DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md',
-      acceptanceWorkflowRun:'35791021805',
-      systemIntegrationPin:'59a9c0326c1afea7af3767e1ed89bf6465a4b809',
+      acceptanceWorkflowRun:'36173019688',
+      systemIntegrationPin:null,
       legacyGeneralRecoverySelected:false
     }),
     outdoor: Object.freeze({
@@ -306,6 +306,8 @@
    *
    * This static Review build does not execute the Store runtime. It may present
    * only the exact Store answer already proven on the exact Store SHA below.
+   * apps/stb/test/store/user1-reference-guard.test.mjs re-runs both demands through
+   * the Store at System's STORE_PIN and fails if any value here differs.
    * Any changed governing demand must go back through Store. No browser-side
    * pricing, capability, motion, cycle-time, or refusal calculation is allowed.
    */
@@ -313,12 +315,12 @@
     status:'STORE_ISSUED_REFERENCE',
     source:Object.freeze({
       repository:'GeorgePlattDemo/scan-to-build-store',
-      storePin:'140217b0aed64725d26b0d9332e3bf7b5d4396e0',
+      storePin:'aa59dd92dde8db139081542f2102f035120fa097',
       pricingFile:'store-zero-pricing-engine.mjs',
       travelFile:'d001-travel-standard.mjs',
       governingStandard:'DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md',
-      workflowRun:'35791021805',
-      systemIntegrationPin:'59a9c0326c1afea7af3767e1ed89bf6465a4b809'
+      workflowRun:'36173019688',
+      systemIntegrationPin:null
     }),
     demand:Object.freeze({
       configurationId:'SYO-USER1-XBRACE',
@@ -362,7 +364,7 @@
       source:Object.freeze({
         repository:'GeorgePlattDemo/scan-to-build-store',
         file:'store-zero-catalog.json',
-        pin:'140217b0aed64725d26b0d9332e3bf7b5d4396e0',
+        pin:'aa59dd92dde8db139081542f2102f035120fa097',
         clock:'2026-09-10'
       })
     }),
@@ -379,17 +381,17 @@
       }),
       cycle:Object.freeze({
         model:'STB-D001-DIMENSIONAL-TRAVEL-0.1',
-        version:'0.1.0',
+        version:'0.2.0',
         basis:'DECLARED_STAGE2_MODEL',
         measured:false,
         commissioned:false,
-        T_job_min:1.4128
+        T_job_min:1.4227
       }),
       totals:Object.freeze({
         material:2.61,
         hardware:0,
-        machine_service:5.89,
-        Q:8.50,
+        machine_service:5.93,
+        Q:8.54,
         Q_basis:'CALCULATED_FROM_DECLARED_STAGE2_MODEL'
       }),
       travel:Object.freeze({
@@ -411,8 +413,8 @@
         setupTimeMin:0
       }),
       calculationIdentity:Object.freeze({
-        inputHash:'f0918ff545e3d77d8d5ec33055d7279bb01dbe172bb4e6cc4d498469d66b2e82',
-        resultHash:'2abe991dbd5331f7fa3762018fed9cc707b637d4512ba62f7fc8fe1e4e28587a'
+        inputHash:'e4b0f53f331ecff901f3e4999decd5ebb2a5382dcc40c46721aa4278bc445f54',
+        resultHash:'8fee8be931b05f506d22f198e3a935ae8c9a1b255dabcfb2af17c93332ba3b47'
       })
     })
   });
@@ -421,12 +423,12 @@
     status:'STORE_ISSUED_REFERENCE',
     source:Object.freeze({
       repository:'GeorgePlattDemo/scan-to-build-store',
-      storePin:'140217b0aed64725d26b0d9332e3bf7b5d4396e0',
+      storePin:'aa59dd92dde8db139081542f2102f035120fa097',
       pricingFile:'store-zero-pricing-engine.mjs',
       travelFile:'d001-travel-standard.mjs',
       governingStandard:'DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md',
-      workflowRun:'35791021805',
-      systemIntegrationPin:'59a9c0326c1afea7af3767e1ed89bf6465a4b809',
+      workflowRun:'36173019688',
+      systemIntegrationPin:null,
       systemDiagnosticRun:'35791336322'
     }),
     demand:Object.freeze({
@@ -472,7 +474,7 @@
       source:Object.freeze({
         repository:'GeorgePlattDemo/scan-to-build-store',
         file:'store-zero-catalog.json',
-        pin:'140217b0aed64725d26b0d9332e3bf7b5d4396e0',
+        pin:'aa59dd92dde8db139081542f2102f035120fa097',
         clock:'2026-09-10'
       })
     }),
@@ -489,17 +491,17 @@
       }),
       cycle:Object.freeze({
         model:'STB-D001-DIMENSIONAL-TRAVEL-0.1',
-        version:'0.1.0',
+        version:'0.2.0',
         basis:'DECLARED_STAGE2_MODEL',
         measured:false,
         commissioned:false,
-        T_job_min:1.4151
+        T_job_min:1.425
       }),
       totals:Object.freeze({
         material:3.13,
         hardware:0,
-        machine_service:5.90,
-        Q:9.03,
+        machine_service:5.94,
+        Q:9.07,
         Q_basis:'CALCULATED_FROM_DECLARED_STAGE2_MODEL'
       }),
       travel:Object.freeze({
@@ -521,8 +523,8 @@
         setupTimeMin:0
       }),
       calculationIdentity:Object.freeze({
-        inputHash:'4b3b498d86177ed5a13c2662778f232b2c11cfafa7f626a689b3823b6872a4cc',
-        resultHash:'59c9988c42ffd2520f6c1931d735a31e07848d72ac602182c510a17c20b89e88'
+        inputHash:'e7c31d6d71a3110484d30c602737615caea418d4a5019c2ab9e14f5097e1a2a2',
+        resultHash:'f5606519d95e7d95aca9aae55fbcfdd8ba46ce76bdc21f7960a51627c2e8570f'
       })
     })
   });

@@ -54,7 +54,8 @@ Launch instructions and path-specific Store pins: [`apps/README.md`](apps/README
 
 Do not use one Store pin as a universal project constant.
 
-- current tested Store source for dimensional `USER_DEFINED_BOARD_V1` and Alcove `ALCOVE_INSERT_V1`: `39a1b318063f62220c9c20c42200389098e0c687` — this is the exact source consumed by current System code and the D-001 integration workflow. Store main is now `ead5fb182eb05e7081e89c103ff74458654502ae`; the changes from the prior evaluator-identical main `1f9f1a217d91686ef21848508b20e605e7cc6bc1` to `ead5fb182eb05e7081e89c103ff74458654502ae` are documentation/authority-only. The System runtime remains pinned to `39a1b318063f62220c9c20c42200389098e0c687`; no evaluator-tree or runtime-pin promotion is implied.
+- current tested Store source for dimensional `USER_DEFINED_BOARD_V1` and Alcove `ALCOVE_INSERT_V1`: `aa59dd92dde8db139081542f2102f035120fa097` (Store main, PR #13: spot drilling 3/16 in deep after the point, inset 1 1/2 in or 2 in) — this is the exact source consumed by current System code, the D-001 integration workflow, and the live hosted Store. Previous runtime pin `39a1b318063f62220c9c20c42200389098e0c687` is history.
+- Live Store is the System pin; Review is historical. The frozen Review demo expects `39a1b318063f62220c9c20c42200389098e0c687`, so its live Store calls stop once the hosted Store runs this pin. To click the old demo, run that old Store SHA locally.
 - accepted published-job / canonical S-001 proof path: `4402abeb6b0299a5b6db2eec85ed04c3b0236bcc`
 - 2026-09-13 accepted-baseline Stage-2 reference identity retained as provenance: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
 

@@ -80,7 +80,7 @@
       ['Recompute on change','Material, geometry, work and Store answer stay tied.'],
       ['Kill stale replies','Late Store answers cannot overwrite newer edits.'],
       ['Keep Store logic out','Browser does not pick SKU or price.'],
-      ['Known gap','Spot target mapping is not fully bound yet.']
+      ['Spots are bound','Each upright carries its own spots; the Store times, prices or refuses them.']
     ]),
     'alcove-review':guide('Freeze the exact version',[
       ['Show what changed','A real build needs a proper revision diff.'],

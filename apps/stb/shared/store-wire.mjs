@@ -720,13 +720,10 @@ function validateAlcoveInsertPayload(payload) {
             'each Alcove component feature must be an object',
           );
         }
-        const allowedFeature = new Set([
-          'featureId',
-          'kind',
-          'pathLengthIn',
-          'yIn',
-          'totalDepthIn',
-        ]);
+        // Shape only. Store Zero decides whether a location or inset is supportable.
+        const allowedFeature = feature.kind === 'SPOT_ON_LOCATION'
+          ? new Set(['featureId', 'kind', 'xIn', 'acrossWidthRule', 'insetFromEdgeIn'])
+          : new Set(['featureId', 'kind', 'pathLengthIn', 'yIn', 'totalDepthIn']);
         if (Object.keys(feature).some((key) => !allowedFeature.has(key))) {
           return fail(
             ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
@@ -741,10 +738,25 @@ function validateAlcoveInsertPayload(payload) {
           );
         }
         featureIds.add(feature.featureId);
+        if (feature.kind === 'SPOT_ON_LOCATION') {
+          if (
+            !Number.isFinite(feature.xIn) ||
+            feature.xIn < 0 ||
+            requireNonemptyString('acrossWidthRule', feature.acrossWidthRule) ||
+            (feature.insetFromEdgeIn != null && !Number.isFinite(feature.insetFromEdgeIn))
+          ) {
+            return fail(
+              ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+              'Alcove spot feature geometry is malformed',
+            );
+          }
+          componentFeatures.push({ ...feature });
+          continue;
+        }
         if (feature.kind !== 'MILL_LONGITUDINAL_PROFILE') {
           return fail(
             ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-            'Alcove component features currently carry only MILL_LONGITUDINAL_PROFILE demand',
+            'Alcove component features carry only MILL_LONGITUDINAL_PROFILE or SPOT_ON_LOCATION demand',
           );
         }
         for (const key of ['pathLengthIn', 'yIn', 'totalDepthIn']) {
@@ -844,7 +856,10 @@ function validateAlcoveInsertPayload(payload) {
         'partRelativeXIn',
         'reference',
         'acrossWidthRule',
+        'insetFromEdgeIn',
+        'targetComponentId',
         'toolDiameterIn',
+        'fullDiameterDepthIn',
         'basis',
       ]);
       if (Object.keys(feature).some((key) => !allowedFeature.has(key))) {
@@ -859,7 +874,9 @@ function validateAlcoveInsertPayload(payload) {
       featureIds.add(feature.featureId);
       if (
         feature.kind !== 'SPOT_ON_LOCATION' ||
-        feature.acrossWidthRule !== 'CENTERED_ON_WIDE_FACE' ||
+        typeof feature.acrossWidthRule !== 'string' ||
+        feature.acrossWidthRule.trim() === '' ||
+        (feature.insetFromEdgeIn != null && !Number.isFinite(feature.insetFromEdgeIn)) ||
         !Number.isFinite(feature.xIn) ||
         feature.xIn < 0 ||
         !Number.isFinite(feature.partRelativeXIn) ||

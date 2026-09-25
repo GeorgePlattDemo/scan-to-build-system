@@ -179,6 +179,33 @@ test('ALCOVE_INSERT_V1 carries spotting to Store and reports the unresolved targ
   assert.equal(spotted.body.rawEstimate.totals.Q, null);
 });
 
+test('ALCOVE_INSERT_V1 upright spots at 1 1/2 in or 2 in are timed and priced; any other inset is refused by Store', async (t) => {
+  await withHost(t);
+
+  const plain = await answer('pine', { heightIn: 72 });
+  assert.equal(plain.body.rawEvaluation.status, 'SUPPORTABLE');
+  const plainQ = plain.body.rawEstimate.totals.Q;
+
+  let previousSpotSec = 0;
+  for (const inset of [1.5, 2]) {
+    const spotted = await answer('pine', { heightIn: 72, pilot: true, uprightSpotInsetIn: inset });
+    assert.equal(spotted.body.rawEvaluation.status, 'SUPPORTABLE', inset + ' in inset is supportable');
+    assert.equal(spotted.body.evaluationReceipt.authority.storeRevision, STORE_PIN);
+    const time = spotted.body.rawEvaluation.machineEvaluation.time;
+    assert.ok(time.T_DRILL_SPOT_sec > previousSpotSec, inset + ' in: spot time is modeled and grows with the inset');
+    previousSpotSec = time.T_DRILL_SPOT_sec;
+    assert.ok(spotted.body.rawEstimate.totals.Q > plainQ, inset + ' in: spots are priced');
+    const spotOps = spotted.body.rawEvaluation.machineEvaluation.componentPlans
+      .flatMap((plan) => plan.operations.filter((op) => op.kind === 'SPOT_ON_LOCATION'));
+    assert.equal(spotOps.length, 20, 'one spot per upright per shelf: 4 uprights x 5 shelves');
+  }
+
+  // System carries the number as entered; only Store decides. 1 3/4 in is not a declared inset.
+  const undeclared = await answer('pine', { heightIn: 72, pilot: true, uprightSpotInsetIn: 1.75 });
+  assert.equal(undeclared.body.rawEvaluation.status, 'REFUSED');
+  assert.ok(JSON.stringify(undeclared.body.rawEvaluation).includes('SPOT_INSET_NOT_DECLARED'));
+});
+
 test('System carries Alcove demand but contains no Alcove Store clone economics', () => {
   const adapter = fs.readFileSync(new URL('../../server/store-adapter.mjs', import.meta.url), 'utf8');
   const wire = fs.readFileSync(new URL('../../shared/store-wire.mjs', import.meta.url), 'utf8');

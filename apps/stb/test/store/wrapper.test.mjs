@@ -167,10 +167,10 @@ test('USER_DEFINED_BOARD_V1 re-evaluates every formal Store request and preserve
   assert.equal(body.materialResolution.selectionPolicy, 'SHORTEST_COMPLETE_STORE_OFFERING');
   assert.equal(body.materialResolution.allocationClaimed, false);
 
-  assert.equal(body.rawEstimate.cycle.T_job_min, 1.4128);
+  assert.equal(body.rawEstimate.cycle.T_job_min, 1.4227);
   assert.equal(body.rawEstimate.totals.material, 2.61);
-  assert.equal(body.rawEstimate.totals.machine_service, 5.89);
-  assert.equal(body.rawEstimate.totals.Q, 8.50);
+  assert.equal(body.rawEstimate.totals.machine_service, 5.93);
+  assert.equal(body.rawEstimate.totals.Q, 8.54);
   assert.equal(body.rawEstimate.travel.derivedSawCuts, 3);
   assert.equal(body.rawEstimate.travel.derivedSpotCount, 2);
   assert.equal(body.rawEstimate.travel.finalRemainderIn, 27.625);
@@ -258,7 +258,7 @@ test('USER_DEFINED_BOARD_V1 18-in same-span demand preserves definition and rece
   );
 
   assert.equal(body.rawEstimate.totals.material, 3.13);
-  assert.equal(body.rawEstimate.totals.Q, 9.03);
+  assert.equal(body.rawEstimate.totals.Q, 9.07);
   assert.equal(body.rawEstimate.travel.finalRemainderIn, 35.625);
   assert.equal(body.evaluationReceipt.authority.storeRevision, STORE_PIN);
   assert.equal(body.materialResolution.materialDemand.species, 'spf');
