@@ -34,8 +34,6 @@ const KNOWN_FAILING = new Set([
   'start-own:R3',
   // outdoor: old nav labels; Store Answer/Accept/Yard/Record jump into Job 1's proof pages; extra "Bring what you have".
   'outdoor:R1', 'outdoor:R2',
-  // alcove: old nav labels; extra "Bring what you have" leads to the shared intake page.
-  'alcove:R1', 'alcove:R2',
   // playhouse: old 12-button nav; extra "Bring what you have"; "Sarah" on its pages.
   'playhouse:R1', 'playhouse:R2', 'playhouse:R9',
 ]);

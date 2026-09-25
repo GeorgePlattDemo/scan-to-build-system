@@ -11,7 +11,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=e1835d3f"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=48518c32"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
 <script src="stb-store-handoff-contract.js?v=82c7dcf3"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
@@ -1674,7 +1674,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       recordMain.append(finalBoundary);
       const recordBottom = doc.createElement('div');
       recordBottom.className = 'bottom';
-      recordBottom.innerHTML = '<button type="button" data-alcove-commercial-action="yard">← BACK TO STORE / YARD</button><button class="next" data-go="landing">Start →</button>';
+      recordBottom.innerHTML = '<button type="button" data-alcove-commercial-action="yard">← BACK TO STORE / YARD</button><button class="next" data-go="projects">Start →</button>';
       recordMain.append(recordBottom);
       if (recordRail) recordRail.innerHTML = '<p class="hd">HANDOFF / RECORD</p><p class="goal">Two sides. One checkable chain.</p><div class="row"><b>Missing stays missing</b><span>No event is filled in because a later event exists.</span></div><div class="row"><b>Custody closes handoff</b><span>Staged and READY are not custody.</span></div><div class="row"><b>Owner keeps the record</b><span>The exact version and history remain reusable without becoming automatic fabrication authority.</span></div>';
 
@@ -2944,16 +2944,26 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       });
     }
 
+    // Trail rules (AGENTS.md): every rule-bound tile gets the same six-step nav from its own stage map.
+    const TRAIL_NAV_CONTEXT = Object.freeze({
+      'start-own':'JOB 1 · START YOUR OWN',
+      alcove:'ALCOVE · CRITICAL FIT'
+    });
+
     function wireStartOwnJourneyNav(nav) {
+      wireTrailJourneyNav(nav, 'start-own');
+    }
+
+    function wireTrailJourneyNav(nav, projectId) {
       if (!nav) return;
-      nav.dataset.activeProject = 'start-own';
+      nav.dataset.activeProject = projectId;
       let context = nav.querySelector('.job-nav-context');
       if (!context) {
         context = doc.createElement('span');
         context.className = 'job-nav-context';
         nav.prepend(context);
       }
-      context.textContent = 'JOB 1 · START YOUR OWN';
+      context.textContent = TRAIL_NAV_CONTEXT[projectId] || projectId;
 
       [...nav.querySelectorAll('button')].forEach(button => {
         const stage = button.dataset.journeyStage || null;
@@ -2972,13 +2982,13 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         }
 
         delete button.dataset.jobExit;
-        const directTarget = PROJECT_STAGE_TARGETS['start-own']?.[stage] || null;
+        const directTarget = PROJECT_STAGE_TARGETS[projectId]?.[stage] || null;
         if (!directTarget) {
           button.hidden = true;
           return;
         }
         button.setAttribute('data-go',directTarget);
-        button.dataset.jobProject = 'start-own';
+        button.dataset.jobProject = projectId;
         button.dataset.jobTarget = directTarget;
         button.textContent = START_OWN_NAV_LABELS[stage] || button.dataset.defaultLabel;
 
@@ -3000,7 +3010,9 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         restoreJourneyNav(nav);
         if (activeJourneyProject === 'start-own') {
           wireStartOwnJourneyNav(nav);
-        } else if (['alcove','outdoor'].includes(activeJourneyProject)) {
+        } else if (activeJourneyProject === 'alcove') {
+          wireTrailJourneyNav(nav, 'alcove');
+        } else if (activeJourneyProject === 'outdoor') {
           ['alcove-review','terms','recap'].forEach(target => {
             const button = nav.querySelector('button[data-go="'+target+'"]');
             if (button) button.hidden = true;
@@ -3189,7 +3201,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
     win.addEventListener('click', function(event) {
       const exitButton = event.target.closest?.('.recovery-nav button[data-job-exit="project-library"]');
-      if (!exitButton || activeJourneyProject !== 'start-own') return;
+      if (!exitButton || !Object.prototype.hasOwnProperty.call(TRAIL_NAV_CONTEXT, activeJourneyProject || '')) return;
       event.preventDefault();
       event.stopImmediatePropagation();
       selectJourneyProject(null);
@@ -3262,6 +3274,10 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       } else if (stage && activeJourneyProject) {
         showMappedProjectStage(activeJourneyProject, stage);
         return;
+      }
+      // Trail rules: arriving at the Shared Home or Landing by any route leaves a rule-bound project.
+      if ((target === 'projects' || target === 'landing') && Object.prototype.hasOwnProperty.call(TRAIL_NAV_CONTEXT, activeJourneyProject || '')) {
+        selectJourneyProject(null);
       }
       const result = originalShow.apply(this, arguments);
       if (target.startsWith('playhouse')) setTimeout(sync, 0);
