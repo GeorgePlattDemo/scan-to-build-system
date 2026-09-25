@@ -9,15 +9,16 @@ U.S. Patents 9,720,401 B2 and 10,768,609 B2
 
 ## Open Scan-to-Build
 
-<a href="https://georgeplattdemo.github.io/scan-to-build-review/system-build-current.html?v=7b26dfc45c9832271840d134426e096787156a04"><kbd>▶ OPEN SYSTEM BUILD</kbd></a>
+<a href="https://georgeplattdemo.github.io/scan-to-build-system/system-build-current.html"><kbd>▶ OPEN SYSTEM BUILD</kbd></a>
 
-**OPEN SYSTEM BUILD is the canonical human-visible current build.** A user-facing application change is not complete until it is visible through this button.
+**OPEN SYSTEM BUILD is the one place to check the app.** It opens `apps/stb/public-build/` from System `main`, published automatically after its tests pass. Every user-facing change is made in System and checked here, not anywhere else. A change is not complete until it is visible through this button.
 
-The prior exact public HTML is retained as a versioned recovery base for rollback and provenance. That retained file is not a second current build.
+The earlier public demonstration remains in `scan-to-build-review`, frozen, for rollback and provenance. It is not a second current build.
 
 Where the visible build identifies reference, modeled, demonstration, planned, or unresolved behavior, those limits remain controlling. The visible build does not by itself establish live commerce or physical execution.
 
-Application entry source: [`apps/stb/browser/index.html`](apps/stb/browser/index.html).  
+Visible build source: [`apps/stb/public-build/`](apps/stb/public-build/).  
+Modular application source: [`apps/stb/browser/index.html`](apps/stb/browser/index.html).  
 Application operating notes: [`apps/README.md`](apps/README.md).
 
 ## Read order

@@ -18,7 +18,8 @@ Read [`START-HERE.md`](START-HERE.md) first. Then the capability-bridge bench. T
 - Review-era exhibit names do not belong in current files.
 - Language gate: owning layer + evidence class + no authority smuggled across a wall.
 - New part against the app = trial protocol + one log row. Assign `APP-CONSTRAINT`, `PART-DEFECT`, `BRIDGE-GAP`, `STORE-PIN`, or `SAFETY`.
-- Frozen Review rule: `GeorgePlattDemo/scan-to-build-review` is the preserved public demonstration and is frozen. Do not modify it. **OPEN SYSTEM BUILD** shows that frozen demonstration, not current System work. A user-facing change is made and verified in System (its tests and the local app). Until a publication route is separately decided, report such changes as `NOT YET PUBLIC`.
+- One-place rule: **OPEN SYSTEM BUILD** (the README button) is the one place to check the app. It shows `apps/stb/public-build/` from System `main`, published automatically after its tests pass. Make every user-facing change in System and check it there. Never make a change in one place and check it somewhere else. A user-facing change is not complete until it is visible through that button.
+- Frozen Review rule: `GeorgePlattDemo/scan-to-build-review` is the frozen earlier demonstration. Do not modify it.
 - Do not emit G-code, remote Cycle Start, or physical-fabrication claims from software results.
 - Do not create extra repositories or extra app folders to “try something.”
 - Patent steps: open `work/capability-bridge/PATENTS.md` and the issued PDFs. Summaries lose.
