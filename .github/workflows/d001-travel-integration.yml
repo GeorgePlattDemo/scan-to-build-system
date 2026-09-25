@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: GeorgePlattDemo/scan-to-build-store
-          ref: 39a1b318063f62220c9c20c42200389098e0c687
+          ref: aa59dd92dde8db139081542f2102f035120fa097
           path: store-zero
 
       - name: Setup Node
@@ -51,3 +51,9 @@ jobs:
         env:
           STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-zero
         run: node --test --test-concurrency=1 test/store/alcove.test.mjs
+
+      - name: User 1 cached reference equals pinned Store
+        working-directory: apps/stb
+        env:
+          STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-zero
+        run: node --test --test-concurrency=1 test/store/user1-reference-guard.test.mjs
