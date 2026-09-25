@@ -247,7 +247,7 @@ assert.match(shell,/SIMULATED_ACCEPTANCE/);
 assert.match(shell,/SIMULATED_PAYMENT/);
 assert.match(shell,/no money moved/);
 assert.match(shell,/does not send controller code, reserve live inventory, establish commissioned-machine readiness, issue physical production authority, or create a live Cycle Start/);
-assert.match(shell,/PHYSICAL FABRICATION<\/b><span>NOT CLAIMED \u00b7 SIMULATION ONLY/);
+assert.match(shell,/PHYSICAL FABRICATION<\/b><span>NOT CLAIMED · SIMULATION ONLY/);
 assert.match(shell,/no live inventory reserved/);
 assert.match(shell,/no physical production authority created/);
 assert.match(shell,/no live motion or controller command/);
@@ -260,9 +260,9 @@ assert.equal(frame.includes('id="stb-config-angle"'),false,'bounded demo reintro
 assert.equal(frame.includes('data-parts='),false,'bounded demo reintroduced quantity choices');
 assert.equal(frame.includes('data-spot='),false,'bounded demo reintroduced spot choices');
 assert.match(frame,/same 8.000 in horizontal span/i);
-assert.match(frame,/18.000 in \u2192 26.388\u00b0 end cuts/);
-assert.match(frame,/2\u00d74 \u00b7 60 in/);
-assert.match(frame,/Center spot = 16 \u00f7 2 = 8 in/);
+assert.match(frame,/18.000 in → 26.388° end cuts/);
+assert.match(frame,/2×4 · 60 in/);
+assert.match(frame,/Center spot = 16 ÷ 2 = 8 in/);
 
 const handoff = contract.createComparisonHandoff({
   projectId:'start-own',
@@ -308,4 +308,4 @@ assert.equal(handoff.requiredGeometryDatumFacts.identifiedParts.length,2);
 assert.equal(handoff.requiredGeometryDatumFacts.identifiedParts[0].features[0].xIn,8);
 assert.equal(handoff.authority.physicalFabrication,false);
 
-console.log('PASS \u00b7 User 1 bounded 16–18 configurator derives geometry, carries two exact Store references, and fails closed between them');
+console.log('PASS · User 1 bounded 16–18 configurator derives geometry, carries two exact Store references, and fails closed between them');
