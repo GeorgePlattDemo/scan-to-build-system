@@ -110,32 +110,53 @@
   ],
   "systemEdits": [
     {
-      "path": "system-build-base-8d8a9dd.html",
-      "pass": "alcove-version-chain",
-      "blobSha": "7c377b72ea606a632675801416fd1081adfc6bb3",
-      "bytes": 135189,
-      "reason": "Alcove version chain: confirmed definitions get version numbers (a change makes a new version, old versions kept); the Store, Your call, Yard and Record pages show one chain card (SENT, ARRIVED with the Store Zero receipt hash, ANSWERED, YOUR CALL hashed, FINAL VERSION order hash, simulated) with full-length hashes; Configure shows the running modeled cell time (cutting, milling, spot drilling, handling, total) from the Store answer. Existing page copy unchanged."
+      "path": "stb-alcove-store-bridge.js",
+      "pass": "store-repin-alcove-spots",
+      "blobSha": "103cb22a5d71c80d5907946edb83de0a8c360825",
+      "bytes": 4998,
+      "reason": "Store repin: Alcove bridge expects Store aa59dd92dde8db139081542f2102f035120fa097 (Store main, PR #13: spot drilling 3/16 in deep after the point, inset 1 1/2 in or 2 in)."
     },
     {
-      "path": "system-build-front-door-0.5.html",
-      "pass": "alcove-version-chain",
-      "blobSha": "38aa668842c296f60d8683157ce33bee6ed9136e",
-      "bytes": 39691,
-      "reason": "Alcove version chain: confirmed definitions get version numbers (a change makes a new version, old versions kept); the Store, Your call, Yard and Record pages show one chain card (SENT, ARRIVED with the Store Zero receipt hash, ANSWERED, YOUR CALL hashed, FINAL VERSION order hash, simulated) with full-length hashes; Configure shows the running modeled cell time (cutting, milling, spot drilling, handling, total) from the Store answer. Existing page copy unchanged."
+      "path": "stb-user-defined-board-runtime-bridge.js",
+      "pass": "store-repin-alcove-spots",
+      "blobSha": "e486df264a006cd9412f47cfb19cf889f8a4b873",
+      "bytes": 8366,
+      "reason": "Store repin: Start-your-own runtime bridge expects Store aa59dd92dde8db139081542f2102f035120fa097."
     },
     {
-      "path": "system-build-current.html",
-      "pass": "alcove-version-chain",
-      "blobSha": "e5ef3229198db08768271f84247bccbb2bb6c767",
-      "bytes": 227072,
-      "reason": "Alcove version chain: confirmed definitions get version numbers (a change makes a new version, old versions kept); the Store, Your call, Yard and Record pages show one chain card (SENT, ARRIVED with the Store Zero receipt hash, ANSWERED, YOUR CALL hashed, FINAL VERSION order hash, simulated) with full-length hashes; Configure shows the running modeled cell time (cutting, milling, spot drilling, handling, total) from the Store answer. Existing page copy unchanged."
+      "path": "stb-store-handoff-contract.js",
+      "pass": "store-repin-alcove-spots",
+      "blobSha": "0f70fd6e28e4963674fc2f6dc516f958e4b0ddbb",
+      "bytes": 51918,
+      "reason": "Store repin: the two cached User 1 Store references (16 in, 18 in) refreshed to the exact answers of Store aa59dd92 ($8.54 and $9.07, new calculation hashes, Store run 36173019688); test/store/user1-reference-guard.test.mjs now fails CI if the cache ever differs from the Store at STORE_PIN."
     },
     {
       "path": "stb-build-guide-spec.js",
-      "pass": "front-door-phase-0",
-      "blobSha": "8108d37dcedb28e06250777d70acd102d43bd535",
-      "bytes": 15198,
-      "reason": "Front door Phase 0: each door shows one row of buttons after Back, with exactly one live button, last in the row, going to the Shared Home (New user: LATER, browse without an account; Returning and Professional: SHARED HOME →). Future buttons shown inert, marked COMING, listed under Build later in the Dev Guide (Professional: configured later with contractor adapters). Demo-account buttons and wrapper-layer button surgery removed."
+      "pass": "store-repin-alcove-spots",
+      "blobSha": "042908b3b2bbdc8f701f01e3a5cf76e0bdfd3322",
+      "bytes": 15237,
+      "reason": "Alcove spots: the Configure Dev Guide gap note \"Spot target mapping is not fully bound yet\" replaced, because each upright now carries its own spots."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "store-repin-alcove-spots",
+      "blobSha": "f5a7cfc928b095224c0998cbaea32e36d3f2e4e8",
+      "bytes": 136338,
+      "reason": "Alcove spots: one 3/16 in spot per upright per shelf (4 per shelf), inset 1 1/2 in or 2 in from the edge (two-option choice under the spots checkbox), sent inside each upright component so Store Zero times, prices or refuses them; summary text says 4 uprights and the inset; Alcove bridge cache-buster."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "store-repin-alcove-spots",
+      "blobSha": "094d8769b2388f46045aeb93be5b90927250cfd5",
+      "bytes": 39691,
+      "reason": "Cache-buster for the updated base."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "store-repin-alcove-spots",
+      "blobSha": "583b1836afc32b590a64f4f824433c9378c11ac8",
+      "bytes": 227072,
+      "reason": "Cache-busters for the updated front door, handoff contract, runtime bridge and guide spec."
     }
   ]
 }
