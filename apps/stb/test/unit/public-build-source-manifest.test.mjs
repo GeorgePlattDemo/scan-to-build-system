@@ -12,16 +12,24 @@ function gitBlobSha(bytes) {
   return crypto.createHash('sha1').update(header).update(bytes).digest('hex');
 }
 
-test('public-build checkpoint is byte-identical to pinned Review source blobs', () => {
+test('public-build files match their pinned Review source blob or their recorded System edit', () => {
   assert.equal(manifest.sourceRepository, 'GeorgePlattDemo/scan-to-build-review');
   assert.equal(manifest.sourceCommit, '7b26dfc45c9832271840d134426e096787156a04');
-  assert.equal(manifest.status, 'exact preservation checkpoint; not yet the canonical System runtime root');
+  assert.equal(manifest.status, 'System-owned checkpoint; source blobs recorded, later System edits listed in systemEdits');
+  const edits = new Map((manifest.systemEdits || []).map(edit => [edit.path, edit]));
 
   for (const entry of manifest.files) {
     const url = new URL('../../public-build/' + entry.path, import.meta.url);
     const bytes = fs.readFileSync(fileURLToPath(url));
-    assert.equal(bytes.length, entry.bytes, entry.path + ' byte length changed');
-    assert.equal(gitBlobSha(bytes), entry.sourceBlobSha, entry.path + ' is not byte-identical to source');
+    const edit = edits.get(entry.path);
+    if (edit) {
+      assert.ok(edit.pass && edit.reason, entry.path + ' System edit must name its pass and reason');
+      assert.equal(bytes.length, edit.bytes, entry.path + ' changed after its recorded System edit');
+      assert.equal(gitBlobSha(bytes), edit.blobSha, entry.path + ' does not match its recorded System edit');
+    } else {
+      assert.equal(bytes.length, entry.bytes, entry.path + ' byte length changed');
+      assert.equal(gitBlobSha(bytes), entry.sourceBlobSha, entry.path + ' is not byte-identical to source');
+    }
   }
 });
 

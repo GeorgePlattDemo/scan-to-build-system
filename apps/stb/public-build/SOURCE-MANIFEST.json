@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "exact preservation checkpoint; not yet the canonical System runtime root",
+  "status": "System-owned checkpoint; source blobs recorded, later System edits listed in systemEdits",
   "sourceRepository": "GeorgePlattDemo/scan-to-build-review",
   "sourceCommit": "7b26dfc45c9832271840d134426e096787156a04",
   "importedInto": "GeorgePlattDemo/scan-to-build-system",
@@ -10,7 +10,8 @@
     "Every listed source file is copied byte-for-byte from the pinned Review commit.",
     "This import does not modify the public Review repository.",
     "This import does not replace apps/stb/browser or change runtime routing by itself.",
-    "No Store answer, pricing rule, project definition, machine capability, or physical authority is changed by this checkpoint."
+    "No Store answer, pricing rule, project definition, machine capability, or physical authority is changed by this checkpoint.",
+    "A file may differ from its source blob only if its current blob and byte length are recorded in systemEdits."
   ],
   "files": [
     {
@@ -105,6 +106,36 @@
       "reference": "elevation-windowseat.png",
       "status": "referenced but absent from source Review commit",
       "handling": "not invented or substituted during preservation import"
+    }
+  ],
+  "systemEdits": [
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "front-door-phase-0",
+      "blobSha": "a10def93c387bee7c45f95514458345e9f02f910",
+      "bytes": 131665,
+      "reason": "Front door Phase 0: each door shows one row of buttons after Back, with exactly one live button, last in the row, going to the Shared Home (New user: LATER, browse without an account; Returning and Professional: SHARED HOME →). Future buttons shown inert, marked COMING, listed under Build later in the Dev Guide (Professional: configured later with contractor adapters). Demo-account buttons and wrapper-layer button surgery removed."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "front-door-phase-0",
+      "blobSha": "e1835d3f276627e7160e54f7a146de5186d2d5ac",
+      "bytes": 39691,
+      "reason": "Front door Phase 0: each door shows one row of buttons after Back, with exactly one live button, last in the row, going to the Shared Home (New user: LATER, browse without an account; Returning and Professional: SHARED HOME →). Future buttons shown inert, marked COMING, listed under Build later in the Dev Guide (Professional: configured later with contractor adapters). Demo-account buttons and wrapper-layer button surgery removed."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "front-door-phase-0",
+      "blobSha": "ef0af7b49a32ebae5c12319bebd11408d00a38a3",
+      "bytes": 217914,
+      "reason": "Front door Phase 0: each door shows one row of buttons after Back, with exactly one live button, last in the row, going to the Shared Home (New user: LATER, browse without an account; Returning and Professional: SHARED HOME →). Future buttons shown inert, marked COMING, listed under Build later in the Dev Guide (Professional: configured later with contractor adapters). Demo-account buttons and wrapper-layer button surgery removed."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "front-door-phase-0",
+      "blobSha": "8108d37dcedb28e06250777d70acd102d43bd535",
+      "bytes": 15198,
+      "reason": "Front door Phase 0: each door shows one row of buttons after Back, with exactly one live button, last in the row, going to the Shared Home (New user: LATER, browse without an account; Returning and Professional: SHARED HOME →). Future buttons shown inert, marked COMING, listed under Build later in the Dev Guide (Professional: configured later with contractor adapters). Demo-account buttons and wrapper-layer button surgery removed."
     }
   ]
 }
