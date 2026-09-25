@@ -1,0 +1,66 @@
+name: Publish OPEN SYSTEM BUILD
+
+# One place to check the app: publishes apps/stb/public-build/ from main to
+# https://georgeplattdemo.github.io/scan-to-build-system/ after its tests pass.
+# Review (scan-to-build-review) is frozen and is not touched by this workflow.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/stb/.node-version
+
+      - name: Public-build tests
+        working-directory: apps/stb/public-build
+        run: node --test --test-concurrency=1 tests/*.test.mjs
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}system-build-current.html
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assemble site (visible build only, no tests)
+        run: |
+          mkdir _site
+          cp -R apps/stb/public-build/. _site/
+          rm -rf _site/tests
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
