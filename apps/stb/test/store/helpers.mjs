@@ -179,6 +179,7 @@ function alcoveComponentPrograms({
   depthIn = 14,
   spanIn = 44,
   shelfCount = 5,
+  uprightSpotInsetIn = null,
 } = {}) {
   const stockWidthIn = 5.5;
   const across = Math.ceil(depthIn / stockWidthIn);
@@ -190,7 +191,16 @@ function alcoveComponentPrograms({
       requirementId: 'ALCOVE-UPRIGHT-PARENTS',
       finishedLengthIn: heightIn,
       finishedWidthIn: stockWidthIn,
-      features: [],
+      // One spot per shelf on each upright, inset from the edge (4 spots per shelf), as the page sends it.
+      features: uprightSpotInsetIn == null
+        ? []
+        : [12, 24, 36, 45, 65].slice(0, shelfCount).map((xIn, shelf) => ({
+            featureId: 'ALCOVE-UPRIGHT-' + String(index + 1).padStart(2, '0') + '-SPOT-' + String(shelf + 1).padStart(2, '0'),
+            kind: 'SPOT_ON_LOCATION',
+            xIn,
+            acrossWidthRule: 'INSET_FROM_EDGE',
+            insetFromEdgeIn: uprightSpotInsetIn,
+          })),
     });
   }
 
@@ -238,6 +248,7 @@ export async function alcoveInsertJobBody({
   spanIn = 44,
   withPrograms = true,
   pilot = false,
+  uprightSpotInsetIn = null,
   unresolvedConditions = [],
 } = {}) {
   const shelfElevations = [12, 24, 36, 45, 65].slice(0, shelfCount);
@@ -295,7 +306,7 @@ export async function alcoveInsertJobBody({
       },
     ],
     componentPrograms: withPrograms
-      ? alcoveComponentPrograms({ heightIn, depthIn, spanIn, shelfCount })
+      ? alcoveComponentPrograms({ heightIn, depthIn, spanIn, shelfCount, uprightSpotInsetIn })
       : [],
     hardwareDemand: {
       requirementId: 'ALCOVE-PINS-AND-SCREWS',
