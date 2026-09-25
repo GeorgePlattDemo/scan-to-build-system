@@ -2,7 +2,7 @@
   'use strict';
 
   const VERSION='STB-DEV-GUIDE-0.2';
-  const guide=(goal,rows)=>Object.freeze({goal,rows:Object.freeze(rows.map(row=>Object.freeze(row)))});
+  const guide=(goal,rows,later=[])=>Object.freeze({goal,rows:Object.freeze(rows.map(row=>Object.freeze(row))),later:Object.freeze(later.map(row=>Object.freeze(row)))});
 
   const legacyWindow=guide('Legacy reference',[
     ['Don’t rebuild here','The live Window Seat owns the current path.'],
@@ -25,13 +25,20 @@
     'new-user':guide('Orient once',[
       ['Keep it short','One pass, then into the work.'],
       ['Don’t trap people','Back and skip still work.'],
-      ['No hidden authority','Orientation changes no project fact.']
+      ['No hidden authority','Orientation changes no project fact.'],
+      ['Play without an account','LATER opens everything. Saving or buying asks who you are.']
+    ],[
+      ['THIS DEVICE','Phase 2 · keep this project in this browser.'],
+      ['EMAIL / SIGN IN','Later · same project file, kept on a server.']
     ]),
     returning:guide('Resume cleanly',[
       ['Don’t start over','Saved project stays saved.'],
       ['Refresh outside facts','Old Store answers are history.'],
       ['Fork changes','New work gets a new version.'],
       ['Still demo-only','Named users are not real auth.']
+    ],[
+      ['MY PROJECTS ON THIS DEVICE','Phase 3 · resume, make another, replace a part.'],
+      ['OPEN A SAVED PROJECT FILE','Phase 3 · check the digest, mark it imported.']
     ]),
     saved:guide('Find the right record',[
       ['Show the version','Don’t flatten history into one card.'],
@@ -42,6 +49,9 @@
       ['Import, don’t bless','A plan is evidence, not truth.'],
       ['Keep provenance','Know what came from where.'],
       ['Same gates','Professional does not bypass Store or machine limits.']
+    ],[
+      ['BRING A DRAWING, PDF OR PHOTO','Configured later with contractor adapters.'],
+      ['PASTE A CUT LIST','Configured later with contractor adapters.']
     ]),
     projects:guide('Keep the library obvious',[
       ['Don’t overcrowd','Show live, bounded, or deferred clearly.'],
@@ -280,6 +290,7 @@
       '<p class="hd">DEV GUIDE</p>',
       '<p class="goal">'+esc(p.goal)+'</p>',
       ...p.rows.map(row=>'<div class="row guide-row"><b>'+esc(row[0])+'</b><span>'+esc(row[1])+'</span></div>'),
+      ...((p.later && p.later.length) ? ['<p class="goal later-hd">Build later</p>', ...p.later.map(row=>'<div class="row guide-row later" data-coming-row="'+esc(row[0])+'"><b>'+esc(row[0])+'</b><span>'+esc(row[1])+'</span></div>')] : []),
       '<div class="guide-meta"><span>'+esc(pageId)+'</span><span>'+VERSION+'</span></div>'
     ].join('');
   }
