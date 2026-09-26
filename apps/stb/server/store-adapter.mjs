@@ -1,6 +1,7 @@
 import {
   ALCOVE_INSERT_DEFINITION,
   BOARD_DEFINITION,
+  CUT_PACKAGE_DEFINITION,
   PUBLISHED_BOARD_SKU,
   STORE_PIN,
   STORE_FRESH_EVALUATION_RULE_ID,
@@ -686,6 +687,54 @@ export async function createStoreAdapter({
     };
   }
 
+  // A la carte lines: the pinned Store answers every cut package and item line on its own.
+  // System adds no price, no board choice and no fallback.
+  async function handleCutPackageJob(envelope, jobPayload, options = {}) {
+    const runtimeCatalog = options.catalogOverride ?? catalog;
+    const definition = jobPayload.definition;
+    const demand = {
+      classId: CUT_PACKAGE_DEFINITION.kind,
+      configurationId: definition.configurationId,
+      configurationVersion: definition.configurationVersion,
+      cutPackages: structuredClone(definition.cutPackages ?? []),
+      itemLines: structuredClone(definition.itemLines ?? []),
+      storeRevision: STORE_PIN,
+    };
+    const storeRequest = { requestId: envelope.requestId, evaluatedAt: nowIso(), storeRevision: STORE_PIN };
+    const reloadCurrentStore = catalogOverride === null && options.catalogOverride == null;
+    let storeResult = null;
+    let estimateError = null;
+    try {
+      storeResult = reloadCurrentStore
+        ? await loaded.modules.requestCutPackageStoreEvaluation(demand, storeRequest)
+        : await loaded.modules.evaluateCutPackageStoreRequest(runtimeCatalog, demand, storeRequest);
+    } catch (error) {
+      estimateError = {
+        code: ADAPTER_ERROR_CODES.ESTIMATE_FAILED,
+        details: error instanceof Error ? error.message : String(error),
+      };
+    }
+    return {
+      status: 200,
+      body: await successEnvelope(envelope, {
+        rawOffering: null,
+        rawEvaluation: storeResult ?? { status: 'UNRESOLVED', complete: false, reason: ADAPTER_ERROR_CODES.ESTIMATE_FAILED },
+        rawEstimate: null,
+        materialResolution: null,
+        estimateAssociationId: storeResult?.calculationIdentity?.resultHash ?? null,
+        estimateError,
+        priceCompleteness: {
+          status: storeResult?.status ?? 'UNAVAILABLE',
+          note: 'Each line is answered by the pinned Store on its own. No local fallback was used.',
+        },
+        calculationIdentity: storeResult?.calculationIdentity ?? null,
+        evaluationReceipt: storeResult?.evaluationReceipt ?? null,
+        mappedCallInputs: { definition: structuredClone(definition), demand, storeRequest },
+        attributedBasis: storeBasis({ modules: loaded.modules, evaluation: storeResult }),
+      }),
+    };
+  }
+
   async function dispatch(body) {
     const validated = await validateWireRequest(body);
     if (!validated.ok) {
@@ -700,6 +749,9 @@ export async function createStoreAdapter({
     }
     if (validated.requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1) {
       return handleAlcoveInsertJob(validated.envelope, validated.payload);
+    }
+    if (validated.requestType === STORE_REQUEST_TYPES.CUT_PACKAGE_V1) {
+      return handleCutPackageJob(validated.envelope, validated.payload);
     }
     if (validated.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
       return handleUserDefinedBoardJob(validated.envelope, validated.payload);

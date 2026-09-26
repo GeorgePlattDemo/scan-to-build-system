@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: GeorgePlattDemo/scan-to-build-store
-          ref: eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81
+          ref: fc3f555b8f1f329bcf2dd81fa26995230d12a527
           path: store-zero
 
       - name: Setup Node
@@ -51,6 +51,12 @@ jobs:
         env:
           STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-zero
         run: node --test --test-concurrency=1 test/store/alcove.test.mjs
+
+      - name: Cut packages and item lines through the pinned Store
+        working-directory: apps/stb
+        env:
+          STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-zero
+        run: node --test --test-concurrency=1 test/store/cut-package.test.mjs
 
       - name: User 1 cached reference equals pinned Store
         working-directory: apps/stb

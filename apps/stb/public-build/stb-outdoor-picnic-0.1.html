@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Picnic Table · Outdoor</title>
+<style>
+:root{
+  --bg:#f5f0e9;--card:#fbf8f3;--line:#e3d9cc;--ink:#26190f;--ink2:#5b4a3b;--muted:#8a7a6a;
+  --brand:#8a5a2b;--brand-ink:#fff;--brand-soft:#efe3d3;--ok:#2f6b3a;--warn:#9b5a14;--bad:#9b2c1f;
+  --link-bg:#e4eefb;--link-ink:#1f4f8a;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1c1712;--card:#241e18;--line:#3a3129;--ink:#f3ebe1;--ink2:#cdbfae;--muted:#9d8f80;
+  --brand:#c88b4f;--brand-ink:#1c1712;--brand-soft:#3a2c1f;--ok:#7fc28b;--warn:#e0a45c;--bad:#ef8a7c;
+  --link-bg:#1f2c3d;--link-ink:#a9c8f0;}}
+:root[data-theme="dark"]{
+  --bg:#1c1712;--card:#241e18;--line:#3a3129;--ink:#f3ebe1;--ink2:#cdbfae;--muted:#9d8f80;
+  --brand:#c88b4f;--brand-ink:#1c1712;--brand-soft:#3a2c1f;--ok:#7fc28b;--warn:#e0a45c;--bad:#ef8a7c;
+  --link-bg:#1f2c3d;--link-ink:#a9c8f0;}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed}
+.wrap{max-width:1320px;margin:0 auto;padding:16px 20px 48px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:18px}
+.pill{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;font-size:13px;color:var(--ink2)}
+.pill.brand{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);font-weight:700;letter-spacing:.02em}
+.pill.step.on{border-color:var(--brand);color:var(--ink);font-weight:650}
+.pill:disabled{opacity:.45}
+.pill.rule{margin-left:auto;background:var(--link-bg);color:var(--link-ink);border-color:transparent;font-weight:600;text-decoration:none}
+h1{font-size:clamp(26px,4vw,46px);line-height:1.08;margin:6px 0 6px;text-align:center;letter-spacing:-.02em}
+.sub{text-align:center;color:var(--ink2);margin:0 0 22px;font-size:clamp(14px,1.6vw,18px)}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.plan{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;display:flex;flex-direction:column}
+.plan img{width:100%;aspect-ratio:774/428;object-fit:cover;border-radius:10px;display:block;background:var(--brand-soft)}
+.plan h2{margin:14px 12px 2px;font-size:clamp(22px,2.4vw,32px);letter-spacing:-.01em}
+.plan .src{margin:0 12px;color:var(--ink2)}
+.plan .facts{margin:6px 12px 14px;color:var(--ink2)}
+.plan .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:auto 12px 10px}
+.from{background:var(--brand-soft);border-radius:10px;padding:8px 14px;min-width:120px}
+.from small{color:var(--ink2)}
+.from b{font-size:22px;margin-left:4px}
+.cta{background:var(--brand);color:var(--brand-ink);border:0;border-radius:10px;padding:13px 22px;font-weight:700;letter-spacing:.02em}
+.cta:disabled{opacity:.45}
+.build{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:22px;align-items:start}
+.render{width:100%;border-radius:12px;display:block;background:var(--brand-soft)}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:14px;font-size:14px}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{background:var(--brand-soft);font-weight:650}
+tr:last-child td{border-bottom:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:19px}
+.kit{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.kit p{margin:0;color:var(--ink2);flex:1 1 260px}
+.opts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.opt{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 6px;text-align:center;min-height:58px}
+.opt span{display:block;font-size:13px;color:var(--ink2)}
+.opt b{display:block;font-size:17px;margin-top:2px}
+.opt.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.opt.on span{color:var(--brand-ink)}
+.opt .no{font-size:12px;font-weight:600;color:var(--bad)}
+.opt.on .no{color:var(--brand-ink)}
+.len{display:grid;grid-template-columns:auto 44px 1fr 44px;gap:10px;align-items:center}
+.len .val{grid-column:3;text-align:center;font-weight:700;font-size:18px;margin-bottom:-6px}
+.len button{width:44px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:20px}
+.len input{width:100%}
+.hint{color:var(--muted);font-size:13px;margin:6px 0 0}
+.answer{border:2px solid var(--brand);border-radius:14px;padding:14px 16px;background:var(--card)}
+.answer .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:16px}
+.answer h3{margin:0 0 6px;font-size:22px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+.total{font-size:clamp(30px,4vw,42px);font-weight:800;letter-spacing:-.02em;margin:2px 0 8px}
+.meta{color:var(--ink2);font-size:13px}
+.status{font-weight:600}
+.status.ask{color:var(--warn)}
+.status.bad{color:var(--bad)}
+.refusals{margin:6px 0 0;padding-left:18px;color:var(--bad);font-size:13px}
+.lines td{font-size:13px}
+.note{color:var(--ink2);font-size:13px}
+[hidden]{display:none!important}
+@media (max-width:900px){.plans,.build{grid-template-columns:1fr}.answer .grid{grid-template-columns:1fr}.opts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:520px){.wrap{padding:12px 16px 40px}.opts{grid-template-columns:repeat(2,minmax(0,1fr))}.pill.rule{margin-left:0}th,td{padding:7px 6px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="bar" aria-label="Outdoor trail">
+    <span class="pill brand">PICNIC TABLE · OUTDOOR</span>
+    <button class="pill" id="library" type="button">← Project Library</button>
+    <button class="pill step" data-step="1" type="button">1 · Your idea</button>
+    <button class="pill step" data-step="2" type="button">2 · Make it yours</button>
+    <button class="pill step" data-step="3" type="button">3 · The Store answers</button>
+    <button class="pill step" data-step="4" type="button" disabled>4 · Your call</button>
+    <button class="pill step" data-step="5" type="button" disabled>5 · We cut it</button>
+    <button class="pill step" data-step="6" type="button" disabled>6 · Pick up &amp; build</button>
+    <a class="pill rule" href="stb-outdoor-reference-authority-0.3.html" target="_blank" rel="noopener">📘 RULE BOOK: Picnic table authorities →</a>
+  </nav>
+
+  <section id="view-plans">
+    <h1>Two proven plans. Pick one. Make it yours.</h1>
+    <p class="sub">Real public plans, turned into a kit: every board cut, every screw hole marked. You build it.</p>
+    <div class="plans" id="plans"></div>
+  </section>
+
+  <section id="view-build" hidden>
+    <h1 id="build-title">The bench: make it yours</h1>
+    <div class="build">
+      <div>
+        <img class="render" id="render" alt="">
+        <table aria-label="Parts">
+          <thead><tr><th>Part</th><th>Qty</th><th>Wood</th><th>Length</th><th>Ends</th><th>Spots</th></tr></thead>
+          <tbody id="parts"></tbody>
+        </table>
+        <p class="hint" id="plan-source"></p>
+      </div>
+      <div>
+        <div class="card kit">
+          <div style="flex:1 1 260px"><h3>THE KIT: “The plan, as designed”</h3><p id="kit-text"></p></div>
+          <button class="cta" id="the-set" type="button">ONE CLICK: THE SET</button>
+        </div>
+        <div class="card"><h3>WOOD: one click</h3><div class="opts" id="woods"></div></div>
+        <div class="card"><h3>HARDWARE: one click</h3><div class="opts" id="tiers"></div></div>
+        <div class="card">
+          <h3>CUSTOM: grow or shrink</h3>
+          <div class="len">
+            <span>Table length</span>
+            <button type="button" id="shorter" aria-label="Shorter">−</button>
+            <div><div class="val" id="len-val">6 ft</div><input type="range" id="len" min="4" max="14" step="1" value="6" aria-label="Table length in feet"></div>
+            <button type="button" id="longer" aria-label="Longer">+</button>
+          </div>
+          <p class="hint" id="len-hint"></p>
+        </div>
+        <div class="answer" id="answer">
+          <div class="grid">
+            <div>
+              <h3>Store Zero answers</h3>
+              <div class="kv"><span>Wood</span><b id="a-wood">—</b></div>
+              <div class="kv"><span>Hardware</span><b id="a-hw">—</b></div>
+              <div class="kv"><span>Machine work</span><b id="a-machine">—</b></div>
+            </div>
+            <div>
+              <div class="meta" id="a-meta"></div>
+              <div class="status" id="a-status"></div>
+              <div id="a-total-wrap" hidden><div class="meta">Total:</div><div class="total" id="a-total"></div></div>
+              <ul class="refusals" id="a-refusals"></ul>
+              <button class="cta" id="confirm" type="button" disabled>CONFIRM &amp; SEND →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-call" hidden>
+    <h1>Your call</h1>
+    <p class="sub" id="call-sub"></p>
+    <div class="card">
+      <h3>What Store Zero will cut and supply</h3>
+      <table class="lines" aria-label="Order lines"><thead><tr><th>Line</th><th>Store item</th><th>Qty</th><th>Price</th></tr></thead><tbody id="call-lines"></tbody></table>
+      <div class="kv" style="margin-top:12px"><span>Machine work (included in the wood lines)</span><b id="call-machine"></b></div>
+      <div class="kv"><span><b>Total</b></span><b class="total" id="call-total" style="font-size:28px;margin:0"></b></div>
+      <p class="note" id="call-receipt"></p>
+      <p class="note">Budgetary estimate from the live Store, not a commercial quote. Nothing is cut until you accept and pay; that step comes next.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <button class="cta" type="button" id="back-build" style="background:var(--card);color:var(--ink);border:1px solid var(--line)">← Change something</button>
+        <button class="cta" type="button" disabled>ACCEPT &amp; PAY (next)</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+// ---------- Store bridge: every price on this page is a fresh answer from the live Store ----------
+const EXPECTED_STORE_PIN = 'fc3f555b8f1f329bcf2dd81fa26995230d12a527';
+const PROTOCOL_VERSION = 'stb-store-zero-http/1';
+const REQUEST_TYPE = 'CUT_PACKAGE_V1';
+const DEFINITION_KIND = 'cut_package.v1';
+const RULE_VERSION = '0.1';
+const CONFIG_URL = new URL('stb-store-runtime.json', location.href).href;
+
+function canonicalize(v){
+  if(v===null)return null;
+  const t=typeof v;
+  if(t==='string'||t==='boolean')return v;
+  if(t==='number'){if(!Number.isFinite(v))throw new TypeError('non-finite');return v}
+  if(Array.isArray(v))return v.map(canonicalize);
+  if(t==='object'){const o={};Object.keys(v).sort().forEach(k=>{if(v[k]===undefined)throw new TypeError('undefined');o[k]=canonicalize(v[k])});return o}
+  throw new TypeError('canonical JSON rejects '+t);
+}
+const canonicalJson=v=>JSON.stringify(canonicalize(v));
+async function sha256(v){
+  const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonicalJson(v)));
+  return Array.from(new Uint8Array(d),b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function resolveEndpoint(){
+  const r=await fetch(CONFIG_URL,{cache:'no-store'});
+  if(!r.ok)throw new Error('STORE_RUNTIME_CONFIGURATION_UNAVAILABLE');
+  const c=await r.json();
+  if(!c.jobEndpoint)throw new Error('STORE_RUNTIME_NOT_DEPLOYED');
+  const e=new URL(c.jobEndpoint);
+  const loop=h=>['localhost','127.0.0.1','[::1]'].includes(h);
+  const localTest=loop(location.hostname)&&loop(e.hostname);
+  if(e.username||e.password||e.search||e.hash||e.pathname!=='/api/store-zero/job'||
+     (!localTest&&(e.protocol!=='https:'||loop(e.hostname)))||(localTest&&!['http:','https:'].includes(e.protocol)))
+    throw new Error('STORE_RUNTIME_ENDPOINT_INVALID');
+  return e.href;
+}
+async function askStore(definition){
+  const payload={definition:JSON.parse(JSON.stringify(definition)),definitionKind:DEFINITION_KIND,ruleVersion:RULE_VERSION};
+  const wire={
+    protocolVersion:PROTOCOL_VERSION,requestId:crypto.randomUUID(),projectId:'outdoor',
+    candidateRevisionId:definition.configurationVersion,requestType:REQUEST_TYPE,scope:REQUEST_TYPE,
+    demandSignature:await sha256({definitionKind:DEFINITION_KIND,ruleVersion:RULE_VERSION,requestType:REQUEST_TYPE,scope:REQUEST_TYPE,definition:payload.definition}),
+    querySignature:null,payloadDigest:await sha256(payload),expectedStorePin:EXPECTED_STORE_PIN,
+    attemptId:crypto.randomUUID(),attemptNumber:1,sentAt:new Date().toISOString(),payload
+  };
+  const endpoint=await resolveEndpoint();
+  const res=await fetch(endpoint,{method:'POST',mode:'cors',cache:'no-store',signal:AbortSignal.timeout(25000),
+    headers:{'Content-Type':'application/json'},body:canonicalJson(wire)});
+  const body=await res.json().catch(()=>null);
+  if(!res.ok||!body||body.adapterError===true){const err=new Error(body?.code||'STORE_ZERO_UNAVAILABLE');err.storeBody=body;throw err}
+  if(['protocolVersion','requestId','attemptId','projectId','candidateRevisionId','requestType','scope','demandSignature','payloadDigest'].some(k=>body[k]!==wire[k]))throw new Error('STORE_CORRELATION_ERROR');
+  if(body.storePin!==EXPECTED_STORE_PIN)throw new Error('STORE_PIN_MISMATCH');
+  const ev=body.rawEvaluation;
+  if(!ev||ev.freshEvaluation!==true||!body.evaluationReceipt||body.evaluationReceipt.requestId!==wire.requestId||body.evaluationReceipt.authority?.storeRevision!==EXPECTED_STORE_PIN)throw new Error('STORE_ANSWER_NOT_FRESH');
+  return {evaluation:ev,receipt:body.evaluationReceipt,requestId:wire.requestId};
+}
+
+// ---------- The project's definitions (System owns what the plans mean) ----------
+// Wood choices map to the Store's own species and grade names. The Store picks boards and lengths.
+const WOODS=[
+  {key:'construction',label:'Construction',species:'spf',grade:'construction'},
+  {key:'treated',label:'Treated',species:'syp-treated',grade:'above-ground'},
+  {key:'ground-contact',label:'Ground-contact',species:'syp-treated',grade:'ground-contact'},
+  {key:'cedar-tone',label:'Cedar-tone',species:'syp-treated',grade:'ground-contact-cedartone'},
+  {key:'cedar',label:'Cedar',species:'cedar',grade:'S4S'}
+];
+// Hardware tiers: the customer's choice. The plan names exact Store SKUs; the Store prices them or says no.
+const TIERS=[
+  {key:'BYO',label:'Bring your own',code:null},
+  {key:'COATED',label:'Coated',code:'COATED'},
+  {key:'HOTDIP',label:'Galvanized',code:'HOTDIP'},
+  {key:'STAINL',label:'Stainless',code:'STAINL'},
+  {key:'SILICO',label:'Silicon bronze',code:'SILICO'}
+];
+const slat=ft=>ft*12-0.5;
+const centered=xs=>xs.map(x=>({xIn:x,acrossWidthRule:'CENTERED_ON_WIDE_FACE'}));
+const many=(prefix,n,len,spots)=>Array.from({length:n},(_,i)=>({partId:prefix+'-'+String(i+1).padStart(2,'0'),lengthIn:len,spots:spots||[]}));
+
+const PLANS={
+  'a-frame':{
+    title:'Classic A-frame',
+    set:{wood:'treated',tier:'COATED'},
+    source:'Plan: Ana White, “Easiest to Build Picnic Table”',
+    facts:'6 ft · seats 8 · 2×6 + 2×4 · screws only',
+    photo:'assets/outdoor/plan-a-frame-photo.webp',
+    render:'assets/outdoor/a-frame-render.webp',
+    lenHint:'End frames stay as the plan built them. Store Zero says if a size can’t be cut.',
+    kitText:ft=>`12 slats at ${fmt(slat(ft))} in, legs cut at 25°, every screw hole spotted.`,
+    groups:ft=>{const L=slat(ft);return[
+      {id:'SLATS',label:'Slats',nominal:[2,6],angle:0,parts:[...many('TOP',6,L,centered([4.75,L/2,L-4.75])),...many('SEAT',6,L,centered([4.75,L-4.75]))]},
+      {id:'LEGS',label:'Legs',nominal:[2,6],angle:25,parts:many('LEG',4,31.375)},
+      {id:'BRACES',label:'Braces',nominal:[2,4],angle:25,parts:many('BRACE',2,32.875)},
+      {id:'SUPPORTS',label:'Seat supports',nominal:[2,4],angle:0,parts:many('SUPPORT',2,61)},
+      {id:'CLEATS',label:'Cleats',nominal:[2,2],angle:0,parts:[...many('CLEAT-END',2,34.25),...many('CLEAT-MID',1,29.25)]}
+    ]},
+    hardware:[{id:'SCR-2P5',sku:'SCR10-2P5-90',pieces:90,need:100,label:'2½ in #10 screws'}]
+  },
+  'table-benches':{
+    title:'Table + two benches',
+    set:{wood:'ground-contact',tier:'COATED'},
+    source:'Plan: MyOutdoorPlans, “Picnic Table with Detached Benches”',
+    facts:'6 ft · all 2×4 · no angle cuts',
+    photo:'assets/outdoor/plan-table-benches-photo.webp',
+    render:'assets/outdoor/table-benches-render.webp',
+    lenHint:'Table and benches grow together. Store Zero says if a size can’t be cut.',
+    kitText:ft=>`13 slats at ${fmt(slat(ft))} in, all square cuts, every screw hole spotted, short parts nested, stubs returned.`,
+    groups:ft=>{const L=slat(ft);return[
+      {id:'SLATS',label:'Table + bench slats',nominal:[2,4],angle:0,parts:[...many('TABLE-SLAT',7,L,centered([6,L-6])),...many('BENCH-SLAT',6,L,centered([6,L-6]))]},
+      {id:'FRAMES',label:'Legs + supports',nominal:[2,4],angle:0,parts:[...many('TABLE-LEG',4,26),...many('TABLE-SUPPORT',4,27.5),...many('BENCH-LEG',8,16.5),...many('BENCH-SUPPORT',8,11.5)]}
+    ]},
+    rows:ft=>[['Table slats',7,'2×4',slat(ft),'square',14],['Bench slats',6,'2×4',slat(ft),'square',12],['Table legs',4,'2×4',26,'square',0],['Table supports',4,'2×4',27.5,'square',0],['Bench legs',8,'2×4',16.5,'square',0],['Bench supports',8,'2×4',11.5,'square',0]],
+    hardware:[
+      {id:'SCR-4P5',sku:'SCR10-4P5-50',pieces:50,need:26,label:'4½ in #10 screws'},
+      {id:'SCR-2P5',sku:'SCR10-2P5-90',pieces:90,need:48,label:'2½ in #10 screws'},
+      {id:'BOLT',sku:'CB38-5P0-1',pieces:1,need:8,label:'3/8 × 5 in carriage bolts'}
+    ]
+  }
+};
+PLANS['a-frame'].rows=ft=>[['Slats',12,'2×6',slat(ft),'square',30],['Legs',4,'2×6',31.375,'25°',0],['Braces',2,'2×4',32.875,'25°',0],['Seat supports',2,'2×4',61,'square',0],['Cleats',3,'2×2','34¼" / 29¼"','square',0]];
+
+function definitionFor(planKey,ft){
+  const plan=PLANS[planKey];
+  const cutPackages=[];
+  for(const wood of WOODS){
+    for(const g of plan.groups(ft)){
+      cutPackages.push({packageId:wood.key+'|'+g.id,
+        material:{species:wood.species,form:'board',nominalT:g.nominal[0],nominalW:g.nominal[1],grade:wood.grade},
+        endCut:{angleDeg:g.angle},parts:g.parts});
+    }
+  }
+  const itemLines=[];
+  for(const tier of TIERS.filter(t=>t.code)){
+    for(const h of plan.hardware){
+      itemLines.push({lineId:tier.key+'|'+h.id,storeSku:`STB-ZERO-HW-${tier.code}-${h.sku}-001`,qty:Math.ceil(h.need/h.pieces)});
+    }
+  }
+  return {configurationId:'OUTDOOR-PICNIC-'+planKey.toUpperCase(),configurationVersion:planKey+'-'+ft+'ft-v1',cutPackages,itemLines};
+}
+
+// ---------- Reading the Store's answer (no arithmetic beyond adding the Store's own lines) ----------
+const money=n=>'$'+Number(n).toFixed(2);
+const r2=n=>Math.round(n*100)/100;
+function woodSummary(ev,planKey,woodKey,ft){
+  const ids=PLANS[planKey].groups(ft).map(g=>woodKey+'|'+g.id);
+  const lines=ids.map(id=>ev.packages.find(p=>p.packageId===id));
+  const refused=lines.filter(l=>!l||l.status!=='SUPPORTABLE');
+  const ok=lines.filter(l=>l&&l.status==='SUPPORTABLE');
+  return {
+    complete:refused.length===0,lines:ok,
+    refused:refused.map(l=>({group:(l?.packageId||'').split('|')[1],status:l?.status||'MISSING',reason:(l?.reasonCodes||[])[0]||'NO_ANSWER'})),
+    material:r2(ok.reduce((s,l)=>s+l.totals.material,0)),
+    machine:r2(ok.reduce((s,l)=>s+l.totals.machine_service,0)),
+    Q:r2(ok.reduce((s,l)=>s+l.Q,0)),
+    minutes:ok.reduce((s,l)=>s+Number(l.time?.T_MACHINE_min||0),0),
+    spots:ok.reduce((s,l)=>s+Number(l.spotCount||0),0),
+    stubs:ok.reduce((s,l)=>s+(l.stubs||[]).length,0)
+  };
+}
+function tierSummary(ev,planKey,tierKey){
+  if(tierKey==='BYO')return {complete:true,Q:0,lines:[],refused:[]};
+  const lines=PLANS[planKey].hardware.map(h=>ev.items.find(i=>i.lineId===tierKey+'|'+h.id));
+  const refused=lines.filter(l=>!l||l.status!=='SUPPORTABLE');
+  return {complete:refused.length===0,lines:lines.filter(l=>l&&l.status==='SUPPORTABLE'),
+    refused:refused.map(l=>({group:l?.storeSku||'',status:l?.status||'MISSING',reason:(l?.reasonCodes||[])[0]||'NO_ANSWER'})),
+    Q:r2(lines.filter(l=>l&&l.status==='SUPPORTABLE').reduce((s,l)=>s+l.Q,0))};
+}
+const REASONS={
+  NO_MATCHING_BOARD_OFFERING:'Store Zero doesn’t stock this size in this wood',
+  PART_LONGER_THAN_LONGEST_STOCKED_BOARD:'no board in this wood is long enough',
+  PART_NOT_HALF_INCH_UNDER_BOARD:'no board in this wood is long enough',
+  NO_OFFERING:'not stocked',NOT_OFFERED:'not offered'
+};
+const reasonText=code=>REASONS[code]||code.replace(/_/g,' ').toLowerCase();
+
+// ---------- Page state ----------
+const S={view:'plans',plan:null,ft:6,wood:'ground-contact',tier:'COATED',answer:null,error:null,asking:false,token:0,fromPrices:{}};
+const $=id=>document.getElementById(id);
+function fmt(n){
+  if(typeof n==='string')return n;
+  const whole=Math.floor(n+1e-9),frac=n-whole;
+  const eighths=Math.round(frac*8);
+  const map={0:'',1:'⅛',2:'¼',3:'⅜',4:'½',5:'⅝',6:'¾',7:'⅞'};
+  return eighths===8?String(whole+1):whole+(map[eighths]||'');
+}
+
+function show(view){
+  S.view=view;
+  $('view-plans').hidden=view!=='plans';
+  $('view-build').hidden=view!=='build';
+  $('view-call').hidden=view!=='call';
+  document.querySelectorAll('.step').forEach(b=>{
+    const n=+b.dataset.step;
+    b.classList.toggle('on',(view==='plans'&&n===1)||(view==='build'&&(n===2||n===3))||(view==='call'&&n===4));
+  });
+  document.querySelector('.step[data-step="2"]').disabled=!S.plan;
+  document.querySelector('.step[data-step="3"]').disabled=!S.plan;
+  document.querySelector('.step[data-step="4"]').disabled=!(S.plan&&selectionComplete());
+  window.scrollTo(0,0);
+}
+
+// Page 1: the two plans, each "From" price is the Store's cheapest complete wood with your own hardware, at 6 ft.
+function renderPlans(){
+  $('plans').innerHTML=Object.entries(PLANS).map(([key,p])=>`
+    <article class="plan">
+      <img src="${p.photo}" alt="${p.title} picnic table">
+      <h2>${p.title}</h2>
+      <p class="src">${p.source}</p>
+      <p class="facts">${p.facts}</p>
+      <div class="row">
+        <div class="from" id="from-${key}"><small>Asking Store Zero…</small></div>
+        <button class="cta" type="button" data-plan="${key}">BUILD THIS ONE →</button>
+      </div>
+    </article>`).join('');
+  $('plans').querySelectorAll('[data-plan]').forEach(b=>b.addEventListener('click',()=>openPlan(b.dataset.plan)));
+  for(const key of Object.keys(PLANS)){
+    askStore(definitionFor(key,6)).then(({evaluation})=>{
+      const best=WOODS.map(w=>woodSummary(evaluation,key,w.key,6)).filter(s=>s.complete).sort((a,b)=>a.Q-b.Q)[0];
+      $('from-'+key).innerHTML=best?`<small>From</small><b>$${Math.round(best.Q)}</b>`:'<small>Store Zero can’t cut this plan as stocked</small>';
+    }).catch(err=>{$('from-'+key).innerHTML=`<small>Store unavailable (${err.message})</small>`});
+  }
+}
+
+function openPlan(key){
+  S.plan=key;S.ft=6;S.wood=PLANS[key].set.wood;S.tier=PLANS[key].set.tier;
+  const p=PLANS[key];
+  $('render').src=p.render;$('render').alt=p.title;
+  $('plan-source').textContent=p.source+'. The plan is the project’s; every board, cut, minute and price comes from Store Zero.';
+  $('len-hint').textContent=p.lenHint;
+  show('build');
+  renderBuild();ask();
+}
+
+function renderBuild(){
+  const p=PLANS[S.plan];
+  $('len').value=S.ft;$('len-val').textContent=S.ft+' ft';
+  $('kit-text').textContent=p.kitText(S.ft);
+  $('parts').innerHTML=p.rows(S.ft).map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${typeof r[3]==='number'?fmt(r[3])+'"':r[3]}</td><td>${r[4]}</td><td>${r[5]}</td></tr>`).join('');
+  const ev=S.answer;
+  const woodS=ev?Object.fromEntries(WOODS.map(w=>[w.key,woodSummary(ev,S.plan,w.key,S.ft)])):{};
+  const tierS=ev?Object.fromEntries(TIERS.map(t=>[t.key,tierSummary(ev,S.plan,t.key)])):{};
+  $('woods').innerHTML=WOODS.map(w=>{
+    const s=woodS[w.key];
+    const price=!ev?'…':s.complete?'$'+Math.round(s.Q):'<span class="no">Not as stocked</span>';
+    return `<button type="button" class="opt ${S.wood===w.key?'on':''}" data-wood="${w.key}"><span>${w.label}</span><b>${price}</b></button>`;
+  }).join('');
+  $('tiers').innerHTML=TIERS.map(t=>{
+    const s=tierS[t.key];
+    const price=t.key==='BYO'?'$0':!ev?'…':s.complete?'+$'+Math.round(s.Q):'<span class="no">Not stocked</span>';
+    return `<button type="button" class="opt ${S.tier===t.key?'on':''}" data-tier="${t.key}"><span>${t.label}</span><b>${price}</b></button>`;
+  }).join('');
+  $('woods').querySelectorAll('[data-wood]').forEach(b=>b.addEventListener('click',()=>{S.wood=b.dataset.wood;renderBuild()}));
+  $('tiers').querySelectorAll('[data-tier]').forEach(b=>b.addEventListener('click',()=>{S.tier=b.dataset.tier;renderBuild()}));
+  const setPrice=ev&&S.ft===6?(()=>{const set=PLANS[S.plan].set,w=woodS[set.wood],t=tierS[set.tier];return w.complete&&t.complete?' · '+money(w.Q+t.Q):''})():'';
+  $('the-set').textContent='ONE CLICK: THE SET'+setPrice;
+  renderAnswer(woodS[S.wood],tierS[S.tier]);
+  show(S.view);
+}
+
+function renderAnswer(w,t){
+  const status=$('a-status'),ref=$('a-refusals');
+  ref.innerHTML='';$('a-total-wrap').hidden=true;$('confirm').disabled=true;
+  $('a-wood').textContent=$('a-hw').textContent=$('a-machine').textContent='—';$('a-meta').textContent='';
+  if(S.asking){status.className='status ask';status.textContent='Asking Store Zero for this exact table…';return}
+  if(S.error){status.className='status bad';status.textContent='Store Zero could not answer ('+S.error+'). No earlier answer is reused.';return}
+  if(!w){status.textContent='';return}
+  $('a-wood').textContent=money(w.material);
+  $('a-machine').textContent=money(w.machine);
+  $('a-hw').textContent=S.tier==='BYO'?'Your own':t.complete?money(t.Q):'—';
+  $('a-meta').textContent=`${Math.round(w.minutes)} min on the machine · ${w.spots} screw holes marked · ${w.stubs} stub${w.stubs===1?'':'s'} returned with your kit`;
+  const problems=[...w.refused.map(r=>`${groupLabel(r.group)}: ${reasonText(r.reason)}`),...t.refused.map(r=>`${r.group}: ${reasonText(r.reason)}`)];
+  if(problems.length){
+    status.className='status bad';status.textContent='Store Zero can’t supply every line for this choice:';
+    ref.innerHTML=problems.map(p=>`<li>${p}</li>`).join('');
+    return;
+  }
+  status.className='status';status.textContent='';
+  $('a-total').textContent=money(w.Q+t.Q);$('a-total-wrap').hidden=false;
+  $('confirm').disabled=false;
+}
+function groupLabel(id){const g=PLANS[S.plan].groups(S.ft).find(x=>x.id===id);return g?g.label+' ('+g.nominal.join('×')+')':id}
+function selectionComplete(){
+  if(!S.answer||S.asking||S.error)return false;
+  return woodSummary(S.answer,S.plan,S.wood,S.ft).complete&&tierSummary(S.answer,S.plan,S.tier).complete;
+}
+
+// Any change to the table itself is a new definition, so the Store is asked again. Old answers are dropped.
+let debounce=null;
+function ask(){
+  const token=++S.token;S.answer=null;S.error=null;S.asking=true;renderBuild();
+  clearTimeout(debounce);
+  debounce=setTimeout(()=>{
+    askStore(definitionFor(S.plan,S.ft)).then(res=>{
+      if(token!==S.token)return;
+      S.answer=res.evaluation;S.receipt=res.receipt;S.requestId=res.requestId;S.asking=false;renderBuild();
+    }).catch(err=>{if(token!==S.token)return;S.asking=false;S.error=err.message;renderBuild()});
+  },350);
+}
+function setLength(ft){ft=Math.max(4,Math.min(14,ft));if(ft===S.ft)return;S.ft=ft;ask()}
+
+function renderCall(){
+  const w=woodSummary(S.answer,S.plan,S.wood,S.ft),t=tierSummary(S.answer,S.plan,S.tier);
+  const wood=WOODS.find(x=>x.key===S.wood),tier=TIERS.find(x=>x.key===S.tier);
+  $('call-sub').textContent=`${PLANS[S.plan].title} · ${S.ft} ft · ${wood.label} · ${tier.label}`;
+  const rows=w.lines.map(l=>`<tr><td>${groupLabel(l.packageId.split('|')[1])}, cut</td><td>${l.storeSku}</td><td>${l.boards} board${l.boards===1?'':'s'}</td><td>${money(l.Q)}</td></tr>`)
+    .concat(t.lines.map(l=>`<tr><td>Hardware</td><td>${l.storeSku}</td><td>${l.qty}</td><td>${money(l.Q)}</td></tr>`));
+  $('call-lines').innerHTML=rows.join('');
+  $('call-machine').textContent=money(w.machine);
+  $('call-total').textContent=money(w.Q+t.Q);
+  $('call-receipt').textContent=`Store receipt ${String(S.receipt.receiptHash).slice(0,12)} · request ${S.requestId.slice(0,8)} · Store ${EXPECTED_STORE_PIN.slice(0,7)} · ${S.receipt.evaluatedAt}`;
+  show('call');
+}
+
+// ---------- Wiring ----------
+$('library').addEventListener('click',()=>{
+  if(window.self!==window.top)window.parent.postMessage({type:'STB_CHILD_RETURN_LIBRARY',projectId:'outdoor'},location.origin);
+  else show('plans');
+});
+document.querySelectorAll('.step').forEach(b=>b.addEventListener('click',()=>{
+  const n=+b.dataset.step;
+  if(n===1)show('plans');
+  else if(n===2&&S.plan)show('build');
+  else if(n===3&&S.plan){show('build');$('answer').scrollIntoView({behavior:'smooth',block:'center'})}
+  else if(n===4&&selectionComplete())renderCall();
+}));
+$('len').addEventListener('input',e=>setLength(+e.target.value));
+$('shorter').addEventListener('click',()=>setLength(S.ft-1));
+$('longer').addEventListener('click',()=>setLength(S.ft+1));
+$('the-set').addEventListener('click',()=>{S.wood=PLANS[S.plan].set.wood;S.tier=PLANS[S.plan].set.tier;if(S.ft!==6){S.ft=6;ask()}else renderBuild()});
+$('confirm').addEventListener('click',()=>{if(selectionComplete())renderCall()});
+$('back-build').addEventListener('click',()=>show('build'));
+
+renderPlans();show('plans');
+window.STBOutdoorPicnic=Object.freeze({version:'0.1',expectedStorePin:EXPECTED_STORE_PIN,definitionFor,plans:Object.keys(PLANS)});
+})();
+</script>
+</body>
+</html>

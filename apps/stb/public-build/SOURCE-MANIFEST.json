@@ -111,24 +111,24 @@
   "systemEdits": [
     {
       "path": "stb-alcove-store-bridge.js",
-      "pass": "store-repin-eb5d6ae",
-      "blobSha": "d06eb92e2d1e86583de2b932170810cdb6ecb3b8",
+      "pass": "outdoor-picnic-store-fc3f555",
+      "blobSha": "99a45e2421a7347cbc59d12117210f36f923047d",
       "bytes": 4998,
-      "reason": "Store repin: Alcove bridge expects Store eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81 (Store main, PR #14: lumber and fastener stock, 183 offerings)."
+      "reason": "Store repin: Alcove bridge expects Store fc3f555b8f1f329bcf2dd81fa26995230d12a527 (Store main, PR #15: cut packages and item lines)."
     },
     {
       "path": "stb-user-defined-board-runtime-bridge.js",
-      "pass": "store-repin-eb5d6ae",
-      "blobSha": "ccc855331d73e3b39d1c8c25d5445cc9078acc08",
+      "pass": "outdoor-picnic-store-fc3f555",
+      "blobSha": "897a3aa5818f63bc5b15dbe70525cba0a56b99d3",
       "bytes": 8366,
-      "reason": "Store repin: Start-your-own runtime bridge expects Store eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81."
+      "reason": "Store repin: Start-your-own runtime bridge expects Store fc3f555b8f1f329bcf2dd81fa26995230d12a527."
     },
     {
       "path": "stb-store-handoff-contract.js",
-      "pass": "store-repin-eb5d6ae",
-      "blobSha": "1c0145fdd9716b202bbbe7040619b1cb86e462d9",
+      "pass": "outdoor-picnic-store-fc3f555",
+      "blobSha": "bc2e0a7cad3544b4c3ce4ae0e2cf0040dd346222",
       "bytes": 51918,
-      "reason": "Store repin: the two cached User 1 Store references (16 in, 18 in) refreshed to the exact answers of Store eb5d6ae7 (prices unchanged at $8.54 and $9.07; new calculation hashes because the Store revision changed; Store run 36248855826). test/store/user1-reference-guard.test.mjs fails CI if the cache ever differs from the Store at STORE_PIN."
+      "reason": "Store repin: the two cached User 1 Store references (16 in, 18 in) refreshed to the exact answers of Store fc3f555b (prices unchanged at $8.54 and $9.07; new calculation hashes because the Store revision changed; Store run 36266986468). test/store/user1-reference-guard.test.mjs fails CI if the cache ever differs from the Store at STORE_PIN."
     },
     {
       "path": "stb-build-guide-spec.js",
@@ -139,24 +139,24 @@
     },
     {
       "path": "system-build-base-8d8a9dd.html",
-      "pass": "store-repin-eb5d6ae",
-      "blobSha": "b049cf01701f13ce4710e6f1847b5f92e8a8a41e",
+      "pass": "outdoor-picnic-store-fc3f555",
+      "blobSha": "595d61620018e626355b0184f043286c00c74019",
       "bytes": 136338,
-      "reason": "Alcove spots: one 3/16 in spot per upright per shelf (4 per shelf), inset 1 1/2 in or 2 in from the edge (two-option choice under the spots checkbox), sent inside each upright component so Store Zero times, prices or refuses them; summary text says 4 uprights and the inset. Alcove bridge cache-buster updated for the Store repin to eb5d6ae7."
+      "reason": "Alcove spots: one 3/16 in spot per upright per shelf (4 per shelf), inset 1 1/2 in or 2 in from the edge (two-option choice under the spots checkbox), sent inside each upright component so Store Zero times, prices or refuses them; summary text says 4 uprights and the inset. Alcove bridge cache-buster updated for the Store repin to fc3f555b."
     },
     {
       "path": "system-build-front-door-0.5.html",
-      "pass": "store-repin-eb5d6ae",
-      "blobSha": "27394a0f610ab7e8d22309ad7f2357b5cf1ca9bb",
+      "pass": "outdoor-picnic-store-fc3f555",
+      "blobSha": "f1f18ab24211fa78cea22e4e8b954b82a5d9c1ca",
       "bytes": 39691,
       "reason": "Cache-buster for the updated base."
     },
     {
       "path": "system-build-current.html",
-      "pass": "store-repin-eb5d6ae",
-      "blobSha": "c290b9ad6716d47b95b559154d3b97a9f2ae6305",
+      "pass": "outdoor-picnic-store-fc3f555",
+      "blobSha": "aec7c6963760179cf8d54a6e2d1b70ade972a860",
       "bytes": 227072,
-      "reason": "Store repin to eb5d6ae7: cache-busters for the updated front door, handoff contract and runtime bridge."
+      "reason": "Outdoor tile opens stb-outdoor-picnic-0.1.html (two plans, wood and hardware choices, length, every price from the live Store through CUT_PACKAGE_V1); cache-busters for the updated front door, handoff contract, runtime bridge and Outdoor page."
     }
   ]
 }
