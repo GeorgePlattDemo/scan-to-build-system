@@ -127,7 +127,7 @@ tr:last-child td{border-bottom:0}
           <div class="len">
             <span>Table length</span>
             <button type="button" id="shorter" aria-label="Shorter">−</button>
-            <div><div class="val" id="len-val">6 ft</div><input type="range" id="len" min="4" max="14" step="1" value="6" aria-label="Table length in feet"></div>
+            <div><div class="val" id="len-val">6 ft</div><input type="range" id="len" min="2" max="20" step="1" value="6" aria-label="Table length in feet"></div>
             <button type="button" id="longer" aria-label="Longer">+</button>
           </div>
           <p class="hint" id="len-hint"></p>
@@ -171,64 +171,23 @@ tr:last-child td{border-bottom:0}
   </section>
 </div>
 
+<script src="stb-store-client.js?v=7eb5ab65"></script>
 <script>
 (function(){
 'use strict';
 
-// ---------- Store bridge: every price on this page is a fresh answer from the live Store ----------
-const EXPECTED_STORE_PIN = 'fc3f555b8f1f329bcf2dd81fa26995230d12a527';
-const PROTOCOL_VERSION = 'stb-store-zero-http/1';
+// ---------- Every price on this page is a fresh answer from the live Store, through the shared client ----------
 const REQUEST_TYPE = 'CUT_PACKAGE_V1';
-const DEFINITION_KIND = 'cut_package.v1';
-const RULE_VERSION = '0.1';
-const CONFIG_URL = new URL('stb-store-runtime.json', location.href).href;
-
-function canonicalize(v){
-  if(v===null)return null;
-  const t=typeof v;
-  if(t==='string'||t==='boolean')return v;
-  if(t==='number'){if(!Number.isFinite(v))throw new TypeError('non-finite');return v}
-  if(Array.isArray(v))return v.map(canonicalize);
-  if(t==='object'){const o={};Object.keys(v).sort().forEach(k=>{if(v[k]===undefined)throw new TypeError('undefined');o[k]=canonicalize(v[k])});return o}
-  throw new TypeError('canonical JSON rejects '+t);
-}
-const canonicalJson=v=>JSON.stringify(canonicalize(v));
-async function sha256(v){
-  const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonicalJson(v)));
-  return Array.from(new Uint8Array(d),b=>b.toString(16).padStart(2,'0')).join('');
-}
-async function resolveEndpoint(){
-  const r=await fetch(CONFIG_URL,{cache:'no-store'});
-  if(!r.ok)throw new Error('STORE_RUNTIME_CONFIGURATION_UNAVAILABLE');
-  const c=await r.json();
-  if(!c.jobEndpoint)throw new Error('STORE_RUNTIME_NOT_DEPLOYED');
-  const e=new URL(c.jobEndpoint);
-  const loop=h=>['localhost','127.0.0.1','[::1]'].includes(h);
-  const localTest=loop(location.hostname)&&loop(e.hostname);
-  if(e.username||e.password||e.search||e.hash||e.pathname!=='/api/store-zero/job'||
-     (!localTest&&(e.protocol!=='https:'||loop(e.hostname)))||(localTest&&!['http:','https:'].includes(e.protocol)))
-    throw new Error('STORE_RUNTIME_ENDPOINT_INVALID');
-  return e.href;
-}
 async function askStore(definition){
-  const payload={definition:JSON.parse(JSON.stringify(definition)),definitionKind:DEFINITION_KIND,ruleVersion:RULE_VERSION};
-  const wire={
-    protocolVersion:PROTOCOL_VERSION,requestId:crypto.randomUUID(),projectId:'outdoor',
-    candidateRevisionId:definition.configurationVersion,requestType:REQUEST_TYPE,scope:REQUEST_TYPE,
-    demandSignature:await sha256({definitionKind:DEFINITION_KIND,ruleVersion:RULE_VERSION,requestType:REQUEST_TYPE,scope:REQUEST_TYPE,definition:payload.definition}),
-    querySignature:null,payloadDigest:await sha256(payload),expectedStorePin:EXPECTED_STORE_PIN,
-    attemptId:crypto.randomUUID(),attemptNumber:1,sentAt:new Date().toISOString(),payload
-  };
-  const endpoint=await resolveEndpoint();
-  const res=await fetch(endpoint,{method:'POST',mode:'cors',cache:'no-store',signal:AbortSignal.timeout(25000),
-    headers:{'Content-Type':'application/json'},body:canonicalJson(wire)});
-  const body=await res.json().catch(()=>null);
-  if(!res.ok||!body||body.adapterError===true){const err=new Error(body?.code||'STORE_ZERO_UNAVAILABLE');err.storeBody=body;throw err}
-  if(['protocolVersion','requestId','attemptId','projectId','candidateRevisionId','requestType','scope','demandSignature','payloadDigest'].some(k=>body[k]!==wire[k]))throw new Error('STORE_CORRELATION_ERROR');
-  if(body.storePin!==EXPECTED_STORE_PIN)throw new Error('STORE_PIN_MISMATCH');
-  const ev=body.rawEvaluation;
-  if(!ev||ev.freshEvaluation!==true||!body.evaluationReceipt||body.evaluationReceipt.requestId!==wire.requestId||body.evaluationReceipt.authority?.storeRevision!==EXPECTED_STORE_PIN)throw new Error('STORE_ANSWER_NOT_FRESH');
-  return {evaluation:ev,receipt:body.evaluationReceipt,requestId:wire.requestId};
+  const client = window.STBStoreClient;
+  if(!client) throw new Error('STORE_CLIENT_UNAVAILABLE');
+  const body = await client.sendJob({
+    projectId:'outdoor',
+    requestType:REQUEST_TYPE,
+    candidateRevisionId:definition.configurationVersion,
+    payload:{definition, definitionKind:'cut_package.v1', ruleVersion:'0.1'}
+  });
+  return {evaluation:body.rawEvaluation, receipt:body.evaluationReceipt, requestId:body.requestId, storePin:body.storePin};
 }
 
 // ---------- The project's definitions (System owns what the plans mean) ----------
@@ -294,23 +253,37 @@ const PLANS={
 };
 PLANS['a-frame'].rows=ft=>[['Slats',12,'2×6',slat(ft),'square',30],['Legs',4,'2×6',31.375,'25°',0],['Braces',2,'2×4',32.875,'25°',0],['Seat supports',2,'2×4',61,'square',0],['Cleats',3,'2×2','34¼" / 29¼"','square',0]];
 
-function definitionFor(planKey,ft){
-  const plan=PLANS[planKey];
+function packagesFor(planKey,ft,woodKeys){
   const cutPackages=[];
-  for(const wood of WOODS){
-    for(const g of plan.groups(ft)){
+  for(const wood of WOODS.filter(w=>woodKeys.includes(w.key))){
+    for(const g of PLANS[planKey].groups(ft)){
       cutPackages.push({packageId:wood.key+'|'+g.id,
         material:{species:wood.species,form:'board',nominalT:g.nominal[0],nominalW:g.nominal[1],grade:wood.grade},
         endCut:{angleDeg:g.angle},parts:g.parts});
     }
   }
+  return cutPackages;
+}
+function itemsFor(planKey,tierKeys){
   const itemLines=[];
-  for(const tier of TIERS.filter(t=>t.code)){
-    for(const h of plan.hardware){
+  for(const tier of TIERS.filter(t=>t.code&&tierKeys.includes(t.key))){
+    for(const h of PLANS[planKey].hardware){
       itemLines.push({lineId:tier.key+'|'+h.id,storeSku:`STB-ZERO-HW-${tier.code}-${h.sku}-001`,qty:Math.ceil(h.need/h.pieces)});
     }
   }
-  return {configurationId:'OUTDOOR-PICNIC-'+planKey.toUpperCase(),configurationVersion:planKey+'-'+ft+'ft-v1',cutPackages,itemLines};
+  return itemLines;
+}
+// Comparison: one request asks the Store about every wood and every hardware choice, for the button prices.
+function comparisonFor(planKey,ft){
+  return {configurationId:'OUTDOOR-PICNIC-'+planKey.toUpperCase(),configurationVersion:`${planKey}-${ft}ft-compare-v1`,
+    cutPackages:packagesFor(planKey,ft,WOODS.map(w=>w.key)),itemLines:itemsFor(planKey,TIERS.map(t=>t.key))};
+}
+// The formal Store answer: only the customer's exact choice, with every choice in its identity.
+function exactFor(planKey,ft,woodKey,tierKey){
+  const def={configurationId:'OUTDOOR-PICNIC-'+planKey.toUpperCase(),configurationVersion:`${planKey}-${ft}ft-${woodKey}-${tierKey}-v1`,
+    cutPackages:packagesFor(planKey,ft,[woodKey]),itemLines:itemsFor(planKey,[tierKey])};
+  if(!def.itemLines.length)delete def.itemLines;
+  return def;
 }
 
 // ---------- Reading the Store's answer (no arithmetic beyond adding the Store's own lines) ----------
@@ -349,7 +322,12 @@ const REASONS={
 const reasonText=code=>REASONS[code]||code.replace(/_/g,' ').toLowerCase();
 
 // ---------- Page state ----------
-const S={view:'plans',plan:null,ft:6,wood:'ground-contact',tier:'COATED',answer:null,error:null,asking:false,token:0,fromPrices:{}};
+// `compare` is the Store's answer for every choice (button prices). `exact` is the Store's answer for the
+// customer's exact choice; it is the only answer shown as "Store Zero answers" and the only one confirmed.
+const S={view:'plans',plan:null,ft:6,wood:null,tier:null,
+  compare:null,compareError:null,compareAsking:false,compareToken:0,
+  exact:null,exactError:null,exactAsking:false,exactToken:0};
+const embedded=window.self!==window.top;
 const $=id=>document.getElementById(id);
 function fmt(n){
   if(typeof n==='string')return n;
@@ -358,7 +336,21 @@ function fmt(n){
   const map={0:'',1:'⅛',2:'¼',3:'⅜',4:'½',5:'⅝',6:'¾',7:'⅞'};
   return eighths===8?String(whole+1):whole+(map[eighths]||'');
 }
+function exactSummary(){
+  if(!S.exact||S.exactAsking||S.exactError)return null;
+  return {w:woodSummary(S.exact.evaluation,S.plan,S.wood,S.ft),t:tierSummary(S.exact.evaluation,S.plan,S.tier)};
+}
+function selectionComplete(){
+  const x=exactSummary();
+  return !!(x&&x.w.complete&&x.t.complete);
+}
 
+// The host's top nav drives this page; the page tells the host which steps can be used right now.
+function postState(){
+  if(!embedded)return;
+  window.parent.postMessage({type:'STB_OUTDOOR_STATE',projectId:'outdoor',view:S.view,
+    planChosen:!!S.plan,callReady:!!(S.plan&&selectionComplete())},location.origin);
+}
 function show(view){
   S.view=view;
   $('view-plans').hidden=view!=='plans';
@@ -371,10 +363,16 @@ function show(view){
   document.querySelector('.step[data-step="2"]').disabled=!S.plan;
   document.querySelector('.step[data-step="3"]').disabled=!S.plan;
   document.querySelector('.step[data-step="4"]').disabled=!(S.plan&&selectionComplete());
-  window.scrollTo(0,0);
+  postState();
+}
+function goStage(stage){
+  if(stage==='scan'){show('plans');window.scrollTo(0,0)}
+  else if((stage==='configure')&&S.plan){show('build');window.scrollTo(0,0)}
+  else if(stage==='store'&&S.plan){show('build');$('answer').scrollIntoView({block:'center'})}
+  else if(stage==='request'&&selectionComplete())renderCall();
 }
 
-// Page 1: the two plans, each "From" price is the Store's cheapest complete wood with your own hardware, at 6 ft.
+// Page 1: each "From" price is the Store's cheapest complete wood, with your own hardware, at 6 ft.
 function renderPlans(){
   $('plans').innerHTML=Object.entries(PLANS).map(([key,p])=>`
     <article class="plan">
@@ -389,7 +387,7 @@ function renderPlans(){
     </article>`).join('');
   $('plans').querySelectorAll('[data-plan]').forEach(b=>b.addEventListener('click',()=>openPlan(b.dataset.plan)));
   for(const key of Object.keys(PLANS)){
-    askStore(definitionFor(key,6)).then(({evaluation})=>{
+    askStore(comparisonFor(key,6)).then(({evaluation})=>{
       const best=WOODS.map(w=>woodSummary(evaluation,key,w.key,6)).filter(s=>s.complete).sort((a,b)=>a.Q-b.Q)[0];
       $('from-'+key).innerHTML=best?`<small>From</small><b>$${Math.round(best.Q)}</b>`:'<small>Store Zero can’t cut this plan as stocked</small>';
     }).catch(err=>{$('from-'+key).innerHTML=`<small>Store unavailable (${err.message})</small>`});
@@ -402,46 +400,56 @@ function openPlan(key){
   $('render').src=p.render;$('render').alt=p.title;
   $('plan-source').textContent=p.source+'. The plan is the project’s; every board, cut, minute and price comes from Store Zero.';
   $('len-hint').textContent=p.lenHint;
-  show('build');
-  renderBuild();ask();
+  show('build');window.scrollTo(0,0);
+  askCompare();askExact();
 }
 
 function renderBuild(){
   const p=PLANS[S.plan];
-  $('len').value=S.ft;$('len-val').textContent=S.ft+' ft';
+  const slider=$('len');
+  if(S.ft>+slider.max)slider.max=S.ft;
+  if(S.ft<+slider.min)slider.min=S.ft;
+  slider.value=S.ft;$('len-val').textContent=S.ft+' ft';
   $('kit-text').textContent=p.kitText(S.ft);
   $('parts').innerHTML=p.rows(S.ft).map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${typeof r[3]==='number'?fmt(r[3])+'"':r[3]}</td><td>${r[4]}</td><td>${r[5]}</td></tr>`).join('');
-  const ev=S.answer;
+  const ev=S.compare;
   const woodS=ev?Object.fromEntries(WOODS.map(w=>[w.key,woodSummary(ev,S.plan,w.key,S.ft)])):{};
   const tierS=ev?Object.fromEntries(TIERS.map(t=>[t.key,tierSummary(ev,S.plan,t.key)])):{};
+  const pending=S.compareAsking?'…':S.compareError?'?':'…';
   $('woods').innerHTML=WOODS.map(w=>{
     const s=woodS[w.key];
-    const price=!ev?'…':s.complete?'$'+Math.round(s.Q):'<span class="no">Not as stocked</span>';
+    const price=!ev?pending:s.complete?'$'+Math.round(s.Q):'<span class="no">Not as stocked</span>';
     return `<button type="button" class="opt ${S.wood===w.key?'on':''}" data-wood="${w.key}"><span>${w.label}</span><b>${price}</b></button>`;
   }).join('');
   $('tiers').innerHTML=TIERS.map(t=>{
     const s=tierS[t.key];
-    const price=t.key==='BYO'?'$0':!ev?'…':s.complete?'+$'+Math.round(s.Q):'<span class="no">Not stocked</span>';
+    const price=t.key==='BYO'?'You supply':!ev?pending:s.complete?'+$'+Math.round(s.Q):'<span class="no">Not stocked</span>';
     return `<button type="button" class="opt ${S.tier===t.key?'on':''}" data-tier="${t.key}"><span>${t.label}</span><b>${price}</b></button>`;
   }).join('');
-  $('woods').querySelectorAll('[data-wood]').forEach(b=>b.addEventListener('click',()=>{S.wood=b.dataset.wood;renderBuild()}));
-  $('tiers').querySelectorAll('[data-tier]').forEach(b=>b.addEventListener('click',()=>{S.tier=b.dataset.tier;renderBuild()}));
-  const setPrice=ev&&S.ft===6?(()=>{const set=PLANS[S.plan].set,w=woodS[set.wood],t=tierS[set.tier];return w.complete&&t.complete?' · '+money(w.Q+t.Q):''})():'';
+  $('woods').querySelectorAll('[data-wood]').forEach(b=>b.addEventListener('click',()=>{if(S.wood===b.dataset.wood)return;S.wood=b.dataset.wood;askExact()}));
+  $('tiers').querySelectorAll('[data-tier]').forEach(b=>b.addEventListener('click',()=>{if(S.tier===b.dataset.tier)return;S.tier=b.dataset.tier;askExact()}));
+  const set=p.set;
+  const setPrice=ev&&S.ft===6&&woodS[set.wood]?.complete&&tierS[set.tier]?.complete?' · '+money(woodS[set.wood].Q+tierS[set.tier].Q):'';
   $('the-set').textContent='ONE CLICK: THE SET'+setPrice;
-  renderAnswer(woodS[S.wood],tierS[S.tier]);
+  if(S.compareError)$('len-hint').textContent='Store Zero could not price the choices ('+S.compareError+').';
+  else $('len-hint').textContent=p.lenHint;
+  renderAnswer();
   show(S.view);
 }
 
-function renderAnswer(w,t){
+// "Store Zero answers" shows only the Store's answer to the exact choice on screen.
+function renderAnswer(){
   const status=$('a-status'),ref=$('a-refusals');
   ref.innerHTML='';$('a-total-wrap').hidden=true;$('confirm').disabled=true;
   $('a-wood').textContent=$('a-hw').textContent=$('a-machine').textContent='—';$('a-meta').textContent='';
-  if(S.asking){status.className='status ask';status.textContent='Asking Store Zero for this exact table…';return}
-  if(S.error){status.className='status bad';status.textContent='Store Zero could not answer ('+S.error+'). No earlier answer is reused.';return}
-  if(!w){status.textContent='';return}
+  if(S.exactAsking){status.className='status ask';status.textContent='Asking Store Zero for this exact table…';return}
+  if(S.exactError){status.className='status bad';status.textContent='Store Zero could not answer ('+S.exactError+'). No earlier answer is reused.';return}
+  const x=exactSummary();
+  if(!x){status.textContent='';return}
+  const {w,t}=x;
   $('a-wood').textContent=money(w.material);
   $('a-machine').textContent=money(w.machine);
-  $('a-hw').textContent=S.tier==='BYO'?'Your own':t.complete?money(t.Q):'—';
+  $('a-hw').textContent=S.tier==='BYO'?'You supply':t.complete?money(t.Q):'—';
   $('a-meta').textContent=`${Math.round(w.minutes)} min on the machine · ${w.spots} screw holes marked · ${w.stubs} stub${w.stubs===1?'':'s'} returned with your kit`;
   const problems=[...w.refused.map(r=>`${groupLabel(r.group)}: ${reasonText(r.reason)}`),...t.refused.map(r=>`${r.group}: ${reasonText(r.reason)}`)];
   if(problems.length){
@@ -454,59 +462,68 @@ function renderAnswer(w,t){
   $('confirm').disabled=false;
 }
 function groupLabel(id){const g=PLANS[S.plan].groups(S.ft).find(x=>x.id===id);return g?g.label+' ('+g.nominal.join('×')+')':id}
-function selectionComplete(){
-  if(!S.answer||S.asking||S.error)return false;
-  return woodSummary(S.answer,S.plan,S.wood,S.ft).complete&&tierSummary(S.answer,S.plan,S.tier).complete;
-}
 
-// Any change to the table itself is a new definition, so the Store is asked again. Old answers are dropped.
-let debounce=null;
-function ask(){
-  const token=++S.token;S.answer=null;S.error=null;S.asking=true;renderBuild();
-  clearTimeout(debounce);
-  debounce=setTimeout(()=>{
-    askStore(definitionFor(S.plan,S.ft)).then(res=>{
-      if(token!==S.token)return;
-      S.answer=res.evaluation;S.receipt=res.receipt;S.requestId=res.requestId;S.asking=false;renderBuild();
-    }).catch(err=>{if(token!==S.token)return;S.asking=false;S.error=err.message;renderBuild()});
+// Any change to the table is a new definition, so the Store is asked again. Old answers are dropped, never reused.
+let compareTimer=null,exactTimer=null;
+function askCompare(){
+  const token=++S.compareToken;S.compare=null;S.compareError=null;S.compareAsking=true;
+  clearTimeout(compareTimer);
+  compareTimer=setTimeout(()=>{
+    askStore(comparisonFor(S.plan,S.ft)).then(res=>{
+      if(token!==S.compareToken)return;S.compare=res.evaluation;S.compareAsking=false;renderBuild();
+    }).catch(err=>{if(token!==S.compareToken)return;S.compareAsking=false;S.compareError=err.message;renderBuild()});
   },350);
+  renderBuild();
 }
-function setLength(ft){ft=Math.max(4,Math.min(14,ft));if(ft===S.ft)return;S.ft=ft;ask()}
+function askExact(){
+  const token=++S.exactToken;S.exact=null;S.exactError=null;S.exactAsking=true;
+  const plan=S.plan,ft=S.ft,wood=S.wood,tier=S.tier;
+  clearTimeout(exactTimer);
+  exactTimer=setTimeout(()=>{
+    const definition=exactFor(plan,ft,wood,tier);
+    askStore(definition).then(res=>{
+      if(token!==S.exactToken)return;
+      S.exact={...res,definition,plan,ft,wood,tier};S.exactAsking=false;renderBuild();
+    }).catch(err=>{if(token!==S.exactToken)return;S.exactAsking=false;S.exactError=err.message;renderBuild()});
+  },250);
+  renderBuild();
+}
+function setLength(ft){ft=Math.round(ft);if(!(ft>=1)||ft===S.ft)return;S.ft=ft;askCompare();askExact()}
 
 function renderCall(){
-  const w=woodSummary(S.answer,S.plan,S.wood,S.ft),t=tierSummary(S.answer,S.plan,S.tier);
-  const wood=WOODS.find(x=>x.key===S.wood),tier=TIERS.find(x=>x.key===S.tier);
+  const x=exactSummary();if(!x)return;
+  const {w,t}=x;
+  const wood=WOODS.find(v=>v.key===S.wood),tier=TIERS.find(v=>v.key===S.tier);
   $('call-sub').textContent=`${PLANS[S.plan].title} · ${S.ft} ft · ${wood.label} · ${tier.label}`;
   const rows=w.lines.map(l=>`<tr><td>${groupLabel(l.packageId.split('|')[1])}, cut</td><td>${l.storeSku}</td><td>${l.boards} board${l.boards===1?'':'s'}</td><td>${money(l.Q)}</td></tr>`)
-    .concat(t.lines.map(l=>`<tr><td>Hardware</td><td>${l.storeSku}</td><td>${l.qty}</td><td>${money(l.Q)}</td></tr>`));
+    .concat(t.lines.map(l=>`<tr><td>Hardware</td><td>${l.storeSku}</td><td>${l.qty}</td><td>${money(l.Q)}</td></tr>`))
+    .concat(S.tier==='BYO'?['<tr><td>Hardware</td><td>You supply</td><td>—</td><td>—</td></tr>']:[]);
   $('call-lines').innerHTML=rows.join('');
   $('call-machine').textContent=money(w.machine);
   $('call-total').textContent=money(w.Q+t.Q);
-  $('call-receipt').textContent=`Store receipt ${String(S.receipt.receiptHash).slice(0,12)} · request ${S.requestId.slice(0,8)} · Store ${EXPECTED_STORE_PIN.slice(0,7)} · ${S.receipt.evaluatedAt}`;
-  show('call');
+  const r=S.exact.receipt;
+  $('call-receipt').textContent=`Store receipt ${String(r.receiptHash).slice(0,12)} for exactly this table (${S.exact.definition.configurationVersion}) · request ${S.exact.requestId.slice(0,8)} · Store ${String(S.exact.storePin).slice(0,7)} · ${r.evaluatedAt}`;
+  show('call');window.scrollTo(0,0);
 }
 
 // ---------- Wiring ----------
-$('library').addEventListener('click',()=>{
-  if(window.self!==window.top)window.parent.postMessage({type:'STB_CHILD_RETURN_LIBRARY',projectId:'outdoor'},location.origin);
-  else show('plans');
+if(embedded)document.querySelectorAll('#library,.step').forEach(el=>el.hidden=true);
+$('library').addEventListener('click',()=>show('plans'));
+document.querySelectorAll('.step').forEach(b=>b.addEventListener('click',()=>goStage(['','scan','configure','store','request'][+b.dataset.step]||'')));
+window.addEventListener('message',event=>{
+  // The System shell (the parent frame, or the top window that drives it) may choose the step.
+  if(event.origin!==location.origin||(event.source!==window.parent&&event.source!==window.top))return;
+  if(event.data?.type==='STB_OUTDOOR_GO')goStage(String(event.data.stage||''));
 });
-document.querySelectorAll('.step').forEach(b=>b.addEventListener('click',()=>{
-  const n=+b.dataset.step;
-  if(n===1)show('plans');
-  else if(n===2&&S.plan)show('build');
-  else if(n===3&&S.plan){show('build');$('answer').scrollIntoView({behavior:'smooth',block:'center'})}
-  else if(n===4&&selectionComplete())renderCall();
-}));
 $('len').addEventListener('input',e=>setLength(+e.target.value));
 $('shorter').addEventListener('click',()=>setLength(S.ft-1));
 $('longer').addEventListener('click',()=>setLength(S.ft+1));
-$('the-set').addEventListener('click',()=>{S.wood=PLANS[S.plan].set.wood;S.tier=PLANS[S.plan].set.tier;if(S.ft!==6){S.ft=6;ask()}else renderBuild()});
+$('the-set').addEventListener('click',()=>{const set=PLANS[S.plan].set;const lengthChanged=S.ft!==6;S.wood=set.wood;S.tier=set.tier;S.ft=6;if(lengthChanged)askCompare();askExact()});
 $('confirm').addEventListener('click',()=>{if(selectionComplete())renderCall()});
-$('back-build').addEventListener('click',()=>show('build'));
+$('back-build').addEventListener('click',()=>{show('build');window.scrollTo(0,0)});
 
 renderPlans();show('plans');
-window.STBOutdoorPicnic=Object.freeze({version:'0.1',expectedStorePin:EXPECTED_STORE_PIN,definitionFor,plans:Object.keys(PLANS)});
+window.STBOutdoorPicnic=Object.freeze({version:'0.2',comparisonFor,exactFor,plans:Object.keys(PLANS)});
 })();
 </script>
 </body>

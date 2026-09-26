@@ -97,7 +97,7 @@ assert.match(shell,/source:'start-own'/);
 assert.match(shell,/storeReference:freshStoreReference/);
 assert.match(shell,/stb-proof-handoff-job1/);
 assert.match(shell,/originalShow\.call\(win,'proof-store'\)/);
-assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=897a3aa5/);
+assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=f77a49e9/);
 assert.match(shell,/const requestId = nextStoreRequestId\(definition\)/);
 assert.match(shell,/user1RuntimeBridge\.request\(definition\.storeDemand/);
 assert.match(shell,/freshEvaluation\?\.freshEvaluation === true/);

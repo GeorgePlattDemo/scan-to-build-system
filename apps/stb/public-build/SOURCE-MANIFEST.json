@@ -111,17 +111,17 @@
   "systemEdits": [
     {
       "path": "stb-alcove-store-bridge.js",
-      "pass": "outdoor-picnic-store-fc3f555",
-      "blobSha": "99a45e2421a7347cbc59d12117210f36f923047d",
-      "bytes": 4998,
-      "reason": "Store repin: Alcove bridge expects Store fc3f555b8f1f329bcf2dd81fa26995230d12a527 (Store main, PR #15: cut packages and item lines)."
+      "pass": "outdoor-one-road-cleanup",
+      "blobSha": "26711eb747f229a3e5ae9fab5a7230f26b1003de",
+      "bytes": 1137,
+      "reason": "Alcove's request shape only; transport, Store address, Store version and freshness checks moved to the shared stb-store-client.js (address and version from stb-store-runtime.json)."
     },
     {
       "path": "stb-user-defined-board-runtime-bridge.js",
-      "pass": "outdoor-picnic-store-fc3f555",
-      "blobSha": "897a3aa5818f63bc5b15dbe70525cba0a56b99d3",
-      "bytes": 8366,
-      "reason": "Store repin: Start-your-own runtime bridge expects Store fc3f555b8f1f329bcf2dd81fa26995230d12a527."
+      "pass": "outdoor-one-road-cleanup",
+      "blobSha": "f77a49e9b5a847c5febadb463c83efddedc08be3",
+      "bytes": 4455,
+      "reason": "User 1's request shape only; transport, Store address, Store version and freshness checks moved to the shared stb-store-client.js (address and version from stb-store-runtime.json)."
     },
     {
       "path": "stb-store-handoff-contract.js",
@@ -139,24 +139,31 @@
     },
     {
       "path": "system-build-base-8d8a9dd.html",
-      "pass": "outdoor-picnic-store-fc3f555",
-      "blobSha": "595d61620018e626355b0184f043286c00c74019",
-      "bytes": 136338,
-      "reason": "Alcove spots: one 3/16 in spot per upright per shelf (4 per shelf), inset 1 1/2 in or 2 in from the edge (two-option choice under the spots checkbox), sent inside each upright component so Store Zero times, prices or refuses them; summary text says 4 uprights and the inset. Alcove bridge cache-buster updated for the Store repin to fc3f555b."
+      "pass": "outdoor-one-road-cleanup",
+      "blobSha": "c77d91895935d096258c3ca1d4be230c264297cd",
+      "bytes": 136393,
+      "reason": "Alcove spots: one 3/16 in spot per upright per shelf (4 per shelf), inset 1 1/2 in or 2 in from the edge (two-option choice under the spots checkbox), sent inside each upright component so Store Zero times, prices or refuses them; summary text says 4 uprights and the inset. Loads the shared stb-store-client.js before the Alcove bridge."
     },
     {
       "path": "system-build-front-door-0.5.html",
-      "pass": "outdoor-picnic-store-fc3f555",
-      "blobSha": "f1f18ab24211fa78cea22e4e8b954b82a5d9c1ca",
+      "pass": "outdoor-one-road-cleanup",
+      "blobSha": "bf4090e1e0c63ab11893aef732cf2d7d7a66d54e",
       "bytes": 39691,
       "reason": "Cache-buster for the updated base."
     },
     {
       "path": "system-build-current.html",
-      "pass": "outdoor-picnic-store-fc3f555",
-      "blobSha": "aec7c6963760179cf8d54a6e2d1b70ade972a860",
-      "bytes": 227072,
-      "reason": "Outdoor tile opens stb-outdoor-picnic-0.1.html (two plans, wood and hardware choices, length, every price from the live Store through CUT_PACKAGE_V1); cache-busters for the updated front door, handoff contract, runtime bridge and Outdoor page."
+      "pass": "outdoor-one-road-cleanup",
+      "blobSha": "bcc48f60e21b188f7c07cfd7524131f8858c78b1",
+      "bytes": 218257,
+      "reason": "Outdoor tile opens stb-outdoor-picnic-0.1.html and uses the six-step trail nav on its own page only (steps it cannot use yet are inert); old Picnic bridge-gap journey pages and the Outdoor hand-off into Job 1 proof pages removed; loads the shared stb-store-client.js; cache-busters for the updated front door, runtime bridge, client and Outdoor page."
+    },
+    {
+      "path": "stb-store-runtime.json",
+      "pass": "outdoor-one-road-cleanup",
+      "blobSha": "26e54c9d4a04a5e325b7cc288565ed7a9b889ff5",
+      "bytes": 153,
+      "reason": "Adds storePin, the Store version System is pinned to, so the one shared browser Store client reads the Store address and version from this file; a Store repin changes this file instead of each project page."
     }
   ]
 }
