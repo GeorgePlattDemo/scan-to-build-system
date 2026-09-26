@@ -63,6 +63,34 @@ test('offering lookup returns the matching published Board SKU only', async (t) 
   assert.equal(parseJson(byQuery).rawOffering.storeSku, PUBLISHED_BOARD_SKU);
 });
 
+test('offering lookup passes any Store SKU through; the Store answers found and price, or not found', async (t) => {
+  const { adapter } = await withHost(t);
+  const skus = [
+    'STB-ZERO-SPF-2X4-60-001',
+    'STB-ZERO-PTGC-2X6-72-001',
+    'STB-ZERO-WRC-2X6-96-001',
+    'STB-ZERO-HW-CARRIAGE-BOLT-PACK-001',
+  ];
+  for (const sku of skus) {
+    const item = adapter.modules.findSku(adapter.catalog, sku);
+    assert.ok(item && item.offered === true, sku + ' is an offered SKU in the pinned Store catalog');
+    const response = await postOffering(await offeringLookupBody({ payload: { requestedStoreSku: sku } }));
+    assert.equal(response.status, 200, sku);
+    const body = parseJson(response);
+    assert.equal(body.storePin, STORE_PIN);
+    assert.equal(body.found, true, sku);
+    assert.equal(body.rawOffering.storeSku, sku);
+    assert.equal(body.rawOffering.offered, true);
+    assert.equal(body.rawOffering.sellingPrice, item.sellingPrice, sku + ' price comes from the Store catalog');
+  }
+  const missing = await postOffering(await offeringLookupBody({ payload: { requestedStoreSku: 'STB-ZERO-NO-SUCH-SKU' } }));
+  assert.equal(missing.status, 200);
+  assert.equal(parseJson(missing).found, false);
+  assert.equal(parseJson(missing).rawOffering, null);
+  const extraFields = await postOffering(await offeringLookupBody({ payload: { requestedStoreSku: 'STB-ZERO-PTGC-2X6-72-001', species: 'spf' } }));
+  assert.equal(extraFields.status, 422, 'only the published Board SKU may carry its frozen query fields');
+});
+
 test('BOARD_SQUARE_V1 45-in and 46-in invoke actual evaluate then estimate', async (t) => {
   const { adapter } = await withHost(t);
   adapter.instrumentation.evaluationCalls = 0;

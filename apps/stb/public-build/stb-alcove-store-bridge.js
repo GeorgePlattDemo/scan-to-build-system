@@ -20,7 +20,7 @@
     return endpoint.href;
   }
   const PROTOCOL_VERSION = 'stb-store-zero-http/1';
-  const EXPECTED_STORE_PIN = 'aa59dd92dde8db139081542f2102f035120fa097';
+  const EXPECTED_STORE_PIN = 'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81';
   const REQUEST_TYPE = 'ALCOVE_INSERT_V1';
   const SCOPE = 'ALCOVE_INSERT_V1';
   const DEFINITION_KIND = 'alcove_insert.v1';

@@ -206,16 +206,6 @@ export async function createStoreAdapter({
   async function handleOffering(envelope, offeringPayload, runtimeCatalog = catalog) {
     const item = lookupItem(loaded.modules, runtimeCatalog, offeringPayload);
     const offered = item && item.offered === true ? item : null;
-    if (offered && offered.storeSku !== PUBLISHED_BOARD_SKU && offeringPayload.kind === 'sku') {
-      return {
-        status: 422,
-        body: adapterErrorBody(
-          ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-          'offering lookup accepts only the published Board SKU',
-          envelope,
-        ),
-      };
-    }
     const rawOffering = attributedOffering(offered, runtimeCatalog, observations);
     return {
       status: 200,
