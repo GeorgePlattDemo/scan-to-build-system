@@ -81,7 +81,7 @@ assert.equal(shell.includes('quoteStartOwnBoardSequence'),false,'visible User 1 
 assert.equal(shell.includes('machineHourRate'),false,'visible User 1 reintroduced Store rate logic');
 assert.equal(shell.includes('setupCharge'),false,'visible User 1 reintroduced Store setup-charge logic');
 assert.match(shell,/STORE_REFRESH_REQUIRED/);
-assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=e486df26/);
+assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=ccc85533/);
 assert.match(shell,/user1RuntimeBridge\.request\(definition\.storeDemand/);
 assert.equal(shell.includes('currentStoreAuthorityUrl'),false,'active Start Own still floats on Store main');
 assert.equal(shell.includes('stbLastConfirmed'),false,'Store-send button regressed to one-use behavior');
@@ -182,9 +182,9 @@ assert.equal(exactStoreAnswer.materialResolution.pricingReferenceSku,'STB-ZERO-S
 assert.equal(exactStoreAnswer.materialResolution.pricingReferenceStockLengthIn,60);
 assert.equal(exactStoreAnswer.materialResolution.selectionPolicy,'SHORTEST_COMPLETE_STORE_OFFERING');
 assert.equal(exactStoreAnswer.estimate.engine.version,'0.3.0');
-assert.equal(exactStoreAnswer.source.storePin,'aa59dd92dde8db139081542f2102f035120fa097');
-assert.equal(exactStoreAnswer.calculationIdentity.inputHash,'e4b0f53f331ecff901f3e4999decd5ebb2a5382dcc40c46721aa4278bc445f54');
-assert.equal(exactStoreAnswer.calculationIdentity.resultHash,'8fee8be931b05f506d22f198e3a935ae8c9a1b255dabcfb2af17c93332ba3b47');
+assert.equal(exactStoreAnswer.source.storePin,'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81');
+assert.equal(exactStoreAnswer.calculationIdentity.inputHash,'8d8c0504a6bd892bfe34c1a588e0f5def1360110aaed438a34f8361d84d1d7b0');
+assert.equal(exactStoreAnswer.calculationIdentity.resultHash,'27e14bb42776f2d60e64b4f677e4e0bbcafd9a85aa864f1b0ee6860ee3074015');
 
 
 const exactStoreAnswer18 = contract.resolveUser1StoreReference({
@@ -210,13 +210,13 @@ assert.equal(exactStoreAnswer18.complete,true);
 assert.equal(exactStoreAnswer18.materialResolution.workpieceLengthIn,72);
 assert.equal(exactStoreAnswer18.materialResolution.pricingReferenceStockLengthIn,72);
 assert.equal(exactStoreAnswer18.materialResolution.selectionPolicy,'SHORTEST_COMPLETE_STORE_OFFERING');
-assert.equal(exactStoreAnswer18.calculationIdentity.inputHash,'e7c31d6d71a3110484d30c602737615caea418d4a5019c2ab9e14f5097e1a2a2');
-assert.equal(exactStoreAnswer18.calculationIdentity.resultHash,'f5606519d95e7d95aca9aae55fbcfdd8ba46ce76bdc21f7960a51627c2e8570f');
+assert.equal(exactStoreAnswer18.calculationIdentity.inputHash,'3a2684d0e44b026f50ce70612cb75b06d27c1b473b7250aae186e410396cf025');
+assert.equal(exactStoreAnswer18.calculationIdentity.resultHash,'f60502af586fe8c2eaa4aad7637d901796735e0f463a98debc3ff48e4f9118d8');
 assert.equal(exactStoreAnswer18.machineService,5.94);
 assert.equal(exactStoreAnswer18.combinedValue,9.07);
 assert.equal(exactStoreAnswer18.estimate.cycle.T_job_min,1.425);
 assert.equal(exactStoreAnswer18.estimate.travel.finalRemainderIn,35.625);
-assert.equal(exactStoreAnswer18.source.storePin,'aa59dd92dde8db139081542f2102f035120fa097');
+assert.equal(exactStoreAnswer18.source.storePin,'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81');
 const freshStoreAnswer = contract.requestUser1StoreEvaluation({
   configurationId:'SYO-USER1-XBRACE',
   configurationVersion:'0.1',
@@ -236,7 +236,7 @@ const freshStoreAnswer = contract.requestUser1StoreEvaluation({
   ]
 },{
   requestId:'START-OWN-RECHECK',
-  currentStorePin:'aa59dd92dde8db139081542f2102f035120fa097',
+  currentStorePin:'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81',
   checkedAt:'2026-09-22T18:55:00.000Z'
 });
 assert.equal(freshStoreAnswer.complete,true);

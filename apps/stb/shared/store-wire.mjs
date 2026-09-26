@@ -122,14 +122,10 @@ function validateOfferingPayload(payload) {
     if (skuError) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, skuError);
     }
-    if (payload.requestedStoreSku !== PUBLISHED_BOARD_SKU) {
-      return fail(
-        ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-        'offering lookup accepts only the published Board SKU or its frozen equivalent query',
-      );
-    }
+    // Any Store SKU may be looked up; the Store answers found/offered/price or not found.
+    // Only the published Board SKU may carry its frozen equivalent query fields.
     const extra = keys.filter((key) => key !== 'requestedStoreSku');
-    if (extra.length > 0 && !sameOfferingQuery(payload)) {
+    if (extra.length > 0 && (payload.requestedStoreSku !== PUBLISHED_BOARD_SKU || !sameOfferingQuery(payload))) {
       return fail(
         ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
         'offering lookup does not accept additional query fields unless they match the frozen Board query',

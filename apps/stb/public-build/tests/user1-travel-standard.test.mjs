@@ -51,11 +51,11 @@ assert.equal(exact.materialResolution.pricingReferenceSku,'STB-ZERO-SPF-2X4-60-0
 assert.equal(exact.materialResolution.pricingReferenceStockLengthIn,60);
 assert.equal(exact.materialResolution.workpieceLengthIn,60);
 assert.equal(exact.materialResolution.selectionPolicy,'SHORTEST_COMPLETE_STORE_OFFERING');
-assert.equal(exact.source.storePin,'aa59dd92dde8db139081542f2102f035120fa097');
-assert.equal(exact.source.workflowRun,'36173019688');
+assert.equal(exact.source.storePin,'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81');
+assert.equal(exact.source.workflowRun,'36248855826');
 assert.equal(exact.source.systemIntegrationPin,null);
-assert.equal(exact.calculationIdentity.inputHash,'e4b0f53f331ecff901f3e4999decd5ebb2a5382dcc40c46721aa4278bc445f54');
-assert.equal(exact.calculationIdentity.resultHash,'8fee8be931b05f506d22f198e3a935ae8c9a1b255dabcfb2af17c93332ba3b47');
+assert.equal(exact.calculationIdentity.inputHash,'8d8c0504a6bd892bfe34c1a588e0f5def1360110aaed438a34f8361d84d1d7b0');
+assert.equal(exact.calculationIdentity.resultHash,'27e14bb42776f2d60e64b4f677e4e0bbcafd9a85aa864f1b0ee6860ee3074015');
 assert.equal(exact.freshEvaluation,false);
 assert.equal(exact.evaluationReceipt,null);
 
@@ -97,19 +97,19 @@ assert.deepEqual(
     ['STB-ZERO-SPF-2X4-72-001',72,'SUPPORTABLE',null]
   ]
 );
-assert.equal(exact18.source.storePin,'aa59dd92dde8db139081542f2102f035120fa097');
+assert.equal(exact18.source.storePin,'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81');
 assert.equal(exact18.source.systemIntegrationPin,null);
-assert.equal(exact18.calculationIdentity.inputHash,'e7c31d6d71a3110484d30c602737615caea418d4a5019c2ab9e14f5097e1a2a2');
-assert.equal(exact18.calculationIdentity.resultHash,'f5606519d95e7d95aca9aae55fbcfdd8ba46ce76bdc21f7960a51627c2e8570f');
+assert.equal(exact18.calculationIdentity.inputHash,'3a2684d0e44b026f50ce70612cb75b06d27c1b473b7250aae186e410396cf025');
+assert.equal(exact18.calculationIdentity.resultHash,'f60502af586fe8c2eaa4aad7637d901796735e0f463a98debc3ff48e4f9118d8');
 
 const formal18 = contract.requestUser1StoreEvaluation(exactDemand18,{
   requestId:'JOB1-18-PROMOTED',
-  currentStorePin:'aa59dd92dde8db139081542f2102f035120fa097',
+  currentStorePin:'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81',
   checkedAt:'2026-09-22T20:47:00.000Z'
 });
 assert.equal(formal18.complete,true);
 assert.equal(formal18.freshEvaluation,true);
-assert.equal(formal18.evaluationReceipt.currentStorePin,'aa59dd92dde8db139081542f2102f035120fa097');
+assert.equal(formal18.evaluationReceipt.currentStorePin,'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81');
 assert.equal(contract.sameUser1StoreAnswerIdentity(exact18,formal18),true);
 
 const intermediate = contract.resolveUser1StoreReference({
@@ -127,12 +127,12 @@ assert.equal(intermediate.complete,false);
 
 const formalA = contract.requestUser1StoreEvaluation(exactDemand,{
   requestId:'JOB1-FRESH-A',
-  currentStorePin:'aa59dd92dde8db139081542f2102f035120fa097',
+  currentStorePin:'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81',
   checkedAt:'2026-09-22T18:45:00.000Z'
 });
 const formalB = contract.requestUser1StoreEvaluation(exactDemand,{
   requestId:'JOB1-FRESH-B',
-  currentStorePin:'aa59dd92dde8db139081542f2102f035120fa097',
+  currentStorePin:'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81',
   checkedAt:'2026-09-22T18:46:00.000Z'
 });
 assert.equal(formalA.status,'CURRENT_STORE_REFERENCE_REVALIDATED');
@@ -141,7 +141,7 @@ assert.equal(formalA.freshEvaluation,true);
 assert.equal(formalA.evaluationReceipt.requestId,'JOB1-FRESH-A');
 assert.equal(formalB.evaluationReceipt.requestId,'JOB1-FRESH-B');
 assert.notEqual(formalA.evaluationReceipt.requestId,formalB.evaluationReceipt.requestId);
-assert.equal(formalA.evaluationReceipt.currentStorePin,'aa59dd92dde8db139081542f2102f035120fa097');
+assert.equal(formalA.evaluationReceipt.currentStorePin,'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81');
 assert.equal(formalA.evaluationReceipt.currentStoreMatchesReference,true);
 assert.equal(formalA.evaluationReceipt.machineEnvelopeId,'D001-STAGE2-ENVELOPE-0.3');
 assert.equal(formalA.evaluationReceipt.travelStandardId,'STB-D001-DIMENSIONAL-TRAVEL-0.1');
@@ -222,7 +222,7 @@ for (const forbidden of [
   assert.equal(syncBlock.includes(forbidden),false,'visible configurator reclaimed Store authority: '+forbidden);
 }
 
-assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=e486df26/);
+assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=ccc85533/);
 assert.match(shell,/const user1RuntimeBridge = window\.STBUserDefinedBoardRuntimeBridge \|\| null/);
 assert.match(shell,/nextStoreRequestId/);
 assert.match(shell,/user1RuntimeBridge\.request\(definition\.storeDemand/);

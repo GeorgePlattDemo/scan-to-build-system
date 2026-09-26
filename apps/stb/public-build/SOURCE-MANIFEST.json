@@ -111,24 +111,24 @@
   "systemEdits": [
     {
       "path": "stb-alcove-store-bridge.js",
-      "pass": "store-repin-alcove-spots",
-      "blobSha": "103cb22a5d71c80d5907946edb83de0a8c360825",
+      "pass": "store-repin-eb5d6ae",
+      "blobSha": "d06eb92e2d1e86583de2b932170810cdb6ecb3b8",
       "bytes": 4998,
-      "reason": "Store repin: Alcove bridge expects Store aa59dd92dde8db139081542f2102f035120fa097 (Store main, PR #13: spot drilling 3/16 in deep after the point, inset 1 1/2 in or 2 in)."
+      "reason": "Store repin: Alcove bridge expects Store eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81 (Store main, PR #14: lumber and fastener stock, 183 offerings)."
     },
     {
       "path": "stb-user-defined-board-runtime-bridge.js",
-      "pass": "store-repin-alcove-spots",
-      "blobSha": "e486df264a006cd9412f47cfb19cf889f8a4b873",
+      "pass": "store-repin-eb5d6ae",
+      "blobSha": "ccc855331d73e3b39d1c8c25d5445cc9078acc08",
       "bytes": 8366,
-      "reason": "Store repin: Start-your-own runtime bridge expects Store aa59dd92dde8db139081542f2102f035120fa097."
+      "reason": "Store repin: Start-your-own runtime bridge expects Store eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81."
     },
     {
       "path": "stb-store-handoff-contract.js",
-      "pass": "store-repin-alcove-spots",
-      "blobSha": "0f70fd6e28e4963674fc2f6dc516f958e4b0ddbb",
+      "pass": "store-repin-eb5d6ae",
+      "blobSha": "1c0145fdd9716b202bbbe7040619b1cb86e462d9",
       "bytes": 51918,
-      "reason": "Store repin: the two cached User 1 Store references (16 in, 18 in) refreshed to the exact answers of Store aa59dd92 ($8.54 and $9.07, new calculation hashes, Store run 36173019688); test/store/user1-reference-guard.test.mjs now fails CI if the cache ever differs from the Store at STORE_PIN."
+      "reason": "Store repin: the two cached User 1 Store references (16 in, 18 in) refreshed to the exact answers of Store eb5d6ae7 (prices unchanged at $8.54 and $9.07; new calculation hashes because the Store revision changed; Store run 36248855826). test/store/user1-reference-guard.test.mjs fails CI if the cache ever differs from the Store at STORE_PIN."
     },
     {
       "path": "stb-build-guide-spec.js",
@@ -139,24 +139,24 @@
     },
     {
       "path": "system-build-base-8d8a9dd.html",
-      "pass": "store-repin-alcove-spots",
-      "blobSha": "f5a7cfc928b095224c0998cbaea32e36d3f2e4e8",
+      "pass": "store-repin-eb5d6ae",
+      "blobSha": "b049cf01701f13ce4710e6f1847b5f92e8a8a41e",
       "bytes": 136338,
-      "reason": "Alcove spots: one 3/16 in spot per upright per shelf (4 per shelf), inset 1 1/2 in or 2 in from the edge (two-option choice under the spots checkbox), sent inside each upright component so Store Zero times, prices or refuses them; summary text says 4 uprights and the inset; Alcove bridge cache-buster."
+      "reason": "Alcove spots: one 3/16 in spot per upright per shelf (4 per shelf), inset 1 1/2 in or 2 in from the edge (two-option choice under the spots checkbox), sent inside each upright component so Store Zero times, prices or refuses them; summary text says 4 uprights and the inset. Alcove bridge cache-buster updated for the Store repin to eb5d6ae7."
     },
     {
       "path": "system-build-front-door-0.5.html",
-      "pass": "store-repin-alcove-spots",
-      "blobSha": "094d8769b2388f46045aeb93be5b90927250cfd5",
+      "pass": "store-repin-eb5d6ae",
+      "blobSha": "27394a0f610ab7e8d22309ad7f2357b5cf1ca9bb",
       "bytes": 39691,
       "reason": "Cache-buster for the updated base."
     },
     {
       "path": "system-build-current.html",
-      "pass": "store-repin-alcove-spots",
-      "blobSha": "583b1836afc32b590a64f4f824433c9378c11ac8",
+      "pass": "store-repin-eb5d6ae",
+      "blobSha": "c290b9ad6716d47b95b559154d3b97a9f2ae6305",
       "bytes": 227072,
-      "reason": "Cache-busters for the updated front door, handoff contract, runtime bridge and guide spec."
+      "reason": "Store repin to eb5d6ae7: cache-busters for the updated front door, handoff contract and runtime bridge."
     }
   ]
 }
