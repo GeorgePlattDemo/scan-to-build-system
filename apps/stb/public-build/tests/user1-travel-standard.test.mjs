@@ -222,7 +222,7 @@ for (const forbidden of [
   assert.equal(syncBlock.includes(forbidden),false,'visible configurator reclaimed Store authority: '+forbidden);
 }
 
-assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=897a3aa5/);
+assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=f77a49e9/);
 assert.match(shell,/const user1RuntimeBridge = window\.STBUserDefinedBoardRuntimeBridge \|\| null/);
 assert.match(shell,/nextStoreRequestId/);
 assert.match(shell,/user1RuntimeBridge\.request\(definition\.storeDemand/);

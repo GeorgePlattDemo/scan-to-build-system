@@ -11,11 +11,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=f1f18ab2"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=bf4090e1"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
 <script src="stb-store-handoff-contract.js?v=bc2e0a7c"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
-<script src="stb-user-defined-board-runtime-bridge.js?v=897a3aa5"></script>
+<script src="stb-store-client.js?v=7eb5ab65"></script>
+<script src="stb-user-defined-board-runtime-bridge.js?v=f77a49e9"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
 <script src="stb-build-guide-spec.js?v=042908b3"></script>
 <script>
@@ -1160,7 +1161,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.1.html?v=0e648116"
+                  src="stb-outdoor-picnic-0.1.html?v=9f843e92"
                 ></iframe>
               </div>
             `;
@@ -1318,18 +1319,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
             try { win.localStorage.setItem('stb-proof-handoff-job1', JSON.stringify(proofHandoff)); } catch (_) {}
             syncProofHandoff();
             originalShow.call(win, 'proof-store');
-          } else if (type === 'STB_OUTDOOR_CONFIRMED' && event.data?.payload) {
-            if (activeJourneyProject !== 'outdoor') return;
-            const boardEval = window.STBUserDefinedBoardStore && event.data.payload.physicalDemand
-              ? window.STBUserDefinedBoardStore.evaluateUserDefinedBoardJob(event.data.payload.physicalDemand)
-              : null;
-            const storeHandoff = createComparisonStoreHandoff('outdoor',event.data.payload);
-            proofHandoff = {job:'JOB 2 · OUTDOOR BUILD',source:'outdoor',payload:event.data.payload,storeHandoff:storeHandoff,boardEvaluation:boardEval};
-            retainComparisonStoreHandoff('outdoor',storeHandoff);
-            try { win.localStorage.setItem('stb-proof-handoff-job2', JSON.stringify(proofHandoff)); } catch (_) {}
-            syncProofHandoff();
-            originalShow.call(win, 'proof-store');
           }
+          // Outdoor no longer hands off into Job 1's proof pages; its steps stay on its own page.
         });
       }
 
@@ -2833,98 +2824,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     sync();
 
 
-    const picnicConfigNext = doc.querySelector('#picnic-config [data-go="picnic-review"]');
-    if (picnicConfigNext) {
-      picnicConfigNext.removeAttribute('data-go');
-      picnicConfigNext.setAttribute('data-canonical-go', 'picnic-store');
-      picnicConfigNext.textContent = 'SEND TO STORE ZERO →';
-    }
-    const picnicConfirm = doc.getElementById('confirm-picnic');
-    if (picnicConfirm) {
-      picnicConfirm.textContent = 'CONFIRM THIS VERSION';
-      picnicConfirm.setAttribute('data-picnic-confirm', 'true');
-    }
-
-    const picnicDoctrine = (!canonicalDoctrine || canonicalDoctrine.expectedProcessStepCount !== 12)
-      ? '<h1>CANONICAL STORE CONTENT UNAVAILABLE</h1><div class="s001-boundary"><b>Fail closed.</b> Shared Store doctrine is unavailable.</div>'
-      : '<div class="band" style="font-size:12px;line-height:1.55"><p style="margin:0">' + canonicalDoctrine.definitionHtml + '</p></div>' +
-        canonicalDoctrine.processIntroHtml +
-        canonicalDoctrine.processStepsHtml;
-
-    ensureProjectJourneyPage('picnic-store',
-      picnicDoctrine +
-      '<div class="s001-v2-callout"><b>CURRENT PICNIC-TABLE STATUS</b>The project is admitted. The Store question is not yet stable enough to submit because this class does not yet publish a complete part/material demand packet.</div>' +
-      '<p class="stage-tag">3 · STORE</p><h1>PICNIC TABLE · STORE QUESTION</h1>' +
-      '<div class="s001-v2-order">' +
-        '<div><b>FORM / SCOPE</b><span id="picnic-store-form"></span></div>' +
-        '<div><b>LENGTH</b><span id="picnic-store-length"></span></div>' +
-        '<div><b>MATERIAL PREFERENCE</b><span id="picnic-store-material"></span></div>' +
-        '<div><b>STORE REQUEST</b><span>DEFERRED · BRIDGE-GAP</span></div>' +
-        '<div><b>PRICE</b><span>UNRESOLVED</span></div>' +
-        '<div><b>PHYSICAL AUTHORITY</b><span>NOT AUTHORIZED</span></div>' +
-      '</div>' +
-      '<div class="s001-boundary"><b>This is not a failed job.</b> The user choices are valid project facts. The missing piece is the project-to-Store bridge: stable part geometry / material demand has not yet been published for this class. No SKU, price, capability, or refusal is invented to make the screen green.</div>' +
-      '<div class="btns"><button type="button" data-canonical-go="picnic-config">BACK TO CONFIGURE</button><button type="button" data-canonical-go="picnic-review">NEXT → REVIEW</button></div>',
-      '<p class="goal">Admit broadly, stop narrowly</p><div class="row"><b>User choices are not the problem</b><span>Form, scope, length and material preference remain valid.</span></div><div class="row"><b>Bridge gap is explicit</b><span>Store cannot answer a demand packet the project has not yet published.</span></div>'
-    );
-
-    const picnicReviewMain = doc.querySelector('#picnic-review > .main');
-    if (picnicReviewMain) {
-      const unresolved = picnicReviewMain.querySelector('.flash.warn');
-      if (unresolved) unresolved.insertAdjacentHTML('afterend', '<div class="flash warn"><b>STORE BRIDGE:</b> No complete Picnic Store request exists yet. This is a BRIDGE-GAP, not a reason to discard the project definition.</div>');
-      const first = picnicReviewMain.querySelector('.btns');
-      if (first && !first.querySelector('[data-canonical-go="picnic-store"]')) first.insertAdjacentHTML('afterbegin','<button type="button" data-canonical-go="picnic-store">← Back to Store</button>');
-    }
-
-    ensureProjectJourneyPage('picnic-request',
-      '<p class="stage-tag">5 · REQUEST</p><h1>REQUEST · PICNIC TABLE</h1>' +
-      '<p class="sub">The definition can be retained, but there is not yet a Store-submittable demand packet for this class.</p>' +
-      '<div class="s001-v2-order">' +
-        '<div><b>FORM / SCOPE</b><span id="picnic-request-form"></span></div>' +
-        '<div><b>LENGTH</b><span id="picnic-request-length"></span></div>' +
-        '<div><b>MATERIAL PREFERENCE</b><span id="picnic-request-material"></span></div>' +
-        '<div><b>REQUEST EVENT</b><span>DEFERRED · NOT SUBMITTED</span></div>' +
-        '<div><b>OWNER</b><span>BRIDGE-GAP · project-to-Store demand packet</span></div>' +
-        '<div><b>PROJECT STATUS</b><span>RETAINED · NOT REJECTED</span></div>' +
-      '</div>' +
-      '<div class="s001-boundary"><b>STOP AT THE REAL GATE.</b> SEND TO THE YARD is unavailable until a complete Store request can be formed. This does not erase the project or force the user to re-enter valid choices.</div>' +
-      '<div class="btns"><button type="button" data-canonical-go="picnic-review">BACK TO REVIEW</button><button type="button" disabled title="Bridge gap: a complete Picnic Store request is not yet implemented.">SEND TO THE YARD — DEFERRED</button></div>',
-      '<p class="goal">A refusal can be a pass</p><div class="row"><b>What stopped</b><span>The Store request bridge, not the customer project.</span></div><div class="row"><b>What remains</b><span>The exact choices and unresolved conditions stay in the project record.</span></div>'
-    );
-
-    ensureProjectJourneyPage('picnic-yard',
-      '<p class="stage-tag">6 · YARD</p><h1>YARD · NOT REACHED</h1><p class="sub">No yard submission exists for the current Picnic class.</p><div class="s001-boundary">This stage is intentionally inaccessible from the current Request gate. Nothing is inferred past the bridge gap.</div>',
-      '<p class="goal">Not reached</p><div class="row"><b>No invented response</b><span>No request means no yard response.</span></div>'
-    );
-    ensureProjectJourneyPage('picnic-terms',
-      '<p class="stage-tag">7 · TERMS</p><h1>TERMS · NOT REACHED</h1><p class="sub">Offer, acceptance, payment and allocation remain NOT ESTABLISHED.</p>',
-      '<p class="goal">Not reached</p><div class="row"><b>Null stays null</b><span>A missing Request event cannot produce later commercial events.</span></div>'
-    );
-    ensureProjectJourneyPage('picnic-recap',
-      '<p class="stage-tag">8 · RECAP</p><h1>RECAP · PICNIC TABLE</h1><p class="sub">Project admitted → choices retained → Store bridge deferred. No later transaction event is claimed.</p>',
-      '<p class="goal">Truthful chronology</p><div class="row"><b>Do not backfill</b><span>Later stages remain absent until the bridge is implemented.</span></div>'
-    );
-    ensureProjectJourneyPage('picnic-record',
-      '<p class="stage-tag">9 · RECORD</p><h1>PICNIC TABLE · OWNER RECORD</h1><p class="sub">The record preserves the project even though the current journey stops at Request.</p><div class="s001-v2-order"><div><b>FORM / SCOPE</b><span id="picnic-record-form"></span></div><div><b>LENGTH</b><span id="picnic-record-length"></span></div><div><b>MATERIAL PREFERENCE</b><span id="picnic-record-material"></span></div><div><b>STORE REQUEST</b><span>NOT FORMED · BRIDGE-GAP</span></div><div><b>COMMERCIAL STATUS</b><span>NOT ESTABLISHED</span></div><div><b>PHYSICAL STATUS</b><span>NOT AUTHORIZED / NOT RECORDED</span></div></div>',
-      '<p class="goal">Keep the project, not a fiction</p><div class="row"><b>Valid inputs survive</b><span>The next implementation pass should start from this retained definition.</span></div>'
-    );
-
-    function syncPicnicJourney() {
-      const title = doc.getElementById('picnic-title')?.textContent || 'Picnic table';
-      const length = doc.getElementById('plen-label')?.textContent || '—';
-      const material = doc.getElementById('pmat-label')?.textContent || 'unresolved';
-      const set = (id, value) => { const el = doc.getElementById(id); if (el) el.textContent = value; };
-      ['picnic-store-form','picnic-request-form','picnic-record-form'].forEach(id => set(id, title));
-      ['picnic-store-length','picnic-request-length','picnic-record-length'].forEach(id => set(id, length));
-      ['picnic-store-material','picnic-request-material','picnic-record-material'].forEach(id => set(id, material));
-    }
-    doc.addEventListener('input', function(event) {
-      if (event.target.closest?.('#picnic-config')) setTimeout(syncPicnicJourney, 0);
-    });
-    doc.addEventListener('click', function(event) {
-      if (event.target.closest?.('#picnic-chooser,#picnic-config')) setTimeout(syncPicnicJourney, 0);
-    });
-    syncPicnicJourney();
+    // The old Picnic journey pages (a Store bridge gap) are gone: the Outdoor tile's picnic page answers from the live Store.
 
     ['alcove-capture','alcove-config','store','request','yard','record','window-parts','playhouse-s001','playhouse-machine','playhouse-store','playhouse-review','playhouse-request','playhouse-yard','playhouse-terms','playhouse-result','playhouse-record'].forEach(addProofLibraryControl);
 
@@ -2970,16 +2870,17 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         recap:'proof-record',
         record:'proof-record'
       }),
+      // Every Outdoor step stays on the Outdoor page; the page switches its own view.
       outdoor: Object.freeze({
         scan:'outdoor-build-live',
         configure:'outdoor-build-live',
-        store:'proof-store',
-        review:'proof-store',
-        request:'proof-accept',
-        yard:'proof-yard',
-        terms:'proof-yard',
-        recap:'proof-record',
-        record:'proof-record'
+        store:'outdoor-build-live',
+        review:'outdoor-build-live',
+        request:'outdoor-build-live',
+        yard:'outdoor-build-live',
+        terms:'outdoor-build-live',
+        recap:'outdoor-build-live',
+        record:'outdoor-build-live'
       }),
       playhouse: Object.freeze({
         scan: 'playhouse-s001',
@@ -2991,17 +2892,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         terms: 'playhouse-terms',
         recap: 'playhouse-result',
         record: 'playhouse-record'
-      }),
-      picnic: Object.freeze({
-        scan: 'picnic-chooser',
-        configure: 'picnic-config',
-        store: 'picnic-store',
-        review: 'picnic-review',
-        request: 'picnic-request',
-        yard: 'picnic-yard',
-        terms: 'picnic-terms',
-        recap: 'picnic-recap',
-        record: 'picnic-record'
       })
     });
 
@@ -3046,7 +2936,41 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     // Trail rules (AGENTS.md): every rule-bound tile gets the same six-step nav from its own stage map.
     const TRAIL_NAV_CONTEXT = Object.freeze({
       'start-own':'JOB 1 · START YOUR OWN',
-      alcove:'ALCOVE · CRITICAL FIT'
+      alcove:'ALCOVE · CRITICAL FIT',
+      outdoor:'OUTDOOR · PICNIC TABLE'
+    });
+
+    // The Outdoor page reports which steps can be used now; steps it cannot use yet are shown inert.
+    var outdoorNavState = {planChosen:false, callReady:false};
+    function outdoorFrame() {
+      return doc.getElementById('outdoor-bench-leg-frame');
+    }
+    function applyOutdoorNavState() {
+      const nav = doc.querySelector('.recovery-nav');
+      if (!nav || activeJourneyProject !== 'outdoor') return;
+      const usable = {
+        scan:true,
+        configure:outdoorNavState.planChosen,
+        store:outdoorNavState.planChosen,
+        request:outdoorNavState.callReady,
+        yard:false,
+        record:false
+      };
+      nav.querySelectorAll('button[data-job-project="outdoor"]').forEach(button => {
+        const stage = button.dataset.journeyStage;
+        const on = !!usable[stage];
+        button.disabled = !on;
+        if (on) button.removeAttribute('aria-disabled');
+        else button.setAttribute('aria-disabled','true');
+        if (stage === 'yard' || stage === 'record') button.title = 'Accept & pay comes next; nothing is cut yet.';
+      });
+    }
+    win.addEventListener('message', function(event) {
+      if (event.origin !== win.location.origin) return;
+      if (event.source !== outdoorFrame()?.contentWindow) return;
+      if (event.data?.type !== 'STB_OUTDOOR_STATE') return;
+      outdoorNavState = {planChosen:event.data.planChosen === true, callReady:event.data.callReady === true};
+      applyOutdoorNavState();
     });
 
     function wireStartOwnJourneyNav(nav) {
@@ -3112,18 +3036,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         } else if (activeJourneyProject === 'alcove') {
           wireTrailJourneyNav(nav, 'alcove');
         } else if (activeJourneyProject === 'outdoor') {
-          ['alcove-review','terms','recap'].forEach(target => {
-            const button = nav.querySelector('button[data-go="'+target+'"]');
-            if (button) button.hidden = true;
-          });
-          const storeButton = nav.querySelector('button[data-go="store"]');
-          const requestButton = nav.querySelector('button[data-go="request"]');
-          const yardButton = nav.querySelector('button[data-go="yard"]');
-          const recordButton = nav.querySelector('button[data-go="record"]');
-          if (storeButton) storeButton.textContent = 'Store Answer';
-          if (requestButton) requestButton.textContent = 'Accept / Pay';
-          if (yardButton) yardButton.textContent = 'Store / Yard';
-          if (recordButton) recordButton.textContent = 'Handoff / Record';
+          wireTrailJourneyNav(nav, 'outdoor');
+          applyOutdoorNavState();
         } else if (activeJourneyProject === 'window-seat') {
           ['alcove-review','terms','recap'].forEach(target => {
             const button = nav.querySelector('button[data-go="'+target+'"]');
@@ -3241,17 +3155,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         setTimeout(syncAlcoveCommercialSurface,0);
         return true;
       }
-      if (projectId === 'picnic' && ['yard','terms','recap','record'].includes(stage)) {
-        originalShow.call(win, 'picnic-request');
-        if (typeof syncPicnicJourney === 'function') setTimeout(syncPicnicJourney, 0);
-        return true;
-      }
       const target = PROJECT_STAGE_TARGETS[projectId]?.[stage] || null;
       if (!target || !doc.getElementById(target)) return false;
       originalShow.call(win, target);
       if (projectId === 'start-own' || projectId === 'outdoor') syncJourneyNav(stage);
+      if (projectId === 'outdoor') {
+        outdoorFrame()?.contentWindow?.postMessage({type:'STB_OUTDOOR_GO', stage}, win.location.origin);
+        applyOutdoorNavState();
+      }
       if (projectId === 'playhouse') setTimeout(sync, 0);
-      if (projectId === 'picnic' && typeof syncPicnicJourney === 'function') setTimeout(syncPicnicJourney, 0);
       return true;
     }
 
@@ -3275,8 +3187,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
     const PROJECT_TILE_TO_JOURNEY = Object.freeze({
       'alcove-capture': 'alcove',
-      'window-parts': 'playhouse',
-      'picnic-chooser': 'picnic'
+      'window-parts': 'playhouse'
     });
 
     win.addEventListener('click', function(event) {
@@ -3322,14 +3233,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     }, true);
 
     win.addEventListener('click', function(event) {
-      if (activeJourneyProject === 'picnic' && event.target.closest?.('#confirm-picnic')) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        doc.documentElement.dataset.picnicRevisionConfirmed = 'true';
-        originalShow.call(win, 'picnic-request');
-        setTimeout(syncPicnicJourney, 0);
-        return;
-      }
       if (activeJourneyProject === 'playhouse' && event.target.closest?.('#playhouse-review [data-canonical-go="playhouse-request"]')) {
         doc.documentElement.dataset.playhouseRevisionConfirmed = 'true';
       }

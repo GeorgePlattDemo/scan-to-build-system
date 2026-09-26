@@ -32,8 +32,6 @@ const contract = sandbox.STBTrailContract;
 const KNOWN_FAILING = new Set([
   // start-own: owns its six steps, but steps 2-6 neither move nor show as inert from a fresh start.
   'start-own:R3',
-  // outdoor: old nav labels; Store Answer/Accept/Yard/Record jump into Job 1's proof pages; extra "Bring what you have".
-  'outdoor:R1', 'outdoor:R2',
   // playhouse: old 12-button nav; extra "Bring what you have"; "Sarah" on its pages.
   'playhouse:R1', 'playhouse:R2', 'playhouse:R9',
 ]);

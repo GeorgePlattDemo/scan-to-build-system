@@ -24,19 +24,21 @@ assert.equal(journey.gates.length,8);
 assert.match(shell,/const PROJECT_TILE_TO_JOURNEY = Object\.freeze/);
 assert.match(shell,/'alcove-capture': 'alcove'/);
 assert.match(shell,/'window-parts': 'playhouse'/);
-assert.match(shell,/'picnic-chooser': 'picnic'/);
+assert.equal(shell.includes("'picnic-chooser': 'picnic'"),false,'the old Picnic journey identity is gone; the Outdoor tile selects outdoor');
 assert.match(shell,/win\.addEventListener\('click', function\(event\) \{[\s\S]*PROJECT_TILE_TO_JOURNEY\[target\]/);
 assert.equal(shell.includes("doc.addEventListener('click', function(event) {\n      const tile = event.target.closest('#projects .tile[data-go]');"),false);
 
 // Every bounded project uses the neutral canonical stage names.
 const expectedTargets={
   alcove:{scan:'alcove-capture',configure:'alcove-config',store:'store',review:'alcove-review',request:'request',yard:'yard',terms:'terms',recap:'recap',record:'record'},
-  playhouse:{scan:'playhouse-s001',configure:'playhouse-machine',store:'playhouse-store',review:'playhouse-review',request:'playhouse-request',yard:'playhouse-yard',terms:'playhouse-terms',recap:'playhouse-result',record:'playhouse-record'},
-  picnic:{scan:'picnic-chooser',configure:'picnic-config',store:'picnic-store',review:'picnic-review',request:'picnic-request',yard:'picnic-yard',terms:'picnic-terms',recap:'picnic-recap',record:'picnic-record'}
+  playhouse:{scan:'playhouse-s001',configure:'playhouse-machine',store:'playhouse-store',review:'playhouse-review',request:'playhouse-request',yard:'playhouse-yard',terms:'playhouse-terms',recap:'playhouse-result',record:'playhouse-record'}
 };
 assert.match(shell,/alcove: ALCOVE_STAGE_TARGETS/);
 assert.match(shell,/playhouse: Object\.freeze/);
-assert.match(shell,/picnic: Object\.freeze/);
+assert.equal(/picnic: Object\.freeze/.test(shell),false);
+// Outdoor's six steps all stay on the Outdoor page.
+for(const stage of ['scan','configure','store','review','request','yard','terms','recap','record']) assert.ok(shell.includes(stage+":'outdoor-build-live'"),'outdoor '+stage+' leaves its page');
+assert.match(shell,/outdoor:'OUTDOOR · PICNIC TABLE'/);
 for(const [project,map] of Object.entries(expectedTargets)){
   for(const [stage,target] of Object.entries(map)){
     assert.ok(shell.includes(stage+": '"+target+"'"),project+' missing '+stage+' mapping');
@@ -82,15 +84,17 @@ assert.match(shell,/canonicalDoctrine\.definitionHtml/);
 assert.match(shell,/canonicalDoctrine\.processIntroHtml/);
 assert.match(shell,/canonicalDoctrine\.processStepsHtml/);
 
-// Picnic is admitted and carried to the real bridge stop, not rejected or silently promoted.
-for(const id of ['picnic-store','picnic-request','picnic-yard','picnic-terms','picnic-recap','picnic-record']) assert.ok(shell.includes("ensureProjectJourneyPage('"+id+"'"),'missing '+id);
-assert.match(shell,/SEND TO STORE ZERO →/);
-assert.match(shell,/DEFERRED · BRIDGE-GAP/);
-assert.match(shell,/This is not a failed job\./);
-assert.match(shell,/PROJECT STATUS<\/b><span>RETAINED · NOT REJECTED/);
-assert.match(shell,/STOP AT THE REAL GATE\./);
-assert.match(shell,/SEND TO THE YARD — DEFERRED/);
-assert.match(shell,/projectId === 'picnic' && \['yard','terms','recap','record'\]\.includes\(stage\)/);
+// Picnic has one path: the Outdoor tile's page, answered by the live Store (CUT_PACKAGE_V1).
+// The old Picnic journey pages that stopped at a Store bridge gap are gone, and old routes lead to the Outdoor page.
+for(const id of ['picnic-store','picnic-request','picnic-yard','picnic-terms','picnic-recap','picnic-record']) assert.equal(shell.includes("ensureProjectJourneyPage('"+id+"'"),false,'old picnic page still built: '+id);
+assert.equal(shell.includes('DEFERRED · BRIDGE-GAP'),false);
+assert.equal(shell.includes("type === 'STB_OUTDOOR_CONFIRMED'"),false,'Outdoor must not hand off into Job 1 proof pages');
+assert.match(shell,/src="stb-outdoor-picnic-0\.1\.html\?v=[0-9a-f]{8}"/);
+assert.match(shell,/QUARANTINED_OUTDOOR_TARGETS\.has\(target\)[\s\S]*openCurrentOutdoorBuildFromLegacyRoute\(\)/);
+const outdoorPage = fs.readFileSync(new URL('../stb-outdoor-picnic-0.1.html', import.meta.url),'utf8');
+assert.match(outdoorPage,/CUT_PACKAGE_V1/);
+assert.match(outdoorPage,/stb-store-client\.js/);
+assert.equal(/Math\.min\(14/.test(outdoorPage),false,'no length ceiling of our own in the Outdoor page');
 
 // Start Your Own remains broad intake and is not falsely declared to be a bounded project.
 assert.match(base,/id="start-own"/);
@@ -101,6 +105,7 @@ assert.equal(shell.includes("'start-own': '"),false,'Start Your Own was incorrec
 // Safety / authority boundaries remain visible.
 assert.match(shell,/No binding quote or fabrication authority is created/);
 assert.match(shell,/PHYSICAL AUTHORITY<\/b><span>NOT AUTHORIZED/);
-assert.match(shell,/NOT AUTHORIZED \/ NOT RECORDED/);
+// The old Picnic record page carried "NOT AUTHORIZED / NOT RECORDED"; the Outdoor page states its own boundary.
+assert.match(outdoorPage,/Nothing is cut until you accept and pay/);
 
 console.log('PASS · bounded project canonical conformance checks');

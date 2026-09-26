@@ -81,7 +81,7 @@ assert.equal(shell.includes('quoteStartOwnBoardSequence'),false,'visible User 1 
 assert.equal(shell.includes('machineHourRate'),false,'visible User 1 reintroduced Store rate logic');
 assert.equal(shell.includes('setupCharge'),false,'visible User 1 reintroduced Store setup-charge logic');
 assert.match(shell,/STORE_REFRESH_REQUIRED/);
-assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=897a3aa5/);
+assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=f77a49e9/);
 assert.match(shell,/user1RuntimeBridge\.request\(definition\.storeDemand/);
 assert.equal(shell.includes('currentStoreAuthorityUrl'),false,'active Start Own still floats on Store main');
 assert.equal(shell.includes('stbLastConfirmed'),false,'Store-send button regressed to one-use behavior');
@@ -118,7 +118,9 @@ assert.equal(shell.includes('parentLengthIn = 72'),false);
 
 // The live bridge is transport/correlation only; it does not reclaim Store decisions.
 assert.match(runtimeBridgeSource,/USER_DEFINED_BOARD_V1/);
-assert.match(runtimeBridgeSource,/stb-store-runtime\.json/);
+assert.match(runtimeBridgeSource,/STBStoreClient/);
+assert.match(read('stb-store-client.js'),/stb-store-runtime\.json/);
+assert.match(shell,/stb-store-client\.js\?v=[0-9a-f]{8}"><\/script>\n<script src="stb-user-defined-board-runtime-bridge\.js/);
 assert.match(runtimeBridgeSource,/materialDemand:\{species:'spf',form:'board',nominalT:2,nominalW:4\}/);
 for (const forbidden of ['sellingPrice','machineHourRate','setupCharge','parentLengthIn','storeSku:']) {
   assert.equal(runtimeBridgeSource.includes(forbidden),false,'live User 1 bridge reclaimed Store authority: '+forbidden);
