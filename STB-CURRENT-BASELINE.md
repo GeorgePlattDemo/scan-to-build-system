@@ -57,7 +57,7 @@ These identities remain provenance. They are not competing current baselines.
 | Path / role | Store pin | Status |
 | --- | --- | --- |
 | 2026-09-13 transferred accepted-app / Stage-2 Store Zero identity | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | ACCEPTED BASELINE HISTORY; SUPERSEDED FOR CURRENT STAGE-2 WORKING PATH |
-| current tested dimensional + Alcove Store source | `aa59dd92dde8db139081542f2102f035120fa097` | CURRENT TESTED SOURCE consumed by System and the live hosted Store for `USER_DEFINED_BOARD_V1` and `ALCOVE_INSERT_V1` (Store main, PR #13: spot depth and insets). Live Store is the System pin; Review is historical. |
+| current tested Store source | `fc3f555b8f1f329bcf2dd81fa26995230d12a527` | CURRENT TESTED SOURCE consumed by System and the live hosted Store for `USER_DEFINED_BOARD_V1`, `ALCOVE_INSERT_V1` and `CUT_PACKAGE_V1` (Store main, PR #15: cut packages and item lines; previous pins `eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81`, `aa59dd92dde8db139081542f2102f035120fa097`). Live Store is the System pin; Review is historical. |
 | previous dimensional + Alcove runtime pin | `39a1b318063f62220c9c20c42200389098e0c687` | HISTORY; still expected by the frozen Review demo |
 | PR #4 sheet Store path | `49d22ce40482a7c2e0169ac1e6df48e0f8384a6d` | SUPERSEDED CANDIDATE HISTORY |
 | PR #6 combined published-job candidate | `096e99d645d745b1670185f46c75de75f9e59661` | ACCEPTED ANCESTRY; SUPERSEDED FOR CURRENT S-001 PROOF |

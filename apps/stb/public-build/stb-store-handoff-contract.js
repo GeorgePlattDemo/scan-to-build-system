@@ -37,15 +37,15 @@
     startOwn: Object.freeze({
       projectId:'start-own',
       projectClass:'USER_DEFINED_BOARD',
-      materialCatalogPin:'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81',
+      materialCatalogPin:'fc3f555b8f1f329bcf2dd81fa26995230d12a527',
       capabilityBasis:'STB-D001-DIMENSIONAL-TRAVEL-0.1',
-      capabilityPin:'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81',
+      capabilityPin:'fc3f555b8f1f329bcf2dd81fa26995230d12a527',
       economicsModel:'STB-STORE-ZERO-PRICE-1',
       economicsVersion:'0.3.0',
       economicsStatus:'PINNED_STORE_ISSUED_REFERENCE',
-      economicsPin:'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81',
+      economicsPin:'fc3f555b8f1f329bcf2dd81fa26995230d12a527',
       governingStandard:'DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md',
-      acceptanceWorkflowRun:'36248855826',
+      acceptanceWorkflowRun:'36266986468',
       systemIntegrationPin:null,
       legacyGeneralRecoverySelected:false
     }),
@@ -315,11 +315,11 @@
     status:'STORE_ISSUED_REFERENCE',
     source:Object.freeze({
       repository:'GeorgePlattDemo/scan-to-build-store',
-      storePin:'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81',
+      storePin:'fc3f555b8f1f329bcf2dd81fa26995230d12a527',
       pricingFile:'store-zero-pricing-engine.mjs',
       travelFile:'d001-travel-standard.mjs',
       governingStandard:'DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md',
-      workflowRun:'36248855826',
+      workflowRun:'36266986468',
       systemIntegrationPin:null
     }),
     demand:Object.freeze({
@@ -364,7 +364,7 @@
       source:Object.freeze({
         repository:'GeorgePlattDemo/scan-to-build-store',
         file:'store-zero-catalog.json',
-        pin:'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81',
+        pin:'fc3f555b8f1f329bcf2dd81fa26995230d12a527',
         clock:'2026-09-10'
       })
     }),
@@ -413,8 +413,8 @@
         setupTimeMin:0
       }),
       calculationIdentity:Object.freeze({
-        inputHash:'8d8c0504a6bd892bfe34c1a588e0f5def1360110aaed438a34f8361d84d1d7b0',
-        resultHash:'27e14bb42776f2d60e64b4f677e4e0bbcafd9a85aa864f1b0ee6860ee3074015'
+        inputHash:'182b55552e6ad778e4f19353a2f2bdca4faa0ba32bf7585b38fab20859c7c626',
+        resultHash:'0de66d1386a51911ba659eaf1237e96a39a708c27af80fd9d1324e099c6189b2'
       })
     })
   });
@@ -423,11 +423,11 @@
     status:'STORE_ISSUED_REFERENCE',
     source:Object.freeze({
       repository:'GeorgePlattDemo/scan-to-build-store',
-      storePin:'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81',
+      storePin:'fc3f555b8f1f329bcf2dd81fa26995230d12a527',
       pricingFile:'store-zero-pricing-engine.mjs',
       travelFile:'d001-travel-standard.mjs',
       governingStandard:'DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md',
-      workflowRun:'36248855826',
+      workflowRun:'36266986468',
       systemIntegrationPin:null,
       systemDiagnosticRun:'35791336322'
     }),
@@ -474,7 +474,7 @@
       source:Object.freeze({
         repository:'GeorgePlattDemo/scan-to-build-store',
         file:'store-zero-catalog.json',
-        pin:'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81',
+        pin:'fc3f555b8f1f329bcf2dd81fa26995230d12a527',
         clock:'2026-09-10'
       })
     }),
@@ -523,8 +523,8 @@
         setupTimeMin:0
       }),
       calculationIdentity:Object.freeze({
-        inputHash:'3a2684d0e44b026f50ce70612cb75b06d27c1b473b7250aae186e410396cf025',
-        resultHash:'f60502af586fe8c2eaa4aad7637d901796735e0f463a98debc3ff48e4f9118d8'
+        inputHash:'8d823a3ac94d481541c8c9af9e000953845999b2e3a60a79b0de11a754287c36',
+        resultHash:'90b88aaac8a4cd78871098021a62540b84cbf7296346121acdd5a134e9ca77de'
       })
     })
   });

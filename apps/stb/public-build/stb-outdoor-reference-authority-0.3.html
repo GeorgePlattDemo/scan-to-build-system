@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scan-to-Build · Outdoor Reference & Authority 0.3</title><style>
+:root{
+ --paper:#f4efe5;--paper2:#fbf8f1;--surface:#fffdf8;--ink:#291f15;--muted:#705f4d;
+ --quiet:#998875;--line:#ded0ba;--line2:#c7b390;--accent:#a65a2b;--accent2:#80431f;
+ --good:#557646;--blue:#55768c;--bad:#a04c43;--shadow:0 9px 27px rgba(65,42,20,.08)
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.58 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-image:radial-gradient(850px 420px at 7% -3%,rgba(166,90,43,.075),transparent 60%)}
+a{color:var(--accent2)}.wrap{max-width:1220px;margin:auto;padding:26px 22px 90px}
+.eyebrow{font:800 11px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.13em;color:var(--quiet)}
+h1{font-size:clamp(40px,6vw,70px);line-height:.98;letter-spacing:-.046em;margin:13px 0 16px;max-width:15ch}
+h1 em{font-style:normal;color:var(--accent)}.lede{font-size:clamp(17px,2vw,21px);max-width:74ch;color:var(--muted);margin:0}
+.top-rule{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;margin-top:22px;padding:15px 17px;border:1px solid var(--line2);background:var(--surface);border-radius:15px;box-shadow:var(--shadow)}
+.top-rule b{font-size:18px}.badge{font:800 10px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;border:1px solid var(--line);border-radius:999px;padding:6px 9px;color:var(--muted)}
+nav{position:sticky;top:0;z-index:10;margin:24px -22px 0;padding:9px 22px;display:flex;gap:7px;overflow:auto;background:rgba(244,239,229,.95);backdrop-filter:blur(10px);border-block:1px solid var(--line)}
+nav a{white-space:nowrap;text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--muted);font-weight:700;font-size:11px;padding:6px 9px;border-radius:999px}
+section{margin:58px 0}.head{display:grid;grid-template-columns:60px 1fr;gap:14px;margin-bottom:18px}.num{font:800 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent);padding-top:8px}
+.head h2{font-size:clamp(27px,3.5vw,40px);letter-spacing:-.025em;line-height:1.06;margin:0 0 7px}.head p{margin:0;color:var(--muted);max-width:85ch}
+.rulegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.rulecard{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:15px;box-shadow:var(--shadow)}
+.rulecard b{display:block;font-size:14px}.rulecard p{margin:6px 0 0;color:var(--muted);font-size:12.5px}
+.chain{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:15px}.chain span{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 10px;font-size:11px;font-weight:800;color:var(--muted)}.chain i{color:var(--quiet);font-style:normal}
+.examples{display:grid;grid-template-columns:1fr 1fr;gap:16px}.example{border:1px solid var(--line);background:var(--surface);border-radius:17px;overflow:hidden;box-shadow:var(--shadow)}
+.example-head{padding:15px 16px 10px}.example-head .type{font:800 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--quiet);letter-spacing:.1em}.example-head h3{font-size:20px;margin:6px 0}.example-head p{margin:0;color:var(--muted);font-size:12.5px}
+.schematic{background:var(--paper2);border-block:1px solid var(--line);padding:6px}.schematic svg{width:100%;display:block}.ground{stroke:var(--line2);stroke-width:2}.wood{fill:#e3cb98;stroke:#8d693f;stroke-width:2}.beam{stroke:#8d693f;stroke-width:22;stroke-linecap:square}.beam.thick{stroke-width:25}.brace{stroke:#a47742;stroke-width:13}.datum{stroke:var(--good);stroke-width:2;fill:none}.svgtxt{font-size:11px;fill:var(--muted)}.svgtxt.supported{fill:var(--good)}.svgtxt.derived{fill:var(--blue)}.svgtxt.unknown{fill:var(--bad)}
+.factgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:13px}.factbox{border:1px solid var(--line);background:var(--paper2);border-radius:10px;padding:10px}
+.factbox b{display:block;font-size:9.5px;letter-spacing:.08em;color:var(--quiet);margin-bottom:4px}.factbox span{font-size:12px;color:var(--muted)}
+.example-foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:0 13px 14px}.source-btn{display:inline-block;text-decoration:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 10px;font-size:11px;font-weight:800}
+.contrastgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.contrast{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:15px;box-shadow:var(--shadow)}
+.contrast h3{font-size:15px;margin:0 0 9px}.contrast .eq{font-size:24px;font-weight:800;color:var(--accent);margin:6px 0}.contrast p{font-size:12.5px;color:var(--muted);margin:6px 0}
+.mini-lines{display:grid;gap:6px;margin-top:10px}.mini-lines div{border:1px solid var(--line);background:var(--paper2);padding:8px 9px;border-radius:8px;font-size:11.5px}
+.scopegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.scope{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:14px}.scope b{font-size:13px}.scope p{font-size:12px;color:var(--muted);margin:6px 0}
+.boundary{display:grid;grid-template-columns:1fr 1fr;gap:13px}.boundary>div{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:15px}.boundary h3{font-size:13px;margin:0 0 8px}.boundary ul{margin:0;padding-left:18px;color:var(--muted);font-size:12px}
+.deep-link{border-left:4px solid var(--accent);background:var(--surface);border-radius:0 14px 14px 0;padding:15px 17px;box-shadow:var(--shadow)}.deep-link b{font-size:16px}.deep-link p{color:var(--muted);margin:6px 0}.deep-link a{font-weight:800}
+.source-tabs{display:grid;grid-template-columns:1fr 1fr;gap:14px}.source-group{border:1px solid var(--line);background:var(--paper2);border-radius:14px;padding:12px}.source-group h3{font-size:15px;margin:2px 0 10px}
+.source-card,details.src{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:7px 0}
+.source-card summary,details.src summary{cursor:pointer;padding:10px 11px;list-style:none;display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:center;font-size:12px}
+details.src summary{display:block}.source-card summary::-webkit-details-marker,details.src summary::-webkit-details-marker{display:none}.sid{font:800 9.5px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent)}
+.source-card summary small{color:var(--quiet);text-align:right}.source-body,details.src>div{padding:0 11px 12px;border-top:1px solid var(--line)}.source-body h4{font-size:14px;margin:11px 0 6px}.meta,details.src p{font-size:11.5px;color:var(--muted)}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:11px}.twocol h5{font-size:9px;letter-spacing:.08em;color:var(--quiet);margin:9px 0 4px}.twocol ul{padding-left:16px;margin:0;font-size:11px;color:var(--muted)}.ext{font-weight:800;font-size:11px}.footer{margin-top:65px;border-top:1px solid var(--line2);padding-top:16px;font-size:12px;color:var(--quiet)}
+@media(max-width:900px){.rulegrid,.contrastgrid,.scopegrid,.examples,.source-tabs{grid-template-columns:1fr}.top-rule,.head,.boundary{grid-template-columns:1fr}.twocol{grid-template-columns:1fr}.source-card summary{grid-template-columns:90px 1fr}.source-card summary small{grid-column:2;text-align:left}}
+</style></head>
+<body><main class="wrap">
+<header id="top"><div class="eyebrow">SCAN-TO-BUILD · OUTDOOR REFERENCE & AUTHORITY · 0.3</div>
+<h1>Why are we allowed to <em>use this fact?</em></h1>
+<p class="lede">Outdoor Build does not begin with a drawing. It begins by deciding which facts are allowed to control the drawing. The research dossier supplies candidates. This page curates the authority rules that determine what may become usable project geometry.</p>
+<div class="top-rule"><div><b>EVERY NUMBER NEEDS A PEDIGREE.</b><br><span style="color:var(--muted)">Family comes first. Datum and angle convention are part of the fact. Published, derived, project-specific, inferred and unknown remain distinct.</span></div><span class="badge">CURATED AUTHORITY · SAME EVIDENCE SET</span></div>
+<div class="chain"><span>RESEARCH DOSSIER</span><i>→</i><span>AUTHORITY PAGE</span><i>→</i><span>BUILD DECK</span><i>→</i><span>BOUNDED CONFIGURATION</span></div>
+</header>
+<nav><a href="stb-outdoor-build.html" onclick="if(window.opener){window.close();return false}">← RETURN TO PROOF LADDER</a><a href="#rules">Rules</a><a href="#examples">Four examples</a><a href="#contrasts">Contrasts</a><a href="#scope">External authority</a><a href="#boundary">Downstream boundary</a><a href="#sources">Source register</a><a href="STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html" target="_blank" rel="opener">Full research dossier ↗</a></nav>
+
+<section id="rules"><div class="head"><div class="num">01</div><div><h2>The rules that survive every family.</h2><p>These are the controls that keep a simple build surface from turning convenience into fake precision.</p></div></div>
+<div class="rulegrid">
+<div class="rulecard"><b>FAMILY PRECEDES GEOMETRY.</b><p>A 25° 2×6 A-frame leg and a 30° 2×8 A-frame leg are separate named systems unless a verified transform relates them.</p></div>
+<div class="rulecard"><b>DATUM IS PART OF THE DIMENSION.</b><p>“32¾ in” is incomplete without saying that Home Depot measures the finished leg along each outer edge.</p></div>
+<div class="rulecard"><b>ANGLE CONVENTION IS PART OF THE FACT.</b><p>30° does not tell you whether the cut is off-square, a bevel, which face carries it, or whether the ends are parallel.</p></div>
+<div class="rulecard"><b>STATE STAYS ATTACHED.</b><p>SUPPORTED, DERIVED, PROJECT-SPECIFIC, INFERRED and UNKNOWN are not cosmetic labels; they determine what may control.</p></div>
+<div class="rulecard"><b>UNKNOWN REMAINS UNKNOWN.</b><p>A picture of an X does not establish a crossing coordinate. An assembly photo does not create a bolt-center datum.</p></div>
+<div class="rulecard"><b>STRUCTURAL RELATIONSHIP CHANGES CAN DEFER.</b><p>If an edit moves an intersection, brace, leg angle, support relationship or load path outside verified evidence, the honest result may be DEFER.</p></div>
+</div></section>
+
+<section id="examples"><div class="head"><div class="num">02</div><div><h2>Four examples that teach four different authority lessons.</h2><p>These are not recommendations. They were selected because each source makes a different provenance problem visible.</p></div></div>
+<div class="examples">
+
+<article class="example" id="AUTH-AF01">
+<div class="example-head"><div class="type">ATTACHED A-FRAME · NAMED DESIGN</div><h3>Home Depot · 6-ft A-frame</h3><p><b>Lesson:</b> 30° alone is not a leg definition.</p></div>
+<div class="schematic"><svg viewBox="0 0 620 300" role="img" aria-label="Home Depot A-frame schematic">
+      <line x1="30" y1="250" x2="590" y2="250" class="ground"/>
+      <path d="M155 248 L270 78 L304 78 L205 248" class="beam"/>
+      <path d="M465 248 L350 78 L316 78 L415 248" class="beam"/>
+      <rect x="205" y="57" width="210" height="24" rx="2" class="wood"/>
+      <rect x="62" y="158" width="195" height="19" rx="2" class="wood"/>
+      <rect x="363" y="158" width="195" height="19" rx="2" class="wood"/>
+      <path d="M156 235 L270 79" class="datum"/>
+      <text x="58" y="119" class="svgtxt supported">32¾ in along outer edge</text>
+      <text x="145" y="275" class="svgtxt supported">30° face lines · ends parallel</text>
+      <text x="310" y="31" text-anchor="middle" class="svgtxt supported">2×8 leg · named A-frame system</text>
+      <text x="310" y="292" text-anchor="middle" class="svgtxt unknown">reusable bolt offsets: UNKNOWN</text>
+    </svg></div>
+<div class="factgrid">
+<div class="factbox"><b>SUPPORTED</b><span>2×8 leg · 32¾ in finished along each outer edge · 30° face lines · ends parallel.</span></div>
+<div class="factbox"><b>DERIVED</b><span>Transparent readbacks may use those exact facts; no generalized new side-frame geometry follows automatically.</span></div>
+<div class="factbox"><b>IMPORTANT DATUM</b><span>Cut end → cut end along each outer edge.</span></div>
+<div class="factbox"><b>ANGLE CONVENTION</b><span>30° line on board face; both end lines parallel.</span></div>
+<div class="factbox"><b>UNKNOWN</b><span>Reusable connection-hole offsets and a verified height/angle transformation rule.</span></div>
+<div class="factbox"><b>WHY IT MATTERS</b><span>The same angle number without stock, datum and end direction would describe a different part.</span></div>
+</div>
+<div class="example-foot"><a class="source-btn" href="#SRC-AF-01">Authority record</a><a class="source-btn" href="https://www.homedepot.com/c/ah/how-to-build-a-picnic-table/9ba683603be9fa5395fab902da03929" target="_blank" rel="noopener">Original source ↗</a></div></article>
+
+<article class="example" id="AUTH-DT01">
+<div class="example-head"><div class="type">DETACHED X / SPLAYED TABLE · NAMED DESIGN</div><h3>Kreg · X Base Outdoor Dining Table</h3><p><b>Lesson:</b> an X is a dependency system, not a decorative shape.</p></div>
+<div class="schematic"><svg viewBox="0 0 620 300" role="img" aria-label="Kreg X base table schematic">
+      <line x1="32" y1="250" x2="588" y2="250" class="ground"/>
+      <path d="M120 248 L245 75" class="beam thick"/>
+      <path d="M275 248 L150 75" class="beam thick"/>
+      <path d="M345 248 L470 75" class="beam thick"/>
+      <path d="M500 248 L375 75" class="beam thick"/>
+      <rect x="92" y="52" width="436" height="25" class="wood"/>
+      <line x1="210" y1="164" x2="410" y2="164" class="brace"/>
+      <text x="76" y="279" class="svgtxt supported">4×4 legs · 29 in · 10° off square · ends parallel</text>
+      <text x="250" y="140" class="svgtxt supported">X pieces include 52° / 13° end cuts</text>
+      <text x="250" y="187" class="svgtxt derived">X + stretchers define one dependent end-frame system</text>
+    </svg></div>
+<div class="factgrid">
+<div class="factbox"><b>SUPPORTED</b><span>4×4 legs 29 in · 10° off-square ends parallel · X components with 52° / 13° classes and published part lengths.</span></div>
+<div class="factbox"><b>DERIVED</b><span>A frozen end station can drive part-demand readbacks. The source does not publish one generic X equation.</span></div>
+<div class="factbox"><b>IMPORTANT DATUM</b><span>Longest-side / part-specific cut-list dimensions; end-frame relationships come from the named assembly.</span></div>
+<div class="factbox"><b>ANGLE CONVENTION</b><span>Leg 10° off square; different X segments carry different end-angle classes.</span></div>
+<div class="factbox"><b>UNKNOWN</b><span>A verified arbitrary width/height → crossing/angle/member-length transform.</span></div>
+<div class="factbox"><b>WHY IT MATTERS</b><span>Moving frame height or width can move the crossing, member length, stretcher relation and connections together.</span></div>
+</div>
+<div class="example-foot"><a class="source-btn" href="#SRC-DT-01">Authority record</a><a class="source-btn" href="https://learn.kregtool.com/plans/x-base-outdoor-dining-table/" target="_blank" rel="noopener">Original source ↗</a></div></article>
+
+<article class="example" id="AUTH-DB01">
+<div class="example-head"><div class="type">DETACHED X-FRAME BENCH · NAMED DESIGN</div><h3>Ana White · X Bench</h3><p><b>Lesson:</b> the same 30° angle can define different cuts.</p></div>
+<div class="schematic"><svg viewBox="0 0 620 300" role="img" aria-label="Ana White X bench schematic">
+      <rect x="70" y="55" width="480" height="25" class="wood"/>
+      <path d="M130 248 L270 88" class="beam"/>
+      <path d="M292 248 L150 88" class="beam"/>
+      <path d="M330 248 L470 88" class="beam"/>
+      <path d="M492 248 L350 88" class="beam"/>
+      <text x="64" y="281" class="svgtxt supported">19¼-in class: 30° · ends PARALLEL</text>
+      <text x="310" y="138" class="svgtxt supported">short X classes: 30° · ends NOT PARALLEL</text>
+      <text x="310" y="166" class="svgtxt derived">same angle number ≠ same cut definition</text>
+    </svg></div>
+<div class="factgrid">
+<div class="factbox"><b>SUPPORTED</b><span>19¼-in X pieces use 30° off-square ends parallel; shorter X classes use 30° with non-parallel ends and published long-point conventions.</span></div>
+<div class="factbox"><b>DERIVED</b><span>Assembly-specific readbacks are possible while the segmented X station remains frozen.</span></div>
+<div class="factbox"><b>IMPORTANT DATUM</b><span>Part-class-specific long-point conventions; there is not one anonymous “X leg length.”</span></div>
+<div class="factbox"><b>ANGLE CONVENTION</b><span>30° off square; parallel vs non-parallel is part identity.</span></div>
+<div class="factbox"><b>UNKNOWN</b><span>A single parametric rule that moves seat height / X width / crossing while preserving the design.</span></div>
+<div class="factbox"><b>WHY IT MATTERS</b><span>Angle magnitude alone cannot choose the saw setup or end orientation.</span></div>
+</div>
+<div class="example-foot"><a class="source-btn" href="#SRC-DB-01">Authority record</a><a class="source-btn" href="https://www.ana-white.com/woodworking-projects/x-bench-free-plans-works-x-outdoor-table" target="_blank" rel="noopener">Original source ↗</a></div></article>
+
+<article class="example" id="AUTH-DB02">
+<div class="example-head"><div class="type">MULTI-ANGLE / SAWHORSE BENCH · NAMED DESIGN</div><h3>Ana White · Sawhorse Outdoor Bench</h3><p><b>Lesson:</b> miter / off-square / bevel cannot be collapsed into one angle field.</p></div>
+<div class="schematic"><svg viewBox="0 0 620 300" role="img" aria-label="Ana White sawhorse bench schematic">
+      <rect x="64" y="55" width="492" height="25" class="wood"/>
+      <path d="M115 248 L205 80" class="beam"/>
+      <path d="M274 248 L205 80" class="beam"/>
+      <path d="M346 248 L415 80" class="beam"/>
+      <path d="M505 248 L415 80" class="beam"/>
+      <text x="58" y="281" class="svgtxt supported">end leg: 15½ in · 10° DOUBLE BEVEL · parallel</text>
+      <text x="295" y="128" class="svgtxt supported">other parts use 10° off-square / 45° / 25° + 17° bevels</text>
+      <text x="295" y="160" class="svgtxt derived">miter / off-square / bevel are separate facts</text>
+    </svg></div>
+<div class="factgrid">
+<div class="factbox"><b>SUPPORTED</b><span>15½-in end legs use 10° double bevels with parallel ends; other parts use 10° off-square, 45° bevels and a 25° / 17° two-ended bevel member.</span></div>
+<div class="factbox"><b>DERIVED</b><span>Named-design cut-list replication is possible while the end frame remains frozen.</span></div>
+<div class="factbox"><b>IMPORTANT DATUM</b><span>Part-specific long-point / face convention from the cut list and diagrams.</span></div>
+<div class="factbox"><b>ANGLE CONVENTION</b><span>Angle and bevel are separate axes of meaning. Opposite ends may carry different bevels.</span></div>
+<div class="factbox"><b>UNKNOWN</b><span>A generalized resize formula for the multi-angle end frame.</span></div>
+<div class="factbox"><b>WHY IT MATTERS</b><span>A UI field labeled only “10°” would erase the difference between two physically different parts.</span></div>
+</div>
+<div class="example-foot"><a class="source-btn" href="#SRC-DB-02">Authority record</a><a class="source-btn" href="https://www.ana-white.com/woodworking-projects/sawhorse-outdoor-bench" target="_blank" rel="noopener">Original source ↗</a></div></article>
+
+</div></section>
+
+<section id="contrasts"><div class="head"><div class="num">03</div><div><h2>Three compact contrasts worth carrying into the product.</h2><p>The research is deep; the lesson can still be short.</p></div></div>
+<div class="contrastgrid">
+<article class="contrast"><h3>30° ≠ UNIVERSAL A-FRAME</h3><div class="eq">30° ≠ “standard”</div><div class="mini-lines"><div><b>Home Depot:</b> 30° · 2×8 · parallel ends · 32¾ along edge.</div><div><b>This Old House:</b> 25° · 2×6 PT · parallel cuts · 31½ rough cut-list leg.</div></div><p>Do not average them into a generic picnic-table leg.</p></article>
+<article class="contrast"><h3>30° ≠ COMPLETE CUT DEFINITION</h3><div class="eq">30° + direction</div><div class="mini-lines"><div><b>X Bench class A:</b> 30° · ends parallel.</div><div><b>X Bench class B:</b> 30° · ends not parallel.</div></div><p>Same angle number. Different part.</p></article>
+<article class="contrast"><h3>MITER ≠ BEVEL</h3><div class="eq">10° ≠ 10°</div><div class="mini-lines"><div><b>Sawhorse end leg:</b> 10° double bevel.</div><div><b>Other member:</b> 10° angle off square.</div></div><p>The saw orientation and resulting geometry are different facts.</p></article>
+</div></section>
+
+<section id="scope"><div class="head"><div class="num">04</div><div><h2>Other authority still matters—but only inside its scope.</h2><p>A link does not make a source controlling. These sources answer different questions from the named design.</p></div></div>
+<div class="scopegrid">
+<div class="scope"><b>PRODUCT STANDARD · PS 20-25</b><p>Can establish standardized lumber-size meaning. It does not measure the user's actual board or choose an outdoor project geometry.</p><a href="#STD-PS20-02">See record</a></div>
+<div class="scope"><b>MATERIAL SCIENCE · USDA FPL</b><p>Can explain moisture, dimensional movement, durability and preservation. It does not become a named picnic-table cut list.</p><a href="#ENG-FPL-01">See record</a></div>
+<div class="scope"><b>TREATED WOOD / HARDWARE · AWPA + Simpson</b><p>Can govern exposure/use-category and connector/fastener compatibility. It does not supply missing leg angles or bolt offsets.</p><a href="#STD-AWPA-01">AWPA</a> · <a href="#MAN-SIMPSON-01">Simpson</a></div>
+<div class="scope"><b>ACCESSIBILITY / LAW · U.S. Access Board</b><p>Can constrain a covered project in its stated Federal ABA scope. It is not a universal backyard design rule.</p><a href="#LAW-ACCESS-01">See record</a></div>
+<div class="scope"><b>COMMERCIAL PRODUCT · Pilot Rock</b><p>Publishes useful overall/product-system facts. Its public page does not thereby disclose fabrication geometry the manufacturer does not publish.</p><a href="#SRC-AF-06">See record</a></div>
+<div class="scope"><b>MANUFACTURER MANUAL · Dura-Trel</b><p>Publishes strong part lengths and connection topology. Crossed-leg angle remains unknown unless separately published or measured.</p><a href="#SRC-DT-07">See record</a></div>
+</div></section>
+
+<section id="boundary"><div class="head"><div class="num">05</div><div><h2>Authority stops before Store and machine authority begins.</h2><p>The project definition can become trustworthy without pretending to own inventory, process capability or physical release.</p></div></div>
+<div class="boundary">
+<div><h3>THIS PAGE MAY ESTABLISH</h3><ul><li>which family a fact belongs to</li><li>named design/version</li><li>published part geometry</li><li>derived values with visible inputs</li><li>project-specific measurement requirements</li><li>unknown / defer conditions</li></ul></div>
+<div><h3>THIS PAGE DOES NOT CREATE</h3><ul><li>actual stock identity / treatment</li><li>inventory or allocation</li><li>machine/cell capability</li><li>kerf / tooling / postprocessor facts</li><li>payment or commercial acceptance</li><li>machine readiness, release or Cycle Start</li></ul></div>
+</div>
+<div class="deep-link" style="margin-top:16px"><b>The full research remains intact.</b><p>The 23-system matrix, part-level replicability tests, configuration-value tests, family dossiers and source-set discussion stay in the research receipt rather than crowding this page.</p><a href="STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html" target="_blank" rel="opener">Open the full Angled-Frame Research Dossier 0.1 →</a></div>
+</section>
+
+<section id="sources"><div class="head"><div class="num">06</div><div><h2>Complete clickable source register</h2><p>The readable teaching ends above. The full records stay here for technical review. Each source retains its role and limitations; the angled-frame research sources remain expandable rather than being pushed into the main narrative.</p></div></div>
+<div class="source-tabs">
+<div class="source-group"><h3>Core authority / material / law / original Outdoor sources</h3><details class="source-card" id="LAW-ACCESS-01">
+<summary><span class="sid">LAW-ACCESS-01</span><span>U.S. Access Board</span><small>Applicable law / accessibility guidance</small></summary>
+<div class="source-body">
+<h4>Guide to the ABA Accessibility Standards — Chapter 10: Outdoor Developed Areas</h4>
+<div class="meta"><b>Published / updated:</b> Current guidelines issued 2004; outdoor provisions added 2013; page date not stated<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Outdoor developed areas / picnic facilities within stated ABA scope</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Scope: the 2013 outdoor provisions cover trails, picnic/camping facilities, viewing areas, and beach access routes constructed or altered by Federal agencies, or by non-Federal entities on Federal land on behalf of a Federal agency under specified arrangements.</li><li>The page expressly states that these new outdoor provisions are not in DOJ's 2010 ADA Standards and have no legal effect on State/local governments and private entities subject to DOJ ADA regulations.</li><li>Picnic-table clear-ground-space and wheelchair-space technical requirements within that ABA scope.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>A universal backyard picnic-table rule.</li><li>A determination that a particular private, State, local, or commercial installation is legally covered.</li><li>Member cut lengths, angles, hole locations, fasteners, or material selection for any named table.</li></ul></div>
+</div>
+<a class="ext" href="https://www.access-board.gov/aba/guides/chapter-10-outdoor/" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="LAW-ACCESS-02">
+<summary><span class="sid">LAW-ACCESS-02</span><span>U.S. Access Board</span><small>Applicable law / technical requirement</small></summary>
+<div class="source-body">
+<h4>ABA Standards — Chapter 10 Recreation Facilities, §1011.4 Picnic Tables</h4>
+<div class="meta"><b>Published / updated:</b> Underlying outdoor provisions added 2013; page date not stated<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Covered ABA picnic tables</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>At least one 30 × 48 in wheelchair space for each 24 linear ft of usable tabletop perimeter.</li><li>Forward approach with knee and toe clearance under the table.</li><li>Picnic-table top height refers to §902.3; the Access Board guide states 28–34 in above floor/ground.</li><li>36 in clear ground space on all usable sides is explained in the companion guide.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>Whether a specific user's project is in ABA jurisdiction.</li><li>A universal design height for every private table.</li><li>A named DIY plan's structural geometry.</li></ul></div>
+</div>
+<a class="ext" href="https://www.access-board.gov/aba/chapter/ch10/" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="STD-PS20-01">
+<summary><span class="sid">STD-PS20-01</span><span>NIST / U.S. Department of Commerce</span><small>Consensus / product standard administration</small></summary>
+<div class="source-body">
+<h4>Voluntary Product Standards Program</h4>
+<div class="meta"><b>Published / updated:</b> Updated 2026-09-11<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Softwood lumber product standard</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>PS 20-25 is the current DOC American Softwood Lumber Standard; PS 20-20 Revision 1 is listed as superseded.</li><li>DOC Voluntary Product Standards are voluntary unless incorporated into an enforceable legal document such as a contract or code.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>That every piece labeled nominal 2×4 will measure exactly 1.500 × 3.500 in.</li><li>Outdoor durability, treatment use category, connector compatibility, or project geometry.</li></ul></div>
+</div>
+<a class="ext" href="https://www.nist.gov/standardsgov/voluntary-product-standards-program" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="STD-PS20-02">
+<summary><span class="sid">STD-PS20-02</span><span>NIST / U.S. Department of Commerce</span><small>Consensus / product standard</small></summary>
+<div class="source-body">
+<h4>Voluntary Product Standard PS 20-25 — American Softwood Lumber Standard</h4>
+<div class="meta"><b>Published / updated:</b> January 2025; effective January 2025<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Softwood lumber sizes / marking / grading framework</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Table 3 gives nominal and minimum dressed sizes. For Dimension lumber, nominal 2 in thickness corresponds to 1-1/2 in minimum dressed dry and 1-9/16 in minimum dressed green.</li><li>For nominal 4 in width, Table 3 gives 3-1/2 in minimum dressed dry and 3-9/16 in minimum dressed green.</li><li>The standard defines dry lumber below nominal 5 in thickness as maximum 19% moisture content, subject to its stated provisions.</li><li>The standard recognizes dimensional change after dressing with moisture change.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>The measured dimensions of the actual board in the user's project.</li><li>A machine kerf.</li><li>Outdoor treatment category, species choice, structural adequacy, or picnic-table geometry.</li></ul></div>
+</div>
+<a class="ext" href="https://www.nist.gov/document/ps-20-25-final" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="ENG-FPL-01">
+<summary><span class="sid">ENG-FPL-01</span><span>USDA Forest Service, Forest Products Laboratory</span><small>Engineering / material-science reference</small></summary>
+<div class="source-body">
+<h4>Wood Handbook — Wood as an Engineering Material, FPL-GTR-282</h4>
+<div class="meta"><b>Published / updated:</b> 2021<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Wood / wood products</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Authoritative technical background on wood properties, commercial lumber, fastenings, moisture, dimensional change, biodeterioration, and preservation.</li><li>A source family for material behavior that named DIY plans do not establish.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>A particular picnic-table cut list.</li><li>A substitute for project measurements, manufacturer instructions, or applicable law.</li></ul></div>
+</div>
+<a class="ext" href="https://research.fs.usda.gov/treesearch/62200" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="ENG-FPL-02">
+<summary><span class="sid">ENG-FPL-02</span><span>USDA Forest Service, Forest Products Laboratory</span><small>Engineering / material-science reference</small></summary>
+<div class="source-body">
+<h4>Wood Handbook Chapter 4 — Moisture Relations and Physical Properties of Wood</h4>
+<div class="meta"><b>Published / updated:</b> 2021<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Wood moisture / dimensional stability</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Wood is hygroscopic; moisture exchange depends on relative humidity, temperature, and current moisture content.</li><li>Moisture relationships affect dimensional stability, shrinkage, swelling, and performance; some behavior is species dependent.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>One universal shrinkage allowance for every species, grain orientation, dimension, and service condition.</li><li>A reason to silently alter a user-confirmed project dimension.</li></ul></div>
+</div>
+<a class="ext" href="https://research.fs.usda.gov/treesearch/62243" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="ENG-FPL-03">
+<summary><span class="sid">ENG-FPL-03</span><span>USDA Forest Service, Forest Products Laboratory</span><small>Engineering / material-science reference</small></summary>
+<div class="source-body">
+<h4>Wood Handbook Chapter 13 — Drying and Control of Moisture Content and Dimensional Changes</h4>
+<div class="meta"><b>Published / updated:</b> 2021<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Wood drying / service moisture / dimensional change</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Wood tends toward equilibrium with surrounding relative humidity.</li><li>Correct drying, handling, and storage reduce later moisture-content changes and dimensional problems.</li><li>Dimensional-change calculations require relevant material and moisture inputs.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>A single automatic gap or oversize number that can be applied to every outdoor project.</li></ul></div>
+</div>
+<a class="ext" href="https://research.fs.usda.gov/treesearch/62261" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="ENG-FPL-04">
+<summary><span class="sid">ENG-FPL-04</span><span>USDA Forest Service, Forest Products Laboratory</span><small>Engineering / material-science reference</small></summary>
+<div class="source-body">
+<h4>Wood Handbook Chapter 14 — Biodeterioration of Wood</h4>
+<div class="meta"><b>Published / updated:</b> 2021<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Outdoor durability / decay environment</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Wood-degrading organisms depend on service conditions including moisture; protection is required where conditions permit degradation.</li><li>Outdoor durability cannot be inferred from geometry alone.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>The proper preservative, retention, or use category for a specific product without the applicable treatment standard/product information.</li></ul></div>
+</div>
+<a class="ext" href="https://research.fs.usda.gov/treesearch/62262" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="ENG-FPL-05">
+<summary><span class="sid">ENG-FPL-05</span><span>USDA Forest Service, Forest Products Laboratory</span><small>Engineering / material-science reference</small></summary>
+<div class="source-body">
+<h4>Wood Handbook Chapter 15 — Wood Preservatives</h4>
+<div class="meta"><b>Published / updated:</b> 2021<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Preservative-treated wood</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Preservative treatment can increase service life.</li><li>Protection depends on preservative, penetration, retention, species, treatment method, and use requirements.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>That any pressure-treated board is suitable for any exposure.</li><li>Specific connector compatibility without product/treatment/environment evidence.</li></ul></div>
+</div>
+<a class="ext" href="https://research.fs.usda.gov/treesearch/62259" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="STD-AWPA-01">
+<summary><span class="sid">STD-AWPA-01</span><span>American Wood Protection Association (AWPA)</span><small>Consensus / product standard framework</small></summary>
+<div class="source-body">
+<h4>Use Category System</h4>
+<div class="meta"><b>Published / updated:</b> Page date not stated; AWPA states U1 is updated annually<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Preservative-treated wood / expected service conditions</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Use Category is selected from expected service conditions, then product, species, preservative, and treatment requirements are resolved.</li><li>The system distinguishes above-ground and ground-contact hazard/service conditions.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>A picnic-table geometry standard.</li><li>A conclusion that a stock item is compliant without its treatment identification and current U1 requirements.</li></ul></div>
+</div>
+<a class="ext" href="https://awpa.com/standards/ucs" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="STD-AWPA-02">
+<summary><span class="sid">STD-AWPA-02</span><span>American Wood Protection Association (AWPA)</span><small>Consensus-standard currency check</small></summary>
+<div class="source-body">
+<h4>Standards Activity, Updates, and Errata</h4>
+<div class="meta"><b>Published / updated:</b> Current as retrieved 2026-09-19<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> AWPA standard-version control</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>The site identifies the 2026 AWPA Book of Standards as the current cycle and reports no updates or errata at retrieval.</li><li>Version currency must be checked rather than inferred from an older excerpt filename.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>The full technical text of U1.</li><li>A substitute for the current standard when exact retention/product requirements matter.</li></ul></div>
+</div>
+<a class="ext" href="https://awpa.com/standards/activity" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="STD-AWPA-03">
+<summary><span class="sid">STD-AWPA-03</span><span>American Wood Protection Association (AWPA)</span><small>Consensus-standard public guidance</small></summary>
+<div class="source-body">
+<h4>For Homeowners — Treated Wood / Use Categories</h4>
+<div class="meta"><b>Published / updated:</b> Page date not stated; retrieved 2026-09-19<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Treated-wood identification / use category</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Public definitions include UC3A exterior above-ground protected, UC3B exterior above-ground exposed, and UC4A ground contact general use.</li><li>AWPA advises checking the end tag for AWPA U1, Use Category, preservative, retention, and related identification.</li><li>Some treated lumber 2 in or less in thickness may be treated only for above-ground use and may not be appropriate for ground contact.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>The exact treatment of a board that has not been identified.</li><li>A manufacturer-specific fastener prescription.</li></ul></div>
+</div>
+<a class="ext" href="https://awpa.com/info/technical/homeowners" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="MAN-SIMPSON-01">
+<summary><span class="sid">MAN-SIMPSON-01</span><span>Simpson Strong-Tie</span><small>Manufacturer / product-system requirement</small></summary>
+<div class="source-body">
+<h4>FAQ: Preservative-Treated Wood</h4>
+<div class="meta"><b>Published / updated:</b> Page date not stated; retrieved 2026-09-19<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Fasteners/connectors in preservative-treated wood</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Connector and fastener material/coating selection depends on treatment chemistry/retention, environment, and the connector system.</li><li>Simpson describes hot-dip galvanized and stainless options and cautions against mixing galvanized fasteners with stainless connectors.</li><li>For higher exposure, Simpson recommends more corrosion-resistant material choices and directs users to treatment/manufacturer information.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>That 'galvanized' by itself is sufficient for every treated-wood exposure.</li><li>A universal fastener choice independent of product, treatment, retention, and environment.</li></ul></div>
+</div>
+<a class="ext" href="https://www.strongtie.com/products/product-use-information/corrosion-information/pressure-treated-wood-faq" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="PLAN-HD-01">
+<summary><span class="sid">PLAN-HD-01</span><span>The Home Depot</span><small>Named design / published plan</small></summary>
+<div class="source-body">
+<h4>How to Build a Picnic Table</h4>
+<div class="meta"><b>Published / updated:</b> Published 2023-11-08<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Home Depot 6-ft attached-bench A-frame DIY table</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Named design: 6 ft long, 30-1/4 in tall, 30-1/2 in wide.</li><li>Four 2×8 table legs at 32-3/4 in finished length along each edge; start from 37 in boards; 30° lines at both ends; the lines are explicitly required to be parallel.</li><li>Four 2×8 × 72 tabletop slats; four 2×6 × 68 bench slats; two 2×6 × 61 bench supports; three 2×4 × 28-3/4 tabletop supports; related cut-list items.</li><li>Sixteen 1/2 × 3-1/2 in galvanized carriage bolts are listed for that design.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>A universal A-frame geometry or 'standard picnic table.'</li><li>A published 17 in seat height on the cited page.</li><li>A universal bolt-hole datum/offset pattern.</li><li>A detached-bench 16-1/2 in 2×4 leg.</li></ul></div>
+</div>
+<a class="ext" href="https://www.homedepot.com/c/ah/how-to-build-a-picnic-table/9ba683603be9fa5395fab902da03929" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="PLAN-TOH-01">
+<summary><span class="sid">PLAN-TOH-01</span><span>This Old House</span><small>Named design / published plan</small></summary>
+<div class="source-body">
+<h4>A Guide to Building a Picnic Table in 4 Simple Steps / Build It | Picnic Table</h4>
+<div class="meta"><b>Published / updated:</b> Updated 2026-06-01<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Current Tom Silva / Ask This Old House heavy-duty attached-bench A-frame design</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Rough cut list: four 2×6 pressure-treated legs, 31-1/2 in long, 25° cuts on each end.</li><li>Finished tabletop target: 30 in; tabletop thickness basis: 1-1/2 in; article uses a 28-1/2 in leg-height setup measurement while marking parallel 25° cuts.</li><li>Bench target: 17 in; cross-brace reference is marked at 15-1/2 in to account for 1-1/2 in bench thickness.</li><li>Two 3/8 in through holes are drilled at each leg/cross-brace overlap and 5 in carriage bolts are used; the article does not publish a reusable hole-offset-from-leg-end dimension.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>The 28° / 32-1/4 in leg geometry stated in the current Outdoor donor.</li><li>A generic hole pattern that can be transferred to another A-frame or a detached bench.</li><li>A universal picnic-table standard.</li></ul></div>
+</div>
+<a class="ext" href="https://www.thisoldhouse.com/woodworking/how-to-build-a-picnic-table" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="PROD-PILOT-01">
+<summary><span class="sid">PROD-PILOT-01</span><span>Pilot Rock / R.J. Thomas Manufacturing</span><small>Manufacturer / product-system reference</small></summary>
+<div class="source-body">
+<h4>AFT Series — Traditional A-Frame Picnic Table — Using ALL Wood</h4>
+<div class="meta"><b>Published / updated:</b> Page date not stated; retrieved 2026-09-19<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Pilot Rock AFT 6-ft commercial all-wood A-frame</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>6 ft treated-pine AFT table; 30-1/4 in table height and 17-3/4 in seat height, stated as nominal.</li><li>Frame uses pressure-treated #1 Southern Yellow Pine: nominal 4×6 leg posts with 2×4 and 2×6 connecting/support braces.</li><li>Top/seats use nominal 2×10 pressure-treated #1 Southern Yellow Pine.</li><li>Frame is assembled with 3/8 in carriage bolts; top/seats with stainless-steel screws; lumber is precision drilled.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>Leg angle, leg along-member length, or hole-center locations on the public product page.</li><li>A 2×8 leg geometry transferable from Home Depot.</li><li>A 2×6 leg geometry transferable from This Old House.</li></ul></div>
+</div>
+<a class="ext" href="https://www.pilotrock.com/series/picnic-tables/aft-series-traditional-a-frame-picnic-table-using-all-wood/" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="PLAN-MOP-01">
+<summary><span class="sid">PLAN-MOP-01</span><span>MyOutdoorPlans</span><small>Named design / published DIY plan</small></summary>
+<div class="source-body">
+<h4>Picnic Table with Detached Benches Plans</h4>
+<div class="meta"><b>Published / updated:</b> Page date not stated; retrieved 2026-09-19<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> 6-ft all-2×4 picnic table with detached benches</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>Cut list: 4 bench legs at 16-1/2 in, 4 bench supports at 11-1/2 in, and three 72 in 2×4 seat slats per bench notation on the published list.</li><li>Table legs are listed at 26 in.</li><li>The bench-support step instructs pilot holes and 5 in carriage bolts but does not publish leg hole offsets from a TOP datum.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>Eight bench legs for two benches.</li><li>3 in and 7 in hole offsets from TOP.</li><li>A universal detached-bench geometry or structural standard.</li></ul></div>
+</div>
+<a class="ext" href="https://myoutdoorplans.com/furniture/picnic-table-with-detached-benches-plans/" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="REPO-SYO-01">
+<summary><span class="sid">REPO-SYO-01</span><span>Scan-to-Build review repository</span><small>Repository donor / commercial-reference input</small></summary>
+<div class="source-body">
+<h4>stb-start-own-0.10.html at pinned Review commit</h4>
+<div class="meta"><b>Published / updated:</b> Pinned repository state 15488f218044…; inspected 2026-09-19<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Generic Start Your Own donor; locked for this pass</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>The locked donor contains a reference construction-lumber catalog in which the 2×4 96 in entry is $4.18 and the displayed 2×4 dimensions are 3.5 × 1.5 in.</li><li>It is the provenance for the current Outdoor donor's $4.18 stock-price pin.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>An outdoor-material approval, current market quote, inventory, allocation, or production authority.</li><li>A picnic-table design standard.</li><li>Permission to modify Start Your Own in this Stage 0 pass.</li></ul></div>
+</div>
+<a class="ext" href="https://github.com/GeorgePlattDemo/scan-to-build-review/blob/15488f2180441f63e99802bf6b0846bb57cc5cc7/stb-start-own-0.10.html" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details>
+<details class="source-card" id="REPO-OUTDOOR-01">
+<summary><span class="sid">REPO-OUTDOOR-01</span><span>Scan-to-Build review repository</span><small>Repository donor / problem statement</small></summary>
+<div class="source-body">
+<h4>stb-outdoor-build.html at pinned Review commit</h4>
+<div class="meta"><b>Published / updated:</b> Pinned repository state 15488f218044…; inspected 2026-09-19<br/><b>Retrieved:</b> 2026-09-19<br/><b>Scope:</b> Current Outdoor Build donor / audit target</div>
+<div class="twocol">
+<div><h5>SUPPORTED</h5><ul><li>What the current prototype presently asserts, derives, labels, validates, and sends to its modeled Store surface.</li><li>The exact fields audited in the gap register.</li></ul></div>
+<div><h5>NOT ESTABLISHED</h5><ul><li>Independent authority for the geometry or material facts merely because a value is committed in REF.</li><li>Evidence that a Store, machine, or cell can physically perform an operation.</li></ul></div>
+</div>
+<a class="ext" href="https://github.com/GeorgePlattDemo/scan-to-build-review/blob/15488f2180441f63e99802bf6b0846bb57cc5cc7/stb-outdoor-build.html" rel="noopener" target="_blank">Open source ↗</a>
+</div>
+</details></div>
+<div class="source-group"><h3>Angled-frame research bench · 23 design/product systems</h3><details class="src" id="SRC-AF-01"><summary><b>AF-01</b> · The Home Depot · How to Build a Picnic Table — 6-ft A-frame</summary>
+<div><p><b>Source / version:</b> 2023; retrieved 2026-09-19</p><p><b>Family:</b> ATTACHED A-FRAME PICNIC TABLE</p>
+<p><b>Published evidence used:</b> 2×8 legs/top; 2×6 benches/supports; 2×4 supports/braces; 30° leg end lines; Leg 32¾ in finished along each outer edge; Carriage-bolt system listed; assembly instructions; no universal leg-hole offsets extracted</p>
+<p><b>Important limit:</b> Reusable connection-hole offsets; verified transformation rule for changing leg angle/height</p><p><a href="https://www.homedepot.com/c/ah/how-to-build-a-picnic-table/9ba683603be9fa5395fab902da03929" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-AF-02"><summary><b>AF-02</b> · This Old House · Build It | Picnic Table — Tom Silva heavy-duty A-frame</summary>
+<div><p><b>Source / version:</b> Updated 2026-06-01; retrieved 2026-09-19</p><p><b>Family:</b> ATTACHED A-FRAME PICNIC TABLE</p>
+<p><b>Published evidence used:</b> 2×6 PT legs/cross brace; 2×8 KD top/benches; 2×4 cleats/braces; 25° leg cuts; ~20° cross-brace ends; 20° cleat bevels; Leg 31½ in rough cut-list length; 28½ in setup dimension is NOT the same fact; Two 3/8-in through holes at each leg/cross-brace overlap; 5-in carriage bolts in article workflow; offsets from leg end not generalized</p>
+<p><b>Important limit:</b> Reusable hole-center offsets independent of assembly layout; diagonal-brace cut geometry is fit-to-assembly</p><p><a href="https://www.thisoldhouse.com/woodworking/how-to-build-a-picnic-table" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-AF-03"><summary><b>AF-03</b> · Lowe's · How to Build a Picnic Table</summary>
+<div><p><b>Source / version:</b> Published 2024-10-28; retrieved 2026-09-19</p><p><b>Family:</b> ATTACHED A-FRAME PICNIC TABLE</p>
+<p><b>Published evidence used:</b> 2×6 top/seat/supports/legs; 2×4 braces; 65° at each leg end; braces 45°; Legs intentionally cut 1 in longer than needed, then leveled; exact final leg blank length not published in extracted text; Two holes through supports for each leg; carriage bolts; hole-center offsets not published</p>
+<p><b>Important limit:</b> Exact final leg member length; explicit angle datum; reusable bolt offsets</p><p><a href="https://www.lowes.com/n/how-to/how-to-build-picnic-table" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-AF-04"><summary><b>AF-04</b> · Ana White · The Modern Minimal Picnic Table</summary>
+<div><p><b>Source / version:</b> Current page; retrieved 2026-09-19</p><p><b>Family:</b> ATTACHED A-FRAME PICNIC TABLE</p>
+<p><b>Published evidence used:</b> 2×6 primary members; 2×4 aprons/bracing; 2×2 cleats; Legs 10° off square; 45° dogears/bracing; Leg 29 in; end apron 25⅝; seat support 63¾; cross brace 26¼; additional seat support 65⅞; Screw/pocket-hole assembly; exact connection-center dimensions depend on diagrams</p>
+<p><b>Important limit:</b> Full parametric dependency between overall height/foot spread and 10° side frame not published as formulas</p><p><a href="https://www.ana-white.com/woodworking-projects/modern-minimal-picnic-table-free-diy-plans" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-AF-05"><summary><b>AF-05</b> · Construct101 · Traditional Picnic Table Plans</summary>
+<div><p><b>Source / version:</b> Published ~2016; retrieved 2026-09-19</p><p><b>Family:</b> ATTACHED A-FRAME PICNIC TABLE</p>
+<p><b>Published evidence used:</b> 2×6 top, legs, bench supports; 2×4 center/support braces; Legs 23° both ends, same direction; bench-support bottom 45°; braces beveled to drawing; Leg 32 5/16 in; 3-in carriage bolts; countersunk washers/nuts; no text-published hole offsets</p>
+<p><b>Important limit:</b> Hole-center datums; brace-end exact bevel values in text</p><p><a href="https://www.construct101.com/traditional-picnic-table-plans/" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-AF-06"><summary><b>AF-06</b> · Pilot Rock / R.J. Thomas · AFT-6TP Traditional A-Frame — all wood</summary>
+<div><p><b>Source / version:</b> Current; retrieved 2026-09-19</p><p><b>Family:</b> ATTACHED A-FRAME PICNIC TABLE</p>
+<p><b>Published evidence used:</b> PT #1 SYP: nominal 4×6 leg posts; 2×4/2×6 braces; 2×10 top/seats; NOT PUBLISHED on public product page; NOT PUBLISHED on public product page; 3/8-in carriage-bolt frame; stainless screws for top/seats; hole locations not public</p>
+<p><b>Important limit:</b> Leg angle, leg length, hole centers, brace locations/dimensions</p><p><a href="https://www.pilotrock.com/series/picnic-tables/aft-series-traditional-a-frame-picnic-table-using-all-wood/" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DT-01"><summary><b>DT-01</b> · Kreg / The Inspired Workshop · X Base Outdoor Dining Table</summary>
+<div><p><b>Source / version:</b> Current; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED X / SPLAYED TABLE</p>
+<p><b>Published evidence used:</b> 4×4 legs; 2×4 aprons/rails; 2×2 X pieces; 2×6 stretcher; concrete top; Legs 10° off square; long X 52°; short X ends 52°/13°; braces 45°; Leg 29; long X 29½; top short X 12¼; bottom long X 16¼; brace 29⅛; Pocket-hole/screw system; concrete-top/base relationship documented</p>
+<p><b>Important limit:</b> No published parametric equation linking table height/width to X-piece angles; changing those relationships crosses into new authority</p><p><a href="https://learn.kregtool.com/plans/x-base-outdoor-dining-table/" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DT-02"><summary><b>DT-02</b> · Kreg · DIY Outdoor Dining Table</summary>
+<div><p><b>Source / version:</b> Current; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED SPLAYED / TRESTLE TABLE</p>
+<p><b>Published evidence used:</b> 4×4 legs; 2×4 supports/stretchers/braces; 2×6 top; Legs 10° both ends; leg supports 10°; diagonal supports 45°; top frame 45°; Leg 28½; lower support 31; diagonal 28¼; top stretcher 94; bottom 96; Pocket-hole/outdoor screw assembly described</p>
+<p><b>Important limit:</b> Generic rule for changing table height/foot spread while retaining 10° frame relationships</p><p><a href="https://learn.kregtool.com/plans/outdoor-dining-table/" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DT-03"><summary><b>DT-03</b> · Ana White · Sawhorse Outdoor Table</summary>
+<div><p><b>Source / version:</b> Current; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED SAWHORSE / TRESTLE TABLE</p>
+<p><b>Published evidence used:</b> 2×6 primary frame/top; 2×4 braces/supports; 10° BEVEL legs; 45° BEVEL braces; 10° off-square short members; Eight 2×6 legs 27⅜ long-point-to-short-point; 3 members 39½ long-long at 45° bevel; 4 members 7⅞ at 10° off square; Pocket-hole/screw assembly; source has detailed diagrams</p>
+<p><b>Important limit:</b> Crawler text contains an ambiguous cross-support line ('one at 40 and one at 50'); do not promote that wording without checking the source diagram</p><p><a href="https://www.ana-white.com/woodworking-projects/sawhorse-outdoor-table" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DT-04"><summary><b>DT-04</b> · Ana White · Outdoor X Base Table</summary>
+<div><p><b>Source / version:</b> Current; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED X-FRAME TABLE</p>
+<p><b>Published evidence used:</b> 2×6 frame; 2×4; 2×2 stretcher; 1×4 top/supports; Apron ends 45°; X-leg cut geometry is primarily in diagrams; Side apron 61¾; exact X-leg member length requires diagram/cut-list inspection; Screw/glue; stretcher explicitly connects X centers</p>
+<p><b>Important limit:</b> Exact X leg length/angle in accessible text; crossing-hole/fastener datums</p><p><a href="https://www.ana-white.com/woodworking-projects/outdoor-x-base-table" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DT-05"><summary><b>DT-05</b> · Rogue Engineer · X-Leg Herringbone Outdoor Dining Table</summary>
+<div><p><b>Source / version:</b> Original 2015; updated 2026-05-12; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED X-FRAME TABLE</p>
+<p><b>Published evidence used:</b> 4×4 X legs; 2×4 framing; 1×4 herringbone top; Exact X angle not surfaced in extracted text; NOT safely extracted from text; Lap joint explicitly stated; plan graphics contain dimension/cut data</p>
+<p><b>Important limit:</b> Member angle, member length, lap dimensions/center datum in text extraction</p><p><a href="https://rogueengineer.com/diy-x-leg-herringbone-dining-table-plans/" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DT-06"><summary><b>DT-06</b> · Woodshop Diaries · Trestle Table (matching table/bench set)</summary>
+<div><p><b>Source / version:</b> Published ~2020; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED TRESTLE / SPLAYED TABLE</p>
+<p><b>Published evidence used:</b> Treated 4×4 legs; long aprons; top/bottom stretchers; top boards; 7° miter on table legs and decorative ends; Not fully public in extracted article text; Screw-based assembly described; exact hole datums not a published geometry system</p>
+<p><b>Important limit:</b> Public-text member lengths and full dependency rules</p><p><a href="https://www.woodshopdiaries.com/diy-trestle-table-and-bench/" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DT-07"><summary><b>DT-07</b> · Dura-Trel · Model 11126 — 6-ft table with unattached benches (table assembly)</summary>
+<div><p><b>Source / version:</b> Rev B JS 5/2026; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED CROSSED-LEG TABLE</p>
+<p><b>Published evidence used:</b> PVC/vinyl rails and legs with wood reinforcement; table legs 1½ × 5½ × 34; LEG / BRACE ANGLES NOT PUBLISHED; Table leg 34; table angle brace 26½; center cross brace 27; Strong: ¼-20 ×3½ leg bolts, 2¼ bracket bolts; brace reuses bottom leg bolt; center brace screw attachment</p>
+<p><b>Important limit:</b> Leg angle, brace angle, bolt-center offsets from member ends</p><p><a href="https://www.dura-trel.com/application/files/9217/8091/4410/6ft_Picnic_Table_with_Benches.pdf" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DB-01"><summary><b>DB-01</b> · Ana White · X Bench — companion to Outdoor X Base Table</summary>
+<div><p><b>Source / version:</b> Submitted 2011; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED X-FRAME BENCH</p>
+<p><b>Published evidence used:</b> 1×3 X components; 2×2 supports; 2×4/2×6 seat structure; 30° off square across X component set; 19¼; 9¼; 9⅞; 12⅜ for principal X pieces; Screw/glue system; no generalized bolt-center system</p>
+<p><b>Important limit:</b> One compact published formula tying X crossing point to seat height/foot spread</p><p><a href="https://www.ana-white.com/woodworking-projects/x-bench-free-plans-works-x-outdoor-table" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DB-02"><summary><b>DB-02</b> · Ana White · Sawhorse Outdoor Bench</summary>
+<div><p><b>Source / version:</b> Current; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED SAWHORSE / SPLAYED BENCH</p>
+<p><b>Published evidence used:</b> 2×4 frame/supports; 2×6 seat member; 10° double bevel; 10° angle off square; 45° bevel; 25°/17° different bevels on same member; 15½; 15¼; 5⅝; 12½; 32¼ for principal angled members; Pocket-hole/screw assembly with step diagrams</p>
+<p><b>Important limit:</b> Parametric formulas across the multi-angle end frame</p><p><a href="https://www.ana-white.com/woodworking-projects/sawhorse-outdoor-bench" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DB-03"><summary><b>DB-03</b> · Woodshop Diaries · Matching Trestle Bench</summary>
+<div><p><b>Source / version:</b> Published ~2020; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED TRESTLE / SPLAYED BENCH</p>
+<p><b>Published evidence used:</b> Treated 4×4 legs; long aprons; blocks; bottom brace; seat boards; 7° miter; Not fully public in extracted article text; Screw-based; no dimensioned hole pattern</p>
+<p><b>Important limit:</b> Leg finished length, foot spread, angle datum beyond miter setting, exact brace positions</p><p><a href="https://www.woodshopdiaries.com/diy-trestle-table-and-bench/" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DB-04"><summary><b>DB-04</b> · Construct101 · 2×6 Outdoor Bench</summary>
+<div><p><b>Source / version:</b> Published ~2019; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED ANGLED-BACK / SPLAYED BENCH</p>
+<p><b>Published evidence used:</b> 2×6 throughout; Part A: 15° one end / 45° opposite; B/C: 45° both ends same direction; A 22¾; B 21; C 28¾; D 43; E 32; seat/back members 48; Screw/glue; source drawings show assembly but text does not publish connection offsets</p>
+<p><b>Important limit:</b> Explicit ergonomic vs structural angle datum; hole locations</p><p><a href="https://www.construct101.com/2x6-outdoor-bench-plans/" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DB-05"><summary><b>DB-05</b> · Construct101 · DIY 2×4 Outdoor Bench</summary>
+<div><p><b>Source / version:</b> Published ~2022; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED ANGLED-BACK / SPLAYED BENCH</p>
+<p><b>Published evidence used:</b> 2×4 throughout; 15° same-direction, opposite-direction, and one-end cuts depending on part; 26 5/16; 23 7/8; 20 3/16; 30 3/8 for principal angled members; Deck screws/glue; drawings identify assembly; no dimensioned hole system</p>
+<p><b>Important limit:</b> Connection datums; structural transformation rules</p><p><a href="https://www.construct101.com/diy-2x4-outdoor-bench-plans/" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DB-06"><summary><b>DB-06</b> · MyOutdoorPlans · Trail Bench Plans</summary>
+<div><p><b>Source / version:</b> Published ~2016; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED A-FRAME BENCH</p>
+<p><b>Published evidence used:</b> 2×8 legs/seat; 2×3 frame; 60° both ends; Leg 34⅛; Assembly drawings; text connection detail less complete than cut geometry</p>
+<p><b>Important limit:</b> Angle datum, notch dimensions in extracted text, connection offsets</p><p><a href="https://myoutdoorplans.com/furniture/trail-bench-plans/" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DB-07"><summary><b>DB-07</b> · Dura-Trel · Model 11126 — unattached bench assembly</summary>
+<div><p><b>Source / version:</b> Rev B JS 5/2026; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED CROSSED-LEG BENCH</p>
+<p><b>Published evidence used:</b> PVC/vinyl bench rails/legs with wood reinforcement; leg 1½ ×5½ ×15¾; LEG / BRACE ANGLES NOT PUBLISHED; Bench leg 15¾; bench angle brace 24¾; center cross brace 10¼; Strong: ¼-20 ×4-in bolts at crossed-leg/bracket system; pilot holes predrilled; brace center overlap screwed</p>
+<p><b>Important limit:</b> Leg angle; bolt-center offsets from part ends; brace angle</p><p><a href="https://www.dura-trel.com/application/files/9217/8091/4410/6ft_Picnic_Table_with_Benches.pdf" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DB-08"><summary><b>DB-08</b> · Kreg / HomeMadeModern · Outdoor Bench</summary>
+<div><p><b>Source / version:</b> Current; retrieved 2026-09-19</p><p><b>Family:</b> DETACHED SPLAYED BENCH</p>
+<p><b>Published evidence used:</b> 2×10 top/legs; 2×4 supports; 15°; Bench top 51; legs 20; supports 32; Pocket-hole screws; assembly order documented</p>
+<p><b>Important limit:</b> Published hole offsets; generalized height-to-leg-angle transformation</p><p><a href="https://learn.kregtool.com/plans/outdoor-bench/" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-DB-09"><summary><b>DB-09</b> · Kreg / Makers Challenge Central · Modern Outdoor Bench</summary>
+<div><p><b>Source / version:</b> Current; retrieved 2026-09-19</p><p><b>Family:</b> OTHER ANGLED OUTDOOR BENCH</p>
+<p><b>Published evidence used:</b> 2×4 cedar; 20° throughout angled set; Leg 16 3/16; long slat 67½; short slat 48; blocks/fillers per cut list; Pocket-hole and exterior-screw assembly</p>
+<p><b>Important limit:</b> No general formula provided; curved shaping and planter/box relationships add family-specific constraints</p><p><a href="https://learn.kregtool.com/plans/modern-outdoor-bench/" rel="noopener" target="_blank">open ↗</a></p></div></details>
+<details class="src" id="SRC-OT-01"><summary><b>OT-01</b> · Ana White · Picnic Table that Converts to Benches</summary>
+<div><p><b>Source / version:</b> Current; retrieved 2026-09-19</p><p><b>Family:</b> CONVERTIBLE TABLE / BENCH ANGLED SYSTEM</p>
+<p><b>Published evidence used:</b> 2×4 legs/supports; 2×6 seats/tabletops; 10° off square on back/front legs and seat supports; Back leg 28⅞; front leg 16¾; seat support 27; Eight 4-in ×½-in bolts listed; moving assembly makes connection datum especially consequential</p>
+<p><b>Important limit:</b> Complete pivot-center datum and kinematic envelope need direct extraction from plan drawings</p><p><a href="https://ana-white.com/woodworking-projects/picnic-table-converts-benches" rel="noopener" target="_blank">open ↗</a></p></div></details></div>
+</div></section>
+
+<footer class="footer"><b>ONE EVIDENCE SET · TWO READING DEPTHS.</b> This page is the curated authority layer. The companion Build Deck uses this proof; it does not repeat it. No repository, branch, commit, PR, repin, controller code or G-code is created by this artifact.</footer>
+</main></body></html>

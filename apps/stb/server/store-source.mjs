@@ -12,6 +12,7 @@ const execFileAsync = promisify(execFile);
 export const REQUIRED_STORE_FILES = Object.freeze([
   'store-zero-stage2-store.mjs',
   'alcove-store-evaluator.mjs',
+  'cut-package-evaluator.mjs',
   'store-zero-pricing-engine.mjs',
   'd001-stage2-envelope.mjs',
   'd001-travel-standard.mjs',
@@ -149,11 +150,13 @@ export async function loadPinnedStoreModules(root) {
     const alcoveUrl = pathToFileURL(path.join(root, 'alcove-store-evaluator.mjs')).href;
     const pricingUrl = pathToFileURL(path.join(root, 'store-zero-pricing-engine.mjs')).href;
     const envelopeUrl = pathToFileURL(path.join(root, 'd001-stage2-envelope.mjs')).href;
-    const [store, alcove, pricing, envelope] = await Promise.all([
+    const cutPackageUrl = pathToFileURL(path.join(root, 'cut-package-evaluator.mjs')).href;
+    const [store, alcove, pricing, envelope, cutPackage] = await Promise.all([
       import(storeUrl),
       import(alcoveUrl),
       import(pricingUrl),
       import(envelopeUrl),
+      import(cutPackageUrl),
     ]);
 
     const required = [
@@ -176,6 +179,9 @@ export async function loadPinnedStoreModules(root) {
       [pricing, 'CYCLE_MODEL'],
       [envelope, 'envelopeCheck'],
       [envelope, 'D001_STAGE2_ENVELOPE'],
+      [cutPackage, 'evaluateCutPackageStoreRequest'],
+      [cutPackage, 'requestCutPackageStoreEvaluation'],
+      [cutPackage, 'CUT_PACKAGE_STANDARD'],
     ];
     const missing = required
       .filter(([mod, name]) => typeof mod[name] === 'undefined')
@@ -217,6 +223,9 @@ export async function loadPinnedStoreModules(root) {
         CYCLE_MODEL: pricing.CYCLE_MODEL,
         envelopeCheck: envelope.envelopeCheck,
         D001_STAGE2_ENVELOPE: envelope.D001_STAGE2_ENVELOPE,
+        evaluateCutPackageStoreRequest: cutPackage.evaluateCutPackageStoreRequest,
+        requestCutPackageStoreEvaluation: cutPackage.requestCutPackageStoreEvaluation,
+        CUT_PACKAGE_STANDARD: cutPackage.CUT_PACKAGE_STANDARD,
       },
     };
   } catch (error) {

@@ -2,6 +2,7 @@ import { canonicalInchString, canonicalJson, sha256Hex } from './canonical.mjs';
 import {
   ALCOVE_INSERT_DEFINITION,
   BOARD_DEFINITION,
+  CUT_PACKAGE_DEFINITION,
   BOARD_OFFERING_QUERY,
   MAX_STORE_RESPONSE_BYTES,
   PUBLISHED_BOARD_SKU,
@@ -540,6 +541,64 @@ function validateUserDefinedBoardPayload(payload) {
 }
 
 
+const isPlainObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+const onlyKeys = (value, allowed) => Object.keys(value).every((key) => allowed.includes(key));
+const finiteNumber = (value) => typeof value === 'number' && Number.isFinite(value);
+
+// Shape only. The Store decides whether a package can be cut, from which board, how long it takes
+// and what it costs, and whether an item is offered.
+function validateCutPackagePayload(payload) {
+  const bad = (details) => fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, details);
+  const scope = (details) => fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, details);
+  if (!isPlainObject(payload)) return bad('cut-package payload must be an object');
+  if (!onlyKeys(payload, ['definition', 'definitionKind', 'ruleVersion'])) return scope('unexpected cut-package payload fields');
+  if (payload.definitionKind !== CUT_PACKAGE_DEFINITION.kind) return scope('definitionKind must be cut_package.v1');
+  if (payload.ruleVersion !== CUT_PACKAGE_DEFINITION.ruleVersion) return scope('ruleVersion must match the cut-package slice');
+  const definition = payload.definition;
+  if (!isPlainObject(definition)) return bad('cut-package payload requires one definition');
+  if (!onlyKeys(definition, ['configurationId', 'configurationVersion', 'cutPackages', 'itemLines'])) return scope('unexpected cut-package definition fields');
+  for (const key of ['configurationId', 'configurationVersion']) {
+    const error = requireNonemptyString(key, definition[key]);
+    if (error) return bad(error);
+  }
+  const packages = definition.cutPackages ?? [];
+  const items = definition.itemLines ?? [];
+  if (!Array.isArray(packages) || !Array.isArray(items)) return bad('cutPackages and itemLines must be arrays');
+  if (packages.length + items.length === 0) return bad('at least one cut package or item line is required');
+  if (packages.length > CUT_PACKAGE_DEFINITION.maxPackages || items.length > CUT_PACKAGE_DEFINITION.maxItemLines) return scope('too many lines');
+  for (const pkg of packages) {
+    if (!isPlainObject(pkg) || !onlyKeys(pkg, ['packageId', 'material', 'endCut', 'parts'])) return scope('unexpected cut-package fields');
+    if (requireNonemptyString('packageId', pkg.packageId)) return bad('packageId required');
+    if (!isPlainObject(pkg.material) || !onlyKeys(pkg.material, ['species', 'form', 'nominalT', 'nominalW', 'grade'])) return scope('unexpected material fields');
+    if (requireNonemptyString('material.species', pkg.material.species)) return bad('material.species required');
+    if (!finiteNumber(pkg.material.nominalT) || !finiteNumber(pkg.material.nominalW)) return bad('material nominal size must be numbers');
+    for (const key of ['form', 'grade']) {
+      if (pkg.material[key] != null && requireNonemptyString('material.' + key, pkg.material[key])) return bad('material.' + key + ' must be a string');
+    }
+    if (pkg.endCut != null && (!isPlainObject(pkg.endCut) || !onlyKeys(pkg.endCut, ['angleDeg']) || !finiteNumber(pkg.endCut.angleDeg))) return bad('endCut.angleDeg must be a number');
+    if (!Array.isArray(pkg.parts) || pkg.parts.length === 0 || pkg.parts.length > CUT_PACKAGE_DEFINITION.maxPartsPerPackage) return bad('each cut package needs parts');
+    for (const part of pkg.parts) {
+      if (!isPlainObject(part) || !onlyKeys(part, ['partId', 'lengthIn', 'spots'])) return scope('unexpected part fields');
+      if (requireNonemptyString('partId', part.partId)) return bad('partId required');
+      if (!finiteNumber(part.lengthIn) || part.lengthIn <= 0) return bad('part lengthIn must be a positive number');
+      const spots = part.spots ?? [];
+      if (!Array.isArray(spots) || spots.length > CUT_PACKAGE_DEFINITION.maxSpotsPerPart) return bad('spots must be a short array');
+      for (const spot of spots) {
+        if (!isPlainObject(spot) || !onlyKeys(spot, ['featureId', 'xIn', 'acrossWidthRule', 'insetFromEdgeIn'])) return scope('unexpected spot fields');
+        if (!finiteNumber(spot.xIn)) return bad('spot xIn must be a number');
+        if (requireNonemptyString('acrossWidthRule', spot.acrossWidthRule)) return bad('spot acrossWidthRule required');
+        if (spot.insetFromEdgeIn != null && !finiteNumber(spot.insetFromEdgeIn)) return bad('spot insetFromEdgeIn must be a number');
+      }
+    }
+  }
+  for (const line of items) {
+    if (!isPlainObject(line) || !onlyKeys(line, ['lineId', 'storeSku', 'qty'])) return scope('unexpected item-line fields');
+    if (requireNonemptyString('lineId', line.lineId) || requireNonemptyString('storeSku', line.storeSku)) return bad('item lines need lineId and storeSku');
+    if (!Number.isInteger(line.qty) || line.qty <= 0) return bad('item-line qty must be a positive whole number');
+  }
+  return { ok: true, definition, definitionKind: payload.definitionKind, ruleVersion: payload.ruleVersion };
+}
+
 function validateAlcoveInsertPayload(payload) {
   if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
     return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'Alcove payload must be an object');
@@ -983,6 +1042,19 @@ export async function validateWireRequest(body) {
     }
     return { ok: true, requestType: body.requestType, payload, envelope: body };
   }
+  if (body.requestType === STORE_REQUEST_TYPES.CUT_PACKAGE_V1) {
+    if (body.scope !== STORE_SCOPES.CUT_PACKAGE_V1) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'cut-package scope mismatch');
+    }
+    const demandError = requireNonemptyString('demandSignature', body.demandSignature);
+    if (demandError) return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, demandError);
+    if (body.querySignature !== null) {
+      return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'cut-package querySignature must be null');
+    }
+    const payload = validateCutPackagePayload(body.payload);
+    if (!payload.ok) return payload;
+    return { ok: true, requestType: body.requestType, payload, envelope: body };
+  }
   if (body.requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1) {
     if (body.scope !== STORE_SCOPES.ALCOVE_INSERT_V1) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove scope mismatch');
@@ -1216,6 +1288,57 @@ export async function alcoveInsertDemandSignature(payload) {
     scope: STORE_SCOPES.ALCOVE_INSERT_V1,
     definition: payload.definition,
   });
+}
+
+export function cutPackageJobPayload({ configurationId, configurationVersion, cutPackages = [], itemLines = [] }) {
+  return {
+    definition: {
+      configurationId,
+      configurationVersion,
+      cutPackages: structuredClone(cutPackages),
+      itemLines: structuredClone(itemLines),
+    },
+    definitionKind: CUT_PACKAGE_DEFINITION.kind,
+    ruleVersion: CUT_PACKAGE_DEFINITION.ruleVersion,
+  };
+}
+
+export async function cutPackageDemandSignature(payload) {
+  return digestCanonical({
+    definitionKind: payload.definitionKind,
+    ruleVersion: payload.ruleVersion,
+    requestType: STORE_REQUEST_TYPES.CUT_PACKAGE_V1,
+    scope: STORE_SCOPES.CUT_PACKAGE_V1,
+    definition: payload.definition,
+  });
+}
+
+export async function buildCutPackageRequest({
+  requestId,
+  projectId,
+  candidateRevisionId,
+  attemptId,
+  attemptNumber,
+  sentAt,
+  demandSignature,
+  payload,
+}) {
+  return {
+    protocolVersion: STORE_PROTOCOL_VERSION,
+    requestId,
+    projectId,
+    candidateRevisionId,
+    requestType: STORE_REQUEST_TYPES.CUT_PACKAGE_V1,
+    scope: STORE_SCOPES.CUT_PACKAGE_V1,
+    demandSignature,
+    querySignature: null,
+    payloadDigest: await payloadDigest(payload),
+    expectedStorePin: STORE_PIN,
+    attemptId,
+    attemptNumber,
+    sentAt,
+    payload,
+  };
 }
 
 export async function buildUserDefinedBoardRequest({
@@ -1461,8 +1584,21 @@ export function inspectStoreResponse(request, parsed, { httpStatus, byteLength }
     }
   }
   if (
+    request.requestType === STORE_REQUEST_TYPES.CUT_PACKAGE_V1 &&
+    !CUT_PACKAGE_DEFINITION.lineStatuses.includes(parsed.rawEvaluation?.status)
+  ) {
+    return {
+      ok: false,
+      current: false,
+      diagnostic: APP_DIAGNOSTICS.APP_MALFORMED_RESPONSE,
+      reason: 'unknown-aggregate',
+      details: parsed.rawEvaluation?.status ?? null,
+    };
+  }
+  if (
     request.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1 ||
-    request.requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1
+    request.requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1 ||
+    request.requestType === STORE_REQUEST_TYPES.CUT_PACKAGE_V1
   ) {
     const receipt = parsed.evaluationReceipt ?? parsed.rawEvaluation?.evaluationReceipt ?? null;
     if (parsed.rawEvaluation?.freshEvaluation !== true) {

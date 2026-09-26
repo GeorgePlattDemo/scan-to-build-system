@@ -10,9 +10,9 @@ const sandbox={window:{}};
 vm.runInNewContext(contractSource,sandbox,{filename:'stb-store-handoff-contract.js'});
 const contract=sandbox.window.STBStoreHandoffContract;
 
-const STORE_SHA='eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81';
-const INPUT_HASH='8d8c0504a6bd892bfe34c1a588e0f5def1360110aaed438a34f8361d84d1d7b0';
-const RESULT_HASH='27e14bb42776f2d60e64b4f677e4e0bbcafd9a85aa864f1b0ee6860ee3074015';
+const STORE_SHA='fc3f555b8f1f329bcf2dd81fa26995230d12a527';
+const INPUT_HASH='182b55552e6ad778e4f19353a2f2bdca4faa0ba32bf7585b38fab20859c7c626';
+const RESULT_HASH='0de66d1386a51911ba659eaf1237e96a39a708c27af80fd9d1324e099c6189b2';
 
 const exactDemand={
   configurationId:'SYO-USER1-XBRACE',
@@ -97,7 +97,7 @@ assert.match(shell,/source:'start-own'/);
 assert.match(shell,/storeReference:freshStoreReference/);
 assert.match(shell,/stb-proof-handoff-job1/);
 assert.match(shell,/originalShow\.call\(win,'proof-store'\)/);
-assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=ccc85533/);
+assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=897a3aa5/);
 assert.match(shell,/const requestId = nextStoreRequestId\(definition\)/);
 assert.match(shell,/user1RuntimeBridge\.request\(definition\.storeDemand/);
 assert.match(shell,/freshEvaluation\?\.freshEvaluation === true/);
@@ -258,8 +258,8 @@ assert.equal(storeAnswer18.machineService,5.94);
 assert.equal(storeAnswer18.combinedValue,9.07);
 assert.equal(storeAnswer18.estimate.cycle.T_job_min,1.425);
 assert.equal(storeAnswer18.estimate.travel.finalRemainderIn,35.625);
-assert.equal(storeAnswer18.calculationIdentity.inputHash,'3a2684d0e44b026f50ce70612cb75b06d27c1b473b7250aae186e410396cf025');
-assert.equal(storeAnswer18.calculationIdentity.resultHash,'f60502af586fe8c2eaa4aad7637d901796735e0f463a98debc3ff48e4f9118d8');
+assert.equal(storeAnswer18.calculationIdentity.inputHash,'8d823a3ac94d481541c8c9af9e000953845999b2e3a60a79b0de11a754287c36');
+assert.equal(storeAnswer18.calculationIdentity.resultHash,'90b88aaac8a4cd78871098021a62540b84cbf7296346121acdd5a134e9ca77de');
 assert.equal(shell.includes('candidateReference'),false);
 assert.equal(shell.includes('CANDIDATE STORE PIN'),false);
 

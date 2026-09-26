@@ -3,7 +3,7 @@
 
   const CONFIG_URL = new URL('stb-store-runtime.json', document.currentScript.src).href;
   const PROTOCOL_VERSION = 'stb-store-zero-http/1';
-  const EXPECTED_STORE_PIN = 'eb5d6ae7f5e0baa96daf3f8342a94cb2a1d7ac81';
+  const EXPECTED_STORE_PIN = 'fc3f555b8f1f329bcf2dd81fa26995230d12a527';
   const REQUEST_TYPE = 'USER_DEFINED_BOARD_V1';
   const SCOPE = 'USER_DEFINED_BOARD_V1';
   const DEFINITION_KIND = 'user_defined_board.v1';
