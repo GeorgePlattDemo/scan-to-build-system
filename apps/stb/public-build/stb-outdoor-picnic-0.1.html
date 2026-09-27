@@ -320,7 +320,9 @@ const REASONS={
   PART_LONGER_THAN_LONGEST_STOCKED_BOARD:'no board in this wood is long enough',
   PART_NOT_HALF_INCH_UNDER_BOARD:'no board in this wood is long enough',
   NO_OFFERING:'not stocked',NOT_OFFERED:'not offered',
-  STORE_SKU_REQUIRED:'Store Zero can’t yet match this hardware requirement to a stocked item'
+  STORE_SKU_REQUIRED:'Store Zero can’t yet match this hardware requirement to a stocked item',
+  NO_MATCHING_HARDWARE_OFFERING:'Store Zero stocks no hardware that matches this exactly',
+  HARDWARE_REQUIREMENT_INCOMPLETE:'the hardware requirement is incomplete'
 };
 const reasonText=code=>REASONS[code]||code.replace(/_/g,' ').toLowerCase();
 
@@ -426,7 +428,7 @@ function renderBuild(){
   }).join('');
   $('tiers').innerHTML=TIERS.map(t=>{
     const s=tierS[t.key];
-    const price=!ev?pending:s.complete?'+$'+Math.round(s.Q):s.refused[0]?.status==='UNRESOLVED'?'<span class="no">Store can’t match yet</span>':'<span class="no">Not stocked</span>';
+    const price=!ev?pending:s.complete?'+$'+Math.round(s.Q):'<span class="no">Not stocked</span>';
     return `<button type="button" class="opt ${S.tier===t.key?'on':''}" data-tier="${t.key}"><span>${t.label}</span><b>${price}</b></button>`;
   }).join('');
   $('woods').querySelectorAll('[data-wood]').forEach(b=>b.addEventListener('click',()=>{if(S.wood===b.dataset.wood)return;S.wood=b.dataset.wood;askExact()}));
@@ -499,7 +501,7 @@ function renderCall(){
   const wood=WOODS.find(v=>v.key===S.wood),tier=TIERS.find(v=>v.key===S.tier);
   $('call-sub').textContent=`${PLANS[S.plan].title} · ${S.ft} ft · ${wood.label} · ${tier.label}`;
   const rows=w.lines.map(l=>`<tr><td>${groupLabel(l.packageId.split('|')[1])}, cut</td><td>${l.storeSku}</td><td>${l.boards} board${l.boards===1?'':'s'}</td><td>${money(l.Q)}</td></tr>`)
-    .concat(t.lines.map(l=>`<tr><td>Hardware</td><td>${l.storeSku}</td><td>${l.qty}</td><td>${money(l.Q)}</td></tr>`));
+    .concat(t.lines.map(l=>`<tr><td>Hardware</td><td>${l.storeSku}</td><td>${l.packages} × ${l.piecesPerPackage} (${l.piecesSupplied} pcs)</td><td>${money(l.Q)}</td></tr>`));
   $('call-lines').innerHTML=rows.join('');
   $('call-machine').textContent=money(w.machine);
   $('call-total').textContent=money(w.Q+t.Q);

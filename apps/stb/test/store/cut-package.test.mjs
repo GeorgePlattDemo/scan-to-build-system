@@ -99,30 +99,46 @@ test('CUT_PACKAGE_V1 wire gate checks shape only and never answers for the Store
   assert.ok(long.body.rawEvaluation.packages[0].stockLengthIn >= 168);
 });
 
-test('CUT_PACKAGE_V1 hardware requirement lines go to the pinned Store, which answers them itself', async (t) => {
-  await withHost(t);
+test('CUT_PACKAGE_V1 hardware requirement lines are resolved by the pinned Store to its own SKU, packages and price', async (t) => {
+  const { adapter } = await withHost(t);
   const { body } = await send({
     configurationId: 'CUT-PACKAGE-TEST',
     configurationVersion: 'v5',
     cutPackages: [{ packageId: 'P', material: { species: 'syp-treated', nominalT: 2, nominalW: 4, grade: 'ground-contact' }, parts: many('A', 2, 30) }],
     itemLines: [
-      { lineId: 'SCREWS', qty: 48, requirement: { kind: 'wood-screw', gauge: '#10', lengthIn: 2.5, finish: 'coated', unit: 'piece' } },
+      { lineId: 'SCREWS', qty: 100, requirement: { kind: 'wood-screw', gauge: '#10', lengthIn: 2.5, finish: 'coated', unit: 'piece' } },
       { lineId: 'BOLTS', qty: 8, requirement: { kind: 'carriage-bolt', diameterIn: 0.375, lengthIn: 5, finish: 'hot-dip-galvanized', unit: 'piece' } },
+      { lineId: 'NONE', qty: 8, requirement: { kind: 'carriage-bolt', diameterIn: 0.5, lengthIn: 5, finish: 'coated', unit: 'piece' } },
+      { lineId: 'EXACT', storeSku: 'STB-ZERO-HW-COATED-SCR10-2P5-90-001', qty: 2 },
     ],
   });
   assert.ok(body);
   const answer = body.rawEvaluation;
   assert.equal(answer.freshEvaluation, true);
-  // The board comes back with the Store's own offering identity.
+  assert.equal(body.storePin, STORE_PIN);
   assert.equal(answer.packages[0].status, 'SUPPORTABLE');
-  assert.match(answer.packages[0].storeSku, /^STB-ZERO-/);
-  // The Store at this pin resolves hardware only by exact SKU, so it answers requirement lines honestly: unresolved, no price.
-  for (const lineId of ['SCREWS', 'BOLTS']) {
+  for (const [lineId, tier] of [['SCREWS', 'COATED'], ['BOLTS', 'HOT_DIP_GALVANIZED']]) {
     const line = answer.items.find((item) => item.lineId === lineId);
-    assert.equal(line.status, 'UNRESOLVED', lineId);
-    assert.deepEqual(line.reasonCodes, ['STORE_SKU_REQUIRED'], lineId);
-    assert.equal(line.Q ?? null, null, lineId);
+    assert.equal(line.status, 'SUPPORTABLE', lineId);
+    const offering = adapter.modules.findSku(adapter.catalog, line.storeSku);
+    assert.ok(offering && offering.offered, lineId);
+    assert.equal(offering.fastener.tier, tier, lineId);
+    assert.equal(line.piecesPerPackage, offering.fastener.piecesPerPackage, lineId);
+    assert.equal(line.packages, Math.ceil(line.requiredPieces / line.piecesPerPackage), lineId);
+    assert.equal(line.piecesSupplied, line.packages * line.piecesPerPackage, lineId);
+    assert.equal(line.Q, Math.round(offering.sellingPrice * line.packages * 100) / 100, lineId);
   }
+  // 100 screws: the Store packs two 90-piece boxes (180 pieces).
+  const screws = answer.items.find((item) => item.lineId === 'SCREWS');
+  assert.deepEqual([screws.piecesPerPackage, screws.packages, screws.piecesSupplied], [90, 2, 180]);
+  const none = answer.items.find((item) => item.lineId === 'NONE');
+  assert.equal(none.status, 'REFUSED');
+  assert.deepEqual(none.reasonCodes, ['NO_MATCHING_HARDWARE_OFFERING']);
+  assert.equal(none.Q, null);
+  // Exact-SKU lines still work where a project names an exact Store offering on purpose.
+  const exact = answer.items.find((item) => item.lineId === 'EXACT');
+  assert.equal(exact.status, 'SUPPORTABLE');
+  assert.equal(exact.storeSku, 'STB-ZERO-HW-COATED-SCR10-2P5-90-001');
 });
 
 test('CUT_PACKAGE_V1 item lines carry exactly one of storeSku or requirement', async (t) => {

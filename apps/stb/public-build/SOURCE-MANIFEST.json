@@ -125,10 +125,10 @@
     },
     {
       "path": "stb-store-handoff-contract.js",
-      "pass": "outdoor-picnic-store-fc3f555",
-      "blobSha": "bc2e0a7cad3544b4c3ce4ae0e2cf0040dd346222",
+      "pass": "outdoor-store-hardware-resolver",
+      "blobSha": "7cec0e9de96c2d313bdd12d76e7b46185e1c7cb8",
       "bytes": 51918,
-      "reason": "Store repin: the two cached User 1 Store references (16 in, 18 in) refreshed to the exact answers of Store fc3f555b (prices unchanged at $8.54 and $9.07; new calculation hashes because the Store revision changed; Store run 36266986468). test/store/user1-reference-guard.test.mjs fails CI if the cache ever differs from the Store at STORE_PIN."
+      "reason": "Store repin to f3515cc (Store PR #16, hardware requirement resolver): cached User 1 Store references (16 in, 18 in) carry the new pin and the calculation hashes the pinned Store answers; totals unchanged."
     },
     {
       "path": "stb-build-guide-spec.js",
@@ -153,17 +153,17 @@
     },
     {
       "path": "system-build-current.html",
-      "pass": "outdoor-store-boundary",
-      "blobSha": "64a7287e8ac84b2a843345ae19292bf064eff857",
+      "pass": "outdoor-store-hardware-resolver",
+      "blobSha": "19292d499c043d0da6f9c02cd82182b15c8cfe9c",
       "bytes": 218257,
-      "reason": "Cache-buster for the Outdoor page after it stopped naming Store SKUs: hardware is sent as a neutral requirement and bring-your-own is removed."
+      "reason": "Cache-busters for the Outdoor page (hardware sent as a neutral requirement; the Store resolves SKU, packages and price) and for the handoff contract after the Store repin to f3515cc."
     },
     {
       "path": "stb-store-runtime.json",
-      "pass": "outdoor-one-road-cleanup",
-      "blobSha": "26e54c9d4a04a5e325b7cc288565ed7a9b889ff5",
+      "pass": "outdoor-store-hardware-resolver",
+      "blobSha": "a4bbe10479af9f06767226ebd137e84a90a31ee2",
       "bytes": 153,
-      "reason": "Adds storePin, the Store version System is pinned to, so the one shared browser Store client reads the Store address and version from this file; a Store repin changes this file instead of each project page."
+      "reason": "Store repin to f3515cc: pin and cached User 1 reference values updated to the pinned Store."
     }
   ]
 }
