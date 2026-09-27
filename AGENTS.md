@@ -12,6 +12,20 @@ Read [`START-HERE.md`](START-HERE.md) first. Then the capability-bridge bench. T
 - Review (`scan-to-build-review`): frozen public demonstration. Read only. No agent writes to it.
 - Live Store is the System pin (`STORE_PIN` in `apps/stb/shared/contracts.mjs`); Review is historical. Never run a second hosted Store for Review.
 
+## Protected path: System → Railway → Store — do not touch
+
+The live app reaches the hosted Store on Railway at one pinned Store version. That path works. **Do not change it, "tidy" it, upgrade it, or re-point it — not as part of any other task, and not because a newer Store commit exists.** Only the owner changes it, deliberately, in a change that does nothing else.
+
+Hands off, unless the owner has asked for exactly this change:
+
+- `STORE_PIN` in `apps/stb/shared/contracts.mjs` (currently `fc3f555b8f1f329bcf2dd81fa26995230d12a527`)
+- `apps/stb/public-build/stb-store-runtime.json` — the Railway `jobEndpoint` and `storePin`
+- the Store `ref:` in `.github/workflows/d001-travel-integration.yml`
+- `Dockerfile.store-zero` and the `start:hosted-store` script it runs
+- any Railway service, environment variable, or deployment setting
+
+A new commit on Store `main` does **not** mean the pin should move. README and documentation changes never touch these files. If a task seems to require touching them, stop and ask.
+
 ## Rules
 
 - This repository is the working surface. Other repos are pins and donors.
@@ -19,7 +33,7 @@ Read [`START-HERE.md`](START-HERE.md) first. Then the capability-bridge bench. T
 - Review-era exhibit names do not belong in current files.
 - Language gate: owning layer + evidence class + no authority smuggled across a wall.
 - New part against the app = trial protocol + one log row. Assign `APP-CONSTRAINT`, `PART-DEFECT`, `BRIDGE-GAP`, `STORE-PIN`, or `SAFETY`.
-- One-place rule: **OPEN SYSTEM BUILD** (the README button) is the one place to check the app. It shows `apps/stb/public-build/` from System `main`, published automatically after its tests pass. Make every user-facing change in System and check it there. Never make a change in one place and check it somewhere else. A user-facing change is not complete until it is visible through that button.
+- One-place rule: **OPEN SYSTEM BUILD** (the README's ▶ OPEN THE APP button) is the one place to check the app. It shows `apps/stb/public-build/` from System `main`, published automatically after its tests pass. Make every user-facing change in System and check it there. Never make a change in one place and check it somewhere else. A user-facing change is not complete until it is visible through that button.
 - Frozen Review rule: `GeorgePlattDemo/scan-to-build-review` is the frozen earlier demonstration. Do not modify it.
 - Do not emit G-code, remote Cycle Start, or physical-fabrication claims from software results.
 - Do not create extra repositories or extra app folders to “try something.”
