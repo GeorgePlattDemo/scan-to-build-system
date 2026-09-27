@@ -592,22 +592,8 @@ function validateCutPackagePayload(payload) {
     }
   }
   for (const line of items) {
-    if (!isPlainObject(line) || !onlyKeys(line, ['lineId', 'storeSku', 'qty', 'requirement'])) return scope('unexpected item-line fields');
-    if (requireNonemptyString('lineId', line.lineId)) return bad('item lines need lineId');
-    // An item line names an exact Store SKU, or states a neutral requirement for the Store to resolve. Never both.
-    if ((line.storeSku == null) === (line.requirement == null)) return bad('item lines need exactly one of storeSku or requirement');
-    if (line.storeSku != null && requireNonemptyString('storeSku', line.storeSku)) return bad('item-line storeSku must be a non-empty string');
-    if (line.requirement != null) {
-      const req = line.requirement;
-      if (!isPlainObject(req) || !onlyKeys(req, ['kind', 'gauge', 'lengthIn', 'diameterIn', 'finish', 'unit'])) return scope('unexpected item-line requirement fields');
-      if (requireNonemptyString('requirement.kind', req.kind)) return bad('item-line requirement needs kind');
-      for (const key of ['gauge', 'finish', 'unit']) {
-        if (req[key] != null && requireNonemptyString('requirement.' + key, req[key])) return bad('requirement.' + key + ' must be a string');
-      }
-      for (const key of ['lengthIn', 'diameterIn']) {
-        if (req[key] != null && (!finiteNumber(req[key]) || req[key] <= 0)) return bad('requirement.' + key + ' must be a positive number');
-      }
-    }
+    if (!isPlainObject(line) || !onlyKeys(line, ['lineId', 'storeSku', 'qty'])) return scope('unexpected item-line fields');
+    if (requireNonemptyString('lineId', line.lineId) || requireNonemptyString('storeSku', line.storeSku)) return bad('item lines need lineId and storeSku');
     if (!Number.isInteger(line.qty) || line.qty <= 0) return bad('item-line qty must be a positive whole number');
   }
   return { ok: true, definition, definitionKind: payload.definitionKind, ruleVersion: payload.ruleVersion };
