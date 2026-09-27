@@ -125,10 +125,10 @@
     },
     {
       "path": "stb-store-handoff-contract.js",
-      "pass": "outdoor-f3515cc-pairing",
-      "blobSha": "7cec0e9de96c2d313bdd12d76e7b46185e1c7cb8",
+      "pass": "outdoor-picnic-store-fc3f555",
+      "blobSha": "bc2e0a7cad3544b4c3ce4ae0e2cf0040dd346222",
       "bytes": 51918,
-      "reason": "Re-pair System with Store f3515cc (reapplies #81/#82 on top of #84): Store pin, cached User 1 references, Outdoor hardware as requirements resolved by the Store, cache-busters."
+      "reason": "Store repin: the two cached User 1 Store references (16 in, 18 in) refreshed to the exact answers of Store fc3f555b (prices unchanged at $8.54 and $9.07; new calculation hashes because the Store revision changed; Store run 36266986468). test/store/user1-reference-guard.test.mjs fails CI if the cache ever differs from the Store at STORE_PIN."
     },
     {
       "path": "stb-build-guide-spec.js",
@@ -153,17 +153,17 @@
     },
     {
       "path": "system-build-current.html",
-      "pass": "outdoor-f3515cc-pairing",
-      "blobSha": "27938f5034239ccdb43a27d4a7a5703d259eb7dc",
+      "pass": "outdoor-accept-pay-yard-record",
+      "blobSha": "da9b05ea0f1b4d01456cf50dc53eab1154313fd7",
       "bytes": 218294,
-      "reason": "Re-pair System with Store f3515cc (reapplies #81/#82 on top of #84): Store pin, cached User 1 references, Outdoor hardware as requirements resolved by the Store, cache-busters."
+      "reason": "Outdoor tile opens stb-outdoor-picnic-0.1.html and uses the six-step trail nav on its own page only (steps it cannot use yet are inert); old Picnic bridge-gap journey pages and the Outdoor hand-off into Job 1 proof pages removed; loads the shared stb-store-client.js; cache-busters for the updated front door, runtime bridge, client and Outdoor page; Outdoor steps 5 and 6 turn on after its simulated Accept & pay and cut."
     },
     {
       "path": "stb-store-runtime.json",
-      "pass": "outdoor-f3515cc-pairing",
-      "blobSha": "a4bbe10479af9f06767226ebd137e84a90a31ee2",
+      "pass": "outdoor-one-road-cleanup",
+      "blobSha": "26e54c9d4a04a5e325b7cc288565ed7a9b889ff5",
       "bytes": 153,
-      "reason": "Re-pair System with Store f3515cc (reapplies #81/#82 on top of #84): Store pin, cached User 1 references, Outdoor hardware as requirements resolved by the Store, cache-busters."
+      "reason": "Adds storePin, the Store version System is pinned to, so the one shared browser Store client reads the Store address and version from this file; a Store repin changes this file instead of each project page."
     }
   ]
 }
