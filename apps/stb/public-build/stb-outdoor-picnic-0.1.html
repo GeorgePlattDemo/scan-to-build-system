@@ -240,13 +240,13 @@ const WOODS=[
   {key:'cedar-tone',label:'Cedar-tone',species:'syp-treated',grade:'ground-contact-cedartone'},
   {key:'cedar',label:'Cedar',species:'cedar',grade:'S4S'}
 ];
-// Hardware tiers: the customer's choice. The plan names exact Store SKUs; the Store prices them or says no.
+// Hardware finish: the customer's choice. System states the requirement (kind, size, finish, count);
+// the Store decides which offering, if any, satisfies it. System never names a Store SKU.
 const TIERS=[
-  {key:'BYO',label:'Bring your own',code:null},
-  {key:'COATED',label:'Coated',code:'COATED'},
-  {key:'HOTDIP',label:'Galvanized',code:'HOTDIP'},
-  {key:'STAINL',label:'Stainless',code:'STAINL'},
-  {key:'SILICO',label:'Silicon bronze',code:'SILICO'}
+  {key:'COATED',label:'Coated',finish:'coated'},
+  {key:'HOTDIP',label:'Galvanized',finish:'hot-dip-galvanized'},
+  {key:'STAINL',label:'Stainless',finish:'stainless'},
+  {key:'SILICO',label:'Silicon bronze',finish:'silicon-bronze'}
 ];
 const slat=ft=>ft*12-0.5;
 const centered=xs=>xs.map(x=>({xIn:x,acrossWidthRule:'CENTERED_ON_WIDE_FACE'}));
@@ -269,7 +269,7 @@ const PLANS={
       {id:'SUPPORTS',label:'Seat supports',nominal:[2,4],angle:0,parts:many('SUPPORT',2,61)},
       {id:'CLEATS',label:'Cleats',nominal:[2,2],angle:0,parts:[...many('CLEAT-END',2,34.25),...many('CLEAT-MID',1,29.25)]}
     ]},
-    hardware:[{id:'SCR-2P5',sku:'SCR10-2P5-90',pieces:90,need:100,label:'2½ in #10 screws'}]
+    hardware:[{id:'SCR-2P5',kind:'wood-screw',gauge:'#10',lengthIn:2.5,need:100,label:'2½ in #10 screws'}]
   },
   'table-benches':{
     title:'Table + two benches',
@@ -286,9 +286,9 @@ const PLANS={
     ]},
     rows:ft=>[['Table slats',7,'2×4',slat(ft),'square',14],['Bench slats',6,'2×4',slat(ft),'square',12],['Table legs',4,'2×4',26,'square',0],['Table supports',4,'2×4',27.5,'square',0],['Bench legs',8,'2×4',16.5,'square',0],['Bench supports',8,'2×4',11.5,'square',0]],
     hardware:[
-      {id:'SCR-4P5',sku:'SCR10-4P5-50',pieces:50,need:26,label:'4½ in #10 screws'},
-      {id:'SCR-2P5',sku:'SCR10-2P5-90',pieces:90,need:48,label:'2½ in #10 screws'},
-      {id:'BOLT',sku:'CB38-5P0-1',pieces:1,need:8,label:'3/8 × 5 in carriage bolts'}
+      {id:'SCR-4P5',kind:'wood-screw',gauge:'#10',lengthIn:4.5,need:26,label:'4½ in #10 screws'},
+      {id:'SCR-2P5',kind:'wood-screw',gauge:'#10',lengthIn:2.5,need:48,label:'2½ in #10 screws'},
+      {id:'BOLT',kind:'carriage-bolt',diameterIn:0.375,lengthIn:5,need:8,label:'3/8 × 5 in carriage bolts'}
     ]
   }
 };
@@ -307,9 +307,12 @@ function packagesFor(planKey,ft,woodKeys){
 }
 function itemsFor(planKey,tierKeys){
   const itemLines=[];
-  for(const tier of TIERS.filter(t=>t.code&&tierKeys.includes(t.key))){
+  for(const tier of TIERS.filter(t=>tierKeys.includes(t.key))){
     for(const h of PLANS[planKey].hardware){
-      itemLines.push({lineId:tier.key+'|'+h.id,storeSku:`STB-ZERO-HW-${tier.code}-${h.sku}-001`,qty:Math.ceil(h.need/h.pieces)});
+      const requirement={kind:h.kind,lengthIn:h.lengthIn,finish:tier.finish,unit:'piece'};
+      if(h.gauge)requirement.gauge=h.gauge;
+      if(h.diameterIn)requirement.diameterIn=h.diameterIn;
+      itemLines.push({lineId:tier.key+'|'+h.id,qty:h.need,requirement});
     }
   }
   return itemLines;
@@ -323,7 +326,6 @@ function comparisonFor(planKey,ft){
 function exactFor(planKey,ft,woodKey,tierKey){
   const def={configurationId:'OUTDOOR-PICNIC-'+planKey.toUpperCase(),configurationVersion:`${planKey}-${ft}ft-${woodKey}-${tierKey}-v1`,
     cutPackages:packagesFor(planKey,ft,[woodKey]),itemLines:itemsFor(planKey,[tierKey])};
-  if(!def.itemLines.length)delete def.itemLines;
   return def;
 }
 
@@ -347,18 +349,21 @@ function woodSummary(ev,planKey,woodKey,ft){
   };
 }
 function tierSummary(ev,planKey,tierKey){
-  if(tierKey==='BYO')return {complete:true,Q:0,lines:[],refused:[]};
-  const lines=PLANS[planKey].hardware.map(h=>ev.items.find(i=>i.lineId===tierKey+'|'+h.id));
-  const refused=lines.filter(l=>!l||l.status!=='SUPPORTABLE');
+  const hw=PLANS[planKey].hardware;
+  const lines=hw.map(h=>ev.items.find(i=>i.lineId===tierKey+'|'+h.id));
+  const refused=lines.map((l,i)=>[l,hw[i]]).filter(([l])=>!l||l.status!=='SUPPORTABLE');
   return {complete:refused.length===0,lines:lines.filter(l=>l&&l.status==='SUPPORTABLE'),
-    refused:refused.map(l=>({group:l?.storeSku||'',status:l?.status||'MISSING',reason:(l?.reasonCodes||[])[0]||'NO_ANSWER'})),
+    refused:refused.map(([l,h])=>({group:h.label,status:l?.status||'MISSING',reason:(l?.reasonCodes||[])[0]||'NO_ANSWER'})),
     Q:r2(lines.filter(l=>l&&l.status==='SUPPORTABLE').reduce((s,l)=>s+l.Q,0))};
 }
 const REASONS={
   NO_MATCHING_BOARD_OFFERING:'Store Zero doesn’t stock this size in this wood',
   PART_LONGER_THAN_LONGEST_STOCKED_BOARD:'no board in this wood is long enough',
   PART_NOT_HALF_INCH_UNDER_BOARD:'no board in this wood is long enough',
-  NO_OFFERING:'not stocked',NOT_OFFERED:'not offered'
+  NO_OFFERING:'not stocked',NOT_OFFERED:'not offered',
+  STORE_SKU_REQUIRED:'Store Zero can’t yet match this hardware requirement to a stocked item',
+  NO_MATCHING_HARDWARE_OFFERING:'Store Zero stocks no hardware that matches this exactly',
+  HARDWARE_REQUIREMENT_INCOMPLETE:'the hardware requirement is incomplete'
 };
 const reasonText=code=>REASONS[code]||code.replace(/_/g,' ').toLowerCase();
 
@@ -420,7 +425,7 @@ function goStage(stage){
   else if(stage==='record'&&S.order?.cutAt)renderRecord();
 }
 
-// Page 1: each "From" price is the Store's cheapest complete wood, with your own hardware, at 6 ft.
+// Page 1: each "From" price is the Store's cheapest complete wood (cut boards only, before hardware), at 6 ft.
 function renderPlans(){
   $('plans').innerHTML=Object.entries(PLANS).map(([key,p])=>`
     <article class="plan">
@@ -471,7 +476,7 @@ function renderBuild(){
   }).join('');
   $('tiers').innerHTML=TIERS.map(t=>{
     const s=tierS[t.key];
-    const price=t.key==='BYO'?'You supply':!ev?pending:s.complete?'+$'+Math.round(s.Q):'<span class="no">Not stocked</span>';
+    const price=!ev?pending:s.complete?'+$'+Math.round(s.Q):'<span class="no">Not stocked</span>';
     return `<button type="button" class="opt ${S.tier===t.key?'on':''}" data-tier="${t.key}"><span>${t.label}</span><b>${price}</b></button>`;
   }).join('');
   $('woods').querySelectorAll('[data-wood]').forEach(b=>b.addEventListener('click',()=>{if(S.wood===b.dataset.wood)return;S.wood=b.dataset.wood;askExact()}));
@@ -497,7 +502,7 @@ function renderAnswer(){
   const {w,t}=x;
   $('a-wood').textContent=money(w.material);
   $('a-machine').textContent=money(w.machine);
-  $('a-hw').textContent=S.tier==='BYO'?'You supply':t.complete?money(t.Q):'—';
+  $('a-hw').textContent=t.complete?money(t.Q):'—';
   $('a-meta').textContent=`${Math.round(w.minutes)} min on the machine · ${w.spots} screw holes marked · ${w.stubs} stub${w.stubs===1?'':'s'} returned with your kit`;
   const problems=[...w.refused.map(r=>`${groupLabel(r.group)}: ${reasonText(r.reason)}`),...t.refused.map(r=>`${r.group}: ${reasonText(r.reason)}`)];
   if(problems.length){
@@ -544,8 +549,7 @@ function renderCall(){
   const wood=WOODS.find(v=>v.key===S.wood),tier=TIERS.find(v=>v.key===S.tier);
   $('call-sub').textContent=`${PLANS[S.plan].title} · ${S.ft} ft · ${wood.label} · ${tier.label}`;
   const rows=w.lines.map(l=>`<tr><td>${groupLabel(l.packageId.split('|')[1])}, cut</td><td>${l.storeSku}</td><td>${l.boards} board${l.boards===1?'':'s'}</td><td>${money(l.Q)}</td></tr>`)
-    .concat(t.lines.map(l=>`<tr><td>Hardware</td><td>${l.storeSku}</td><td>${l.qty}</td><td>${money(l.Q)}</td></tr>`))
-    .concat(S.tier==='BYO'?['<tr><td>Hardware</td><td>You supply</td><td>—</td><td>—</td></tr>']:[]);
+    .concat(t.lines.map(l=>`<tr><td>Hardware</td><td>${l.storeSku}</td><td>${l.packages} × ${l.piecesPerPackage} (${l.piecesSupplied} pcs)</td><td>${money(l.Q)}</td></tr>`));
   $('call-lines').innerHTML=rows.join('');
   $('call-machine').textContent=money(w.machine);
   $('call-total').textContent=money(w.Q+t.Q);
@@ -567,7 +571,7 @@ function acceptAndPay(){
     title:`${PLANS[S.plan].title} · ${S.ft} ft · ${wood.label} · ${tier.label}`,
     configurationVersion:S.exact.definition.configurationVersion,
     receiptHash:S.exact.receipt.receiptHash,requestId:S.exact.requestId,storePin:S.exact.storePin,evaluatedAt:S.exact.receipt.evaluatedAt,
-    wood:JSON.parse(JSON.stringify(x.w)),hardware:JSON.parse(JSON.stringify(x.t)),byo:S.tier==='BYO',
+    wood:JSON.parse(JSON.stringify(x.w)),hardware:JSON.parse(JSON.stringify(x.t)),
     total:r2(x.w.Q+x.t.Q),acceptedAt:stamp(),paidAt:stamp(),cutAt:null
   };
   renderYard();
@@ -607,8 +611,7 @@ function renderRecord(){
   });
   const stubs=o.wood.lines.reduce((n,l)=>n+(l.stubs||[]).length,0);
   if(stubs)rows.push(`<tr><td>Stubs</td><td>Returned with your kit</td><td>${stubs}</td></tr>`);
-  rows.push(...o.hardware.lines.map(l=>`<tr><td>Hardware</td><td>${l.storeSku}</td><td>${l.qty}</td></tr>`));
-  if(o.byo)rows.push('<tr><td>Hardware</td><td>You supply</td><td>—</td></tr>');
+  rows.push(...o.hardware.lines.map(l=>`<tr><td>Hardware</td><td>${l.storeSku}</td><td>${l.packages} × ${l.piecesPerPackage} (${l.piecesSupplied} pcs)</td></tr>`));
   $('record-kit').innerHTML=rows.join('');
   $('record-timeline').innerHTML=timelineRows(o);
   $('record-ids').textContent=`Order ${o.orderId} · ${o.configurationVersion} · Store ${String(o.storePin).slice(0,7)} · request ${String(o.requestId).slice(0,8)}`;
