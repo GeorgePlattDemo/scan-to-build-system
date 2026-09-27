@@ -92,7 +92,7 @@ test('Outdoor: six trail steps on its own page, exact Store answer per choice, r
     // Six steps, all on the Outdoor page; only "Your idea" usable before a plan is chosen.
     let nav = await navState(base);
     const steps = nav.filter(b => /^\d · /.test(b.label));
-    assert.deepEqual(steps.map(b => b.label.replace(/^\d · /, '')), ['Your idea', 'Make it yours', 'The Store answers', 'Your call', 'We cut it', 'Pick up & build']);
+    assert.deepEqual(steps.map(b => b.label.replace(/^\d · /, '')), ['Your idea', 'The bench', 'The Store answers', 'Your call', 'We cut it', 'Pick up & build']);
     assert.ok(steps.every(b => b.go === 'outdoor-build-live'), JSON.stringify(steps));
     assert.deepEqual(steps.map(b => b.inert), [false, true, true, true, true, true]);
     assert.ok(nav.every(b => /^\d · /.test(b.label) || b.go === 'projects'), 'no buttons into other jobs: ' + JSON.stringify(nav));

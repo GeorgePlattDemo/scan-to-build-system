@@ -11,7 +11,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=bf4090e1"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=80330c3a"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
 <script src="stb-store-handoff-contract.js?v=bc2e0a7c"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
@@ -61,6 +61,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       .dev-build-guide .guide-row b{font-size:11.5px;letter-spacing:0;color:var(--text)}
       .dev-build-guide .guide-row span{font-size:10.5px;line-height:1.4}
       .dev-build-guide .guide-meta{margin-top:auto;padding-top:10px;border-top:1px solid var(--border);display:grid;gap:3px;font:8.5px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text3)}
+      /* Trail rules: the top nav appears only inside a live project, never on Landing, the doors or the Shared Home. */
+      .recovery-nav:not([data-active-project]){display:none!important}
       .recovery-nav .job-nav-context{display:inline-flex;align-items:center;padding:5px 9px;border:1px solid var(--border-accent);border-radius:999px;background:var(--tint);color:var(--accent);font-size:9.5px;font-weight:800;letter-spacing:.06em;white-space:nowrap}
       .s001-v2-intent-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(300px,1.1fr);gap:16px;align-items:start;margin:14px 0}
       .s001-v2-story{font-size:13px;line-height:1.55;margin:10px 0 0}
@@ -128,6 +130,9 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     const storeHandoffContract = window.STBStoreHandoffContract || null;
     const user1RuntimeBridge = window.STBUserDefinedBoardRuntimeBridge || null;
     let captureStartOwnProof = () => {};
+    // Opens a Start-your-own screen ('intent' or 'bench') from anywhere in the shell.
+    // The real switcher is scoped inside the Shared Home block below and assigns itself here.
+    let openStartOwnStage = () => {};
     let pendingSeatView = {mode:'continuous',stage:null};
 
     const home = doc.getElementById('projects');
@@ -175,7 +180,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=8fbe4542"
+                  src="three-frames.html?v=798a80fe"
                 ></iframe>
               </div>
             `;
@@ -184,7 +189,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=8fbe4542';
+            liveFrame.src = 'three-frames.html?v=798a80fe';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -198,6 +203,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
             pendingStartOwnStage = stage === 'bench' ? 'bench' : 'intent';
             pendingStartOwnFocus = focus === 'definition-boundary' ? 'definition-boundary' : null;
           };
+          openStartOwnStage = (stage, focus = null) => showStartOwnStage(stage, focus);
           const proofDecisions = new Set();
           let proofActions = 0;
           const classifyStartOwnDecision = target => {
@@ -1161,7 +1167,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.1.html?v=bc010a18"
+                  src="stb-outdoor-picnic-0.1.html?v=92b45245"
                 ></iframe>
               </div>
             `;
@@ -1836,10 +1842,10 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     const intentRail = intent?.querySelector('.rail');
     if (intentMain) intentMain.innerHTML = `
       <h1>SCAN / INTENT · PLAYHOUSE WINDOW</h1>
-      <p class="sub">Sarah does not need a whole sheet of plywood. She needs the useful parts the sheet can become.</p>
+      <p class="sub">User 1 does not need a whole sheet of plywood. She needs the useful parts the sheet can become.</p>
       <div class="s001-v2-intent-grid">
         <section class="s001-card">
-          <h3>SARAH'S PROJECT</h3>
+          <h3>USER 1'S PROJECT</h3>
           <svg class="s001-source-art" viewBox="0 0 420 300" role="img" aria-label="Small outdoor playhouse with a large arched window marked on the wall">
             <rect width="420" height="300" fill="#eee7da"/>
             <path d="M75 125 L210 42 L345 125" fill="none" stroke="#766652" stroke-width="8" stroke-linejoin="round"/>
@@ -1854,22 +1860,22 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
           <p class="s001-v2-story">She wants a large arched opening in the playhouse wall. She wants the center kept intact enough to take home and may turn it into shutters. She wants the remaining pieces returned too. Hinges and final owner finishing are outside this yard order.</p>
         </section>
         <section class="s001-card">
-          <h3>WHAT SARAH DEFINES</h3>
+          <h3>WHAT USER 1 DEFINES</h3>
           <div class="s001-data">
             <div class="row"><b>WOOD</b><span>48 × 96 in · 1/2 in plywood</span></div>
             <div class="row"><b>OPENING</b><span>36 in wide · 24 in straight · 12 in rise</span></div>
             <div class="row"><b>KEEP CENTER</b><span>Yes · retained by tabs</span></div>
             <div class="row"><b>RETURN REMNANTS</b><span>Yes · do not treat as disposal</span></div>
-            <div class="row"><b>OWNER FINISH</b><span>Sarah trims retained tabs later</span></div>
+            <div class="row"><b>OWNER FINISH</b><span>User 1 trims retained tabs later</span></div>
             <div class="row"><b>HARDWARE</b><span>Not included in this order</span></div>
           </div>
           <div class="s001-v2-callout"><b>The sheet is the input. The outcome is the parts.</b>The scan / intent page keeps the human reason for the job. The next page carries only the material, geometry and operations the system needs.</div>
         </section>
       </div>
-      <div class="s001-boundary">Intent does not create machine motion. Sarah defines the material and features; the machine-facing definition is derived next and remains bounded by the admitted Store envelope.</div>
+      <div class="s001-boundary">Intent does not create machine motion. User 1 defines the material and features; the machine-facing definition is derived next and remains bounded by the admitted Store envelope.</div>
       <div class="btns"><button type="button" data-canonical-go="projects">BACK TO HOME</button><button type="button" data-canonical-go="playhouse-machine">SEE MACHINE DEFINITION →</button></div>
     `;
-    if (intentRail) intentRail.innerHTML = `<p class="hd">BUILD GUIDE</p><p class="goal">Outcome before gadget</p><div class="row"><b>Why this page exists</b><span>Human intent has value here. Sarah describes the result she wants, not machine coordinates.</span></div><div class="row"><b>What carries forward</b><span>Material, dimensions, retained-part intent and requested operations.</span></div>`;
+    if (intentRail) intentRail.innerHTML = `<p class="hd">BUILD GUIDE</p><p class="goal">Outcome before gadget</p><div class="row"><b>Why this page exists</b><span>Human intent has value here. User 1 describes the result she wants, not machine coordinates.</span></div><div class="row"><b>What carries forward</b><span>Material, dimensions, retained-part intent and requested operations.</span></div>`;
 
     let machine = doc.getElementById('playhouse-machine');
     if (!machine) {
@@ -1905,14 +1911,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
               <span><i class="s001-v2-key saw"></i> secondary straight-cut request</span>
               <span><i class="s001-v2-key out"></i> outside current routed field</span>
             </div>
-            <p class="dim">The blue straight-cut lines are shown because Sarah requested them. They are intentionally kept separate from the currently pinned routed S-001 Store envelope.</p>
+            <p class="dim">The blue straight-cut lines are shown because User 1 requested them. They are intentionally kept separate from the currently pinned routed S-001 Store envelope.</p>
           </section>
           <section class="s001-card">
             <h3>BOUNDED GEOMETRY</h3>
             <div class="s001-control"><label for="s001-opening-width">Opening width</label><output id="s001-opening-width-out">36 in</output><input id="s001-opening-width" data-s001-control type="range" min="1" max="48" step="0.5" value="36"></div>
             <div class="s001-control"><label for="s001-straight-height">Straight side height</label><output id="s001-straight-height-out">24 in</output><input id="s001-straight-height" data-s001-control type="range" min="1" max="35" step="0.5" value="24"></div>
             <div class="s001-control"><label for="s001-arch-rise">Arch rise</label><output id="s001-arch-rise-out">12 in</output><input id="s001-arch-rise" data-s001-control type="range" min="1" max="12" step="0.5" value="12"></div>
-            <div class="btns"><button type="button" data-s001-control id="s001-reset">RESET TO SARAH'S 36 / 24 / 12</button></div>
+            <div class="btns"><button type="button" data-s001-control id="s001-reset">RESET TO USER 1'S 36 / 24 / 12</button></div>
             <div class="s001-status">ROUTED PROFILE IS INSIDE CURRENT 48 × 36 REFERENCE FIELD</div>
             <p class="dim" id="s001-geometry-summary"></p>
             <div class="s001-v2-seq">
@@ -1968,7 +1974,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     const review = doc.getElementById('playhouse-review');
     const reviewMain = review?.querySelector('.main');
     if (reviewMain) reviewMain.innerHTML = `
-      <h1>REVIEW · SARAH'S JOB</h1>
+      <h1>REVIEW · USER 1'S JOB</h1>
       <p class="sub">The narrative has become a bounded definition and a Store answer. Review shows the facts without turning unresolved work into capability.</p>
       <div class="s001-v2-order">
         <div><b>PROJECT</b><span>Playhouse arched window</span></div>
@@ -1977,7 +1983,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         <div><b>PRIMARY ROUTE</b><span>SUPPORTABLE · REFERENCE</span></div>
         <div><b>CENTER FEATURE</b><span>Requested · retained separately</span></div>
         <div><b>STRAIGHT CUTS</b><span>2 requested · 18 in from sheet ends · separate path</span></div>
-        <div><b>RETURN MATERIAL</b><span>Center and remnants retained for Sarah</span></div>
+        <div><b>RETURN MATERIAL</b><span>Center and remnants retained for User 1</span></div>
         <div><b>HARDWARE</b><span>Not included</span></div>
       </div>
       <div class="s001-boundary">Confirming this review retains the job definition. It is not payment, reservation, production release, machine readiness, or physical execution authorization.</div>
@@ -2004,11 +2010,11 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     const recordMain = record?.querySelector('.main');
     const recordRail = record?.querySelector('.rail');
     if (recordMain) recordMain.innerHTML = `
-      <h1>SARAH · ORDER / JOURNEY RECORD</h1>
+      <h1>USER 1 · ORDER / JOURNEY RECORD</h1>
       <p class="sub">Only the facts needed to explain what this journey established are retained here.</p>
       <div class="s001-v2-order">
         <div><b>PROJECT</b><span>Playhouse arched window</span></div>
-        <div><b>OWNER</b><span>Sarah · demonstration project</span></div>
+        <div><b>OWNER</b><span>User 1 · demonstration project</span></div>
         <div><b>MATERIAL</b><span>STB-ZERO-PLY-050-48X96-001 · 48 × 96 in · 1/2 in plywood</span></div>
         <div><b>GEOMETRY</b><span id="s001-record-geometry"></span></div>
         <div><b>PRIMARY STORE REQUEST</b><span>SHEET_MODE2_ARCHED_APERTURE_V0</span></div>
@@ -2350,6 +2356,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     }
 
     function syncProofSimulationUI(){
+      applyStartOwnNavState();
       if(proofHandoff?.source!=='start-own') return;
       const sim=ensureProofSimulation();
       if(!sim) return;
@@ -2508,7 +2515,21 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       return true;
     }
 
+    // Trail rule 3: a Start-your-own step that cannot be used yet is shown inert, never a silent no-op.
+    function applyStartOwnNavState(){
+      if(activeJourneyProject!=='start-own') return;
+      const nav=doc.querySelector('.recovery-nav');
+      if(!nav) return;
+      nav.querySelectorAll('button[data-job-project="start-own"]').forEach(button=>{
+        const on=canOpenStartOwnSimulationStage(button.dataset.journeyStage);
+        button.disabled=!on;
+        if(on) button.removeAttribute('aria-disabled');
+        else button.setAttribute('aria-disabled','true');
+      });
+    }
+
     function syncProofHandoff(){
+      applyStartOwnNavState();
       if(!proofHandoff)return;
       const payload=proofHandoff.payload||{};
       const version=proofHandoff.storeHandoff?.versionId||payload.id||payload.versionId||payload.normalizedPart?.versionId||'IDENTIFIED VERSION';
@@ -2650,7 +2671,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         if(proofHandoff?.source==='start-own'){
           selectJourneyProject('start-own');
           originalShow.call(win,'start-own-live');
-          setTimeout(() => showStartOwnStage('bench'),0);
+          setTimeout(() => openStartOwnStage('bench'),0);
           syncJourneyNav('configure');
         } else if(proofHandoff?.source==='outdoor'){
           selectJourneyProject('outdoor');
@@ -2685,25 +2706,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         }
       }
     }, true);
-
-    function addProofLibraryControl(id){
-      const page=doc.getElementById(id);
-      if(!page||page.querySelector('[data-proof-library]'))return;
-      const button=doc.createElement('button');
-      button.type='button';button.className='back';button.dataset.proofLibrary='true';button.textContent='← PROJECT LIBRARY';
-      const backbar=page.querySelector('.backbar');
-      if(backbar){
-        backbar.append(button);
-        return;
-      }
-      const main=page.querySelector(':scope > .main,:scope > .body,:scope > div');
-      if(main){
-        const bar=doc.createElement('div');
-        bar.className='backbar';
-        bar.append(button);
-        main.prepend(bar);
-      }
-    }
 
     ensureProjectJourneyPage('playhouse-request',
       '<p class="stage-tag">5 · REQUEST</p><h1>REQUEST · PLAYHOUSE WINDOW</h1>' +
@@ -2826,7 +2828,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
     // The old Picnic journey pages (a Store bridge gap) are gone: the Outdoor tile's picnic page answers from the live Store.
 
-    ['alcove-capture','alcove-config','store','request','yard','record','window-parts','playhouse-s001','playhouse-machine','playhouse-store','playhouse-review','playhouse-request','playhouse-yard','playhouse-terms','playhouse-result','playhouse-record'].forEach(addProofLibraryControl);
+    // The trail nav carries "← Project Library" on every project page, so no second in-page copy is added.
 
     const originalShow = win.show;
     const QUARANTINED_OUTDOOR_TARGETS = new Set(['picnic-chooser','picnic-config','picnic-store','picnic-review','picnic-request','picnic-yard','picnic-terms','picnic-recap','picnic-record']);
@@ -2905,7 +2907,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
     const START_OWN_NAV_LABELS = Object.freeze({
       scan:'1 · Your idea',
-      configure:'2 · Make it yours',
+      configure:'2 · The bench',
       store:'3 · The Store answers',
       review:'3 · The Store answers',
       request:'4 · Your call',
@@ -2937,7 +2939,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     const TRAIL_NAV_CONTEXT = Object.freeze({
       'start-own':'JOB 1 · START YOUR OWN',
       alcove:'ALCOVE · CRITICAL FIT',
-      outdoor:'OUTDOOR · PICNIC TABLE'
+      outdoor:'OUTDOOR · PICNIC TABLE',
+      playhouse:'PLAYHOUSE · ARCHED WINDOW'
     });
 
     // The Outdoor page reports which steps can be used now; steps it cannot use yet are shown inert.
@@ -3037,12 +3040,17 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         restoreJourneyNav(nav);
         if (activeJourneyProject === 'start-own') {
           wireStartOwnJourneyNav(nav);
+          applyStartOwnNavState();
+        } else if (activeJourneyProject === 'playhouse') {
+          wireTrailJourneyNav(nav, 'playhouse');
         } else if (activeJourneyProject === 'alcove') {
           wireTrailJourneyNav(nav, 'alcove');
         } else if (activeJourneyProject === 'outdoor') {
           wireTrailJourneyNav(nav, 'outdoor');
           applyOutdoorNavState();
         } else if (activeJourneyProject === 'window-seat') {
+          // Window Seat is the one declared exception to the trail rules; it keeps its own nav.
+          nav.dataset.activeProject = 'window-seat';
           ['alcove-review','terms','recap'].forEach(target => {
             const button = nav.querySelector('button[data-go="'+target+'"]');
             if (button) button.hidden = true;
@@ -3134,7 +3142,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       if (projectId === 'start-own' && !canOpenStartOwnSimulationStage(stage)) { syncProofSimulationUI(); return true; }
       if (projectId === 'start-own' && (stage === 'scan' || stage === 'configure')) {
         originalShow.call(win,'start-own-live');
-        setTimeout(() => showStartOwnStage(
+        setTimeout(() => openStartOwnStage(
           stage === 'configure' ? 'bench' : 'intent',
           stage === 'configure' ? 'definition-boundary' : null
         ),0);

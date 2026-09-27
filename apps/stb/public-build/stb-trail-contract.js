@@ -11,7 +11,7 @@
   // Rule 1: one trail, same steps, same order, same labels.
   const STEPS = Object.freeze([
     'Your idea',
-    'Make it yours',
+    'The bench',
     'The Store answers',
     'Your call',
     'We cut it',
