@@ -51,11 +51,11 @@ assert.equal(exact.materialResolution.pricingReferenceSku,'STB-ZERO-SPF-2X4-60-0
 assert.equal(exact.materialResolution.pricingReferenceStockLengthIn,60);
 assert.equal(exact.materialResolution.workpieceLengthIn,60);
 assert.equal(exact.materialResolution.selectionPolicy,'SHORTEST_COMPLETE_STORE_OFFERING');
-assert.equal(exact.source.storePin,'f3515cc3e6c35168b086d103dbe3f5520eebcb91');
+assert.equal(exact.source.storePin,'fc3f555b8f1f329bcf2dd81fa26995230d12a527');
 assert.equal(exact.source.workflowRun,'36266986468');
 assert.equal(exact.source.systemIntegrationPin,null);
-assert.equal(exact.calculationIdentity.inputHash,'8b3278c2e1f77220c0eb67be6d257f46c31bdec0e947f889703834d074b02d26');
-assert.equal(exact.calculationIdentity.resultHash,'3dc22b93e02a0928b8dc1c8633067285ebae0fca11764878226cc90e79b7b8f3');
+assert.equal(exact.calculationIdentity.inputHash,'182b55552e6ad778e4f19353a2f2bdca4faa0ba32bf7585b38fab20859c7c626');
+assert.equal(exact.calculationIdentity.resultHash,'0de66d1386a51911ba659eaf1237e96a39a708c27af80fd9d1324e099c6189b2');
 assert.equal(exact.freshEvaluation,false);
 assert.equal(exact.evaluationReceipt,null);
 
@@ -97,19 +97,19 @@ assert.deepEqual(
     ['STB-ZERO-SPF-2X4-72-001',72,'SUPPORTABLE',null]
   ]
 );
-assert.equal(exact18.source.storePin,'f3515cc3e6c35168b086d103dbe3f5520eebcb91');
+assert.equal(exact18.source.storePin,'fc3f555b8f1f329bcf2dd81fa26995230d12a527');
 assert.equal(exact18.source.systemIntegrationPin,null);
-assert.equal(exact18.calculationIdentity.inputHash,'ed342628c6b9db67f27c93a69a3ebd2a4842233ede44c453962222821138badb');
-assert.equal(exact18.calculationIdentity.resultHash,'cec075b5dc0a63116fe7fe690f2224f61bafc90f58819dd7ad68dced321264f9');
+assert.equal(exact18.calculationIdentity.inputHash,'8d823a3ac94d481541c8c9af9e000953845999b2e3a60a79b0de11a754287c36');
+assert.equal(exact18.calculationIdentity.resultHash,'90b88aaac8a4cd78871098021a62540b84cbf7296346121acdd5a134e9ca77de');
 
 const formal18 = contract.requestUser1StoreEvaluation(exactDemand18,{
   requestId:'JOB1-18-PROMOTED',
-  currentStorePin:'f3515cc3e6c35168b086d103dbe3f5520eebcb91',
+  currentStorePin:'fc3f555b8f1f329bcf2dd81fa26995230d12a527',
   checkedAt:'2026-09-22T20:47:00.000Z'
 });
 assert.equal(formal18.complete,true);
 assert.equal(formal18.freshEvaluation,true);
-assert.equal(formal18.evaluationReceipt.currentStorePin,'f3515cc3e6c35168b086d103dbe3f5520eebcb91');
+assert.equal(formal18.evaluationReceipt.currentStorePin,'fc3f555b8f1f329bcf2dd81fa26995230d12a527');
 assert.equal(contract.sameUser1StoreAnswerIdentity(exact18,formal18),true);
 
 const intermediate = contract.resolveUser1StoreReference({
@@ -127,12 +127,12 @@ assert.equal(intermediate.complete,false);
 
 const formalA = contract.requestUser1StoreEvaluation(exactDemand,{
   requestId:'JOB1-FRESH-A',
-  currentStorePin:'f3515cc3e6c35168b086d103dbe3f5520eebcb91',
+  currentStorePin:'fc3f555b8f1f329bcf2dd81fa26995230d12a527',
   checkedAt:'2026-09-22T18:45:00.000Z'
 });
 const formalB = contract.requestUser1StoreEvaluation(exactDemand,{
   requestId:'JOB1-FRESH-B',
-  currentStorePin:'f3515cc3e6c35168b086d103dbe3f5520eebcb91',
+  currentStorePin:'fc3f555b8f1f329bcf2dd81fa26995230d12a527',
   checkedAt:'2026-09-22T18:46:00.000Z'
 });
 assert.equal(formalA.status,'CURRENT_STORE_REFERENCE_REVALIDATED');
@@ -141,7 +141,7 @@ assert.equal(formalA.freshEvaluation,true);
 assert.equal(formalA.evaluationReceipt.requestId,'JOB1-FRESH-A');
 assert.equal(formalB.evaluationReceipt.requestId,'JOB1-FRESH-B');
 assert.notEqual(formalA.evaluationReceipt.requestId,formalB.evaluationReceipt.requestId);
-assert.equal(formalA.evaluationReceipt.currentStorePin,'f3515cc3e6c35168b086d103dbe3f5520eebcb91');
+assert.equal(formalA.evaluationReceipt.currentStorePin,'fc3f555b8f1f329bcf2dd81fa26995230d12a527');
 assert.equal(formalA.evaluationReceipt.currentStoreMatchesReference,true);
 assert.equal(formalA.evaluationReceipt.machineEnvelopeId,'D001-STAGE2-ENVELOPE-0.3');
 assert.equal(formalA.evaluationReceipt.travelStandardId,'STB-D001-DIMENSIONAL-TRAVEL-0.1');
