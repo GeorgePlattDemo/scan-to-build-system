@@ -32,7 +32,9 @@ function answer(wire) {
   const def = wire.payload.definition;
   const packages = def.cutPackages.map(p => ({
     packageId: p.packageId, status: 'SUPPORTABLE', storeSku: 'FAKE-' + p.packageId, boards: 1, sellingPrice: 6,
-    totals: { material: 6, machine_service: 4, Q: 10 }, Q: 10, time: { T_MACHINE_min: 1 }, spotCount: 0, stubs: [], reasonCodes: [],
+    totals: { material: 6, machine_service: 4, Q: 10 }, Q: 10, time: { T_MACHINE_min: 1 }, spotCount: 0, reasonCodes: [],
+    stubs: [{ boardId: p.packageId + '-B1', stubIn: 3 }],
+    cutPlan: [{ boardId: p.packageId + '-B1', storeSku: 'FAKE-' + p.packageId, stockLengthIn: 96, partsInCutOrder: p.parts.slice(0, 2).map(x => ({ partId: x.partId, lengthIn: x.lengthIn })), stubIn: 3 }],
   }));
   const items = (def.itemLines || []).map(l => ({ ...l, status: 'SUPPORTABLE', sellingPrice: 2, Q: l.qty * 2, reasonCodes: [] }));
   const receipt = { requestId: wire.requestId, freshnessRule: 'STB-STORE-FRESH-EVALUATION-0.1', evaluatedAt: '2026-09-26T00:00:00Z',
@@ -134,6 +136,30 @@ test('Outdoor: six trail steps on its own page, exact Store answer per choice, r
     const receiptText = await outdoor.locator('#call-receipt').innerText();
     assert.ok(receiptText.includes(('receipt-' + exact.requestId).slice(0, 12)), receiptText);
     assert.ok(receiptText.includes('table-benches-16ft-cedar-BYO-v1'), receiptText);
+    assert.equal(await base.evaluate(() => [...document.querySelectorAll('.page.on')].pop()?.id), 'outdoor-build-live');
+
+    // Accept & pay (simulated) -> We cut it -> Pick up & build, all on the Outdoor page, carrying the exact receipt.
+    assert.equal(await outdoor.locator('#accept-pay').isDisabled(), true, 'nothing is paid before accepting');
+    await outdoor.locator('#accept-box').check();
+    await outdoor.locator('#accept-pay').click();
+    await page.waitForTimeout(400);
+    assert.equal(await outdoor.locator('#view-yard').isVisible(), true);
+    assert.match(await outdoor.locator('#yard-timeline').innerText(), new RegExp(('receipt-' + exact.requestId).slice(0, 12)));
+    assert.ok((await outdoor.locator('#yard-boards tr').count()) > 0, 'the cut list comes from the Store answer');
+    nav = await navState(base);
+    assert.deepEqual(nav.filter(b => /^\d · /.test(b.label)).map(b => b.inert), [false, false, false, false, false, true]);
+    await outdoor.locator('#mark-cut').click();
+    await page.waitForTimeout(400);
+    assert.equal(await outdoor.locator('#view-record').isVisible(), true);
+    assert.match(await outdoor.locator('#record-kit').innerText(), /You supply/);
+    nav = await navState(base);
+    assert.deepEqual(nav.filter(b => /^\d · /.test(b.label)).map(b => b.inert), [false, false, false, false, false, false]);
+    await base.locator('.recovery-nav button:visible', { hasText: 'We cut it' }).first().click();
+    await page.waitForTimeout(400);
+    assert.equal(await outdoor.locator('#view-yard').isVisible(), true);
+    await base.locator('.recovery-nav button:visible', { hasText: 'Pick up & build' }).first().click();
+    await page.waitForTimeout(400);
+    assert.equal(await outdoor.locator('#view-record').isVisible(), true);
     assert.equal(await base.evaluate(() => [...document.querySelectorAll('.page.on')].pop()?.id), 'outdoor-build-live');
 
     // "Your idea" returns to the plans, still on the Outdoor page.

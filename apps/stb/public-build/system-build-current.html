@@ -1161,7 +1161,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.1.html?v=9f843e92"
+                  src="stb-outdoor-picnic-0.1.html?v=bc010a18"
                 ></iframe>
               </div>
             `;
@@ -2941,7 +2941,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     });
 
     // The Outdoor page reports which steps can be used now; steps it cannot use yet are shown inert.
-    var outdoorNavState = {planChosen:false, callReady:false};
+    var outdoorNavState = {planChosen:false, callReady:false, paid:false, cut:false};
     function outdoorFrame() {
       return doc.getElementById('outdoor-bench-leg-frame');
     }
@@ -2953,8 +2953,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         configure:outdoorNavState.planChosen,
         store:outdoorNavState.planChosen,
         request:outdoorNavState.callReady,
-        yard:false,
-        record:false
+        yard:outdoorNavState.paid,
+        record:outdoorNavState.cut
       };
       nav.querySelectorAll('button[data-job-project="outdoor"]').forEach(button => {
         const stage = button.dataset.journeyStage;
@@ -2962,14 +2962,18 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         button.disabled = !on;
         if (on) button.removeAttribute('aria-disabled');
         else button.setAttribute('aria-disabled','true');
-        if (stage === 'yard' || stage === 'record') button.title = 'Accept & pay comes next; nothing is cut yet.';
       });
     }
     win.addEventListener('message', function(event) {
       if (event.origin !== win.location.origin) return;
       if (event.source !== outdoorFrame()?.contentWindow) return;
       if (event.data?.type !== 'STB_OUTDOOR_STATE') return;
-      outdoorNavState = {planChosen:event.data.planChosen === true, callReady:event.data.callReady === true};
+      outdoorNavState = {
+        planChosen:event.data.planChosen === true,
+        callReady:event.data.callReady === true,
+        paid:event.data.paid === true,
+        cut:event.data.cut === true
+      };
       applyOutdoorNavState();
     });
 
