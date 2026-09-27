@@ -153,10 +153,10 @@
     },
     {
       "path": "system-build-current.html",
-      "pass": "outdoor-one-road-cleanup",
-      "blobSha": "bcc48f60e21b188f7c07cfd7524131f8858c78b1",
-      "bytes": 218257,
-      "reason": "Outdoor tile opens stb-outdoor-picnic-0.1.html and uses the six-step trail nav on its own page only (steps it cannot use yet are inert); old Picnic bridge-gap journey pages and the Outdoor hand-off into Job 1 proof pages removed; loads the shared stb-store-client.js; cache-busters for the updated front door, runtime bridge, client and Outdoor page."
+      "pass": "outdoor-accept-pay-yard-record",
+      "blobSha": "da9b05ea0f1b4d01456cf50dc53eab1154313fd7",
+      "bytes": 218294,
+      "reason": "Outdoor tile opens stb-outdoor-picnic-0.1.html and uses the six-step trail nav on its own page only (steps it cannot use yet are inert); old Picnic bridge-gap journey pages and the Outdoor hand-off into Job 1 proof pages removed; loads the shared stb-store-client.js; cache-busters for the updated front door, runtime bridge, client and Outdoor page; Outdoor steps 5 and 6 turn on after its simulated Accept & pay and cut."
     },
     {
       "path": "stb-store-runtime.json",

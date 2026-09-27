@@ -79,6 +79,10 @@ tr:last-child td{border-bottom:0}
 .refusals{margin:6px 0 0;padding-left:18px;color:var(--bad);font-size:13px}
 .lines td{font-size:13px}
 .note{color:var(--ink2);font-size:13px}
+.cta.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.timeline{display:grid;gap:6px;margin:4px 0 10px}
+.timeline div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding:4px 0;font-size:14px}
+.timeline b{color:var(--ok)}
 [hidden]{display:none!important}
 @media (max-width:900px){.plans,.build{grid-template-columns:1fr}.answer .grid{grid-template-columns:1fr}.opts{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:520px){.wrap{padding:12px 16px 40px}.opts{grid-template-columns:repeat(2,minmax(0,1fr))}.pill.rule{margin-left:0}th,td{padding:7px 6px}}
@@ -162,10 +166,47 @@ tr:last-child td{border-bottom:0}
       <div class="kv" style="margin-top:12px"><span>Machine work (included in the wood lines)</span><b id="call-machine"></b></div>
       <div class="kv"><span><b>Total</b></span><b class="total" id="call-total" style="font-size:28px;margin:0"></b></div>
       <p class="note" id="call-receipt"></p>
-      <p class="note">Budgetary estimate from the live Store, not a commercial quote. Nothing is cut until you accept and pay; that step comes next.</p>
+      <p class="note">Budgetary estimate from the live Store, not a commercial quote. Nothing is cut until you accept and pay.</p>
+      <label class="note" style="display:flex;gap:8px;align-items:flex-start;margin-top:10px"><input type="checkbox" id="accept-box"> <span>I accept Store Zero’s answer above for exactly this table, and I’m ready to pay. (Demo: payment is simulated; no money moves.)</span></label>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-        <button class="cta" type="button" id="back-build" style="background:var(--card);color:var(--ink);border:1px solid var(--line)">← Change something</button>
-        <button class="cta" type="button" disabled>ACCEPT &amp; PAY (next)</button>
+        <button class="cta ghost" type="button" id="back-build">← Change something</button>
+        <button class="cta" type="button" id="accept-pay" disabled>ACCEPT &amp; PAY →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-yard" hidden>
+    <h1>We cut it</h1>
+    <p class="sub" id="yard-sub"></p>
+    <div class="card">
+      <h3>Paid · in the yard queue</h3>
+      <div class="timeline" id="yard-timeline"></div>
+      <p class="note">SIMULATED: offer, acceptance, payment and the yard queue are a demonstration. The cut list below is Store Zero’s own answer for your exact table.</p>
+    </div>
+    <div class="card">
+      <h3>Cut list, board by board</h3>
+      <table class="lines" aria-label="Cut list"><thead><tr><th>Board</th><th>Store item</th><th>Parts, in cut order</th><th>Stub back</th></tr></thead><tbody id="yard-boards"></tbody></table>
+      <p class="note" id="yard-machine"></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <button class="cta" type="button" id="mark-cut">MARK CUT &amp; READY FOR PICKUP →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-record" hidden>
+    <h1>Pick up &amp; build</h1>
+    <p class="sub" id="record-sub"></p>
+    <div class="card">
+      <h3>Your kit</h3>
+      <table class="lines" aria-label="Kit contents"><thead><tr><th>What</th><th>Details</th><th>Qty</th></tr></thead><tbody id="record-kit"></tbody></table>
+    </div>
+    <div class="card">
+      <h3>Record</h3>
+      <div class="timeline" id="record-timeline"></div>
+      <p class="note" id="record-ids"></p>
+      <p class="note">Build it with the plan and the rule book. SIMULATED: no money moved and no machine ran; the boards, cuts, minutes and prices are Store Zero’s answer.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <button class="cta ghost" type="button" id="start-over">Start another table</button>
       </div>
     </div>
   </section>
@@ -326,7 +367,8 @@ const reasonText=code=>REASONS[code]||code.replace(/_/g,' ').toLowerCase();
 // customer's exact choice; it is the only answer shown as "Store Zero answers" and the only one confirmed.
 const S={view:'plans',plan:null,ft:6,wood:null,tier:null,
   compare:null,compareError:null,compareAsking:false,compareToken:0,
-  exact:null,exactError:null,exactAsking:false,exactToken:0};
+  exact:null,exactError:null,exactAsking:false,exactToken:0,
+  order:null};
 const embedded=window.self!==window.top;
 const $=id=>document.getElementById(id);
 function fmt(n){
@@ -349,20 +391,24 @@ function selectionComplete(){
 function postState(){
   if(!embedded)return;
   window.parent.postMessage({type:'STB_OUTDOOR_STATE',projectId:'outdoor',view:S.view,
-    planChosen:!!S.plan,callReady:!!(S.plan&&selectionComplete())},location.origin);
+    planChosen:!!S.plan,callReady:!!(S.plan&&selectionComplete()),paid:!!S.order,cut:!!S.order?.cutAt},location.origin);
 }
 function show(view){
   S.view=view;
   $('view-plans').hidden=view!=='plans';
   $('view-build').hidden=view!=='build';
   $('view-call').hidden=view!=='call';
+  $('view-yard').hidden=view!=='yard';
+  $('view-record').hidden=view!=='record';
   document.querySelectorAll('.step').forEach(b=>{
     const n=+b.dataset.step;
-    b.classList.toggle('on',(view==='plans'&&n===1)||(view==='build'&&(n===2||n===3))||(view==='call'&&n===4));
+    b.classList.toggle('on',(view==='plans'&&n===1)||(view==='build'&&(n===2||n===3))||(view==='call'&&n===4)||(view==='yard'&&n===5)||(view==='record'&&n===6));
   });
   document.querySelector('.step[data-step="2"]').disabled=!S.plan;
   document.querySelector('.step[data-step="3"]').disabled=!S.plan;
   document.querySelector('.step[data-step="4"]').disabled=!(S.plan&&selectionComplete());
+  document.querySelector('.step[data-step="5"]').disabled=!S.order;
+  document.querySelector('.step[data-step="6"]').disabled=!S.order?.cutAt;
   postState();
 }
 function goStage(stage){
@@ -370,6 +416,8 @@ function goStage(stage){
   else if((stage==='configure')&&S.plan){show('build');window.scrollTo(0,0)}
   else if(stage==='store'&&S.plan){show('build');$('answer').scrollIntoView({block:'center'})}
   else if(stage==='request'&&selectionComplete())renderCall();
+  else if(stage==='yard'&&S.order)renderYard();
+  else if(stage==='record'&&S.order?.cutAt)renderRecord();
 }
 
 // Page 1: each "From" price is the Store's cheapest complete wood, with your own hardware, at 6 ft.
@@ -502,14 +550,75 @@ function renderCall(){
   $('call-machine').textContent=money(w.machine);
   $('call-total').textContent=money(w.Q+t.Q);
   const r=S.exact.receipt;
+  $('accept-box').checked=false;$('accept-pay').disabled=true;
   $('call-receipt').textContent=`Store receipt ${String(r.receiptHash).slice(0,12)} for exactly this table (${S.exact.definition.configurationVersion}) · request ${S.exact.requestId.slice(0,8)} · Store ${String(S.exact.storePin).slice(0,7)} · ${r.evaluatedAt}`;
   show('call');window.scrollTo(0,0);
+}
+
+// ---------- Accept & pay → We cut it → Pick up & build (simulated commerce; the cut list is the Store's answer) ----------
+const stamp=()=>new Date().toISOString();
+const shortId=prefix=>prefix+'-'+crypto.randomUUID().slice(0,8).toUpperCase();
+function acceptAndPay(){
+  const x=exactSummary();
+  if(!x||!selectionComplete()||!$('accept-box').checked)return;
+  const wood=WOODS.find(v=>v.key===S.wood),tier=TIERS.find(v=>v.key===S.tier);
+  S.order={
+    orderId:shortId('ORDER'),paymentId:shortId('SIM-PAY'),
+    title:`${PLANS[S.plan].title} · ${S.ft} ft · ${wood.label} · ${tier.label}`,
+    configurationVersion:S.exact.definition.configurationVersion,
+    receiptHash:S.exact.receipt.receiptHash,requestId:S.exact.requestId,storePin:S.exact.storePin,evaluatedAt:S.exact.receipt.evaluatedAt,
+    wood:JSON.parse(JSON.stringify(x.w)),hardware:JSON.parse(JSON.stringify(x.t)),byo:S.tier==='BYO',
+    total:r2(x.w.Q+x.t.Q),acceptedAt:stamp(),paidAt:stamp(),cutAt:null
+  };
+  renderYard();
+}
+function timelineRows(o){
+  const rows=[
+    ['Store answer',`receipt ${String(o.receiptHash).slice(0,12)} · ${o.evaluatedAt}`],
+    ['Offer accepted',o.acceptedAt],
+    ['Paid (simulated)',`${money(o.total)} · ${o.paymentId}`],
+    ['In the yard queue',`${o.orderId} · position 1`]
+  ];
+  if(o.cutAt)rows.push(['Cut & ready for pickup (simulated)',o.cutAt]);
+  return rows.map(([k,v])=>`<div><span><b>✓</b> ${k}</span><span>${v}</span></div>`).join('');
+}
+function renderYard(){
+  const o=S.order;if(!o)return;
+  $('yard-sub').textContent=o.title+' · '+money(o.total);
+  $('yard-timeline').innerHTML=timelineRows(o);
+  const boards=o.wood.lines.flatMap(l=>(l.cutPlan||[]).map(b=>({...b,group:l.packageId.split('|')[1]})));
+  $('yard-boards').innerHTML=boards.map(b=>`<tr><td>${b.boardId}</td><td>${b.storeSku} (${b.stockLengthIn}")</td><td>${(b.partsInCutOrder||[]).map(p=>p.partId+' '+fmt(p.lengthIn)+'"').join(' → ')}</td><td>${b.stubIn!=null?fmt(b.stubIn)+'"':(b.offcutIn!=null?fmt(b.offcutIn)+'" offcut':'—')}</td></tr>`).join('');
+  $('yard-machine').textContent=`${Math.round(o.wood.minutes)} min on the machine · ${o.wood.spots} screw holes marked · machine work ${money(o.wood.machine)}.`;
+  $('mark-cut').disabled=!!o.cutAt;
+  $('mark-cut').textContent=o.cutAt?'CUT & READY ✓':'MARK CUT & READY FOR PICKUP →';
+  show('yard');window.scrollTo(0,0);
+}
+function markCut(){
+  if(!S.order||S.order.cutAt)return;
+  S.order.cutAt=stamp();
+  renderRecord();
+}
+function renderRecord(){
+  const o=S.order;if(!o||!o.cutAt)return;
+  $('record-sub').textContent=o.title+' · '+money(o.total);
+  const rows=o.wood.lines.map(l=>{
+    const parts=(l.cutPlan||[]).reduce((n,b)=>n+(b.partsInCutOrder||[]).length,0);
+    return `<tr><td>${groupLabel(l.packageId.split('|')[1])}</td><td>${parts} cut parts from ${l.boards} × ${l.storeSku}</td><td>${parts}</td></tr>`;
+  });
+  const stubs=o.wood.lines.reduce((n,l)=>n+(l.stubs||[]).length,0);
+  if(stubs)rows.push(`<tr><td>Stubs</td><td>Returned with your kit</td><td>${stubs}</td></tr>`);
+  rows.push(...o.hardware.lines.map(l=>`<tr><td>Hardware</td><td>${l.storeSku}</td><td>${l.qty}</td></tr>`));
+  if(o.byo)rows.push('<tr><td>Hardware</td><td>You supply</td><td>—</td></tr>');
+  $('record-kit').innerHTML=rows.join('');
+  $('record-timeline').innerHTML=timelineRows(o);
+  $('record-ids').textContent=`Order ${o.orderId} · ${o.configurationVersion} · Store ${String(o.storePin).slice(0,7)} · request ${String(o.requestId).slice(0,8)}`;
+  show('record');window.scrollTo(0,0);
 }
 
 // ---------- Wiring ----------
 if(embedded)document.querySelectorAll('#library,.step').forEach(el=>el.hidden=true);
 $('library').addEventListener('click',()=>show('plans'));
-document.querySelectorAll('.step').forEach(b=>b.addEventListener('click',()=>goStage(['','scan','configure','store','request'][+b.dataset.step]||'')));
+document.querySelectorAll('.step').forEach(b=>b.addEventListener('click',()=>goStage(['','scan','configure','store','request','yard','record'][+b.dataset.step]||'')));
 window.addEventListener('message',event=>{
   // The System shell (the parent frame, or the top window that drives it) may choose the step.
   if(event.origin!==location.origin||(event.source!==window.parent&&event.source!==window.top))return;
@@ -521,9 +630,13 @@ $('longer').addEventListener('click',()=>setLength(S.ft+1));
 $('the-set').addEventListener('click',()=>{const set=PLANS[S.plan].set;const lengthChanged=S.ft!==6;S.wood=set.wood;S.tier=set.tier;S.ft=6;if(lengthChanged)askCompare();askExact()});
 $('confirm').addEventListener('click',()=>{if(selectionComplete())renderCall()});
 $('back-build').addEventListener('click',()=>{show('build');window.scrollTo(0,0)});
+$('accept-box').addEventListener('change',e=>{$('accept-pay').disabled=!(e.target.checked&&selectionComplete())});
+$('accept-pay').addEventListener('click',acceptAndPay);
+$('mark-cut').addEventListener('click',markCut);
+$('start-over').addEventListener('click',()=>{S.order=null;show('plans');window.scrollTo(0,0)});
 
 renderPlans();show('plans');
-window.STBOutdoorPicnic=Object.freeze({version:'0.2',comparisonFor,exactFor,plans:Object.keys(PLANS)});
+window.STBOutdoorPicnic=Object.freeze({version:'0.3',comparisonFor,exactFor,plans:Object.keys(PLANS)});
 })();
 </script>
 </body>
