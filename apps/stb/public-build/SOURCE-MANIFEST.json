@@ -192,6 +192,13 @@
       "blobSha": "798a80fe62bc187a45f12a631827dc132d4e9dc4",
       "bytes": 88410,
       "reason": "Start-your-own bench heading reads \"The bench\"."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "start-own-guide-rail",
+      "blobSha": "020272660b3922c3e0860f5a2d61b3c3157fefdf",
+      "bytes": 219160,
+      "reason": "Start your own shows the Dev Guide rail on the right on every screen, like every other project page (its guide note already said \"Guide uses the rail\"); the page was forced to one column, which pushed the rail below the project. Narrow screens still stack."
     }
   ]
 }
