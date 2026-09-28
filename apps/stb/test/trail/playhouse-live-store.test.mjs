@@ -78,7 +78,7 @@ async function settled(frame) {
     if (s && !s.asking && (s.answer || s.error)) return s;
     await frame.page().waitForTimeout(100);
   }
-  throw new Error('Playhouse never settled on a Store answer');
+  throw new Error('Playhouse never settled on a Store answer: ' + JSON.stringify(await frame.evaluate(() => window.STBPlayhouseLive?.state() ?? null)));
 }
 
 async function setGeometry(frame, { width, straight, rise }) {
@@ -177,7 +177,7 @@ test('an opening past the working field is REFUSED by the Store, with its reason
     assert.equal(state.answer.evaluation.status, 'REFUSED');
     await frame.evaluate(() => window.show('playhouse-store'));
     await frame.page().waitForTimeout(300);
-    assert.match(await frame.locator('#s001-live-reasons').innerText(), /CENTER_WORK_FIELD_EXCEEDED/);
+    assert.match(await frame.locator('#s001-live-reasons').textContent(), /CENTER_WORK_FIELD_EXCEEDED/);
     assert.equal(await frame.locator('#s001-live-q').innerText(), '—');
     const inert = await navInert(frame);
     assert.equal(inert.request, true);

@@ -77,8 +77,12 @@ assert.equal((doctrine.processStepsHtml.match(/class="s"/g)||[]).length,12);
 for(const id of ['playhouse-request','playhouse-yard','playhouse-terms']) assert.ok(shell.includes("ensureProjectJourneyPage('"+id+"'"),'missing '+id);
 assert.match(shell,/CONFIRM THIS VERSION →/);
 assert.match(shell,/REQUEST ≠ ORDER/);
-assert.match(shell,/A mixed answer is still a valid answer/);
-assert.match(shell,/CENTER ROUTE \/ STRAIGHT CUTS[\s\S]*UNRESOLVED/);
+// Playhouse's Store step is the live Store's answer for the current version, never a stored reference answer.
+assert.match(shell,/requestType:S001_REQUEST_TYPE/);
+assert.match(shell,/const S001_REQUEST_TYPE = 'SHEET_PACKAGE_V1'/);
+assert.match(shell,/window\.STBStoreClient/);
+assert.match(shell,/data-s001-needs-supportable/);
+assert.doesNotMatch(shell,/SUPPORTABLE · REFERENCE|\$26\.55|4402abeb6b0299a5b6db2eec85ed04c3b0236bcc|SHEET_MODE2_ARCHED_APERTURE_V0/);
 assert.match(shell,/OFFER[\s\S]*NOT ESTABLISHED/);
 assert.match(shell,/PRODUCTION RELEASE[\s\S]*NOT ESTABLISHED/);
 assert.match(shell,/MACHINE READINESS \/ CYCLE START[\s\S]*NOT ESTABLISHED \/ NOT AUTHORIZED/);
