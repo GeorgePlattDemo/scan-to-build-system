@@ -63,4 +63,4 @@ jobs:
           test/store/sheet-package-at-pin.test.mjs
           test/store/cut-package.test.mjs
           test/store/alcove.test.mjs
-          test/trail/playhouse-live-store.test.mjs
+          test/integration/playhouse-live-store.test.mjs
