@@ -355,6 +355,13 @@
       "blobSha": "fed3ac7d69f6f1025ea9352717261c1c3f2947ef",
       "bytes": 215667,
       "reason": "Window Seat joins the trail: six-step nav from its own stage map, step usability reported by the page (as Outdoor does), iframe points at stb-window-seat-0.8.html; the old guided/continuous seat machinery and its CSS are removed. Cache-buster for the updated dev guide."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-edge-mill-switch",
+      "blobSha": "5b6a2cebc9b977388c7f969c92e51990dbf7b34e",
+      "bytes": 215667,
+      "reason": "Cache-buster for Window Seat 0.8 with its edge-mill switch (off until the Store pin includes the pass-through edge mill)."
     }
   ],
   "retiredFiles": [

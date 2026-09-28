@@ -387,7 +387,7 @@
       <p>Solid ¾ in board only. No plywood, MDF or glued-panel shortcut.</p>
       <p>No joinery, spans or loads invented. The app is not a substitute engineer.</p>
       <p>Intent before inventory. The bench says what’s wanted; the Store says what it can do.</p>
-      <p>Gap: this Store version cuts to length and spots. Mill-to-width stays on the list, unanswered.</p>
+      <p>Mill-to-width goes to the Store once its pin has the edge mill. Until then it stays on the list, unanswered.</p>
     </aside>
   </div>
 </section>
@@ -538,6 +538,9 @@ const FAM=[{k:'pine',n:'Select pine',c:'#D8BE7C'},{k:'poplar',n:'Select poplar',
            {k:'oak',n:'Select red oak',c:'#C4A06A'},{k:'cherry',n:'Select cherry',c:'#A6522C'}];
 const famName=()=>FAM.find(f=>f.k===P.fam).n;
 /* What a “1×8” is: dressed sizes of common 1× boards. Lumber standard, not a Store fact. */
+/* Edge mill: the Store takes a finished width on cut packages from the Store version that adds the
+   pass-through edge mill. Flip this on in the same change that moves System's Store pin to that version. */
+const STORE_EDGE_MILL=false;
 const DRESSED=[{n:2,a:1.5},{n:3,a:2.5},{n:4,a:3.5},{n:6,a:5.5},{n:8,a:7.25},{n:10,a:9.25},{n:12,a:11.25}];
 /* Store merchandise the customer may pick by exact SKU. The Store prices it or says no. */
 const HARDWARE=[
@@ -717,9 +720,10 @@ function buildRequest(def){
   const spots=spotsByRun(def), packages={}, mills=[];
   def.runs.forEach(r=>{
     const b=boardFor(r.w); if(!b)return;
-    if(b.mill!=null&&!mills.some(m=>m.nominalW===b.nominalW&&m.to===b.mill))mills.push({nominalW:b.nominalW,from:b.actual,to:b.mill});
-    const key=groupOf(r.role)+'-1X'+b.nominalW;
-    if(!packages[key])packages[key]={packageId:key,material:{species:P.fam,form:'board',nominalT:1,nominalW:b.nominalW,grade:'select'},endCut:{angleDeg:0},parts:[]};
+    if(b.mill!=null&&!STORE_EDGE_MILL&&!mills.some(m=>m.nominalW===b.nominalW&&m.to===b.mill))mills.push({nominalW:b.nominalW,from:b.actual,to:b.mill});
+    const key=groupOf(r.role)+'-1X'+b.nominalW+(b.mill!=null&&STORE_EDGE_MILL?'-TO-'+String(b.mill).replace('.','P'):'');
+    if(!packages[key]){packages[key]={packageId:key,material:{species:P.fam,form:'board',nominalT:1,nominalW:b.nominalW,grade:'select'},endCut:{angleDeg:0},parts:[]};
+      if(b.mill!=null&&STORE_EDGE_MILL)packages[key].finishedWidthIn=b.mill;}
     const part={partId:r.id,lengthIn:r.len};
     if(spots[r.id]&&spots[r.id].length)part.spots=spots[r.id];
     packages[key].parts.push(part);
@@ -994,6 +998,7 @@ function render(){
   const pick=[];alts.forEach(x=>{if(pick.length<2&&!pick.some(p=>p.depth===x.depth))pick.push(x)});
   $('p-depth').innerHTML=kv('You asked for',inch(P.depth)+' deep')+kv('Made from',P.runs+' × '+inch(def.runW)+' boards')
     +(b?(b.mill==null?'<p style="margin:6px 0 0"><b>Exact board width.</b> Every board is a 1×'+b.nominalW+' as it comes. No milling.</p>'
+      :STORE_EDGE_MILL?'<p style="margin:6px 0 0"><b>Edge-milled to '+inch(b.mill)+'.</b> Each 1×'+b.nominalW+' ('+fmt(b.actual)+' in) runs through the edge mill against the fence before its parts are cut. The Store prices the time.</p>'
       :'<p style="margin:6px 0 0;color:var(--warn)"><b>'+inch(def.runW)+' isn’t a board width.</b> Each 1×'+b.nominalW+' ('+fmt(b.actual)+' in) would be milled to '+inch(b.mill)+'. This Store version cuts to length and spots; it doesn’t take a mill-to-width request yet. So it stays on the list, unanswered, and your call waits.</p>')
       :'<p style="margin:6px 0 0;color:var(--no)"><b>No 1× board is that wide.</b></p>')
     +'<p class="dim" style="margin:6px 0 0">Your number stays yours. These land on board widths exactly, if you want them:</p>'
@@ -1004,6 +1009,7 @@ function render(){
 
   /* request register: nothing drops off the list */
   const reg=[];
+  if(STORE_EDGE_MILL){const b2=boardFor(def.runW);if(b2&&b2.mill!=null)reg.push(['Edge-mill 1×'+b2.nominalW+' boards to '+fmt(b2.mill)+' in wide','the whole board, against the fence, before its parts are cut','SENT','ok'])}
   reg.push(['Cut every part to length',def.runs.length+' boards, in '+req.definition.cutPackages.length+' package'+(req.definition.cutPackages.length===1?'':'s')+' by wood width','SENT','ok']);
   req.mills.forEach(m=>reg.push(['Mill 1×'+m.nominalW+' boards from '+fmt(m.from)+' to '+fmt(m.to)+' in wide','not in this Store version’s request, so the Store can’t answer it yet. Your call waits until it’s answered or you pick a board width.','ASKED · NOT ANSWERED','no']));
   reg.push(['Spot facing for shelf pins',P.spots.on?(P.SH.LEFT+P.SH.RIGHT)*2*P.runs+' spots, '+spotPlacement().label:'off',P.spots.on?'SENT':'OFF',P.spots.on?'ok':'']);
