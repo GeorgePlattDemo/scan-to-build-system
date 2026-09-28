@@ -182,7 +182,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=86826875"
+                  src="three-frames.html?v=d173ace3"
                 ></iframe>
               </div>
             `;
@@ -191,7 +191,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=86826875';
+            liveFrame.src = 'three-frames.html?v=d173ace3';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -839,9 +839,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                 const pickedFeet = pickedBoard / 12;
                 const boardWords = Number.isInteger(pickedFeet) ? pickedFeet+'-foot 2×4' : formatInches(pickedBoard)+' 2×4';
                 setText('stb-bench-price-line', formatInches(demand.finishedLength)+' braces · '+formatDegrees(demand.angleDegrees)+' ends · '
-                  +(storeComplete && totals?.Q != null
-                    ? boardWords+' · $'+Number(totals.Q).toFixed(2)+' all in.'
-                    : 'ask the Store.'));
+                  +(storeComplete ? boardWords+'.' : 'ask the Store.'));
 
                 const svg = childDoc.getElementById('stb-user1-bench-svg');
                 if (svg) {
@@ -887,7 +885,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                 const answerLine = childDoc.getElementById('stb-system-answer');
                 if (answerLine) {
                   answerLine.innerHTML = storeComplete
-                    ? '<b>STORE</b> · exact promoted Store reference matched · '+String(material?.stockLengthIn || demand.definedWorkpieceLengthIn)+' in stock · Q $'+Number(totals.Q).toFixed(2)+' · '+Number(estimate.cycle.T_job_min).toFixed(4)+' modeled min · 3 saw operations · 2 spots · calculation '+String(estimate.calculationIdentity?.resultHash || '').slice(0,12)+'…'
+                    ? '<b>STORE</b> · exact promoted Store reference matched · '+String(material?.stockLengthIn || demand.definedWorkpieceLengthIn)+' in stock · '+Number(estimate.cycle.T_job_min).toFixed(4)+' modeled min · 3 saw operations · 2 spots · calculation '+String(estimate.calculationIdentity?.resultHash || '').slice(0,12)+'…'
                     : '<b>STORE</b> · LIVE STORE EVALUATION REQUIRED · confirm sends this exact definition to Store Zero; no browser-side Store answer is substituted.';
                 }
 
