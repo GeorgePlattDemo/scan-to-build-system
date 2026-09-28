@@ -213,6 +213,20 @@
       "blobSha": "85c7f84c766a5b1959d66570af445de541caa7dd",
       "bytes": 222102,
       "reason": "Job 1 bench: the board heading names the board the Store actually picked (was stuck on 5-FOOT 60 IN); angles and lengths read in people units (tenths of a degree, eighths of an inch) while the definition record keeps full precision; board-swap callout and price line filled from the Store answer; the nav highlight follows the in-page bench button and back link. Cache-buster for the updated bench."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "b047a3ba7deffbf7c3112e42dad345c39950cecb",
+      "bytes": 90145,
+      "reason": "Job 1 bench: \"Want it a little higher?\" moved inside the board frame, directly under the board drawing, so the picture stays upper left and the board visibly changes right above the choice."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "bd802bf971200ec72cfcefc6dd64a51a8cdd87c2",
+      "bytes": 222102,
+      "reason": "Cache-buster for the updated Job 1 bench."
     }
   ]
 }

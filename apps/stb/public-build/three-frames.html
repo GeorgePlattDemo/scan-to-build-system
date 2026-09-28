@@ -218,27 +218,6 @@
   <div class="bench-head"><h1>The bench</h1><p>The intent is the reference. The board is the work User 1 defined from it.</p></div>
   <div class="bench-intent-slot" id="stb-bench-intent-slot"></div>
 
-  <div class="bench-panel bench-higher" id="stb-bench-controls">
-    <p class="kicker">One change. Same span.</p>
-    <h2>Want it a little higher?</h2>
-    <p class="lede">Same footprint, same two parts. Longer braces stand taller and the end cuts get a little shallower. We work out the angle and the drill spot — you just pick.</p>
-    <div class="higher-choices">
-      <button type="button" class="on" data-length="16">16 IN · AS DRAWN<span>stands about 13⅞ in tall · 30° ends</span></button>
-      <button type="button" data-length="18">18 IN · A LITTLE HIGHER<span>stands about 16⅛ in tall · 26.4° ends</span></button>
-    </div>
-    <div class="control higher-exact">
-      <b>OR TYPE ANY LENGTH FROM 16 TO 18 IN</b>
-      <span class="value" id="stb-config-length-value">16 in braces · stands about 13⅞ in · 30° ends</span>
-      <input id="stb-config-length" type="number" min="16" max="18" step="0.125" value="16" inputmode="decimal" aria-describedby="stb-config-geometry-note stb-config-boundary-note">
-      <div id="stb-config-boundary-note" hidden style="margin-top:10px;padding:9px 10px;border:1px solid #b63f35;border-radius:7px;background:#fff0ee;color:#8d261f;font-size:11px;font-weight:700">
-        OUTSIDE THIS DEMO RANGE · Enter 16.000 through 18.000 in, or reset the demo.
-      </div>
-      <button id="stb-config-reset" type="button" hidden style="margin-top:8px">RESET TO 16 IN</button>
-    </div>
-    <p class="bench-price-line" id="stb-bench-price-line">Change it and the Store answers again.</p>
-    <p class="fine" id="stb-config-geometry-note">The math: both keep the same 8.000 in horizontal span. 16.000 in → 30.000° end cuts. 18.000 in → 26.388° end cuts.</p>
-  </div>
-
   <div class="frame" id="stb-user1-bench">
     <div class="frame-tab">THE SAME BOARD, ON THE BENCH</div>
     <div class="frame-in">
@@ -334,6 +313,26 @@
           </g>
         </g>
       </svg>
+      </div>
+      <div class="bench-panel bench-higher" id="stb-bench-controls">
+        <p class="kicker">One change. Same span.</p>
+        <h2>Want it a little higher?</h2>
+        <p class="lede">Same footprint, same two parts. Longer braces stand taller and the end cuts get a little shallower. We work out the angle and the drill spot — you just pick.</p>
+        <div class="higher-choices">
+          <button type="button" class="on" data-length="16">16 IN · AS DRAWN<span>stands about 13⅞ in tall · 30° ends</span></button>
+          <button type="button" data-length="18">18 IN · A LITTLE HIGHER<span>stands about 16⅛ in tall · 26.4° ends</span></button>
+        </div>
+        <div class="control higher-exact">
+          <b>OR TYPE ANY LENGTH FROM 16 TO 18 IN</b>
+          <span class="value" id="stb-config-length-value">16 in braces · stands about 13⅞ in · 30° ends</span>
+          <input id="stb-config-length" type="number" min="16" max="18" step="0.125" value="16" inputmode="decimal" aria-describedby="stb-config-geometry-note stb-config-boundary-note">
+          <div id="stb-config-boundary-note" hidden style="margin-top:10px;padding:9px 10px;border:1px solid #b63f35;border-radius:7px;background:#fff0ee;color:#8d261f;font-size:11px;font-weight:700">
+            OUTSIDE THIS DEMO RANGE · Enter 16.000 through 18.000 in, or reset the demo.
+          </div>
+          <button id="stb-config-reset" type="button" hidden style="margin-top:8px">RESET TO 16 IN</button>
+        </div>
+        <p class="bench-price-line" id="stb-bench-price-line">Change it and the Store answers again.</p>
+        <p class="fine" id="stb-config-geometry-note">The math: both keep the same 8.000 in horizontal span. 16.000 in → 30.000° end cuts. 18.000 in → 26.388° end cuts.</p>
       </div>
       <div class="specrow">
         <div class="spec"><b>DEFINED WORKPIECE</b><span id="stb-bench-workpiece-spec">2×4 · 60 in</span></div>
