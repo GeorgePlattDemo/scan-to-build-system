@@ -2,7 +2,7 @@
 
 **Status:** stable post-app working surface  
 **Owner:** Application  
-**Current downstream Store pin:** `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a`
+**Downstream Store version:** recorded once in [`../../docs/project/VERIFICATION-REGISTER.md`](../../docs/project/VERIFICATION-REGISTER.md) and [`../../START-HERE.md`](../../START-HERE.md).
 
 This folder is the working bucket for the demand side of Scan-to-Build: how a person brings what they know into the application and reaches an attributable project definition.
 
@@ -113,7 +113,7 @@ Sarah remains a donor/prototype source only. No missing current requirement is t
 
 ## Sources
 
-Current readers start with `../../docs/application/CONTROLLING-SOURCE-POINTERS.md` and the current System application tree at `../../apps/stb/`.
+Current readers start with `../../provenance/SOURCE-PINS.md` and the current System application tree at `../../apps/stb/`.
 
 Historical source: transferred app `GeorgePlattDemo/grok-file@4595b4785a2686486e477ce2e70fb3f476285a8d`; `STB-SEMANTIC-BOUNDARIES-0.1.md` at that transferred-app pin; frozen application roadmap `985db87a707bd454d7c58419e2cf4d884f00cded`; entry/intake contract `2d80b5a7b0e7687c425e100bfa0ff3a833166d42` (**ADMIT AFTER REWRITE** because its embedded Store pin is stale relative to the accepted app). These are provenance/history, not current System authority.
 

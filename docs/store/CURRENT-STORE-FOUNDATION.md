@@ -1,7 +1,7 @@
 # Current Store Foundation
 
 **Current Store owner source:** `GeorgePlattDemo/scan-to-build-store`  
-**Current Stage-2 pin consumed by the accepted app:** `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a`
+**Store version the app calls:** recorded once in [`../project/VERIFICATION-REGISTER.md`](../project/VERIFICATION-REGISTER.md) and [`../../START-HERE.md`](../../START-HERE.md), not repeated here.
 
 This page records the Store boundary used by current post-app work. It does not replace the Store source documents.
 
@@ -118,4 +118,4 @@ For each added material/SKU/source path, preserve:
 - fulfillment meaning;
 - explicit unavailable/unresolved/refused paths.
 
-For each added capability, Store gets only the bounded declaration it needs. Detailed mechanics stay under `work/machines/engineering/`.
+For each added capability, Store gets only the bounded declaration it needs. Detailed mechanics stay in Program `research/machine-development/engineering/`.

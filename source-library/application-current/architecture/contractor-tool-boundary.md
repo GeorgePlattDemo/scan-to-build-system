@@ -4,7 +4,7 @@
 **Purpose:** identify the smallest useful contractor handoff. Not a large integration program.  
 **Claim limit:** Scan-to-Build does **not** currently integrate with any tool named here. Names are representative of categories in current practice.
 
-This file is the companion to [docs/journeys/contractor.md](../journeys/contractor.md). The journey file specifies the CONTRACTOR entry path. This file specifies what may cross the boundary from software the contractor already uses.
+This file is the companion to [docs/journeys/contractor.md](../../journey-donors/contractor.md). The journey file specifies the CONTRACTOR entry path. This file specifies what may cross the boundary from software the contractor already uses.
 
 ## Governing limit
 

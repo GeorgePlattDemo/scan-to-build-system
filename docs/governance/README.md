@@ -31,30 +31,20 @@ Use **Store** for Store-owned material, stock, admitted capability, modeled work
 
 A Program decision may explain why a System or Store change should occur; it does not silently perform that change.
 
+## What is here
+
+- [`adrs/`](adrs/) — short decision records the app still follows (fail-closed, fixture immutability, identifier policy, no silent unit conversion, no model on the safety path, and others).
+- [`architecture/`](architecture/) — the architecture boundary, current simulation authority, fixture revision and the M1 metric limitation.
+- [`corrections/`](corrections/) — recorded corrections.
+- [`identifier-policy.md`](identifier-policy.md).
+
 ## Historical Governed Reference evidence
 
-Source repository:
+Source repository (plain-text provenance): `GeorgePlattDemo/scan-to-build-governed-reference@18949f163718a937f072f4be3a654bb303e53160`.
 
-`GeorgePlattDemo/scan-to-build-governed-reference@18949f163718a937f072f4be3a654bb303e53160`
+On 2026-09-28 the copied Governed Reference repository files (`source/`, `reference-node/`, `legal/`) and six custody/disclosure research notes were removed from System. They remain in the archived Governed Reference repository and in System's git history at `scan-to-build-system@48bc96a977fa`. The custody research substance is carried in Program `governance/information-custody-and-processing.md`; the copyright ownership questions moved to Program `governance/copyright-ownership-questions.md`.
 
-The copied files under this directory remain useful for provenance, M1/reference-node evidence, historical threat/security boundaries, and exact implementation ancestry.
-
-Copying them into System did not make every historical rule current forever.
-
-Still-valid operational meanings require deliberate admission by the current System or Store owner. Research/evidence/decision material may be reconciled into Program.
-
-## System-relevant historical reading
-
-When investigating the old M1/reference-node proof, useful historical files include:
-
-- `source/STB-BUILD-M1.md`
-- `architecture/current-simulation-authority.md`
-- `reference-node/README.md`
-- `architecture/architecture-boundary.md`
-- `corrections/G-I0-COMPOSITION-0.1.md`
-- source security/threat/review records
-
-Read them as evidence of the identified historical implementation, not as substitutes for current System operational definitions, current Store contracts, or Program research/decision records.
+Read what remains here as evidence of the identified historical implementation, not as a substitute for current System operational definitions, current Store contracts, or Program research and decision records.
 
 ## Current safety boundary
 

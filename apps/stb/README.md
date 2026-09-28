@@ -10,7 +10,7 @@ The exact public Review composition currently opened by **OPEN SYSTEM BUILD** is
 This is a custody/reconciliation checkpoint, not a second application architecture and not a runtime switch. Its source manifest and unit test prove byte identity before any Review → System reconciliation work.
 
 
-<a href="https://georgeplattdemo.github.io/scan-to-build-review/working-app.html"><kbd>← BACK TO WORKING APP</kbd></a>
+<a href="https://georgeplattdemo.github.io/scan-to-build-system/system-build-current.html"><kbd>▶ OPEN THE APP</kbd></a>
 
 Local application subtree.
 
@@ -35,7 +35,7 @@ Checkpoints complete here:
 
 The bounded first application vertical is implemented and accepted against the pinned Stage-2 Store reference. It remains a reference/local application build, not a live commercial or physical fabrication service. Browsing does not create a project. There is no cloud custody, governed authority, or physical execution. A complete committed Board revision automatically asks Store Zero once as an evaluation, not an order. Board compact and Page 5 present the returned answer and budgetary Q. Missing Q is never shown as zero. “Current” means the answer applies to this exact revision; it is not a live refresh or commercial commitment. Definition review records `DefinitionReviewRecorded` or `UnresolvedDefinitionAcknowledged`. Neither is commercial submission, Store commercial acceptance, reservation, payment, governed authorization, or physical execution. Owner archive export/import preserves history as an inert snapshot. Imported Store answers and reviews remain historical. A new local Store question and a new local review are required before anything is current. Order, payment, fulfillment, and physical execution paths remain absent. Support is not fabrication authorization.
 
-Cross-layer application terminology is controlled by [`../../docs/architecture/STB-SEMANTIC-BOUNDARIES-0.1.md`](../../docs/architecture/STB-SEMANTIC-BOUNDARIES-0.1.md).
+Cross-layer application terminology is controlled by [`../../docs/architecture/STB-SEMANTIC-BOUNDARIES-0.1.md`](../../source-library/application-current/STB-SEMANTIC-BOUNDARIES-0.1.md).
 
 ## Runtime
 

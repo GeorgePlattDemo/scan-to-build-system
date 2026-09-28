@@ -124,7 +124,7 @@ Until that evidence exists, this file remains REFERENCE.
 
 ## 10. Sources used
 
-- `work/machines/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md`
+- Program `research/machine-development/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md`
 - Store Job 001 operating pattern @ `3620b353` (rewritten; exhibit names omitted)
 - accepted Board vertical @ `4595b478` for the 24–60 in demand window
 - Atlas Bridge §4

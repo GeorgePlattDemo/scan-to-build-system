@@ -59,7 +59,7 @@ Do not use one Store pin as a universal project constant.
 - accepted published-job / canonical S-001 proof path: `4402abeb6b0299a5b6db2eec85ed04c3b0236bcc`
 - 2026-09-13 accepted-baseline Stage-2 reference identity retained as provenance: `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
 
-For the frozen current repair identities and old-versus-new classification, read [`docs/project/CURRENT-STATE-LOCK-2026-09-21.md`](docs/project/CURRENT-STATE-LOCK-2026-09-21.md).
+The 2026-09-21 repair lock was retired on 2026-09-28; it remains in git history at `scan-to-build-system@48bc96a977fa` `docs/project/CURRENT-STATE-LOCK-2026-09-21.md`. Current claims live in the verification register.
 
 Historical candidate pins and their roles are listed in [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md).
 
@@ -82,10 +82,9 @@ Do not start in `grok-file`, a public exhibit, or a new demo folder.
 | App | `apps/stb/` |
 | Trial protocol | `work/capability-bridge/TRIAL-PROTOCOL.md` |
 | Dimensional / sheet / Store evidence surface | `work/capability-bridge/` |
-| Current System machine interfaces / implementation evidence | `work/machines/` — retain only System-owned implementation material; broader research belongs in Program |
+| Machine development research and engineering | [Program `research/machine-development/`](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/research/machine-development/README.md) |
 | Issued patents | `docs/patents/source/` |
-| Atlas originals | `source-library/atlas-research/` (donor) |
-| Detailed project/source index | `STB-PROJECT-STATE-AND-SOURCE-INDEX.md` |
+| Atlas research papers | [Program `research/atlas/`](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/research/atlas/README.md) |
 
 ## Do not
 

@@ -10,4 +10,4 @@ Consequences: External processing requires recorded terms first.
 
 Does not establish: a provider choice.
 
-Affected: docs/architecture/external-processing-0.1.md
+Affected: docs/architecture/external-processing-0.1.md (retired from System 2026-09-28; substance carried in Program `governance/information-custody-and-processing.md`)

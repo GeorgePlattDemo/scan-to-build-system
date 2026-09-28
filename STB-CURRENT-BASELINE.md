@@ -65,7 +65,7 @@ These identities remain provenance. They are not competing current baselines.
 
 Do not substitute one pin for another because the jobs have similar names. The path determines the pin.
 
-The post-acceptance working-state lock for the current Start Your Own repair is [`docs/project/CURRENT-STATE-LOCK-2026-09-21.md`](docs/project/CURRENT-STATE-LOCK-2026-09-21.md). That lock does not rewrite the immutable 2026-09-13 acceptance identities above; it records later working truth separately.
+The post-acceptance working-state lock for the Start Your Own repair (`docs/project/CURRENT-STATE-LOCK-2026-09-21.md`) was retired on 2026-09-28 and remains in git history at `scan-to-build-system@48bc96a977fa`. That lock does not rewrite the immutable 2026-09-13 acceptance identities above; it records later working truth separately.
 
 ## Current bounded capability status
 

@@ -42,7 +42,7 @@ For current project status, read [`../STB-CURRENT-BASELINE.md`](../STB-CURRENT-B
 
 Do not replace the Stage-2 Store pin with the published-job pin globally. The Store identity is path-specific.
 
-Current repair lock: [`../docs/project/CURRENT-STATE-LOCK-2026-09-21.md`](../docs/project/CURRENT-STATE-LOCK-2026-09-21.md).
+Repair lock (retired 2026-09-28): `scan-to-build-system@48bc96a977fa` `docs/project/CURRENT-STATE-LOCK-2026-09-21.md`.
 
 ## Parallel candidate identity
 

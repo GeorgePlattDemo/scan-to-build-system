@@ -30,7 +30,7 @@ It remains software/reference behavior. It does not by documentation alone estab
 4. [`COMMON-ENTRY-ARCHITECTURE.md`](COMMON-ENTRY-ARCHITECTURE.md) — canonical multiple-entry / one-truth-model application rule
 5. [`INFORMATION-CUSTODY-BOUNDARY.md`](INFORMATION-CUSTODY-BOUNDARY.md) — current project/evidence/owner-record custody and future disclosure boundary
 6. [`../../work/user-intake/README.md`](../../work/user-intake/README.md) for current intake work
-7. [`CONTROLLING-SOURCE-POINTERS.md`](CONTROLLING-SOURCE-POINTERS.md) for current owner pointers plus historical application provenance
+7. [`../../provenance/SOURCE-PINS.md`](../../provenance/SOURCE-PINS.md) for exact source identities and application provenance
 
 ## Application semantic rule
 
