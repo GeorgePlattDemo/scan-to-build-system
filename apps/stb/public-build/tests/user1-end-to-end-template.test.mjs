@@ -10,9 +10,9 @@ const sandbox={window:{}};
 vm.runInNewContext(contractSource,sandbox,{filename:'stb-store-handoff-contract.js'});
 const contract=sandbox.window.STBStoreHandoffContract;
 
-const STORE_SHA='7326a58da685c06c9b1fe95577cb5038de3bcdb5';
-const INPUT_HASH='59d4837cacf277ea1cf69faed18356641046c16ede9de8386080818f97cc38bb';
-const RESULT_HASH='5eaf81c7d75e449868e0f864214ee1a100cd7ec438fa32a1e883a119a1087cee';
+const STORE_SHA='9c62d9d6f7775deef83d47196d32c9b5174a352c';
+const INPUT_HASH='bea3c0b3841d013b463277ebaa02121bef79b65abe5e46b05a40f337afa3b868';
+const RESULT_HASH='0fd6b7d19ef8f64d133486c9d2ccf72256b2993bb60aa14c77b3c3e8004973bc';
 
 const exactDemand={
   configurationId:'SYO-USER1-XBRACE',
@@ -258,8 +258,8 @@ assert.equal(storeAnswer18.machineService,5.94);
 assert.equal(storeAnswer18.combinedValue,9.07);
 assert.equal(storeAnswer18.estimate.cycle.T_job_min,1.425);
 assert.equal(storeAnswer18.estimate.travel.finalRemainderIn,35.625);
-assert.equal(storeAnswer18.calculationIdentity.inputHash,'5af6f66f36344a8ccaa74a081423f95090545bcf80849cbbe9d8c406a14ded6e');
-assert.equal(storeAnswer18.calculationIdentity.resultHash,'81e47c66f472106927d0bbc4898f2c1b34489bf6a37aa29a66a31b6b0f3f9032');
+assert.equal(storeAnswer18.calculationIdentity.inputHash,'e594a8fd7ca9de466c0f5e85fc929ec51221e45405add3e5707fa0277fbb2add');
+assert.equal(storeAnswer18.calculationIdentity.resultHash,'595b797784e7f97d11a16e70a6e202eddf2cd6f38c02a165159fe4ce2abf9a37');
 assert.equal(shell.includes('candidateReference'),false);
 assert.equal(shell.includes('CANDIDATE STORE PIN'),false);
 

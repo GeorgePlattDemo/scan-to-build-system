@@ -51,11 +51,11 @@ assert.equal(exact.materialResolution.pricingReferenceSku,'STB-ZERO-SPF-2X4-60-0
 assert.equal(exact.materialResolution.pricingReferenceStockLengthIn,60);
 assert.equal(exact.materialResolution.workpieceLengthIn,60);
 assert.equal(exact.materialResolution.selectionPolicy,'SHORTEST_COMPLETE_STORE_OFFERING');
-assert.equal(exact.source.storePin,'7326a58da685c06c9b1fe95577cb5038de3bcdb5');
-assert.equal(exact.source.workflowRun,'36266986468');
+assert.equal(exact.source.storePin,'9c62d9d6f7775deef83d47196d32c9b5174a352c');
+assert.equal(exact.source.workflowRun,'36479757210');
 assert.equal(exact.source.systemIntegrationPin,null);
-assert.equal(exact.calculationIdentity.inputHash,'59d4837cacf277ea1cf69faed18356641046c16ede9de8386080818f97cc38bb');
-assert.equal(exact.calculationIdentity.resultHash,'5eaf81c7d75e449868e0f864214ee1a100cd7ec438fa32a1e883a119a1087cee');
+assert.equal(exact.calculationIdentity.inputHash,'bea3c0b3841d013b463277ebaa02121bef79b65abe5e46b05a40f337afa3b868');
+assert.equal(exact.calculationIdentity.resultHash,'0fd6b7d19ef8f64d133486c9d2ccf72256b2993bb60aa14c77b3c3e8004973bc');
 assert.equal(exact.freshEvaluation,false);
 assert.equal(exact.evaluationReceipt,null);
 
@@ -97,19 +97,19 @@ assert.deepEqual(
     ['STB-ZERO-SPF-2X4-72-001',72,'SUPPORTABLE',null]
   ]
 );
-assert.equal(exact18.source.storePin,'7326a58da685c06c9b1fe95577cb5038de3bcdb5');
+assert.equal(exact18.source.storePin,'9c62d9d6f7775deef83d47196d32c9b5174a352c');
 assert.equal(exact18.source.systemIntegrationPin,null);
-assert.equal(exact18.calculationIdentity.inputHash,'5af6f66f36344a8ccaa74a081423f95090545bcf80849cbbe9d8c406a14ded6e');
-assert.equal(exact18.calculationIdentity.resultHash,'81e47c66f472106927d0bbc4898f2c1b34489bf6a37aa29a66a31b6b0f3f9032');
+assert.equal(exact18.calculationIdentity.inputHash,'e594a8fd7ca9de466c0f5e85fc929ec51221e45405add3e5707fa0277fbb2add');
+assert.equal(exact18.calculationIdentity.resultHash,'595b797784e7f97d11a16e70a6e202eddf2cd6f38c02a165159fe4ce2abf9a37');
 
 const formal18 = contract.requestUser1StoreEvaluation(exactDemand18,{
   requestId:'JOB1-18-PROMOTED',
-  currentStorePin:'7326a58da685c06c9b1fe95577cb5038de3bcdb5',
+  currentStorePin:'9c62d9d6f7775deef83d47196d32c9b5174a352c',
   checkedAt:'2026-09-22T20:47:00.000Z'
 });
 assert.equal(formal18.complete,true);
 assert.equal(formal18.freshEvaluation,true);
-assert.equal(formal18.evaluationReceipt.currentStorePin,'7326a58da685c06c9b1fe95577cb5038de3bcdb5');
+assert.equal(formal18.evaluationReceipt.currentStorePin,'9c62d9d6f7775deef83d47196d32c9b5174a352c');
 assert.equal(contract.sameUser1StoreAnswerIdentity(exact18,formal18),true);
 
 const intermediate = contract.resolveUser1StoreReference({
@@ -127,12 +127,12 @@ assert.equal(intermediate.complete,false);
 
 const formalA = contract.requestUser1StoreEvaluation(exactDemand,{
   requestId:'JOB1-FRESH-A',
-  currentStorePin:'7326a58da685c06c9b1fe95577cb5038de3bcdb5',
+  currentStorePin:'9c62d9d6f7775deef83d47196d32c9b5174a352c',
   checkedAt:'2026-09-22T18:45:00.000Z'
 });
 const formalB = contract.requestUser1StoreEvaluation(exactDemand,{
   requestId:'JOB1-FRESH-B',
-  currentStorePin:'7326a58da685c06c9b1fe95577cb5038de3bcdb5',
+  currentStorePin:'9c62d9d6f7775deef83d47196d32c9b5174a352c',
   checkedAt:'2026-09-22T18:46:00.000Z'
 });
 assert.equal(formalA.status,'CURRENT_STORE_REFERENCE_REVALIDATED');
@@ -141,7 +141,7 @@ assert.equal(formalA.freshEvaluation,true);
 assert.equal(formalA.evaluationReceipt.requestId,'JOB1-FRESH-A');
 assert.equal(formalB.evaluationReceipt.requestId,'JOB1-FRESH-B');
 assert.notEqual(formalA.evaluationReceipt.requestId,formalB.evaluationReceipt.requestId);
-assert.equal(formalA.evaluationReceipt.currentStorePin,'7326a58da685c06c9b1fe95577cb5038de3bcdb5');
+assert.equal(formalA.evaluationReceipt.currentStorePin,'9c62d9d6f7775deef83d47196d32c9b5174a352c');
 assert.equal(formalA.evaluationReceipt.currentStoreMatchesReference,true);
 assert.equal(formalA.evaluationReceipt.machineEnvelopeId,'D001-STAGE2-ENVELOPE-0.3');
 assert.equal(formalA.evaluationReceipt.travelStandardId,'STB-D001-DIMENSIONAL-TRAVEL-0.1');

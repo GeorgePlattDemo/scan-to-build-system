@@ -18,7 +18,7 @@ The live app reaches the hosted Store on Railway at one pinned Store version. Ra
 
 Hands off, unless the owner has asked for exactly this change:
 
-- `STORE_PIN` in `apps/stb/shared/contracts.mjs` (currently `7326a58da685c06c9b1fe95577cb5038de3bcdb5`)
+- `STORE_PIN` in `apps/stb/shared/contracts.mjs` (currently `9c62d9d6f7775deef83d47196d32c9b5174a352c`)
 - `apps/stb/public-build/stb-store-runtime.json` — the Railway `jobEndpoint` and `storePin`
 - the Store `ref:` in `.github/workflows/d001-travel-integration.yml`
 - `Dockerfile.store-zero` and the `start:hosted-store` script it runs

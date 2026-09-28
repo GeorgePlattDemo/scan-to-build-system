@@ -418,6 +418,27 @@
       "blobSha": "a73f305de80f5e31ca94bf7e6f60701e2a7a392e",
       "bytes": 224771,
       "reason": "Playhouse Store step asks the live Store (SHEET_PACKAGE_V1) through the shared client instead of showing a stored reference answer; steps 4-6 open only on SUPPORTABLE; new front-door cache-buster."
+    },
+    {
+      "path": "stb-store-handoff-contract.js",
+      "pass": "store-pin-9c62d9d",
+      "blobSha": "8bb29a610fd5f179b698ade17ce21c986ccd7afb",
+      "bytes": 51918,
+      "reason": "Store pin 7326a58 -> 9c62d9d: pin fields, acceptance run and the two cached Job 1 calculation identities refreshed from the Store at the new pin (values otherwise unchanged)."
+    },
+    {
+      "path": "stb-store-runtime.json",
+      "pass": "store-pin-9c62d9d",
+      "blobSha": "a9ab13a67746a74949071d93b45557d67bf6f4fa",
+      "bytes": 153,
+      "reason": "Store pin 7326a58 -> 9c62d9d."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "store-pin-9c62d9d",
+      "blobSha": "6ffb4bcc0310bb2cb95f6a5a238db661a2cbc200",
+      "bytes": 224771,
+      "reason": "Cache-buster for the refreshed Store handoff contract (Store pin 9c62d9d)."
     }
   ],
   "retiredFiles": [
