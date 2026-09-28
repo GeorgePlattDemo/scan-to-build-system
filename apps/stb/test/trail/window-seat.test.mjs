@@ -106,6 +106,10 @@ test('Window Seat: one job, same rules, live-Store request', { timeout: 120000 }
     // A changed bench is a new version identity.
     assert.match(req.configurationVersion, /^ws-r\d+-[0-9a-f]{8}$/);
 
+    // Every Store answer carries the shared Store Zero text and "What happens next", all twelve steps.
+    assert.match(await page.locator('#store-doctrine').innerText(), /Store Zero is a declared reference lumberyard/);
+    assert.equal(await page.locator('#store-doctrine .s').count(), 12);
+
     // Back to the whole job: every step visible again.
     await page.locator('[data-view-btn="whole"]').click();
     assert.equal(await page.locator('.step:visible').count(), 6);

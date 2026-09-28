@@ -10,7 +10,7 @@
     --border:#e3ded7; --border-accent:#d9c3a2;
     --text:#1c1917; --text-2:#57534e; --text-3:#8a8580; --accent:#7a4f22; --on-accent:#ffffff;
     --warn:#8a6d1f; --ok:#5d7f3f; --no:#b4534a; --store:#e8f0f6; --store-line:#b9cfe0; --store-ink:#1f4f73;
-    --draw:#f2ece2;
+    --draw:#f2ece2; --text2:var(--text-2);
   }
   @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
     --bg:#16150f; --surface:#1e1c16; --rail:#191711; --tint:#262015;
@@ -193,6 +193,24 @@
   .timeline b{color:var(--ok)}
   .verbs{font:11.5px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-2)}
 
+  /* Store Zero reference text: the same shared file every Store answer carries */
+  .doctrine{margin-top:14px;font-size:13.5px}
+  .doctrine .band{margin:0 0 14px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);font-size:12.5px;line-height:1.55}
+  .doctrine .band.warn{border-color:var(--warn)}
+  .doctrine h1{font-size:22px;margin:18px 0 6px;text-align:left}
+  .doctrine .lede{margin:0 0 8px;color:var(--text2)}
+  .doctrine .s{padding:12px 0;border-top:1px solid var(--border)}
+  .doctrine .s .h{display:flex;gap:9px;align-items:baseline;margin-bottom:5px;flex-wrap:wrap}
+  .doctrine .s .num{font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--text2)}
+  .doctrine .s .name{font-size:14px;font-weight:650}
+  .doctrine .s .st{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:3px;border:1px solid var(--border);color:var(--text2)}
+  .doctrine .s p{margin:0 0 6px;color:var(--text2)}
+  .doctrine .s p.q,.doctrine .s p.k{font-size:12.5px;padding-left:11px;border-left:2px solid var(--border)}
+  .doctrine .ops{border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:10px 0 4px}
+  .doctrine .ops .t{margin:0 0 6px;font-size:9.5px;font-weight:700;letter-spacing:.08em}
+  .doctrine .ops .chain{font:11.5px/1.9 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text2);margin:0 0 6px}
+  .doctrine .close{border-top:1px solid var(--border);margin-top:14px;padding-top:12px}
+  .doctrine .close p{margin:0 0 8px;color:var(--text2)}
   @media (max-width:1100px){ .cfg{grid-template-columns:240px minmax(0,1fr)} .cfg>div:last-child{grid-column:1/-1} }
   @media (max-width:800px){
     .wrap{padding:14px 16px 48px}
@@ -407,6 +425,7 @@
         <div class="store" id="store-panel"></div>
         <div id="store-lines"></div>
         <div id="store-unanswered"></div>
+        <div class="doctrine" id="store-doctrine"></div>
         <details id="reviewer">
           <summary>CHECK IT YOURSELF: THE SAME REQUEST, WITHOUT RAILWAY</summary>
           <div id="reviewer-body"></div>
@@ -508,6 +527,7 @@
 </section>
 
 </div>
+<script src="store-zero-canonical-doctrine.js?v=65366367"></script>
 <script src="stb-store-client.js?v=7eb5ab65"></script>
 <script>
 (function(){
@@ -1252,6 +1272,17 @@ function renderRecord(def){
     +'<p class="small dim">Build it with the drawing. SIMULATED: no money moved and no machine ran; the boards, cuts, minutes and prices are Store Zero’s answer.</p>';
 }
 
+/* Every Store answer carries the same Store Zero reference text and "What happens next", from the one
+   shared file. If that file is missing or incomplete, say so; never a shortened stand-in. */
+function renderStoreDoctrine(host){
+  if(!host)return;
+  const d=window.STBStoreZeroCanonicalDoctrine;
+  const probe=document.createElement('div');if(d)probe.innerHTML=d.processStepsHtml||'';
+  const ok=!!d&&probe.querySelectorAll('.s').length===d.expectedProcessStepCount;
+  host.innerHTML=ok?'<div class="band">'+d.definitionHtml+'</div>'+d.processIntroHtml+d.processStepsHtml
+    :'<div class="band warn"><b>Store Zero reference text unavailable.</b> '+((d&&d.unavailableMessage)||'The shared Store Zero text did not load, so none is shown in its place.')+'</div>';
+}
+
 /* ═════ VIEWS: the whole job in one scroll, or one step at a time ═════ */
 const STEPS=['scan','configure','store','request','yard','record'];
 function usable(){return {scan:true,configure:true,store:true,request:callOpen()||!!S.order,yard:!!S.order,record:!!(S.order&&S.order.cutAt)}}
@@ -1296,7 +1327,7 @@ window.addEventListener('message',event=>{
 });
 if(embedded){$('bar').hidden=true;$('own-page').hidden=false}
 
-readFacts();controls();settleRuns();render();setView('whole','scan');
+readFacts();controls();settleRuns();renderStoreDoctrine($('store-doctrine'));render();setView('whole','scan');
 window.STBWindowSeat=Object.freeze({version:'0.8',definition:()=>buildDefinition(),request:()=>buildRequest(buildDefinition()).definition,conditions:()=>conditions(buildDefinition())});
 })();
 </script>
