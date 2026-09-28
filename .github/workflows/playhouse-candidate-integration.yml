@@ -1,0 +1,66 @@
+name: Playhouse candidate Store integration
+
+# Proves the Playhouse sheet path against an exact candidate Store version without moving the live pin.
+# The candidate ref below is the Store main merge commit under review. The live pin stays STORE_PIN in
+# apps/stb/shared/contracts.mjs and is moved only by its own owner-approved change.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  playhouse-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout System
+        uses: actions/checkout@v4
+
+      - name: Checkout exact candidate Store
+        uses: actions/checkout@v4
+        with:
+          repository: GeorgePlattDemo/scan-to-build-store
+          ref: 9c62d9d6f7775deef83d47196d32c9b5174a352c
+          path: store-candidate
+
+      - name: Checkout exact live Store pin
+        uses: actions/checkout@v4
+        with:
+          repository: GeorgePlattDemo/scan-to-build-store
+          ref: 7326a58da685c06c9b1fe95577cb5038de3bcdb5
+          path: store-live
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/stb/.node-version
+          cache: npm
+          cache-dependency-path: apps/stb/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/stb
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Chromium
+        working-directory: apps/stb
+        run: npx playwright install --with-deps chromium
+
+      - name: At the live pin, a sheet request fails closed
+        working-directory: apps/stb
+        env:
+          STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-live
+        run: node --test --test-concurrency=1 test/store/sheet-package-at-pin.test.mjs
+
+      - name: Against the candidate Store, Playhouse and D-001 paths
+        working-directory: apps/stb
+        run: >-
+          node test/candidate/run-with-candidate-store.mjs --store-root ${{ github.workspace }}/store-candidate --
+          test/store/sheet-package.test.mjs
+          test/store/sheet-package-at-pin.test.mjs
+          test/store/cut-package.test.mjs
+          test/store/alcove.test.mjs
+          test/integration/playhouse-live-store.test.mjs

@@ -468,6 +468,7 @@ export const STORE_REQUEST_TYPES = Object.freeze({
   USER_DEFINED_BOARD_V1: 'USER_DEFINED_BOARD_V1',
   ALCOVE_INSERT_V1: 'ALCOVE_INSERT_V1',
   CUT_PACKAGE_V1: 'CUT_PACKAGE_V1',
+  SHEET_PACKAGE_V1: 'SHEET_PACKAGE_V1',
 });
 export const STORE_SCOPES = Object.freeze({
   OFFERING_LOOKUP: 'OFFERING_LOOKUP',
@@ -475,6 +476,7 @@ export const STORE_SCOPES = Object.freeze({
   USER_DEFINED_BOARD_V1: 'USER_DEFINED_BOARD_V1',
   ALCOVE_INSERT_V1: 'ALCOVE_INSERT_V1',
   CUT_PACKAGE_V1: 'CUT_PACKAGE_V1',
+  SHEET_PACKAGE_V1: 'SHEET_PACKAGE_V1',
 });
 // A la carte cut packages and item lines. System sends what the project needs; the Store answers
 // each line on its own. System checks only the shape; every decision about boards, time and price is Store's.
@@ -486,6 +488,15 @@ export const CUT_PACKAGE_DEFINITION = Object.freeze({
   maxSpotsPerPart: 24,
   maxItemLines: 60,
   lineStatuses: Object.freeze(['SUPPORTABLE', 'NOT_ALL_LINES_SUPPORTABLE', 'UNRESOLVED']),
+});
+// One parent sheet and the features wanted from it. System carries the project's definition; the pinned
+// Store decides the sheet, the tabs, the time, the price, or the refusal. See Store S-001-STAGE2-ENVELOPE-0.1.md.
+export const SHEET_PACKAGE_DEFINITION = Object.freeze({
+  kind: 'sheet_package.v1',
+  ruleVersion: '0.1',
+  maxFeatures: 24,
+  storeModule: 'sheet-package-evaluator.mjs',
+  statuses: Object.freeze(['SUPPORTABLE', 'UNRESOLVED', 'REFUSED', 'UNAVAILABLE']),
 });
 export const STORE_JOB_STATUSES = Object.freeze([
   'SUPPORTABLE',

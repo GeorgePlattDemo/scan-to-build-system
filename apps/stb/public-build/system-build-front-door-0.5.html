@@ -217,10 +217,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
       let width = Math.max(1, Math.min(48, Number(widthInput.value) || 36));
       let straight = Math.max(1, Math.min(35, Number(straightInput.value) || 24));
-      let rise = Math.max(1, Number(riseInput.value) || 12);
-      const maxRise = Math.max(1, 36 - straight);
-      riseInput.max = String(maxRise);
-      if (rise > maxRise) rise = maxRise;
+      // No fit correction here: the Store decides whether the opening fits and may refuse it.
+      let rise = Math.max(1, Math.min(12, Number(riseInput.value) || 12));
       widthInput.value = String(width);
       straightInput.value = String(straight);
       riseInput.value = String(rise);

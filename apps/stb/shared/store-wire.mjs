@@ -3,6 +3,7 @@ import {
   ALCOVE_INSERT_DEFINITION,
   BOARD_DEFINITION,
   CUT_PACKAGE_DEFINITION,
+  SHEET_PACKAGE_DEFINITION,
   BOARD_OFFERING_QUERY,
   MAX_STORE_RESPONSE_BYTES,
   PUBLISHED_BOARD_SKU,
@@ -32,6 +33,8 @@ export const ADAPTER_ERROR_CODES = Object.freeze({
   INVALID_BOUNDED_SCOPE: 'INVALID_BOUNDED_SCOPE',
   OFFERING_INCOMPLETE: 'OFFERING_INCOMPLETE',
   ESTIMATE_FAILED: 'ESTIMATE_FAILED',
+  // The pinned Store version does not carry this request type's evaluator. Fail closed; no local answer.
+  STORE_CAPABILITY_NOT_AT_PIN: 'STORE_CAPABILITY_NOT_AT_PIN',
 });
 
 export const APP_DIAGNOSTICS = Object.freeze({
@@ -601,6 +604,54 @@ function validateCutPackagePayload(payload) {
   return { ok: true, definition, definitionKind: payload.definitionKind, ruleVersion: payload.ruleVersion };
 }
 
+// Shape only. The Store decides the sheet, whether each feature fits, the tabs, the time and the price.
+const SHEET_FEATURE_FIELDS = Object.freeze([
+  'featureId', 'kind', 'placement', 'widthIn', 'straightHeightIn', 'riseIn', 'retain', 'requestedTabCount',
+  'within', 'line', 'fromEnd', 'distanceIn',
+]);
+function validateSheetPackagePayload(payload) {
+  const bad = (details) => fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, details);
+  const scope = (details) => fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, details);
+  if (!isPlainObject(payload)) return bad('sheet-package payload must be an object');
+  if (!onlyKeys(payload, ['definition', 'definitionKind', 'ruleVersion'])) return scope('unexpected sheet-package payload fields');
+  if (payload.definitionKind !== SHEET_PACKAGE_DEFINITION.kind) return scope('definitionKind must be sheet_package.v1');
+  if (payload.ruleVersion !== SHEET_PACKAGE_DEFINITION.ruleVersion) return scope('ruleVersion must match the sheet-package slice');
+  const definition = payload.definition;
+  if (!isPlainObject(definition)) return bad('sheet-package payload requires one definition');
+  if (!onlyKeys(definition, ['configurationId', 'configurationVersion', 'sheet', 'features', 'returnAllPieces', 'exteriorRatingRequested'])) {
+    return scope('unexpected sheet-package definition fields');
+  }
+  for (const key of ['configurationId', 'configurationVersion']) {
+    const error = requireNonemptyString(key, definition[key]);
+    if (error) return bad(error);
+  }
+  const sheet = definition.sheet;
+  if (!isPlainObject(sheet) || !onlyKeys(sheet, ['thicknessIn', 'lengthIn', 'widthIn', 'species', 'grade'])) return scope('unexpected sheet fields');
+  for (const key of ['thicknessIn', 'lengthIn', 'widthIn']) {
+    if (sheet[key] != null && !finiteNumber(sheet[key])) return bad('sheet.' + key + ' must be a number');
+  }
+  for (const key of ['species', 'grade']) {
+    if (sheet[key] != null && requireNonemptyString('sheet.' + key, sheet[key])) return bad('sheet.' + key + ' must be a string');
+  }
+  const features = definition.features;
+  if (!Array.isArray(features) || features.length > SHEET_PACKAGE_DEFINITION.maxFeatures) return bad('features must be a short array');
+  for (const feature of features) {
+    if (!isPlainObject(feature) || !onlyKeys(feature, SHEET_FEATURE_FIELDS)) return scope('unexpected sheet feature fields');
+    if (requireNonemptyString('featureId', feature.featureId) || requireNonemptyString('kind', feature.kind)) return bad('each feature needs featureId and kind');
+    for (const key of ['widthIn', 'straightHeightIn', 'riseIn', 'distanceIn']) {
+      if (feature[key] != null && !finiteNumber(feature[key])) return bad('feature.' + key + ' must be a number');
+    }
+    if (feature.requestedTabCount != null && !Number.isInteger(feature.requestedTabCount)) return bad('requestedTabCount must be a whole number');
+    for (const key of ['placement', 'retain', 'within', 'line', 'fromEnd']) {
+      if (feature[key] != null && requireNonemptyString('feature.' + key, feature[key])) return bad('feature.' + key + ' must be a string');
+    }
+  }
+  for (const key of ['returnAllPieces', 'exteriorRatingRequested']) {
+    if (definition[key] != null && typeof definition[key] !== 'boolean') return bad(key + ' must be true or false');
+  }
+  return { ok: true, definition, definitionKind: payload.definitionKind, ruleVersion: payload.ruleVersion };
+}
+
 function validateAlcoveInsertPayload(payload) {
   if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
     return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'Alcove payload must be an object');
@@ -1057,6 +1108,19 @@ export async function validateWireRequest(body) {
     if (!payload.ok) return payload;
     return { ok: true, requestType: body.requestType, payload, envelope: body };
   }
+  if (body.requestType === STORE_REQUEST_TYPES.SHEET_PACKAGE_V1) {
+    if (body.scope !== STORE_SCOPES.SHEET_PACKAGE_V1) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'sheet-package scope mismatch');
+    }
+    const demandError = requireNonemptyString('demandSignature', body.demandSignature);
+    if (demandError) return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, demandError);
+    if (body.querySignature !== null) {
+      return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'sheet-package querySignature must be null');
+    }
+    const payload = validateSheetPackagePayload(body.payload);
+    if (!payload.ok) return payload;
+    return { ok: true, requestType: body.requestType, payload, envelope: body };
+  }
   if (body.requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1) {
     if (body.scope !== STORE_SCOPES.ALCOVE_INSERT_V1) {
       return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'Alcove scope mismatch');
@@ -1155,6 +1219,7 @@ export function httpStatusForAdapterCode(code) {
     case ADAPTER_ERROR_CODES.STORE_PIN_MISMATCH:
     case ADAPTER_ERROR_CODES.STORE_CHECKOUT_DIRTY:
     case ADAPTER_ERROR_CODES.MISSING_STORE_MODULE:
+    case ADAPTER_ERROR_CODES.STORE_CAPABILITY_NOT_AT_PIN:
       return 503;
     case ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE:
     case ADAPTER_ERROR_CODES.PAYLOAD_DIGEST_MISMATCH:
@@ -1302,6 +1367,43 @@ export function cutPackageJobPayload({ configurationId, configurationVersion, cu
     },
     definitionKind: CUT_PACKAGE_DEFINITION.kind,
     ruleVersion: CUT_PACKAGE_DEFINITION.ruleVersion,
+  };
+}
+
+export function sheetPackageJobPayload(definition) {
+  return {
+    definition: structuredClone(definition),
+    definitionKind: SHEET_PACKAGE_DEFINITION.kind,
+    ruleVersion: SHEET_PACKAGE_DEFINITION.ruleVersion,
+  };
+}
+
+export async function sheetPackageDemandSignature(payload) {
+  return digestCanonical({
+    definitionKind: payload.definitionKind,
+    ruleVersion: payload.ruleVersion,
+    requestType: STORE_REQUEST_TYPES.SHEET_PACKAGE_V1,
+    scope: STORE_SCOPES.SHEET_PACKAGE_V1,
+    definition: payload.definition,
+  });
+}
+
+export async function buildSheetPackageRequest({ requestId, projectId, candidateRevisionId, attemptId, attemptNumber, sentAt, demandSignature, payload }) {
+  return {
+    protocolVersion: STORE_PROTOCOL_VERSION,
+    requestId,
+    projectId,
+    candidateRevisionId,
+    requestType: STORE_REQUEST_TYPES.SHEET_PACKAGE_V1,
+    scope: STORE_SCOPES.SHEET_PACKAGE_V1,
+    demandSignature,
+    querySignature: null,
+    payloadDigest: await payloadDigest(payload),
+    expectedStorePin: STORE_PIN,
+    attemptId,
+    attemptNumber,
+    sentAt,
+    payload,
   };
 }
 
@@ -1598,9 +1700,22 @@ export function inspectStoreResponse(request, parsed, { httpStatus, byteLength }
     };
   }
   if (
+    request.requestType === STORE_REQUEST_TYPES.SHEET_PACKAGE_V1 &&
+    !SHEET_PACKAGE_DEFINITION.statuses.includes(parsed.rawEvaluation?.status)
+  ) {
+    return {
+      ok: false,
+      current: false,
+      diagnostic: APP_DIAGNOSTICS.APP_MALFORMED_RESPONSE,
+      reason: 'unknown-aggregate',
+      details: parsed.rawEvaluation?.status ?? null,
+    };
+  }
+  if (
     request.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1 ||
     request.requestType === STORE_REQUEST_TYPES.ALCOVE_INSERT_V1 ||
-    request.requestType === STORE_REQUEST_TYPES.CUT_PACKAGE_V1
+    request.requestType === STORE_REQUEST_TYPES.CUT_PACKAGE_V1 ||
+    request.requestType === STORE_REQUEST_TYPES.SHEET_PACKAGE_V1
   ) {
     const receipt = parsed.evaluationReceipt ?? parsed.rawEvaluation?.evaluationReceipt ?? null;
     if (parsed.rawEvaluation?.freshEvaluation !== true) {

@@ -404,6 +404,20 @@
       "blobSha": "5ca71d279675d155d44cba32c3a432b06f93c09e",
       "bytes": 215667,
       "reason": "Cache-busters for Window Seat and Outdoor, whose Store answers now carry the shared Store Zero text and \"What happens next\" (store-zero-canonical-doctrine.js), like Job 1 and Alcove."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "playhouse-live-store",
+      "blobSha": "15a2b1a40adb69ceac05c617988caf07733699fd",
+      "bytes": 39662,
+      "reason": "The Playhouse bench no longer shrinks the arch rise to fit the routed field; the Store decides and may refuse."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "playhouse-live-store",
+      "blobSha": "a73f305de80f5e31ca94bf7e6f60701e2a7a392e",
+      "bytes": 224771,
+      "reason": "Playhouse Store step asks the live Store (SHEET_PACKAGE_V1) through the shared client instead of showing a stored reference answer; steps 4-6 open only on SUPPORTABLE; new front-door cache-buster."
     }
   ],
   "retiredFiles": [
