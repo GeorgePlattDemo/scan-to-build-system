@@ -241,6 +241,13 @@
       "blobSha": "f3af7120933d13390a009abaff70b33bf63abcd9",
       "bytes": 222388,
       "reason": "Job 1 bench: the live line under the pills reads size, angle, board and Store price together. Cache-buster for the updated bench."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "149f66fcfb40e0f0159b4fc7e9f828fb5b6ae29c",
+      "bytes": 222431,
+      "reason": "The top nav's \"2 · The bench\" opens Job 1's bench at the top (X-brace picture, board, then the choice) instead of jumping down to the confirm block."
     }
   ]
 }

@@ -3191,7 +3191,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         originalShow.call(win,'start-own-live');
         setTimeout(() => openStartOwnStage(
           stage === 'configure' ? 'bench' : 'intent',
-          stage === 'configure' ? 'definition-boundary' : null
+          null  // open the bench at the top, so the X-brace picture and the board are what you see first
         ),0);
         syncJourneyNav(stage);
         return true;
