@@ -70,11 +70,6 @@
       "bytes": 71279
     },
     {
-      "path": "stb-window-seat-space-utilization-0.7.4.html",
-      "sourceBlobSha": "e6be8170d2fe1e4b81796b30491566ce76bfb8e3",
-      "bytes": 497759
-    },
-    {
       "path": "stb-start-own-bench-leg-0.1.html",
       "sourceBlobSha": "4ca2cb591b98b8d6f1621fc7b9ea7d3fd1788590",
       "bytes": 70244
@@ -346,6 +341,37 @@
       "blobSha": "d9bf681cad8a5081c1e635380e8e6e592fa9652d",
       "bytes": 221400,
       "reason": "Job 1 bench: the working screen no longer shows a price; the line under the pills gives size, angle and board, and the Store line drops its Q. The price appears only in the tile below. Cache-buster for the updated bench."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "window-seat-on-the-trail",
+      "blobSha": "3685dbc46f57af8c18a3b9a13dab4dc9528d6e48",
+      "bytes": 15696,
+      "reason": "Window Seat dev notes: one job, two views, same rules; the mill-to-width gap named."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-on-the-trail",
+      "blobSha": "fed3ac7d69f6f1025ea9352717261c1c3f2947ef",
+      "bytes": 215667,
+      "reason": "Window Seat joins the trail: six-step nav from its own stage map, step usability reported by the page (as Outdoor does), iframe points at stb-window-seat-0.8.html; the old guided/continuous seat machinery and its CSS are removed. Cache-buster for the updated dev guide."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-edge-mill-switch",
+      "blobSha": "5b6a2cebc9b977388c7f969c92e51990dbf7b34e",
+      "bytes": 215667,
+      "reason": "Cache-buster for Window Seat 0.8 with its edge-mill switch (off until the Store pin includes the pass-through edge mill)."
+    }
+  ],
+  "retiredFiles": [
+    {
+      "path": "stb-window-seat-space-utilization-0.7.4.html",
+      "sourceBlobSha": "e6be8170d2fe1e4b81796b30491566ce76bfb8e3",
+      "bytes": 497759,
+      "pass": "window-seat-on-the-trail",
+      "replacedBy": "stb-window-seat-0.8.html",
+      "reason": "Window Seat is no longer the trail exception. 0.8 keeps the drawing, the capture, every toggle and the long explanation, adds spot facing for shelf pins, and sends the job to the live Store as a cut-package request. The 0.7.4 page answered from a browser copy of Store logic pinned to Store commits that no longer exist; it is retired, not edited. Its bytes remain at the recorded Review source blob."
     }
   ]
 }

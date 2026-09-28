@@ -53,13 +53,12 @@ assert.match(base,/show\('store'\)/);
 assert.match(base,/data-go="request">Next →/);
 assert.match(base,/data-go="yard">SEND TO THE YARD/);
 assert.match(base,/data-go="terms">CONTINUE TO TERMS/);
-assert.ok(shell.includes("['alcove-review','terms','recap']"),'Alcove internal event pages are not hidden from customer navigation');
+assert.ok(shell.includes("if (stage === 'review' || stage === 'terms' || stage === 'recap') button.hidden = true;"),'Alcove internal event pages are not hidden from customer navigation');
 assert.match(shell,/review:'store'/);
 assert.match(shell,/request:'request'/);
 assert.match(shell,/terms:'yard'/);
 assert.match(shell,/recap:'record'/);
-assert.match(shell,/Store Answer/);
-assert.match(shell,/Accept \/ Pay/);
+assert.match(shell,/request:'4 · Your call'/);
 assert.match(shell,/Confirmed version sent to Store Zero\./);
 
 // Shared Store doctrine is valid before confirmation and does not claim a completed event.
