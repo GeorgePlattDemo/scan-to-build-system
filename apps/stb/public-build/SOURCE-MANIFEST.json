@@ -199,6 +199,20 @@
       "blobSha": "020272660b3922c3e0860f5a2d61b3c3157fefdf",
       "bytes": 219160,
       "reason": "Start your own shows the Dev Guide rail on the right on every screen, like every other project page (its guide note already said \"Guide uses the rail\"); the page was forced to one column, which pushed the rail below the project. Narrow screens still stack."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "24eb5514b0026e64e253e4a1ad75d71f5fa00da1",
+      "bytes": 90066,
+      "reason": "Job 1 bench: the one choice sits right under the picture as \"Want it a little higher?\" with two big buttons (16 in as drawn, 18 in a little higher) plus an exact-length box; a callout on the board says when the Store moves to a longer 2×4 and why; a plain price line; friendly Cut it / Drill it / Keep the stub steps."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "85c7f84c766a5b1959d66570af445de541caa7dd",
+      "bytes": 222102,
+      "reason": "Job 1 bench: the board heading names the board the Store actually picked (was stuck on 5-FOOT 60 IN); angles and lengths read in people units (tenths of a degree, eighths of an inch) while the definition record keeps full precision; board-swap callout and price line filled from the Store answer; the nav highlight follows the in-page bench button and back link. Cache-buster for the updated bench."
     }
   ]
 }
