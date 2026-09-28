@@ -53,11 +53,18 @@
       ['BRING A DRAWING, PDF OR PHOTO','Configured later with contractor adapters.'],
       ['PASTE A CUT LIST','Configured later with contractor adapters.']
     ]),
-    projects:guide('Keep the library obvious',[
-      ['Don’t overcrowd','Show live, bounded, or deferred clearly.'],
-      ['One project at a time','Clear old route/state on project switch.'],
-      ['No cross-talk','Job 1 facts stay out of Outdoor, Alcove, Sheet.'],
-      ['Still patched','Some legacy routes are intercepted, not retired.']
+    projects:guide('Library',[
+      ['Don’t overcrowd','Live, bounded or deferred. Say which.'],
+      ['Tiles = tests','Board · plan · fit · assembly · sheet.'],
+      ['Start your own','First. Never moves.'],
+      ['One project at a time','Switch tile → clear route + state.'],
+      ['No cross-talk','Job 1 facts stay in Job 1.'],
+      ['Same six steps','Every tile, every door. Scoreboard enforces.'],
+      ['Opening ≠ owning','Read-only copy until Make changes / Save.'],
+      ['Gap','Read-only copy: Playhouse only. Rest open live.'],
+      ['Gap','Accounts are demo. User 1 only. No auth.'],
+      ['Still patched','Legacy routes intercepted, not retired.'],
+      ['Build configurators as needed','One small bench per job class. No universal configurator.']
     ]),
     'start-own':guide('Legacy donor',[
       ['Don’t build here','The live Job 1 artifact owns this route.'],

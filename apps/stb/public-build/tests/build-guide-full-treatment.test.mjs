@@ -33,7 +33,9 @@ test('Dev Guide covers current pages and only rewrites the reserved rail',()=>{
 
   for(const id of new Set([...baseIds,...dynamicIds])){
     assert.ok(spec.pages[id],`missing Dev Guide: ${id}`);
-    assert.ok(spec.pages[id].rows.length>=2 && spec.pages[id].rows.length<=5,`Dev Guide not shorthand-sized: ${id}`);
+    // Shorthand-sized: 2-5 rows. The Shared Home ('projects') is the one long list of short dev notes, capped at 12.
+    const maxRows = id === 'projects' ? 12 : 5;
+    assert.ok(spec.pages[id].rows.length>=2 && spec.pages[id].rows.length<=maxRows,`Dev Guide not shorthand-sized: ${id}`);
     const rendered=spec.render(id);
     assert.match(rendered,/DEV GUIDE/);
     assert.equal(rendered.includes('GLOBAL WARTS'),false);

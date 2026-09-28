@@ -248,6 +248,62 @@
       "blobSha": "149f66fcfb40e0f0159b4fc7e9f828fb5b6ae29c",
       "bytes": 222431,
       "reason": "The top nav's \"2 · The bench\" opens Job 1's bench at the top (X-brace picture, board, then the choice) instead of jumping down to the confirm block."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "shared-home-copy",
+      "blobSha": "b4781f8b8a6ba4a40218c096777542d3b9b24c27",
+      "bytes": 136381,
+      "reason": "Outdoor build tile subtitle reads \"From a published plan\" (was \"To fit your space\", which a picnic table from a published plan does not do)."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "shared-home-copy",
+      "blobSha": "20c5c144f862dcabb34fcb0291b706197d3f3d65",
+      "bytes": 15519,
+      "reason": "Shared Home Dev Guide leads with \"Build configurators as needed\": five tiles test five ways a job arrives, one small bench per kind of job, same six steps for every tile and door."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "shared-home-copy",
+      "blobSha": "aeb3afafa39f1f1bf296a74842f412b60c9d1099",
+      "bytes": 39684,
+      "reason": "Cache-buster for the updated base."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "shared-home-copy",
+      "blobSha": "015affbfd9eefe2d4bf693e7854c26e90d29dfe2",
+      "bytes": 221515,
+      "reason": "Shared Home copy rewritten in plain words: pick the project closest to yours, change the numbers to yours, a question only when it changes what gets cut, Start your own first, one clear question and an instant answer. Cache-busters for the updated front door and Dev Guide spec."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "shared-home-copy",
+      "blobSha": "7b4ed32faaa00db389eaf7f23fd6324393c4f542",
+      "bytes": 15444,
+      "reason": "Shared Home Dev Guide leads with \"Build configurators as needed\": five tiles test five ways a job arrives, one small bench per kind of job, same six steps for every tile and door; five rows, the shorthand limit."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "shared-home-copy",
+      "blobSha": "161373b788202e904585881110e28ba5ebd04d49",
+      "bytes": 221515,
+      "reason": "Cache-buster for the updated Dev Guide spec."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "shared-home-copy",
+      "blobSha": "b5915e13e3e81cdbdaae1a909f9f232b21f5d560",
+      "bytes": 15672,
+      "reason": "Shared Home Dev Guide as terse dev notes: Don’t overcrowd first, tiles = tests, same six steps, known gaps named (read-only copy on Playhouse only; demo accounts), \"Build configurators as needed\" last."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "shared-home-copy",
+      "blobSha": "723b4be3ef178d4155ec825d048f8e3107be5ad3",
+      "bytes": 221566,
+      "reason": "Shared Home copy in plain text with no bold after the heading; says why a pre-made job is faster (already worked out, you answer only your part) and that Start your own takes longer. Cache-buster for the updated Dev Guide spec."
     }
   ]
 }
