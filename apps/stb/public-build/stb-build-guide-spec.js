@@ -155,7 +155,7 @@
       ['Same rules','Six steps, live Store. No exception.'],
       ['Whole job = audit view','Same state, every step shown.'],
       ['Fork at the hero','Bench, or read it all.'],
-      ['Gap','Mill-to-width: asked, not answered yet.'],
+      ['Edge mill','Any depth: boards milled to width, priced by Store.'],
       ['Known wart','Iframe complicates focus, print, routing.']
     ]),
     'proof-store':guide('Show the exact Store answer',[

@@ -362,6 +362,34 @@
       "blobSha": "5b6a2cebc9b977388c7f969c92e51990dbf7b34e",
       "bytes": 215667,
       "reason": "Cache-buster for Window Seat 0.8 with its edge-mill switch (off until the Store pin includes the pass-through edge mill)."
+    },
+    {
+      "path": "stb-store-handoff-contract.js",
+      "pass": "store-pin-7326a58",
+      "blobSha": "63a8ac108aa3ea56fb920c8ceb2cf57d15e44d1e",
+      "bytes": 51918,
+      "reason": "Store repin to 7326a58 (edge mill on cut packages): the two cached User 1 Store references (16 in, 18 in) carry the new pin and the exact calculation identities the Store at 7326a58 returns; prices, boards and cycle unchanged."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "store-pin-7326a58",
+      "blobSha": "a2066875721378aa266084574110529ce60fd381",
+      "bytes": 15714,
+      "reason": "Window Seat dev note: the edge mill is live at the new pin."
+    },
+    {
+      "path": "stb-store-runtime.json",
+      "pass": "store-pin-7326a58",
+      "blobSha": "43293e3bbb7e22242ca75a9390c76165960d2fea",
+      "bytes": 153,
+      "reason": "Store repin to 7326a58: the pin the browser client expects from the hosted Store. The Railway endpoint is unchanged."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "store-pin-7326a58",
+      "blobSha": "591ca1ce76e1e5f386b3ff2453e6e3cc5118dd9c",
+      "bytes": 215667,
+      "reason": "Store repin to 7326a58: cache-busters for the refreshed Store handoff contract, Window Seat (edge mill on) and the dev guide."
     }
   ],
   "retiredFiles": [

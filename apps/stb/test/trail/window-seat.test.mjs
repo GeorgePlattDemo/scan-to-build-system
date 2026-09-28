@@ -1,7 +1,7 @@
 // Window Seat on the trail: the one fully worked example follows the same rules as every tile.
 // - The request it sends is a plain cut-package request the System wire accepts (rule 4: the live Store answers).
-// - Depth that isn't a board width stays the customer's number; the mill-to-width ask is kept, not sent, and
-//   blocks Your call until answered or until the customer picks a depth that lands on a board.
+// - Depth that isn't a board width stays the customer's number: its boards are edge-milled to width, and the
+//   finished width travels in the cut package for the Store to time and price.
 // - Spot facing for shelf pins travels inside each tower side's own boards, in the Store's declared placements.
 // - Two views of one job: the whole job in one scroll, or one step at a time.
 
@@ -52,12 +52,14 @@ test('Window Seat: one job, same rules, live-Store request', { timeout: 120000 }
     assert.equal(await page.locator('#fork [data-to-step="configure"]').count(), 1);
     assert.equal(await page.locator('#fork [data-read-whole]').count(), 1);
 
-    // The drawing's 14 in depth over two boards is 7 in each: not a board width.
+    // The drawing's 14 in depth over two boards is 7 in each: 1×8s edge-milled to 7 in.
     let req = await page.evaluate(() => window.STBWindowSeat.request());
     assert.deepEqual([...new Set(req.cutPackages.map(p => p.material.nominalW))], [8]);
     assert.ok(req.cutPackages.every(p => p.material.species === 'pine' && p.material.grade === 'select'));
+    assert.ok(req.cutPackages.every(p => p.finishedWidthIn === 7), 'finished width travels to the Store');
     assert.ok((await wireOk(req)).ok, 'System wire accepts the Window Seat request');
-    assert.match(await page.locator('#ws-reg').innerText(), /ASKED · NOT ANSWERED/);
+    assert.doesNotMatch(await page.locator('#ws-reg').innerText(), /ASKED · NOT ANSWERED/);
+    assert.match(await page.locator('#ws-reg').innerText(), /Edge-mill 1×8 boards to 7 in wide/);
 
     // Fork: to the bench. One step at a time from here.
     await page.locator('#fork [data-to-step="configure"]').click();
@@ -66,9 +68,10 @@ test('Window Seat: one job, same rules, live-Store request', { timeout: 120000 }
     assert.equal(await page.locator('#s-configure').isVisible(), true);
     assert.equal(await page.locator('#btn-call').isDisabled(), true);
 
-    // Pick a depth that lands on a board: the mill ask disappears.
+    // Pick a depth that lands on a board: no milling is asked.
     await page.locator('#p-depth button', { hasText: 'USE 14 1/2 IN' }).click();
-    assert.doesNotMatch(await page.locator('#ws-reg').innerText(), /ASKED · NOT ANSWERED/);
+    assert.doesNotMatch(await page.locator('#ws-reg').innerText(), /Edge-mill/);
+    assert.ok((await page.evaluate(() => window.STBWindowSeat.request())).cutPackages.every(p => p.finishedWidthIn === undefined));
 
     // Spot facing for shelf pins, 2 in from the edge: one spot per board, per tower side, per shelf.
     await page.locator('#c-spots').check();

@@ -14,11 +14,11 @@ Read [`START-HERE.md`](START-HERE.md) first. Then the capability-bridge bench. T
 
 ## Protected path: System → Railway → Store — do not touch
 
-The live app reaches the hosted Store on Railway at one pinned Store version. That path works. **Do not change it, "tidy" it, upgrade it, or re-point it — not as part of any other task, and not because a newer Store commit exists.** Only the owner changes it, deliberately, in a change that does nothing else.
+The live app reaches the hosted Store on Railway at one pinned Store version. Railway rebuilds from System `main` (`Dockerfile.store-zero`), and at startup fetches exactly the Store commit in `STORE_PIN`; its deploy log names it. That path works. **Do not change it, "tidy" it, upgrade it, or re-point it — not as part of any other task, and not because a newer Store commit exists.** Only the owner changes it, deliberately, in a change that does nothing else.
 
 Hands off, unless the owner has asked for exactly this change:
 
-- `STORE_PIN` in `apps/stb/shared/contracts.mjs` (currently `fc3f555b8f1f329bcf2dd81fa26995230d12a527`)
+- `STORE_PIN` in `apps/stb/shared/contracts.mjs` (currently `7326a58da685c06c9b1fe95577cb5038de3bcdb5`)
 - `apps/stb/public-build/stb-store-runtime.json` — the Railway `jobEndpoint` and `storePin`
 - the Store `ref:` in `.github/workflows/d001-travel-integration.yml`
 - `Dockerfile.store-zero` and the `start:hosted-store` script it runs

@@ -387,7 +387,7 @@
       <p>Solid ¾ in board only. No plywood, MDF or glued-panel shortcut.</p>
       <p>No joinery, spans or loads invented. The app is not a substitute engineer.</p>
       <p>Intent before inventory. The bench says what’s wanted; the Store says what it can do.</p>
-      <p>Mill-to-width goes to the Store once its pin has the edge mill. Until then it stays on the list, unanswered.</p>
+      <p>A depth that isn’t a board width is edge-milled: the whole board, against the fence, before the parts are cut. The Store prices the time.</p>
     </aside>
   </div>
 </section>
@@ -538,9 +538,9 @@ const FAM=[{k:'pine',n:'Select pine',c:'#D8BE7C'},{k:'poplar',n:'Select poplar',
            {k:'oak',n:'Select red oak',c:'#C4A06A'},{k:'cherry',n:'Select cherry',c:'#A6522C'}];
 const famName=()=>FAM.find(f=>f.k===P.fam).n;
 /* What a “1×8” is: dressed sizes of common 1× boards. Lumber standard, not a Store fact. */
-/* Edge mill: the Store takes a finished width on cut packages from the Store version that adds the
-   pass-through edge mill. Flip this on in the same change that moves System's Store pin to that version. */
-const STORE_EDGE_MILL=false;
+/* Edge mill: the Store takes a finished width on cut packages (Store 7326a58 and later: pass-through edge
+   mill, the whole board fed past the router against the fence). On since System's pin moved there. */
+const STORE_EDGE_MILL=true;
 const DRESSED=[{n:2,a:1.5},{n:3,a:2.5},{n:4,a:3.5},{n:6,a:5.5},{n:8,a:7.25},{n:10,a:9.25},{n:12,a:11.25}];
 /* Store merchandise the customer may pick by exact SKU. The Store prices it or says no. */
 const HARDWARE=[
