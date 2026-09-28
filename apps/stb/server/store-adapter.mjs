@@ -2,6 +2,7 @@ import {
   ALCOVE_INSERT_DEFINITION,
   BOARD_DEFINITION,
   CUT_PACKAGE_DEFINITION,
+  SHEET_PACKAGE_DEFINITION,
   PUBLISHED_BOARD_SKU,
   STORE_PIN,
   STORE_FRESH_EVALUATION_RULE_ID,
@@ -735,6 +736,58 @@ export async function createStoreAdapter({
     };
   }
 
+  // Sheet packages: the pinned Store answers the whole sheet on its own. System adds no geometry,
+  // no tab plan, no price and no fallback. A pin without the sheet evaluator fails closed.
+  async function handleSheetPackageJob(envelope, jobPayload, options = {}) {
+    const sheet = loaded.modules.sheetPackage;
+    if (!sheet) {
+      return {
+        status: httpStatusForAdapterCode(ADAPTER_ERROR_CODES.STORE_CAPABILITY_NOT_AT_PIN),
+        body: adapterErrorBody(
+          ADAPTER_ERROR_CODES.STORE_CAPABILITY_NOT_AT_PIN,
+          { requestType: envelope.requestType, storeModule: SHEET_PACKAGE_DEFINITION.storeModule, storePin: STORE_PIN },
+          envelope,
+        ),
+      };
+    }
+    const runtimeCatalog = options.catalogOverride ?? catalog;
+    const definition = jobPayload.definition;
+    const demand = { ...structuredClone(definition), storeRevision: STORE_PIN };
+    const storeRequest = { requestId: envelope.requestId, evaluatedAt: nowIso(), storeRevision: STORE_PIN };
+    const reloadCurrentStore = catalogOverride === null && options.catalogOverride == null;
+    let storeResult = null;
+    let estimateError = null;
+    try {
+      storeResult = reloadCurrentStore
+        ? await sheet.requestSheetPackageStoreEvaluation(demand, storeRequest)
+        : await sheet.evaluateSheetPackageStoreRequest(runtimeCatalog, demand, storeRequest);
+    } catch (error) {
+      estimateError = {
+        code: ADAPTER_ERROR_CODES.ESTIMATE_FAILED,
+        details: error instanceof Error ? error.message : String(error),
+      };
+    }
+    return {
+      status: 200,
+      body: await successEnvelope(envelope, {
+        rawOffering: null,
+        rawEvaluation: storeResult ?? { status: 'UNRESOLVED', complete: false, reason: ADAPTER_ERROR_CODES.ESTIMATE_FAILED },
+        rawEstimate: null,
+        materialResolution: null,
+        estimateAssociationId: storeResult?.calculationIdentity?.resultHash ?? null,
+        estimateError,
+        priceCompleteness: {
+          status: storeResult?.status ?? 'UNAVAILABLE',
+          note: 'The pinned Store answered the whole sheet on its own. No local fallback was used.',
+        },
+        calculationIdentity: storeResult?.calculationIdentity ?? null,
+        evaluationReceipt: storeResult?.evaluationReceipt ?? null,
+        mappedCallInputs: { definition: structuredClone(definition), demand, storeRequest },
+        attributedBasis: storeBasis({ modules: loaded.modules, evaluation: storeResult }),
+      }),
+    };
+  }
+
   async function dispatch(body) {
     const validated = await validateWireRequest(body);
     if (!validated.ok) {
@@ -756,6 +809,9 @@ export async function createStoreAdapter({
     if (validated.requestType === STORE_REQUEST_TYPES.USER_DEFINED_BOARD_V1) {
       return handleUserDefinedBoardJob(validated.envelope, validated.payload);
     }
+    if (validated.requestType === STORE_REQUEST_TYPES.SHEET_PACKAGE_V1) {
+      return handleSheetPackageJob(validated.envelope, validated.payload);
+    }
     return handleJob(validated.envelope, validated.payload);
   }
 
@@ -773,6 +829,8 @@ export async function createStoreAdapter({
       handleAlcoveInsertJob(envelope, payload, options),
     handleUserDefinedBoardJob: (envelope, payload, options) =>
       handleUserDefinedBoardJob(envelope, payload, options),
+    handleSheetPackageJob: (envelope, payload, options) =>
+      handleSheetPackageJob(envelope, payload, options),
     dispatch,
     diagnosticEvaluateJob(spec, runtimeCatalog = catalog) {
       return runEvaluation(runtimeCatalog, spec);

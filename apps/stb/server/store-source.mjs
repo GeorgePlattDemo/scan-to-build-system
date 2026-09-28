@@ -4,7 +4,7 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { pathToFileURL } from 'node:url';
 
-import { STORE_PIN } from '../shared/contracts.mjs';
+import { SHEET_PACKAGE_DEFINITION, STORE_PIN } from '../shared/contracts.mjs';
 import { ADAPTER_ERROR_CODES } from '../shared/store-wire.mjs';
 
 const execFileAsync = promisify(execFile);
@@ -158,6 +158,16 @@ export async function loadPinnedStoreModules(root) {
       import(envelopeUrl),
       import(cutPackageUrl),
     ]);
+    // Sheet packages are answered only by a pinned Store version that carries the S-001 sheet evaluator.
+    // A pin without it is not an error for the other request types; sheet requests then fail closed.
+    const sheetPath = path.join(root, SHEET_PACKAGE_DEFINITION.storeModule);
+    let sheetPackage = null;
+    try {
+      await fs.access(sheetPath);
+      sheetPackage = await import(pathToFileURL(sheetPath).href);
+    } catch (error) {
+      if (error?.code !== 'ENOENT') throw error;
+    }
 
     const required = [
       [store, 'findSku'],
@@ -182,6 +192,13 @@ export async function loadPinnedStoreModules(root) {
       [cutPackage, 'evaluateCutPackageStoreRequest'],
       [cutPackage, 'requestCutPackageStoreEvaluation'],
       [cutPackage, 'CUT_PACKAGE_STANDARD'],
+      ...(sheetPackage
+        ? [
+            [sheetPackage, 'evaluateSheetPackageStoreRequest'],
+            [sheetPackage, 'requestSheetPackageStoreEvaluation'],
+            [sheetPackage, 'SHEET_PACKAGE_STANDARD'],
+          ]
+        : []),
     ];
     const missing = required
       .filter(([mod, name]) => typeof mod[name] === 'undefined')
@@ -226,6 +243,13 @@ export async function loadPinnedStoreModules(root) {
         evaluateCutPackageStoreRequest: cutPackage.evaluateCutPackageStoreRequest,
         requestCutPackageStoreEvaluation: cutPackage.requestCutPackageStoreEvaluation,
         CUT_PACKAGE_STANDARD: cutPackage.CUT_PACKAGE_STANDARD,
+        sheetPackage: sheetPackage
+          ? {
+              evaluateSheetPackageStoreRequest: sheetPackage.evaluateSheetPackageStoreRequest,
+              requestSheetPackageStoreEvaluation: sheetPackage.requestSheetPackageStoreEvaluation,
+              SHEET_PACKAGE_STANDARD: sheetPackage.SHEET_PACKAGE_STANDARD,
+            }
+          : null,
       },
     };
   } catch (error) {

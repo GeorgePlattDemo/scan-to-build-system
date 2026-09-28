@@ -1920,7 +1920,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
               <span><i class="s001-v2-key saw"></i> secondary straight-cut request</span>
               <span><i class="s001-v2-key out"></i> outside current routed field</span>
             </div>
-            <p class="dim">The blue straight-cut lines are shown because User 1 requested them. They are intentionally kept separate from the currently pinned routed S-001 Store envelope.</p>
+            <p class="dim">The blue straight-cut lines are shown because User 1 requested them. The Store decides whether each requested operation is inside its current capability.</p>
           </section>
           <section class="s001-card">
             <h3>BOUNDED GEOMETRY</h3>
@@ -1928,12 +1928,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
             <div class="s001-control"><label for="s001-straight-height">Straight side height</label><output id="s001-straight-height-out">24 in</output><input id="s001-straight-height" data-s001-control type="range" min="1" max="35" step="0.5" value="24"></div>
             <div class="s001-control"><label for="s001-arch-rise">Arch rise</label><output id="s001-arch-rise-out">12 in</output><input id="s001-arch-rise" data-s001-control type="range" min="1" max="12" step="0.5" value="12"></div>
             <div class="btns"><button type="button" data-s001-control id="s001-reset">RESET TO USER 1'S 36 / 24 / 12</button></div>
-            <div class="s001-status">ROUTED PROFILE IS INSIDE CURRENT 48 × 36 REFERENCE FIELD</div>
+            <div class="s001-status" id="s001-field-status">CURRENT 48 × 36 ROUTED FIELD · THE STORE CHECKS THE FIT</div>
             <p class="dim" id="s001-geometry-summary"></p>
             <div class="s001-v2-seq">
               <div class="row"><span class="n">01</span><div><b>ROUTE INTERNAL CENTER FEATURE</b><span>Straight internal route. Retained material remains connected by tabs according to the project rule.</span></div></div>
               <div class="row"><span class="n">02</span><div><b>ROUTE OUTER ARCHED PROFILE</b><span>Curvilinear opening profile with retained tabs.</span></div></div>
-              <div class="row"><span class="n">03</span><div><b>SECONDARY STRAIGHT CUT REQUEST</b><span>Two straight cuts, 18 in from the sheet ends. Shown as a separate requested operation because it is not admitted by the pinned routed envelope.</span></div></div>
+              <div class="row"><span class="n">03</span><div><b>SECONDARY STRAIGHT CUT REQUEST</b><span>Two straight cuts, 18 in from the sheet ends. Sent to the Store as its own requested operation.</span></div></div>
             </div>
           </section>
         </div>
@@ -1948,23 +1948,29 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     const storeRail = store?.querySelector('.rail');
     if (storeMain) storeMain.innerHTML = `
       <h1>PLAYHOUSE · CURRENT STORE ANSWER</h1>
-      <p class="sub">Store separates what the pinned S-001 routed envelope can support from requested work that still belongs to a separate operation path.</p>
-      <div class="s001-v2-store-split">
-        <section class="s001-v2-store-card s001-v2-pass"><h3>ROUTED ARCHED OPENING</h3><p><b>SUPPORTABLE · REFERENCE</b></p><p>Request: <code>SHEET_MODE2_ARCHED_APERTURE_V0</code><br>Envelope: <code>S001-MODE2-ARCHED-APERTURE-V0</code></p><p id="s001-store-opening"></p><p id="s001-store-radius"></p><p>4 requested tabs · Store reference plan 5 · physical retention NOT MEASURED.</p></section>
-        <section class="s001-v2-store-card s001-v2-separate"><h3>ADDITIONAL PROJECT FEATURES</h3><p><b>RETAINED · SEPARATE FROM PINNED ROUTED ENVELOPE</b></p><p>Internal center route feature and two straight saw-cut requests at 18 in from each sheet end remain in the project definition.</p><p>They are not silently promoted into <code>SHEET_MODE2_ARCHED_APERTURE_V0</code>.</p></section>
+      <p class="sub">Store answers exactly this version of User 1's sheet: the arched opening, the center split and the two straight cuts. It picks the sheet, plans the tabs, times the work and prices it, or says no and why.</p>
+      <div id="s001-live-answer" data-store-status="ASKING">
+        <div class="s001-v2-store-split">
+          <section class="s001-v2-store-card" id="s001-live-card"><h3>STORE ZERO ANSWERS</h3><p><b id="s001-live-status">ASKING THE STORE…</b></p><p id="s001-store-opening"></p><p id="s001-store-radius"></p><p id="s001-live-summary"></p><ul id="s001-live-reasons"></ul></section>
+          <section class="s001-v2-store-card s001-v2-separate"><h3>WHAT THE STORE WILL DO</h3><ol id="s001-live-operations"></ol><p id="s001-live-pieces"></p></section>
+        </div>
+        <div class="s001-v2-order">
+          <div><b>SHEET</b><span id="s001-live-material">—</span></div>
+          <div><b>STORE STATUS</b><span id="s001-live-status-2">—</span></div>
+          <div><b>MATERIAL</b><span id="s001-live-material-price">—</span></div>
+          <div><b>MACHINE SERVICE</b><span id="s001-live-machine">—</span></div>
+          <div><b>BUDGETARY TOTAL</b><span id="s001-live-q">—</span></div>
+          <div><b>MODELED TIME</b><span id="s001-live-time">—</span></div>
+          <div><b>TABS</b><span id="s001-live-tabs">—</span></div>
+          <div><b>COMMISSIONED</b><span>false</span></div>
+          <div><b>PHYSICAL AUTHORITY</b><span>false</span></div>
+          <div><b>STORE RECEIPT</b><span id="s001-live-receipt">—</span></div>
+        </div>
       </div>
-      <div class="s001-v2-order">
-        <div><b>MATERIAL</b><span>STB-ZERO-PLY-050-48X96-001</span></div>
-        <div><b>ROUTED DISPOSITION</b><span>SUPPORTABLE · REFERENCE</span></div>
-        <div><b>REFERENCE AMOUNT</b><span>$26.55 material-only</span></div>
-        <div><b>PROCESS / SECONDARY COST</b><span>UNRESOLVED</span></div>
-        <div><b>COMMISSIONED</b><span>false</span></div>
-        <div><b>PHYSICAL AUTHORITY</b><span>false</span></div>
-      </div>
-      <div class="s001-boundary">The Store answer is deliberately mixed: the arched routed opening is inside the current reference envelope; the extra center route and straight-cut requests remain visible but are not invented into that envelope. No binding quote or fabrication authority is created.</div>
-      <div class="btns"><button type="button" data-canonical-go="playhouse-machine">BACK TO MACHINE DEFINITION</button><button type="button" data-canonical-go="playhouse-review">REVIEW JOB FACTS →</button></div>
+      <div class="s001-boundary">This is a fresh answer from the live Store for exactly this version. Change the geometry and the Store is asked again; an earlier answer is never reused. Times are modeled Stage-2 reference assumptions. No binding quote or fabrication authority is created.</div>
+      <div class="btns"><button type="button" data-canonical-go="playhouse-machine">BACK TO MACHINE DEFINITION</button><button type="button" data-canonical-go="playhouse-review" id="s001-to-review">REVIEW JOB FACTS →</button></div>
     `;
-    if (storeRail) storeRail.innerHTML = `<p class="hd">BUILD GUIDE</p><p class="goal">The Store is a membrane</p><div class="row"><b>Supported</b><span>The bounded arched route inside the pinned reference envelope.</span></div><div class="row"><b>Retained, not invented</b><span>Additional requested features stay in the job even when this Store envelope does not yet admit them.</span></div>`;
+    if (storeRail) storeRail.innerHTML = `<p class="hd">BUILD GUIDE</p><p class="goal">The Store is a membrane</p><div class="row"><b>Asked fresh</b><span>Every version of the sheet goes to the live Store. The page never answers for the Store.</span></div><div class="row"><b>Refused stays refused</b><span>If the Store says no, the reason is the result and the later steps stay closed.</span></div>`;
 
     if (storeMain) {
       if (!canonicalDoctrine || canonicalDoctrine.expectedProcessStepCount !== 12) {
@@ -1975,7 +1981,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
           '<div class="band" style="font-size:12px;line-height:1.55"><p style="margin:0">' + canonicalDoctrine.definitionHtml + '</p></div>' +
           canonicalDoctrine.processIntroHtml +
           canonicalDoctrine.processStepsHtml +
-          '<div class="s001-v2-callout"><b>CURRENT PLAYHOUSE STATUS</b>The process above is the shared journey. The section below is the actual reference answer for this project; unresolved work remains unresolved.</div>' +
+          '<div class="s001-v2-callout"><b>CURRENT PLAYHOUSE STATUS</b>The process above is the shared journey. The section below is the live Store's answer for this exact version; refused or unresolved work stays that way.</div>' +
           projectAnswer;
       }
     }
@@ -1989,14 +1995,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         <div><b>PROJECT</b><span>Playhouse arched window</span></div>
         <div><b>WOOD</b><span>48 × 96 in · 1/2 in plywood</span></div>
         <div><b>OPENING</b><span id="s001-review-opening"></span></div>
-        <div><b>PRIMARY ROUTE</b><span>SUPPORTABLE · REFERENCE</span></div>
-        <div><b>CENTER FEATURE</b><span>Requested · retained separately</span></div>
-        <div><b>STRAIGHT CUTS</b><span>2 requested · 18 in from sheet ends · separate path</span></div>
+        <div><b>STORE ANSWER</b><span data-s001-bind="status">—</span></div>
+        <div><b>CENTER FEATURE</b><span>Split down the center · two pieces kept on tabs</span></div>
+        <div><b>STRAIGHT CUTS</b><span>2 requested · 18 in from sheet ends</span></div>
+        <div><b>BUDGETARY TOTAL</b><span data-s001-bind="q">—</span></div>
         <div><b>RETURN MATERIAL</b><span>Center and remnants retained for User 1</span></div>
         <div><b>HARDWARE</b><span>Not included</span></div>
       </div>
       <div class="s001-boundary">Confirming this review retains the job definition. It is not payment, reservation, production release, machine readiness, or physical execution authorization.</div>
-      <div class="btns"><button type="button" data-canonical-go="playhouse-store">BACK TO STORE</button><button type="button" data-canonical-go="playhouse-request">CONFIRM THIS VERSION →</button></div>
+      <div class="btns"><button type="button" data-canonical-go="playhouse-store">BACK TO STORE</button><button type="button" data-canonical-go="playhouse-request" data-s001-needs-supportable>CONFIRM THIS VERSION →</button></div>
     `;
 
     const result = doc.getElementById('playhouse-result');
@@ -2007,8 +2014,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       <div class="s001-v2-order">
         <div><b>CLASS</b><span>S001_CENTERED_ARCHED_SHEET_V0</span></div>
         <div><b>GEOMETRY</b><span id="s001-result-geometry"></span></div>
-        <div><b>ROUTED STORE STATUS</b><span>SUPPORTABLE · REFERENCE</span></div>
-        <div><b>ADDITIONAL OPS</b><span>Retained · not admitted to pinned routed envelope</span></div>
+        <div><b>STORE STATUS</b><span data-s001-bind="status">—</span></div>
+        <div><b>BUDGETARY TOTAL</b><span data-s001-bind="q">—</span></div>
         <div><b>PHYSICAL STATUS</b><span>NOT CLAIMED / NOT AUTHORIZED</span></div>
         <div><b>OWNER MATERIAL</b><span>Center + remnants designated for return</span></div>
       </div>
@@ -2024,18 +2031,20 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       <div class="s001-v2-order">
         <div><b>PROJECT</b><span>Playhouse arched window</span></div>
         <div><b>OWNER</b><span>User 1 · demonstration project</span></div>
-        <div><b>MATERIAL</b><span>STB-ZERO-PLY-050-48X96-001 · 48 × 96 in · 1/2 in plywood</span></div>
+        <div><b>MATERIAL</b><span data-s001-bind="material">—</span></div>
         <div><b>GEOMETRY</b><span id="s001-record-geometry"></span></div>
-        <div><b>PRIMARY STORE REQUEST</b><span>SHEET_MODE2_ARCHED_APERTURE_V0</span></div>
-        <div><b>PRIMARY STORE RESULT</b><span>SUPPORTABLE · REFERENCE</span></div>
-        <div><b>RETENTION</b><span>4 requested tabs · 5 planned by reference policy · NOT MEASURED physically</span></div>
-        <div><b>ADDITIONAL REQUESTS</b><span>Internal center route + two straight cuts · retained outside pinned routed envelope</span></div>
+        <div><b>STORE REQUEST</b><span>SHEET_PACKAGE_V1</span></div>
+        <div><b>STORE RESULT</b><span data-s001-bind="status">—</span></div>
+        <div><b>RETENTION</b><span data-s001-bind="tabs">—</span></div>
+        <div><b>REQUESTED WORK</b><span>Arched opening + center split + two straight cuts</span></div>
         <div><b>RETURN TO OWNER</b><span>Center piece and remaining sheet pieces</span></div>
         <div><b>HARDWARE</b><span>Not included</span></div>
-        <div><b>MATERIAL-ONLY REFERENCE</b><span>$26.55</span></div>
-        <div><b>PROCESS / SECONDARY PRICE</b><span>UNRESOLVED</span></div>
+        <div><b>MATERIAL PRICE</b><span data-s001-bind="materialPrice">—</span></div>
+        <div><b>MACHINE SERVICE</b><span data-s001-bind="machine">—</span></div>
+        <div><b>BUDGETARY TOTAL</b><span data-s001-bind="q">—</span></div>
         <div><b>PHYSICAL EXECUTION</b><span>false · no cut, inspection, staging or pickup recorded</span></div>
-        <div><b>STORE PIN</b><span>4402abeb6b0299a5b6db2eec85ed04c3b0236bcc</span></div>
+        <div><b>STORE PIN</b><span data-s001-bind="pin">—</span></div>
+        <div><b>STORE RECEIPT</b><span data-s001-bind="receipt">—</span></div>
       </div>
       <div class="s001-v2-callout"><b>Outcome, not gadget.</b>The human page explains why the job exists. The machine page carries only material, geometry and operations. The order / record page keeps only what the journey actually established.</div>
       <div class="btns"><button type="button" data-canonical-go="playhouse-s001">RETURN TO INTENT</button><button type="button" data-canonical-go="projects">HOME</button></div>
@@ -2718,39 +2727,39 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
     ensureProjectJourneyPage('playhouse-request',
       '<p class="stage-tag">5 · REQUEST</p><h1>REQUEST · PLAYHOUSE WINDOW</h1>' +
-      '<p class="sub">Carry one identified project definition forward without turning the reference Store answer into an order.</p>' +
+      '<p class="sub">Carry one identified project definition forward without turning the Store answer into an order.</p>' +
       '<div class="s001-v2-order">' +
         '<div><b>PROJECT</b><span>Playhouse arched window</span></div>' +
         '<div><b>GEOMETRY</b><span id="s001-request-geometry"></span></div>' +
-        '<div><b>PRIMARY ROUTE</b><span>SUPPORTABLE · REFERENCE</span></div>' +
-        '<div><b>ADDITIONAL OPS</b><span>Internal center route + two straight cuts · unresolved / separate path</span></div>' +
+        '<div><b>STORE ANSWER</b><span data-s001-bind="status">—</span></div>' +
+        '<div><b>BUDGETARY TOTAL</b><span data-s001-bind="q">—</span></div>' +
         '<div><b>FULL COMMERCIAL OFFER</b><span>NOT ESTABLISHED</span></div>' +
         '<div><b>PHYSICAL AUTHORITY</b><span>NOT AUTHORIZED</span></div>' +
       '</div>' +
       '<div class="s001-boundary"><b>REQUEST ≠ ORDER.</b> The project may continue through the journey while unsupported or unpriced work stays explicit. Nothing here accepts terms, pays, allocates material, releases production, or starts a machine.</div>' +
-      '<div class="btns"><button type="button" data-canonical-go="playhouse-review">BACK TO REVIEW</button><button type="button" data-canonical-go="playhouse-yard">SEND TO THE YARD →</button></div>',
-      '<p class="goal">Carry the exact ask</p><div class="row"><b>Do not drop the extra work</b><span>Unresolved center-route and straight-cut requests remain part of the project.</span></div><div class="row"><b>Do not promote the Store answer</b><span>Reference supportability is not an order or offer.</span></div>'
+      '<div class="btns"><button type="button" data-canonical-go="playhouse-review">BACK TO REVIEW</button><button type="button" data-canonical-go="playhouse-yard" data-s001-needs-supportable>SEND TO THE YARD →</button></div>',
+      '<p class="goal">Carry the exact ask</p><div class="row"><b>Do not drop the extra work</b><span>The center split and straight cuts stay part of the project.</span></div><div class="row"><b>Do not promote the Store answer</b><span>A budgetary Store answer is not an order or offer.</span></div>'
     );
 
     ensureProjectJourneyPage('playhouse-yard',
-      '<p class="stage-tag">6 · YARD</p><h1>YARD · REFERENCE RESPONSE</h1>' +
-      '<p class="sub">The yard can answer what its current reference surface knows and leave the rest open.</p>' +
+      '<p class="stage-tag">6 · YARD</p><h1>YARD · STORE ANSWER</h1>' +
+      '<p class="sub">The yard works from the Store answer for this exact version.</p>' +
       '<div class="s001-v2-order">' +
         '<div><b>PROJECT</b><span>Playhouse arched window</span></div>' +
         '<div><b>GEOMETRY</b><span id="s001-yard-geometry"></span></div>' +
-        '<div><b>ROUTED OPENING</b><span>SUPPORTABLE · REFERENCE</span></div>' +
-        '<div><b>MATERIAL-ONLY REFERENCE</b><span>$26.55</span></div>' +
-        '<div><b>CENTER ROUTE / STRAIGHT CUTS</b><span>UNRESOLVED · separate operation path</span></div>' +
+        '<div><b>STORE ANSWER</b><span data-s001-bind="status">—</span></div>' +
+        '<div><b>BUDGETARY TOTAL</b><span data-s001-bind="q">—</span></div>' +
+        '<div><b>MATERIAL</b><span data-s001-bind="material">—</span></div>' +
         '<div><b>SELLER-OF-RECORD OFFER</b><span>NOT ESTABLISHED</span></div>' +
       '</div>' +
-      '<div class="s001-boundary">A mixed answer is still a valid answer. Supported work stays supported; unresolved work stays visible. The project is not rejected merely because every requested operation is not yet inside one Store envelope.</div>' +
+      '<div class="s001-boundary">Only a SUPPORTABLE Store answer reaches the yard. A refusal is a result, not something the yard works around.</div>' +
       '<div class="btns"><button type="button" data-canonical-go="playhouse-request">BACK TO REQUEST</button><button type="button" data-canonical-go="playhouse-terms">CONTINUE TO TERMS →</button></div>',
       '<p class="goal">Answer only what the yard owns</p><div class="row"><b>Material / capability</b><span>Reference evidence may be stated.</span></div><div class="row"><b>Commercial authority</b><span>Still absent unless separately established.</span></div>'
     );
 
     ensureProjectJourneyPage('playhouse-terms',
       '<p class="stage-tag">7 · TERMS</p><h1>TERMS · KEEP THE EVENTS APART</h1>' +
-      '<p class="sub">This project has a bounded definition and a reference Store answer. The later commercial and physical events remain null.</p>' +
+      '<p class="sub">This project has a bounded definition and a live Store answer. The later commercial and physical events remain null.</p>' +
       '<div class="s001-v2-order">' +
         '<div><b>OFFER</b><span>NOT ESTABLISHED</span></div>' +
         '<div><b>ACCEPTANCE</b><span>NOT ESTABLISHED</span></div>' +
@@ -2783,11 +2792,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       const riseInput = doc.getElementById('s001-arch-rise');
       if (!widthInput || !straightInput || !riseInput) return;
       let straight = Math.max(1, Math.min(35, Number(straightInput.value) || 24));
-      let rise = Math.max(1, Number(riseInput.value) || 12);
+      let rise = Math.max(1, Math.min(12, Number(riseInput.value) || 12));
       let width = Math.max(1, Math.min(48, Number(widthInput.value) || 36));
-      const maxRise = Math.max(1, 36 - straight);
-      riseInput.max = String(maxRise);
-      if (rise > maxRise) rise = maxRise;
       widthInput.value = String(width); straightInput.value = String(straight); riseInput.value = String(rise);
       const g = read();
       text('s001-opening-width-out', fmt(g.width) + ' in');
@@ -2823,7 +2829,140 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       text('s001-request-geometry', `${fmt(g.width)} wide · ${fmt(g.straight)} straight · ${fmt(g.rise)} rise · ${fmt(g.total)} total height`);
       text('s001-yard-geometry', `${fmt(g.width)} wide · ${fmt(g.straight)} straight · ${fmt(g.rise)} rise · ${fmt(g.total)} total height`);
       text('s001-record-geometry', `${fmt(g.width)} wide · ${fmt(g.straight)} straight · ${fmt(g.rise)} rise`);
+      s001AskIfChanged(g);
     };
+
+    // ── Playhouse · the live Store answers every version of the sheet ─────────────────────────────
+    // The page carries the project's own definition to the pinned Store through the shared client and
+    // shows what comes back. It never answers for the Store, never reuses an earlier answer for a changed
+    // version, and never changes the geometry to get a yes. Steps 4–6 open only on a SUPPORTABLE answer
+    // for the version on screen.
+    const S001_PROJECT_ID = 'playhouse';
+    const S001_REQUEST_TYPE = 'SHEET_PACKAGE_V1';
+    const s001Live = { token:0, asking:false, answer:null, error:null, version:null, timer:null };
+    function s001Definition(g) {
+      return {
+        configurationId:'PLAYHOUSE-ARCHED-WINDOW',
+        configurationVersion:`playhouse-w${g.width}-s${g.straight}-r${g.rise}-t4-c18x18`,
+        sheet:{ thicknessIn:0.5, lengthIn:96, widthIn:48 },
+        features:[
+          { featureId:'OPENING', kind:'ARCHED_APERTURE', placement:'CENTERED', widthIn:g.width, straightHeightIn:g.straight, riseIn:g.rise, retain:'TABS', requestedTabCount:4 },
+          { featureId:'CENTER-SPLIT', kind:'STRAIGHT_SPLIT', within:'OPENING', line:'VERTICAL_CENTERLINE' },
+          { featureId:'CUT-LEFT', kind:'CROSSCUT', fromEnd:'LEFT', distanceIn:18 },
+          { featureId:'CUT-RIGHT', kind:'CROSSCUT', fromEnd:'RIGHT', distanceIn:18 }
+        ],
+        returnAllPieces:true
+      };
+    }
+    function s001Supportable() {
+      const a = s001Live.answer;
+      return !s001Live.asking && !s001Live.error && !!a && a.evaluation?.status === 'SUPPORTABLE' && a.version === s001Live.version;
+    }
+    const s001Money = value => Number.isFinite(Number(value)) ? '$' + Number(value).toFixed(2) : '—';
+    const S001_OP_TEXT = {
+      LOAD_REFERENCE:() => 'Load the sheet and reference it on the sheet cell',
+      ROUTE_PROFILE:op => op.profile === 'STRAIGHT_SPLIT'
+        ? `Route the center split · ${fmt(op.lengthIn)} in`
+        : `Route the arched opening · ${fmt(op.lengthIn)} in · ${op.tabs} tabs kept`,
+      RELEASE:() => 'Release the sheet from the cell',
+      CROSSCUT:op => `Panel-saw crosscut at ${fmt(op.xIn)} in`,
+      LABEL:() => 'Label every piece'
+    };
+    function s001Render() {
+      const a = s001Live.answer;
+      const ev = a?.evaluation || null;
+      const status = s001Live.asking ? 'ASKING'
+        : s001Live.error ? 'UNAVAILABLE'
+        : ev?.status || 'ASKING';
+      const box = doc.getElementById('s001-live-answer');
+      if (box) box.dataset.storeStatus = s001Live.error ? 'ERROR' : status;
+      const statusText = s001Live.asking ? 'ASKING THE STORE…'
+        : s001Live.error ? 'THE STORE COULD NOT ANSWER (' + s001Live.error + '). NO EARLIER ANSWER IS REUSED.'
+        : ev?.status === 'SUPPORTABLE' ? 'SUPPORTABLE · STAGE-2 REFERENCE'
+        : ev?.status || '—';
+      text('s001-live-status', statusText);
+      text('s001-live-status-2', s001Live.error ? 'NO ANSWER' : (ev?.status || '—'));
+      const reasons = doc.getElementById('s001-live-reasons');
+      if (reasons) reasons.innerHTML = (!s001Live.asking && ev && ev.status !== 'SUPPORTABLE')
+        ? (ev.reasonRecords || []).map(r => '<li><b>' + r.code + '</b> · ' + r.explanation + '</li>').join('')
+        : '';
+      const ok = !s001Live.asking && ev?.status === 'SUPPORTABLE';
+      text('s001-live-summary', ok ? `${ev.pieces.length} pieces come back to User 1 · ${fmt(ev.time.T_MACHINE_min)} min modeled` : '');
+      const ops = doc.getElementById('s001-live-operations');
+      if (ops) ops.innerHTML = ok ? ev.operations.map(op => '<li>' + (S001_OP_TEXT[op.opId]?.(op) || op.opId) + '</li>').join('') : '';
+      const kinds = ok ? ev.pieces.reduce((m,p) => (m[p.kind] = (m[p.kind]||0) + 1, m), {}) : {};
+      text('s001-live-pieces', ok ? `Returned: ${kinds.PANEL||0} end panels, ${kinds.FRAME||0} frame, ${kinds.RETAINED_CENTER_PIECE||0} center pieces on tabs.` : '');
+      const material = ev?.material ? `${ev.material.storeSku} · ${ev.material.description || ''}` : '—';
+      const tabs = ok ? (() => { const t = ev.features.apertures[0]?.tabPlan; return `${t.requestedTabCount} requested · ${t.plannedTabCount} planned · retention NOT MEASURED`; })() : '—';
+      const receipt = ok ? String(a.receipt.receiptHash).slice(0,16) + '… · request ' + String(a.requestId).slice(0,8) : '—';
+      text('s001-live-material', material);
+      text('s001-live-material-price', ok ? s001Money(ev.totals.material) : '—');
+      text('s001-live-machine', ok ? s001Money(ev.totals.machine_service) : '—');
+      text('s001-live-q', ok ? s001Money(ev.totals.Q) + ' budgetary · not a quote' : '—');
+      text('s001-live-time', ok ? fmt(ev.time.T_MACHINE_min) + ' min · modeled, not measured' : '—');
+      text('s001-live-tabs', tabs);
+      text('s001-live-receipt', receipt);
+      const binds = {
+        status: s001Live.error ? 'NO ANSWER' : (ev?.status || '—'),
+        q: ok ? s001Money(ev.totals.Q) + ' budgetary' : '—',
+        material,
+        materialPrice: ok ? s001Money(ev.totals.material) : '—',
+        machine: ok ? s001Money(ev.totals.machine_service) : '—',
+        tabs,
+        pin: a?.storePin || '—',
+        receipt
+      };
+      doc.querySelectorAll('[data-s001-bind]').forEach(el => { el.textContent = binds[el.dataset.s001Bind] ?? '—'; });
+      const open = s001Supportable();
+      doc.querySelectorAll('[data-s001-needs-supportable]').forEach(button => {
+        button.disabled = !open;
+        if (open) button.removeAttribute('aria-disabled'); else button.setAttribute('aria-disabled','true');
+      });
+      doc.documentElement.dataset.playhouseStoreStatus = binds.status;
+      applyPlayhouseNavState();
+    }
+    function s001Ask(g) {
+      const client = window.STBStoreClient;
+      const definition = s001Definition(g);
+      const token = ++s001Live.token;
+      s001Live.version = definition.configurationVersion;
+      s001Live.asking = true; s001Live.error = null; s001Live.answer = null;
+      s001Render();
+      clearTimeout(s001Live.timer);
+      s001Live.timer = setTimeout(() => {
+        if (!client) { s001Live.asking = false; s001Live.error = 'STORE_CLIENT_UNAVAILABLE'; s001Render(); return; }
+        client.sendJob({
+          projectId:S001_PROJECT_ID,
+          requestType:S001_REQUEST_TYPE,
+          candidateRevisionId:definition.configurationVersion,
+          payload:{ definition, definitionKind:'sheet_package.v1', ruleVersion:'0.1' }
+        }).then(body => {
+          if (token !== s001Live.token) return;
+          const ev = body.rawEvaluation;
+          // The answer must be this project's answer for this exact version.
+          if (body.projectId !== S001_PROJECT_ID || body.requestType !== S001_REQUEST_TYPE || ev?.configurationVersion !== definition.configurationVersion) {
+            throw new Error('STORE_ANSWER_NOT_FOR_THIS_VERSION');
+          }
+          s001Live.answer = { evaluation:ev, receipt:body.evaluationReceipt, requestId:body.requestId, storePin:body.storePin, version:definition.configurationVersion };
+          s001Live.asking = false;
+          s001Render();
+        }).catch(error => {
+          if (token !== s001Live.token) return;
+          s001Live.asking = false; s001Live.answer = null; s001Live.error = error?.message || 'STORE_ZERO_UNAVAILABLE';
+          s001Render();
+        });
+      }, 250);
+    }
+    function s001AskIfChanged(g) {
+      const version = s001Definition(g).configurationVersion;
+      if (version === s001Live.version && (s001Live.asking || s001Live.answer)) { s001Render(); return; }
+      s001Ask(g);
+    }
+    win.STBPlayhouseLive = Object.freeze({
+      definition:() => s001Definition(read()),
+      state:() => JSON.parse(JSON.stringify({ asking:s001Live.asking, error:s001Live.error, version:s001Live.version, answer:s001Live.answer })),
+      supportable:() => s001Supportable()
+    });
 
     ['s001-opening-width','s001-straight-height','s001-arch-rise'].forEach(id => doc.getElementById(id)?.addEventListener('input', sync));
     doc.getElementById('s001-reset')?.addEventListener('click', () => {
@@ -3018,6 +3157,22 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       applySeatNavState();
     });
 
+    // Playhouse: steps 4–6 open only when the live Store has answered SUPPORTABLE for the version on screen.
+    function playhouseStageOpen(stage) {
+      if (!['request','yard','terms','recap','record'].includes(stage)) return true;
+      return !!win.STBPlayhouseLive?.supportable();
+    }
+    function applyPlayhouseNavState() {
+      const nav = doc.querySelector('.recovery-nav');
+      if (!nav || activeJourneyProject !== 'playhouse') return;
+      nav.querySelectorAll('button[data-job-project="playhouse"]').forEach(button => {
+        const on = playhouseStageOpen(button.dataset.journeyStage);
+        button.disabled = !on;
+        if (on) button.removeAttribute('aria-disabled');
+        else button.setAttribute('aria-disabled','true');
+      });
+    }
+
     function wireStartOwnJourneyNav(nav) {
       wireTrailJourneyNav(nav, 'start-own');
     }
@@ -3080,6 +3235,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
           applyStartOwnNavState();
         } else if (activeJourneyProject === 'playhouse') {
           wireTrailJourneyNav(nav, 'playhouse');
+          applyPlayhouseNavState();
         } else if (activeJourneyProject === 'alcove') {
           wireTrailJourneyNav(nav, 'alcove');
         } else if (activeJourneyProject === 'outdoor') {
@@ -3138,6 +3294,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       }
       const target = PROJECT_STAGE_TARGETS[projectId]?.[stage] || null;
       if (!target || !doc.getElementById(target)) return false;
+      // A refused, unresolved or unanswered Playhouse version keeps the commercial and cut steps closed.
+      if (projectId === 'playhouse' && !playhouseStageOpen(stage)) { applyPlayhouseNavState(); return true; }
       originalShow.call(win, target);
       if (projectId === 'start-own' || projectId === 'outdoor') syncJourneyNav(stage);
       if (projectId === 'outdoor') {
