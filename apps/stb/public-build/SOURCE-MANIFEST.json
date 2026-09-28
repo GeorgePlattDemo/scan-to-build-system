@@ -332,6 +332,20 @@
       "blobSha": "9ab1a12b093285fa377d13bde619e66aad0f9379",
       "bytes": 221542,
       "reason": "Job 1 bench: the whole-job line ends \"Not worth dragging the miter saw out\" (was \"The Store says it fits\"); the line under the pills stops at the price. Cache-buster for the updated bench."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "job1-price-after-store",
+      "blobSha": "d173ace30b7a8354af3593297c01a215282cf241",
+      "bytes": 88886,
+      "reason": "Job 1 bench: the price tile (\"Back from the Store\", in the Store color) sits directly below the working screen, right after the whole-job line, so the price reads as the answer that came back from the Store."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-price-after-store",
+      "blobSha": "d9bf681cad8a5081c1e635380e8e6e592fa9652d",
+      "bytes": 221400,
+      "reason": "Job 1 bench: the working screen no longer shows a price; the line under the pills gives size, angle and board, and the Store line drops its Q. The price appears only in the tile below. Cache-buster for the updated bench."
     }
   ]
 }

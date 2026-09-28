@@ -86,6 +86,9 @@
   .bench-intent-slot .stb-user1-facts label{display:none}
   .bench-intent-slot{margin:0 0 18px}
   .bench-panel{border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:16px;margin:14px 0}
+  .store-answer-panel{border-color:#9bb8cf;background:#eef4f9}
+  .store-answer-panel .kicker{margin:0 0 2px;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:#2f6f9e;text-transform:uppercase}
+  @media(prefers-color-scheme:dark){.store-answer-panel{border-color:#35536b;background:#17222c}.store-answer-panel .kicker{color:#8fb8da}}
   .bench-higher{margin:14px 0 0;padding:12px 14px;border:1px solid var(--border-accent);border-radius:10px;background:var(--tint)}
   .higher-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .higher-row h2{font-size:16px;margin:0}
@@ -339,6 +342,16 @@
     </div>
   </div>
 
+  <div class="bench-panel store-answer-panel">
+    <p class="kicker">Back from the Store</p>
+    <h2>REFERENCE CALCULATED PRICE</h2>
+    <div class="price-block"><div><p class="lede" id="stb-price-basis">Store Zero budgetary estimate from the current material answer and modeled D-001 work.</p></div><div class="price-big" id="stb-price-total">NOT COMPLETE</div></div>
+    <div class="definition-grid">
+      <div class="defrow"><span>Material</span><span id="stb-price-material">—</span></div>
+      <div class="defrow"><span>Modeled machine service</span><span id="stb-price-processing">—</span></div>
+    </div>
+  </div>
+
   <div class="bench-panel">
     <h2>RESULTING DEFINITION / REFERENCE ORDER — USER 1</h2>
     <div class="definition-grid">
@@ -386,15 +399,6 @@
   <div class="bench-panel warn">
     <h2>Before you send it</h2>
     <p class="lede" id="stb-before-send">Current unresolved conditions remain attached to this version. Nothing is filled in by assumption.</p>
-  </div>
-
-  <div class="bench-panel">
-    <h2>REFERENCE CALCULATED PRICE</h2>
-    <div class="price-block"><div><p class="lede" id="stb-price-basis">Store Zero budgetary estimate from the current material answer and modeled D-001 work.</p></div><div class="price-big" id="stb-price-total">NOT COMPLETE</div></div>
-    <div class="definition-grid">
-      <div class="defrow"><span>Material</span><span id="stb-price-material">—</span></div>
-      <div class="defrow"><span>Modeled machine service</span><span id="stb-price-processing">—</span></div>
-    </div>
   </div>
 
   <div class="confirm-block">
