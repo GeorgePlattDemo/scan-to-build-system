@@ -51,7 +51,7 @@ Every project tile on the Shared Home follows one protocol. The machine-readable
 4. "The Store answers" is always a fresh answer from the live hosted Store for the current definition. No cached answer, no browser copy of Store logic. A changed definition is asked again.
 5. Within the envelope: priced → your call → paid (simulated) → cut → pick up and record. Past the envelope: the Store refuses, steps 4–6 stay inert, and the refusal is the result. Both are passes.
 6. One commercial terms flow for every tile: offer, accept, pay, allocate, release, cut, stage, ready, custody. Alcove is the reference wording and order.
-7. Layout may vary; rules may not. **Window Seat (Space utilization) is the one declared exception** and stays outside these rules until it is separately brought in. No other tile may be excepted.
+7. Layout may vary; rules may not. No tile is excepted. Window Seat (Space utilization) is the one fully worked example: it may show every detail in one scroll, but taken to the bench it runs the same six steps against the same live Store.
 8. Adding a tile means declaring it in the trail contract. Nothing else.
 9. The guest is the user. No demo-account names on project pages.
 

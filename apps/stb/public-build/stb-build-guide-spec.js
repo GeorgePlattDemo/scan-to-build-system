@@ -151,11 +151,12 @@
       ['Fail closed','Missing Store coverage stays missing.'],
       ['Known wart','Still iframe-hosted.']
     ]),
-    'window-seat-live':guide('Same truth, two views',[
-      ['Guided ≠ different data','One snapshot, different visibility.'],
-      ['Continuous is audit mode','Not a second journey.'],
-      ['View changes no authority','Only visibility changes.'],
-      ['Known wart','Iframe complicates focus, print, routing, analytics.']
+    'window-seat-live':guide('One job, two views',[
+      ['Same rules','Six steps, live Store. No exception.'],
+      ['Whole job = audit view','Same state, every step shown.'],
+      ['Fork at the hero','Bench, or read it all.'],
+      ['Gap','Mill-to-width: asked, not answered yet.'],
+      ['Known wart','Iframe complicates focus, print, routing.']
     ]),
     'proof-store':guide('Show the exact Store answer',[
       ['Keep the long IDs','They prove which answer this is.'],

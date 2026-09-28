@@ -1,5 +1,7 @@
 # Project-owned journey routing
 
+> **Window Seat sections superseded (2026-09-28).** Window Seat 0.8 is no longer a dual-view exception: it runs the same six-step trail as every tile and asks the live Store. See the trail rules in [`AGENTS.md`](../../AGENTS.md). The rest of this note stands.
+
 **Status:** current human-visible routing protocol  
 **Scope:** bounded projects in the Scan-to-Build human-visible application  
 **Implementation target:** current promoted `scan-to-build-review` shell; accepted `apps/stb` runtime remains unchanged by this correction.

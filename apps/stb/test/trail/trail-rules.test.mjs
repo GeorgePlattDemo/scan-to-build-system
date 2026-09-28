@@ -6,7 +6,7 @@
 // - A KNOWN_FAILING entry that no longer happens also fails the test, telling you to delete it
 //   (once a tile is fixed, it stays fixed).
 //
-// Checks per tile (the one declared exception, Window Seat, is skipped):
+// Checks per tile (no tile is excepted):
 //   R1  the top nav shows the six trail steps, with the contract labels, in order
 //   R2  every visible nav button lands on this tile's own pages (or Landing / Home); no other buttons
 //   R3  a step you cannot use yet is shown inert (disabled); steps 2-6 never silently do nothing

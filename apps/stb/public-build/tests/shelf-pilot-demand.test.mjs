@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const alcove=fs.readFileSync('system-build-base-8d8a9dd.html','utf8');
 const bridge=fs.readFileSync('stb-alcove-store-bridge.js','utf8');
 new vm.Script(bridge,{filename:'stb-alcove-store-bridge.js'});
-const seat=fs.readFileSync('stb-window-seat-space-utilization-0.7.4.html','utf8');
+const seat=fs.readFileSync('stb-window-seat-0.8.html','utf8');
 
 // Alcove: one bounded option, off by default, derived from existing shelf elevations.
 assert.match(alcove,/pilotShelves:false/);
@@ -79,35 +79,24 @@ assert.equal(/stockLengthIn:72|stockLengthIn:96|STB-ZERO-HW-ALCOVE-PACK-001/.tes
 assert.match(alcove,/selectionAuthority:'STORE_ZERO'/);
 assert.match(alcove,/requirementId:'ALCOVE-PINS-AND-SCREWS'/);
 
-// Window Seat: same concept, derived from the actual generated tower shelf datums.
-assert.match(seat,/shelfPilotSpots:false/);
-assert.match(seat,/id="c-shelf-pilot"/);
+// Window Seat: same concept, derived from the actual generated tower shelf datums,
+// sent to the live Store inside each board's own part (cut-package spots). No local price path.
+assert.match(seat,/spots:\{on:false,rule:'INSET_FROM_EDGE',inset:1\.5\}/);
+assert.match(seat,/id="c-spots"/);
+assert.match(seat,/id="c-spot-place"/);
 assert.match(seat,/shelfDatums=\[\]/);
 assert.match(seat,/shelfDatums\.push\(r3\(y\)\)/);
 assert.match(seat,/shelfDatums\.push\(r3\(datum\)\)/);
-assert.match(seat,/shelfPilotDemand:\{enabled:P\.shelfPilotSpots/);
-assert.match(seat,/kind:'SPOT_ON_LOCATION'/);
-assert.match(seat,/targetOccurrenceId:upright\.id/);
-assert.match(seat,/partRelativeXIn:r3\(y\)/);
-assert.match(seat,/reference:'FROM_BASE'/);
-assert.match(seat,/acrossWidthRule:'CENTERED_ON_WIDE_FACE'/);
-assert.match(seat,/toolDiameterIn:0\.1875/);
-assert.match(seat,/basis:'DERIVED_FROM_CONFIGURED_SHELF_ELEVATION'/);
-assert.match(seat,/operationId:'OP-SHELF-PILOT-SPOTS-316'/);
-assert.match(seat,/mode:'SPOT_ON_LOCATION'/);
-assert.match(seat,/basis:'GENERATED FROM CONFIGURATION'/);
-assert.match(seat,/not a generic finished-hole request/);
-assert.match(seat,/current Window Seat price does not absorb this new operation; Store migration remains required/);
-assert.match(seat,/def\.shelfPilotDemand\.features\.forEach/);
+assert.match(seat,/rule:'CENTERED_ON_WIDE_FACE',inset:null/);
+assert.match(seat,/rule:'INSET_FROM_EDGE',inset:1\.5/);
+assert.match(seat,/rule:'INSET_FROM_EDGE',inset:2\}/);
+assert.match(seat,/acrossWidthRule:place\.rule/);
+assert.match(seat,/insetFromEdgeIn=place\.inset/);
+assert.match(seat,/if\(spots\[r\.id\]&&spots\[r\.id\]\.length\)part\.spots=spots\[r\.id\]/);
 assert.match(seat,/fill="#2f6f9e"/);
+// The Store answers; the page carries no Store catalog, price rule or recovery model.
+assert.match(seat,/stb-store-client\.js/);
+assert.match(seat,/requestType:'CUT_PACKAGE_V1'/);
+assert.equal(/sellingPrice\s*\*|list_reference|RECOVERY|FIXTURE|onHand/.test(seat),false,'Window Seat page contains Store-owned price, stock or recovery logic');
 
-// The local legacy adapter has no special priced branch for the new shelf pilot operation;
-// it therefore reaches the declared UNRESOLVED fallback instead of being silently priced.
-assert.equal(/if\(o\.operationId==='OP-SHELF-PILOT-SPOTS-316'\)/.test(seat),false);
-assert.match(seat,/no declared service line for this request at this pin — the Store answers it, this page does not invent it/);
-
-// Alcove now routes the option to Store for evaluation; Window Seat remains unmigrated.
-assert.match(alcove,/pricingStatus:alcove\.pilotShelves\?'STORE_EVALUATION_REQUIRED':'NOT_REQUESTED'/);
-assert.match(seat,/pricingStatus:P\.shelfPilotSpots\?'UNPRICED_UNTIL_STORE_MIGRATION':'NOT_REQUESTED'/);
-
-console.log('PASS · Alcove and Window Seat expose optional shelf-elevation SPOT_ON_LOCATION demand without inventing Store pricing');
+console.log('PASS · Alcove and Window Seat send optional shelf-elevation SPOT_ON_LOCATION demand to the Store without inventing Store pricing');

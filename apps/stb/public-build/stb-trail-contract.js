@@ -42,10 +42,7 @@
     Object.freeze({
       id: 'window-seat',
       tileLabel: 'Space utilization',
-      pages: Object.freeze(['window-seat-live']),
-      // Rule 7: the one declared exception. Window Seat keeps its long-scroll configurator and is not
-      // held to the trail rules until it is separately brought in. No other tile may use this flag.
-      exception: 'Window Seat: long-scroll configurator, outside the trail rules until separately brought in.'
+      pages: Object.freeze(['window-seat-live'])
     }),
     Object.freeze({
       id: 'playhouse',
@@ -54,7 +51,8 @@
     })
   ]);
 
-  const EXCEPTION_IDS = Object.freeze(TILES.filter(tile => tile.exception).map(tile => tile.id));
+  // Rule 7: no exceptions. Layout may vary; the rules may not.
+  const EXCEPTION_IDS = Object.freeze([]);
 
   g.STBTrailContract = Object.freeze({
     version: VERSION,
