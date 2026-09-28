@@ -64,3 +64,9 @@ jobs:
           test/store/cut-package.test.mjs
           test/store/alcove.test.mjs
           test/integration/playhouse-live-store.test.mjs
+
+      - name: Trail rules R4-R6 for every tile against the pinned Store
+        working-directory: apps/stb
+        env:
+          STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-live
+        run: node --test --test-concurrency=1 test/integration/trail-terms.test.mjs

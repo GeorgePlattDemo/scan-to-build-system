@@ -11,7 +11,9 @@ test('Job 1 Yard is one continuous scroll with one final customer action', () =>
 
   const buttons=[...yard.matchAll(/<button\b/g)];
   assert.equal(buttons.length,1,'Yard must expose exactly one page action');
-  assert.match(yard,/data-proof-sim-action="handoff-record">CUSTOMER \/ YARD RECORD HANDOFF →<\/button>/);
+  // The yard itself runs through the shared terms flow; pickup and the full receipt are on the record step.
+  assert.match(yard,/<div class="start-own-terms-host" data-terms-step="yard"><\/div>/);
+  assert.match(yard,/data-proof-go="proof-record">PICK UP &amp; RECORD →<\/button>/);
 
   for(const oldButton of ['SIMULATE ALLOCATION','SIMULATE RELEASE','RUN CELL SIMULATION','INSPECT / LABEL / STAGE','ISSUE READY NOTICE','CONTINUE → RECEIPTS']){
     assert.equal(yard.includes(oldButton),false,'obsolete Yard button remains: '+oldButton);

@@ -17,6 +17,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
 <script src="stb-store-client.js?v=7eb5ab65"></script>
 <script src="stb-user-defined-board-runtime-bridge.js?v=f77a49e9"></script>
+<script src="stb-terms-flow.js?v=850b1843"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
 <script src="stb-build-guide-spec.js?v=a2066875"></script>
 <script>
@@ -1029,6 +1030,13 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                       mode:'LIVE_STORE_RUNTIME'
                     },
                     evaluationReceipt:freshReceipt,
+                    wire:{
+                      payloadDigest:freshStoreBody.payloadDigest || null,
+                      demandSignature:freshStoreBody.demandSignature || null,
+                      requestId:freshStoreBody.requestId || null,
+                      storePin:freshStoreBody.storePin || null,
+                      sentAt:freshStoreBody.sentAt || null
+                    },
                     authority:startOwnAuthority
                   };
                   const selectedWorkpieceLengthIn = Number.isFinite(workpieceLengthIn)
@@ -1180,7 +1188,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.1.html?v=d7795586"
+                  src="stb-outdoor-picnic-0.1.html?v=6d3f7a51"
                 ></iframe>
               </div>
             `;
@@ -1212,7 +1220,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="window-seat-frame"
                   class="window-seat-shell-frame"
                   title="Space utilization · Window seat"
-                  src="stb-window-seat-0.8.html?v=702a948d"
+                  src="stb-window-seat-0.8.html?v=922170b1"
                 ></iframe>
               </div>
             `;
@@ -1483,6 +1491,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         if (el) el.textContent = value;
       });
       renderAlcoveChain();
+      feedAlcoveTerms();
+      renderAlcoveTerms();
     }
 
     // ── Alcove version chain ──────────────────────────────────────────────
@@ -1538,15 +1548,47 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         + '<li><p class="chainstep">1 · SENT</p>' + alcoveHashLine('Version', vLabel + ' · ' + (answer.candidateRevisionId || '—')) + alcoveHashLine('Sent', win.STBAlcoveLastSentAt || version.confirmedAt) + alcoveHashLine('Sent hash', answer.payloadDigest) + alcoveHashLine('Demand signature', answer.demandSignature) + '</li>'
         + '<li><p class="chainstep">2 · ARRIVED AT STORE ZERO</p>' + alcoveHashLine('Receipt hash', receipt.receiptHash) + alcoveHashLine('Request', receipt.requestId) + alcoveHashLine('Received', receipt.evaluatedAt) + alcoveHashLine('Store revision', authority.storeRevision) + alcoveHashLine('Catalog', authority.catalogHash) + alcoveHashLine('Machine envelope', (authority.machineEnvelope?.id || '') + ' · ' + (authority.machineEnvelope?.hash || '—')) + alcoveHashLine('Economics', (authority.economics?.id || '') + ' · ' + (authority.economics?.hash || '—')) + '</li>'
         + '<li><p class="chainstep">3 · ANSWERED</p>' + alcoveHashLine('Status', status + ' · ' + price) + alcoveHashLine('Input hash', answer.calculationIdentity?.inputHash) + alcoveHashLine('Result hash', answer.calculationIdentity?.resultHash) + '</li>'
-        + '<li><p class="chainstep">4 · YOUR CALL</p>' + (decision ? alcoveHashLine(decision.decision, decision.hash) + alcoveHashLine('At', decision.at) : alcoveHashLine('Waiting', 'acknowledge or decline this answer')) + '</li>'
-        + '<li><p class="chainstep">5 · FINAL VERSION</p>' + (order ? alcoveHashLine('Order hash', order.hash) + alcoveHashLine('At', order.at + ' · simulated · no money moved') : alcoveHashLine('Waiting', 'continue after acknowledging')) + '</li>'
+        + '<li><p class="chainstep">4 · YOUR CALL AND AFTER</p>' + alcoveHashLine('Terms flow', 'your call, payment, yard and handoff follow on the next steps, one hash per event') + '</li>'
         + '</ol>'
         + (history ? '<p class="chainstep">VERSION HISTORY</p><ul class="chainhistory">' + history + '</ul>' : '')
         + '</div>';
     }
+    var alcoveTerms = window.STBTermsFlow ? window.STBTermsFlow.create({ projectId:'alcove', title:'Alcove insert' }) : null;
+    window.STBTermsFlow?.installStyle(doc);
+    function feedAlcoveTerms() {
+      if (!alcoveTerms) return;
+      const { answer, version } = alcoveChainFacts();
+      if (!answer || !version) { alcoveTerms.setAnswer(null); return; }
+      const ev = answer.rawEvaluation || {};
+      const status = ev.status || answer.priceCompleteness?.status || 'UNRESOLVED';
+      const reasons = (ev.reasonRecords || answer.priceCompleteness?.reasonRecords || []).map(r => ({ code:r.code, text:r.explanation || '' }));
+      (answer.priceCompleteness?.refusalConditions || []).forEach(code => { if (!reasons.some(r => r.code === code)) reasons.push({ code, text:'' }); });
+      (answer.priceCompleteness?.unresolvedConditions || []).forEach(code => { if (!reasons.some(r => r.code === code)) reasons.push({ code, text:'' }); });
+      const total = answer.rawEstimate?.totals?.Q ?? ev.estimate?.totals?.Q ?? null;
+      const supportable = status === 'SUPPORTABLE' && answer.priceCompleteness?.status === 'COMPLETE_FOR_DECLARED_COMPONENT_TRAVEL';
+      alcoveTerms.setAnswer({ version:'alcove-v' + version.n + '-' + (answer.candidateRevisionId || ''), status: supportable ? 'SUPPORTABLE' : (status === 'SUPPORTABLE' ? 'UNRESOLVED' : status),
+        total, reasons, body:answer, sentAt: win.STBAlcoveLastSentAt || version.confirmedAt || null });
+    }
+    function renderAlcoveTerms() {
+      if (!alcoveTerms) return;
+      doc.querySelectorAll('.alcove-terms-host').forEach(host => {
+        const step = host.dataset.termsStep;
+        host.innerHTML = alcoveTerms.renderControls(step) + alcoveTerms.renderChain();
+      });
+      doc.documentElement.dataset.alcoveTerms = alcoveTerms.state().stage;
+      applyAlcoveNavState();
+    }
+    function alcoveStageOpen(stage) {
+      if (!alcoveTerms) return true;
+      const t = alcoveTerms.state();
+      if (['request'].includes(stage)) return t.callOpen;
+      if (['yard','terms'].includes(stage)) return t.yardOpen;
+      if (['recap','record'].includes(stage)) return t.recordOpen;
+      return true;
+    }
     function renderAlcoveChain() {
       if (activeJourneyProject !== 'alcove') return;
-      ['store', 'request', 'yard', 'record'].forEach(pageId => {
+      ['store'].forEach(pageId => {
         const main = doc.querySelector('#' + pageId + ' .main');
         if (!main) return;
         let box = main.querySelector(':scope > .alcove-chain-slot');
@@ -1560,25 +1602,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         box.innerHTML = html;
       });
     }
-    async function recordAlcoveDecision(kind) {
-      const { answer, receipt, version } = alcoveChainFacts();
-      if (!answer || !version) return;
-      const at = new Date().toISOString();
-      const hash = await alcoveSha256({ kind:'ALCOVE_DECISION', decision:kind, version:version.n, receiptHash:receipt.receiptHash || null, resultHash:answer.calculationIdentity?.resultHash || null, at });
-      alcoveChainState.decision = { decision:kind, hash, at };
-      alcoveChainState.order = null;
-      renderAlcoveChain();
-    }
-    async function recordAlcoveOrder() {
-      const { answer, receipt, version } = alcoveChainFacts();
-      const decision = alcoveChainState.decision;
-      if (!answer || !version || !decision || decision.decision !== 'ACKNOWLEDGED' || alcoveChainState.order) return;
-      const at = new Date().toISOString();
-      const hash = await alcoveSha256({ kind:'ALCOVE_FINAL_VERSION', version:version.n, decisionHash:decision.hash, receiptHash:receipt.receiptHash || null, resultHash:answer.calculationIdentity?.resultHash || null, amount:textOf('p-price'), packaging:selectedDecision('Packaging'), handoff:selectedDecision('Handoff'), collector:selectedDecision('Who collects'), at });
-      alcoveChainState.order = { hash, at };
-      renderAlcoveChain();
-    }
-
     function reconcileAlcoveCommercialJourney() {
       const storePage = doc.getElementById('store');
       const storeMain = storePage?.querySelector(':scope > .main');
@@ -1690,14 +1713,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       storeMain.append(returnedOffer);
 
       requestMain.innerHTML = `
-        <p class="tag">ALCOVE · ACCEPT / SETTLE</p>
-        <h1>Store answered. The commercial event remains separate.</h1>
-        <p class="sub">This is the customer handoff. The Store answer is complete enough for the current reference demonstration; now the holder may accept, decline, or return to Configure for a new version.</p>
+        <p class="tag">ALCOVE · YOUR CALL</p>
+        <h1>Store answered. Your call.</h1>
+        <p class="sub">Accept and send exactly this version to the Store, decline it, or return to Configure for a new version.</p>
         <div class="hdr">
           <div><b>VERSION</b><span>Version 1 · confirmed</span></div>
-          <div><b>STORE ANSWER</b><span>REFERENCE · RETURNED</span></div>
-          <div><b>ACCEPTANCE</b><span id="alcove-acceptance-state">NOT ESTABLISHED</span></div>
-          <div><b>SETTLEMENT</b><span id="alcove-settlement-state">NOT ESTABLISHED</span></div>
+          <div><b>STORE ANSWER</b><span>LIVE · RETURNED</span></div>
         </div>
         <h2>Returned Store answer</h2>
         <div class="cols">
@@ -1713,40 +1734,23 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
           </div>
         </div>
         <div class="band"><b>Timing basis before acceptance.</b> Settlement → material allocation → production release → Store / Yard queue → local readiness → required operations → inspection / labels / packaging → staging → READY notice → pickup / delivery. Existing reference timing only: staging target ≤2 business hours after the last required cycle, then a 4-business-hour pickup window after READY. This is not a live ETA.</div>
-        <div class="band warn"><b>Reference commerce only.</b> This demonstration does not process money. Offer ≠ acceptance. Acceptance ≠ settlement. Settlement ≠ allocation. Allocation ≠ production release. Selecting reference acceptance below does not record payment or create downstream physical authority.</div>
+        <div class="band warn"><b>Simulated commerce.</b> No money moves. Offer ≠ acceptance ≠ payment ≠ allocation ≠ production release. Accepting records your acceptance, a simulated payment and a place in the yard queue for exactly this version; it creates no physical authority.</div>
+        <div class="alcove-terms-host" data-terms-step="call"></div>
         <div class="btns">
           <button type="button" data-alcove-commercial-action="change">CHANGE DEFINITION</button>
-          <button type="button" data-alcove-commercial-action="decline">DO NOT CONTINUE</button>
-          <button class="primary" type="button" data-alcove-commercial-action="accept">ACKNOWLEDGE REFERENCE ANSWER</button>
-          <button type="button" data-alcove-commercial-action="yard" disabled>CONTINUE REFERENCE DEMONSTRATION →</button>
         </div>
-        <p id="alcove-commercial-decision-note" class="fine">No customer decision recorded. Settlement / payment remains NOT ESTABLISHED.</p>
       `;
       if (requestRail) requestRail.innerHTML = '<p class="hd">ACCEPT / SETTLE</p><p class="goal">Store answered. The holder decides.</p><div class="row"><b>One real handoff</b><span>Store returns the answer; the customer decides whether to proceed.</span></div><div class="row"><b>Reference commerce</b><span>Acceptance can be demonstrated. Payment is not falsely claimed.</span></div><div class="row"><b>Keep the verbs separate</b><span>Accept ≠ settle ≠ allocate ≠ release.</span></div>';
 
       yardMain.innerHTML = `
         <p class="tag">ALCOVE · STORE / YARD FULFILLMENT</p>
         <h1>Order status · Store / Yard acts</h1>
-        <p class="sub">The customer's ordering decisions are finished on the Store surface. The remaining events belong to Store, Yard, the local cell, quality, and handoff. This reference build shows their status; it does not ask the customer to manually advance them.</p>
+        <p class="sub">The remaining events belong to Store, Yard, the local cell, quality and handoff. In this demonstration the yard is simulated, one button, each event recorded with its hash.</p>
         <div class="hdr">
-          <div><b>PROJECT</b><span>alcove insert · Version 1</span></div>
-          <div><b>COMMERCIAL</b><span>REFERENCE ONLY</span></div>
-          <div><b>FULFILLMENT</b><span>NOT RELEASED</span></div>
+          <div><b>PROJECT</b><span>alcove insert</span></div>
           <div><b>PHYSICAL AUTHORITY</b><span>NONE</span></div>
         </div>
-        <div class="timeline">
-          <div class="dot open">○</div><div>Settlement established</div><div class="who">commercial</div><div class="when">NOT ESTABLISHED</div>
-          <div class="dot open">○</div><div>Material allocated</div><div class="who">store</div><div class="when">NOT ALLOCATED</div>
-          <div class="dot open">○</div><div>Production released</div><div class="who">release</div><div class="when">NOT RELEASED</div>
-          <div class="dot open">○</div><div>Store / Yard queue</div><div class="who">yard</div><div class="when">NOT QUEUED</div>
-          <div class="dot open">○</div><div>Local cell readiness</div><div class="who">cell</div><div class="when">NOT ESTABLISHED</div>
-          <div class="dot open">○</div><div>Cycle Start</div><div class="who">local operator</div><div class="when">NOT AUTHORIZED HERE</div>
-          <div class="dot open">○</div><div>Cut · mill · drill · label</div><div class="who">local cell</div><div class="when">NOT RECORDED</div>
-          <div class="dot open">○</div><div>Secondary work / inspection</div><div class="who">quality</div><div class="when">NOT RECORDED</div>
-          <div class="dot open">○</div><div>Packaging / staging</div><div class="who">yard</div><div class="when">NOT RECORDED</div>
-          <div class="dot open">○</div><div>READY notice</div><div class="who">fulfillment</div><div class="when">NOT ISSUED</div>
-          <div class="dot open">○</div><div>Pickup / delivery preparation</div><div class="who">yard</div><div class="when">NOT RECORDED</div>
-        </div>
+        <div class="alcove-terms-host" data-terms-step="yard"></div>
         <h2>Selected fulfillment preferences</h2>
         <div class="kv"><span>Packaging</span><span id="alcove-yard-packaging">—</span></div>
         <div class="kv"><span>Pickup / delivery</span><span id="alcove-yard-handoff">—</span></div>
@@ -1760,7 +1764,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       recordMain.innerHTML = `
         <p class="tag">ALCOVE · HANDOFF / OWNER RECORD</p>
         <h1>Handoff · record</h1>
-        <p class="sub">One final surface shows what Store / Yard would complete, what the user receives and does, and the exact owner-held record. Missing events stay missing.</p>
+        <p class="sub">Record the pickup to issue the full receipt: every event from sent to custody, each with its hash. Missing events stay missing.</p>
+        <div class="alcove-terms-host" data-terms-step="record"></div>
         <div class="cards">
           <div class="card"><b>What Store / Yard does</b><span>Complete required work; inspect; label; group; package / crate if selected; stage; issue READY; release at pickup / delivery; record custody; reconcile material, remnants and exceptions; close its fulfillment record when those events actually exist.</span></div>
           <div class="card"><b>What the user does</b><span>Receive READY; pick up or receive delivery; verify handoff; take custody; retain the project / part record; later assemble, install or finish work that always remained owner work.</span></div>
@@ -1772,7 +1777,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       recordMain.append(recordBlock);
       const finalBoundary = doc.createElement('div');
       finalBoundary.className = 'band warn';
-      finalBoundary.innerHTML = '<b>Current demonstration truth.</b> Commercial completion, physical outcome, READY, custody and closeout remain absent unless separately evidenced. A later event never backfills a missing earlier event.';
+      finalBoundary.innerHTML = '<b>Current demonstration truth.</b> Payment and the yard are simulated. No physical outcome is claimed. A later event never backfills a missing earlier event.';
       recordMain.append(finalBoundary);
       const recordBottom = doc.createElement('div');
       recordBottom.className = 'bottom';
@@ -1786,6 +1791,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     }
 
     reconcileAlcoveCommercialJourney();
+    if (alcoveTerms) {
+      alcoveTerms.onChange(renderAlcoveTerms);
+      doc.querySelectorAll('.alcove-terms-host').forEach(host => alcoveTerms.bind(host, (action, t) => {
+        if (action === 'accept' && t.stage === 'QUEUED') originalShow.call(win, 'yard');
+        else if (action === 'yard' && t.stage === 'READY') originalShow.call(win, 'record');
+        setTimeout(syncAlcoveCommercialSurface, 0);
+      }));
+    }
 
     win.addEventListener('click', function(event) {
       if (activeJourneyProject !== 'alcove') return;
@@ -1793,9 +1806,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       if (!action) return;
       event.preventDefault();
       event.stopImmediatePropagation();
-      const note = doc.getElementById('alcove-commercial-decision-note');
-      const acceptance = doc.getElementById('alcove-acceptance-state');
-      const continueButton = doc.querySelector('#request [data-alcove-commercial-action="yard"]');
       if (action === 'change') {
         originalShow.call(win,'alcove-config');
         return;
@@ -1805,35 +1815,19 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         setTimeout(syncAlcoveCommercialSurface,0);
         return;
       }
-      if (action === 'decline') {
-        doc.documentElement.dataset.alcoveReferenceDecision = 'declined';
-        if (acceptance) acceptance.textContent = 'DECLINED · REFERENCE';
-        if (note) note.textContent = 'Reference offer declined. Definition remains intact; no settlement or downstream authority was created.';
-        if (continueButton) continueButton.disabled = true;
-        recordAlcoveDecision('DECLINED');
-        return;
-      }
-      if (action === 'accept') {
-        doc.documentElement.dataset.alcoveReferenceDecision = 'acknowledged';
-        if (acceptance) acceptance.textContent = 'NOT ESTABLISHED · NO COMMERCIAL OFFER';
-        if (note) note.textContent = 'Reference Store answer acknowledged. Commercial acceptance and settlement / payment remain NOT ESTABLISHED.';
-        if (continueButton) continueButton.disabled = false;
-        recordAlcoveDecision('ACKNOWLEDGED');
-        return;
-      }
       if (action === 'store') {
         originalShow.call(win,'store');
         setTimeout(syncAlcoveCommercialSurface,0);
         return;
       }
       if (action === 'yard') {
-        if (doc.documentElement.dataset.alcoveReferenceDecision !== 'acknowledged') return;
-        recordAlcoveOrder();
+        if (!alcoveStageOpen('yard')) return;
         originalShow.call(win,'yard');
         setTimeout(syncAlcoveCommercialSurface,0);
         return;
       }
       if (action === 'record') {
+        if (!alcoveStageOpen('record')) return;
         originalShow.call(win,'record');
         return;
       }
@@ -2042,10 +2036,11 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         <div><b>MATERIAL PRICE</b><span data-s001-bind="materialPrice">—</span></div>
         <div><b>MACHINE SERVICE</b><span data-s001-bind="machine">—</span></div>
         <div><b>BUDGETARY TOTAL</b><span data-s001-bind="q">—</span></div>
-        <div><b>PHYSICAL EXECUTION</b><span>false · no cut, inspection, staging or pickup recorded</span></div>
+        <div><b>PHYSICAL EXECUTION</b><span>false · simulated yard events only</span></div>
         <div><b>STORE PIN</b><span data-s001-bind="pin">—</span></div>
         <div><b>STORE RECEIPT</b><span data-s001-bind="receipt">—</span></div>
       </div>
+      <div class="s001-terms-host" data-terms-step="record"></div>
       <div class="s001-v2-callout"><b>Outcome, not gadget.</b>The human page explains why the job exists. The machine page carries only material, geometry and operations. The order / record page keeps only what the journey actually established.</div>
       <div class="btns"><button type="button" data-canonical-go="playhouse-s001">RETURN TO INTENT</button><button type="button" data-canonical-go="projects">HOME</button></div>
     `;
@@ -2121,7 +2116,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       +'</div>'
       +'<div class="band"><b>THE USER CHOICE.</b> You already came to the yard for the board. The modeled machine-service portion for this exact definition is <b id="proof-accept-service-copy">—</b>. Owning a miter saw does not make setup, measuring, three angled cuts, spotting, cleanup and carrying the board home free. The choice is yours.</div>'
       +'<div class="proof-gap"><b>PRACTICE RUN.</b>No money moves. No physical stock is reserved. No board is cut. Offer, acceptance and payment still get separate receipts.</div>'
-      +'<div class="proof-nav"><button type="button" data-proof-return-source>← GO BACK / CHANGE DEFINITION</button><button class="next primary" id="proof-accept-pay-yard" type="button" data-proof-sim-action="accept-pay-yard">ACCEPT ESTIMATE / PAY / SEND TO YARD →</button></div>',
+      +'<div class="start-own-terms-host" data-terms-step="call"></div>'
+      +'<div class="proof-nav"><button type="button" data-proof-return-source>← GO BACK / CHANGE DEFINITION</button></div>',
       '<p class="goal">A small service can still be useful</p><div class="row"><b>Machine service is visible</b><span>The customer sees the service portion separately from material.</span></div><div class="row"><b>Simulation stays labeled</b><span>Offer, acceptance and payment get receipts without pretending live commerce occurred.</span></div>'
     );
 
@@ -2129,6 +2125,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       '<p class="stage-tag">STORE / YARD · CONTINUOUS FULFILLMENT RECORD</p><h1>THE PAID DEFINITION BECOMES PHYSICAL WORK.</h1>'
       +'<p class="sub">One identified job travels through the Yard. The events stay separate and keep their own receipts.</p>'
       +'<div class="band"><b data-proof-job-thread>JOB 1 · X BRACE</b></div>'
+      +'<div class="start-own-terms-host" data-terms-step="yard"></div>'
       +'<div class="proof-actor-grid">'
         +'<div><b>JOB</b><span id="proof-yard-job">—</span></div>'
         +'<div><b>VERSION</b><span id="proof-yard-version">—</span></div>'
@@ -2235,7 +2232,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         +'<div class="kv"><span>READY</span><span id="proof-yard-ready-state">NOT RECORDED</span></div>'
         +'<div class="kv"><span>CUSTODY</span><span id="proof-yard-custody-state">NOT TRANSFERRED</span></div>'
       +'</div>'
-      +'<div class="proof-nav"><button class="next primary" id="proof-yard-handoff" type="button" data-proof-sim-action="handoff-record">CUSTOMER / YARD RECORD HANDOFF →</button></div>',
+      +'<div class="proof-nav"><button class="next primary" id="proof-yard-handoff" type="button" data-proof-go="proof-record">PICK UP &amp; RECORD →</button></div>',
       '<p class="goal">The whole circuit stays visible</p><div class="row"><b>One definition</b><span>Store, controller, operator and Yard add only the facts they own.</span></div><div class="row"><b>One audit chain</b><span>Every simulated receipt remains tied to the identified Store result.</span></div><div class="row"><b>One physical boundary</b><span>Cycle Start stays local; simulation never claims machine authority.</span></div>'
     );
 
@@ -2263,6 +2260,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       '<p class="stage-tag">FINAL OWNER RECORD</p><h1>PICKED UP. GO FIX THAT BENCH.</h1>'
       +'<p class="sub">Everything that happened stays tied to the exact version you approved.</p>'
       +'<div class="band"><b data-proof-job-thread>JOB 1 · X BRACE</b></div>'
+      +'<div class="start-own-terms-host" data-terms-step="record"></div>'
       +'<div class="proof-actor-grid">'
         +'<div><b>JOB</b><span id="proof-record-job">—</span></div>'
         +'<div><b>VERSION</b><span id="proof-record-version">—</span></div>'
@@ -2374,6 +2372,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     }
 
     function syncProofSimulationUI(){
+      renderStartOwnTerms();
       applyStartOwnNavState();
       if(proofHandoff?.source!=='start-own') return;
       const sim=ensureProofSimulation();
@@ -2462,10 +2461,45 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       doc.querySelectorAll('.recovery-nav button[data-journey-stage]').forEach(button=>{
         if(activeJourneyProject!=='start-own') return;
         const stage=button.dataset.journeyStage;
-        if(stage==='yard') button.disabled=!paid;
-        if(stage==='terms') button.disabled=!ready;
-        if(stage==='record') button.disabled=!custody;
+        const on=canOpenStartOwnSimulationStage(stage);
+        button.disabled=!on;
       });
+    }
+
+    var startOwnTerms = window.STBTermsFlow ? window.STBTermsFlow.create({ projectId:'start-own', title:'Job 1 · X brace' }) : null;
+    window.STBTermsFlow?.installStyle(doc);
+    function feedStartOwnTerms(){
+      if(!startOwnTerms) return;
+      const ref=proofHandoff?.source==='start-own' ? proofHandoff?.payload?.storeReference : null;
+      if(!ref){ startOwnTerms.setAnswer(null); return; }
+      const economics=proofSimulationEconomics();
+      const receipt=ref.evaluationReceipt||null;
+      const supportable=ref.status==='SUPPORTABLE' && economics.complete===true && Number.isFinite(Number(economics.q));
+      const reasons=[...(ref.refusalConditions||[]),...(ref.unresolvedConditions||[])].map(code=>({code:String(code),text:''}));
+      startOwnTerms.setAnswer({
+        version:String(proofHandoff.storeHandoff?.versionId||proofHandoff.payload?.id||'job-1')+'|'+String(receipt?.requestId||ref.wire?.requestId||''),
+        status:supportable?'SUPPORTABLE':(ref.status==='SUPPORTABLE'?'UNRESOLVED':ref.status||'UNRESOLVED'),
+        total:economics.q, reasons,
+        body:{ payloadDigest:ref.wire?.payloadDigest||null, demandSignature:ref.wire?.demandSignature||null, requestId:receipt?.requestId||ref.wire?.requestId||null,
+          storePin:ref.source?.storePin||ref.wire?.storePin||null, evaluationReceipt:receipt, calculationIdentity:ref.calculationIdentity||null },
+        sentAt:ref.wire?.sentAt||null
+      });
+    }
+    function renderStartOwnTerms(){
+      if(!startOwnTerms) return;
+      feedStartOwnTerms();
+      doc.querySelectorAll('.start-own-terms-host').forEach(host=>{
+        host.innerHTML=startOwnTerms.renderControls(host.dataset.termsStep)+startOwnTerms.renderChain();
+      });
+      doc.documentElement.dataset.startOwnTerms=startOwnTerms.state().stage;
+    }
+    if(startOwnTerms){
+      doc.querySelectorAll('.start-own-terms-host').forEach(host=>startOwnTerms.bind(host,(action,t)=>{
+        if(action==='accept'&&t.stage==='QUEUED') handleProofSimulationAction('accept-pay-yard');
+        else if(action==='yard'&&t.stage==='READY'){ handleProofSimulationAction('run-yard'); syncProofSimulationUI(); }
+        else if(action==='pickup'&&t.stage==='HANDED_OFF'){ handleProofSimulationAction('handoff-record'); }
+        renderStartOwnTerms(); applyStartOwnNavState();
+      }));
     }
 
     function handleProofSimulationAction(action){
@@ -2478,11 +2512,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         proofSimulationReceipt('SIMULATED_OFFER','Simulated offer created from the identified Store answer · total '+money);
         proofSimulationReceipt('SIMULATED_ACCEPTANCE','Customer accepted the simulated offer for the same identified definition');
         proofSimulationReceipt('SIMULATED_PAYMENT','Simulated payment recorded · '+money+' · no money moved');
-        completeProofYardSimulation();
+        proofSimulationReceipt('SIMULATED_QUEUE','Sent to the Store · in the yard queue for the same identified paid definition');
         syncProofSimulationUI();
         originalShow.call(win,'proof-yard');
         syncJourneyNav('yard');
         return true;
+      } else if(action==='run-yard'){
+        if(!proofSimulationHas('SIMULATED_PAYMENT')) return true;
+        completeProofYardSimulation();
       } else if(action==='offer'){
         if(economics.complete!==true || !Number.isFinite(q)) return true;
         proofSimulationReceipt('SIMULATED_OFFER','Simulated offer created from the identified Store answer · total '+money);
@@ -2527,6 +2564,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
     function canOpenStartOwnSimulationStage(stage){
       if(proofHandoff?.source!=='start-own') return stage==='scan'||stage==='configure';
+      // The shared terms flow decides: 4 needs a SUPPORTABLE answer, 5 an accepted order, 6 a READY order.
+      const t=startOwnTerms?.state();
+      if(t){
+        if(stage==='request'||stage==='review') return t.callOpen;
+        if(stage==='yard'||stage==='terms') return t.yardOpen;
+        if(stage==='recap'||stage==='record') return t.recordOpen;
+        return true;
+      }
       if(stage==='yard') return proofSimulationHas('SIMULATED_PAYMENT');
       if(stage==='terms') return proofSimulationHas('SIMULATED_READY_NOTICE');
       if(stage==='record') return proofSimulationHas('SIMULATED_CUSTODY_TRANSFER');
@@ -2727,17 +2772,17 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
     ensureProjectJourneyPage('playhouse-request',
       '<p class="stage-tag">5 · REQUEST</p><h1>REQUEST · PLAYHOUSE WINDOW</h1>' +
-      '<p class="sub">Carry one identified project definition forward without turning the Store answer into an order.</p>' +
+      '<p class="sub">Your call on exactly this version: accept and send it to the Store, or decline.</p>' +
       '<div class="s001-v2-order">' +
         '<div><b>PROJECT</b><span>Playhouse arched window</span></div>' +
         '<div><b>GEOMETRY</b><span id="s001-request-geometry"></span></div>' +
         '<div><b>STORE ANSWER</b><span data-s001-bind="status">—</span></div>' +
         '<div><b>BUDGETARY TOTAL</b><span data-s001-bind="q">—</span></div>' +
-        '<div><b>FULL COMMERCIAL OFFER</b><span>NOT ESTABLISHED</span></div>' +
         '<div><b>PHYSICAL AUTHORITY</b><span>NOT AUTHORIZED</span></div>' +
       '</div>' +
-      '<div class="s001-boundary"><b>REQUEST ≠ ORDER.</b> The project may continue through the journey while unsupported or unpriced work stays explicit. Nothing here accepts terms, pays, allocates material, releases production, or starts a machine.</div>' +
-      '<div class="btns"><button type="button" data-canonical-go="playhouse-review">BACK TO REVIEW</button><button type="button" data-canonical-go="playhouse-yard" data-s001-needs-supportable>SEND TO THE YARD →</button></div>',
+      '<div class="s001-terms-host" data-terms-step="call"></div>' +
+      '<div class="s001-boundary"><b>REQUEST ≠ ORDER.</b> Accept &amp; send to Store records your acceptance, a simulated payment and a place in the yard queue for exactly this version. Decline ends it here. Nothing here starts a machine.</div>' +
+      '<div class="btns"><button type="button" data-canonical-go="playhouse-review">BACK TO REVIEW</button><button type="button" data-canonical-go="playhouse-yard" data-s001-needs="yard">SEE THE YARD →</button></div>',
       '<p class="goal">Carry the exact ask</p><div class="row"><b>Do not drop the extra work</b><span>The center split and straight cuts stay part of the project.</span></div><div class="row"><b>Do not promote the Store answer</b><span>A budgetary Store answer is not an order or offer.</span></div>'
     );
 
@@ -2750,24 +2795,18 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         '<div><b>STORE ANSWER</b><span data-s001-bind="status">—</span></div>' +
         '<div><b>BUDGETARY TOTAL</b><span data-s001-bind="q">—</span></div>' +
         '<div><b>MATERIAL</b><span data-s001-bind="material">—</span></div>' +
-        '<div><b>SELLER-OF-RECORD OFFER</b><span>NOT ESTABLISHED</span></div>' +
+        '<div><b>OPERATIONS</b><span data-s001-bind="operations">—</span></div>' +
       '</div>' +
-      '<div class="s001-boundary">Only a SUPPORTABLE Store answer reaches the yard. A refusal is a result, not something the yard works around.</div>' +
-      '<div class="btns"><button type="button" data-canonical-go="playhouse-request">BACK TO REQUEST</button><button type="button" data-canonical-go="playhouse-terms">CONTINUE TO TERMS →</button></div>',
-      '<p class="goal">Answer only what the yard owns</p><div class="row"><b>Material / capability</b><span>Reference evidence may be stated.</span></div><div class="row"><b>Commercial authority</b><span>Still absent unless separately established.</span></div>'
+      '<div class="s001-terms-host" data-terms-step="yard"></div>' +
+      '<div class="s001-boundary">Only an accepted, SUPPORTABLE Store answer reaches the yard. The yard is simulated: no machine runs.</div>' +
+      '<div class="btns"><button type="button" data-canonical-go="playhouse-request">BACK TO YOUR CALL</button><button type="button" data-canonical-go="playhouse-record" data-s001-needs="record">PICK UP &amp; RECORD →</button></div>',
+      '<p class="goal">The yard works the Store answer</p><div class="row"><b>Queue → ready</b><span>Allocate, release, cut, stage and READY, each recorded with its hash.</span></div><div class="row"><b>Simulated</b><span>No machine runs and no money moves.</span></div>'
     );
 
     ensureProjectJourneyPage('playhouse-terms',
       '<p class="stage-tag">7 · TERMS</p><h1>TERMS · KEEP THE EVENTS APART</h1>' +
-      '<p class="sub">This project has a bounded definition and a live Store answer. The later commercial and physical events remain null.</p>' +
-      '<div class="s001-v2-order">' +
-        '<div><b>OFFER</b><span>NOT ESTABLISHED</span></div>' +
-        '<div><b>ACCEPTANCE</b><span>NOT ESTABLISHED</span></div>' +
-        '<div><b>PAYMENT</b><span>NOT ESTABLISHED</span></div>' +
-        '<div><b>ALLOCATION</b><span>NOT ESTABLISHED</span></div>' +
-        '<div><b>PRODUCTION RELEASE</b><span>NOT ESTABLISHED</span></div>' +
-        '<div><b>MACHINE READINESS / CYCLE START</b><span>NOT ESTABLISHED / NOT AUTHORIZED</span></div>' +
-      '</div>' +
+      '<p class="sub">Every event for this version, in order, each with its hash. Open events stay open until they happen.</p>' +
+      '<div class="s001-terms-host" data-terms-step="chain"></div>' +
       '<div class="s001-boundary">definition ≠ request ≠ offer ≠ acceptance ≠ payment ≠ allocation ≠ production release ≠ machine readiness ≠ Cycle Start</div>' +
       '<div class="btns"><button type="button" data-canonical-go="playhouse-yard">BACK TO YARD</button><button type="button" data-canonical-go="playhouse-result">NEXT → RECAP</button></div>',
       '<p class="goal">Null is honest</p><div class="row"><b>Do not fill the blanks</b><span>The journey can continue as a record even when commercial events have not happened.</span></div>'
@@ -2854,6 +2893,39 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         returnAllPieces:true
       };
     }
+    var s001Terms = window.STBTermsFlow ? window.STBTermsFlow.create({ projectId:'playhouse', title:'Playhouse arched window' }) : null;
+    window.STBTermsFlow?.installStyle(doc);
+    function s001FeedTerms() {
+      if (!s001Terms) return;
+      const a = s001Live.answer;
+      if (!a || s001Live.asking || s001Live.error || a.version !== s001Live.version) { s001Terms.setAnswer(null); return; }
+      const ev = a.evaluation;
+      s001Terms.setAnswer({ version:a.version, status:ev.status, total:ev.totals?.Q ?? null,
+        reasons:(ev.reasonRecords || []).map(r => ({ code:r.code, text:r.explanation })), body:a.body, sentAt:a.sentAt });
+    }
+    function s001RenderTerms() {
+      if (!s001Terms) return;
+      doc.querySelectorAll('.s001-terms-host').forEach(host => {
+        const step = host.dataset.termsStep;
+        host.innerHTML = (step === 'chain' ? '' : s001Terms.renderControls(step)) + s001Terms.renderChain();
+      });
+      const t = s001Terms.state();
+      doc.querySelectorAll('[data-s001-needs]').forEach(button => {
+        const open = button.dataset.s001Needs === 'yard' ? t.yardOpen : button.dataset.s001Needs === 'record' ? t.recordOpen : false;
+        button.disabled = !open;
+        if (open) button.removeAttribute('aria-disabled'); else button.setAttribute('aria-disabled','true');
+      });
+      doc.documentElement.dataset.playhouseTerms = t.stage;
+      applyPlayhouseNavState();
+    }
+    if (s001Terms) {
+      s001Terms.onChange(s001RenderTerms);
+      doc.querySelectorAll('.s001-terms-host').forEach(host => s001Terms.bind(host, (action, t) => {
+        if (action === 'accept' && t.stage === 'QUEUED') originalShow.call(win, 'playhouse-yard');
+        else if (action === 'yard' && t.stage === 'READY') originalShow.call(win, 'playhouse-record');
+        s001RenderTerms();
+      }));
+    }
     function s001Supportable() {
       const a = s001Live.answer;
       return !s001Live.asking && !s001Live.error && !!a && a.evaluation?.status === 'SUPPORTABLE' && a.version === s001Live.version;
@@ -2910,6 +2982,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         machine: ok ? s001Money(ev.totals.machine_service) : '—',
         tabs,
         pin: a?.storePin || '—',
+        operations: ok ? ev.operations.map(op => S001_OP_TEXT[op.opId]?.(op) || op.opId).join(' · ') : '—',
         receipt
       };
       doc.querySelectorAll('[data-s001-bind]').forEach(el => { el.textContent = binds[el.dataset.s001Bind] ?? '—'; });
@@ -2919,7 +2992,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         if (open) button.removeAttribute('aria-disabled'); else button.setAttribute('aria-disabled','true');
       });
       doc.documentElement.dataset.playhouseStoreStatus = binds.status;
-      applyPlayhouseNavState();
+      s001FeedTerms();
+      s001RenderTerms();
     }
     function s001Ask(g) {
       const client = window.STBStoreClient;
@@ -2931,6 +3005,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       clearTimeout(s001Live.timer);
       s001Live.timer = setTimeout(() => {
         if (!client) { s001Live.asking = false; s001Live.error = 'STORE_CLIENT_UNAVAILABLE'; s001Render(); return; }
+        const sentAt = new Date().toISOString();
         client.sendJob({
           projectId:S001_PROJECT_ID,
           requestType:S001_REQUEST_TYPE,
@@ -2943,7 +3018,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
           if (body.projectId !== S001_PROJECT_ID || body.requestType !== S001_REQUEST_TYPE || ev?.configurationVersion !== definition.configurationVersion) {
             throw new Error('STORE_ANSWER_NOT_FOR_THIS_VERSION');
           }
-          s001Live.answer = { evaluation:ev, receipt:body.evaluationReceipt, requestId:body.requestId, storePin:body.storePin, version:definition.configurationVersion };
+          s001Live.answer = { evaluation:ev, receipt:body.evaluationReceipt, requestId:body.requestId, storePin:body.storePin, version:definition.configurationVersion, body, sentAt };
           s001Live.asking = false;
           s001Render();
         }).catch(error => {
@@ -2963,6 +3038,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     win.STBPlayhouseLive = Object.freeze({
       definition:() => s001Definition(read()),
       state:() => JSON.parse(JSON.stringify({ asking:s001Live.asking, error:s001Live.error, version:s001Live.version, answer:s001Live.answer })),
+      terms:() => s001Terms?.state() ?? null,
       supportable:() => s001Supportable()
     });
 
@@ -3162,13 +3238,28 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     // Playhouse: steps 4–6 open only when the live Store has answered SUPPORTABLE for the version on screen.
     function playhouseStageOpen(stage) {
       if (!['request','yard','terms','recap','record'].includes(stage)) return true;
-      return !!win.STBPlayhouseLive?.supportable();
+      if (!win.STBPlayhouseLive?.supportable()) return false;
+      const t = win.STBPlayhouseLive.terms();
+      if (stage === 'request') return true;
+      if (stage === 'yard' || stage === 'terms') return !!t?.yardOpen;
+      return !!t?.recordOpen;
     }
     function applyPlayhouseNavState() {
       const nav = doc.querySelector('.recovery-nav');
       if (!nav || activeJourneyProject !== 'playhouse') return;
       nav.querySelectorAll('button[data-job-project="playhouse"]').forEach(button => {
         const on = playhouseStageOpen(button.dataset.journeyStage);
+        button.disabled = !on;
+        if (on) button.removeAttribute('aria-disabled');
+        else button.setAttribute('aria-disabled','true');
+      });
+    }
+
+    function applyAlcoveNavState() {
+      const nav = doc.querySelector('.recovery-nav');
+      if (!nav || activeJourneyProject !== 'alcove') return;
+      nav.querySelectorAll('button[data-job-project="alcove"]').forEach(button => {
+        const on = alcoveStageOpen(button.dataset.journeyStage);
         button.disabled = !on;
         if (on) button.removeAttribute('aria-disabled');
         else button.setAttribute('aria-disabled','true');
@@ -3240,6 +3331,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
           applyPlayhouseNavState();
         } else if (activeJourneyProject === 'alcove') {
           wireTrailJourneyNav(nav, 'alcove');
+          applyAlcoveNavState();
         } else if (activeJourneyProject === 'outdoor') {
           wireTrailJourneyNav(nav, 'outdoor');
           applyOutdoorNavState();
@@ -3290,6 +3382,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         }[stage] || null;
         const target = customerStage ? PROJECT_STAGE_TARGETS.alcove[customerStage] : null;
         if (!target || !doc.getElementById(target)) return false;
+        if (!alcoveStageOpen(customerStage)) { applyAlcoveNavState(); return true; }
         originalShow.call(win, target);
         setTimeout(syncAlcoveCommercialSurface,0);
         return true;

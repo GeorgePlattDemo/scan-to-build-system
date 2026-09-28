@@ -459,10 +459,9 @@
         <p class="dim" id="call-sub">Waiting on a current Store answer.</p>
         <div id="call-body"></div>
         <p class="verbs">confirm ≠ order ≠ pay ≠ allocate ≠ release ≠ cut ≠ ready ≠ picked up</p>
-        <label class="small dim" style="display:flex;gap:8px;align-items:flex-start;margin-top:10px"><input type="checkbox" id="accept-box" disabled> <span>I accept Store Zero’s answer above for exactly this window seat, and I’m ready to pay. (Demo: payment is simulated; no money moves.)</span></label>
+        <div id="call-terms" data-terms-step="call"></div>
         <div class="actions">
           <button type="button" data-to-step="configure">← Change something</button>
-          <button class="go push" type="button" id="accept-pay" disabled>ACCEPT &amp; PAY →</button>
         </div>
       </div>
     </div>
@@ -484,10 +483,10 @@
       <div class="pad">
         <h1>We cut it</h1>
         <p class="dim" id="yard-sub">Nothing is in the yard yet. This step opens after you accept and pay.</p>
+        <div id="yard-terms" data-terms-step="yard"></div>
         <div id="yard-body"></div>
         <div class="actions">
           <button type="button" class="trail-only" data-to-step="request">← Your call</button>
-          <button class="go push" type="button" id="mark-cut" disabled>MARK CUT &amp; READY FOR PICKUP →</button>
         </div>
       </div>
     </div>
@@ -509,6 +508,7 @@
       <div class="pad">
         <h1>Pick up &amp; build</h1>
         <p class="dim" id="record-sub">Nothing to pick up yet. This step opens once the parts are cut and ready.</p>
+        <div id="record-terms" data-terms-step="record"></div>
         <div id="record-body"></div>
         <div class="actions">
           <button type="button" class="trail-only" data-to-step="yard">← We cut it</button>
@@ -529,6 +529,7 @@
 </div>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
 <script src="stb-store-client.js?v=7eb5ab65"></script>
+<script src="stb-terms-flow.js?v=850b1843"></script>
 <script>
 (function(){
 'use strict';
@@ -556,6 +557,9 @@ let P=JSON.parse(JSON.stringify(START));
 let rev={n:1};
 const occHistory={};
 const S={view:'whole',step:'scan',asking:false,answer:null,error:null,order:null,autoPick:null,tried:null};
+/* One terms flow for every tile (stb-terms-flow.js): sent → arrived → answered → your call → paid → queued → yard → handoff. */
+const TERMS=window.STBTermsFlow.create({projectId:'window-seat',title:'Window seat'});
+window.STBTermsFlow.installStyle(document);
 
 /* The customer's wood. The Store answers whether it stocks it. */
 const FAM=[{k:'pine',n:'Select pine',c:'#D8BE7C'},{k:'poplar',n:'Select poplar',c:'#9FA678'},
@@ -1015,7 +1019,7 @@ async function askStore(){
     const body=await send(req.definition);
     S.answer={rev:rev.n,sig:req.sig,stale:false,definition:req.definition,mills:req.mills,
       evaluation:body.rawEvaluation,receipt:body.evaluationReceipt||body.rawEvaluation?.evaluationReceipt||null,
-      requestId:body.requestId,storePin:body.storePin,demand:body.mappedCallInputs?.demand||null};
+      requestId:body.requestId,storePin:body.storePin,demand:body.mappedCallInputs?.demand||null,body,sentAt:new Date().toISOString()};
     /* The bench moved while the Store was answering: the answer belongs to the version that was sent. */
     if(buildRequest(buildDefinition()).sig!==req.sig){S.answer.stale=true;rev.n++}
   }catch(e){S.error=String(e&&e.message||e)}
@@ -1207,10 +1211,29 @@ function renderStore(req){
     :'Not every line is supportable. Change something on the bench, or stop here: a refusal is a result.';
 }
 
+/* Every current Store answer goes to the terms flow; a refusal ends there, with the Store's reasons. */
+function feedTerms(){
+  const v=storeView();
+  if(!v||!answerCurrent()||S.asking||S.error){if(!S.order)TERMS.setAnswer(null);return}
+  const bad=v.lines.filter(l=>l.status!=='SUPPORTABLE');
+  const mills=(S.answer.mills||[]).length;
+  TERMS.setAnswer({version:S.answer.definition.configurationVersion,status:callOpen()?'SUPPORTABLE':(v.ev.status==='SUPPORTABLE'?'UNRESOLVED':v.ev.status||'REFUSED'),
+    total:v.ev.totals?.sumOfSupportableLines,
+    reasons:[...bad.map(l=>({code:l.reasonRecord?.code||l.status,text:lineLabel(l.packageId||l.lineId)+': '+plain(l.reasonRecord?.code||l.status)})),...(mills?[{code:'MILL_TO_WIDTH_NOT_ANSWERED',text:'This Store version can’t answer mill-to-width.'}]:[])],
+    body:S.answer.body,sentAt:S.answer.sentAt});
+}
+function renderTerms(){
+  for(const id of ['call-terms','yard-terms','record-terms']){const h=$(id);if(h)h.innerHTML=TERMS.renderControls(h.dataset.termsStep)+TERMS.renderChain()}
+}
+function afterTerms(action,st){
+  if(action==='accept'&&st.stage==='QUEUED'){acceptAndPay();return}
+  if(action==='yard'&&st.stage==='READY'){markCut();return}
+  render();
+}
 function renderCall(){
   const v=storeView(),open=callOpen();
-  $('accept-box').disabled=!open||!!(S.order&&S.order.rev===rev.n);
-  if(!open){$('call-sub').textContent=S.order?'Revision '+S.order.rev+' was accepted and paid. See the steps below.':'Waiting on a current Store answer with every line supportable.';$('call-body').innerHTML='';$('accept-pay').disabled=true;$('accept-box').checked=false;return}
+  feedTerms();renderTerms();
+  if(!open){$('call-sub').textContent=S.order?'Revision '+S.order.rev+' was accepted and sent to the Store. See the steps below.':'Waiting on a current Store answer with every line supportable.';$('call-body').innerHTML='';return}
   const t=v.ev.totals;
   $('call-sub').textContent='Window seat, revision '+rev.n+' · '+famName()+' · '+money(t.sumOfSupportableLines);
   $('call-body').innerHTML='<div class="box"><h4>WHAT STORE ZERO WILL CUT AND SUPPLY</h4><div class="bd scroll-x"><table class="pt"><thead><tr><th>Line</th><th>Store item</th><th>Qty</th><th>Price</th></tr></thead><tbody>'
@@ -1218,42 +1241,33 @@ function renderCall(){
     +v.it.map(i=>'<tr><td>Hardware</td><td>'+esc(i.storeSku)+'</td><td>'+i.qty+'</td><td>'+money(i.Q)+'</td></tr>').join('')
     +'</tbody></table><div class="kv" style="margin-top:10px"><span>Machine work (in the wood lines)</span><b>'+money(t.machine_service)+'</b></div>'
     +'<div class="kv"><span><b>Total</b></span><b style="font-size:22px">'+money(t.sumOfSupportableLines)+'</b></div>'
-    +'<p class="small dim" style="margin:6px 0 0">Receipt '+esc(String(S.answer.receipt?.receiptHash||'').slice(0,12))+' · budgetary estimate from the live Store, not a commercial quote. Nothing is cut until you accept and pay.</p></div></div>';
-  $('accept-pay').disabled=!($('accept-box').checked&&open)||!!(S.order&&S.order.rev===rev.n);
+    +'<p class="small dim" style="margin:6px 0 0">Receipt '+esc(String(S.answer.receipt?.receiptHash||'').slice(0,12))+' · budgetary estimate from the live Store, not a commercial quote. Nothing is cut until you accept and send it to the Store.</p></div></div>';
 }
 const stamp=()=>new Date().toLocaleString();
 const shortId=p=>p+'-'+(crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)).slice(0,8).toUpperCase();
 function acceptAndPay(){
-  if(!callOpen()||!$('accept-box').checked)return;
-  const v=storeView(),a=S.answer;
-  S.order={rev:rev.n,orderId:shortId('ORDER'),paymentId:shortId('SIM-PAY'),configurationVersion:a.definition.configurationVersion,
+  if(!callOpen()||TERMS.state().stage!=='QUEUED')return;
+  const v=storeView(),a=S.answer,t=TERMS.state();
+  S.order={rev:rev.n,orderId:t.orderId,paymentId:(t.events.find(e=>e.id==='paid')?.detail||'').split(' · ')[1]||'',configurationVersion:a.definition.configurationVersion,
     receiptHash:a.receipt?.receiptHash||'',requestId:a.requestId,storePin:a.storePin,evaluatedAt:a.receipt?.evaluatedAt||'',
     total:v.ev.totals.sumOfSupportableLines,packages:JSON.parse(JSON.stringify(v.pk)),items:JSON.parse(JSON.stringify(v.it)),
     minutes:v.minutes,spots:v.spots,machine:v.ev.totals.machine_service,fam:famName(),acceptedAt:stamp(),paidAt:stamp(),cutAt:null};
   render();go('yard');
 }
-function timelineRows(o){
-  const rows=[['Store answer','receipt '+String(o.receiptHash).slice(0,12)+' · '+o.evaluatedAt],['Offer accepted',o.acceptedAt],
-    ['Paid (simulated)',money(o.total)+' · '+o.paymentId],['In the yard queue',o.orderId+' · position 1']];
-  if(o.cutAt)rows.push(['Cut, staged, ready for pickup (simulated)',o.cutAt]);
-  return rows.map(([k,v])=>'<div><span><b>✓</b> '+k+'</span><span>'+esc(v)+'</span></div>').join('');
-}
 function renderYard(){
   const o=S.order;
-  $('mark-cut').disabled=!o||!!o.cutAt;
-  $('mark-cut').textContent=o&&o.cutAt?'CUT & READY ✓':'MARK CUT & READY FOR PICKUP →';
+  renderTerms();
   if(!o){$('yard-sub').textContent='Nothing is in the yard yet. This step opens after you accept and pay.';$('yard-body').innerHTML='';return}
   $('yard-sub').textContent='Window seat, revision '+o.rev+' · '+o.fam+' · '+money(o.total);
   const boards=o.packages.flatMap(p=>(p.cutPlan||[]).map(b=>({...b,line:lineLabel(p.packageId)})));
-  $('yard-body').innerHTML='<div class="box"><h4>PAID · IN THE YARD QUEUE</h4><div class="bd"><div class="timeline">'+timelineRows(o)+'</div>'
-    +'<p class="small dim" style="margin:0">SIMULATED: offer, acceptance, payment and the yard queue are a demonstration. The cut list is the Store’s own answer for this exact version.</p></div></div>'
-    +'<div class="box"><h4>CUT LIST, BOARD BY BOARD</h4><div class="bd scroll-x"><table class="pt"><thead><tr><th>Board</th><th>Line</th><th>Store item</th><th>Parts, in cut order</th><th>Back to you</th></tr></thead><tbody>'
+  $('yard-body').innerHTML='<div class="box"><h4>CUT LIST, BOARD BY BOARD</h4><div class="bd scroll-x"><table class="pt"><thead><tr><th>Board</th><th>Line</th><th>Store item</th><th>Parts, in cut order</th><th>Back to you</th></tr></thead><tbody>'
     +boards.map(b=>'<tr><td class="id">'+esc(b.boardId)+'</td><td>'+b.line+'</td><td>'+esc(b.storeSku)+' ('+b.stockLengthIn+' in)</td><td>'+(b.partsInCutOrder||[]).map(p=>esc(p.partId)+' '+fmt(p.lengthIn)+'"').join(' → ')+'</td><td>'+(b.stubIn!=null?fmt(b.stubIn)+'" stub':(b.offcutIn!=null?fmt(b.offcutIn)+'" offcut':'—'))+'</td></tr>').join('')
     +'</tbody></table><p class="small dim" style="margin:8px 0 0">'+Math.round(o.minutes)+' min on the machine'+(o.spots?' · '+o.spots+' spots':'')+' · machine work '+money(o.machine)+'.</p></div></div>';
 }
 function markCut(){if(!S.order||S.order.cutAt)return;S.order.cutAt=stamp();render();go('record')}
 function renderRecord(def){
   const o=S.order;
+  renderTerms();
   if(!o||!o.cutAt){$('record-sub').textContent='Nothing to pick up yet. This step opens once the parts are cut and ready.';$('record-body').innerHTML='';return}
   $('record-sub').textContent='Window seat, revision '+o.rev+' · '+o.fam+' · '+money(o.total);
   const where={};o.packages.forEach(p=>(p.cutPlan||[]).forEach(b=>(b.partsInCutOrder||[]).forEach(x=>{where[x.partId]=b.boardId})));
@@ -1262,7 +1276,7 @@ function renderRecord(def){
   if(stubs)kit.push('<tr><td>Stubs</td><td>Returned with your kit</td><td>'+stubs+'</td></tr>');
   o.items.forEach(i=>kit.push('<tr><td>Hardware</td><td>'+esc(i.description||i.storeSku)+'</td><td>'+i.qty+'</td></tr>'));
   $('record-body').innerHTML='<div class="box"><h4>YOUR KIT</h4><div class="bd scroll-x"><table class="pt"><thead><tr><th>What</th><th>Details</th><th>Qty</th></tr></thead><tbody>'+kit.join('')+'</tbody></table></div></div>'
-    +'<div class="box"><h4>RECORD</h4><div class="bd"><div class="timeline">'+timelineRows(o)+'</div>'
+    +'<div class="box"><h4>RECORD</h4><div class="bd">'
     +'<p class="small dim" style="margin:0">Order '+esc(o.orderId)+' · '+esc(o.configurationVersion)+' · Store '+esc(String(o.storePin).slice(0,7))+' · request '+esc(String(o.requestId).slice(0,8))+'</p></div></div>'
     +'<details><summary>EVERY PART, AND THE BOARD IT CAME FROM</summary><div class="small">'
     +(o.rev===rev.n?def.feats.map(f=>'<div class="kv"><span>'+f.id+' · '+f.name+'</span><span>'+f.runs.map(r=>esc(r.id.split('-').pop())+' ← '+esc(where[r.id]||'—')).join(', ')+'</span></div>').join('')
@@ -1285,7 +1299,7 @@ function renderStoreDoctrine(host){
 
 /* ═════ VIEWS: the whole job in one scroll, or one step at a time ═════ */
 const STEPS=['scan','configure','store','request','yard','record'];
-function usable(){return {scan:true,configure:true,store:true,request:callOpen()||!!S.order,yard:!!S.order,record:!!(S.order&&S.order.cutAt)}}
+function usable(){const t=TERMS.state();return {scan:true,configure:true,store:true,request:callOpen()||!!S.order,yard:t.yardOpen&&!!S.order,record:t.recordOpen&&!!(S.order&&S.order.cutAt)}}
 function setView(view,step){
   S.view=view;if(step)S.step=step;
   document.body.dataset.view=view;document.body.dataset.step=S.step;
@@ -1312,10 +1326,9 @@ document.addEventListener('click',e=>{
 });
 $('btn-ask').onclick=()=>{if(answerCurrent()){go('store');return}if(S.view==='trail')go('store');else $('s-store').scrollIntoView({behavior:'smooth',block:'start'});askStore()};
 $('btn-call').onclick=()=>go('request');
-$('accept-box').onchange=()=>renderCall();
-$('accept-pay').onclick=acceptAndPay;
-$('mark-cut').onclick=markCut;
-$('start-over').onclick=()=>{S.order=null;S.answer=null;S.error=null;P=JSON.parse(JSON.stringify(START));rev.n++;controls();render();setView('whole');window.scrollTo(0,0)};
+for(const id of ['call-terms','yard-terms','record-terms'])TERMS.bind($(id),afterTerms);
+TERMS.onChange(()=>{renderTerms();syncNav()});
+$('start-over').onclick=()=>{TERMS.setAnswer(null);S.order=null;S.answer=null;S.error=null;P=JSON.parse(JSON.stringify(START));rev.n++;controls();render();setView('whole');window.scrollTo(0,0)};
 window.addEventListener('message',event=>{
   /* The System shell (the parent frame, or the top window that drives it) may choose the step. */
   if(event.origin!==location.origin||(event.source!==window.parent&&event.source!==window.top))return;

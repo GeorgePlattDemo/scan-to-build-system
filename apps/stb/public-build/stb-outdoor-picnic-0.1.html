@@ -187,11 +187,10 @@ tr:last-child td{border-bottom:0}
       <div class="kv" style="margin-top:12px"><span>Machine work (included in the wood lines)</span><b id="call-machine"></b></div>
       <div class="kv"><span><b>Total</b></span><b class="total" id="call-total" style="font-size:28px;margin:0"></b></div>
       <p class="note" id="call-receipt"></p>
-      <p class="note">Budgetary estimate from the live Store, not a commercial quote. Nothing is cut until you accept and pay.</p>
-      <label class="note" style="display:flex;gap:8px;align-items:flex-start;margin-top:10px"><input type="checkbox" id="accept-box"> <span>I accept Store Zero’s answer above for exactly this table, and I’m ready to pay. (Demo: payment is simulated; no money moves.)</span></label>
+      <p class="note">Budgetary estimate from the live Store, not a commercial quote. Nothing is cut until you accept and send it to the Store.</p>
+      <div id="call-terms" data-terms-step="call"></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
         <button class="cta ghost" type="button" id="back-build">← Change something</button>
-        <button class="cta" type="button" id="accept-pay" disabled>ACCEPT &amp; PAY →</button>
       </div>
     </div>
   </section>
@@ -201,7 +200,7 @@ tr:last-child td{border-bottom:0}
     <p class="sub" id="yard-sub"></p>
     <div class="card">
       <h3>Paid · in the yard queue</h3>
-      <div class="timeline" id="yard-timeline"></div>
+      <div id="yard-terms" data-terms-step="yard"></div>
       <p class="note">SIMULATED: offer, acceptance, payment and the yard queue are a demonstration. The cut list below is Store Zero’s own answer for your exact table.</p>
     </div>
     <div class="card">
@@ -209,7 +208,6 @@ tr:last-child td{border-bottom:0}
       <table class="lines" aria-label="Cut list"><thead><tr><th>Board</th><th>Store item</th><th>Parts, in cut order</th><th>Stub back</th></tr></thead><tbody id="yard-boards"></tbody></table>
       <p class="note" id="yard-machine"></p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-        <button class="cta" type="button" id="mark-cut">MARK CUT &amp; READY FOR PICKUP →</button>
       </div>
     </div>
   </section>
@@ -223,7 +221,7 @@ tr:last-child td{border-bottom:0}
     </div>
     <div class="card">
       <h3>Record</h3>
-      <div class="timeline" id="record-timeline"></div>
+      <div id="record-terms" data-terms-step="record"></div>
       <p class="note" id="record-ids"></p>
       <p class="note">Build it with the plan and the rule book. SIMULATED: no money moved and no machine ran; the boards, cuts, minutes and prices are Store Zero’s answer.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
@@ -235,6 +233,7 @@ tr:last-child td{border-bottom:0}
 
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
 <script src="stb-store-client.js?v=7eb5ab65"></script>
+<script src="stb-terms-flow.js?v=850b1843"></script>
 <script>
 (function(){
 'use strict';
@@ -250,7 +249,7 @@ async function askStore(definition){
     candidateRevisionId:definition.configurationVersion,
     payload:{definition, definitionKind:'cut_package.v1', ruleVersion:'0.1'}
   });
-  return {evaluation:body.rawEvaluation, receipt:body.evaluationReceipt, requestId:body.requestId, storePin:body.storePin};
+  return {evaluation:body.rawEvaluation, receipt:body.evaluationReceipt, requestId:body.requestId, storePin:body.storePin, body, sentAt:new Date().toISOString()};
 }
 
 // ---------- The project's definitions (System owns what the plans mean) ----------
@@ -387,6 +386,8 @@ const reasonText=code=>REASONS[code]||code.replace(/_/g,' ').toLowerCase();
 // ---------- Page state ----------
 // `compare` is the Store's answer for every choice (button prices). `exact` is the Store's answer for the
 // customer's exact choice; it is the only answer shown as "Store Zero answers" and the only one confirmed.
+const TERMS=window.STBTermsFlow.create({projectId:'outdoor',title:'Outdoor · picnic table'});
+window.STBTermsFlow.installStyle(document);
 const S={view:'plans',plan:null,ft:6,wood:null,tier:null,
   compare:null,compareError:null,compareAsking:false,compareToken:0,
   exact:null,exactError:null,exactAsking:false,exactToken:0,
@@ -409,11 +410,36 @@ function selectionComplete(){
   return !!(x&&x.w.complete&&x.t.complete);
 }
 
+// Every exact Store answer goes to the terms flow; a refusal ends there, with the Store's reasons.
+function feedTerms(){
+  if(!S.exact||S.exactAsking||S.exactError){TERMS.setAnswer(null);return}
+  const x=exactSummary();
+  const ok=!!(x&&x.w.complete&&x.t.complete);
+  const reasons=x?[...x.w.refused.map(r=>({code:r.reason,text:groupLabel(r.group)+': '+reasonText(r.reason)})),...x.t.refused.map(r=>({code:r.reason,text:r.group+': '+reasonText(r.reason)}))]:[];
+  TERMS.setAnswer({version:S.exact.definition.configurationVersion,status:ok?'SUPPORTABLE':(S.exact.evaluation.status||'REFUSED'),
+    total:x?r2(x.w.Q+x.t.Q):null,reasons,body:S.exact.body,sentAt:S.exact.sentAt});
+}
+function renderTerms(){
+  for(const id of ['call-terms','yard-terms','record-terms']){
+    const host=$(id);if(!host)continue;
+    host.innerHTML=TERMS.renderControls(host.dataset.termsStep)+TERMS.renderChain();
+  }
+}
+TERMS.onChange(renderTerms);
+function afterTerms(action,st){
+  if(action==='accept'&&st.stage==='QUEUED'){acceptAndPay();return}
+  if(action==='yard'&&st.stage==='READY'){markCut();return}
+  if(action==='pickup'){renderRecord();return}
+  show(S.view);
+}
+for(const id of ['call-terms','yard-terms','record-terms'])TERMS.bind($(id),afterTerms);
+
 // The host's top nav drives this page; the page tells the host which steps can be used right now.
 function postState(){
   if(!embedded)return;
+  const t=TERMS.state();
   window.parent.postMessage({type:'STB_OUTDOOR_STATE',projectId:'outdoor',view:S.view,
-    planChosen:!!S.plan,callReady:!!(S.plan&&selectionComplete()),paid:!!S.order,cut:!!S.order?.cutAt},location.origin);
+    planChosen:!!S.plan,callReady:!!(S.plan&&selectionComplete()),paid:t.yardOpen,cut:t.recordOpen,terms:t.stage},location.origin);
 }
 function show(view){
   S.view=view;
@@ -509,6 +535,7 @@ function renderBuild(){
 
 // "Store Zero answers" shows only the Store's answer to the exact choice on screen.
 function renderAnswer(){
+  feedTerms();
   const status=$('a-status'),ref=$('a-refusals');
   ref.innerHTML='';$('a-total-wrap').hidden=true;$('confirm').disabled=true;
   $('a-wood').textContent=$('a-hw').textContent=$('a-machine').textContent='—';$('a-meta').textContent='';
@@ -572,20 +599,19 @@ function renderCall(){
   $('call-machine').textContent=money(w.machine);
   $('call-total').textContent=money(w.Q+t.Q);
   const r=S.exact.receipt;
-  $('accept-box').checked=false;$('accept-pay').disabled=true;
+  renderTerms();
   $('call-receipt').textContent=`Store receipt ${String(r.receiptHash).slice(0,12)} for exactly this table (${S.exact.definition.configurationVersion}) · request ${S.exact.requestId.slice(0,8)} · Store ${String(S.exact.storePin).slice(0,7)} · ${r.evaluatedAt}`;
   show('call');window.scrollTo(0,0);
 }
 
 // ---------- Accept & pay → We cut it → Pick up & build (simulated commerce; the cut list is the Store's answer) ----------
 const stamp=()=>new Date().toISOString();
-const shortId=prefix=>prefix+'-'+crypto.randomUUID().slice(0,8).toUpperCase();
 function acceptAndPay(){
   const x=exactSummary();
-  if(!x||!selectionComplete()||!$('accept-box').checked)return;
+  if(!x||!selectionComplete()||TERMS.state().stage!=='QUEUED')return;
   const wood=WOODS.find(v=>v.key===S.wood),tier=TIERS.find(v=>v.key===S.tier);
   S.order={
-    orderId:shortId('ORDER'),paymentId:shortId('SIM-PAY'),
+    orderId:TERMS.state().orderId,paymentId:(TERMS.state().events.find(e=>e.id==='paid')?.detail||'').split(' · ')[1]||'',
     title:`${PLANS[S.plan].title} · ${S.ft} ft · ${wood.label} · ${tier.label}`,
     configurationVersion:S.exact.definition.configurationVersion,
     receiptHash:S.exact.receipt.receiptHash,requestId:S.exact.requestId,storePin:S.exact.storePin,evaluatedAt:S.exact.receipt.evaluatedAt,
@@ -594,25 +620,13 @@ function acceptAndPay(){
   };
   renderYard();
 }
-function timelineRows(o){
-  const rows=[
-    ['Store answer',`receipt ${String(o.receiptHash).slice(0,12)} · ${o.evaluatedAt}`],
-    ['Offer accepted',o.acceptedAt],
-    ['Paid (simulated)',`${money(o.total)} · ${o.paymentId}`],
-    ['In the yard queue',`${o.orderId} · position 1`]
-  ];
-  if(o.cutAt)rows.push(['Cut & ready for pickup (simulated)',o.cutAt]);
-  return rows.map(([k,v])=>`<div><span><b>✓</b> ${k}</span><span>${v}</span></div>`).join('');
-}
 function renderYard(){
   const o=S.order;if(!o)return;
   $('yard-sub').textContent=o.title+' · '+money(o.total);
-  $('yard-timeline').innerHTML=timelineRows(o);
+  renderTerms();
   const boards=o.wood.lines.flatMap(l=>(l.cutPlan||[]).map(b=>({...b,group:l.packageId.split('|')[1]})));
   $('yard-boards').innerHTML=boards.map(b=>`<tr><td>${b.boardId}</td><td>${b.storeSku} (${b.stockLengthIn}")</td><td>${(b.partsInCutOrder||[]).map(p=>p.partId+' '+fmt(p.lengthIn)+'"').join(' → ')}</td><td>${b.stubIn!=null?fmt(b.stubIn)+'"':(b.offcutIn!=null?fmt(b.offcutIn)+'" offcut':'—')}</td></tr>`).join('');
   $('yard-machine').textContent=`${Math.round(o.wood.minutes)} min on the machine · ${o.wood.spots} screw holes marked · machine work ${money(o.wood.machine)}.`;
-  $('mark-cut').disabled=!!o.cutAt;
-  $('mark-cut').textContent=o.cutAt?'CUT & READY ✓':'MARK CUT & READY FOR PICKUP →';
   show('yard');window.scrollTo(0,0);
 }
 function markCut(){
@@ -632,7 +646,7 @@ function renderRecord(){
   rows.push(...o.hardware.lines.map(l=>`<tr><td>Hardware</td><td>${l.storeSku}</td><td>${l.qty}</td></tr>`));
   if(o.byo)rows.push('<tr><td>Hardware</td><td>You supply</td><td>—</td></tr>');
   $('record-kit').innerHTML=rows.join('');
-  $('record-timeline').innerHTML=timelineRows(o);
+  renderTerms();
   $('record-ids').textContent=`Order ${o.orderId} · ${o.configurationVersion} · Store ${String(o.storePin).slice(0,7)} · request ${String(o.requestId).slice(0,8)}`;
   show('record');window.scrollTo(0,0);
 }
@@ -652,10 +666,7 @@ $('longer').addEventListener('click',()=>setLength(S.ft+1));
 $('the-set').addEventListener('click',()=>{const set=PLANS[S.plan].set;const lengthChanged=S.ft!==6;S.wood=set.wood;S.tier=set.tier;S.ft=6;if(lengthChanged)askCompare();askExact()});
 $('confirm').addEventListener('click',()=>{if(selectionComplete())renderCall()});
 $('back-build').addEventListener('click',()=>{show('build');window.scrollTo(0,0)});
-$('accept-box').addEventListener('change',e=>{$('accept-pay').disabled=!(e.target.checked&&selectionComplete())});
-$('accept-pay').addEventListener('click',acceptAndPay);
-$('mark-cut').addEventListener('click',markCut);
-$('start-over').addEventListener('click',()=>{S.order=null;show('plans');window.scrollTo(0,0)});
+$('start-over').addEventListener('click',()=>{S.order=null;TERMS.setAnswer(null);show('plans');window.scrollTo(0,0)});
 
 /* Every Store answer carries the same Store Zero reference text and "What happens next", from the one
    shared file. If that file is missing or incomplete, say so; never a shortened stand-in. */

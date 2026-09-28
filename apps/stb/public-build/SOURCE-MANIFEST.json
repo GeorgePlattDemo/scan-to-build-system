@@ -439,6 +439,13 @@
       "blobSha": "6ffb4bcc0310bb2cb95f6a5a238db661a2cbc200",
       "bytes": 224771,
       "reason": "Cache-buster for the refreshed Store handoff contract (Store pin 9c62d9d)."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "one-terms-flow",
+      "blobSha": "1a2f547d10faba5e4ed0f45ec319e7e53d44f5f1",
+      "bytes": 228027,
+      "reason": "One terms flow (stb-terms-flow.js) for Job 1, Alcove and Playhouse: accept or decline with hashes, send to Store, yard, pickup and a full receipt; steps 4-6 follow the flow."
     }
   ],
   "retiredFiles": [
