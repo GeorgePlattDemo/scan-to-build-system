@@ -86,6 +86,17 @@
   .bench-intent-slot .stb-user1-facts label{display:none}
   .bench-intent-slot{margin:0 0 18px}
   .bench-panel{border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:16px;margin:14px 0}
+  .bench-higher{margin:14px 0 0;padding:12px 14px;border:1px solid var(--border-accent);border-radius:10px;background:var(--tint)}
+  .higher-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .higher-row h2{font-size:16px;margin:0}
+  .higher-row .choice-row{margin:0}
+  .higher-row .choice-row button{font-size:12px;padding:6px 12px}
+  .higher-exact{font-size:11.5px;color:var(--text-2);display:inline-flex;align-items:center;gap:6px}
+  .higher-exact input{width:78px;font:inherit;font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text)}
+  .bench-price-line{margin:8px 0 0;font-size:14px;font-weight:700;color:var(--text)}
+  .bench-higher .fine{margin:6px 0 0;font-size:10.5px;color:var(--text-3)}
+  .board-swap{margin:8px 0 0;padding:12px 14px;border-left:4px solid var(--accent);border-radius:8px;background:var(--tint);font-size:13.5px;line-height:1.45;color:var(--text)}
+  .board-swap b{color:var(--accent)}
   .bench-panel h2{font-size:16px;margin:0 0 4px}
   .bench-panel .lede{margin:0 0 14px;color:var(--text-2);font-size:12.5px}
   .control-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -298,6 +309,23 @@
         </g>
       </svg>
       </div>
+      <div class="bench-higher" id="stb-bench-controls">
+        <div class="higher-row">
+          <h2>Want it a little higher?</h2>
+          <div class="choice-row">
+            <button type="button" class="on" data-length="16">16 IN</button>
+            <button type="button" data-length="18">18 IN</button>
+          </div>
+          <label class="higher-exact">or exactly <input id="stb-config-length" type="number" min="16" max="18" step="0.125" value="16" inputmode="decimal" aria-describedby="stb-config-geometry-note stb-config-boundary-note"> in</label>
+        </div>
+        <p class="bench-price-line" id="stb-bench-price-line">Change it and the Store answers again.</p>
+        <div class="board-swap" id="stb-bench-board-swap" hidden role="status"></div>
+        <div id="stb-config-boundary-note" hidden style="margin-top:8px;padding:8px 10px;border:1px solid #b63f35;border-radius:7px;background:#fff0ee;color:#8d261f;font-size:11px;font-weight:700">
+          OUTSIDE THIS DEMO RANGE · Enter 16.000 through 18.000 in, or reset the demo.
+        </div>
+        <button id="stb-config-reset" type="button" hidden style="margin-top:8px">RESET TO 16 IN</button>
+        <p class="fine" id="stb-config-geometry-note">Same two parts, same 8.000 in horizontal span. 16.000 in → 30.000° end cuts. 18.000 in → 26.388° end cuts.</p>
+      </div>
       <div class="specrow">
         <div class="spec"><b>DEFINED WORKPIECE</b><span id="stb-bench-workpiece-spec">2×4 · 60 in</span></div>
         <div class="spec"><b>EACH PART</b><span id="stb-bench-length-spec">16 in</span></div>
@@ -312,27 +340,6 @@
         <li id="stb-bench-stub-step"><b>Keep the stub.</b> Two matching X-brace parts, and the rest of the board comes back to you.</li>
       </ol>
       <div class="workline"><b id="stb-bench-workline">THAT’S THE WHOLE JOB · 3 CUTS · 2 SPOTS ON LOCATION · WITHIN LIMITS (TIGHT)</b><span>the picture up top is what you want · this is what the board does</span></div>
-    </div>
-  </div>
-
-  <div class="bench-panel" id="stb-bench-controls">
-    <h2>One change. Same span.</h2>
-    <p class="lede">Keep the same 8.000 in horizontal span. Change only the brace length from 16 to 18 in. Scan-to-Build derives the matching end-cut angle and centered spot. Store decides whether the defined workpiece, stock, capability, modeled time, and Q still resolve.</p>
-    <div class="control-grid" style="grid-template-columns:minmax(280px,1fr)">
-      <div class="control">
-        <b>EACH BRACE · BOUNDED DEMO</b>
-        <span class="value" id="stb-config-length-value">16.000 in · 30.000° end cuts · 13.856 in achieved rise</span>
-        <input id="stb-config-length" type="number" min="16" max="18" step="0.125" value="16" inputmode="decimal" aria-describedby="stb-config-geometry-note stb-config-boundary-note">
-        <div class="choice-row">
-          <button type="button" class="on" data-length="16">16 IN</button>
-          <button type="button" data-length="18">18 IN</button>
-        </div>
-        <p class="lede" id="stb-config-geometry-note" style="margin:10px 0 0;font-size:11px">16.000 in → 30.000° end cuts. 18.000 in → 26.388° end cuts. Both preserve the same 8.000 in horizontal span.</p>
-        <div id="stb-config-boundary-note" hidden style="margin-top:10px;padding:9px 10px;border:1px solid #b63f35;border-radius:7px;background:#fff0ee;color:#8d261f;font-size:11px;font-weight:700">
-          OUTSIDE THIS DEMO RANGE · Enter 16.000 through 18.000 in, or reset the demo.
-        </div>
-        <button id="stb-config-reset" type="button" hidden style="margin-top:8px">RESET TO 16 IN</button>
-      </div>
     </div>
   </div>
 

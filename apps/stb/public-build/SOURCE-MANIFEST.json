@@ -199,6 +199,55 @@
       "blobSha": "020272660b3922c3e0860f5a2d61b3c3157fefdf",
       "bytes": 219160,
       "reason": "Start your own shows the Dev Guide rail on the right on every screen, like every other project page (its guide note already said \"Guide uses the rail\"); the page was forced to one column, which pushed the rail below the project. Narrow screens still stack."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "24eb5514b0026e64e253e4a1ad75d71f5fa00da1",
+      "bytes": 90066,
+      "reason": "Job 1 bench: the one choice sits right under the picture as \"Want it a little higher?\" with two big buttons (16 in as drawn, 18 in a little higher) plus an exact-length box; a callout on the board says when the Store moves to a longer 2×4 and why; a plain price line; friendly Cut it / Drill it / Keep the stub steps."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "85c7f84c766a5b1959d66570af445de541caa7dd",
+      "bytes": 222102,
+      "reason": "Job 1 bench: the board heading names the board the Store actually picked (was stuck on 5-FOOT 60 IN); angles and lengths read in people units (tenths of a degree, eighths of an inch) while the definition record keeps full precision; board-swap callout and price line filled from the Store answer; the nav highlight follows the in-page bench button and back link. Cache-buster for the updated bench."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "b047a3ba7deffbf7c3112e42dad345c39950cecb",
+      "bytes": 90145,
+      "reason": "Job 1 bench: \"Want it a little higher?\" moved inside the board frame, directly under the board drawing, so the picture stays upper left and the board visibly changes right above the choice."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "bd802bf971200ec72cfcefc6dd64a51a8cdd87c2",
+      "bytes": 222102,
+      "reason": "Cache-buster for the updated Job 1 bench."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "d60105d1365915d0f0690a1684af7360fbaeb6e9",
+      "bytes": 89102,
+      "reason": "Job 1 bench: the choice is compact again: one \"Want it a little higher?\" with two small 16 IN / 18 IN pills and a small exact box, right under the board; one live line gives size, angle, board and price; the board-swap note sits under that line so the board does not jump."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "f3af7120933d13390a009abaff70b33bf63abcd9",
+      "bytes": 222388,
+      "reason": "Job 1 bench: the live line under the pills reads size, angle, board and Store price together. Cache-buster for the updated bench."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "149f66fcfb40e0f0159b4fc7e9f828fb5b6ae29c",
+      "bytes": 222431,
+      "reason": "The top nav's \"2 · The bench\" opens Job 1's bench at the top (X-brace picture, board, then the choice) instead of jumping down to the confirm block."
     }
   ]
 }

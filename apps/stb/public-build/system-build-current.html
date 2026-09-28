@@ -182,7 +182,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=798a80fe"
+                  src="three-frames.html?v=d60105d1"
                 ></iframe>
               </div>
             `;
@@ -191,7 +191,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=798a80fe';
+            liveFrame.src = 'three-frames.html?v=d60105d1';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -378,6 +378,18 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                 const rem = Math.abs(eighths % 8);
                 const fraction = ['', '⅛', '¼', '⅜', '½', '⅝', '¾', '⅞'][rem];
                 return (whole ? String(whole) : (rem ? '' : '0')) + fraction + ' in';
+              };
+              // People read angles to a tenth of a degree; the definition record keeps full precision.
+              const formatDegrees = value => {
+                const n = Number(value);
+                return Number.isFinite(n) ? String(Math.round(n * 10) / 10) + '°' : 'unresolved';
+              };
+              const boardName = lengthIn => {
+                const n = Number(lengthIn);
+                if (!Number.isFinite(n)) return '2×4';
+                const feet = n / 12;
+                const words = {4:'4-FOOT',5:'5-FOOT',6:'6-FOOT',7:'7-FOOT',8:'8-FOOT',10:'10-FOOT',12:'12-FOOT'};
+                return (Number.isInteger(feet) && words[feet] ? words[feet] + ' ' : '') + '2×4 · ' + n + ' IN';
               };
               const activate = (selector,attr,value) => {
                 childDoc.querySelectorAll(selector).forEach(button => {
@@ -767,14 +779,16 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                 renderBoardGeometry(definition);
                 setText('stb-config-parts-value',demand.quantity+' part'+(demand.quantity===1?'':'s'));
                 setText('stb-config-length-value',
-                  Number(demand.finishedLength).toFixed(3)+' in · '+
-                  Number(demand.angleDegrees).toFixed(3)+'° end cuts · '+
-                  Number(definition.derived.achievedRiseIn.value).toFixed(3)+' in achieved rise');
+                  formatInches(demand.finishedLength)+' braces · stands about '+
+                  formatInches(definition.derived.achievedRiseIn.value)+' · '+
+                  formatDegrees(demand.angleDegrees)+' ends');
                 setText('stb-config-angle-value',demand.angleDegrees+'° · both ends · parallel');
                 setText('stb-config-spot-value',demand.spotDemand?'1 centered spot / part':'no spot');
                 setText('stb-bench-workpiece-spec','2×4 · '+formatInches(demand.definedWorkpieceLengthIn));
-                setText('stb-bench-length-spec',Number(demand.finishedLength).toFixed(3)+' in');
-                setText('stb-bench-angle-spec',Number(demand.angleDegrees).toFixed(3)+'°');
+                setText('stb-bench-length-spec',formatInches(demand.finishedLength));
+                setText('stb-bench-angle-spec',formatDegrees(demand.angleDegrees));
+                // The drawing names the board the Store actually picked, never a stale default.
+                setText('stb-bench-stock-line','ONE '+boardName(demand.definedWorkpieceLengthIn)+' · one board, marked left to right · schematic');
                 setText('stb-bench-parts-spec',String(demand.quantity));
                 setText('stb-def-workpiece',formatInches(demand.definedWorkpieceLengthIn));
                 setText('stb-def-parts',String(demand.quantity));
@@ -794,13 +808,40 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                 setText('stb-bench-control-copy',Number.isFinite(retained)
                   ? 'Store returned '+formatInches(retained)+' remaining on the '+formatInches(demand.definedWorkpieceLengthIn)+' defined workpiece; '+formatInches(holdIn)+' is the Store travel model retained-control minimum.'
                   : 'The project definition changed. This browser does not decide Store capability or retained-control validity; a fresh Store answer is required.');
-                setText('stb-bench-cut-copy','cut demand — '+demand.angleDegrees+'° ends · '+productionCuts+' declared saw operation'+(productionCuts===1?'':'s')+' · '+demand.quantity+' part'+(demand.quantity===1?'':'s'));
-                setText('stb-bench-cut-step','Define it. This version carries '+productionCuts+' declared saw operation'+(productionCuts===1?'':'s')+' with '+demand.quantity+' part'+(demand.quantity===1?'':'s')+' at '+demand.angleDegrees+'°. Store owns the admitted machine sequence.');
-                setText('stb-bench-drill-step',demand.spotDemand
-                  ? 'Spot demand. One centered 3/16 in SPOT_ON_LOCATION feature per part is carried to Store. It is not converted here into a generic finished hole.'
-                  : 'Spot demand. No spot is requested on this version.');
-                setText('stb-bench-stub-step','Keep the stub. The project keeps the defined parts and Store-returned remainder as separate facts; the browser does not calculate machine disposition.');
-                setText('stb-bench-workline','DEFINED JOB · '+productionCuts+' SAW OPERATION'+(productionCuts===1?'':'S')+' · '+spots+' SPOT'+(spots===1?'':'S')+' ON LOCATION · '+(storeComplete?'STORE ANSWER MATCHED':'FRESH STORE ANSWER REQUIRED'));
+                setText('stb-bench-cut-copy','cut demand — '+formatDegrees(demand.angleDegrees)+' ends · '+productionCuts+' declared saw operation'+(productionCuts===1?'':'s')+' · '+demand.quantity+' part'+(demand.quantity===1?'':'s'));
+                const cutsBold = childDoc.getElementById('stb-bench-cut-step');
+                if (cutsBold) cutsBold.innerHTML = '<b>Cut it.</b> '+productionCuts+' cut'+(productionCuts===1?'':'s')+' along the one board — '+formatDegrees(demand.angleDegrees)+' each — make the '+demand.quantity+' part'+(demand.quantity===1?'':'s')+'.';
+                const drillBold = childDoc.getElementById('stb-bench-drill-step');
+                if (drillBold) drillBold.innerHTML = demand.spotDemand
+                  ? '<b>Drill it.</b> One 3/16 in spot right in the middle of each part — '+formatInches(definition.derived.centerSpotAlongLengthIn.value)+' from either end.'
+                  : '<b>Drill it.</b> No spot on this version.';
+                const stubBold = childDoc.getElementById('stb-bench-stub-step');
+                if (stubBold) stubBold.innerHTML = '<b>Keep the stub.</b> Two matching braces'+(Number.isFinite(retained)?', and the other '+formatInches(retained)+' of the board comes back to you.':', and the rest of the board comes back to you.');
+                setText('stb-bench-workline','THAT’S THE WHOLE JOB · '+productionCuts+' CUT'+(productionCuts===1?'':'S')+' · '+spots+' SPOT'+(spots===1?'':'S')+' · '+(storeComplete?'THE STORE SAYS IT FITS':'ASK THE STORE'));
+
+                // Make the Store's board choice visible when it moves past the 5-foot board.
+                const swap = childDoc.getElementById('stb-bench-board-swap');
+                if (swap) {
+                  const picked = Number(demand.definedWorkpieceLengthIn);
+                  const minimum = Number(definition.lineage?.requestedDefinedWorkpieceLengthIn) || 60;
+                  const moved = Number.isFinite(picked) && picked > minimum;
+                  swap.hidden = !moved;
+                  if (!moved) swap.textContent = '';
+                  if (moved) {
+                    const feet = picked / 12;
+                    const pickedPhrase = (Number.isInteger(feet) ? feet+'-foot 2×4 ('+picked+' in)' : picked+' in 2×4');
+                    swap.innerHTML = '<b>The Store grabbed a longer board.</b> At '+formatInches(demand.finishedLength)+' a brace, a '+(minimum/12)+'-foot 2×4 wouldn’t leave the '+formatInches(holdIn)+' the machine needs to hold for the last cut — so it moved up to a '+pickedPhrase+'.'
+                      +(Number.isFinite(retained) ? ' The extra comes back with your stub: '+formatInches(retained)+'.' : '');
+                  }
+                }
+                // One line right under the choice: size, angle, board, price.
+                const pickedBoard = Number(demand.definedWorkpieceLengthIn);
+                const pickedFeet = pickedBoard / 12;
+                const boardWords = Number.isInteger(pickedFeet) ? pickedFeet+'-foot 2×4' : formatInches(pickedBoard)+' 2×4';
+                setText('stb-bench-price-line', formatInches(demand.finishedLength)+' braces · '+formatDegrees(demand.angleDegrees)+' ends · '
+                  +(storeComplete && totals?.Q != null
+                    ? boardWords+' · $'+Number(totals.Q).toFixed(2)+' all in. Not worth dragging the miter saw out.'
+                    : 'ask the Store.'));
 
                 const svg = childDoc.getElementById('stb-user1-bench-svg');
                 if (svg) {
@@ -874,8 +915,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
               benchButton?.addEventListener('click', () => {
                 syncAndRender('BENCH_HANDOFF');
                 showStage('bench');
+                syncJourneyNav('configure');
               });
-              benchBack?.addEventListener('click', () => showStage('intent'));
+              benchBack?.addEventListener('click', () => {
+                showStage('intent');
+                syncJourneyNav('scan');
+              });
               benchLibrary?.addEventListener('click', () => {
                 selectJourneyProject(null);
                 originalShow.call(win,'projects');
@@ -3146,7 +3191,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         originalShow.call(win,'start-own-live');
         setTimeout(() => openStartOwnStage(
           stage === 'configure' ? 'bench' : 'intent',
-          stage === 'configure' ? 'definition-boundary' : null
+          null  // open the bench at the top, so the X-brace picture and the board are what you see first
         ),0);
         syncJourneyNav(stage);
         return true;
