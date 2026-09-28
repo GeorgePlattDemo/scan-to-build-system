@@ -184,9 +184,9 @@ assert.equal(exactStoreAnswer.materialResolution.pricingReferenceSku,'STB-ZERO-S
 assert.equal(exactStoreAnswer.materialResolution.pricingReferenceStockLengthIn,60);
 assert.equal(exactStoreAnswer.materialResolution.selectionPolicy,'SHORTEST_COMPLETE_STORE_OFFERING');
 assert.equal(exactStoreAnswer.estimate.engine.version,'0.3.0');
-assert.equal(exactStoreAnswer.source.storePin,'7326a58da685c06c9b1fe95577cb5038de3bcdb5');
-assert.equal(exactStoreAnswer.calculationIdentity.inputHash,'59d4837cacf277ea1cf69faed18356641046c16ede9de8386080818f97cc38bb');
-assert.equal(exactStoreAnswer.calculationIdentity.resultHash,'5eaf81c7d75e449868e0f864214ee1a100cd7ec438fa32a1e883a119a1087cee');
+assert.equal(exactStoreAnswer.source.storePin,'9c62d9d6f7775deef83d47196d32c9b5174a352c');
+assert.equal(exactStoreAnswer.calculationIdentity.inputHash,'bea3c0b3841d013b463277ebaa02121bef79b65abe5e46b05a40f337afa3b868');
+assert.equal(exactStoreAnswer.calculationIdentity.resultHash,'0fd6b7d19ef8f64d133486c9d2ccf72256b2993bb60aa14c77b3c3e8004973bc');
 
 
 const exactStoreAnswer18 = contract.resolveUser1StoreReference({
@@ -212,13 +212,13 @@ assert.equal(exactStoreAnswer18.complete,true);
 assert.equal(exactStoreAnswer18.materialResolution.workpieceLengthIn,72);
 assert.equal(exactStoreAnswer18.materialResolution.pricingReferenceStockLengthIn,72);
 assert.equal(exactStoreAnswer18.materialResolution.selectionPolicy,'SHORTEST_COMPLETE_STORE_OFFERING');
-assert.equal(exactStoreAnswer18.calculationIdentity.inputHash,'5af6f66f36344a8ccaa74a081423f95090545bcf80849cbbe9d8c406a14ded6e');
-assert.equal(exactStoreAnswer18.calculationIdentity.resultHash,'81e47c66f472106927d0bbc4898f2c1b34489bf6a37aa29a66a31b6b0f3f9032');
+assert.equal(exactStoreAnswer18.calculationIdentity.inputHash,'e594a8fd7ca9de466c0f5e85fc929ec51221e45405add3e5707fa0277fbb2add');
+assert.equal(exactStoreAnswer18.calculationIdentity.resultHash,'595b797784e7f97d11a16e70a6e202eddf2cd6f38c02a165159fe4ce2abf9a37');
 assert.equal(exactStoreAnswer18.machineService,5.94);
 assert.equal(exactStoreAnswer18.combinedValue,9.07);
 assert.equal(exactStoreAnswer18.estimate.cycle.T_job_min,1.425);
 assert.equal(exactStoreAnswer18.estimate.travel.finalRemainderIn,35.625);
-assert.equal(exactStoreAnswer18.source.storePin,'7326a58da685c06c9b1fe95577cb5038de3bcdb5');
+assert.equal(exactStoreAnswer18.source.storePin,'9c62d9d6f7775deef83d47196d32c9b5174a352c');
 const freshStoreAnswer = contract.requestUser1StoreEvaluation({
   configurationId:'SYO-USER1-XBRACE',
   configurationVersion:'0.1',
@@ -238,7 +238,7 @@ const freshStoreAnswer = contract.requestUser1StoreEvaluation({
   ]
 },{
   requestId:'START-OWN-RECHECK',
-  currentStorePin:'7326a58da685c06c9b1fe95577cb5038de3bcdb5',
+  currentStorePin:'9c62d9d6f7775deef83d47196d32c9b5174a352c',
   checkedAt:'2026-09-22T18:55:00.000Z'
 });
 assert.equal(freshStoreAnswer.complete,true);
