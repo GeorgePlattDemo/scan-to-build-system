@@ -61,6 +61,13 @@ assert.match(shell,/recap:'record'/);
 assert.match(shell,/request:'4 · Your call'/);
 assert.match(shell,/Confirmed version sent to Store Zero\./);
 
+// Every live Store answer page carries the one shared Store Zero text (never a local copy).
+for(const file of ['stb-window-seat-0.8.html','stb-outdoor-picnic-0.1.html']){
+  const page=read(file);
+  assert.match(page,/store-zero-canonical-doctrine\.js\?v=/,file+' loads the shared Store Zero text');
+  assert.match(page,/function renderStoreDoctrine/,file+' renders it with its Store answer');
+  assert.equal(page.includes('Store Zero is a declared reference lumberyard'),false,file+' must not copy the Store Zero text');
+}
 // Shared Store doctrine is valid before confirmation and does not claim a completed event.
 assert.match(doctrine.processIntroHtml,/This identified version stays unchanged unless you create or approve a new one\./);
 assert.equal(doctrine.processIntroHtml.includes('Your confirmed version stays unchanged'),false);

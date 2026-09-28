@@ -397,6 +397,13 @@
       "blobSha": "80e7a3277cfb9e55c5d156fe4695b6fbbdca7c00",
       "bytes": 215667,
       "reason": "Cache-buster for Window Seat: boards across the depth plan themselves and are checked with the Store before the formal answer."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "store-answer-doctrine",
+      "blobSha": "5ca71d279675d155d44cba32c3a432b06f93c09e",
+      "bytes": 215667,
+      "reason": "Cache-busters for Window Seat and Outdoor, whose Store answers now carry the shared Store Zero text and \"What happens next\" (store-zero-canonical-doctrine.js), like Job 1 and Alcove."
     }
   ],
   "retiredFiles": [
