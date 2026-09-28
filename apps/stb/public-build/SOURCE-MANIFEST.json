@@ -304,6 +304,20 @@
       "blobSha": "723b4be3ef178d4155ec825d048f8e3107be5ad3",
       "bytes": 221566,
       "reason": "Shared Home copy in plain text with no bold after the heading; says why a pre-made job is faster (already worked out, you answer only your part) and that Start your own takes longer. Cache-buster for the updated Dev Guide spec."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "job1-no-typed-length",
+      "blobSha": "9761633d04780871ea454e8e3c009c0b8bd3ea49",
+      "bytes": 88370,
+      "reason": "Job 1 bench: the typed length box is gone; only the 16 IN and 18 IN pills remain, both backed by real Store answers. The static page could not know which board the Store would pick for a typed length (the 5-foot board holds the 24 in grip only up to 17 3/4 in), so the box could show the wrong board. A hidden field keeps the chosen length for the bench logic."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-no-typed-length",
+      "blobSha": "ada88a882ebba45a610fdcf7fdf6cb6392f32c8a",
+      "bytes": 221566,
+      "reason": "Cache-buster for the updated Job 1 bench."
     }
   ]
 }
