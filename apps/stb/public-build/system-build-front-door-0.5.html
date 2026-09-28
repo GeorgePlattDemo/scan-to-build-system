@@ -11,7 +11,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-base-8d8a9dd.html?v=c77d9189"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-base-8d8a9dd.html?v=3108e228"></iframe>
 <script>
 (() => {
   const frame = document.getElementById('stb-current');
@@ -90,9 +90,9 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     );
 
     makePage('playhouse-s001',
-      '<h1>PLAYHOUSE ARCHED WINDOW</h1><p class="sub">Sarah wants a large arched window opening in a small outdoor playhouse wall panel. This uses the existing bounded S-001 sheet project — not a new machine claim.</p>' +
+      '<h1>PLAYHOUSE ARCHED WINDOW</h1><p class="sub">User 1 wants a large arched window opening in a small outdoor playhouse wall panel. This uses the existing bounded S-001 sheet project — not a new machine claim.</p>' +
       '<div class="s001-play-grid">' +
-        '<section class="s001-card"><h3>EXAMPLE SOURCE · SARAH</h3>' +
+        '<section class="s001-card"><h3>EXAMPLE SOURCE · USER 1</h3>' +
           '<svg class="s001-source-art" viewBox="0 0 420 300" role="img" aria-label="Simple outdoor playhouse with a large arched window marked on the front wall">' +
             '<rect x="0" y="0" width="420" height="300" fill="#eee7da"/>' +
             '<path d="M75 125 L210 42 L345 125" fill="none" stroke="#766652" stroke-width="8" stroke-linejoin="round"/>' +
@@ -119,14 +119,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
           '<div class="s001-control"><label for="s001-opening-width">Opening width</label><output id="s001-opening-width-out">36 in</output><input id="s001-opening-width" data-s001-control type="range" min="1" max="48" step="0.5" value="36"></div>' +
           '<div class="s001-control"><label for="s001-straight-height">Straight side height</label><output id="s001-straight-height-out">24 in</output><input id="s001-straight-height" data-s001-control type="range" min="1" max="35" step="0.5" value="24"></div>' +
           '<div class="s001-control"><label for="s001-arch-rise">Arch rise</label><output id="s001-arch-rise-out">12 in</output><input id="s001-arch-rise" data-s001-control type="range" min="1" max="12" step="0.5" value="12"></div>' +
-          '<div class="btns"><button type="button" data-s001-control id="s001-reset">RESET TO SARAH\'S 36 / 24 / 12</button></div>' +
+          '<div class="btns"><button type="button" data-s001-control id="s001-reset">RESET TO USER 1\'S 36 / 24 / 12</button></div>' +
           '<div class="s001-status" id="s001-field-status">INSIDE CURRENT 48 × 36 SOFTWARE / REFERENCE FIELD</div>' +
           '<p class="dim" id="s001-geometry-summary"></p>' +
         '</section>' +
       '</div>' +
       '<div class="s001-boundary">The drawing is a view of the definition. It is not a toolpath, controller program, Cycle Start, fabrication release, or claim that a physical S-001 machine has been commissioned.</div>' +
       '<div class="btns"><button type="button" data-canonical-go="projects">BACK TO HOME</button><button type="button" data-canonical-go="playhouse-store">ASK STORE ZERO →</button></div>',
-      '<p class="goal">One bounded sheet example</p><div class="row"><b>Sarah’s starting values</b><span>36 in wide · 24 in straight side · 12 in arch rise.</span></div><div class="row"><b>Current field</b><span>48 × 36 in, centered on the 48 × 96 sheet.</span></div><div class="row"><b>First sheet research candidate</b><span>Routed profile with retained tabs. Drilling is not admitted in this round.</span></div>'
+      '<p class="goal">One bounded sheet example</p><div class="row"><b>User 1’s starting values</b><span>36 in wide · 24 in straight side · 12 in arch rise.</span></div><div class="row"><b>Current field</b><span>48 × 36 in, centered on the 48 × 96 sheet.</span></div><div class="row"><b>First sheet research candidate</b><span>Routed profile with retained tabs. Drilling is not admitted in this round.</span></div>'
     );
 
     makePage('playhouse-store',
@@ -138,7 +138,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     );
 
     makePage('playhouse-review',
-      '<h1>REVIEW SARAH\'S DEFINITION</h1><p class="sub">Review keeps the user definition, Store answer, and remaining physical unknowns separate.</p>' +
+      '<h1>REVIEW USER 1\'S DEFINITION</h1><p class="sub">Review keeps the user definition, Store answer, and remaining physical unknowns separate.</p>' +
       '<div class="s001-data"><div class="row"><b>PROJECT</b><span>Playhouse arched window</span></div><div class="row"><b>OPENING WIDTH</b><span id="s001-review-width"></span></div><div class="row"><b>STRAIGHT SIDE</b><span id="s001-review-straight"></span></div><div class="row"><b>ARCH RISE</b><span id="s001-review-rise"></span></div><div class="row"><b>TOTAL OPENING HEIGHT</b><span id="s001-review-total"></span></div><div class="row"><b>STORE</b><span>SUPPORTABLE · reference/software path</span></div></div>' +
       '<div class="s001-boundary">Confirming this definition is not an order, payment, reservation, production release, machine readiness statement, or physical fabrication authorization.</div>' +
       '<div class="btns"><button type="button" data-canonical-go="playhouse-store">BACK TO STORE</button><button type="button" data-canonical-go="playhouse-result">CONFIRM DEFINITION →</button></div>',
@@ -153,14 +153,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     );
 
     makePage('playhouse-record',
-      '<h1>SARAH · PLAYHOUSE PROJECT RECORD</h1><p class="sub">A compact demonstration record tying the use case back to the bounded S-001 definition.</p>' +
+      '<h1>USER 1 · PLAYHOUSE PROJECT RECORD</h1><p class="sub">A compact demonstration record tying the use case back to the bounded S-001 definition.</p>' +
       '<div class="s001-data"><div class="row"><b>SOURCE STORY</b><span>Outdoor playhouse wall panel · large arched window opening</span></div><div class="row"><b>PROJECT CLASS</b><span>S001_CENTERED_ARCHED_SHEET_V0</span></div><div class="row"><b>STORE REQUEST</b><span>SHEET_MODE2_ARCHED_APERTURE_V0</span></div><div class="row"><b>STORE PIN</b><span>4402abeb6b0299a5b6db2eec85ed04c3b0236bcc</span></div><div class="row"><b>CURRENT GEOMETRY</b><span id="s001-record-geometry"></span></div><div class="row"><b>AUTHORITY</b><span>controller output false · physical execution false</span></div></div>' +
       '<div class="s001-boundary">This visible shell is a demonstration surface. The accepted system repository carries the durable S-001 request / response / Review / Result / Record lineage; this page does not replace that record implementation.</div>' +
       '<div class="btns"><button type="button" data-canonical-go="playhouse-s001">RETURN TO PROJECT</button><button type="button" data-canonical-go="projects">HOME</button></div>',
       '<p class="goal">Traceable, not inflated</p><div class="row"><b>Project meaning</b><span>Owned upstream.</span></div><div class="row"><b>Store answer</b><span>Reference supportability only.</span></div><div class="row"><b>Physical evidence</b><span>Still absent until a real guarded and commissioned test earns it.</span></div>'
     );
 
-    const allowed = ['Sarah','Tom','Dick','Harry'];
+    const allowed = ['User 1'];
     const projectCatalog = {
       'alcove-capture': { key:'alcove', title:'Critical fit · Shelf insert', rootId:'alcove-capture' },
       'window-parts': { key:'plywood', title:'Playhouse arched window', rootId:'playhouse-s001' },
@@ -170,7 +170,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     const savedKey = 'stb-canonical-saved-projects-v1';
     let savedByUser = {};
     try { savedByUser = JSON.parse(localStorage.getItem(savedKey) || '{}') || {}; } catch { savedByUser = {}; }
-    let activeUser = 'Sarah';
+    let activeUser = 'User 1';
     let preview = null;
     let ownedOpen = null;
     let restoringState = false;
@@ -366,8 +366,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       const body = doc.getElementById('canonical-my-projects-body');
       if (!intro || !body) return;
       intro.textContent = activeUser.toUpperCase() + ' · previous / working projects';
-      if (activeUser === 'Sarah') {
-        body.innerHTML = '<p class="dim">Sarah’s current project list is the full project set shown on Home.</p>';
+      if (activeUser === 'User 1') {
+        body.innerHTML = '<p class="dim">User 1’s current project list is the full project set shown on Home.</p>';
         return;
       }
       const items = savedByUser[activeUser] || [];
@@ -383,10 +383,10 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       const body = doc.getElementById('canonical-archive-body');
       if (!intro || !body) return;
       intro.textContent = activeUser.toUpperCase() + ' · private demo archive';
-      if (activeUser === 'Sarah') {
+      if (activeUser === 'User 1') {
         body.innerHTML = '<div class="reviewbox"><p style="font-weight:600;margin-bottom:6px">Alcove insert · frozen reference record</p><p class="dim">Open the retained record path for the current bounded-project demonstration.</p><button type="button" data-canonical-go="record">OPEN RECORD</button></div>';
       } else {
-        body.innerHTML = '<p><b>' + activeUser.toUpperCase() + '</b> has no completed records in this demonstration.</p><p class="dim">Switching users does not expose Sarah’s private demo record.</p>';
+        body.innerHTML = '<p><b>' + activeUser.toUpperCase() + '</b> has no completed records in this demonstration.</p><p class="dim">Switching users does not expose User 1’s private demo record.</p>';
       }
     }
 
@@ -400,7 +400,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     }
 
     function renderAccount(name) {
-      if (!allowed.includes(name)) name = 'Sarah';
+      if (!allowed.includes(name)) name = 'User 1';
       activeUser = name;
       if (userSelect) userSelect.value = name;
       keepHomeShared();
@@ -527,7 +527,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
       requestedView = requestedId;
       let id = requestedId;
-      if (id === 'my-projects' && activeUser === 'Sarah') id = 'projects';
+      if (id === 'my-projects' && activeUser === 'User 1') id = 'projects';
       const next = doc.getElementById(id);
       if (!next) return;
       if (push && currentId && currentId !== id) navStack.push(currentId);

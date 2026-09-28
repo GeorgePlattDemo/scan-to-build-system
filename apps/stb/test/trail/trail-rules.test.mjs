@@ -29,12 +29,8 @@ const sandbox = {};
 vm.runInNewContext(contractSource, sandbox, { filename: 'stb-trail-contract.js' });
 const contract = sandbox.STBTrailContract;
 
-const KNOWN_FAILING = new Set([
-  // start-own: owns its six steps, but steps 2-6 neither move nor show as inert from a fresh start.
-  'start-own:R3',
-  // playhouse: old 12-button nav; extra "Bring what you have"; "Sarah" on its pages.
-  'playhouse:R1', 'playhouse:R2', 'playhouse:R9',
-]);
+// Empty: every rule-bound tile passes. Keep it that way — a new violation fails the test.
+const KNOWN_FAILING = new Set([]);
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css' };
 function serve() {

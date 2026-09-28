@@ -44,8 +44,8 @@ A new commit on Store `main` does **not** mean the pin should move. README and d
 
 Every project tile on the Shared Home follows one protocol. The machine-readable half is `apps/stb/public-build/stb-trail-contract.js`; the check is `apps/stb/test/trail/trail-rules.test.mjs` (the trail scoreboard).
 
-1. One trail, same steps, same order: **Your idea → Make it yours → The Store answers → Your call → We cut it → Pick up & build.**
-2. The top nav is Home plus the current tile's six steps. Every step opens this tile's own page for that step. Never another tile's page, never a button that does nothing.
+1. One trail, same steps, same order: **Your idea → The bench → The Store answers → Your call → We cut it → Pick up & build.** Step 1 may span as many pages as capture needs (scan, photos, plans); the nav stays on step 1 throughout.
+2. The top nav appears only inside a live project: "← Project Library" plus the current tile's six steps. Landing, the three doors and the Shared Home show no step nav. Every step opens this tile's own page for that step. Never another tile's page, never a button that does nothing.
 3. A step you cannot use yet is shown inert (disabled), never a silent no-op.
 4. "The Store answers" is always a fresh answer from the live hosted Store for the current definition. No cached answer, no browser copy of Store logic. A changed definition is asked again.
 5. Within the envelope: priced → your call → paid (simulated) → cut → pick up and record. Past the envelope: the Store refuses, steps 4–6 stay inert, and the refusal is the result. Both are passes.

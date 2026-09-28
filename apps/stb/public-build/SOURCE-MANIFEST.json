@@ -164,6 +164,34 @@
       "blobSha": "26e54c9d4a04a5e325b7cc288565ed7a9b889ff5",
       "bytes": 153,
       "reason": "Adds storePin, the Store version System is pinned to, so the one shared browser Store client reads the Store address and version from this file; a Store repin changes this file instead of each project page."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "one-trail-nav",
+      "blobSha": "42e8edf97ed3d4e924d70cbe9e238677ed77c1d6",
+      "bytes": 218921,
+      "reason": "Top nav appears only inside a live project (hidden on Landing, the doors and the Shared Home). Playhouse joins the six-step trail. Step 2 is named \"The bench\". Start-your-own steps it cannot use yet are shown inert, and a scoping bug that stopped \"The bench\" (and the Store page's return-to-bench button) from opening is fixed. The duplicate in-page Project Library buttons are removed because the trail nav carries one. The demo name Sarah becomes User 1. Cache-busters refreshed."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "one-trail-nav",
+      "blobSha": "3108e228ba351be8fe8219f29c72e1d928b04fd4",
+      "bytes": 136377,
+      "reason": "Critical-fit bench heading reads \"The bench\"; the only demo account is User 1."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "one-trail-nav",
+      "blobSha": "80330c3a24c357acae854e35d5e32ca27b66d90f",
+      "bytes": 39684,
+      "reason": "The only demo account is User 1 (was Sarah, Tom, Dick, Harry). Cache-buster for the updated base."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "one-trail-nav",
+      "blobSha": "798a80fe62bc187a45f12a631827dc132d4e9dc4",
+      "bytes": 88410,
+      "reason": "Start-your-own bench heading reads \"The bench\"."
     }
   ]
 }
