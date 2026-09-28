@@ -42,7 +42,7 @@ assert.match(surface,/2×4 · 60 in/,'60-in defined workpiece changed');
 assert.match(surface,/27⅝ in remains/,'60-in retained math changed');
 assert.match(surface,/3⅝ in spare/,'60-in spare math changed');
 assert.match(surface,/id="stb-bench-controls"/);
-assert.match(surface,/One change\. Same span\./);
+assert.match(surface,/Want it a little higher\?/);
 assert.match(surface,/id="stb-config-length"[^>]*min="16"[^>]*max="18"[^>]*value="16"/);
 assert.match(surface,/data-length="16">16 IN/);
 assert.match(surface,/data-length="18">18 IN/);
@@ -64,7 +64,7 @@ assert.match(surface,/CONFIRM &amp; SEND TO STORE ZERO →/);
 assert.match(surface,/id="stb-bench-dynamic-geometry"/);
 
 // Host carries one definition through intent, bench, Store, Terms and record.
-assert.match(shell,/three-frames\.html\?v=b047a3ba/);
+assert.match(shell,/three-frames\.html\?v=d60105d1/);
 assert.match(shell,/const definedWorkpieceLengthIn = 60;/);
 assert.match(shell,/DEMO_HORIZONTAL_SPAN_IN = 8/);
 assert.match(shell,/Math\.asin\(spanRatio\)/);

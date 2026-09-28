@@ -182,7 +182,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=b047a3ba"
+                  src="three-frames.html?v=d60105d1"
                 ></iframe>
               </div>
             `;
@@ -191,7 +191,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=b047a3ba';
+            liveFrame.src = 'three-frames.html?v=d60105d1';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -834,10 +834,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                       +(Number.isFinite(retained) ? ' The extra comes back with your stub: '+formatInches(retained)+'.' : '');
                   }
                 }
-                // One plain line on what it costs.
-                setText('stb-bench-price-line', storeComplete && totals?.Q != null
-                  ? 'Store Zero’s budget answer: $'+Number(totals.Q).toFixed(2)+' all in — the board, '+productionCuts+' cuts, '+spots+' drill spots, and the stub back. Not worth dragging the miter saw out.'
-                  : 'Change it and the Store answers again.');
+                // One line right under the choice: size, angle, board, price.
+                const pickedBoard = Number(demand.definedWorkpieceLengthIn);
+                const pickedFeet = pickedBoard / 12;
+                const boardWords = Number.isInteger(pickedFeet) ? pickedFeet+'-foot 2×4' : formatInches(pickedBoard)+' 2×4';
+                setText('stb-bench-price-line', formatInches(demand.finishedLength)+' braces · '+formatDegrees(demand.angleDegrees)+' ends · '
+                  +(storeComplete && totals?.Q != null
+                    ? boardWords+' · $'+Number(totals.Q).toFixed(2)+' all in. Not worth dragging the miter saw out.'
+                    : 'ask the Store.'));
 
                 const svg = childDoc.getElementById('stb-user1-bench-svg');
                 if (svg) {

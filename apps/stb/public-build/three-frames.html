@@ -86,21 +86,17 @@
   .bench-intent-slot .stb-user1-facts label{display:none}
   .bench-intent-slot{margin:0 0 18px}
   .bench-panel{border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:16px;margin:14px 0}
-  .bench-higher{border-color:var(--border-accent);background:linear-gradient(180deg,var(--tint),var(--surface) 70%)}
-  .bench-higher .kicker{margin:0 0 2px;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--accent);text-transform:uppercase}
-  .bench-higher h2{font-size:22px;margin:0 0 6px}
-  .bench-higher .lede{font-size:13.5px;color:var(--text)}
-  .higher-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 10px}
-  .higher-choices button{font:inherit;text-align:left;font-size:14px;font-weight:800;letter-spacing:.02em;padding:14px 16px;border:2px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);cursor:pointer;transition:border-color .15s,transform .15s}
-  .higher-choices button span{display:block;margin-top:4px;font-size:12px;font-weight:500;letter-spacing:0;color:var(--text-2)}
-  .higher-choices button:hover{transform:translateY(-1px)}
-  .higher-choices button.on{border-color:var(--accent);background:var(--tint);color:var(--accent)}
-  .higher-exact{margin:0 0 10px}
-  .bench-price-line{margin:6px 0 0;font-size:14px;font-weight:700;color:var(--text)}
-  .bench-higher .fine{margin:8px 0 0;font-size:11px;color:var(--text-3)}
-  .board-swap{margin:0 0 12px;padding:12px 14px;border-left:4px solid var(--accent);border-radius:8px;background:var(--tint);font-size:13.5px;line-height:1.45;color:var(--text)}
+  .bench-higher{margin:14px 0 0;padding:12px 14px;border:1px solid var(--border-accent);border-radius:10px;background:var(--tint)}
+  .higher-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .higher-row h2{font-size:16px;margin:0}
+  .higher-row .choice-row{margin:0}
+  .higher-row .choice-row button{font-size:12px;padding:6px 12px}
+  .higher-exact{font-size:11.5px;color:var(--text-2);display:inline-flex;align-items:center;gap:6px}
+  .higher-exact input{width:78px;font:inherit;font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text)}
+  .bench-price-line{margin:8px 0 0;font-size:14px;font-weight:700;color:var(--text)}
+  .bench-higher .fine{margin:6px 0 0;font-size:10.5px;color:var(--text-3)}
+  .board-swap{margin:8px 0 0;padding:12px 14px;border-left:4px solid var(--accent);border-radius:8px;background:var(--tint);font-size:13.5px;line-height:1.45;color:var(--text)}
   .board-swap b{color:var(--accent)}
-  @media(max-width:640px){.higher-choices{grid-template-columns:1fr}}
   .bench-panel h2{font-size:16px;margin:0 0 4px}
   .bench-panel .lede{margin:0 0 14px;color:var(--text-2);font-size:12.5px}
   .control-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -221,7 +217,6 @@
   <div class="frame" id="stb-user1-bench">
     <div class="frame-tab">THE SAME BOARD, ON THE BENCH</div>
     <div class="frame-in">
-      <div class="board-swap" id="stb-bench-board-swap" hidden role="status"></div>
       <div class="stage">
       <svg id="stb-user1-bench-svg" viewBox="0 0 900 320" role="img" aria-label="One five-foot two-by-four, marked left to right: three thirty-degree cuts make two sixteen-inch parts, leaving twenty-seven and five-eighths inches. The current retained-control minimum is twenty-four inches, leaving three and five-eighths inches spare.">
         <defs>
@@ -314,25 +309,22 @@
         </g>
       </svg>
       </div>
-      <div class="bench-panel bench-higher" id="stb-bench-controls">
-        <p class="kicker">One change. Same span.</p>
-        <h2>Want it a little higher?</h2>
-        <p class="lede">Same footprint, same two parts. Longer braces stand taller and the end cuts get a little shallower. We work out the angle and the drill spot — you just pick.</p>
-        <div class="higher-choices">
-          <button type="button" class="on" data-length="16">16 IN · AS DRAWN<span>stands about 13⅞ in tall · 30° ends</span></button>
-          <button type="button" data-length="18">18 IN · A LITTLE HIGHER<span>stands about 16⅛ in tall · 26.4° ends</span></button>
-        </div>
-        <div class="control higher-exact">
-          <b>OR TYPE ANY LENGTH FROM 16 TO 18 IN</b>
-          <span class="value" id="stb-config-length-value">16 in braces · stands about 13⅞ in · 30° ends</span>
-          <input id="stb-config-length" type="number" min="16" max="18" step="0.125" value="16" inputmode="decimal" aria-describedby="stb-config-geometry-note stb-config-boundary-note">
-          <div id="stb-config-boundary-note" hidden style="margin-top:10px;padding:9px 10px;border:1px solid #b63f35;border-radius:7px;background:#fff0ee;color:#8d261f;font-size:11px;font-weight:700">
-            OUTSIDE THIS DEMO RANGE · Enter 16.000 through 18.000 in, or reset the demo.
+      <div class="bench-higher" id="stb-bench-controls">
+        <div class="higher-row">
+          <h2>Want it a little higher?</h2>
+          <div class="choice-row">
+            <button type="button" class="on" data-length="16">16 IN</button>
+            <button type="button" data-length="18">18 IN</button>
           </div>
-          <button id="stb-config-reset" type="button" hidden style="margin-top:8px">RESET TO 16 IN</button>
+          <label class="higher-exact">or exactly <input id="stb-config-length" type="number" min="16" max="18" step="0.125" value="16" inputmode="decimal" aria-describedby="stb-config-geometry-note stb-config-boundary-note"> in</label>
         </div>
         <p class="bench-price-line" id="stb-bench-price-line">Change it and the Store answers again.</p>
-        <p class="fine" id="stb-config-geometry-note">The math: both keep the same 8.000 in horizontal span. 16.000 in → 30.000° end cuts. 18.000 in → 26.388° end cuts.</p>
+        <div class="board-swap" id="stb-bench-board-swap" hidden role="status"></div>
+        <div id="stb-config-boundary-note" hidden style="margin-top:8px;padding:8px 10px;border:1px solid #b63f35;border-radius:7px;background:#fff0ee;color:#8d261f;font-size:11px;font-weight:700">
+          OUTSIDE THIS DEMO RANGE · Enter 16.000 through 18.000 in, or reset the demo.
+        </div>
+        <button id="stb-config-reset" type="button" hidden style="margin-top:8px">RESET TO 16 IN</button>
+        <p class="fine" id="stb-config-geometry-note">Same two parts, same 8.000 in horizontal span. 16.000 in → 30.000° end cuts. 18.000 in → 26.388° end cuts.</p>
       </div>
       <div class="specrow">
         <div class="spec"><b>DEFINED WORKPIECE</b><span id="stb-bench-workpiece-spec">2×4 · 60 in</span></div>

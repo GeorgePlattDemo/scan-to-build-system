@@ -227,6 +227,20 @@
       "blobSha": "bd802bf971200ec72cfcefc6dd64a51a8cdd87c2",
       "bytes": 222102,
       "reason": "Cache-buster for the updated Job 1 bench."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "d60105d1365915d0f0690a1684af7360fbaeb6e9",
+      "bytes": 89102,
+      "reason": "Job 1 bench: the choice is compact again: one \"Want it a little higher?\" with two small 16 IN / 18 IN pills and a small exact box, right under the board; one live line gives size, angle, board and price; the board-swap note sits under that line so the board does not jump."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-bench-higher",
+      "blobSha": "f3af7120933d13390a009abaff70b33bf63abcd9",
+      "bytes": 222388,
+      "reason": "Job 1 bench: the live line under the pills reads size, angle, board and Store price together. Cache-buster for the updated bench."
     }
   ]
 }
