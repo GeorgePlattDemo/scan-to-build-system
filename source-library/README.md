@@ -1,5 +1,7 @@
 # Source Library
 
+> **Archive. Do not start here.** Nothing in this folder is current authority. Current meaning: [Definitions](../docs/definitions/README.md). Current app state: [verification register](../docs/project/VERIFICATION-REGISTER.md).
+
 This directory preserves useful prior Scan-to-Build work close to the current system without silently promoting it into current authority.
 
 The purpose of this library is **transfer and retrieval**, not redesign.

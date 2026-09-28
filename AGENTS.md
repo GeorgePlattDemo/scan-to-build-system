@@ -28,6 +28,7 @@ A new commit on Store `main` does **not** mean the pin should move. README and d
 
 ## Rules
 
+- Definitions: every shared term is defined once, in [`docs/definitions/README.md`](docs/definitions/README.md). Add or change a term there, not in another file. Identifiers in code are compatibility surfaces; do not rename them for nicer prose.
 - This repository is the working surface. Other repos are pins and donors.
 - Current names only: User 1, Store 1, Machine Build *n* written in full, Board, alcove class, fixture, pin.
 - Review-era exhibit names do not belong in current files.
