@@ -530,12 +530,12 @@ const embedded=window.self!==window.top;
 
 /* ═════ PROJECT STATE: customer intent only ═════ */
 const START={fam:'pine',H:94,W:{LEFT:24,CENTER:55,RIGHT:24},SH:{LEFT:4,RIGHT:4},
-  seat:22,upperH:14,bays:2,cub:2,front:false,depth:14,runs:2,gap:0,
+  seat:22,upperH:14,bays:2,cub:2,front:false,depth:14,runs:2,runsAuto:true,gap:0,
   spots:{on:false,rule:'INSET_FROM_EDGE',inset:1.5},hw:{sku:'',qty:1}};
 let P=JSON.parse(JSON.stringify(START));
 let rev={n:1};
 const occHistory={};
-const S={view:'whole',step:'scan',asking:false,answer:null,error:null,order:null};
+const S={view:'whole',step:'scan',asking:false,answer:null,error:null,order:null,autoPick:null,tried:null};
 
 /* The customer's wood. The Store answers whether it stocks it. */
 const FAM=[{k:'pine',n:'Select pine',c:'#D8BE7C'},{k:'poplar',n:'Select poplar',c:'#9FA678'},
@@ -689,6 +689,19 @@ function boardFor(w){
   return {nominalW:wider.n,actual:wider.a,mill:r3(w)};
 }
 
+/* Putting the job together before the Store sees it: the fewest boards across the depth whose
+   finished width is a 1× board as it comes, or one the edge mill can reach (up to 1 in off one edge,
+   the Store's declared limit). The Store still answers; this only keeps System from sending a job
+   that can't work. */
+const EDGE_MILL_MAX_IN=1.0;
+function millPlausible(w){const b=boardFor(w);return !!b&&(b.mill==null||b.actual-b.mill<=EDGE_MILL_MAX_IN+1e-9)}
+const MAX_RUNS=6;
+function plausibleRuns(depth){const out=[];for(let n=1;n<=MAX_RUNS;n++)if(millPlausible(depth/n))out.push(n);return out}
+function planRuns(depth){return plausibleRuns(depth)[0]||MAX_RUNS}
+/* Auto keeps the Store's pick for exactly this bench; any other change plans again. */
+const autoKey=()=>JSON.stringify({...P,runs:0})+'|'+JSON.stringify(OPS.map(o=>[o.requested,o.params||null]));
+function settleRuns(){if(!P.runsAuto)return;P.runs=(S.autoPick&&S.autoPick.key===autoKey())?S.autoPick.n:planRuns(P.depth)}
+
 /* Shelf-pin spots: one 3/16 in spot on each board of each tower side, at every shelf. */
 function spotPlacement(){
   return SPOT_RULES.find(s=>s.rule===P.spots.rule&&(s.inset==null||s.inset===P.spots.inset))||SPOT_RULES[0];
@@ -732,7 +745,12 @@ function buildRequest(def){
     if(spots[r.id]&&spots[r.id].length)part.spots=spots[r.id];
     packages[key].parts.push(part);
   });
-  const cutPackages=Object.values(packages);
+  /* A cut package carries at most 120 parts (System wire limit); a bigger group goes as several packages. */
+  const MAX_PARTS=120,cutPackages=[];
+  Object.values(packages).forEach(pk=>{
+    if(pk.parts.length<=MAX_PARTS){cutPackages.push(pk);return}
+    for(let i=0;i*MAX_PARTS<pk.parts.length;i++)cutPackages.push({...pk,packageId:pk.packageId+(i?'-'+(i+1):''),parts:pk.parts.slice(i*MAX_PARTS,(i+1)*MAX_PARTS)});
+  });
   const itemLines=P.hw.sku?[{lineId:'HARDWARE',storeSku:P.hw.sku,qty:P.hw.qty}]:[];
   const body={cutPackages};
   if(itemLines.length)body.itemLines=itemLines;
@@ -751,6 +769,7 @@ function conditions(def){
   if(def.center.windowH<=2)c.push({t:'No window opening left',d:inch(P.H)+' tall, less the '+inch(P.seat)+' seat and '+inch(P.upperH)+' upper storage, leaves '+inch(Math.max(def.center.windowH,0))+'. Raise the height, lower the seat, or shrink the upper storage.',block:true});
   if(def.center.cubClearH<=1)c.push({t:'No cubby opening left under the seat',d:'a '+inch(P.seat)+' seat leaves '+inch(Math.max(def.center.cubClearH,0))+' below it',block:true});
   def.feats.filter(f=>!f.defined).forEach(f=>c.push({t:'Part needs an answer: '+f.asm+' '+f.name,d:'works out at '+fmt(f.len)+' in long × '+fmt(def.runW)+' in per board',block:true}));
+  {const bw=boardFor(def.runW);if(bw&&bw.mill!=null&&bw.actual-bw.mill>EDGE_MILL_MAX_IN+1e-9)c.push({t:'Too much to mill off each board',d:'a '+inch(def.runW)+' board has to come from a 1×'+bw.nominalW+' ('+fmt(bw.actual)+' in), '+fmt(r3(bw.actual-bw.mill))+' in off one edge. The edge mill takes up to 1 in. Pick Auto: '+planRuns(P.depth)+' boards across.',block:true})}
   if(!boardFor(def.runW))c.push({t:'No 1× board is that wide',d:inch(def.runW)+' per board is wider than an 11¼ in 1×12. Add a board across the depth.',block:true});
   if(M.narrow!=null&&def.W+P.gap*2>M.narrow)c.push({t:'Wider than your controlling width',d:'three modules plus clearance measure '+inch(def.W+P.gap*2)+'; the narrowest width you marked controlling is '+inch(M.narrow),block:true});
   if(M.low!=null&&P.H>M.low)c.push({t:'Taller than your controlling height',d:inch(P.H)+' is taller than the lowest height you marked controlling, '+inch(M.low),block:true});
@@ -790,7 +809,7 @@ function controls(){
     +rng('c-d',6,24,0.25,P.depth,'Depth')
     +'<button type="button" data-depth="0.25" aria-label="A quarter inch deeper">+¼</button></div>'
     +'<div class="ws-lab"><span>Boards across the depth</span><span id="v-runs">—</span></div>'
-    +'<div class="seg" id="c-runs">'+[1,2,3,4].map(n=>'<button type="button" data-n="'+n+'">'+n+'</button>').join('')+'</div>'
+    +'<div class="seg" id="c-runs"><button type="button" data-n="auto">Auto</button>'+[1,2,3,4].map(n=>'<button type="button" data-n="'+n+'">'+n+'</button>').join('')+'</div>'
     +'<p class="millnote" id="v-runw"></p>'
     +'</div>';
   h+='<div class="grp"><p class="gh">3 · CENTER WINDOW SEAT</p>'
@@ -834,7 +853,8 @@ function controls(){
     P.spots.rule=s.rule;P.spots.inset=s.inset==null?null:s.inset;changed()};
   $('depth-panel').addEventListener('click',e=>{const b=e.target.closest('[data-depth]');if(!b)return;
     P.depth=Math.min(24,Math.max(6,Math.round((P.depth+Number(b.dataset.depth))*4)/4));changed()});
-  $('c-runs').onclick=e=>{const b=e.target.closest('button');if(!b)return;P.runs=+b.dataset.n;changed()};
+  $('c-runs').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.n==='auto'){P.runsAuto=true}else{P.runsAuto=false;P.runs=+b.dataset.n}changed()};
   $('c-hw').onchange=function(){P.hw.sku=this.value;changed()};
   const sw=$('species');
   FAM.forEach(f=>{const b=document.createElement('button');b.type='button';b.className='sp';b.dataset.k=f.k;
@@ -864,7 +884,8 @@ function syncControls(def,req){
   set('v-bays',P.bays);set('v-cub',P.cub);set('v-shL',P.SH.LEFT);set('v-shR',P.SH.RIGHT);set('v-runs',P.runs);
   set('v-hwq',P.hw.sku?P.hw.qty:'none picked');
   const b=boardFor(def.runW);
-  $('v-runw').innerHTML=!b?'<b>No 1× board is that wide.</b> Add a board across the depth.'
+  $('v-runw').innerHTML=!b?'<b>No 1× board is that wide.</b> Add a board across the depth, or pick Auto.'
+    :b.mill!=null&&b.actual-b.mill>EDGE_MILL_MAX_IN+1e-9?'<b style="color:var(--no)">Not plausible:</b> a 1×'+b.nominalW+' would need '+fmt(r3(b.actual-b.mill))+' in off one edge; the edge mill takes up to 1 in. Pick <b>Auto</b> ('+planRuns(P.depth)+' boards).'
     :b.mill!=null?'Each board: a <b>1×'+b.nominalW+'</b> ('+fmt(b.actual)+' in) <b>edge-milled to '+inch(b.mill)+'</b>, '+fmt(r3(b.actual-b.mill))+' in off one edge. The Store prices the mill time.'
     :'Each board: a <b>1×'+b.nominalW+'</b> as it comes, '+inch(b.actual)+'. No milling.';
   const place=spotPlacement();
@@ -874,7 +895,8 @@ function syncControls(def,req){
    ['c-bays',P.bays],['c-cub',P.cub],['c-shL',P.SH.LEFT],['c-shR',P.SH.RIGHT],['c-hwq',P.hw.qty]].forEach(([id,v])=>{const e=$(id);if(e&&e.value!==String(v))e.value=String(v)});
   $('c-front').checked=P.front;$('c-spots').checked=P.spots.on;
   if($('c-hw').value!==P.hw.sku)$('c-hw').value=P.hw.sku;
-  $$('#c-runs button').forEach(x=>{const on=+x.dataset.n===P.runs;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
+  set('v-runs',P.runsAuto?P.runs+' (auto)':P.runs);
+  $$('#c-runs button').forEach(x=>{const on=x.dataset.n==='auto'?P.runsAuto:(!P.runsAuto&&+x.dataset.n===P.runs);x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
   $$('#c-spot-place button').forEach(x=>{const on=x.dataset.k===place.k;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
   $$('#species .sp').forEach(x=>{const on=x.dataset.k===P.fam;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
   $('ops-count').textContent=OPS.filter(o=>o.requested).length+' ON';
@@ -931,6 +953,7 @@ function draw(def,spots){
 
 /* ═════ REVISIONS: a change after an answer is a new version ═════ */
 function changed(){
+  settleRuns();
   const req=buildRequest(buildDefinition());
   if(S.answer&&S.answer.sig!==req.sig&&!S.answer.stale){S.answer.stale=true;rev.n++}
   S.error=null;
@@ -940,16 +963,36 @@ const answerCurrent=()=>!!(S.answer&&!S.answer.stale);
 
 /* ═════ THE STORE: asked live, through the shared client ═════ */
 async function askStore(){
-  const def=buildDefinition(),cond=conditions(def);
-  if(cond.some(c=>c.block)||S.asking)return;
-  const req=buildRequest(def);
+  if(S.asking)return;
+  settleRuns();
+  if(conditions(buildDefinition()).some(c=>c.block))return;
   S.asking=true;S.error=null;render();
   try{
     const client=window.STBStoreClient;
     if(!client)throw new Error('STORE_CLIENT_UNAVAILABLE');
-    const body=await client.sendJob({projectId:'window-seat',requestType:'CUT_PACKAGE_V1',
-      candidateRevisionId:req.definition.configurationVersion,
-      payload:{definition:req.definition,definitionKind:'cut_package.v1',ruleVersion:'0.1'}});
+    const send=definition=>client.sendJob({projectId:'window-seat',requestType:'CUT_PACKAGE_V1',
+      candidateRevisionId:definition.configurationVersion,
+      payload:{definition,definitionKind:'cut_package.v1',ruleVersion:'0.1'}});
+    /* Auto: every plausible count of boards across goes to the Store in one comparison request.
+       The fewest boards the Store answers in full is the plan; the formal answer below is for that plan. */
+    if(P.runsAuto&&!(S.autoPick&&S.autoPick.key===autoKey())){
+      const plans=plausibleRuns(P.depth);
+      S.tried=null;
+      if(plans.length>1){
+        /* One request per plan, side by side, so each stays well inside the request size limit. */
+        const keep=P.runs,asks=plans.map(n=>{P.runs=n;const cutPackages=buildRequest(buildDefinition()).definition.cutPackages;
+          return {n,definition:{configurationId:'WINDOW-SEAT-BOARDS-ACROSS',configurationVersion:'ws-r'+rev.n+'-n'+n+'-'+hash(JSON.stringify(cutPackages)),cutPackages}}});
+        P.runs=keep;
+        const answers=await Promise.all(asks.map(x=>send(x.definition).then(r=>r.rawEvaluation?.packages||[])));
+        S.tried=asks.map((x,i)=>{const mine=answers[i];const bad=mine.filter(p=>p.status!=='SUPPORTABLE');
+          return {n:x.n,ok:mine.length>0&&!bad.length,why:[...new Set(bad.map(p=>plain(p.reasonRecord?.code||p.status)))].join('; ')}});
+        const win=S.tried.find(t=>t.ok);
+        S.autoPick={key:autoKey(),n:win?win.n:plans[0]};
+      }else S.autoPick={key:autoKey(),n:plans[0]||MAX_RUNS};
+      settleRuns();
+    }
+    const req=buildRequest(buildDefinition());
+    const body=await send(req.definition);
     S.answer={rev:rev.n,sig:req.sig,stale:false,definition:req.definition,mills:req.mills,
       evaluation:body.rawEvaluation,receipt:body.evaluationReceipt||body.rawEvaluation?.evaluationReceipt||null,
       requestId:body.requestId,storePin:body.storePin,demand:body.mappedCallInputs?.demand||null};
@@ -968,7 +1011,11 @@ const REASONS={
   GRADE_CHOICE_REQUIRED:'more than one grade is stocked; a grade must be picked',
   NO_OFFERING:'the Store has no item with that number',NOT_OFFERED:'the Store lists that item but doesn’t sell it',
   SPOT_INSET_OUTSIDE_BOARD_WIDTH:'a spot’s edge distance is wider than the board',
-  SPOT_LOCATION_OUTSIDE_PART:'a spot falls off the end of its part'
+  SPOT_LOCATION_OUTSIDE_PART:'a spot falls off the end of its part',
+  EDGE_MILL_REMOVAL_EXCEEDS_D001_MAX_CUT_WIDTH:'the edge mill would have to take more than 1 in off',
+  FINISHED_WIDTH_EXCEEDS_BOARD_WIDTH:'the finished width is wider than the board',
+  EDGE_MILL_BOARD_BELOW_TWO_ROLLER_CONTROL:'the board is too short for the rollers to feed it past the mill',
+  'OP_NOT_ON_OFFERING:MILL_LONGITUDINAL_PROFILE':'the Store doesn’t edge-mill this wood'
 };
 const plain=code=>REASONS[code]?REASONS[code]+' ('+code+')':code;
 function lineLabel(id){const g=String(id).split('-')[0];return (GROUP_LABEL[g]||id)+(String(id).includes('-1X')?' · '+String(id).split('-')[1].replace('X','×'):'')}
@@ -1016,7 +1063,7 @@ function render(){
       :'<p style="margin:6px 0 0;color:var(--no)"><b>No 1× board is that wide.</b></p>')
     +'<p class="dim" style="margin:6px 0 0">Your number stays yours. These land on board widths exactly, if you want them:</p>'
     +pick.map((x,i)=>'<div class="ln" style="margin-top:6px"><span><b>'+inch(x.depth)+'</b> <span class="dim">: '+x.runs+' × 1×'+x.d.n+'</span></span><button type="button" class="xbtn" data-alt="'+i+'">USE '+fmt(x.depth)+' IN</button></div>').join('');
-  $$('#p-depth [data-alt]').forEach(btn=>btn.onclick=()=>{const x=pick[+btn.dataset.alt];P.depth=x.depth;P.runs=x.runs;changed()});
+  $$('#p-depth [data-alt]').forEach(btn=>btn.onclick=()=>{const x=pick[+btn.dataset.alt];P.depth=x.depth;P.runs=x.runs;P.runsAuto=false;changed()});
 
   $('p-cond').innerHTML=cond.map(c=>'<div class="ln"><span><b>'+c.t+'</b> <span class="dim">'+c.d+'</span></span><span class="chip '+(c.block?'no':'warn')+'">'+(c.block?'BLOCKS':'TRAVELS')+'</span></div>').join('');
 
@@ -1092,10 +1139,11 @@ function renderStore(req){
     const ev=v.ev,t=ev.totals||{};
     const stale=a.stale;
     h='<p class="lb">'+(stale?'OLD ANSWER · REVISION '+a.rev+' · YOUR BENCH HAS CHANGED':'STORE ZERO ANSWERED · REVISION '+a.rev)+'</p>'
-      +'<div class="big" style="'+(stale?'opacity:.5':'')+'">'+money(t.sumOfSupportableLines)+'</div>'
+      +'<div class="big" style="'+(stale?'opacity:.5':'')+'">'+(t.linesSupportable?money(t.sumOfSupportableLines):'No price')+'</div>'
       +'<p class="small" style="margin:0 0 6px">wood '+money(t.material)+' + machine work '+money(t.machine_service)+(t.items?' + hardware '+money(t.items):'')+' · '+Math.round(v.minutes)+' min on the machine'+(v.spots?' · '+v.spots+' spots':'')+'</p>'
       +'<p class="status '+(v.allOk?'good':'bad')+'">'+(v.allOk?'Every line answered: SUPPORTABLE.':t.linesNotSupportable+' line'+(t.linesNotSupportable===1?'':'s')+' not supportable. The total counts only the lines that are.')+'</p>'
       +'<p class="small dim" style="margin:6px 0 0">Budgetary estimate, not a commercial quote. Each line is answered on its own.</p>'
+      +(S.tried&&S.tried.length>1?'<p class="small" style="margin:8px 0 0"><b>Boards across, checked with the Store:</b> '+S.tried.map(t=>t.n+' across: '+(t.ok?(t.n===P.runs?'<b>fits, chosen</b>':'fits'):esc(t.why||'no'))).join(' · ')+'</p>':'')
       +(stale?'<button type="button" class="go" data-ask style="margin-top:8px"'+(cond.length?' disabled':'')+'>ASK AGAIN FOR REVISION '+rev.n+'</button>':'');
   }
   panel.innerHTML=h;
@@ -1105,7 +1153,8 @@ function renderStore(req){
   if(v){
     $('store-lines').innerHTML='<div class="box"><h4>LINE BY LINE</h4><div class="bd scroll-x"><table class="pt"><thead><tr><th>Line</th><th>Store item</th><th>Boards</th><th>Min</th><th>Status</th><th>Price</th></tr></thead><tbody>'
       +v.pk.map(p=>'<tr><td>'+lineLabel(p.packageId)+'</td><td>'+(p.storeSku?esc(p.storeSku)+' ('+p.stockLengthIn+' in)':'—')+'</td><td>'+(p.boards||'—')+'</td><td>'+(p.time?Math.round(p.time.T_MACHINE_min):'—')+'</td><td><span class="chip '+(p.status==='SUPPORTABLE'?'ok':'no')+'">'+p.status+'</span>'
-        +((p.reasonCodes||[]).length?'<br><span class="small dim">'+p.reasonCodes.map(plain).join('; ')+'</span>':'')+'</td><td>'+money(p.Q)+'</td></tr>').join('')
+        +(p.status!=='SUPPORTABLE'&&(p.considered||[]).length?'<br><span class="small dim">'+p.considered.map(c=>c.stockLengthIn+' in board: '+(c.status==='SUPPORTABLE'?'fits':plain(c.reason||c.status))).join('; ')+'</span>'
+          :((p.reasonCodes||[]).length?'<br><span class="small dim">'+p.reasonCodes.map(plain).join('; ')+'</span>':''))+'</td><td>'+money(p.Q)+'</td></tr>').join('')
       +v.it.map(i=>'<tr><td>Hardware</td><td>'+esc(i.description||i.storeSku)+'</td><td>'+i.qty+'</td><td>—</td><td><span class="chip '+(i.status==='SUPPORTABLE'?'ok':'no')+'">'+i.status+'</span>'
         +((i.reasonCodes||[]).length?'<br><span class="small dim">'+i.reasonCodes.map(plain).join('; ')+'</span>':'')+'</td><td>'+money(i.Q)+'</td></tr>').join('')
       +'</tbody></table>'
@@ -1247,7 +1296,7 @@ window.addEventListener('message',event=>{
 });
 if(embedded){$('bar').hidden=true;$('own-page').hidden=false}
 
-readFacts();controls();render();setView('whole','scan');
+readFacts();controls();settleRuns();render();setView('whole','scan');
 window.STBWindowSeat=Object.freeze({version:'0.8',definition:()=>buildDefinition(),request:()=>buildRequest(buildDefinition()).definition,conditions:()=>conditions(buildDefinition())});
 })();
 </script>

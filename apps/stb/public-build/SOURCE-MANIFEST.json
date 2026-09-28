@@ -390,6 +390,13 @@
       "blobSha": "3296715add0016d7117899e8e74db91c718257d2",
       "bytes": 215667,
       "reason": "Store repin to 7326a58: cache-busters for the refreshed Store handoff contract, Window Seat (edge mill on, depth in its own group with quarter-inch steps) and the dev guide."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-plausible-depth",
+      "blobSha": "80e7a3277cfb9e55c5d156fe4695b6fbbdca7c00",
+      "bytes": 215667,
+      "reason": "Cache-buster for Window Seat: boards across the depth plan themselves and are checked with the Store before the formal answer."
     }
   ],
   "retiredFiles": [

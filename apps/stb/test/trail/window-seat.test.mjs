@@ -68,6 +68,18 @@ test('Window Seat: one job, same rules, live-Store request', { timeout: 120000 }
     assert.equal(await page.locator('#s-configure').isVisible(), true);
     assert.equal(await page.locator('#btn-call').isDisabled(), true);
 
+    // Boards across the depth plan themselves (Auto): the fewest boards the edge mill can reach.
+    assert.equal(await page.locator('#v-runs').innerText(), '2 (auto)');
+    await page.evaluate(() => { const e = document.getElementById('c-d'); e.value = '15'; e.dispatchEvent(new Event('input')); });
+    assert.equal(await page.locator('#v-runs').innerText(), '3 (auto)', '7 1/2 in boards would need 1 3/4 in off a 1×10; 3 × 1×6 milled to 5 in works');
+    assert.ok((await page.evaluate(() => window.STBWindowSeat.request())).cutPackages.every(p => p.material.nominalW === 6 && p.finishedWidthIn === 5));
+    // Forcing 2 boards at 15 in is not plausible, and the bench says so before asking the Store.
+    await page.locator('#c-runs [data-n="2"]').click();
+    assert.ok((await page.evaluate(() => window.STBWindowSeat.conditions())).some(c => c.block && /Too much to mill/.test(c.t)));
+    assert.equal(await page.locator('#btn-ask').isDisabled(), true);
+    await page.locator('#c-runs [data-n="auto"]').click();
+    await page.evaluate(() => { const e = document.getElementById('c-d'); e.value = '14'; e.dispatchEvent(new Event('input')); });
+
     // Depth is the customer's number, a quarter inch at a time; the boards are milled to match.
     await page.locator('#depth-panel [data-depth="0.25"]').click();
     assert.equal(await page.locator('#v-d').innerText(), '14 1/4 in');
