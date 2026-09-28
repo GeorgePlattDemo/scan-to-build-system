@@ -91,6 +91,6 @@ A cell claim may mention this offering only after Store 1 actually lists it and 
 
 ## 10. Sources used
 
-- `work/machines/staging/SHEET-MACHINE-STAGING-0.1.md`
+- Program `research/machine-development/staging/SHEET-MACHINE-STAGING-0.1.md`
 - Governed Reference sheet simulation pin `18949f16`
 - Atlas Bridge §4 (neutral ops only)

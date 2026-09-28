@@ -33,16 +33,16 @@ Exact historical admissions remain in [`../../provenance/ADMISSION-REGISTER.md`]
 
 | Need | Open |
 | --- | --- |
-| Project state | [`../../STB-PROJECT-STATE-AND-SOURCE-INDEX.md`](../../STB-PROJECT-STATE-AND-SOURCE-INDEX.md) |
+| Project state | [`../../STB-CURRENT-BASELINE.md`](../../STB-CURRENT-BASELINE.md) · [`../../docs/project/VERIFICATION-REGISTER.md`](../../docs/project/VERIFICATION-REGISTER.md) |
 | Source/layer ownership | [`../../docs/project/SOURCE-AUTHORITY.md`](../../docs/project/SOURCE-AUTHORITY.md) |
 | Application guidance | [`../../docs/application/README.md`](../../docs/application/README.md) |
 | Store navigation | [`../../docs/store/`](../../docs/store/) |
-| Machine source map | [`../../docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md`](../../docs/machine/POST-APP-MECHANICAL-SOURCE-MAP.md) |
+| Machine source map | [Program `research/machine-development/POST-APP-MECHANICAL-SOURCE-MAP.md`](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/research/machine-development/POST-APP-MECHANICAL-SOURCE-MAP.md) |
 | Machine-development program | [Program machine development](https://github.com/GeorgePlattDemo/3d-solutions-program/tree/main/research/machine-development) |
 | Dimensional staging | [Program dimensional staging](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/research/machine-development/staging/DIMENSIONAL-MACHINE-STAGING-0.1.md) |
 | Sheet staging | [Program sheet staging](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/research/machine-development/staging/SHEET-MACHINE-STAGING-0.1.md) |
 | Research-cell staging | [Program research-cell staging](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/research/machine-development/cell/RESEARCH-CELL-STAGING-0.1.md) |
-| Atlas donor copies | [`../../source-library/atlas-research/`](../../source-library/atlas-research/) |
+| Atlas research papers | [Program `research/atlas/`](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/research/atlas/README.md) |
 | Patent sources | [PATENTS.md](PATENTS.md) |
 
 ## Current working rules

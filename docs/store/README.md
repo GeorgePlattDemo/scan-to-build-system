@@ -1,24 +1,19 @@
 # Store Documentation
 
-This directory holds the current Store documentary boundary and source evidence used by the post-app system repository.
+System's side of the seam with Store. Store's own facts, capability and answers live in the Store repository; this folder only records how System asks and what it keeps.
 
 ## Start here
 
-1. [`CURRENT-STORE-FOUNDATION.md`](CURRENT-STORE-FOUNDATION.md) — reconciled current Store boundary for system work.
-2. [`CURRENT-SOURCE-SET.md`](CURRENT-SOURCE-SET.md) — exact current source family and treatment.
-3. [`current/STB-STORE-CELL-STAGES-0.1.md`](current/STB-STORE-CELL-STAGES-0.1.md) — exact current Stage 1–4 evidence document copied from the Store pin.
-4. [`current/D-001-STAGE2-ENVELOPE-0.1.md`](current/D-001-STAGE2-ENVELOPE-0.1.md) — exact current D-001 Stage-2 reference envelope copied from the Store pin.
-5. [`../../work/store/README.md`](../../work/store/README.md) — active Store 1 build surface.
+1. [`CURRENT-STORE-FOUNDATION.md`](CURRENT-STORE-FOUNDATION.md) — the Store boundary as System uses it.
+2. [Store stage guide](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/STB-STORE-CELL-STAGES-0.1.md) — Stages 1–4, owned by Store.
+3. [D-001 envelope](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/D-001-STAGE2-ENVELOPE-0.1.md) — what the reference cell accepts and refuses, owned by Store.
+4. [Store `store-1/`](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/store-1/README.md) — Store 1 build surface, owned by Store.
 
-## Source identity
+## Which Store version
 
-Exact Stage-2 source:
+The exact Store version the app calls is recorded once, in [`../project/VERIFICATION-REGISTER.md`](../project/VERIFICATION-REGISTER.md) and [`../../START-HERE.md`](../../START-HERE.md). It is not repeated here, so it cannot go stale here.
 
-`GeorgePlattDemo/scan-to-build-store@b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`
-
-The copied files under `current/` are source snapshots. Do not edit them to represent Store 1 future changes.
-
-Large/current Store owner sources such as `DEFINITIONS.md`, `STORE-ZERO.md`, `STORE-JOB-001.md`, and `CAPTURE-TO-WORKPACKET.md` remain pinned in the source repo until mechanically transferred or individually admitted.
+System keeps no copies of Store documents. Earlier snapshot copies under `docs/store/current/` were removed on 2026-09-28 after they drifted from Store's own files.
 
 ## Boundary
 

@@ -6,7 +6,7 @@
 
 Scan-to-Build is not the contractor’s office. It is not Jobber, Buildertrend, JobTread, Procore, Bluebeam, STACK, PlanSwift, CompanyCam, QuickBooks, or a millwork ERP. The contractor keeps those tools. This path accepts a bounded, permissioned request and returns a named resolution.
 
-Companion: [contractor-tool-boundary.md](../architecture/contractor-tool-boundary.md).
+Companion: [contractor-tool-boundary.md](../application-current/architecture/contractor-tool-boundary.md).
 
 ## Why this path is different
 
@@ -256,7 +256,7 @@ DeclaredRecord (contractor-stated need; holder still owns the home record)
 
 Entry context `CONTRACTOR` is recorded and **does not bypass** provenance, verification, consent, gate, packet, or authorization requirements. A contractor is not an owner for `G-CONSENT` unless they are also the holder and are acting as PLACE.
 
-See [entry-to-store-handoff.md](../architecture/entry-to-store-handoff.md).
+See [entry-to-store-handoff.md](../application-current/architecture/entry-to-store-handoff.md).
 
 ## Store interaction
 

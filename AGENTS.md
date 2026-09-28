@@ -60,7 +60,7 @@ The scoreboard is a ratchet: known violations are listed and may not grow; a fix
 
 - Bench text: `work/capability-bridge/`
 - App code: `apps/stb/` only after a trial row says `AMEND: app`
-- Physical program: `work/machines/`
+- Physical program: Program repository, `research/machine-development/`
 - Provenance: `provenance/`
 
 If a file is missing, say so. Do not invent a second baseline.

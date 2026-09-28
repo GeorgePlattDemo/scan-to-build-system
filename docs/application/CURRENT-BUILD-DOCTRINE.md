@@ -14,4 +14,4 @@ The accepted application and its planning lineage establish several durable buil
 - Old prototype behavior may be preserved only where its semantics survive current owners.
 - New worked identity is User 1; Sarah remains historical provenance/donor material.
 
-This page summarizes current doctrine for navigation. Exact source identities are in `CONTROLLING-SOURCE-POINTERS.md`.
+This page summarizes current doctrine for navigation. Exact source identities are in [`../../provenance/SOURCE-PINS.md`](../../provenance/SOURCE-PINS.md).

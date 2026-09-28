@@ -3,7 +3,7 @@
 **Status:** first load  
 **Evidence class:** DOCUMENTED working rewrite  
 **Donor status of originals:** not adopted / field survey  
-**Originals:** [`../../source-library/atlas-research/`](../../source-library/atlas-research/)
+**Originals:** [Program `research/atlas/`](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/research/atlas/README.md)
 
 This file is the only Atlas text allowed to steer the application and Store surfaces.
 Original part files stay donors. Atlas part numbers are not architecture, Store types, Cell objects, or runtime states.

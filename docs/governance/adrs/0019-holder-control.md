@@ -10,4 +10,4 @@ Consequences: Planned gates exist only as register entries.
 
 Does not establish: a custody product.
 
-Affected: docs/architecture/information-custody-0.1.md
+Affected: docs/architecture/information-custody-0.1.md (retired from System 2026-09-28; substance carried in Program `governance/information-custody-and-processing.md`)

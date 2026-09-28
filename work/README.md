@@ -2,18 +2,19 @@
 
 Daily bench for Store-callable capability work:
 
-- [`capability-bridge/`](capability-bridge/) — gold index, patent access, Atlas rewrite, dimensional model, beginning-stage sheet model, Store surface.
+- [`capability-bridge/`](capability-bridge/) — gold index, patent access, Atlas rewrite, dimensional model, beginning-stage sheet model, Store surface, trial protocol and trial log.
 
-Start there. Vault folders below stay as admitted sources.
+Start there.
 
 - [`user-intake/`](user-intake/) — User 1 entry, evidence, observations and candidate project definition.
-- [`store/`](store/) — Store 1 expansion, material/stock/capability/economics/special-order/fulfillment work.
-- [Program machine-development research](https://github.com/GeorgePlattDemo/3d-solutions-program/tree/main/research/machine-development) — current owner of the physical research sequence, machine-development questions/findings, and research-cell planning. The old System machine-program path is retained only as a compatibility pointer.
-- [Program machine-development staging](https://github.com/GeorgePlattDemo/3d-solutions-program/tree/main/research/machine-development/staging) — current research/evidence-staging home; System paths are compatibility pointers.
-- [Program machine-development engineering](https://github.com/GeorgePlattDemo/3d-solutions-program/tree/main/research/machine-development/engineering) — current candidate mechanical/control/component/patent-correspondence research home.
-- [`cell/`](cell/) — compatibility pointers for research-cell material now owned by Program; System retains only operational seams/provenance here.
+- [`USER-STORE-MACHINE-CHAIN.md`](USER-STORE-MACHINE-CHAIN.md) — the chain from User 1 to owner record; each arrow is a boundary.
+- [`BRANCH-AND-FOLDER-DISCIPLINE.md`](BRANCH-AND-FOLDER-DISCIPLINE.md) — folders for ownership, branches for bounded changes.
 - [`../docs/patents/`](../docs/patents/) — full issued patent sources and the patent-alignment gate.
-- [`NEXT-ENGINEERING-STEP.md`](NEXT-ENGINEERING-STEP.md) — physical Build-1 planning handoff; does not block filling the reference models.
+
+Owned elsewhere:
+
+- Machine and cell research, staging and engineering — [Program `research/machine-development/`](https://github.com/GeorgePlattDemo/3d-solutions-program/tree/main/research/machine-development).
+- Store 1 expansion — [Store `store-1/`](https://github.com/GeorgePlattDemo/scan-to-build-store/tree/main/store-1).
 
 Folders hold durable subject ownership. Branches hold bounded change sets.
 

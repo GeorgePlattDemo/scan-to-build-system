@@ -92,7 +92,7 @@ Only after that orientation: **Start**. Starting writes a `DeclaredRecord` (or a
 7. If sealed accept on a simulation-eligible sheet path, request simulation.
 8. Export an `OutcomeRecord` if one exists.
 9. Stop. Abandon is a valid terminal.
-10. Visit the in-store channel for clarification (see [in-store-channel.md](../architecture/in-store-channel.md)).
+10. Visit the in-store channel for clarification (see [in-store-channel.md](../application-current/architecture/in-store-channel.md)).
 
 There is no “keep designing until it works” loop that mutates class, size, or species behind the visitor’s back.
 
@@ -134,7 +134,7 @@ COLD → same sequence as every path:
 
 declared need → `ProjectInstance` → observations → `MaterialSpec` → draft `WorkPacket` → store evaluation → gates → INFORM / DEFER / REFUSE → optional simulation → `OutcomeRecord`.
 
-See [entry-to-store-handoff.md](../architecture/entry-to-store-handoff.md).
+See [entry-to-store-handoff.md](../application-current/architecture/entry-to-store-handoff.md).
 
 Entry context must be recorded as `COLD`. It does not bypass provenance, verification, consent, gate, packet, or authorization requirements.
 
