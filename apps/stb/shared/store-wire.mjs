@@ -567,7 +567,9 @@ function validateCutPackagePayload(payload) {
   if (packages.length + items.length === 0) return bad('at least one cut package or item line is required');
   if (packages.length > CUT_PACKAGE_DEFINITION.maxPackages || items.length > CUT_PACKAGE_DEFINITION.maxItemLines) return scope('too many lines');
   for (const pkg of packages) {
-    if (!isPlainObject(pkg) || !onlyKeys(pkg, ['packageId', 'material', 'endCut', 'parts'])) return scope('unexpected cut-package fields');
+    if (!isPlainObject(pkg) || !onlyKeys(pkg, ['packageId', 'material', 'endCut', 'finishedWidthIn', 'parts'])) return scope('unexpected cut-package fields');
+    // Optional: the width every board in the package is edge-milled to. The Store decides whether it can.
+    if (pkg.finishedWidthIn != null && (!finiteNumber(pkg.finishedWidthIn) || pkg.finishedWidthIn <= 0)) return bad('finishedWidthIn must be a positive number');
     if (requireNonemptyString('packageId', pkg.packageId)) return bad('packageId required');
     if (!isPlainObject(pkg.material) || !onlyKeys(pkg.material, ['species', 'form', 'nominalT', 'nominalW', 'grade'])) return scope('unexpected material fields');
     if (requireNonemptyString('material.species', pkg.material.species)) return bad('material.species required');
