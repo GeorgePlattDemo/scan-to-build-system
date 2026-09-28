@@ -174,6 +174,10 @@
   .card{background:var(--tint);border:1px solid var(--border-accent);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:12.5px}
   .card .lb{margin:0 0 6px;font-size:10.5px;font-weight:650;letter-spacing:.06em;color:var(--accent)}
   .xbtn{font-size:11px;padding:4px 9px;border-radius:20px;white-space:nowrap}
+  .depthrow{display:grid;grid-template-columns:44px 1fr 44px;gap:6px;align-items:center;margin:2px 0 8px}
+  .depthrow input{margin:0}
+  .depthrow button{padding:5px 0;font-size:12px;font-weight:650}
+  .millnote{font-size:11px;margin:4px 0 0;padding:6px 8px;border-radius:7px;background:var(--tint);color:var(--text)}
   .mini2{font-size:10.5px;letter-spacing:.05em;padding:6px 8px;color:var(--text-2);width:100%}
 
   /* store */
@@ -777,33 +781,38 @@ function controls(){
     +lab('Center window seat','v-wC')+rng('c-wC',30,84,1,P.W.CENTER,'Center width')
     +lab('Right tower','v-wR')+rng('c-wR',14,48,1,P.W.RIGHT,'Right tower width')
     +'<div class="total"><b id="v-W">—</b><span id="v-Wb">—</span></div>'
-    +lab('Depth you want','v-d')+rng('c-d',6,24,0.25,P.depth,'Depth')
-    +'<p class="dim" style="font-size:10.5px;margin:-4px 0 9px">Your number. We don’t quietly move it to a board width.</p>'
     +lab('Clearance each side','v-gap')+rng('c-gap',0,4,0.25,P.gap,'Clearance each side')
     +'</div>';
-  h+='<div class="grp"><p class="gh">2 · CENTER WINDOW SEAT</p>'
+  /* Depth is the customer's number. Any depth works: boards that aren't that wide are edge-milled to width. */
+  h+='<div class="grp" id="depth-panel"><p class="gh">2 · DEPTH</p>'
+    +'<div class="ws-lab"><span>Depth you want</span><span id="v-d" style="font-size:15px;font-weight:700;color:var(--accent)">—</span></div>'
+    +'<div class="depthrow"><button type="button" data-depth="-0.25" aria-label="A quarter inch shallower">−¼</button>'
+    +rng('c-d',6,24,0.25,P.depth,'Depth')
+    +'<button type="button" data-depth="0.25" aria-label="A quarter inch deeper">+¼</button></div>'
+    +'<div class="ws-lab"><span>Boards across the depth</span><span id="v-runs">—</span></div>'
+    +'<div class="seg" id="c-runs">'+[1,2,3,4].map(n=>'<button type="button" data-n="'+n+'">'+n+'</button>').join('')+'</div>'
+    +'<p class="millnote" id="v-runw"></p>'
+    +'</div>';
+  h+='<div class="grp"><p class="gh">3 · CENTER WINDOW SEAT</p>'
     +lab('Seat height','v-seat')+rng('c-seat',12,26,1,P.seat,'Seat height')
     +lab('Upper storage','v-upperH',' clear')+rng('c-upperH',8,30,1,P.upperH,'Upper storage height')
     +lab('Upper bays','v-bays')+rng('c-bays',1,4,1,P.bays,'Upper bays')
     +lab('Cubbies under the seat','v-cub')+rng('c-cub',1,6,1,P.cub,'Cubbies')
     +'<label class="cbx"><input type="checkbox" id="c-front"'+(P.front?' checked':'')+'><span>Front board below the seat</span></label>'
     +'</div>';
-  h+='<div class="grp"><p class="gh">3 · TOWERS</p>'
+  h+='<div class="grp"><p class="gh">4 · TOWERS</p>'
     +lab('Left tower shelves','v-shL')+rng('c-shL',0,8,1,P.SH.LEFT,'Left tower shelves')
     +lab('Right tower shelves','v-shR')+rng('c-shR',0,8,1,P.SH.RIGHT,'Right tower shelves')
     +'</div>';
-  h+='<div class="grp"><p class="gh">4 · SPOT FACING</p>'
+  h+='<div class="grp"><p class="gh">5 · SPOT FACING</p>'
     +'<label class="cbx"><input type="checkbox" id="c-spots"'+(P.spots.on?' checked':'')+'><span>Spot the tower sides for shelf pins, at every shelf<br><span class="dim">A 3/16 in spot, 3/16 in deep, on the face of each board. It marks the hole; you drill for the pin.</span></span></label>'
     +'<p class="ws-h" style="margin:4px 0 4px">WHERE ACROSS THE BOARD</p>'
     +'<div class="seg" id="c-spot-place">'+SPOT_RULES.map(s=>'<button type="button" data-k="'+s.k+'">'+(s.k==='CENTER'?'Center':s.k==='1.5'?'1½ in':'2 in')+'</button>').join('')+'</div>'
     +'<p class="dim" id="v-spots" style="font-size:10.5px;margin:4px 0 0">—</p>'
     +'</div>';
-  h+='<div class="grp"><p class="gh">5 · WOOD</p>'
+  h+='<div class="grp"><p class="gh">6 · WOOD</p>'
     +'<div id="species" style="display:grid;grid-template-columns:1fr 1fr;gap:4px"></div>'
     +'<p class="dim" style="font-size:10.5px;margin:9px 0 4px">Solid board, ¾ in. No plywood, MDF or glued panel.</p>'
-    +'<div class="ws-lab"><span>Boards across the depth</span><span id="v-runs">—</span></div>'
-    +'<div class="seg" id="c-runs">'+[1,2,3,4].map(n=>'<button type="button" data-n="'+n+'">'+n+'</button>').join('')+'</div>'
-    +'<p class="dim" style="font-size:10.5px;margin:4px 0 0" id="v-runw"></p>'
     +'<p class="ws-h" style="margin:10px 0 4px">HARDWARE (OPTIONAL)</p>'
     +'<select class="sel" id="c-hw" style="width:100%" aria-label="Hardware"><option value="">None</option>'
     +HARDWARE.map(x=>'<option value="'+x.sku+'"'+(P.hw.sku===x.sku?' selected':'')+'>'+x.name+'</option>').join('')+'</select>'
@@ -811,7 +820,7 @@ function controls(){
     +rng('c-hwq',1,6,1,P.hw.qty,'Hardware packs')
     +'<p class="dim" style="font-size:10.5px;margin:-4px 0 0">Store merchandise you pick. The Store prices it. Not a connection recommendation.</p>'
     +'</div>';
-  h+='<details class="grp" id="ops-panel"><summary style="padding:0;font-size:10px;letter-spacing:.07em;color:var(--accent)">6 · EXTRA REQUESTS: <span id="ops-count">0</span></summary><div id="ops-body" style="padding-top:10px"></div></details>';
+  h+='<details class="grp" id="ops-panel"><summary style="padding:0;font-size:10px;letter-spacing:.07em;color:var(--accent)">7 · EXTRA REQUESTS: <span id="ops-count">0</span></summary><div id="ops-body" style="padding-top:10px"></div></details>';
   h+='<button type="button" class="mini2" id="btn-reset">RESET TO THE DRAWING</button>';
   $('ctlcol').innerHTML=h;
   const on=(id,fn)=>{const e=$(id);if(e)e.oninput=function(){fn(this);changed()}};
@@ -823,6 +832,8 @@ function controls(){
   $('c-spots').onchange=function(){P.spots.on=this.checked;changed()};
   $('c-spot-place').onclick=e=>{const b=e.target.closest('button');if(!b)return;const s=SPOT_RULES.find(x=>x.k===b.dataset.k);
     P.spots.rule=s.rule;P.spots.inset=s.inset==null?null:s.inset;changed()};
+  $('depth-panel').addEventListener('click',e=>{const b=e.target.closest('[data-depth]');if(!b)return;
+    P.depth=Math.min(24,Math.max(6,Math.round((P.depth+Number(b.dataset.depth))*4)/4));changed()});
   $('c-runs').onclick=e=>{const b=e.target.closest('button');if(!b)return;P.runs=+b.dataset.n;changed()};
   $('c-hw').onchange=function(){P.hw.sku=this.value;changed()};
   const sw=$('species');
@@ -853,7 +864,9 @@ function syncControls(def,req){
   set('v-bays',P.bays);set('v-cub',P.cub);set('v-shL',P.SH.LEFT);set('v-shR',P.SH.RIGHT);set('v-runs',P.runs);
   set('v-hwq',P.hw.sku?P.hw.qty:'none picked');
   const b=boardFor(def.runW);
-  $('v-runw').innerHTML='Each board finishes at <b>'+inch(def.runW)+'</b>'+(b?(b.mill!=null?', cut from a 1×'+b.nominalW+' ('+fmt(b.actual)+' in) milled narrower':': a 1×'+b.nominalW+' exactly'):'')+'.';
+  $('v-runw').innerHTML=!b?'<b>No 1× board is that wide.</b> Add a board across the depth.'
+    :b.mill!=null?'Each board: a <b>1×'+b.nominalW+'</b> ('+fmt(b.actual)+' in) <b>edge-milled to '+inch(b.mill)+'</b>, '+fmt(r3(b.actual-b.mill))+' in off one edge. The Store prices the mill time.'
+    :'Each board: a <b>1×'+b.nominalW+'</b> as it comes, '+inch(b.actual)+'. No milling.';
   const place=spotPlacement();
   const shelfSpots=P.spots.on?(P.SH.LEFT+P.SH.RIGHT)*2*P.runs:0;
   set('v-spots',P.spots.on?shelfSpots+' spots: '+(P.SH.LEFT+P.SH.RIGHT)+' shelves × 2 sides × '+P.runs+' board'+(P.runs===1?'':'s')+', '+place.label+'.':'Off.');

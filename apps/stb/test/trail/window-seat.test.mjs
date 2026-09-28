@@ -68,6 +68,13 @@ test('Window Seat: one job, same rules, live-Store request', { timeout: 120000 }
     assert.equal(await page.locator('#s-configure').isVisible(), true);
     assert.equal(await page.locator('#btn-call').isDisabled(), true);
 
+    // Depth is the customer's number, a quarter inch at a time; the boards are milled to match.
+    await page.locator('#depth-panel [data-depth="0.25"]').click();
+    assert.equal(await page.locator('#v-d').innerText(), '14 1/4 in');
+    assert.match(await page.locator('#v-runw').innerText(), /1×8 .* edge-milled to 7 1\/8 in/);
+    assert.ok((await page.evaluate(() => window.STBWindowSeat.request())).cutPackages.every(p => p.finishedWidthIn === 7.125));
+    await page.locator('#depth-panel [data-depth="-0.25"]').click();
+
     // Pick a depth that lands on a board: no milling is asked.
     await page.locator('#p-depth button', { hasText: 'USE 14 1/2 IN' }).click();
     assert.doesNotMatch(await page.locator('#ws-reg').innerText(), /Edge-mill/);

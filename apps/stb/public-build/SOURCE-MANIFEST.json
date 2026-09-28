@@ -387,9 +387,9 @@
     {
       "path": "system-build-current.html",
       "pass": "store-pin-7326a58",
-      "blobSha": "591ca1ce76e1e5f386b3ff2453e6e3cc5118dd9c",
+      "blobSha": "3296715add0016d7117899e8e74db91c718257d2",
       "bytes": 215667,
-      "reason": "Store repin to 7326a58: cache-busters for the refreshed Store handoff contract, Window Seat (edge mill on) and the dev guide."
+      "reason": "Store repin to 7326a58: cache-busters for the refreshed Store handoff contract, Window Seat (edge mill on, depth in its own group with quarter-inch steps) and the dev guide."
     }
   ],
   "retiredFiles": [
