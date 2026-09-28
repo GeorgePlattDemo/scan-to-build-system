@@ -290,6 +290,20 @@
       "blobSha": "161373b788202e904585881110e28ba5ebd04d49",
       "bytes": 221515,
       "reason": "Cache-buster for the updated Dev Guide spec."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "shared-home-copy",
+      "blobSha": "b5915e13e3e81cdbdaae1a909f9f232b21f5d560",
+      "bytes": 15672,
+      "reason": "Shared Home Dev Guide as terse dev notes: Don’t overcrowd first, tiles = tests, same six steps, known gaps named (read-only copy on Playhouse only; demo accounts), \"Build configurators as needed\" last."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "shared-home-copy",
+      "blobSha": "723b4be3ef178d4155ec825d048f8e3107be5ad3",
+      "bytes": 221566,
+      "reason": "Shared Home copy in plain text with no bold after the heading; says why a pre-made job is faster (already worked out, you answer only your part) and that Start your own takes longer. Cache-buster for the updated Dev Guide spec."
     }
   ]
 }

@@ -53,12 +53,18 @@
       ['BRING A DRAWING, PDF OR PHOTO','Configured later with contractor adapters.'],
       ['PASTE A CUT LIST','Configured later with contractor adapters.']
     ]),
-    projects:guide('Build configurators as needed',[
-      ['Five tiles, five tests','Each tests a different way a job arrives: one board · a published plan · an exact fit · a whole assembly · a different material.'],
-      ['One small bench per kind of job','Built when that job shows up. No universal configurator, no dropdown maze.'],
-      ['Same six steps','Every tile, every door, same rules.'],
-      ['Don’t overcrowd','Show live, bounded, or deferred clearly.'],
-      ['Still patched','Some legacy routes are intercepted, not retired.']
+    projects:guide('Library',[
+      ['Don’t overcrowd','Live, bounded or deferred. Say which.'],
+      ['Tiles = tests','Board · plan · fit · assembly · sheet.'],
+      ['Start your own','First. Never moves.'],
+      ['One project at a time','Switch tile → clear route + state.'],
+      ['No cross-talk','Job 1 facts stay in Job 1.'],
+      ['Same six steps','Every tile, every door. Scoreboard enforces.'],
+      ['Opening ≠ owning','Read-only copy until Make changes / Save.'],
+      ['Gap','Read-only copy: Playhouse only. Rest open live.'],
+      ['Gap','Accounts are demo. User 1 only. No auth.'],
+      ['Still patched','Legacy routes intercepted, not retired.'],
+      ['Build configurators as needed','One small bench per job class. No universal configurator.']
     ]),
     'start-own':guide('Legacy donor',[
       ['Don’t build here','The live Job 1 artifact owns this route.'],
