@@ -53,10 +53,11 @@
       ['BRING A DRAWING, PDF OR PHOTO','Configured later with contractor adapters.'],
       ['PASTE A CUT LIST','Configured later with contractor adapters.']
     ]),
-    projects:guide('Keep the library obvious',[
+    projects:guide('Build configurators as needed',[
+      ['Five tiles, five tests','Each tests a different way a job arrives: one board · a published plan · an exact fit · a whole assembly · a different material.'],
+      ['One small bench per kind of job','Built when that job shows up. No universal configurator, no dropdown maze.'],
+      ['Same six steps','Every tile, every door, same rules.'],
       ['Don’t overcrowd','Show live, bounded, or deferred clearly.'],
-      ['One project at a time','Clear old route/state on project switch.'],
-      ['No cross-talk','Job 1 facts stay out of Outdoor, Alcove, Sheet.'],
       ['Still patched','Some legacy routes are intercepted, not retired.']
     ]),
     'start-own':guide('Legacy donor',[

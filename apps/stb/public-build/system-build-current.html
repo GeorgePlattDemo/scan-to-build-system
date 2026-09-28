@@ -11,14 +11,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=80330c3a"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=aeb3afaf"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
 <script src="stb-store-handoff-contract.js?v=bc2e0a7c"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
 <script src="stb-store-client.js?v=7eb5ab65"></script>
 <script src="stb-user-defined-board-runtime-bridge.js?v=f77a49e9"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=042908b3"></script>
+<script src="stb-build-guide-spec.js?v=7b4ed32f"></script>
 <script>
 (() => {
   const shell = document.getElementById('stb-current');
@@ -1384,16 +1384,10 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         });
         body.insertAdjacentHTML('beforeend', `
           <h1 style="font-size:21px">What are you making?</h1>
-          <p><b>A bounded project starts with work that has already been mapped.</b> <span class="dim">The parts, their relationships, and the questions that must be answered are defined before you get here. Anything that still needs engineering, Store resolution, or physical verification stays visible.</span></p>
-          <p class="dim">What's left is the part only you can answer: <b style="color:var(--text)">your space, your measurements, and the choices that make this one yours.</b></p>
-          <p class="dim">You should not be asked to solve the project for us. <b style="color:var(--text)">A question appears only when your answer changes the definition.</b></p>
-          <p><b>That's why the list is worth a look first.</b> <span class="dim">When a bounded project fits what you want to make, you skip the questions that do not belong to you.</span></p>
-          <h3>Some answers open more questions</h3>
-          <p class="dim">Choose doors, for example, and the project may also need to know the door type, hardware path, clearances, and required machining.</p>
-          <p class="dim">Choose no doors and those questions disappear. <b style="color:var(--text)">No choice, no unnecessary question.</b></p>
-          <h3>If nothing here is your thing</h3>
-          <p class="dim"><b style="color:var(--text)">Start your own stays first.</b> Bring the need, measurements, sketch, drawing, photo, or file you already have. We keep the source, show what can be defined, and leave what is still missing visible.</p>
-          <p class="dim">When the required responsibilities are accounted for, the project can ask the Store a clear question.</p>
+          <p><b>Pick the project closest to yours.</b> <span class="dim">You get it exactly as it was built — every part, every cut, the decisions already made. Then change the numbers to yours.</span></p>
+          <p class="dim">You won't be asked to design anything. <b style="color:var(--text)">A question only shows up when your answer changes what gets cut.</b> Pick no doors, and the door questions never appear.</p>
+          <p class="dim">Nothing close? <b style="color:var(--text)">Start your own</b> is first on the list. Bring a board, a sketch, a photo or a file — we keep what you bring and show you what's still missing.</p>
+          <p><b>Either way, the Store gets one clear question, and you get an instant answer.</b></p>
         `);
       }
 
