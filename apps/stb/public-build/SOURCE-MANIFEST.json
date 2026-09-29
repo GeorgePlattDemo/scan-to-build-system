@@ -474,6 +474,13 @@
       "blobSha": "0258ea654c06b7cea11de9315d47986d627de979",
       "bytes": 229196,
       "reason": "Alcove is Job 2: its tile moves second on the Shared Home and is labelled TEST 02 · FIT THE SPACE (Outdoor becomes TEST 03). Cache-buster for the updated guide."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-0.9",
+      "blobSha": "fec922c90c4572c858174d6ad82d546d0bf99db3",
+      "bytes": 229391,
+      "reason": "Window Seat 0.9 goes live: the window-seat-live iframe loads stb-window-seat-0.9.html (0.8 stays in the repo until the owner retires it), the tile opens on page 1 (her idea, where both routes are offered) instead of the long scroll, and the shell's own rail is hidden on window-seat-live because 0.9 renders its Dev/Rev rail beside each of its pages from the same guide file. Cache-buster for the new page."
     }
   ],
   "retiredFiles": [

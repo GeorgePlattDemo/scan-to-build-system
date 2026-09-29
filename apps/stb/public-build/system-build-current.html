@@ -40,6 +40,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       .window-seat-shell-page.on{display:block!important}
       .window-seat-shell-main{width:100%;min-width:0;background:var(--surface)}
       .window-seat-shell-frame{display:block;width:100%;height:calc(100vh - 76px);min-height:680px;border:0;background:var(--bg)}
+      /* Window Seat draws its own Dev/Rev rail beside each of its pages, from the same guide file; one guide, not two. */
+      .window-seat-shell-page>aside.rail{display:none!important}
       .start-own-shell-page{padding:0!important;overflow:hidden;background:var(--surface)}
       /* Start your own keeps the Dev Guide rail on the right, like every other project page. */
       .start-own-shell-page.on{display:grid!important;grid-template-columns:minmax(0,1fr) 172px;align-items:stretch}
@@ -1216,8 +1218,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         const windowSeatTile = ribbon.querySelector('.tile[data-go="window-intake"]');
         if (windowSeatTile) {
           windowSeatTile.removeAttribute('data-go');
-          windowSeatTile.dataset.windowSeatArtifact = 'stb-window-seat-0.8.html';
-          windowSeatTile.title = 'Space utilization · Window seat 0.8';
+          windowSeatTile.dataset.windowSeatArtifact = 'stb-window-seat-0.9.html';
+          windowSeatTile.title = 'Space utilization · Window seat 0.9';
 
           let windowSeatPage = doc.getElementById('window-seat-live');
           if (!windowSeatPage) {
@@ -1230,7 +1232,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="window-seat-frame"
                   class="window-seat-shell-frame"
                   title="Space utilization · Window seat"
-                  src="stb-window-seat-0.8.html?v=922170b1"
+                  src="stb-window-seat-0.9.html?v=9c6d5030"
                 ></iframe>
               </div>
             `;
@@ -1242,8 +1244,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
             event.stopImmediatePropagation();
             selectJourneyProject('window-seat');
             originalShow.call(win, 'window-seat-live');
-            // Every visit opens at the start: the whole job, in one scroll.
-            seatFrame()?.contentWindow?.postMessage({type:'STB_SEAT_GO', stage:'whole'}, win.location.origin);
+            // Every visit opens at page 1, her idea, where both routes are offered.
+            seatFrame()?.contentWindow?.postMessage({type:'STB_SEAT_GO', stage:'hero'}, win.location.origin);
           }, true);
         }
       }
