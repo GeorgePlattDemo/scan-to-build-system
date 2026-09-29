@@ -460,6 +460,20 @@
       "blobSha": "c3eb42c504f4d0f5aaa06293efa491af5715d4bc",
       "bytes": 229196,
       "reason": "Job 1 Dev/Rev rails: layout for header, flag, plain bullets and quiet plumbing; Job 1 rail follows the idea/bench view; bench whole-job line ends \"Hardly worth dragging the miter saw out\" (was \"Not worth\"). Cache-buster for the updated guide."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "job2-alcove-dev-rev-guide",
+      "blobSha": "0806f25f2bbbbe4afb76049627667c3748bc2242",
+      "bytes": 46159,
+      "reason": "Job 2 (Alcove) Dev/Rev rails, owner text: page 1 Your idea (alcove-capture), page 2 The bench (alcove-config), page 3 Store answer (store), with current-gap notes. Job 1 page 3: \"Events stay separate.\" (was \"Twelve events\"). Shared Home tiles note follows the new order."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job2-alcove-dev-rev-guide",
+      "blobSha": "0258ea654c06b7cea11de9315d47986d627de979",
+      "bytes": 229196,
+      "reason": "Alcove is Job 2: its tile moves second on the Shared Home and is labelled TEST 02 · FIT THE SPACE (Outdoor becomes TEST 03). Cache-buster for the updated guide."
     }
   ],
   "retiredFiles": [

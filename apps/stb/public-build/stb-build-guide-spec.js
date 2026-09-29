@@ -158,7 +158,7 @@
           "items": [
             "Request ≠ order ≠ payment ≠ allocation ≠ release ≠ Cycle Start.",
             "Staged ≠ picked up. Finished ≠ closed. Closed is custody.",
-            "Twelve events stay separate. Missing events stay missing. Nothing is promoted by wording.",
+            "Events stay separate. Missing events stay missing. Nothing is promoted by wording.",
             "ACCEPT creates the next event. It does not allocate, pay, or release.",
             "CHANGE DEFINITION mints a version. It does not edit this one."
           ]
@@ -187,11 +187,666 @@
       ]
     }
   };
+  // Job 2 (Alcove) rails: owner's text, verbatim, with the approved edits and current-gap notes.
+  const JOB2={
+    "alcove-idea": {
+      "header": "DEV/REV GUIDE — JOB 2 · ALCOVE · PAGE 1 · YOUR IDEA",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "No universal configurator.",
+            "Every intent assembles its own tools.",
+            "Only those tools go to the bench.",
+            "The picture is context.",
+            "The picture is not the definition.",
+            "The scan is context.",
+            "The scan is not measurement authority.",
+            "Controlling facts own the cut.",
+            "Everything else stays attached as context."
+          ]
+        },
+        {
+          "title": "INTENT MUST DEFINE",
+          "items": [
+            "What must be known.",
+            "Who owns each fact.",
+            "What the user enters.",
+            "What System may derive.",
+            "What may be omitted.",
+            "What omission means.",
+            "What choices create new required facts.",
+            "What makes the definition complete.",
+            "What must be routed elsewhere."
+          ]
+        },
+        {
+          "title": "ALCOVE FACTS",
+          "items": [
+            "Height.",
+            "Width / span.",
+            "Depth.",
+            "Shelf count.",
+            "Shelf elevations.",
+            "Material.",
+            "Door choice.",
+            "Taste positions.",
+            "Site condition.",
+            "Slope.",
+            "Bow.",
+            "Plumb.",
+            "Scan provenance."
+          ]
+        },
+        {
+          "title": "CONTROLLING VS OBSERVED",
+          "items": [
+            "Controlling means: cut to this.",
+            "Observed does not automatically mean controlling.",
+            "Scan does not outrank a controlling measurement.",
+            "Bow stays bow.",
+            "Slope stays slope.",
+            "Plumb stays plumb.",
+            "Taste stays taste.",
+            "Do not silently convert context into geometry.",
+            "Do not auto-correct a room nobody else stood in."
+          ]
+        },
+        {
+          "title": "TOOL MANIFEST",
+          "items": [
+            "Every intent exposes a tool manifest.",
+            "Required inputs are named.",
+            "Conditional inputs are named.",
+            "Derivation rules are named.",
+            "Completion rules are named.",
+            "Downstream routing is named.",
+            "Store-owned facts are marked Store-owned.",
+            "Missing Store facts stay missing upstream.",
+            "The manifest defines what may appear on the bench.",
+            "The bench does not enlarge it."
+          ]
+        },
+        {
+          "title": "CONDITIONAL TOOLS",
+          "items": [
+            "Choices may create new required facts.",
+            "Choices do not create hidden defaults.",
+            "DOORS = NO → no door tools.",
+            "DOORS = YES → door facts required.",
+            "Door opening becomes required.",
+            "Door quantity becomes required.",
+            "Handing becomes required where applicable.",
+            "Clearance becomes required where applicable.",
+            "Construction / sourcing path must be declared.",
+            "Missing required door facts = definition incomplete."
+          ]
+        },
+        {
+          "title": "SPECIAL ORDER · S/O",
+          "items": [
+            "S/O is a routing tag.",
+            "S/O stays part of the identified definition.",
+            "S/O routes the requirement outside local fabrication.",
+            "Store or supplier authority must resolve it.",
+            "S/O is not approval.",
+            "S/O is not availability.",
+            "S/O is not a quote.",
+            "S/O is not permission to substitute.",
+            "S/O does not erase the requirement.",
+            "No resolution → UNRESOLVED or UNAVAILABLE.",
+            "System does not redesign it to make local machinery happy."
+          ]
+        },
+        {
+          "title": "COMPLETION RULE",
+          "items": [
+            "Intent-complete means the job can be stated.",
+            "Intent-complete does not mean Store can fulfill it.",
+            "User/System-owned facts must be complete.",
+            "Store-owned facts need not be invented.",
+            "An explicit unresolved route is valid.",
+            "A hidden missing fact is not."
+          ]
+        },
+        {
+          "title": "CURRENT GAP",
+          "items": [
+            "Current gap: door tools, S/O routing, and the formal tool manifest are governing rules here; the current Alcove intent page does not yet implement them."
+          ]
+        },
+        {
+          "title": "PLUMBING RULES",
+          "items": [
+            "Preserve the working artifact.",
+            "Guide uses the rail.",
+            "Iframe keeps its width.",
+            "Parent routes.",
+            "Child owns the bounded definition.",
+            "New required fact → return to Intent.",
+            "Extend the manifest there.",
+            "Never invent a new knob on the bench."
+          ],
+          "quiet": true
+        }
+      ]
+    },
+    "alcove-bench": {
+      "header": "DEV/REV GUIDE — JOB 2 · ALCOVE · PAGE 2 · THE BENCH",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "This page is the bench.",
+            "Do not rename it configurator.",
+            "Do not grow it into a universal configurator.",
+            "Intent decided what may change.",
+            "Bench applies those permitted changes.",
+            "Bench produces the bounded job.",
+            "Bench does not answer Store questions."
+          ]
+        },
+        {
+          "title": "BENCH RECEIVES",
+          "items": [
+            "Identified intent.",
+            "Permitted toolset.",
+            "Current values.",
+            "Controlling facts.",
+            "Declared derivation rules.",
+            "Conditional requirements already exposed by Intent."
+          ]
+        },
+        {
+          "title": "BENCH PRODUCES",
+          "items": [
+            "One identified definition.",
+            "Finished-part demand.",
+            "Feature demand.",
+            "Operation demand.",
+            "Material demand.",
+            "Store-facing physical demand."
+          ]
+        },
+        {
+          "title": "ALCOVE TRANSFORMATION",
+          "items": [
+            "Height → upright finished length.",
+            "Span → shelf finished length.",
+            "Depth → shelf strips.",
+            "Depth → longitudinal mill demand when required.",
+            "Shelf count → shelf quantity.",
+            "Shelf elevations → defined shelf positions.",
+            "Selected spotting → physical spot demand.",
+            "Shelf elevations → spot locations.",
+            "Material choice → material demand.",
+            "Door choice → no door demand or defined door demand.",
+            "S/O requirement → retained alternate fulfillment demand."
+          ]
+        },
+        {
+          "title": "PHYSICAL DEMAND RULE",
+          "items": [
+            "If it changes the cut, show it.",
+            "If it changes a feature, show it.",
+            "If it changes an operation, show it.",
+            "If it changes material demand, show it.",
+            "If it changes Store evaluation, send the changed demand.",
+            "Do not hide physical consequences behind UI state."
+          ]
+        },
+        {
+          "title": "SPOTTING RULE",
+          "items": [
+            "A spot is physical work.",
+            "Shelf-driven spots stay tied to shelf elevations.",
+            "Spot demand stays bound to its target component.",
+            "Tool demand stays explicit.",
+            "Location stays explicit.",
+            "Store may support it.",
+            "Store may refuse it.",
+            "Store may price it.",
+            "Store may not move it."
+          ]
+        },
+        {
+          "title": "BENCH MAY DERIVE",
+          "items": [
+            "Finished component geometry.",
+            "Required part count.",
+            "Required feature count.",
+            "Required operation demand.",
+            "Declared transformations from the manifest."
+          ]
+        },
+        {
+          "title": "BENCH MAY NOT INVENT",
+          "items": [
+            "New user intent.",
+            "New controlling dimensions.",
+            "New material preference.",
+            "New shelf locations.",
+            "New door requirements.",
+            "Store SKU.",
+            "Store price.",
+            "Store time.",
+            "Store capability.",
+            "Store machine envelope.",
+            "Store economics."
+          ]
+        },
+        {
+          "title": "CHANGE RULE",
+          "items": [
+            "A controlling change creates a different definition.",
+            "New definition → new version identity.",
+            "New definition → invalidate prior Store answer.",
+            "New definition → fresh Store ask.",
+            "Old definition stays history.",
+            "Old Store answer stays with the old definition.",
+            "Never attach an old answer to changed work."
+          ]
+        },
+        {
+          "title": "FAILURE RULE",
+          "items": [
+            "Missing tool → return to Intent.",
+            "Missing derivation rule → stop.",
+            "Missing Store fact → ask Store.",
+            "Missing authority → leave unresolved.",
+            "Do not patch across an authority boundary."
+          ]
+        },
+        {
+          "title": "COMPLETENESS RULE",
+          "items": [
+            "Bench-defined does not mean Store-supportable.",
+            "A valid job may still be UNRESOLVED.",
+            "A valid job may still be REFUSED.",
+            "A valid job may still be UNAVAILABLE.",
+            "That is not a configurator failure.",
+            "That is the boundary working."
+          ]
+        },
+        {
+          "title": "CURRENT GAP",
+          "items": [
+            "Current gap: the bench does not yet consume a formal tool manifest. Preserve the existing Alcove behavior; do not invent one in this pass."
+          ]
+        },
+        {
+          "title": "PLUMBING",
+          "items": [
+            "Preserve the working artifact.",
+            "Do not squeeze it.",
+            "Guide uses the rail.",
+            "Iframe keeps its width.",
+            "Mind the seam.",
+            "postMessage is a contract.",
+            "Origin matters.",
+            "Schema matters.",
+            "Correlation matters.",
+            "Parent routes.",
+            "Child owns the bounded definition.",
+            "Known wart: two DOMs.",
+            "Known wart: focus seams.",
+            "Known wart: history seams.",
+            "Known wart: browser-held state."
+          ],
+          "quiet": true
+        }
+      ]
+    },
+    "alcove-store": {
+      "header": "DEV/REV GUIDE — JOB 2 · ALCOVE · PAGE 3 · STORE ANSWER",
+      "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "This page is one Store answer.",
+            "The answer belongs to one identified definition.",
+            "The answer belongs to one identified Store authority.",
+            "Viewing the page creates no domain event.",
+            "Store answers the job.",
+            "Store does not redefine the job."
+          ]
+        },
+        {
+          "title": "REFERENCE STATUS",
+          "items": [
+            "Store Zero is a declared reference lumberyard.",
+            "It is not live inventory.",
+            "It is not a live branch commitment.",
+            "It is not a dealer quote.",
+            "Its economics are declared reference economics.",
+            "Its machine capability is declared reference capability.",
+            "Its answer is meaningful only with its pins and authorities."
+          ]
+        },
+        {
+          "title": "FOUR STORE OUTCOMES",
+          "items": [
+            "SUPPORTABLE.",
+            "UNRESOLVED.",
+            "REFUSED.",
+            "UNAVAILABLE.",
+            "Every non-supportable answer carries reasons.",
+            "No reason → incomplete audit trail."
+          ]
+        },
+        {
+          "title": "STORE MUST RESOLVE",
+          "items": [
+            "Material identity.",
+            "Parent stock.",
+            "Required quantity.",
+            "Catalog availability.",
+            "Required Store services.",
+            "Supported operations.",
+            "Machine-envelope fit.",
+            "Crosscut demand.",
+            "Mill demand.",
+            "Spot demand.",
+            "Other declared operation demand.",
+            "Modeled machine work.",
+            "Modeled machine time.",
+            "Hardware demand where Store-owned.",
+            "Store economics.",
+            "Pricing basis.",
+            "Completeness.",
+            "Reason records.",
+            "Calculation identity."
+          ]
+        },
+        {
+          "title": "STORE MAY SELECT",
+          "items": [
+            "Compliant Store stock.",
+            "Compliant parent length.",
+            "Compliant Store SKU.",
+            "Store-owned service path.",
+            "Store-owned fulfillment path."
+          ]
+        },
+        {
+          "title": "STORE MAY NOT CHANGE",
+          "items": [
+            "Controlling site dimensions.",
+            "Unit height.",
+            "Finished span.",
+            "Finished depth.",
+            "Shelf count.",
+            "Shelf elevations.",
+            "Requested material demand.",
+            "Requested feature locations.",
+            "Door intent.",
+            "S/O intent.",
+            "Identified definition version."
+          ]
+        },
+        {
+          "title": "NO SILENT SUBSTITUTION",
+          "items": [
+            "Shortage is not preference.",
+            "Different stock is not automatically equivalent.",
+            "Different material is not automatically equivalent.",
+            "Easier geometry is not equivalent geometry.",
+            "Unsupported work stays unsupported.",
+            "Unavailable work stays unavailable.",
+            "Store does not alter the job to make the answer green."
+          ]
+        },
+        {
+          "title": "NO LOCAL STORE REPLICA",
+          "items": [
+            "System does not pre-compute Store price.",
+            "System does not pre-compute Store time.",
+            "System does not pre-compute Store SKU choice.",
+            "System does not pre-compute Store capability.",
+            "System does not pre-compute Store envelope fit.",
+            "System does not recreate Store economics.",
+            "Ask Store.",
+            "No answer → preserve the gap.",
+            "No local fallback."
+          ]
+        },
+        {
+          "title": "COMPLETE PRICE RULE",
+          "items": [
+            "Material must resolve.",
+            "Required operations must resolve.",
+            "Modeled work must resolve.",
+            "Declared economics must resolve.",
+            "Required extras must resolve.",
+            "Missing required component → no complete budgetary estimate.",
+            "Do not price around an unresolved requirement."
+          ]
+        },
+        {
+          "title": "ANSWER IDENTITY",
+          "items": [
+            "Bind answer to project.",
+            "Bind answer to definition version.",
+            "Bind answer to request identity.",
+            "Bind answer to Store revision.",
+            "Bind answer to machine-envelope authority.",
+            "Bind answer to economics authority.",
+            "Bind answer to calculation identity.",
+            "Bind answer to completeness.",
+            "Bind answer to reasons.",
+            "Pins travel with the answer.",
+            "Reasons travel with the answer."
+          ]
+        },
+        {
+          "title": "REPRODUCIBILITY RULE",
+          "items": [
+            "Same identified demand.",
+            "Same pinned Store authority.",
+            "Same declared rules.",
+            "Same calculation.",
+            "Change the definition → different answer.",
+            "Change governing Store authority → different answer.",
+            "Keep both records.",
+            "Never overwrite history."
+          ]
+        },
+        {
+          "title": "FIRST THREE IDENTITIES",
+          "items": [
+            "SENT = what System sent.",
+            "ARRIVED = what Store received.",
+            "ANSWERED = what Store calculated.",
+            "Sent hash ≠ receipt hash.",
+            "Receipt hash ≠ result hash.",
+            "Result hash ≠ acceptance.",
+            "Do not collapse them into one receipt."
+          ]
+        },
+        {
+          "title": "STORE ANSWER ≠ OFFER",
+          "items": [
+            "Store answer is a Store result.",
+            "Store answer is not a commercial offer.",
+            "Only a fresh SUPPORTABLE answer may feed the simulated offer.",
+            "UNRESOLVED stops with reasons.",
+            "REFUSED stops with reasons.",
+            "UNAVAILABLE stops with reasons.",
+            "No green answer → no simulated offer."
+          ]
+        },
+        {
+          "title": "OFFER ≠ USER DECISION",
+          "items": [
+            "Simulated offer is a new event.",
+            "It is based on the exact Store answer.",
+            "User may accept.",
+            "User may decline.",
+            "Decision belongs to that version.",
+            "Decision does not rewrite the Store result."
+          ]
+        },
+        {
+          "title": "ACCEPT",
+          "items": [
+            "ACCEPT creates the next event.",
+            "ACCEPT does not move money.",
+            "ACCEPT does not allocate material.",
+            "ACCEPT does not release production.",
+            "ACCEPT does not start a machine.",
+            "ACCEPT does not claim physical work."
+          ]
+        },
+        {
+          "title": "CHANGE DEFINITION",
+          "items": [
+            "CHANGE DEFINITION creates a new version.",
+            "It does not edit the confirmed version.",
+            "It invalidates downstream use of the old answer.",
+            "Old version stays immutable history.",
+            "New version requires a fresh Store answer."
+          ]
+        },
+        {
+          "title": "SHARED 13-STEP TRAIL",
+          "items": [
+            "SENT — identified definition sent.",
+            "ARRIVED — Store receipt.",
+            "ANSWERED — Store budgetary answer or refusal.",
+            "OFFERED — simulated commercial offer.",
+            "YOUR CALL — accept or decline.",
+            "PAID — simulated.",
+            "QUEUED — sent to Store / yard queue.",
+            "MATERIAL ALLOCATED.",
+            "PRODUCTION RELEASED.",
+            "CUT · MILL · DRILL · LABEL.",
+            "STAGED.",
+            "READY NOTICE.",
+            "PICKED UP · CUSTODY."
+          ]
+        },
+        {
+          "title": "KEEP THE SEPARATIONS",
+          "items": [
+            "Request ≠ answer.",
+            "Answer ≠ offer.",
+            "Offer ≠ acceptance.",
+            "Acceptance ≠ payment.",
+            "Payment ≠ queue.",
+            "Queue ≠ allocation.",
+            "Allocation ≠ release.",
+            "Release ≠ Cycle Start.",
+            "Cycle Start ≠ completed work.",
+            "Completed work ≠ staged.",
+            "Staged ≠ ready.",
+            "Ready ≠ custody.",
+            "Custody closes the handoff."
+          ]
+        },
+        {
+          "title": "POST-ANSWER AUDIT CHAIN",
+          "items": [
+            "Post-answer events are hash-linked.",
+            "Each event carries its predecessor.",
+            "New version starts a new chain.",
+            "Old chain stays history.",
+            "Never splice two versions together.",
+            "Never resurrect a stale answer downstream."
+          ]
+        },
+        {
+          "title": "MACHINE BOUNDARY",
+          "items": [
+            "Capability answer is not machine control.",
+            "Production release is not Cycle Start.",
+            "A hash is not Cycle Start.",
+            "A Store result is not Cycle Start.",
+            "The declared envelope answers modeled fit.",
+            "The declared envelope supports modeled time.",
+            "It does not claim commissioned execution.",
+            "Local safety controls remain local.",
+            "Operator boundary remains local.",
+            "The person at the cell owns Cycle Start."
+          ]
+        },
+        {
+          "title": "WHAT THIS PAGE DOES NOT CLAIM",
+          "items": [
+            "Live inventory.",
+            "Live dealer commitment.",
+            "Final commercial quote.",
+            "Real payment.",
+            "Material allocation.",
+            "Production release.",
+            "Physical Cycle Start.",
+            "Completed fabrication.",
+            "Inspection.",
+            "Staging.",
+            "Readiness.",
+            "Custody."
+          ]
+        },
+        {
+          "title": "AUDIT QUESTION",
+          "items": [
+            "What definition was sent?",
+            "What did Store receive?",
+            "What authority answered?",
+            "What did Store answer?",
+            "Why?",
+            "Under which pins?",
+            "What changed afterward?",
+            "Who owned each event?",
+            "Did anyone rewrite the job?",
+            "Can the chain prove they did not?"
+          ]
+        },
+        {
+          "title": "CURRENT GAP",
+          "items": [
+            "Current gap: S/O requirements are not yet carried through this Alcove Store path. Do not simulate a Store answer for them."
+          ]
+        },
+        {
+          "title": "AUTHORITY LINKS",
+          "items": [
+            "Store Zero README",
+            "https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/README.md",
+            "Dimensional Store Travel Standard",
+            "https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md",
+            "D-001 Stage-2 Envelope",
+            "File: D-001-STAGE2-ENVELOPE-0.1.md",
+            "Internal version: D001-STAGE2-ENVELOPE-0.3",
+            "https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/D-001-STAGE2-ENVELOPE-0.1.md"
+          ]
+        },
+        {
+          "title": "AUTHORITY SUMMARY",
+          "items": [
+            "Intent defines the tools.",
+            "Bench defines the job.",
+            "Store answers the job.",
+            "The trail records what happened next.",
+            "None may silently rewrite another’s facts."
+          ]
+        }
+      ]
+    }
+  };
   const asRail=r=>Object.freeze(Object.assign({},r,{rows:Object.freeze(r.bullets.map(b=>Object.freeze([b,'']))),later:Object.freeze([])}));
   const RAILS=Object.freeze({
     'job1-idea':asRail(JOB1['job1-idea']),
     'job1-bench':asRail(JOB1['job1-bench']),
-    'job1-store':asRail(JOB1['job1-store'])
+    'job1-store':asRail(JOB1['job1-store']),
+    'alcove-idea':asRail(JOB2['alcove-idea']),
+    'alcove-bench':asRail(JOB2['alcove-bench']),
+    'alcove-store':asRail(JOB2['alcove-store'])
   });
 
   const PAGES=Object.freeze({
@@ -234,7 +889,7 @@
     ]),
     projects:guide('Library',[
       ['Don’t overcrowd','Live, bounded or deferred. Say which.'],
-      ['Tiles = tests','Board · plan · fit · assembly · sheet.'],
+      ['Tiles = tests','Board · fit · plan · assembly · sheet.'],
       ['Start your own','First. Never moves.'],
       ['One project at a time','Switch tile → clear route + state.'],
       ['No cross-talk','Job 1 facts stay in Job 1.'],
@@ -256,18 +911,8 @@
       ['Don’t trust uploads','Full build needs file limits, scanning, sandboxed parsing.'],
       ['Let users correct it','Extraction must never become truth by accident.']
     ]),
-    'alcove-capture':guide('Separate context from cut facts',[
-      ['Scan is context','Measurements control parts.'],
-      ['Record the ugly','Slope and bow stay visible.'],
-      ['Don’t auto-correct','Observed ≠ fixed.'],
-      ['Full build','Add uncertainty, device/source metadata, accessibility.']
-    ]),
-    'alcove-config':guide('Change it once',[
-      ['Recompute on change','Material, geometry, work and Store answer stay tied.'],
-      ['Kill stale replies','Late Store answers cannot overwrite newer edits.'],
-      ['Keep Store logic out','Browser does not pick SKU or price.'],
-      ['Spots are bound','Each upright carries its own spots; the Store times, prices or refuses them.']
-    ]),
+    'alcove-capture':RAILS['alcove-idea'],
+    'alcove-config':RAILS['alcove-bench'],
     'alcove-review':guide('Freeze the exact version',[
       ['Show what changed','A real build needs a proper revision diff.'],
       ['Confirm ≠ order','No payment or production authority here.'],
@@ -286,12 +931,7 @@
       ['Don’t invent Store input','No demand packet yet.'],
       ['No fake green','Unresolved stays unresolved.']
     ]),
-    store:guide('Let Store answer Store questions',[
-      ['Keep the basis','Pin, request, hashes, material, capability, Q.'],
-      ['Changed job = new answer','Never reuse the old result.'],
-      ['Quote is not custody','No inventory or payment implied.'],
-      ['Full build','Need expiry, concurrency, retries, signed receipts.']
-    ]),
+    store:RAILS['alcove-store'],
     request:guide('Scope the services',[
       ['Don’t redesign here','Geometry is already defined.'],
       ['Keep yes/no explicit','Declined work matters downstream.'],
@@ -459,6 +1099,7 @@
   }
 
   function revItem(t){
+    if(/^https:\/\/\S+$/.test(t)) return '<li><a href="'+esc(t)+'" target="_blank" rel="noopener">'+esc(t.replace(/^https:\/\/github\.com\/GeorgePlattDemo\//,''))+'</a></li>';
     const m=/^(.*?): (https:\/\/\S+)$/.exec(t);
     return '<li>'+(m?esc(m[1])+': <a href="'+esc(m[2])+'" target="_blank" rel="noopener">'+esc(m[2].replace(/^https:\/\/github\.com\/GeorgePlattDemo\//,''))+'</a>':esc(t))+'</li>';
   }
@@ -466,7 +1107,7 @@
     return [
       '<p class="hd rev-hd">'+esc(r.header||'DEV/REV GUIDE')+'</p>',
       '<p class="rev-flag">'+esc(r.flag)+'</p>',
-      '<ul class="rev-list">'+r.bullets.map(revItem).join('')+'</ul>',
+      ...(r.bullets.length ? ['<ul class="rev-list">'+r.bullets.map(revItem).join('')+'</ul>'] : []),
       ...r.sections.map(sec=>'<p class="rev-sec'+(sec.quiet?' quiet':'')+'">'+esc(sec.title)+'</p><ul class="rev-list'+(sec.quiet?' quiet':'')+'">'+sec.items.map(revItem).join('')+'</ul>')
     ].join('');
   }

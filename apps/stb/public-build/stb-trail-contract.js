@@ -30,14 +30,14 @@
       pages: Object.freeze(['start-own-live', 'proof-store', 'proof-accept', 'proof-yard', 'proof-terms', 'proof-record'])
     }),
     Object.freeze({
-      id: 'outdoor',
-      tileLabel: 'Outdoor build',
-      pages: Object.freeze(['outdoor-build-live'])
-    }),
-    Object.freeze({
       id: 'alcove',
       tileLabel: 'Critical fit',
       pages: Object.freeze(['alcove-capture', 'alcove-config', 'alcove-review', 'store', 'request', 'yard', 'terms', 'recap', 'record'])
+    }),
+    Object.freeze({
+      id: 'outdoor',
+      tileLabel: 'Outdoor build',
+      pages: Object.freeze(['outdoor-build-live'])
     }),
     Object.freeze({
       id: 'window-seat',
