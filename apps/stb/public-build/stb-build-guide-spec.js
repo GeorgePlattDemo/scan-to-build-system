@@ -15,6 +15,185 @@
     ['Delete last','Retire after dependency checks.']
   ]);
 
+
+  // Dev/Rev rails: a header, a flag line, then plain bullets and sections. Only the header is bold.
+  // Job 1 rails: owner's text, verbatim (DEV/REV GUIDE ceiling).
+  const JOB1={
+    "job1-idea": {
+      "header": "DEV/REV GUIDE — JOB 1 · PAGE 1 · YOUR IDEA",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [
+        "This page is the want. It does not become the bench.",
+        "Knobs for this job are made here, auto or by hand, from the need.",
+        "Condensed out of this tour. Alcove says where they come from.",
+        "Never added on the bench.",
+        "No universal configurator.",
+        "A board job stays packed.",
+        "One tile. One board. Numbers are theirs.",
+        "Opening is not owning.",
+        "Next is the bench."
+      ],
+      "sections": [
+        {
+          "title": "Authority",
+          "items": [
+            "Intent owns the want.",
+            "Bench owns the board.",
+            "Store owns capability, time, economics, and retained-control truth.",
+            "None may rewrite the others."
+          ]
+        },
+        {
+          "title": "Plumbing",
+          "items": [
+            "Preserve the working artifact.",
+            "Guide uses the rail. Iframe keeps its width.",
+            "Parent routes. Child owns the bounded definition."
+          ],
+          "quiet": true
+        }
+      ]
+    },
+    "job1-bench": {
+      "header": "DEV/REV GUIDE — JOB 1 · PAGE 2 · THE BENCH",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [
+        "This page is always the bench. Do not rename it configurator.",
+        "Knobs are used here. Never added here. Never regrown here.",
+        "This is where those knobs make the definition the Store prices.",
+        "Picture is the want. Schematic is the same board.",
+        "Higher is one toggle. Angle, hold, and stub move together.",
+        "Store says why the stick changed. Do not hide that sentence.",
+        "Not worth is a verdict. Hardly worth is the lean. Use hardly."
+      ],
+      "sections": [
+        {
+          "title": "Limits",
+          "items": [
+            "Within limits stays visible.",
+            "Tight stays visible.",
+            "Stub stays visible.",
+            "Derived geometry stays visible."
+          ]
+        },
+        {
+          "title": "Authority",
+          "items": [
+            "Bench owns the board.",
+            "Store owns capability, time, economics, and retained-control truth.",
+            "Bench may not pre-compute price, time, envelope, or capability."
+          ]
+        },
+        {
+          "title": "Plumbing",
+          "items": [
+            "Preserve the working artifact.",
+            "Don’t squeeze it. Guide uses the rail. Iframe keeps its width.",
+            "Mind the seam. Parent routes. Child owns the bounded definition.",
+            "postMessage is a contract. Origin, schema, correlation.",
+            "Known wart. Two DOMs, focus and history seams, browser-held state."
+          ],
+          "quiet": true
+        }
+      ]
+    },
+    "job1-store": {
+      "header": "DEV/REV GUIDE — JOB 1 · PAGE 3 · STORE ANSWER",
+      "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
+      "bullets": [
+        "This page is one answer to one confirmed version.",
+        "Viewing it creates no event.",
+        "Declared reference lumberyard. Not a dealer. Not live inventory. Not a quote.",
+        "No payment, allocation, release, or Cycle Start authority.",
+        "Same request, same pins, same number."
+      ],
+      "sections": [
+        {
+          "title": "Version chain",
+          "items": [
+            "Sent, receipt, result. Three hashes. Three events. Do not collapse them.",
+            "A sent hash is not a receipt.",
+            "A receipt is not a result.",
+            "A result is not acceptance."
+          ]
+        },
+        {
+          "title": "May not touch",
+          "items": [
+            "Geometry. Controlling dimensions. Shelf locations. User material choice. Version identity."
+          ]
+        },
+        {
+          "title": "Must answer, or no complete answer",
+          "items": [
+            "Material identity and quantity.",
+            "Capability. Required operations. Modeled time.",
+            "Envelope pin. Economics pin.",
+            "Unresolved stays visible. Disabled stays visible. A no stays a no.",
+            "Missing required fact: no complete budgetary estimate.",
+            "The travel standard calls that Q. Do not mint Q on the page."
+          ]
+        },
+        {
+          "title": "In hand",
+          "items": [
+            "Four answers, each with a reason: supportable, unresolved, refused, unavailable.",
+            "Catalog clock. Same request, same clock, same number. A later clock is a different answer.",
+            "Budgetary estimate if complete: material + machine service + declared extras.",
+            "Not a quote. Not an offer. Not a reservation."
+          ]
+        },
+        {
+          "title": "Lanes",
+          "items": [
+            "Project defines what. Machine model defines how. Store resolves whether.",
+            "If the Store must answer it, ask the Store.",
+            "No local replica. No pre-computed price, time, or envelope.",
+            "No silent substitution. A shortage is not a preference.",
+            "Services may change price or handling. They do not rewrite geometry."
+          ]
+        },
+        {
+          "title": "Gates",
+          "items": [
+            "Request ≠ order ≠ payment ≠ allocation ≠ release ≠ Cycle Start.",
+            "Staged ≠ picked up. Finished ≠ closed. Closed is custody.",
+            "Twelve events stay separate. Missing events stay missing. Nothing is promoted by wording.",
+            "ACCEPT creates the next event. It does not allocate, pay, or release.",
+            "CHANGE DEFINITION mints a version. It does not edit this one."
+          ]
+        },
+        {
+          "title": "Machine",
+          "items": [
+            "Start position verified only when that event exists. Not setup.",
+            "Cycle Start belongs to the person at the cell. No hash here can start a spindle."
+          ]
+        },
+        {
+          "title": "Not this page",
+          "items": [
+            "Live count. Validity clock. Payment. Allocation. Release. Readiness. Cycle Start. Inspection. Custody."
+          ]
+        },
+        {
+          "title": "Links",
+          "items": [
+            "Store Zero: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/README.md",
+            "Travel standard: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md",
+            "D-001 envelope, file 0.1, version string D001-STAGE2-ENVELOPE-0.3: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/D-001-STAGE2-ENVELOPE-0.1.md"
+          ]
+        }
+      ]
+    }
+  };
+  const asRail=r=>Object.freeze(Object.assign({},r,{rows:Object.freeze(r.bullets.map(b=>Object.freeze([b,'']))),later:Object.freeze([])}));
+  const RAILS=Object.freeze({
+    'job1-idea':asRail(JOB1['job1-idea']),
+    'job1-bench':asRail(JOB1['job1-bench']),
+    'job1-store':asRail(JOB1['job1-store'])
+  });
+
   const PAGES=Object.freeze({
     landing:guide('Goal',[
       ['Say what this is','One screen, no scrolling to understand it.'],
@@ -139,12 +318,7 @@
       ['No rewrite','Corrections append; history stays.'],
       ['Still not durable','Full build needs signed, stored owner records.']
     ]),
-    'start-own-live':guide('Preserve the working artifact',[
-      ['Don’t squeeze it','Guide uses the rail; iframe keeps its width.'],
-      ['Mind the seam','Parent routes; child owns the bounded definition.'],
-      ['postMessage is a contract','Origin + schema + correlation.'],
-      ['Known wart','Two DOMs, focus/history seams, browser-held state.']
-    ]),
+    'start-own-live':RAILS['job1-bench'],
     'outdoor-build-live':guide('Keep Outdoor its own job',[
       ['Don’t borrow Job 1','Own definition, own Store handoff.'],
       ['Keep source trail','Plan/source stays attached.'],
@@ -158,12 +332,7 @@
       ['Edge mill','Any depth: boards milled to width, priced by Store.'],
       ['Known wart','Iframe complicates focus, print, routing.']
     ]),
-    'proof-store':guide('Show the exact Store answer',[
-      ['Keep the long IDs','They prove which answer this is.'],
-      ['Reject stale results','Late/duplicate/wrong-correlation stays historical.'],
-      ['Budgetary means budgetary','No commerce or machine authority.'],
-      ['Full build','Timeouts, retries, expiry, signed receipts.']
-    ]),
+    'proof-store':RAILS['job1-store'],
     'proof-accept':guide('Two customer choices',[
       ['Back or buy','Nothing else.'],
       ['One click, three receipts','Offer · acceptance · payment stay separate.'],
@@ -289,23 +458,44 @@
     return String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
 
+  function revItem(t){
+    const m=/^(.*?): (https:\/\/\S+)$/.exec(t);
+    return '<li>'+(m?esc(m[1])+': <a href="'+esc(m[2])+'" target="_blank" rel="noopener">'+esc(m[2].replace(/^https:\/\/github\.com\/GeorgePlattDemo\//,''))+'</a>':esc(t))+'</li>';
+  }
+  function renderRail(r){
+    return [
+      '<p class="hd rev-hd">'+esc(r.header||'DEV/REV GUIDE')+'</p>',
+      '<p class="rev-flag">'+esc(r.flag)+'</p>',
+      '<ul class="rev-list">'+r.bullets.map(revItem).join('')+'</ul>',
+      ...r.sections.map(sec=>'<p class="rev-sec'+(sec.quiet?' quiet':'')+'">'+esc(sec.title)+'</p><ul class="rev-list'+(sec.quiet?' quiet':'')+'">'+sec.items.map(revItem).join('')+'</ul>')
+    ].join('');
+  }
+
   function render(pageId){
+    const meta='<div class="guide-meta"><span>'+esc(pageId)+'</span><span>'+VERSION+'</span></div>';
+    // Job 1 is one page with two trail steps; both rails ship and the page's stage picks one.
+    if(pageId==='start-own-live'){
+      return '<div class="rev-stage" data-rev-stage="intent">'+renderRail(RAILS['job1-idea'])+'</div>'
+        +'<div class="rev-stage" data-rev-stage="bench">'+renderRail(RAILS['job1-bench'])+'</div>'+meta;
+    }
     const p=PAGES[pageId] || guide('Keep it honest',[
       ['Don’t fake a contract','This page still needs a specific Dev Guide.'],
       ['Preserve the main','Developer notes stay in the rail.']
     ]);
+    if(p.flag) return renderRail(p)+meta;
     return [
       '<p class="hd">DEV GUIDE</p>',
       '<p class="goal">'+esc(p.goal)+'</p>',
       ...p.rows.map(row=>'<div class="row guide-row"><b>'+esc(row[0])+'</b><span>'+esc(row[1])+'</span></div>'),
       ...((p.later && p.later.length) ? ['<p class="goal later-hd">Build later</p>', ...p.later.map(row=>'<div class="row guide-row later" data-coming-row="'+esc(row[0])+'"><b>'+esc(row[0])+'</b><span>'+esc(row[1])+'</span></div>')] : []),
-      '<div class="guide-meta"><span>'+esc(pageId)+'</span><span>'+VERSION+'</span></div>'
+      meta
     ].join('');
   }
 
   g.STBBuildGuideSpec=Object.freeze({
     version:VERSION,
     pages:PAGES,
+    rails:RAILS,
     pageIds:Object.freeze(Object.keys(PAGES)),
     render
   });

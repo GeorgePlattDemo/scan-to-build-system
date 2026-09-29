@@ -19,7 +19,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-user-defined-board-runtime-bridge.js?v=f77a49e9"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=a2066875"></script>
+<script src="stb-build-guide-spec.js?v=cacfe4f3"></script>
 <script>
 (() => {
   const shell = document.getElementById('stb-current');
@@ -63,6 +63,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       .dev-build-guide .guide-row{margin-bottom:16px}
       .dev-build-guide .guide-row b{font-size:11.5px;letter-spacing:0;color:var(--text)}
       .dev-build-guide .guide-row span{font-size:10.5px;line-height:1.4}
+      /* Dev/Rev rails: only the header is bold; plain tight bullets; plumbing stays quiet. */
+      .dev-build-guide .rev-hd{margin:0 0 8px;font-size:10.5px;line-height:1.35;letter-spacing:.04em;font-weight:700;color:var(--text)}
+      .dev-build-guide .rev-flag{margin:0 0 12px;font-size:11.5px;line-height:1.4;font-weight:400;color:var(--text)}
+      .dev-build-guide .rev-list a{color:inherit;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+      .dev-build-guide .rev-list{margin:0 0 14px;padding-left:14px;display:grid;gap:4px;font-size:10.5px;line-height:1.4;font-weight:400;color:var(--text2)}
+      .dev-build-guide .rev-sec{margin:2px 0 5px;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:400;color:var(--text2)}
+      .dev-build-guide .rev-sec.quiet,.dev-build-guide .rev-list.quiet{color:var(--text3)}
+      #start-own-live:not([data-rev-stage="bench"]) .rev-stage[data-rev-stage="bench"],
+      #start-own-live[data-rev-stage="bench"] .rev-stage[data-rev-stage="intent"]{display:none}
       .dev-build-guide .guide-meta{margin-top:auto;padding-top:10px;border-top:1px solid var(--border);display:grid;gap:3px;font:8.5px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text3)}
       /* Trail rules: the top nav appears only inside a live project, never on Landing, the doors or the Shared Home. */
       .recovery-nav:not([data-active-project]){display:none!important}
@@ -392,6 +401,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
               const showStage = (stage, focus = null) => {
                 const bench = stage === 'bench';
+                doc.getElementById('start-own-live')?.setAttribute('data-rev-stage', bench ? 'bench' : 'intent');
                 if (intentScreen) intentScreen.hidden = bench;
                 if (benchScreen) benchScreen.hidden = !bench;
                 if (bench && benchIntentSlot && !benchIntentSlot.firstElementChild) {
@@ -786,7 +796,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   : '<b>Drill it.</b> No spot on this version.';
                 const stubBold = childDoc.getElementById('stb-bench-stub-step');
                 if (stubBold) stubBold.innerHTML = '<b>Keep the stub.</b> Two matching braces'+(Number.isFinite(retained)?', and the other '+formatInches(retained)+' of the board comes back to you.':', and the rest of the board comes back to you.');
-                setText('stb-bench-workline','THAT’S THE WHOLE JOB · '+productionCuts+' CUT'+(productionCuts===1?'':'S')+' · '+spots+' SPOT'+(spots===1?'':'S')+' · '+(storeComplete?'NOT WORTH DRAGGING THE MITER SAW OUT':'ASK THE STORE'));
+                setText('stb-bench-workline','THAT’S THE WHOLE JOB · '+productionCuts+' CUT'+(productionCuts===1?'':'S')+' · '+spots+' SPOT'+(spots===1?'':'S')+' · '+(storeComplete?'HARDLY WORTH DRAGGING THE MITER SAW OUT':'ASK THE STORE'));
 
                 // Make the Store's board choice visible when it moves past the 5-foot board.
                 const swap = childDoc.getElementById('stb-bench-board-swap');
