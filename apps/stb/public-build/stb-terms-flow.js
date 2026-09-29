@@ -1,41 +1,42 @@
 (function(root){
   'use strict';
 
-  // STB terms flow: one commercial terms flow for every project tile (System AGENTS.md, trail rule 6).
-  // Alcove's version chain is the reference wording and order. Every tile uses this file; none keeps its own.
+  // STB terms flow: one post-Store terms flow for every project tile (System AGENTS.md, trail rule 6).
+  // This file owns the event meanings, order and gates. Every tile uses it; no tile is the master copy.
   //
   //   1 SENT        your definition, by its payload digest
   //   2 ARRIVED     the Store's arrival receipt
-  //   3 ANSWERED    the Store's answer: the offer (SUPPORTABLE) or the refusal and its reasons
-  //   4 YOUR CALL   accepted or declined, hashed
-  //   5 PAID        simulated; no money moves
-  //   6 SENT TO STORE · IN THE YARD QUEUE
-  //   7 MATERIAL ALLOCATED   8 PRODUCTION RELEASED   9 CUT   10 STAGED   11 READY NOTICE
-  //   12 PICKED UP · CUSTODY  the handoff, which issues the full receipt
+  //   3 ANSWERED    the Store's budgetary answer or refusal — not a quote or commercial offer
+  //   4 OFFERED     System's simulated commercial offer based on that exact Store answer
+  //   5 YOUR CALL   accepted or declined, hashed
+  //   6 PAID        simulated; no money moves
+  //   7 SENT TO STORE · IN THE YARD QUEUE
+  //   8 MATERIAL ALLOCATED   9 PRODUCTION RELEASED   10 CUT   11 STAGED   12 READY NOTICE
+  //   13 PICKED UP · CUSTODY  the handoff, which issues the terms / handoff receipt
   //
-  // Rules: only a fresh SUPPORTABLE Store answer can be accepted. A refused, unresolved or unavailable
-  // answer ends the flow at step 3 with the Store's reasons. A declined answer ends it at step 4.
-  // Events after step 3 are hash-linked (each carries the previous hash). A new Store answer for a
+  // Rules: only a fresh SUPPORTABLE Store answer can produce a simulated offer. A refused, unresolved or
+  // unavailable answer ends at step 3 with the Store's reasons. A declined simulated offer ends at step 5.
+  // Events after the Store answer are hash-linked (each carries the previous hash). A new Store answer for a
   // changed version starts a new chain; the old one is kept in history, never edited.
-  // Commerce and the yard are SIMULATED. Nothing here moves money, starts a machine, or claims a cut.
+  // Commerce and the yard are SIMULATED. Nothing here moves money, starts a machine, or claims a physical cut.
 
-  const VERSION = 'STB-TERMS-FLOW-0.1';
+  const VERSION = 'STB-TERMS-FLOW-0.2';
   const EVENTS = Object.freeze([
-    Object.freeze({ id:'sent',      label:'Your definition · sent',             who:'you' }),
-    Object.freeze({ id:'arrived',   label:'Arrived at Store Zero · receipt',    who:'store' }),
-    Object.freeze({ id:'answered',  label:'Store answered · offer',             who:'store' }),
-    Object.freeze({ id:'decision',  label:'Your call',                          who:'you' }),
-    Object.freeze({ id:'paid',      label:'Paid (simulated)',                   who:'commercial' }),
-    Object.freeze({ id:'queued',    label:'Sent to the Store · in the yard queue', who:'yard' }),
-    Object.freeze({ id:'allocated', label:'Material allocated',                 who:'store' }),
-    Object.freeze({ id:'released',  label:'Production released',                who:'release' }),
-    Object.freeze({ id:'cut',       label:'Cut · mill · drill · label',         who:'local cell' }),
-    Object.freeze({ id:'staged',    label:'Packaging / staging',                who:'yard' }),
-    Object.freeze({ id:'ready',     label:'READY notice',                       who:'fulfillment' }),
-    Object.freeze({ id:'custody',   label:'Picked up · custody (handoff)',      who:'you' })
+    Object.freeze({ id:'sent',      label:'Your definition · sent',                  who:'you' }),
+    Object.freeze({ id:'arrived',   label:'Arrived at Store Zero · receipt',         who:'store' }),
+    Object.freeze({ id:'answered',  label:'Store answered · budgetary answer',       who:'store' }),
+    Object.freeze({ id:'offered',   label:'Simulated offer · created',               who:'system demo' }),
+    Object.freeze({ id:'decision',  label:'Your call',                               who:'you' }),
+    Object.freeze({ id:'paid',      label:'Paid (simulated)',                        who:'commercial simulation' }),
+    Object.freeze({ id:'queued',    label:'Sent to the Store · in the yard queue',   who:'yard' }),
+    Object.freeze({ id:'allocated', label:'Material allocated',                      who:'store' }),
+    Object.freeze({ id:'released',  label:'Production released',                     who:'release' }),
+    Object.freeze({ id:'cut',       label:'Cut · mill · drill · label',              who:'local cell' }),
+    Object.freeze({ id:'staged',    label:'Packaging / staging',                     who:'yard' }),
+    Object.freeze({ id:'ready',     label:'READY notice',                            who:'fulfillment' }),
+    Object.freeze({ id:'custody',   label:'Picked up · custody (handoff)',           who:'you' })
   ]);
   const YARD_EVENTS = Object.freeze(['allocated','released','cut','staged','ready']);
-  // The flows on this page, by project, so a reviewer (or the trail scoreboard) can read any tile's chain.
   const INSTANCES = new Map();
 
   function canonical(value){
@@ -84,7 +85,7 @@
           { id:'sent', at: answer.sentAt || body.sentAt || null, hash: body.payloadDigest || null, detail: 'demand ' + String(body.demandSignature || '—').slice(0,16) + '…' },
           { id:'arrived', at: receipt?.evaluatedAt || null, hash: receipt?.receiptHash || null, detail: 'request ' + String(body.requestId || '—').slice(0,8) + ' · Store ' + String(body.storePin || '—').slice(0,7) },
           { id:'answered', at: receipt?.evaluatedAt || null, hash: body.calculationIdentity?.resultHash || receipt?.calculationIdentity?.resultHash || null,
-            detail: answer.status === 'SUPPORTABLE' ? 'SUPPORTABLE · ' + money(answer.total) + ' budgetary, not a quote' : answer.status + ' · ' + (answer.reasons || []).map(r => r.code).join(', ') }
+            detail: answer.status === 'SUPPORTABLE' ? 'SUPPORTABLE · ' + money(answer.total) + ' budgetary, not a quote or offer' : answer.status + ' · ' + (answer.reasons || []).map(r => r.code).join(', ') }
         ]
       };
       notify();
@@ -99,9 +100,14 @@
     }
 
     function canAccept(){ return !!chain && chain.status === 'SUPPORTABLE' && !event('decision') && !!event('arrived')?.hash; }
+    async function ensureOffer(){
+      if (!canAccept()) return false;
+      if (!event('offered')) await append('offered', 'SIMULATED_OFFER · ' + money(chain.total) + ' · based on this Store budgetary answer');
+      return true;
+    }
 
     async function accept(){
-      if (!canAccept()) return state();
+      if (!await ensureOffer()) return state();
       await append('decision', 'ACCEPTED');
       chain.paymentId = shortId('SIM-PAY');
       await append('paid', money(chain.total) + ' · ' + chain.paymentId + ' · simulated');
@@ -111,7 +117,7 @@
       return state();
     }
     async function decline(){
-      if (!chain || event('decision') || !event('arrived')?.hash) return state();
+      if (!await ensureOffer()) return state();
       await append('decision', 'DECLINED');
       notify();
       return state();
@@ -167,7 +173,7 @@
       };
     }
 
-    // The chain, every tile the same: twelve rows, done (✓) or open (○), each with its hash.
+    // The chain, every tile the same: thirteen rows, done (✓) or open (○), each with its hash.
     function renderChain(){
       const done = new Map((chain?.events || []).map(e => [e.id, e]));
       const s = stage();
@@ -186,7 +192,7 @@
         ? '<ul class="stb-terms-reasons">' + chain.reasons.map(r => '<li><b>' + esc(r.code) + '</b>' + (r.text ? ' · ' + esc(r.text) : '') + '</li>').join('') + '</ul>'
         : '';
       return '<div class="stb-terms" data-terms-stage="' + s + '"><p class="stb-terms-hd">TERMS · ' + esc(chain?.title || projectId) + (chain ? ' · ' + esc(chain.version) : '') + '</p>' + rows + reasons
-        + '<p class="stb-terms-note">Offer ≠ acceptance ≠ payment ≠ allocation ≠ release ≠ cut ≠ ready ≠ custody. Commerce and the yard are simulated: no money moves and no machine runs.</p></div>';
+        + '<p class="stb-terms-note">Store answer ≠ simulated offer ≠ acceptance ≠ payment ≠ allocation ≠ release ≠ cut ≠ ready ≠ custody. Commerce and the yard are simulated: no money moves and no machine runs.</p></div>';
     }
 
     // The buttons for one step: 'call' (step 4), 'yard' (step 5) or 'record' (step 6).
@@ -194,21 +200,21 @@
       const s = stage();
       if (step === 'call') {
         if (s === 'NO_ANSWER') return '<p class="stb-terms-wait">Waiting on a current Store answer for this version.</p>';
-        if (s === 'REFUSED_BY_STORE') return '<p class="stb-terms-refused" data-terms-refused>The Store did not accept this version (' + esc(chain.status) + '). The refusal is the result. Change the definition to ask again.</p>';
-        if (s === 'DECLINED') return '<p class="stb-terms-declined">You declined this answer. Change the definition to ask again.</p>';
-        if (s !== 'ANSWERED') return '<p class="stb-terms-done">Accepted and sent to the Store · ' + esc(chain.orderId) + '.</p>';
-        return '<div class="stb-terms-actions"><button type="button" class="stb-terms-go" data-terms-action="accept">ACCEPT &amp; SEND TO STORE · ' + esc(money(chain.total)) + ' →</button>'
-          + '<button type="button" class="stb-terms-ghost" data-terms-action="decline">DECLINE</button></div>';
+        if (s === 'REFUSED_BY_STORE') return '<p class="stb-terms-refused" data-terms-refused>The Store did not support this version (' + esc(chain.status) + '). The refusal is the result. Change the definition to ask again.</p>';
+        if (s === 'DECLINED') return '<p class="stb-terms-declined">You declined the simulated offer for this answer. Change the definition to ask again.</p>';
+        if (s !== 'ANSWERED') return '<p class="stb-terms-done">Simulated offer accepted and sent to the Store · ' + esc(chain.orderId) + '.</p>';
+        return '<div class="stb-terms-actions"><button type="button" class="stb-terms-go" data-terms-action="accept">ACCEPT SIMULATED OFFER &amp; SEND TO STORE · ' + esc(money(chain.total)) + ' →</button>'
+          + '<button type="button" class="stb-terms-ghost" data-terms-action="decline">DECLINE SIMULATED OFFER</button></div>';
       }
       if (step === 'yard') {
-        if (!['QUEUED','READY','HANDED_OFF'].includes(s)) return '<p class="stb-terms-wait">Nothing is in the yard yet. This opens after you accept and send to the Store.</p>';
+        if (!['QUEUED','READY','HANDED_OFF'].includes(s)) return '<p class="stb-terms-wait">Nothing is in the yard yet. This opens after you accept the simulated offer and send this version to the Store.</p>';
         if (s === 'QUEUED') return '<div class="stb-terms-actions"><button type="button" class="stb-terms-go" data-terms-action="yard">RUN THE YARD (SIMULATED): ALLOCATE → RELEASE → CUT → STAGE → READY →</button></div>';
-        return '<p class="stb-terms-done">Cut, staged and ready for pickup · ' + esc(chain.orderId) + '.</p>';
+        return '<p class="stb-terms-done">Simulated yard run reached READY · ' + esc(chain.orderId) + '.</p>';
       }
       if (step === 'record') {
-        if (s === 'READY') return '<div class="stb-terms-actions"><button type="button" class="stb-terms-go" data-terms-action="pickup">RECORD PICKUP · ISSUE THE FULL RECEIPT →</button></div>';
+        if (s === 'READY') return '<div class="stb-terms-actions"><button type="button" class="stb-terms-go" data-terms-action="pickup">RECORD PICKUP · ISSUE TERMS / HANDOFF RECEIPT →</button></div>';
         if (s === 'HANDED_OFF') return renderReceipt();
-        return '<p class="stb-terms-wait">Nothing to pick up yet. This opens once the parts are ready.</p>';
+        return '<p class="stb-terms-wait">Nothing to pick up yet. This opens once the simulated yard run is READY.</p>';
       }
       return '';
     }
@@ -216,16 +222,15 @@
     function renderReceipt(){
       const r = receipt();
       if (!r) return '';
-      return '<div class="stb-terms-receipt" data-terms-receipt><p class="stb-terms-hd">FULL RECEIPT · HANDOFF</p>'
+      return '<div class="stb-terms-receipt" data-terms-receipt><p class="stb-terms-hd">TERMS / HANDOFF RECEIPT</p>'
         + '<div class="stb-terms-kv"><span>Order</span><b>' + esc(r.orderId) + '</b></div>'
         + '<div class="stb-terms-kv"><span>Version</span><b>' + esc(r.version) + '</b></div>'
-        + '<div class="stb-terms-kv"><span>Total (budgetary, simulated payment)</span><b>' + esc(money(r.total)) + ' · ' + esc(r.paymentId) + '</b></div>'
+        + '<div class="stb-terms-kv"><span>Total (Store budgetary Q; simulated payment)</span><b>' + esc(money(r.total)) + ' · ' + esc(r.paymentId) + '</b></div>'
         + '<div class="stb-terms-kv"><span>Store</span><b>' + esc(String(r.storePin).slice(0,12)) + ' · request ' + esc(String(r.requestId).slice(0,8)) + '</b></div>'
         + r.events.map(e => '<div class="stb-terms-kv"><span>' + esc(EVENTS.find(d => d.id === e.id)?.label || e.id) + '</span><code>' + esc(e.hash || '—') + '</code></div>').join('')
-        + '<p class="stb-terms-note">Every event carries the hash of the one before it. SIMULATED: no money moved and no machine ran.</p></div>';
+        + '<p class="stb-terms-note">This receipt records the simulated post-Store event chain and custody handoff; the project definition, Store calculation and cut plan remain in their own project records. Every event after the Store answer carries the hash of the one before it. SIMULATED: no money moved and no machine ran.</p></div>';
     }
 
-    // Handle this flow's buttons inside `host`. `after(action, state)` lets the page move to the next step.
     function bind(host, after){
       if (!host || host.dataset.termsBound === projectId) return;
       host.dataset.termsBound = projectId;
@@ -270,7 +275,6 @@
     d.head.append(style);
   }
 
-  // Checks one chain: every event after the Store answer carries the previous event's hash.
   function verify(state){
     const events = state?.events || [];
     for (let i = 3; i < events.length; i++) if (events[i].prevHash !== events[i-1].hash || !events[i].hash) return false;
