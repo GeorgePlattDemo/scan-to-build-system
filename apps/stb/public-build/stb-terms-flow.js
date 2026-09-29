@@ -59,13 +59,13 @@
   }
   const now = () => new Date().toISOString();
   const shortId = prefix => prefix + '-' + root.crypto.randomUUID().slice(0,8).toUpperCase();
-  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const esc = s => String(s == null ? '' : s).replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
   const money = n => Number.isFinite(Number(n)) ? '$' + Number(n).toFixed(2) : '—';
 
   function closeDownstreamNav(projectId){
     for (const doc of WATCHED_DOC_LIST) {
       try {
-        doc.querySelectorAll(`.recovery-nav button[data-job-project="${projectId}"]`).forEach(button => {
+        doc.querySelectorAll(`.recovery-nav button[data-job-project=\"${projectId}\"]`).forEach(button => {
           if (!DOWNSTREAM_STAGES.has(button.dataset.journeyStage)) return;
           button.disabled = true;
           button.setAttribute('aria-disabled','true');
@@ -118,6 +118,7 @@
   function create({ projectId, title }){
     if (!projectId) throw new Error('TERMS_FLOW_PROJECT_REQUIRED');
     let chain = null;
+    let invalidatedIdentity = null;
     const history = [];
     const listeners = new Set();
     const notify = () => listeners.forEach(fn => { try { fn(state()); } catch (_) { /* a listener never breaks the flow */ } });
@@ -126,7 +127,10 @@
     function last(){ return chain?.events[chain.events.length - 1] || null; }
 
     function invalidate(){
-      if (chain) history.push(chain);
+      if (chain) {
+        invalidatedIdentity = String(chain.version) + '|' + String(chain.requestId || '');
+        history.push(chain);
+      }
       chain = null;
       closeDownstreamNav(projectId);
       notify();
@@ -137,12 +141,17 @@
       if (!answer) return invalidate();
       const body = answer.body || {};
       const receipt = body.evaluationReceipt || body.rawEvaluation?.evaluationReceipt || null;
-      if (chain && chain.version === answer.version && chain.requestId === body.requestId) return state();
+      const incomingVersion = String(answer.version);
+      const incomingRequestId = body.requestId || null;
+      const incomingIdentity = incomingVersion + '|' + String(incomingRequestId || '');
+      if (!chain && invalidatedIdentity === incomingIdentity) return state();
+      if (chain && chain.version === incomingVersion && chain.requestId === incomingRequestId) return state();
       if (chain) history.push(chain);
+      invalidatedIdentity = null;
       chain = {
         projectId, title: title || projectId,
-        version: String(answer.version),
-        requestId: body.requestId || null,
+        version: incomingVersion,
+        requestId: incomingRequestId,
         storePin: body.storePin || null,
         status: answer.status,
         total: answer.total,
