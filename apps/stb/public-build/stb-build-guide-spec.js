@@ -2,7 +2,7 @@
   'use strict';
 
   const VERSION='STB-DEV-GUIDE-0.2';
-  const guide=(goal,rows,later=[])=>Object.freeze({goal,rows:Object.freeze(rows.map(row=>Object.freeze(row))),later:Object.freeze(later.map(row=>Object.freeze(row)))});
+  const guide=(goal,rows,later=[],label='DEV GUIDE')=>Object.freeze({goal,label,rows:Object.freeze(rows.map(row=>Object.freeze(row))),later:Object.freeze(later.map(row=>Object.freeze(row)))});
 
   const legacyWindow=guide('Legacy reference',[
     ['Don’t rebuild here','The live Window Seat owns the current path.'],
@@ -77,12 +77,29 @@
       ['Don’t trust uploads','Full build needs file limits, scanning, sandboxed parsing.'],
       ['Let users correct it','Extraction must never become truth by accident.']
     ]),
-    'alcove-capture':guide('Separate context from cut facts',[
-      ['Scan is context','Measurements control parts.'],
-      ['Record the ugly','Slope and bow stay visible.'],
-      ['Don’t auto-correct','Observed ≠ fixed.'],
-      ['Full build','Add uncertainty, device/source metadata, accessibility.']
-    ]),
+    // Owner's Dev/Rev notes. A row starting with '§ ' is a section heading.
+    'alcove-capture':guide('',[
+      ['This page is intent.','It does not become the bench.'],
+      ['Add a toolbar to the top.','Trail words only.'],
+      ['The toolbar travels.','It does not configure.'],
+      ['Next page says Bench,','not Configure.'],
+      ['§ Capturing intent',''],
+      ['Scan is context.','A tape/laser controls the cut.'],
+      ['Width at top, middle, and bottom.','They are rarely the same.'],
+      ['Height both sides.','Depth at the face. Plumb.'],
+      ['Taste is a number too.','Shelf at the mantel is their call.'],
+      ['Controlling means cut to this.','Everything else is kept and not cut to.'],
+      ['Record the ugly.','Slope and bow stay visible.'],
+      ['Observed is not fixed.',''],
+      ['Resolution is 1/32 in on controlling dimensions.','The scan stays supporting.'],
+      ['§ Rules',''],
+      ['The configurator is built around this job,','not around every job.'],
+      ['Knobs travel to the bench.','They do not grow there.'],
+      ['A board job stays packed.','This one does not.'],
+      ['Do not auto-correct a room nobody else stood in.',''],
+      ['§ Full build',''],
+      ['','Uncertainty. Device and source. Accessibility.']
+    ],[],'Dev/Rev guide'),
     'alcove-config':guide('Change it once',[
       ['Recompute on change','Material, geometry, work and Store answer stay tied.'],
       ['Kill stale replies','Late Store answers cannot overwrite newer edits.'],
@@ -298,9 +315,11 @@
       ['Preserve the main','Developer notes stay in the rail.']
     ]);
     return [
-      '<p class="hd">DEV GUIDE</p>',
-      '<p class="goal">'+esc(p.goal)+'</p>',
-      ...p.rows.map(row=>'<div class="row guide-row"><b>'+esc(row[0])+'</b><span>'+esc(row[1])+'</span></div>'),
+      '<p class="hd">'+esc(p.label)+'</p>',
+      ...(p.goal ? ['<p class="goal">'+esc(p.goal)+'</p>'] : []),
+      ...p.rows.map(row=>row[0].startsWith('§ ')
+        ? '<p class="goal">'+esc(row[0].slice(2))+'</p>'
+        : '<div class="row guide-row">'+(row[0]?'<b>'+esc(row[0])+'</b>':'')+(row[1]?'<span>'+esc(row[1])+'</span>':'')+'</div>'),
       ...((p.later && p.later.length) ? ['<p class="goal later-hd">Build later</p>', ...p.later.map(row=>'<div class="row guide-row later" data-coming-row="'+esc(row[0])+'"><b>'+esc(row[0])+'</b><span>'+esc(row[1])+'</span></div>')] : []),
       '<div class="guide-meta"><span>'+esc(pageId)+'</span><span>'+VERSION+'</span></div>'
     ].join('');

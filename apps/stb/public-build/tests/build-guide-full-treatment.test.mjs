@@ -34,11 +34,11 @@ test('Dev Guide covers current pages and only rewrites the reserved rail',()=>{
   for(const id of new Set([...baseIds,...dynamicIds])){
     assert.ok(spec.pages[id],`missing Dev Guide: ${id}`);
     // Shorthand-sized: 2-5 rows. The Shared Home ('projects') is the one long list of short dev notes, capped at 12;
-    // the Start your own bench ('start-own-live') carries seven short notes.
-    const maxRows = id === 'projects' ? 12 : id === 'start-own-live' ? 7 : 5;
+    // the Start your own bench ('start-own-live') carries seven short notes; Alcove capture carries the owner's full Dev/Rev notes.
+    const maxRows = id === 'projects' ? 12 : id === 'start-own-live' ? 7 : id === 'alcove-capture' ? 20 : 5;
     assert.ok(spec.pages[id].rows.length>=2 && spec.pages[id].rows.length<=maxRows,`Dev Guide not shorthand-sized: ${id}`);
     const rendered=spec.render(id);
-    assert.match(rendered,/DEV GUIDE/);
+    assert.match(rendered,/DEV GUIDE|Dev\/Rev guide/);
     assert.equal(rendered.includes('GLOBAL WARTS'),false);
     assert.equal(rendered.includes('PRODUCTION BASELINE'),false);
     assert.equal(rendered.includes('BUILD GUIDE · FULL BUILD'),false);
