@@ -134,13 +134,11 @@ test('Playhouse asks the live Store for its own definition and shows that fresh 
     assert.match(await frame.locator('#s001-live-status').innerText(), /SUPPORTABLE/);
     assert.match(await frame.locator('#s001-live-receipt').innerText(), new RegExp(String(state.answer.receipt.receiptHash).slice(0, 16)));
     assert.doesNotMatch(await frame.locator('#playhouse-store').innerText(), /\$26\.55 material-only|4402abe|SHEET_MODE2_ARCHED_APERTURE_V0/);
-    // A SUPPORTABLE answer for this version opens steps 4–6.
+    // A SUPPORTABLE answer opens step 4 (your call). Steps 5 and 6 wait for the terms flow: accepted, then ready.
     const inert = await navInert(frame);
     assert.equal(inert.request, false);
-    assert.equal(inert.yard, false);
-    assert.equal(inert.record, false);
-    await frame.locator('.recovery-nav button[data-journey-stage="record"]').click();
-    await frame.page().waitForTimeout(300);
+    assert.equal(inert.yard, true);
+    assert.equal(inert.record, true);
     assert.match(await frame.locator('#playhouse-record').innerText(), new RegExp(STORE_PIN));
     assert.deepEqual(errors, []);
   });

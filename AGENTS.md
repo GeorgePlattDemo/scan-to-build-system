@@ -50,12 +50,14 @@ Every project tile on the Shared Home follows one protocol. The machine-readable
 3. A step you cannot use yet is shown inert (disabled), never a silent no-op.
 4. "The Store answers" is always a fresh answer from the live hosted Store for the current definition. No cached answer, no browser copy of Store logic. A changed definition is asked again.
 5. Within the envelope: priced → your call → paid (simulated) → cut → pick up and record. Past the envelope: the Store refuses, steps 4–6 stay inert, and the refusal is the result. Both are passes.
-6. One commercial terms flow for every tile: offer, accept, pay, allocate, release, cut, stage, ready, custody. Alcove is the reference wording and order.
+6. One post-Store terms flow for every tile: Store answer → simulated offer → accept or decline → simulated pay → allocate → release → cut → stage → ready → custody. `apps/stb/public-build/stb-terms-flow.js` owns the event meanings, order and gates. Projects may vary presentation; they may not redefine that sequence. A Store budgetary answer is not itself a quote or commercial offer.
 7. Layout may vary; rules may not. No tile is excepted. Window Seat (Space utilization) is the one fully worked example: it may show every detail in one scroll, but taken to the bench it runs the same six steps against the same live Store.
 8. Adding a tile means declaring it in the trail contract. Nothing else.
 9. The guest is the user. No demo-account names on project pages.
 
 The scoreboard is a ratchet: known violations are listed and may not grow; a fixed tile must be removed from the known list so it stays fixed.
+
+Rules 1–3, 8 and 9 are checked by the trail scoreboard. Rules 4–6 are checked for every tile against the real pinned Store by `apps/stb/test/integration/trail-terms.test.mjs`. Rule 6's one post-Store terms flow is `apps/stb/public-build/stb-terms-flow.js`: every tile uses it; none keeps its own commerce state machine.
 
 ## Preferred write targets
 

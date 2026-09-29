@@ -98,7 +98,7 @@ assert.match(shell,/terms:'proof-yard'/);
 assert.equal(shell.includes("target==='proof-record' && go.closest('#proof-yard')"),false,'Job 1 still forces the separate receipts detour');
 assert.match(shell,/setTimeout\(\(\) => openStartOwnStage\('bench'\),0\)/);
 assert.match(shell,/STORE BUDGETARY Q<\/b><span id="proof-store-q"/);
-assert.match(shell,/data-proof-sim-action="accept-pay-yard"/);
+assert.match(shell,/<div class="start-own-terms-host" data-terms-step="call"><\/div>/);
 assert.match(shell,/ACCEPT ESTIMATE \/ PAY \/ SEND TO YARD →/);
 assert.match(shell,/SIMULATED_OFFER/);
 assert.match(shell,/SIMULATED_ACCEPTANCE/);

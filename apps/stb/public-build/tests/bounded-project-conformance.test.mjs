@@ -82,10 +82,9 @@ assert.match(shell,/requestType:S001_REQUEST_TYPE/);
 assert.match(shell,/const S001_REQUEST_TYPE = 'SHEET_PACKAGE_V1'/);
 assert.match(shell,/window\.STBStoreClient/);
 assert.match(shell,/data-s001-needs-supportable/);
+// Playhouse's steps 4–6 run the shared terms flow, like every tile.
+for(const step of ['call','yard','chain','record']) assert.ok(shell.includes('<div class="s001-terms-host" data-terms-step="'+step+'"></div>'),'Playhouse terms host missing: '+step);
 assert.doesNotMatch(shell,/SUPPORTABLE · REFERENCE|\$26\.55|4402abeb6b0299a5b6db2eec85ed04c3b0236bcc|SHEET_MODE2_ARCHED_APERTURE_V0/);
-assert.match(shell,/OFFER[\s\S]*NOT ESTABLISHED/);
-assert.match(shell,/PRODUCTION RELEASE[\s\S]*NOT ESTABLISHED/);
-assert.match(shell,/MACHINE READINESS \/ CYCLE START[\s\S]*NOT ESTABLISHED \/ NOT AUTHORIZED/);
 assert.match(shell,/RECAP · WHAT HAPPENED/);
 
 // Playhouse and Picnic Store pages consume the same Store doctrine rather than inventing a short substitute.
@@ -116,6 +115,6 @@ assert.equal(shell.includes("'start-own': '"),false,'Start Your Own was incorrec
 assert.match(shell,/No binding quote or fabrication authority is created/);
 assert.match(shell,/PHYSICAL AUTHORITY<\/b><span>NOT AUTHORIZED/);
 // The old Picnic record page carried "NOT AUTHORIZED / NOT RECORDED"; the Outdoor page states its own boundary.
-assert.match(outdoorPage,/Nothing is cut until you accept and pay/);
+assert.match(outdoorPage,/Nothing is cut until you accept and send it to the Store/);
 
 console.log('PASS · bounded project canonical conformance checks');

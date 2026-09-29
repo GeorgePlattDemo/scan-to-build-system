@@ -138,20 +138,24 @@ test('Outdoor: six trail steps on its own page, exact Store answer per choice, r
     assert.ok(receiptText.includes('table-benches-16ft-cedar-BYO-v1'), receiptText);
     assert.equal(await base.evaluate(() => [...document.querySelectorAll('.page.on')].pop()?.id), 'outdoor-build-live');
 
-    // Accept & pay (simulated) -> We cut it -> Pick up & build, all on the Outdoor page, carrying the exact receipt.
-    assert.equal(await outdoor.locator('#accept-pay').isDisabled(), true, 'nothing is paid before accepting');
-    await outdoor.locator('#accept-box').check();
-    await outdoor.locator('#accept-pay').click();
+    // The shared terms flow: Store answer -> simulated offer -> accept & send -> run the yard -> record pickup.
+    assert.equal(await outdoor.locator('#call-terms [data-terms-event="arrived"]').getAttribute('data-terms-state'), 'done');
+    assert.match(await outdoor.locator('#call-terms').innerText(), new RegExp(('receipt-' + exact.requestId).slice(0, 12)));
+    await outdoor.locator('#call-terms [data-terms-action="accept"]').click();
     await page.waitForTimeout(400);
     assert.equal(await outdoor.locator('#view-yard').isVisible(), true);
-    assert.match(await outdoor.locator('#yard-timeline').innerText(), new RegExp(('receipt-' + exact.requestId).slice(0, 12)));
+    for (const id of ['offered', 'decision', 'paid', 'queued']) assert.equal(await outdoor.locator(`#yard-terms [data-terms-event="${id}"]`).getAttribute('data-terms-state'), 'done', id);
     assert.ok((await outdoor.locator('#yard-boards tr').count()) > 0, 'the cut list comes from the Store answer');
     nav = await navState(base);
     assert.deepEqual(nav.filter(b => /^\d · /.test(b.label)).map(b => b.inert), [false, false, false, false, false, true]);
-    await outdoor.locator('#mark-cut').click();
+    await outdoor.locator('#yard-terms [data-terms-action="yard"]').click();
     await page.waitForTimeout(400);
     assert.equal(await outdoor.locator('#view-record').isVisible(), true);
     assert.match(await outdoor.locator('#record-kit').innerText(), /You supply/);
+    await outdoor.locator('#record-terms [data-terms-action="pickup"]').click();
+    await page.waitForTimeout(400);
+    assert.equal(await outdoor.locator('#record-terms [data-terms-receipt]').count(), 1, 'terms / handoff receipt at custody');
+    assert.equal(await outdoor.locator('#record-terms [data-terms-state="done"]').count(), 13, 'every event recorded');
     nav = await navState(base);
     assert.deepEqual(nav.filter(b => /^\d · /.test(b.label)).map(b => b.inert), [false, false, false, false, false, false]);
     await base.locator('.recovery-nav button:visible', { hasText: 'We cut it' }).first().click();

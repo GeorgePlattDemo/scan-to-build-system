@@ -12,7 +12,8 @@
 //   R3  a step you cannot use yet is shown inert (disabled); steps 2-6 never silently do nothing
 //   R8  every tile on the Shared Home is declared in the contract, and every declared tile is on the Shared Home
 //   R9  no demo-account names on the tile's pages
-// Live-Store rules (R4-R6: fresh Store answer, refusal past the limits, one terms flow) are the next scoreboard.
+// Live-Store rules R4-R6 (fresh Store answer, refusal past the limits, one terms flow) are checked for every
+// tile against the real pinned Store in test/integration/trail-terms.test.mjs.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
