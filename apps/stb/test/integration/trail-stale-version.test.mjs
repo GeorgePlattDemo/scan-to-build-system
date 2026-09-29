@@ -109,7 +109,9 @@ const TILES = {
     },
     call:(frame,win)=>win.locator('#btn-call').click(),
     callHost:'#call-terms',
-    async change({ win }) {
+    async change({ page, frame, win }) {
+      await frame.locator('.recovery-nav button[data-journey-stage="configure"]').click();
+      await wait(page,350);
       await win.locator('#depth-panel [data-depth="0.25"]').click();
     },
     async fresh({ win }) {
