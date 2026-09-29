@@ -139,11 +139,14 @@
       ['No rewrite','Corrections append; history stays.'],
       ['Still not durable','Full build needs signed, stored owner records.']
     ]),
-    'start-own-live':guide('Preserve the working artifact',[
-      ['Don’t squeeze it','Guide uses the rail; iframe keeps its width.'],
-      ['Mind the seam','Parent routes; child owns the bounded definition.'],
-      ['postMessage is a contract','Origin + schema + correlation.'],
-      ['Known wart','Two DOMs, focus/history seams, browser-held state.']
+    'start-own-live':guide('',[
+      ['This page is always the bench.','Do not rename it configurator.'],
+      ['A board job stays packed.','Intent pages travel here. They do not grow knobs.'],
+      ['Preserve the working artifact.','Don’t squeeze it.'],
+      ['The guide uses the rail.','The iframe keeps its width. Mind the seam.'],
+      ['Parent routes.','The child owns the bounded definition.'],
+      ['postMessage is a contract.','Origin, schema, correlation.'],
+      ['Known wart.','Two DOMs, focus and history seams, browser-held state.']
     ]),
     'outdoor-build-live':guide('Keep Outdoor its own job',[
       ['Don’t borrow Job 1','Own definition, own Store handoff.'],
