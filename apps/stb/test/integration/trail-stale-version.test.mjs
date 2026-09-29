@@ -76,6 +76,9 @@ const TILES = {
       await frameOf(page,'three-frames.html').locator('button[data-length="18"]').click();
     },
     async fresh({ page }) {
+      // Start Your Own retains its human gate: editing B invalidates A immediately, but B does not
+      // become an identified Store request until the user confirms that changed definition.
+      await frameOf(page,'three-frames.html').locator('#stb-confirm-store').click();
       await until(async()=> (await terms(page,'start-own'))?.stage==='ANSWERED','job 1 fresh answer');
       return { win:page };
     }
