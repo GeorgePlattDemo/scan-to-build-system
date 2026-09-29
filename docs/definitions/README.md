@@ -35,7 +35,11 @@ Words the working app uses on screen or in its records. Where a term has an exac
 
 **Your idea** (step 1) — Capture: what you want, and what you measured, photographed or already have. May span as many pages as capture needs.
 
-**The bench** (step 2) — Where a library project's few real choices are made against a board or sheet you can see. Only choices that change what gets cut are offered. Not a general-purpose configurator.
+**The bench** (step 2) — Where a library project's few real choices are made against a board or sheet you can see. Only choices that change what gets cut are offered. Not a general-purpose configurator. The bench turns the knobs made at intent. It never adds one.
+
+**Knob** — One setting a job needs so it can be defined and accepted. Made at intent, for that job, auto or by hand, from the need. Turned on the bench. Never added there.
+
+**Configurator** — The knobs made for one job at intent. A tool, not the program. There is no universal configurator.
 
 **The Store answers** (step 3) — A fresh answer from the live, independently hosted Store for the exact current definition. Never a cached answer and never a browser-side copy of Store logic.
 

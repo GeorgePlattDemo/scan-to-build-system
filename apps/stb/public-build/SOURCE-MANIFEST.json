@@ -446,6 +446,20 @@
       "blobSha": "1a2f547d10faba5e4ed0f45ec319e7e53d44f5f1",
       "bytes": 228027,
       "reason": "One terms flow (stb-terms-flow.js) for Job 1, Alcove and Playhouse: accept or decline with hashes, send to Store, yard, pickup and a full receipt; steps 4-6 follow the flow."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "job1-dev-rev-guide",
+      "blobSha": "8753e9c55027bca1371c9233aa09fef0e88d85fa",
+      "bytes": 23540,
+      "reason": "Job 1 Dev/Rev rails, owner text: page 1 Your idea, page 2 The bench, page 3 Store answer (proof-store)."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-dev-rev-guide",
+      "blobSha": "c3eb42c504f4d0f5aaa06293efa491af5715d4bc",
+      "bytes": 229196,
+      "reason": "Job 1 Dev/Rev rails: layout for header, flag, plain bullets and quiet plumbing; Job 1 rail follows the idea/bench view; bench whole-job line ends \"Hardly worth dragging the miter saw out\" (was \"Not worth\"). Cache-buster for the updated guide."
     }
   ],
   "retiredFiles": [

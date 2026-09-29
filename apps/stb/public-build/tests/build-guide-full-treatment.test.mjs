@@ -34,10 +34,13 @@ test('Dev Guide covers current pages and only rewrites the reserved rail',()=>{
   for(const id of new Set([...baseIds,...dynamicIds])){
     assert.ok(spec.pages[id],`missing Dev Guide: ${id}`);
     // Shorthand-sized: 2-5 rows. The Shared Home ('projects') is the one long list of short dev notes, capped at 12.
-    const maxRows = id === 'projects' ? 12 : 5;
-    assert.ok(spec.pages[id].rows.length>=2 && spec.pages[id].rows.length<=maxRows,`Dev Guide not shorthand-sized: ${id}`);
+    // Dev/Rev rails (a flag line plus sections) are the owner's full notes and are not size-capped.
+    if (!spec.pages[id].flag) {
+      const maxRows = id === 'projects' ? 12 : 5;
+      assert.ok(spec.pages[id].rows.length>=2 && spec.pages[id].rows.length<=maxRows,`Dev Guide not shorthand-sized: ${id}`);
+    }
     const rendered=spec.render(id);
-    assert.match(rendered,/DEV GUIDE/);
+    assert.match(rendered,/DEV GUIDE|DEV\/REV GUIDE/);
     assert.equal(rendered.includes('GLOBAL WARTS'),false);
     assert.equal(rendered.includes('PRODUCTION BASELINE'),false);
     assert.equal(rendered.includes('BUILD GUIDE · FULL BUILD'),false);
@@ -57,7 +60,7 @@ test('landing Dev Guide restores the original short cues',()=>{
 test('sharp shorthand still names the important build debt',()=>{
   assert.match(spec.render('projects'),/Don’t overcrowd/);
   assert.match(spec.render('alcove-config'),/Kill stale replies/);
-  assert.match(spec.render('proof-store'),/Reject stale results/);
+  assert.match(spec.render('proof-store'),/A sent hash is not a receipt/);
   assert.match(spec.render('proof-accept'),/One click, three receipts/);
   assert.match(spec.render('proof-accept'),/idempotent/i);
   assert.match(spec.render('proof-yard'),/READY ≠ custody/);
