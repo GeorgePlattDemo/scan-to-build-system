@@ -42,8 +42,10 @@
     'window-seat':'#s-configure'
   });
   const START_OWN_CONTROLS = 'button[data-length],#stb-config-length';
+  const DOWNSTREAM_STAGES = new Set(['request','review','yard','terms','recap','record']);
   const INSTANCES = new Map();
   const WATCHED_DOCS = new WeakSet();
+  const WATCHED_DOC_LIST = new Set();
 
   function canonical(value){
     if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
@@ -60,9 +62,22 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const money = n => Number.isFinite(Number(n)) ? '$' + Number(n).toFixed(2) : '—';
 
+  function closeDownstreamNav(projectId){
+    for (const doc of WATCHED_DOC_LIST) {
+      try {
+        doc.querySelectorAll(`.recovery-nav button[data-job-project="${projectId}"]`).forEach(button => {
+          if (!DOWNSTREAM_STAGES.has(button.dataset.journeyStage)) return;
+          button.disabled = true;
+          button.setAttribute('aria-disabled','true');
+        });
+      } catch (_) { /* a stale document reference never reopens authority */ }
+    }
+  }
+
   function watchDefinitionDocument(doc){
     if (!doc || WATCHED_DOCS.has(doc)) return;
     WATCHED_DOCS.add(doc);
+    WATCHED_DOC_LIST.add(doc);
 
     const fromDefinitionControl = event => {
       const target = event.target;
@@ -94,8 +109,9 @@
       }
     };
     attachFrames();
-    if (doc.documentElement && root.MutationObserver) {
-      new root.MutationObserver(attachFrames).observe(doc.documentElement, { childList:true, subtree:true });
+    const MutationObserverCtor = doc.defaultView?.MutationObserver || root.MutationObserver;
+    if (doc.documentElement && MutationObserverCtor) {
+      new MutationObserverCtor(attachFrames).observe(doc.documentElement, { childList:true, subtree:true });
     }
   }
 
@@ -112,6 +128,7 @@
     function invalidate(){
       if (chain) history.push(chain);
       chain = null;
+      closeDownstreamNav(projectId);
       notify();
       return state();
     }
