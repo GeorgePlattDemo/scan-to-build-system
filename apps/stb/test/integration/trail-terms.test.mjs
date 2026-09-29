@@ -3,10 +3,10 @@
 // whose HEAD is STORE_PIN.
 //
 //   R4  "The Store answers" is a fresh answer from the Store for the current definition.
-//   R5  Within the envelope: answer → your call → paid (simulated) → yard → pickup and a full receipt.
-//       Past it: the choice is declined with its reason and steps 4–6 stay inert.
-//   R6  One terms flow for every tile: the shared stb-terms-flow.js chain, twelve events, each hash-linked
-//       to the one before. Declining ends the chain at "your call".
+//   R5  Within the envelope: Store answer → simulated offer → your call → paid (simulated) → yard → pickup
+//       and a terms / handoff receipt. Past it: the choice is declined with its reason and steps 4–6 stay inert.
+//   R6  One terms flow for every tile: the shared stb-terms-flow.js chain, thirteen events, each event after
+//       the Store answer hash-linked to the one before. Declining ends the chain at "your call".
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -29,13 +29,14 @@ async function until(fn, label, tries = 80) {
 function assertFullChain(state, label) {
   assert.equal(state.stage, 'HANDED_OFF', label + ': handed off');
   assert.deepEqual(state.events.map(e => e.id),
-    ['sent', 'arrived', 'answered', 'decision', 'paid', 'queued', 'allocated', 'released', 'cut', 'staged', 'ready', 'custody'], label + ': twelve events in order');
+    ['sent', 'arrived', 'answered', 'offered', 'decision', 'paid', 'queued', 'allocated', 'released', 'cut', 'staged', 'ready', 'custody'], label + ': thirteen events in order');
   assert.ok(state.events.slice(0, 3).every(e => typeof e.hash === 'string' && e.hash.length > 0), label + ': sent, arrived and answered carry Store hashes');
+  assert.match(state.events[3].detail, /^SIMULATED_OFFER · /, label + ': System creates the simulated offer after the Store answer');
   for (let i = 3; i < state.events.length; i++) {
     assert.equal(state.events[i].prevHash, state.events[i - 1].hash, label + ': ' + state.events[i].id + ' links to ' + state.events[i - 1].id);
   }
-  assert.equal(state.events[3].detail, 'ACCEPTED');
-  assert.ok(state.receipt && state.receipt.events.length === 12, label + ': full receipt at handoff');
+  assert.equal(state.events[4].detail, 'ACCEPTED');
+  assert.ok(state.receipt && state.receipt.events.length === 13, label + ': terms / handoff receipt at custody');
   assert.equal(state.receipt.storePin, STORE_PIN, label + ': receipt names the pinned Store');
 }
 function assertAnswered(state, log, requestType, projectId, label) {
@@ -46,6 +47,7 @@ function assertAnswered(state, log, requestType, projectId, label) {
   assert.equal(last.answer.evaluationReceipt?.authority?.storeRevision, STORE_PIN, label + ': answered by the pinned Store');
   assert.equal(state.events[1].hash, last.answer.evaluationReceipt.receiptHash, label + ': arrival hash is the Store receipt');
   assert.equal(state.events[0].hash, last.request.payloadDigest, label + ': sent hash is the request payload digest');
+  assert.equal(state.events.length, 3, label + ': Store answer is not silently promoted into a simulated offer');
 }
 
 // ---------- Tile drivers: each reaches a fresh Store answer the way a customer would ----------
@@ -165,8 +167,8 @@ async function walkToHandoff(tile, ctx) {
   const state = await terms(win, tile.projectId);
   assertFullChain(state, tile.projectId);
   assert.equal(await win.evaluate(s => window.STBTermsFlow.verify(s), state), true);
-  assert.equal(await inner.locator(`${tile.hosts.record} [data-terms-receipt]`).count(), 1, tile.projectId + ': receipt shown');
-  assert.equal(await inner.locator(`${tile.hosts.record} [data-terms-state="done"]`).count(), 12, tile.projectId + ': every event shown done');
+  assert.equal(await inner.locator(`${tile.hosts.record} [data-terms-receipt]`).count(), 1, tile.projectId + ': terms / handoff receipt shown');
+  assert.equal(await inner.locator(`${tile.hosts.record} [data-terms-state="done"]`).count(), 13, tile.projectId + ': every event shown done');
   if (!tile.inner) {
     const inert = await navInert(frame, tile.projectId);
     assert.ok(!inert.request && !inert.yard && !inert.record, tile.projectId + ': steps 4–6 open after handoff');
@@ -174,7 +176,7 @@ async function walkToHandoff(tile, ctx) {
 }
 
 for (const [id, tile] of Object.entries(TILES)) {
-  test(`R4–R6 ${id}: fresh Store answer → accept & send → yard → pickup → full hash-linked receipt`, { timeout: 240000 }, async () => {
+  test(`R4–R6 ${id}: fresh Store answer → simulated offer → accept & send → yard → pickup → terms / handoff receipt`, { timeout: 240000 }, async () => {
     await withBrowser(async ({ browser, origin, log }) => {
       const { page, frame, errors } = await openTile(browser, origin, tile.label);
       await walkToHandoff(tile, { page, frame, log });
@@ -182,7 +184,7 @@ for (const [id, tile] of Object.entries(TILES)) {
     });
   });
 
-  test(`R5 ${id}: declining ends the chain at your call; the yard and pickup stay closed`, { timeout: 240000 }, async () => {
+  test(`R5 ${id}: declining the simulated offer ends the chain at your call; yard and pickup stay closed`, { timeout: 240000 }, async () => {
     await withBrowser(async ({ browser, origin, log }) => {
       const { page, frame } = await openTile(browser, origin, tile.label);
       const { win } = await tile.answer({ page, frame, log });
@@ -191,9 +193,10 @@ for (const [id, tile] of Object.entries(TILES)) {
       await wait(page, 600);
       await inner.locator(`${tile.hosts.call} [data-terms-action="decline"]`).click();
       const state = await until(async () => { const s = await terms(win, tile.projectId); return s?.stage === 'DECLINED' ? s : null; }, id + ' declined');
-      assert.equal(state.events.length, 4);
-      assert.equal(state.events[3].detail, 'DECLINED');
-      assert.equal(state.events[3].prevHash, state.events[2].hash);
+      assert.equal(state.events.length, 5);
+      assert.match(state.events[3].detail, /^SIMULATED_OFFER · /);
+      assert.equal(state.events[4].detail, 'DECLINED');
+      assert.equal(state.events[4].prevHash, state.events[3].hash);
       assert.equal(state.yardOpen, false);
       assert.equal(state.recordOpen, false);
       if (!tile.inner) {
@@ -227,7 +230,7 @@ for (const [id, tile] of Object.entries(TILES)) {
         const inert = await navInert(frame, tile.projectId);
         assert.ok(inert.request && inert.yard && inert.record, id + ': steps 4–6 inert past the envelope ' + JSON.stringify(inert));
       } else {
-        const hostFrame = await (async () => page.frames().find(f => f.url().includes('system-build-base-8d8a9dd.html')))();
+        const hostFrame = page.frames().find(f => f.url().includes('system-build-base-8d8a9dd.html'));
         const inert = await navInert(hostFrame, tile.projectId);
         assert.ok(inert.request && inert.yard && inert.record, id + ': steps 4–6 inert past the envelope ' + JSON.stringify(inert));
       }
