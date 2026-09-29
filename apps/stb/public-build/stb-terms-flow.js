@@ -59,13 +59,13 @@
   }
   const now = () => new Date().toISOString();
   const shortId = prefix => prefix + '-' + root.crypto.randomUUID().slice(0,8).toUpperCase();
-  const esc = s => String(s == null ? '' : s).replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const money = n => Number.isFinite(Number(n)) ? '$' + Number(n).toFixed(2) : '—';
 
   function closeDownstreamNav(projectId){
     for (const doc of WATCHED_DOC_LIST) {
       try {
-        doc.querySelectorAll(`.recovery-nav button[data-job-project=\"${projectId}\"]`).forEach(button => {
+        doc.querySelectorAll(`.recovery-nav button[data-job-project="${projectId}"]`).forEach(button => {
           if (!DOWNSTREAM_STAGES.has(button.dataset.journeyStage)) return;
           button.disabled = true;
           button.setAttribute('aria-disabled','true');
