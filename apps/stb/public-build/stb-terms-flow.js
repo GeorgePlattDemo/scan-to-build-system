@@ -41,7 +41,9 @@
     alcove:'#alcove-config',
     'window-seat':'#s-configure'
   });
+  const START_OWN_CONTROLS = 'button[data-length],#stb-config-length';
   const INSTANCES = new Map();
+  const WATCHED_DOCS = new WeakSet();
 
   function canonical(value){
     if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
@@ -58,21 +60,55 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const money = n => Number.isFinite(Number(n)) ? '$' + Number(n).toFixed(2) : '—';
 
-  // One flow per project page. `answer` is what the page took from the shared Store client:
-  //   { version, status, total, reasons:[{code,text}], body }  where body is the client's Store response.
+  function watchDefinitionDocument(doc){
+    if (!doc || WATCHED_DOCS.has(doc)) return;
+    WATCHED_DOCS.add(doc);
+
+    const fromDefinitionControl = event => {
+      const target = event.target;
+      if (!target?.closest) return;
+
+      for (const [projectId, selector] of Object.entries(CONFIG_ROOTS)) {
+        const flow = INSTANCES.get(projectId);
+        if (!flow || !target.closest(selector) || target.closest('.stb-terms')) continue;
+        if (event.type === 'click' && !target.closest('button,[data-material],[data-depth],[data-n],[data-k]')) continue;
+        flow.invalidate();
+        return;
+      }
+
+      const startOwn = INSTANCES.get('start-own');
+      if (startOwn && target.closest(START_OWN_CONTROLS)) startOwn.invalidate();
+    };
+    doc.addEventListener('input', fromDefinitionControl, true);
+    doc.addEventListener('change', fromDefinitionControl, true);
+    doc.addEventListener('click', fromDefinitionControl, true);
+
+    const attachFrames = () => {
+      for (const frame of doc.querySelectorAll('iframe')) {
+        try { if (frame.contentDocument) watchDefinitionDocument(frame.contentDocument); } catch (_) { /* cross-origin frames are not project controls */ }
+        if (frame.dataset.stbTermsWatchBound === 'true') continue;
+        frame.dataset.stbTermsWatchBound = 'true';
+        frame.addEventListener('load', () => {
+          try { if (frame.contentDocument) watchDefinitionDocument(frame.contentDocument); } catch (_) { /* same boundary */ }
+        });
+      }
+    };
+    attachFrames();
+    if (doc.documentElement && root.MutationObserver) {
+      new root.MutationObserver(attachFrames).observe(doc.documentElement, { childList:true, subtree:true });
+    }
+  }
+
   function create({ projectId, title }){
     if (!projectId) throw new Error('TERMS_FLOW_PROJECT_REQUIRED');
     let chain = null;
     const history = [];
     const listeners = new Set();
-    const notify = () => listeners.forEach(fn => { try { fn(state()); } catch (e) { /* a listener never breaks the flow */ } });
+    const notify = () => listeners.forEach(fn => { try { fn(state()); } catch (_) { /* a listener never breaks the flow */ } });
 
     function event(id){ return chain?.events.find(e => e.id === id) || null; }
     function last(){ return chain?.events[chain.events.length - 1] || null; }
 
-    // Definition change is a hard state boundary. The old answer / simulated offer / acceptance remains history,
-    // but it can never authorize the changed definition. This is deliberately fail-closed and happens before
-    // a replacement Store answer exists.
     function invalidate(){
       if (chain) history.push(chain);
       chain = null;
@@ -187,33 +223,12 @@
       };
     }
 
-    // Standardized definition-change signals invalidate the current accepted chain immediately.
-    // Start Your Own already emits STB_PROJECT_DEFINITION_CHANGED from its child bench. Alcove and Window Seat
-    // are older inline/iframe surfaces, so their configuration roots are watched here until they emit the same
-    // signal themselves. This adapter owns only invalidation; it does not interpret or change project facts.
     if (root.addEventListener) {
       root.addEventListener('message', message => {
         if (message.data?.type === 'STB_PROJECT_DEFINITION_CHANGED' && message.data?.projectId === projectId) invalidate();
       });
     }
-    const configRootSelector = CONFIG_ROOTS[projectId] || null;
-    if (root.document && configRootSelector) {
-      const fromConfig = event => {
-        if (!chain) return;
-        const target = event.target;
-        if (!target?.closest || !target.closest(configRootSelector)) return;
-        if (target.closest('.stb-terms')) return;
-        // input/change are consequential controls by construction on these two configuration surfaces.
-        // click catches segmented/material buttons; ordinary navigation outside the configuration root is ignored.
-        if (event.type === 'click' && !target.closest('button,[data-material],[data-depth],[data-n],[data-k]')) return;
-        invalidate();
-      };
-      root.document.addEventListener('input', fromConfig, true);
-      root.document.addEventListener('change', fromConfig, true);
-      root.document.addEventListener('click', fromConfig, true);
-    }
 
-    // The chain, every tile the same: thirteen rows, done (✓) or open (○), each with its hash.
     function renderChain(){
       const done = new Map((chain?.events || []).map(e => [e.id, e]));
       const s = stage();
@@ -235,7 +250,6 @@
         + '<p class="stb-terms-note">Store answer ≠ simulated offer ≠ acceptance ≠ payment ≠ allocation ≠ release ≠ cut ≠ ready ≠ custody. Commerce and the yard are simulated: no money moves and no machine runs.</p></div>';
     }
 
-    // The buttons for one step: 'call' (step 4), 'yard' (step 5) or 'record' (step 6).
     function renderControls(step){
       const s = stage();
       if (step === 'call') {
@@ -308,7 +322,9 @@
     + '.stb-terms-kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px;padding:3px 0;font-size:12.5px}.stb-terms-kv code{font:11px ui-monospace,Menlo,monospace;word-break:break-all}';
   function installStyle(doc){
     const d = doc || root.document;
-    if (!d || d.getElementById('stb-terms-style')) return;
+    if (!d) return;
+    watchDefinitionDocument(d);
+    if (d.getElementById('stb-terms-style')) return;
     const style = d.createElement('style');
     style.id = 'stb-terms-style';
     style.textContent = STYLE;
