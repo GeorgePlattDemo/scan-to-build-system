@@ -59,7 +59,7 @@ test('landing Dev Guide restores the original short cues',()=>{
 
 test('sharp shorthand still names the important build debt',()=>{
   assert.match(spec.render('projects'),/Don’t overcrowd/);
-  assert.match(spec.render('alcove-config'),/Kill stale replies/);
+  assert.match(spec.render('alcove-config'),/Never attach an old answer to changed work\./);
   assert.match(spec.render('proof-store'),/A sent hash is not a receipt/);
   assert.match(spec.render('proof-accept'),/One click, three receipts/);
   assert.match(spec.render('proof-accept'),/idempotent/i);

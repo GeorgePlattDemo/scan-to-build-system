@@ -19,7 +19,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-user-defined-board-runtime-bridge.js?v=f77a49e9"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=cacfe4f3"></script>
+<script src="stb-build-guide-spec.js?v=063b52d6"></script>
 <script>
 (() => {
   const shell = document.getElementById('stb-current');
@@ -121,15 +121,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
       const ribbon = home.querySelector(':scope > .split > .ribbon');
       if (ribbon) {
-        ['start-own','picnic-chooser','alcove-capture','window-intake','window-parts'].forEach(id => {
+        ['start-own','alcove-capture','picnic-chooser','window-intake','window-parts'].forEach(id => {
           const tile = ribbon.querySelector(`.tile[data-go="${id}"]`);
           if (tile) ribbon.append(tile);
         });
 
         const proofLabels = Object.freeze([
           ['start-own','TEST 01 · FROM A BOARD'],
-          ['picnic-chooser','TEST 02 · FROM A BOUNDED PROJECT'],
-          ['alcove-capture','TEST 03 · FIT THE SPACE'],
+          ['alcove-capture','TEST 02 · FIT THE SPACE'],
+          ['picnic-chooser','TEST 03 · FROM A BOUNDED PROJECT'],
           ['window-intake','TEST 04 · DEFINE THE ASSEMBLY'],
           ['window-parts','TEST 05 · CHANGE THE MATERIAL STREAM']
         ]);

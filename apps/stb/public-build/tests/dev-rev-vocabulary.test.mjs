@@ -38,3 +38,36 @@ test('bench, knob and configurator are defined once, as approved',()=>{
   assert.ok(definitions.includes('**Configurator** — The knobs made for one job at intent. A tool, not the program. There is no universal configurator.'));
   for(const t of ['**Knob** —','**Configurator** —']) assert.equal(definitions.split(t).length-1,1,`${t} defined more than once`);
 });
+
+const job2=['alcove-idea','alcove-bench','alcove-store'].map(k=>rails[k]);
+const text=r=>lines(r).join('\n');
+
+test('Job 2 (Alcove) carries the same flag across all three pages',()=>{
+  for(const r of job2) assert.ok(r.flag.startsWith(FLAG),`flag drifted: ${r.header}`);
+  assert.ok(rails['alcove-store'].flag.endsWith('Store answers Store questions.'));
+  assert.ok(rails['job1-store'].flag.endsWith('Store answers Store questions.'));
+});
+
+test('Alcove states the knob rule on intent and on the bench',()=>{
+  assert.match(text(rails['alcove-idea']),/No universal configurator\./);
+  assert.match(text(rails['alcove-idea']),/Never invent a new knob on the bench\./);
+  assert.match(text(rails['alcove-idea']),/The bench does not enlarge it\./);
+  assert.match(text(rails['alcove-bench']),/Do not rename it configurator\./);
+});
+
+test('Store Zero is named one way on every Store answer page',()=>{
+  assert.match(text(rails['job1-store']),/Declared reference lumberyard\./);
+  assert.match(text(rails['alcove-store']),/Store Zero is a declared reference lumberyard\./);
+  for(const r of Object.values(rails)) assert.equal(/controlled reference Store/i.test(text(r)),false);
+});
+
+test('budgetary answer (whole Store result) and complete budgetary estimate (the number) stay distinct',()=>{
+  assert.match(text(rails['alcove-store']),/ANSWERED — Store budgetary answer or refusal\./);
+  assert.match(text(rails['alcove-store']),/no complete budgetary estimate\./);
+  assert.match(text(rails['job1-store']),/no complete budgetary estimate\./);
+});
+
+test('the shared trail is not given a stale count',()=>{
+  for(const r of Object.values(rails)) assert.equal(/Twelve events/.test(text(r)),false);
+  assert.ok(rails['alcove-store'].sections.some(s=>s.title==='SHARED 13-STEP TRAIL' && s.items.length===13));
+});
