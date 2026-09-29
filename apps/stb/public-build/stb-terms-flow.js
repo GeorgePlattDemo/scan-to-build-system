@@ -37,6 +37,10 @@
     Object.freeze({ id:'custody',   label:'Picked up · custody (handoff)',           who:'you' })
   ]);
   const YARD_EVENTS = Object.freeze(['allocated','released','cut','staged','ready']);
+  const CONFIG_ROOTS = Object.freeze({
+    alcove:'#alcove-config',
+    'window-seat':'#s-configure'
+  });
   const INSTANCES = new Map();
 
   function canonical(value){
@@ -66,8 +70,18 @@
     function event(id){ return chain?.events.find(e => e.id === id) || null; }
     function last(){ return chain?.events[chain.events.length - 1] || null; }
 
+    // Definition change is a hard state boundary. The old answer / simulated offer / acceptance remains history,
+    // but it can never authorize the changed definition. This is deliberately fail-closed and happens before
+    // a replacement Store answer exists.
+    function invalidate(){
+      if (chain) history.push(chain);
+      chain = null;
+      notify();
+      return state();
+    }
+
     function setAnswer(answer){
-      if (!answer) { if (chain) history.push(chain); chain = null; notify(); return state(); }
+      if (!answer) return invalidate();
       const body = answer.body || {};
       const receipt = body.evaluationReceipt || body.rawEvaluation?.evaluationReceipt || null;
       if (chain && chain.version === answer.version && chain.requestId === body.requestId) return state();
@@ -173,6 +187,32 @@
       };
     }
 
+    // Standardized definition-change signals invalidate the current accepted chain immediately.
+    // Start Your Own already emits STB_PROJECT_DEFINITION_CHANGED from its child bench. Alcove and Window Seat
+    // are older inline/iframe surfaces, so their configuration roots are watched here until they emit the same
+    // signal themselves. This adapter owns only invalidation; it does not interpret or change project facts.
+    if (root.addEventListener) {
+      root.addEventListener('message', message => {
+        if (message.data?.type === 'STB_PROJECT_DEFINITION_CHANGED' && message.data?.projectId === projectId) invalidate();
+      });
+    }
+    const configRootSelector = CONFIG_ROOTS[projectId] || null;
+    if (root.document && configRootSelector) {
+      const fromConfig = event => {
+        if (!chain) return;
+        const target = event.target;
+        if (!target?.closest || !target.closest(configRootSelector)) return;
+        if (target.closest('.stb-terms')) return;
+        // input/change are consequential controls by construction on these two configuration surfaces.
+        // click catches segmented/material buttons; ordinary navigation outside the configuration root is ignored.
+        if (event.type === 'click' && !target.closest('button,[data-material],[data-depth],[data-n],[data-k]')) return;
+        invalidate();
+      };
+      root.document.addEventListener('input', fromConfig, true);
+      root.document.addEventListener('change', fromConfig, true);
+      root.document.addEventListener('click', fromConfig, true);
+    }
+
     // The chain, every tile the same: thirteen rows, done (✓) or open (○), each with its hash.
     function renderChain(){
       const done = new Map((chain?.events || []).map(e => [e.id, e]));
@@ -247,7 +287,7 @@
       });
     }
 
-    const flow = Object.freeze({ setAnswer, accept, decline, runYard, pickup, state, renderChain, renderControls, renderReceipt, bind, onChange: fn => { listeners.add(fn); return () => listeners.delete(fn); } });
+    const flow = Object.freeze({ setAnswer, invalidate, accept, decline, runYard, pickup, state, renderChain, renderControls, renderReceipt, bind, onChange: fn => { listeners.add(fn); return () => listeners.delete(fn); } });
     INSTANCES.set(projectId, flow);
     return flow;
   }
