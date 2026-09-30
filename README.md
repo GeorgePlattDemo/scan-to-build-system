@@ -8,75 +8,84 @@
 
 ---
 
-## What this is
+## What this repository is
 
-This is the working app — the digital proof that a bounded wood project can be defined once and carried all the way to a yard and back without anyone rebuilding it.
+This repository owns the working public application and the shared operational meaning of an identified job.
 
-Today, a custom wood project gets reinterpreted at every step. Someone measures the space. Someone else redraws it. The counter turns it into a material list. The shop turns it into something a machine understands. Every handoff is a chance to lose what the customer actually meant.
+A project is defined in System. The Store answers what its own declared stock, capability, modeled work, and economics can provide. System keeps the definition, the exact Store answer, the customer's next decision, and the consequential record together without turning a Store answer into project meaning or machine authority.
 
-Here, the project is defined once — finished parts, dimensions and required operations — in terms that survive the trip to the yard intact. Where the yard's machine supports the work, the machine's own setup turns those requirements into motion locally:
+For the current publication source, Store-pin owner, simulation boundary, and historical pointers, start with [`docs/project/CURRENT-SYSTEM-STATE.md`](docs/project/CURRENT-SYSTEM-STATE.md).
 
-```
-what you want → what you measured → the parts, defined → the yard's answer → your decision → the parts, made → pickup → your record
-```
+## Five bounded demonstrations
 
-## One job, start to finish
+The current public library presents five demonstrations in the order defined by the shared trail contract:
 
-A picnic-table bench needs an X-brace. In the app that becomes a definition: two parts, 16 inches each, 30° ends, a spot marked at the center of each. The job goes to the Store on a 60-inch 2×4. The Store checks its own stock, checks that its machine can hold the board through every cut — there must always be at least 24 inches to grip — and answers: it fits, with about 27⅝ inches left over, and here's the budgetary price.
-
-Nobody retyped the numbers. Nobody redrew the brace. If the job didn't fit, the Store would have said no and said why, and the app would have shown you that no.
-
-## What works today
-
-Proven in the app's own tests — each claim is tied to an exact version in the [verification register](docs/project/VERIFICATION-REGISTER.md):
-
-- A project leaves this app, a separately hosted Store evaluates it, and the answer comes back and is kept with the exact project version it answered.
-- The whole chain — request, answer, your review, the record — survives exporting, importing and reopening the project.
-- An old answer can't be resent as a new one. A fresh question always gets a fresh evaluation.
-- If the Store refuses a job, nothing later in the app can turn that into a yes.
-- Answers that come back malformed, or claiming authority they don't have, are quarantined rather than shown as real.
-- Board jobs, cut packages and alcove inserts are answered live by the hosted Store; a sheet-goods job (an arched playhouse window) runs through the same path against its own Store version.
-
-What's modeled rather than real: the yard is fictional, prices are budgetary estimates, and machine time is calculated, not measured. Payment and the yard queue are simulated. No machine runs.
-
-## Try it
-
-Open the app, choose **New user**, then **Later**, and pick a project from the library:
-
-| Project | What it tests |
+| Project | What it exercises |
 | --- | --- |
-| **Start your own** | One board, your own cuts. The simplest case. |
-| **Outdoor build** | A picnic table from real published plans, turned into a cut list. |
-| **Critical fit** | A shelf insert that has to fit an exact opening. |
-| **Space utilization** | A window seat with two towers — a bigger assembly. |
-| **Playhouse arched window** | Sheet goods instead of boards. |
+| **Start your own** | One user-defined board job: cuts and a bounded spot operation. |
+| **Critical fit** | An alcove/shelf insert whose definition is driven by an exact opening. |
+| **Space utilization** | A larger window-seat assembly using the same Store boundary. |
+| **Outdoor build** | A project entered from a published picnic-table plan. |
+| **Playhouse arched window** | Sheet goods and the S-001 Store path instead of a dimensional-board path. |
 
-The tabs across the top follow the job: bring what you have, scan, configure, the Store's answer, review, request, yard, record. A dev guide in the right-hand rail says what each screen is trying to do.
+These are different project classes, not five copies of one configurator. Their shared journey is the protocol; their project facts remain their own.
 
-## Where this fits
+## One trail
 
-This repository sits under the [3D Solutions Program](https://github.com/GeorgePlattDemo/3d-solutions-program), which asks the bigger question, and next to the [Scan-to-Build Store](https://github.com/GeorgePlattDemo/scan-to-build-store), which owns the yard's side.
+Every project uses the same six labels, in the same order:
 
-The line between them is the whole point: System carries your project, and the Store answers it. System never makes up a Store answer, a price or a refusal. If it did, nothing would really have crossed from you to the yard.
+**Your idea → The bench → The Store answers → Your call → We cut it → Pick up & build**
 
-In the issued patents, this is the customer-facing half: the interface where a person chooses and sizes a project, the project definition that drives the machine, and the record that comes back. The app currently works against Stage 2 of the [Store's stages](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/STB-STORE-CELL-STAGES-0.1.md) — a reference yard and a declared reference cell.
+The machine-readable contract is [`apps/stb/public-build/stb-trail-contract.js`](apps/stb/public-build/stb-trail-contract.js). It currently names all five project tiles and no exceptions.
+
+The labels are deliberately broader than page count. A project may need several pages inside one step, but it does not get a different authority sequence.
+
+## The Store boundary
+
+System does not own Store facts or calculate a substitute Store answer.
+
+The application consumes one exact Store version through `STORE_PIN` in [`apps/stb/shared/contracts.mjs`](apps/stb/shared/contracts.mjs). The Store evaluates the identified request and returns its own result. A different System page or project wrapper may not recreate that result locally because doing so would collapse the boundary this repository is meant to demonstrate.
+
+A Store `SUPPORTABLE` answer is not fabrication authorization. A changed definition requires a fresh Store evaluation for the changed version.
+
+## What the evidence register establishes
+
+The [`verification register`](docs/project/VERIFICATION-REGISTER.md) is the claim-to-proof record. Historical and candidate rows remain tied to the exact identities they actually proved.
+
+Among the properties already recorded there are Store-backed dimensional and sheet software paths, durable custody of Store requests and answers, rejection of stale historical requests as current requests, quarantine of malformed or authority-bearing answers, preservation of Store refusal, and explicit non-claims for physical production and physical execution authority.
+
+The register also says something important about the current front door: **current five-project/public-build evidence still needs separately scoped proof rows rather than being inferred from older acceptance or candidate evidence.** This README does not turn a green workflow or a current UI state into a new PASS row.
+
+## What is simulated or modeled
+
+The current application is a software demonstration, not a production system.
+
+- Store Zero is a fictional reference lumberyard.
+- Store prices are budgetary reference estimates, not binding quotations.
+- Machine time is modeled, not measured commissioned production time.
+- Offer, acceptance, payment, yard queue, allocation/release narrative, cutting, staging, and handoff are simulated where shown in the demonstration.
+- No commissioned D-001 or S-001 physical production is established.
+- The software does not issue physical execution authority.
+
+The Store owns the current Stage-2 fixture and capability declarations: [Scan-to-Build Store](https://github.com/GeorgePlattDemo/scan-to-build-store).
 
 ## Where the support lives
 
-| If you want to know… | Read | Why it's the evidence |
+| If you want to know… | Read | What it establishes |
 | --- | --- | --- |
-| What's actually proven, and what isn't? | [Verification register](docs/project/VERIFICATION-REGISTER.md) | Every claim tied to a test and an exact version |
-| How do new, returning and professional users end up on the same path? | [Common entry](docs/application/COMMON-ENTRY-ARCHITECTURE.md) | Three ways in, one project |
-| What happens to my measurements, scans and files? | [Information custody](docs/application/INFORMATION-CUSTODY-BOUNDARY.md) | What's kept, what's shared, what stays yours |
-| What exactly crosses to the Store? | [Store foundation](docs/store/CURRENT-STORE-FOUNDATION.md) | The request, the answer, and why every question is fresh |
-| What does a word mean? | [Definitions](docs/definitions/README.md) | The one authority for shared meaning across Program, System and Store, backed by code in [`apps/stb/shared/`](apps/stb/shared/) |
-| What is current, published, modeled, and historical? | [Current System state](docs/project/CURRENT-SYSTEM-STATE.md) | Current publication source, Store-pin owner, simulation/commissioning limits, and pointers to historical records |
-| What do the patents disclose? | [Patent sources](docs/patents/README.md) | The issued grants and how this work maps to them |
+| What is current now? | [Current System state](docs/project/CURRENT-SYSTEM-STATE.md) | Publication source, Store-pin owner, simulation/commissioning limits, historical pointers |
+| What has actually been proved? | [Verification register](docs/project/VERIFICATION-REGISTER.md) | Exact claim, exact identity, exact proof, and explicit gaps |
+| What do shared words mean? | [Definitions](docs/definitions/README.md) | Shared operational meaning across Program, System, and Store |
+| What crosses the Store boundary? | [Current Store foundation](docs/store/CURRENT-STORE-FOUNDATION.md) | Request/answer boundary and fresh-evaluation rule |
+| How do different users enter the same system? | [Common entry](docs/application/COMMON-ENTRY-ARCHITECTURE.md) | New, returning, and professional entry paths |
+| What happens to source material and records? | [Information custody](docs/application/INFORMATION-CUSTODY-BOUNDARY.md) | What is retained, shared, or unresolved |
+| What does Store own? | [Scan-to-Build Store](https://github.com/GeorgePlattDemo/scan-to-build-store) | Store Zero, Store facts, capability, economics, answers, and refusals |
+| Why investigate this at all? | [3D Solutions Program](https://github.com/GeorgePlattDemo/3d-solutions-program) | Research question, evidence, candidate engineering, and open questions |
 
-## The fine print
+## Limits
 
-This is a working software proof, not a store. Nothing here is a live inventory, a binding quote, a payment, or permission to run a machine. A passing test proves what that test checks, and nothing more.
+A passing test proves what that test checks and nothing more. The current public application does not establish live inventory, binding quotation, payment, reservation, physical fabrication, commissioned machine safety, or permission for Cycle Start.
 
 **NO BLOOD ON WOOD.**
 
-<sub>Maintainers and agents: start at [`START-HERE.md`](START-HERE.md). Accepted baseline, pins and genealogy: [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md) · [`docs/project/BRANCH-PR-GENEALOGY.md`](docs/project/BRANCH-PR-GENEALOGY.md) · [`AGENTS.md`](AGENTS.md) · [`apps/README.md`](apps/README.md)</sub>
+<sub>Maintainers and agents: start at [`START-HERE.md`](START-HERE.md). Historical accepted baseline and genealogy remain in [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md) and [`docs/project/BRANCH-PR-GENEALOGY.md`](docs/project/BRANCH-PR-GENEALOGY.md).</sub>

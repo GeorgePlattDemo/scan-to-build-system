@@ -87,7 +87,7 @@ Words the working app uses on screen or in its records. Where a term has an exac
 
 **Fresh evaluation** — Every formal Store request is evaluated again against current Store state. An earlier answer is history, not a current answer.
 
-**Store pin** — The exact Store commit the app calls. Recorded once, in the [verification register](../project/VERIFICATION-REGISTER.md) and [START-HERE](../../START-HERE.md). Changing it is a deliberate, separate act (see the protected path in [AGENTS.md](../../AGENTS.md)).
+**Store pin** — The exact Store commit the app calls. Its current operational owner is `STORE_PIN` in [`apps/stb/shared/contracts.mjs`](../../apps/stb/shared/contracts.mjs). Changing it is a deliberate, separate act (see the protected path in [AGENTS.md](../../AGENTS.md)).
 
 **Stages 1–4** — Store/cell evidence levels: one board; Store Zero and the D-001 reference cell; a physical cell; an evidence-informed system. Owned by Store: [stage guide](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/STB-STORE-CELL-STAGES-0.1.md).
 
