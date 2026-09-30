@@ -4,11 +4,6 @@
   const VERSION='STB-DEV-GUIDE-0.2';
   const guide=(goal,rows,later=[])=>Object.freeze({goal,rows:Object.freeze(rows.map(row=>Object.freeze(row))),later:Object.freeze(later.map(row=>Object.freeze(row)))});
 
-  const legacyWindow=guide('Legacy reference',[
-    ['Don’t rebuild here','The live Window Seat owns the current path.'],
-    ['Keep the donor','Useful copy and checks still depend on it.'],
-    ['Retire carefully','Remove only after parity tests.']
-  ]);
   const legacyPicnic=guide('Legacy reference',[
     ['Don’t route here','Outdoor uses the live bounded artifact.'],
     ['Keep the donor','Recovery still depends on some old anchors.'],
@@ -839,6 +834,472 @@
       ]
     }
   };
+  // Job 4 (Window Seat) rails: one per page of stb-window-seat-0.9.html, rendered inside that page.
+  const JOB4={
+    "ws-hero": {
+      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 1 · HER IDEA",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "The picture is the want.",
+            "The picture is not the definition.",
+            "Her words carry weight. They are not measurements.",
+            "Nobody cuts to a picture."
+          ]
+        },
+        {
+          "title": "TWO ROUTES, ONE JOB",
+          "items": [
+            "The regular path: one page at a time, on the six trail steps.",
+            "One long scroll: every page in order, on one screen, for audit.",
+            "One state. One definition. One Store request. Whichever route.",
+            "Switching route keeps the version and the terms stage.",
+            "Pages 1 and 2 both sit on trail step 1."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "Both routes send the same definition and get the same result hash. Test: window-seat-journey.test.mjs.",
+            "Switching route keeps the state. Tests: window-seat.test.mjs, window-seat-journey.test.mjs.",
+            "The nav stays on step 1 across pages 1 and 2. Tests: window-seat.test.mjs, window-seat-journey.test.mjs."
+          ]
+        },
+        {
+          "title": "STATED ONLY",
+          "items": [
+            "The picture is context, not the definition.",
+            "The hex trim in the picture stays context."
+          ]
+        },
+        {
+          "title": "PLUMBING",
+          "items": [
+            "Preserve the working artifact.",
+            "Guide text comes from the shared guide file. One guide, not two.",
+            "Parent routes. Child owns the bounded definition.",
+            "postMessage is a contract. Origin, schema, correlation.",
+            "Known wart. Two DOMs, focus and history seams, browser-held state."
+          ],
+          "quiet": true
+        }
+      ]
+    },
+    "ws-intent": {
+      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 2 · YOUR INTENT",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "No universal configurator.",
+            "This page builds Window Seat’s configurator: the knobs this job needs, and only this job.",
+            "Every knob is made here.",
+            "The bench only turns them.",
+            "A missing knob sends you back here. Never invent one on the bench."
+          ]
+        },
+        {
+          "title": "WHY CONFIGURATOR HELL HAPPENS",
+          "items": [
+            "A universal configurator tries to anticipate every job.",
+            "Every new job adds knobs. Knobs never leave.",
+            "Soon no knob can change without breaking another job.",
+            "The fix: make the knobs from the job, at intent, then stop.",
+            "The bench stays small because intent did the work.",
+            "A new job gets its own knobs on its own intent page. Other jobs are untouched."
+          ]
+        },
+        {
+          "title": "HOW A KNOB IS MADE",
+          "items": [
+            "From the sketch: the number is read off the drawing.",
+            "By hand: not on the sketch; you enter it.",
+            "Derived: from a stated rule. No rule, no derivation.",
+            "An added knob brings its required facts empty. No hidden defaults.",
+            "The Store is not asked until the required facts are filled."
+          ]
+        },
+        {
+          "title": "THE 14 KNOBS",
+          "items": [
+            "From the sketch: overall height · left tower width · center width · right tower width · depth · upper bays · cubbies under the seat · left tower shelves · right tower shelves.",
+            "By hand: clearance each side · seat height · upper storage, clear · wood.",
+            "Derived: boards across the depth, the fewest 1× boards that cover it (lumber standard). Can be set by hand on the bench."
+          ]
+        },
+        {
+          "title": "KNOBS ADDED BY HAND, HERE ONLY",
+          "items": [
+            "Front board below the seat.",
+            "Shelf-pin spot facing. Needs a placement.",
+            "One more spot. Needs a part, a distance and a placement.",
+            "Wood screws. Need a gauge, a length, a finish and a count."
+          ]
+        },
+        {
+          "title": "CONTROLLING VS OBSERVED",
+          "items": [
+            "Where a number came from is kept apart from whether it controls.",
+            "Only controlling numbers are cut to.",
+            "Observed numbers stay attached as context.",
+            "Taste and what’s off travel with the job. They cut nothing.",
+            "Do not auto-correct a room nobody else stood in."
+          ]
+        },
+        {
+          "title": "OPEN QUESTIONS",
+          "items": [
+            "“A seat you can sit on” is carried as UNRESOLVED, for a qualified person.",
+            "How it goes together on site is DEFERRED, to you or a qualified person.",
+            "Open questions travel with the job. They never block the Store ask."
+          ]
+        },
+        {
+          "title": "KEPT, NOT SENT",
+          "items": [
+            "Asked for, but the Store has no line: label every part · inspect the finished sizes · bundle by module · pack and protect · something else.",
+            "Kept on the job. Never sent. Never claimed done."
+          ]
+        },
+        {
+          "title": "COMPLETION RULE",
+          "items": [
+            "Intent-complete means the job can be stated.",
+            "Intent-complete does not mean the Store can make it."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "Knobs, including knobs added by hand, exist only on this page. Tests: window-seat.test.mjs, window-seat-journey.test.mjs.",
+            "An added knob’s facts start empty, and the Store waits for them. Test: window-seat-journey.test.mjs."
+          ]
+        },
+        {
+          "title": "ENFORCED BY CODE ONLY",
+          "items": [
+            "Source kept apart from controlling status: measure(), conditions().",
+            "Taste and what’s off cut nothing: identified().",
+            "Open questions never block the ask: conditions().",
+            "Kept-not-sent is never sent: buildRequest()."
+          ]
+        },
+        {
+          "title": "CURRENT GAP",
+          "items": [
+            "The seat question has nowhere to record a qualified person’s answer.",
+            "Wood choices are listed on the page, not read from the Store catalog. The Store still refuses what it does not carry."
+          ]
+        },
+        {
+          "title": "PLUMBING",
+          "items": [
+            "Preserve the working artifact.",
+            "Parent routes. Child owns the bounded definition."
+          ],
+          "quiet": true
+        }
+      ]
+    },
+    "ws-bench": {
+      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 3 · THE BENCH",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "This page is always the bench. Do not rename it configurator.",
+            "The bench turns the knobs made at intent. It never adds one.",
+            "A missing knob → back to intent.",
+            "The bench defines the job. It does not answer Store questions."
+          ]
+        },
+        {
+          "title": "BENCH RECEIVES",
+          "items": [
+            "The identified intent · the 14 knobs · any knobs added by hand · current values · controlling facts · derivation rules."
+          ]
+        },
+        {
+          "title": "BENCH PRODUCES",
+          "items": [
+            "One identified definition · finished parts · features · operations · material demand · what will be asked of the Store."
+          ]
+        },
+        {
+          "title": "WINDOW SEAT TRANSFORMATION",
+          "items": [
+            "Tower and center widths → tops, bottoms, shelves and seat lengths.",
+            "Depth → the width of every part.",
+            "Boards across the depth → boards per part, and each board’s finished width.",
+            "Seat height → where the seat sits; cubby divider length.",
+            "Upper storage, clear → upper shelf position; upper divider length.",
+            "Upper bays and cubbies → dividers.",
+            "Tower shelves → shelves and their positions.",
+            "Spot facing → spots at shelf positions, on tower sides only.",
+            "Wood → the material of every board."
+          ]
+        },
+        {
+          "title": "EDGE MILL",
+          "items": [
+            "Depth is the customer’s number, in ¼ in steps.",
+            "Boards are milled to width to match. 14 in → two 1×8s milled to 7 in.",
+            "A depth that lands on a board sends no milling.",
+            "The mill’s limit is Store capability. The page holds no copy.",
+            "Too much to mill → the Store refuses, with its reason. Turn the knob. Ask again."
+          ]
+        },
+        {
+          "title": "CHANGE RULE",
+          "items": [
+            "Any change is a new version identity.",
+            "The old answer becomes history. Downstream steps close. The Store is asked again.",
+            "Never attach an old answer to changed work."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "No control on the bench adds a knob. Tests: window-seat.test.mjs, window-seat-journey.test.mjs.",
+            "Edge mill, ¼ in steps, and spots, (4+4) × 2 × 2 on tower sides. Tests: window-seat.test.mjs, shelf-pilot-demand.test.mjs.",
+            "No mill limit, SKU, price or stock in the page. Tests: window-seat-journey.test.mjs, shelf-pilot-demand.test.mjs.",
+            "Each change is a new version identity. Tests: window-seat.test.mjs, trail-stale-version.test.mjs."
+          ]
+        },
+        {
+          "title": "CURRENT GAP",
+          "items": [
+            "A bench click that changes nothing still re-asks the Store. The fix belongs in the shared terms flow.",
+            "Wood screws stay on the job, not sent. System’s wire accepts hardware only by Store item number."
+          ]
+        },
+        {
+          "title": "PLUMBING",
+          "items": [
+            "Preserve the working artifact.",
+            "Don’t squeeze it. Guide uses the rail. Iframe keeps its width.",
+            "Mind the seam. Parent routes. Child owns the bounded definition.",
+            "postMessage is a contract. Origin, schema, correlation.",
+            "Known wart. Two DOMs, focus and history seams, browser-held state."
+          ],
+          "quiet": true
+        }
+      ]
+    },
+    "ws-store": {
+      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 4 · STORE ANSWER",
+      "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "One fresh Store answer to this exact version.",
+            "Viewing it creates no event.",
+            "Store answers the job. Store does not redefine the job.",
+            "Store owns capability, time, economics, and retained-control truth."
+          ]
+        },
+        {
+          "title": "REFERENCE STATUS",
+          "items": [
+            "Store Zero is a declared reference lumberyard.",
+            "Not live inventory. Not a dealer commitment. Not a quote."
+          ]
+        },
+        {
+          "title": "FOUR STORE OUTCOMES",
+          "items": [
+            "SUPPORTABLE · UNRESOLVED · REFUSED · UNAVAILABLE.",
+            "Every non-supportable answer carries reasons.",
+            "A refusal is the result. Steps 4–6 stay inert.",
+            "A failed ask stays failed, with nothing in its place."
+          ]
+        },
+        {
+          "title": "NO LOCAL STORE REPLICA",
+          "items": [
+            "No SKU, price, stock, capability or mill limit in the page.",
+            "Ask the Store."
+          ]
+        },
+        {
+          "title": "FIRST THREE IDENTITIES",
+          "items": [
+            "SENT · ARRIVED · ANSWERED.",
+            "Three events, three hashes. Do not collapse them."
+          ]
+        },
+        {
+          "title": "COMPLETE PRICE RULE",
+          "items": [
+            "The Store budgetary answer is the whole Store result.",
+            "The complete budgetary estimate is the number inside it, only when every line is supportable.",
+            "Missing required component → no complete budgetary estimate."
+          ]
+        },
+        {
+          "title": "TWO LISTS",
+          "items": [
+            "“What happens next” is the Store Zero text’s 12-step walk.",
+            "The shared terms flow records 13 events.",
+            "They are different lists. Events stay separate."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "A fresh live answer; a failed ask stays failed. Tests: window-seat.test.mjs, trail-terms.test.mjs.",
+            "15 in over 2 boards: refused by the Store (EDGE_MILL_REMOVAL_EXCEEDS_D001_MAX_CUT_WIDTH), no complete budgetary estimate. Test: window-seat-journey.test.mjs.",
+            "The Store Zero text is the shared file, never a copy. Tests: window-seat-journey.test.mjs, bounded-project-conformance.test.mjs."
+          ]
+        },
+        {
+          "title": "AUTHORITY LINKS",
+          "items": [
+            "Store Zero: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/README.md",
+            "Travel standard: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md",
+            "D-001 envelope, file 0.1, version string D001-STAGE2-ENVELOPE-0.3: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/D-001-STAGE2-ENVELOPE-0.1.md"
+          ]
+        }
+      ]
+    },
+    "ws-request": {
+      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 5 · YOUR CALL",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "The complete budgetary estimate, what is still open, and your call.",
+            "Only a fresh SUPPORTABLE answer can be accepted.",
+            "ACCEPT creates the next event.",
+            "ACCEPT does not move money, allocate material, release production or start a machine.",
+            "DECLINE is a result too."
+          ]
+        },
+        {
+          "title": "SHARED TERMS FLOW",
+          "items": [
+            "One shared 13-event terms flow, hash-linked.",
+            "No Window Seat commerce of its own."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "The shared flow’s chain verifies. Tests: window-seat-journey.test.mjs, trail-terms.test.mjs."
+          ]
+        },
+        {
+          "title": "STATED ONLY",
+          "items": [
+            "Commerce is simulated. No money moves."
+          ]
+        }
+      ]
+    },
+    "ws-yard": {
+      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 6 · WE CUT IT",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "The cut plan is the Store’s, board by board.",
+            "The yard run is simulated.",
+            "Allocation ≠ release ≠ Cycle Start.",
+            "Cycle Start belongs to the person at the cell."
+          ]
+        },
+        {
+          "title": "STATED ONLY",
+          "items": [
+            "The yard is simulated.",
+            "Cycle Start stays with the person at the cell."
+          ]
+        }
+      ]
+    },
+    "ws-record": {
+      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 7 · PICK UP & BUILD",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "Kit, record, every part and its board.",
+            "Staged ≠ picked up.",
+            "Custody closes the handoff.",
+            "The record appends. It is never rewritten.",
+            "How it goes together on site stays DEFERRED, to you or a qualified person."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "The 13 events stay separate and hash-linked. Tests: window-seat-journey.test.mjs, trail-terms.test.mjs."
+          ]
+        }
+      ]
+    },
+    "ws-audit": {
+      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · AUDIT COPY",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "The whole job as plain text you can copy.",
+            "Only in the long scroll.",
+            "Same state as the regular path. Nothing is recomputed for the copy.",
+            "Opened outside the published site, a copy cannot reach the live Store. It fails closed."
+          ]
+        },
+        {
+          "title": "WHAT IT CARRIES",
+          "items": [
+            "The identified definition · the request exactly as sent · the Store answer and its identities · the terms events · how to check it yourself."
+          ]
+        },
+        {
+          "title": "AUDIT QUESTION",
+          "items": [
+            "What definition was sent?",
+            "What did the Store receive?",
+            "What did it answer, and why?",
+            "Under which pins?",
+            "What changed afterward?",
+            "Did anyone rewrite the job?"
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "It carries the full definition, the request as sent, and the answer with its identities. Tests: window-seat.test.mjs, window-seat-journey.test.mjs.",
+            "The same audit copy from either route. Test: window-seat-journey.test.mjs."
+          ]
+        },
+        {
+          "title": "STATED ONLY",
+          "items": [
+            "Reproducing the result hash from the copy alone was checked by hand once, not by a test."
+          ]
+        }
+      ]
+    }
+  };
   const asRail=r=>Object.freeze(Object.assign({},r,{rows:Object.freeze(r.bullets.map(b=>Object.freeze([b,'']))),later:Object.freeze([])}));
   const RAILS=Object.freeze({
     'job1-idea':asRail(JOB1['job1-idea']),
@@ -846,7 +1307,15 @@
     'job1-store':asRail(JOB1['job1-store']),
     'alcove-idea':asRail(JOB2['alcove-idea']),
     'alcove-bench':asRail(JOB2['alcove-bench']),
-    'alcove-store':asRail(JOB2['alcove-store'])
+    'alcove-store':asRail(JOB2['alcove-store']),
+    'ws-hero':asRail(JOB4['ws-hero']),
+    'ws-intent':asRail(JOB4['ws-intent']),
+    'ws-bench':asRail(JOB4['ws-bench']),
+    'ws-store':asRail(JOB4['ws-store']),
+    'ws-request':asRail(JOB4['ws-request']),
+    'ws-yard':asRail(JOB4['ws-yard']),
+    'ws-record':asRail(JOB4['ws-record']),
+    'ws-audit':asRail(JOB4['ws-audit'])
   });
 
   const PAGES=Object.freeze({
@@ -918,12 +1387,6 @@
       ['Confirm ≠ order','No payment or production authority here.'],
       ['Fork after edit','Never rewrite the confirmed version.']
     ]),
-    'window-intake':legacyWindow,
-    'window-space':legacyWindow,
-    'window-span':legacyWindow,
-    'window-resolve':legacyWindow,
-    'window-parts':legacyWindow,
-    'window-review':legacyWindow,
     'picnic-chooser':legacyPicnic,
     'picnic-config':legacyPicnic,
     'picnic-review':guide('Keep the bridge gap honest',[
@@ -965,6 +1428,14 @@
       ['Fail closed','Missing Store coverage stays missing.'],
       ['Known wart','Still iframe-hosted.']
     ]),
+    'window-seat-hero':RAILS['ws-hero'],
+    'window-seat-intent':RAILS['ws-intent'],
+    'window-seat-bench':RAILS['ws-bench'],
+    'window-seat-store':RAILS['ws-store'],
+    'window-seat-request':RAILS['ws-request'],
+    'window-seat-yard':RAILS['ws-yard'],
+    'window-seat-record':RAILS['ws-record'],
+    'window-seat-audit':RAILS['ws-audit'],
     'window-seat-live':guide('One job, two views',[
       ['Same rules','Six steps, live Store. No exception.'],
       ['Whole job = audit view','Same state, every step shown.'],

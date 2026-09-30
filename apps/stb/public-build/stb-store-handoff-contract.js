@@ -14,7 +14,6 @@
     startOwn: Object.freeze({projectId:'start-own', artifact:'stb-start-own-bench-leg-0.1.html', projectClass:'USER_DEFINED_BOARD'}),
     outdoor: Object.freeze({projectId:'outdoor-build', artifact:'stb-outdoor-bench-leg-0.1.html', projectClass:'BOUNDED_SOURCE_BACKED'}),
     alcove: Object.freeze({projectId:'alcove', artifact:'system-build-current.html#alcove-capture', projectClass:'ALCOVE_INSERT'}),
-    windowSeat: Object.freeze({projectId:'window-seat', artifact:'stb-window-seat-space-utilization-0.7.4.html', projectClass:'SPACE_UTILIZATION'}),
     sheetS001: Object.freeze({projectId:'sheet-s001', artifact:'system-build-current.html#playhouse-s001', projectClass:'SHEET_ROUTED_OPENING'})
   });
 
@@ -68,17 +67,6 @@
       economicsModel:null,
       economicsStatus:'PROJECT_NATIVE_REFERENCE',
       economicsReason:'Alcove economics are owned by the Alcove implementation. The shared Store handoff contract may carry the identified Alcove answer forward but must not recalculate or replace it.',
-      legacyGeneralRecoverySelected:false
-    }),
-    windowSeat: Object.freeze({
-      projectId:'window-seat',
-      projectClass:'SPACE_UTILIZATION',
-      materialCatalogPin:'4402abeb6b0299a5b6db2eec85ed04c3b0236bcc',
-      capabilityBasis:'D001-BOARD-EDGE-MILL-REF-0.3',
-      capabilityPin:'f88ec61c42446755d00259f88e7fd09f2702fd92',
-      economicsModel:'STB-STORE-ZERO-WINDOW-SEAT-RECOVERY-0.1',
-      economicsPin:'f88ec61c42446755d00259f88e7fd09f2702fd92',
-      economicsStatus:'DECLARED_REFERENCE',
       legacyGeneralRecoverySelected:false
     }),
     sheetS001: Object.freeze({
@@ -892,84 +880,6 @@
     });
   }
 
-  var WINDOW_SEAT_RECOVERY = Object.freeze({
-    id:'STB-STORE-ZERO-WINDOW-SEAT-RECOVERY-0.1',
-    basis:'DECLARED REFERENCE / UNMEASURED',
-    fixedReferenceFulfillment:365.0,
-    cellConsumptionBaseline:60.0,
-    pineBaselineCycleMin:56.159065,
-    hardwareDefault:18.0,
-    components:Object.freeze({
-      materialHandlingFabrication:110.0,
-      inspectLabelBundleStage:75.0,
-      facilityAdminRework:70.0,
-      serviceCommercialReserve:110.0
-    }),
-    species:Object.freeze({
-      pine:Object.freeze({chipClass:'SOFT WOOD',chipLoadIpt:0.00675,feedInPerMin:243,wearFactor:1.00,sizeKey:'1x6p'}),
-      poplar:Object.freeze({chipClass:'HARD WOOD',chipLoadIpt:0.00600,feedInPerMin:216,wearFactor:1.05,sizeKey:'1x6w'}),
-      cherry:Object.freeze({chipClass:'HARD WOOD',chipLoadIpt:0.00600,feedInPerMin:216,wearFactor:1.10,sizeKey:'1x6c'}),
-      oak:Object.freeze({chipClass:'HARD WOOD',chipLoadIpt:0.00600,feedInPerMin:216,wearFactor:1.15,sizeKey:'1x6o'})
-    }),
-    formula:'recovery = 425 × (modeled_cycle_minutes / 56.16) × species_wear_factor'
-  });
-
-  function money2(v){
-    return Math.round(Number(v)*100)/100;
-  }
-
-  function quoteModeledRecovery(input){
-    input = input || {};
-    var speciesKey = String(input.species || 'pine');
-    var prof = WINDOW_SEAT_RECOVERY.species[speciesKey] || WINDOW_SEAT_RECOVERY.species.pine;
-    var sticks = Math.max(0, Number(input.sticks) || 0);
-    var millMinutes = Math.max(0, Number(input.millMinutes) || 0);
-    var material = money2(input.material || 0);
-    var hardware = money2(input.hardware == null ? 0 : input.hardware);
-    var C = D001_CYCLE, R = WINDOW_SEAT_RECOVERY;
-    var otherMinutesRaw = sticks ? (C.jobSetupMin + sticks * (C.loadSeatMin + C.releaseLabelMin + C.cutsPerStick * C.crosscutMin)) : 0;
-    var minutesRaw = sticks ? (otherMinutesRaw + millMinutes) : 0;
-    var cycleFactor = sticks ? minutesRaw / R.pineBaselineCycleMin : 0;
-    var scale = cycleFactor * prof.wearFactor;
-    var cellConsumption = sticks ? money2(R.cellConsumptionBaseline * scale) : 0;
-    var recovery = sticks ? money2((R.fixedReferenceFulfillment + R.cellConsumptionBaseline) * scale) : 0;
-    var breakdown = Object.freeze({
-      materialHandlingFabrication: money2(R.components.materialHandlingFabrication * scale),
-      inspectLabelBundleStage: money2(R.components.inspectLabelBundleStage * scale),
-      facilityAdminRework: money2(R.components.facilityAdminRework * scale),
-      serviceCommercialReserve: money2(R.components.serviceCommercialReserve * scale)
-    });
-    var feed = money2(prof.chipLoadIpt * D001_ENVELOPE.cuttingEdges * D001_ENVELOPE.spindleRpm);
-    return Object.freeze({
-      status:'DECLARED_REFERENCE',
-      complete:sticks>0,
-      material:material,
-      hardware:hardware,
-      recovery:recovery,
-      cellConsumption:cellConsumption,
-      total:money2(material + recovery + hardware),
-      sticks:sticks,
-      millMinutes:money2(millMinutes),
-      otherMinutes:money2(otherMinutesRaw),
-      minutes:money2(minutesRaw),
-      cycleFactor:cycleFactor,
-      profile:Object.freeze({
-        species:speciesKey,
-        chipClass:prof.chipClass,
-        chipLoadIpt:prof.chipLoadIpt,
-        feedInPerMin:feed,
-        wearFactor:prof.wearFactor,
-        cutterDiameterIn:D001_ENVELOPE.cutterDiameterIn,
-        cuttingEdges:D001_ENVELOPE.cuttingEdges,
-        spindleRpm:D001_ENVELOPE.spindleRpm
-      }),
-      recoveryBreakdown:breakdown || R.components,
-      cycle:C,
-      envelope:D001_ENVELOPE,
-      recoveryModel:R,
-      formula:R.formula
-    });
-  }
 
 
 
@@ -1129,8 +1039,6 @@
     d001Hold:D001_HOLD,
     sequenceCrosscuts:sequenceCrosscuts,
     sequenceDefinedWorkpiece:sequenceDefinedWorkpiece,
-    windowSeatRecovery:WINDOW_SEAT_RECOVERY,
-    quoteModeledRecovery:quoteModeledRecovery,
     comparisonDemand:comparisonDemand,
     createComparisonHandoff:createComparisonHandoff,
     storeDemandIdentity:storeDemandIdentity,

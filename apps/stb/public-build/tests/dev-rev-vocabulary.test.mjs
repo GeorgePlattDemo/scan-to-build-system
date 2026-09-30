@@ -71,3 +71,24 @@ test('the shared trail is not given a stale count',()=>{
   for(const r of Object.values(rails)) assert.equal(/Twelve events/.test(text(r)),false);
   assert.ok(rails['alcove-store'].sections.some(s=>s.title==='SHARED 13-STEP TRAIL' && s.items.length===13));
 });
+
+const job4=['hero','intent','bench','store','request','yard','record','audit'].map(k=>rails['ws-'+k]);
+
+test('Job 4 (Window Seat) carries the same flag on every page',()=>{
+  for(const r of job4) assert.ok(r && r.flag.startsWith(FLAG),`flag drifted: ${r && r.header}`);
+  assert.ok(rails['ws-store'].flag.endsWith('Store answers Store questions.'));
+});
+
+test('Window Seat states the knob rule on intent and on the bench',()=>{
+  assert.match(text(rails['ws-intent']),/No universal configurator\./);
+  assert.match(text(rails['ws-intent']),/Every knob is made here\./);
+  assert.match(text(rails['ws-intent']),/Never invent one on the bench\./);
+  assert.match(text(rails['ws-bench']),/Do not rename it configurator\./);
+  assert.match(text(rails['ws-bench']),/The bench turns the knobs made at intent\. It never adds one\./);
+});
+
+test('Window Seat names Store Zero and the budgetary terms the same way',()=>{
+  assert.match(text(rails['ws-store']),/Store Zero is a declared reference lumberyard\./);
+  assert.match(text(rails['ws-store']),/The Store budgetary answer is the whole Store result\./);
+  assert.match(text(rails['ws-store']),/no complete budgetary estimate\./);
+});
