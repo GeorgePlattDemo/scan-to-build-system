@@ -1,3 +1,5 @@
+> **STATUS — HISTORICAL RECONCILIATION PLAN.** The R1–R6 migration sequence below is not an open instruction. System now publishes `apps/stb/public-build/` directly; `scan-to-build-review` is frozen history. This record is preserved to explain how custody was established and how earlier migration decisions were reasoned. Current state: [`CURRENT-SYSTEM-STATE.md`](../project/CURRENT-SYSTEM-STATE.md).
+
 # Current Visible Build Reconciliation 0.1
 
 **Status:** ownership and migration record; no runtime change  
