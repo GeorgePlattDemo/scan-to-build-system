@@ -1295,73 +1295,51 @@
       ]
     }
   };
-  // Job 4 (Outdoor build) rails: one per page of stb-outdoor-picnic-0.2.html, rendered inside that page.
+  // Job 4 (Outdoor build) rails: one per page of stb-outdoor-picnic-0.4.html, rendered inside that page.
   const JOB4={
     "od-plan": {
-      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 1 · YOUR PLAN",
+      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 1 · PICK A PLAN",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
         {
           "title": "CORE RULE",
           "items": [
-            "A plan is a cut list with angles.",
-            "It is not your definition until you choose it.",
-            "The page lays out every part as the plan gives it: what to cut, how long, and at what angle.",
+            "This app turns a defined plan into a runnable job.",
+            "A plan is a cut list with angles: parts, lengths, ends.",
+            "Picking a plan is your intent. This job’s configurator is made from it.",
             "The photos are context. Nobody cuts to a photo.",
             "The plan’s source stays attached."
           ]
         },
         {
-          "title": "TWO ROADS",
+          "title": "WHERE THIS APP STARTS",
           "items": [
-            "Resize it and send it: the plan, at your size, with nothing added.",
-            "Make it yours: your additions, made on page 2.",
-            "Both roads share the bench and the Store.",
-            "Pages 1 and 2 both sit on trail step 1."
+            "It starts at a defined plan.",
+            "Both plans here were read by a person and entered by hand, then checked against the published pages.",
+            "Reading a plan file, or turning an idea into a plan, is design and CAD/CAM work: a mature field, and other tools’ job.",
+            "Hand this app a defined plan, and the job starts here."
           ]
         },
         {
-          "title": "WHAT RESIZING CHANGES",
+          "title": "THE FROM PRICE",
           "items": [
-            "Only the slats follow the table length.",
-            "Every other part and every angle stays as the plan gives it.",
-            "Sizes stay inside the plan rule: 60 to 216 in, to the inch.",
-            "The A-frame’s 25° legs and cross supports never change."
-          ]
-        },
-        {
-          "title": "THE PLAN’S KNOBS",
-          "items": [
-            "Table length: from the plan, sized to the rule.",
-            "Wood: by hand. The plans name none; this project starts you on one.",
-            "Hardware pack: by hand. The Store picks the item and the number of boxes."
-          ]
-        },
-        {
-          "title": "PRICES",
-          "items": [
-            "Every price is a live Store answer. None is cached.",
-            "Option prices add up the Store’s own line prices for each choice.",
-            "Change anything, and the old answer is marked changed and the Store is asked again.",
-            "Your call only ever uses the Store’s exact answer."
+            "A live Store answer for the plan as published: 6 ft, the cheapest wood the Store has, your own hardware.",
+            "Not cached. If the Store cannot answer, the card says so."
           ]
         },
         {
           "title": "ENFORCED",
           "items": [
-            "The plan road sends only the plan: plan lengths, slats at table length, plan angles, no holes. Test: outdoor-picnic.test.mjs.",
-            "The 25° never changes. Tests: outdoor-picnic.test.mjs, outdoor-picnic-rule-sync.test.mjs.",
-            "Sizes stay inside the plan rule. Tests: outdoor-picnic-rule-sync.test.mjs, outdoor-picnic.test.mjs.",
-            "The photos are named as photos, not drawings. Tests: outdoor-picnic-rule-sync.test.mjs, outdoor-picnic.test.mjs."
+            "Two plan cards, photos named as photos, each From price answered by the Store. Test: outdoor-picnic.test.mjs.",
+            "The page’s plan values equal picnic-rule.mjs. Test: outdoor-picnic-rule-sync.test.mjs."
           ]
         },
         {
           "title": "CURRENT GAP",
           "items": [
-            "Wood defaults and the benches plan’s hardware counts are this project’s reading, not the plans’.",
             "The A-frame plan’s source is not yet in the rule book’s authority register.",
-            "The page carries the plan rule’s values. A test keeps them identical to picnic-rule.mjs."
+            "Wood defaults and the benches plan’s hardware counts are this project’s reading, not the plans’."
           ]
         },
         {
@@ -1377,208 +1355,52 @@
         }
       ]
     },
-    "od-yours": {
-      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 2 · MAKE IT YOURS",
-      "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
-      "sections": [
-        {
-          "title": "CORE RULE",
-          "items": [
-            "A plan tells you what to cut and at what angle.",
-            "Anything beyond that is your addition.",
-            "Additions are made here. Each becomes a setting for this job.",
-            "The bench only turns them. It never adds one.",
-            "The Store says whether each can be done.",
-            "No universal configurator."
-          ]
-        },
-        {
-          "title": "ADDITIONS",
-          "items": [
-            "A decorative angle on the slat ends. Needs the angle. One angle, both ends, every slat: the Store cuts a package at one angle.",
-            "Holes for hardware, where you say. Needs the distance from each end, the place across the board, and whether one goes in the middle.",
-            "Each hole is marked with a 3/16 in spot. You drill.",
-            "An addition brings its facts empty. The Store is not asked until they are set."
-          ]
-        },
-        {
-          "title": "WHAT THE PLAN LEAVES TO YOU",
-          "items": [
-            "Finish · hardware suitability · hole size and depth · how it goes together.",
-            "Named here. Not built. Not evaluated."
-          ]
-        },
-        {
-          "title": "WHY HOLES ARE YOURS",
-          "items": [
-            "No published plan gives hole locations. They say to pre-drill, with no measurements.",
-            "Holes are never labelled as the plan’s."
-          ]
-        },
-        {
-          "title": "THE STORE DECIDES",
-          "items": [
-            "The Store’s reference cell declares which angles it cuts. The page holds no copy of that limit.",
-            "An angle the Store can’t cut comes back refused, with its reason."
-          ]
-        },
-        {
-          "title": "ENFORCED",
-          "items": [
-            "Additions exist only on this page. The bench has none. Test: outdoor-picnic.test.mjs.",
-            "An addition’s facts start empty, and the Store waits for them. Test: outdoor-picnic.test.mjs.",
-            "No angle limit, item number, price or stock in the page. No automatic holes. Tests: outdoor-picnic-rule-sync.test.mjs, bounded-project-conformance.test.mjs."
-          ]
-        },
-        {
-          "title": "CHECKED BY HAND",
-          "items": [
-            "Against the pinned Store: 30° supported; 50° refused (MITER_ANGLE_OUTSIDE_D001_STAGE2_ENVELOPE)."
-          ]
-        },
-        {
-          "title": "CURRENT GAP",
-          "items": [
-            "No per-end angle. No compound angle; the Store declares none.",
-            "Whether the angle is measured to the long point or the short point is not defined. The Store answers the number it is sent.",
-            "Hole diameter and depth are not defined."
-          ]
-        },
-        {
-          "title": "PLUMBING",
-          "items": [
-            "Preserve the working artifact.",
-            "Parent routes. Child owns the bounded definition."
-          ],
-          "quiet": true
-        }
-      ]
-    },
     "od-bench": {
-      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 3 · THE BENCH",
-      "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
-      "sections": [
-        {
-          "title": "CORE RULE",
-          "items": [
-            "This page is always the bench. Do not rename it configurator.",
-            "The bench turns the settings made on pages 1 and 2, for the road you took. It never adds one.",
-            "A missing setting sends you to page 2.",
-            "The bench defines the job. It does not answer Store questions."
-          ]
-        },
-        {
-          "title": "BENCH RECEIVES",
-          "items": [
-            "The chosen plan · the road taken · table length · wood · hardware pack · any additions from page 2."
-          ]
-        },
-        {
-          "title": "BENCH PRODUCES",
-          "items": [
-            "One identified definition · every part at its length and angle · spots where you asked · hardware requirements · what will be asked of the Store."
-          ]
-        },
-        {
-          "title": "THE ROAD DECIDES WHAT TRAVELS",
-          "items": [
-            "On the plan road, additions made earlier are not sent. Only the plan travels.",
-            "On the make-it-yours road, your additions travel with the plan."
-          ]
-        },
-        {
-          "title": "ANGLES",
-          "items": [
-            "The plan’s 25° is sent as a number.",
-            "The plan’s own words, “ends parallel, long point to short point”, travel in the job’s record."
-          ]
-        },
-        {
-          "title": "CHANGE RULE",
-          "items": [
-            "Every change is a new version.",
-            "An accepted version cannot authorize a changed one.",
-            "Never attach an old answer to changed work."
-          ]
-        },
-        {
-          "title": "ENFORCED",
-          "items": [
-            "The plan road sends only the plan, again after returning from page 2. Test: outdoor-picnic.test.mjs.",
-            "The bench shows exactly the road’s settings and has no control that adds one. Test: outdoor-picnic.test.mjs.",
-            "Every change is a new version. Tests: outdoor-picnic.test.mjs, trail-stale-version.test.mjs."
-          ]
-        },
-        {
-          "title": "PLUMBING",
-          "items": [
-            "Preserve the working artifact.",
-            "Don’t squeeze it. Guide uses the rail. Iframe keeps its width.",
-            "Mind the seam. Parent routes. Child owns the bounded definition.",
-            "postMessage is a contract. Origin, schema, correlation.",
-            "Known wart. Two DOMs, focus and history seams, browser-held state."
-          ],
-          "quiet": true
-        }
-      ]
-    },
-    "od-store": {
-      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 4 · STORE ANSWER",
+      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 2 · THE BENCH",
       "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
       "bullets": [],
       "sections": [
         {
           "title": "CORE RULE",
           "items": [
-            "One fresh Store answer to this exact version.",
-            "Viewing it creates no event.",
-            "Store answers the job. Store does not redefine the job.",
-            "Store owns capability, time, economics, and retained-control truth."
+            "This page is always the bench. Do not rename it configurator.",
+            "The plan as published: resize it, pick the wood and hardware, get the Store’s price.",
+            "The bench turns the knobs made from the plan. It never adds one.",
+            "Nothing is added to the plan here: no holes, no extra cuts."
           ]
         },
         {
-          "title": "REFERENCE STATUS",
+          "title": "THE CONFIGURATOR FOR THIS JOB",
           "items": [
-            "Store Zero is a declared reference lumberyard.",
-            "Not live inventory. Not a dealer commitment. Not a quote."
+            "Made from the plan you pick. No universal configurator.",
+            "Every plan gets: size · wood · hardware pack · spot holes for each kind of board · a decorative cut for each kind of square-cut board.",
+            "Boards with the plan’s own angle get no decorative-cut knob. The plan’s angles are the plan’s.",
+            "This page turns size, wood and hardware. The rest are turned after “Take it to the bench to do more work”."
           ]
         },
         {
-          "title": "FOUR STORE OUTCOMES",
+          "title": "WHAT RESIZING CHANGES",
           "items": [
-            "SUPPORTABLE · UNRESOLVED · REFUSED · UNAVAILABLE.",
-            "Every non-supportable answer carries reasons.",
-            "Past the envelope, the Store refuses. Steps 4–6 stay inert.",
-            "A failed ask stays failed, with nothing in its place."
+            "Only the slats follow the table length.",
+            "Every other part and every angle stays as the plan gives it.",
+            "60 to 216 in, to the inch, inside the plan rule.",
+            "The A-frame’s 25° legs and cross supports never change."
           ]
         },
         {
-          "title": "HARDWARE",
+          "title": "THE STORE ANSWERS ON THIS PAGE",
           "items": [
-            "Hardware travels as requirements: kind, size, finish, count.",
-            "The Store picks the item and the number of boxes, or refuses.",
-            "Bring your own sends none."
+            "Trail step 3 lives here: the Store’s live total for this exact version.",
+            "Every price is a live Store answer. None is cached.",
+            "Change anything, and the Store is asked again.",
+            "Hardware travels as requirements. The Store picks the item and the number of boxes. Bring your own sends none."
           ]
         },
         {
-          "title": "NO LOCAL STORE REPLICA",
+          "title": "THE STORE",
           "items": [
-            "No item number, price, stock, capability or angle limit in the page.",
-            "Ask the Store."
-          ]
-        },
-        {
-          "title": "FIRST THREE IDENTITIES",
-          "items": [
-            "SENT · ARRIVED · ANSWERED.",
-            "Three events, three hashes. Do not collapse them."
-          ]
-        },
-        {
-          "title": "COMPLETE PRICE RULE",
-          "items": [
+            "Store owns capability, time, economics, and retained-control truth.",
+            "Store Zero is a declared reference lumberyard. Not live inventory. Not a dealer commitment. Not a quote.",
             "The Store budgetary answer is the whole Store result.",
             "The complete budgetary estimate is the number inside it, only when every line is supportable.",
             "Missing required component → no complete budgetary estimate."
@@ -1587,30 +1409,125 @@
         {
           "title": "ENFORCED",
           "items": [
-            "A fresh live answer; past the envelope, refused, with steps 4–6 inert (216 in). Test: trail-terms.test.mjs.",
-            "Hardware as requirements; bring your own sends none. Tests: outdoor-picnic.test.mjs, cut-package-item-lines.test.mjs.",
-            "The Store Zero text is the shared file, never a copy. Test: bounded-project-conformance.test.mjs."
+            "This page adds no work: no holes, no extra cuts. Only the plan is sent. Test: outdoor-picnic.test.mjs.",
+            "The 25° never changes, and no other part is angled. Test: outdoor-picnic-rule-sync.test.mjs.",
+            "Sizes stay inside the plan rule, to the inch. Tests: outdoor-picnic-rule-sync.test.mjs, outdoor-picnic.test.mjs.",
+            "No Store item numbers, prices, stock or angle limit in the page; no automatic holes. Test: outdoor-picnic-rule-sync.test.mjs.",
+            "Every change is a new exact request with a new version. Tests: outdoor-picnic.test.mjs, trail-stale-version.test.mjs.",
+            "Past the envelope, the Store refuses and steps 4–6 stay inert (216 in). Test: trail-terms.test.mjs."
           ]
         },
         {
-          "title": "ENFORCED BY CODE ONLY",
+          "title": "PLUMBING",
           "items": [
-            "A complete budgetary estimate shows only when every line is supportable.",
-            "Every Store reason for a refused line is shown."
+            "Preserve the working artifact.",
+            "Guide text comes from the shared guide file. One guide, not two.",
+            "Parent routes. Child owns the bounded definition.",
+            "postMessage is a contract. Origin, schema, correlation.",
+            "Known wart. Two DOMs, focus and history seams, browser-held state."
+          ],
+          "quiet": true
+        }
+      ]
+    },
+    "od-edge": {
+      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 3 · THE EDGE OF THE ENVELOPE",
+      "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "Say where the app stops.",
+            "The same bench, for more work: holes and decorative cuts.",
+            "The knobs here were made from the plan, one per kind of board. The bench turns them on. It never adds one.",
+            "Each thing tried gets one answer: the Store can do it · waiting on a detail from you · past the edge.",
+            "Past the edge is a result, not an error. It comes with the Store’s reason, and who could move the edge.",
+            "“← Back to the plan as is” drops the work. The Store answers the plan again, the same version as before.",
+            "“Send it with this work” opens only when everything tried is inside the edge."
+          ]
+        },
+        {
+          "title": "THE TWO CLEAR UNCERTAINTIES",
+          "items": [
+            "Hole locations. No plan here publishes them. Any spot is yours, never the plan’s.",
+            "Decorative cuts. The Store decides which angles its cell cuts. The page holds no copy of that limit."
+          ]
+        },
+        {
+          "title": "INFORMATION TRAVELS BEFORE ATOMS",
+          "items": [
+            "What is missing at the edge is missing information.",
+            "Add it upstream, and the edge moves: a plan that publishes hole centers, a machine that declares a cut.",
+            "This app does not design. It takes defined intent and makes it a runnable job."
+          ]
+        },
+        {
+          "title": "THE EDGE TODAY, AND WHO COULD MOVE IT",
+          "items": [
+            "Getting to a defined plan: design and CAD/CAM tools, and plan publishers.",
+            "Hole locations: the plan’s author.",
+            "Hole size and depth: the plan or the hardware maker.",
+            "A different angle on each end, compound cuts, clipped corners: the Store and its machine.",
+            "Angles past the envelope: the Store.",
+            "Strength and engineering: a qualified person.",
+            "Hardware suitability: the hardware maker, for the wood and weather."
+          ]
+        },
+        {
+          "title": "THE STORE",
+          "items": [
+            "Store owns capability, time, economics, and retained-control truth.",
+            "Store Zero is a declared reference lumberyard. Not live inventory. Not a dealer commitment. Not a quote.",
+            "The Store budgetary answer is the whole Store result.",
+            "The complete budgetary estimate is the number inside it, only when every line is supportable.",
+            "Missing required component → no complete budgetary estimate."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "The page shows exactly the knobs made from the plan; no decorative cut on the plan’s 25° boards. Test: outdoor-picnic.test.mjs.",
+            "No hole is drawn or sent until you place it. Test: outdoor-picnic.test.mjs.",
+            "Back to the plan as is: the work is dropped and the same plan is asked again. Test: outdoor-picnic.test.mjs.",
+            "The edge list and “Information travels before atoms” are on the page. Test: outdoor-picnic.test.mjs."
+          ]
+        },
+        {
+          "title": "CHECKED BY HAND",
+          "items": [
+            "Against the pinned Store: spot holes and a 45° cut on the under-seat supports go through.",
+            "A 50° cut on 85 in tabletop boards is refused, with three Store reasons: MITER_ANGLE_OUTSIDE_D001_STAGE2_ENVELOPE, ANGLED_PART_LEAVES_LESS_THAN_CONTROL_LENGTH, PART_NOT_HALF_INCH_UNDER_BOARD."
+          ]
+        },
+        {
+          "title": "CURRENT GAP",
+          "items": [
+            "One angle per set of boards, both ends, one plane.",
+            "Whether an angle is measured to the long point or the short point is not defined. The Store answers the number it is sent.",
+            "Hole diameter and depth are not defined. A spot marks where; you drill."
           ]
         },
         {
           "title": "AUTHORITY LINKS",
           "items": [
             "Store Zero: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/README.md",
-            "Travel standard: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md",
             "D-001 envelope, file 0.1, version string D001-STAGE2-ENVELOPE-0.3: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/D-001-STAGE2-ENVELOPE-0.1.md"
           ]
+        },
+        {
+          "title": "PLUMBING",
+          "items": [
+            "Preserve the working artifact.",
+            "Guide text comes from the shared guide file. One guide, not two.",
+            "Parent routes. Child owns the bounded definition."
+          ],
+          "quiet": true
         }
       ]
     },
     "od-call": {
-      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 5 · YOUR CALL",
+      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 4 · YOUR CALL",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
@@ -1646,7 +1563,7 @@
       ]
     },
     "od-yard": {
-      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 6 · WE CUT IT",
+      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 5 · WE CUT IT",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
@@ -1669,7 +1586,7 @@
       ]
     },
     "od-record": {
-      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 7 · PICK UP & BUILD",
+      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 6 · PICK UP & BUILD",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
@@ -1715,9 +1632,8 @@
     'ws-record':asRail(JOB3['ws-record']),
     'ws-audit':asRail(JOB3['ws-audit']),
     'od-plan':asRail(JOB4['od-plan']),
-    'od-yours':asRail(JOB4['od-yours']),
     'od-bench':asRail(JOB4['od-bench']),
-    'od-store':asRail(JOB4['od-store']),
+    'od-edge':asRail(JOB4['od-edge']),
     'od-call':asRail(JOB4['od-call']),
     'od-yard':asRail(JOB4['od-yard']),
     'od-record':asRail(JOB4['od-record'])
@@ -1821,9 +1737,8 @@
     ]),
     'start-own-live':RAILS['job1-bench'],
     'outdoor-plan':RAILS['od-plan'],
-    'outdoor-yours':RAILS['od-yours'],
     'outdoor-bench':RAILS['od-bench'],
-    'outdoor-store':RAILS['od-store'],
+    'outdoor-edge':RAILS['od-edge'],
     'outdoor-call':RAILS['od-call'],
     'outdoor-yard':RAILS['od-yard'],
     'outdoor-record':RAILS['od-record'],

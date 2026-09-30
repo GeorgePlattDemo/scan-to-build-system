@@ -93,24 +93,28 @@ test('Window Seat names Store Zero and the budgetary terms the same way',()=>{
   assert.match(text(rails['ws-store']),/no complete budgetary estimate\./);
 });
 
-const outdoor=['plan','yours','bench','store','call','yard','record'].map(k=>rails['od-'+k]);
+const outdoor=['plan','bench','edge','call','yard','record'].map(k=>rails['od-'+k]);
 
 test('Job 4 (Outdoor build) carries the same flag on every page',()=>{
   for(const r of outdoor) assert.ok(r && r.flag.startsWith(FLAG),`flag drifted: ${r && r.header}`);
-  assert.ok(rails['od-store'].flag.endsWith('Store answers Store questions.'));
+  assert.ok(rails['od-bench'].flag.endsWith('Store answers Store questions.'));
+  assert.ok(rails['od-edge'].flag.endsWith('Store answers Store questions.'));
 });
 
-test('Outdoor states the plan rule and the knob rule',()=>{
-  assert.match(text(rails['od-plan']),/A plan is a cut list with angles\./);
-  assert.match(text(rails['od-plan']),/Every price is a live Store answer\. None is cached\./);
-  assert.match(text(rails['od-yours']),/Anything beyond that is your addition\./);
-  assert.match(text(rails['od-yours']),/No universal configurator\./);
+test('Outdoor states where the app starts, the knob rule, and where it stops',()=>{
+  assert.match(text(rails['od-plan']),/This app turns a defined plan into a runnable job\./);
+  assert.match(text(rails['od-plan']),/design and CAD\/CAM work/);
   assert.match(text(rails['od-bench']),/Do not rename it configurator\./);
   assert.match(text(rails['od-bench']),/It never adds one\./);
+  assert.match(text(rails['od-bench']),/Every price is a live Store answer\. None is cached\./);
+  assert.match(text(rails['od-edge']),/Say where the app stops\./);
+  assert.match(text(rails['od-edge']),/Past the edge is a result, not an error\./);
 });
 
 test('Outdoor names Store Zero and the budgetary terms the same way',()=>{
-  assert.match(text(rails['od-store']),/Store Zero is a declared reference lumberyard\./);
-  assert.match(text(rails['od-store']),/The Store budgetary answer is the whole Store result\./);
-  assert.match(text(rails['od-store']),/no complete budgetary estimate\./);
+  for(const k of ['od-bench','od-edge']){
+    assert.match(text(rails[k]),/Store Zero is a declared reference lumberyard\./);
+    assert.match(text(rails[k]),/The Store budgetary answer is the whole Store result\./);
+    assert.match(text(rails[k]),/no complete budgetary estimate\./);
+  }
 });

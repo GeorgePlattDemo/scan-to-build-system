@@ -574,6 +574,34 @@
       "blobSha": "b059245a2e2782e39fb69d628b962d6c85553a99",
       "bytes": 229574,
       "reason": "Cache-buster for Outdoor 0.2: the two roads sit right under the plan cards, the bench shows the photo of the chosen table, and \"Make it yours\" on the bench is a button."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-0.4",
+      "blobSha": "cf35d042db42e91c6c1e46a502e48de829a7b6af",
+      "bytes": 229574,
+      "reason": "Outdoor 0.4 goes live: the outdoor-build-live iframe loads stb-outdoor-picnic-0.4.html. Screen 1 is the two plan cards with a 'From' price; screen 2 is the plan as published (grow or shrink to the inch, wood, hardware pack, the Store's live total, Confirm & send). The pill 'Take it to the bench to do more work' opens the edge of the envelope: spot holes and decorative cuts per board, the Store's answer for each, who upstream could move the edge, and 'Back to the plan as is'. 0.2 stays in the repo until the owner retires it. Cache-buster for the new page."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "outdoor-0.4-full-pass",
+      "blobSha": "82cbeba843640ee4dbcdc67061f193c9f96a944c",
+      "bytes": 78070,
+      "reason": "Outdoor 0.4 full pass: Job 4 Dev/Rev rails for the six pages of stb-outdoor-picnic-0.4.html (pick a plan, the bench, the edge of the envelope, your call, we cut it, pick up), replacing the 0.2 set."
+    },
+    {
+      "path": "stb-store-handoff-contract.js",
+      "pass": "outdoor-0.4-full-pass",
+      "blobSha": "2b87ea1bef893282005b11c5c7803f15ee041cd0",
+      "bytes": 47598,
+      "reason": "Outdoor 0.4 full pass: CURRENT_ARTIFACTS.outdoor names stb-outdoor-picnic-0.4.html."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-0.4-full-pass",
+      "blobSha": "640daa8a939a3dd9bb549d3714db299577e5fd40",
+      "bytes": 229574,
+      "reason": "Outdoor 0.4 full pass: the unused comparison handoff names stb-outdoor-picnic-0.4.html; cache-busters for the guide, the Store handoff contract, Window Seat 0.9 and Outdoor 0.4."
     }
   ],
   "retiredFiles": [
@@ -622,6 +650,14 @@
       "pass": "outdoor-0.2-full-pass",
       "reason": "No tile or page opens it; the two places that still named it now name Outdoor 0.2. Its bytes remain at the recorded Review source blob.",
       "replacedBy": "stb-outdoor-picnic-0.2.html"
+    },
+    {
+      "path": "stb-outdoor-picnic-0.2.html",
+      "blobSha": "1e05b41db29d109520c5ddcb77ea8e38372f4d14",
+      "bytes": 71734,
+      "pass": "outdoor-0.4-full-pass",
+      "replacedBy": "stb-outdoor-picnic-0.4.html",
+      "reason": "Outdoor 0.4 is live: the plan as published on the bench, then \"take it to the bench to do more work\" to the edge of the envelope, and back. 0.2 is retired, not edited; its bytes remain in git history at this blob."
     }
   ]
 }
