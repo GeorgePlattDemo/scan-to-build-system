@@ -74,7 +74,7 @@ test('the shared trail is not given a stale count',()=>{
 
 const job4=['hero','intent','bench','store','request','yard','record','audit'].map(k=>rails['ws-'+k]);
 
-test('Job 4 (Window Seat) carries the same flag on every page',()=>{
+test('Job 3 (Window Seat) carries the same flag on every page',()=>{
   for(const r of job4) assert.ok(r && r.flag.startsWith(FLAG),`flag drifted: ${r && r.header}`);
   assert.ok(rails['ws-store'].flag.endsWith('Store answers Store questions.'));
 });

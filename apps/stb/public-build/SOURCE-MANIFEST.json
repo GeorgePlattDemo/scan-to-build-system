@@ -516,6 +516,20 @@
       "blobSha": "6e5c0b73b4737312d6c7446e3472d8944e2ecf1d",
       "bytes": 229391,
       "reason": "Window Seat full pass: cache-busters for the guide, the Store handoff contract, the front door and Window Seat 0.9."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "tile-order-window-seat-3",
+      "blobSha": "74d6e545234fd5335eeaad98fbb943702231ab0a",
+      "bytes": 229391,
+      "reason": "Tile order: Window Seat is Job 3 (TEST 03 · DEFINE THE ASSEMBLY), Outdoor is Job 4 (TEST 04 · FROM A BOUNDED PROJECT). Cache-busters for the guide and Window Seat 0.9."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "tile-order-window-seat-3",
+      "blobSha": "e58617e19f52993c117f515422d2e79db8ee0d0e",
+      "bytes": 65125,
+      "reason": "Tile order: Window Seat rails are headed JOB 3; the Library note reads Board · fit · assembly · plan · sheet."
     }
   ],
   "retiredFiles": [

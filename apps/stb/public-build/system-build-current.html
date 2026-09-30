@@ -19,7 +19,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-user-defined-board-runtime-bridge.js?v=f77a49e9"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=b6638c18"></script>
+<script src="stb-build-guide-spec.js?v=a852467d"></script>
 <script>
 (() => {
   const shell = document.getElementById('stb-current');
@@ -123,7 +123,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
       const ribbon = home.querySelector(':scope > .split > .ribbon');
       if (ribbon) {
-        ['start-own','alcove-capture','picnic-chooser','window-intake','window-parts'].forEach(id => {
+        ['start-own','alcove-capture','window-intake','picnic-chooser','window-parts'].forEach(id => {
           const tile = ribbon.querySelector(`.tile[data-go="${id}"]`);
           if (tile) ribbon.append(tile);
         });
@@ -131,8 +131,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         const proofLabels = Object.freeze([
           ['start-own','TEST 01 · FROM A BOARD'],
           ['alcove-capture','TEST 02 · FIT THE SPACE'],
-          ['picnic-chooser','TEST 03 · FROM A BOUNDED PROJECT'],
-          ['window-intake','TEST 04 · DEFINE THE ASSEMBLY'],
+          ['window-intake','TEST 03 · DEFINE THE ASSEMBLY'],
+          ['picnic-chooser','TEST 04 · FROM A BOUNDED PROJECT'],
           ['window-parts','TEST 05 · CHANGE THE MATERIAL STREAM']
         ]);
         proofLabels.forEach(([id,label]) => {
@@ -1232,7 +1232,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="window-seat-frame"
                   class="window-seat-shell-frame"
                   title="Space utilization · Window seat"
-                  src="stb-window-seat-0.9.html?v=80c38edf"
+                  src="stb-window-seat-0.9.html?v=88e6981d"
                 ></iframe>
               </div>
             `;
