@@ -1072,7 +1072,7 @@
           "title": "CURRENT GAP",
           "items": [
             "A bench click that changes nothing still re-asks the Store. The fix belongs in the shared terms flow.",
-            "Wood screws stay on the job, not sent. System’s wire accepts hardware only by Store item number."
+            "Wood screws travel as a requirement when that knob is on. Store picks its own item or refuses. Incomplete gauge, length, finish, or count blocks the ask. #8 may be refused if it is not stocked."
           ]
         },
         {

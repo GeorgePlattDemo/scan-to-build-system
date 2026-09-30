@@ -195,7 +195,7 @@
       "pass": "job1-bench-higher",
       "blobSha": "24eb5514b0026e64e253e4a1ad75d71f5fa00da1",
       "bytes": 90066,
-      "reason": "Job 1 bench: the one choice sits right under the picture as \"Want it a little higher?\" with two big buttons (16 in as drawn, 18 in a little higher) plus an exact-length box; a callout on the board says when the Store moves to a longer 2×4 and why; a plain price line; friendly Cut it / Drill it / Keep the stub steps."
+      "reason": "Job 1 bench: the one choice sits right under the picture as \"Want it a little higher?\" with two big buttons (16 in as drawn, 18 in a little higher) plus an exact-length box; a callout on the board says when the Store moves to a longer 2\u00d74 and why; a plain price line; friendly Cut it / Drill it / Keep the stub steps."
     },
     {
       "path": "system-build-current.html",
@@ -237,7 +237,7 @@
       "pass": "job1-bench-higher",
       "blobSha": "149f66fcfb40e0f0159b4fc7e9f828fb5b6ae29c",
       "bytes": 222431,
-      "reason": "The top nav's \"2 · The bench\" opens Job 1's bench at the top (X-brace picture, board, then the choice) instead of jumping down to the confirm block."
+      "reason": "The top nav's \"2 \u00b7 The bench\" opens Job 1's bench at the top (X-brace picture, board, then the choice) instead of jumping down to the confirm block."
     },
     {
       "path": "system-build-base-8d8a9dd.html",
@@ -286,7 +286,7 @@
       "pass": "shared-home-copy",
       "blobSha": "b5915e13e3e81cdbdaae1a909f9f232b21f5d560",
       "bytes": 15672,
-      "reason": "Shared Home Dev Guide as terse dev notes: Don’t overcrowd first, tiles = tests, same six steps, known gaps named (read-only copy on Playhouse only; demo accounts), \"Build configurators as needed\" last."
+      "reason": "Shared Home Dev Guide as terse dev notes: Don\u2019t overcrowd first, tiles = tests, same six steps, known gaps named (read-only copy on Playhouse only; demo accounts), \"Build configurators as needed\" last."
     },
     {
       "path": "system-build-current.html",
@@ -468,7 +468,7 @@
       "pass": "job2-alcove-dev-rev-guide",
       "blobSha": "0258ea654c06b7cea11de9315d47986d627de979",
       "bytes": 229196,
-      "reason": "Alcove is Job 2: its tile moves second on the Shared Home and is labelled TEST 02 · FIT THE SPACE (Outdoor becomes TEST 03). Cache-buster for the updated guide."
+      "reason": "Alcove is Job 2: its tile moves second on the Shared Home and is labelled TEST 02 \u00b7 FIT THE SPACE (Outdoor becomes TEST 03). Cache-buster for the updated guide."
     },
     {
       "path": "system-build-current.html",
@@ -517,14 +517,14 @@
       "pass": "tile-order-window-seat-3",
       "blobSha": "74d6e545234fd5335eeaad98fbb943702231ab0a",
       "bytes": 229391,
-      "reason": "Tile order: Window Seat is Job 3 (TEST 03 · DEFINE THE ASSEMBLY), Outdoor is Job 4 (TEST 04 · FROM A BOUNDED PROJECT). Cache-busters for the guide and Window Seat 0.9."
+      "reason": "Tile order: Window Seat is Job 3 (TEST 03 \u00b7 DEFINE THE ASSEMBLY), Outdoor is Job 4 (TEST 04 \u00b7 FROM A BOUNDED PROJECT). Cache-busters for the guide and Window Seat 0.9."
     },
     {
       "path": "stb-build-guide-spec.js",
       "pass": "tile-order-window-seat-3",
       "blobSha": "e58617e19f52993c117f515422d2e79db8ee0d0e",
       "bytes": 65125,
-      "reason": "Tile order: Window Seat rails are headed JOB 3; the Library note reads Board · fit · assembly · plan · sheet."
+      "reason": "Tile order: Window Seat rails are headed JOB 3; the Library note reads Board \u00b7 fit \u00b7 assembly \u00b7 plan \u00b7 sheet."
     },
     {
       "path": "system-build-current.html",
@@ -630,6 +630,13 @@
       "blobSha": "8c2a6ae10bdb00f0b603110f6d92fcb85c59630a",
       "bytes": 229574,
       "reason": "Playhouse rails: cache-busters for the guide, Window Seat 0.9 and Outdoor 0.4."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "window-seat-hardware-sent",
+      "blobSha": "d5874157845c754f1b70ca8cfcb2f9bd4c647dfa",
+      "bytes": 90531,
+      "reason": "Window Seat screws travel as a Store requirement when that knob is on. Incomplete screw facts block the ask. #8 stays selectable; Store owns stock refusal."
     }
   ],
   "retiredFiles": [
