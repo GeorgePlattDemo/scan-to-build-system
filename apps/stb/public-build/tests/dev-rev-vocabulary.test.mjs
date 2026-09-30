@@ -118,3 +118,18 @@ test('Outdoor names Store Zero and the budgetary terms the same way',()=>{
     assert.match(text(rails[k]),/no complete budgetary estimate\./);
   }
 });
+
+const playhouse=['idea','bench','store','review','call','yard','terms','recap','record'].map(k=>rails['ph-'+k]);
+
+test('Job 5 (Playhouse) carries the same flag on every page',()=>{
+  for(const r of playhouse) assert.ok(r && r.flag.startsWith(FLAG),`flag drifted: ${r && r.header}`);
+  assert.ok(rails['ph-store'].flag.endsWith('Store answers Store questions.'));
+});
+
+test('Playhouse states the knob rule and names the Store the same way',()=>{
+  assert.match(text(rails['ph-bench']),/Do not rename it configurator\./);
+  assert.match(text(rails['ph-bench']),/It never adds one\./);
+  assert.match(text(rails['ph-store']),/Store Zero is a declared reference lumberyard\./);
+  assert.match(text(rails['ph-store']),/The Store budgetary answer is the whole Store result\./);
+  assert.match(text(rails['ph-store']),/no complete budgetary estimate\./);
+});
