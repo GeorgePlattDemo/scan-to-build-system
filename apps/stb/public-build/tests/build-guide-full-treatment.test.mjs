@@ -27,7 +27,6 @@ test('Dev Guide covers current pages and only rewrites the reserved rail',()=>{
     'start-own-live','outdoor-build-live','window-seat-live',
     'proof-store','proof-accept','proof-yard','proof-terms','proof-record',
     'playhouse-s001','playhouse-machine','playhouse-store','playhouse-review','playhouse-request','playhouse-yard','playhouse-terms','playhouse-result','playhouse-record',
-    'picnic-store','picnic-request','picnic-yard','picnic-terms','picnic-recap','picnic-record',
     'alcove-store-order-surface','alcove-store-service-choices','alcove-store-yard-answer','alcove-store-commercial-sequence','alcove-store-returned-offer'
   ];
 

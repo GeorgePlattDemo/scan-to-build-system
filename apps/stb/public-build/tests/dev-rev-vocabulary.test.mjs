@@ -92,3 +92,25 @@ test('Window Seat names Store Zero and the budgetary terms the same way',()=>{
   assert.match(text(rails['ws-store']),/The Store budgetary answer is the whole Store result\./);
   assert.match(text(rails['ws-store']),/no complete budgetary estimate\./);
 });
+
+const outdoor=['plan','yours','bench','store','call','yard','record'].map(k=>rails['od-'+k]);
+
+test('Job 4 (Outdoor build) carries the same flag on every page',()=>{
+  for(const r of outdoor) assert.ok(r && r.flag.startsWith(FLAG),`flag drifted: ${r && r.header}`);
+  assert.ok(rails['od-store'].flag.endsWith('Store answers Store questions.'));
+});
+
+test('Outdoor states the plan rule and the knob rule',()=>{
+  assert.match(text(rails['od-plan']),/A plan is a cut list with angles\./);
+  assert.match(text(rails['od-plan']),/Every price is a live Store answer\. None is cached\./);
+  assert.match(text(rails['od-yours']),/Anything beyond that is your addition\./);
+  assert.match(text(rails['od-yours']),/No universal configurator\./);
+  assert.match(text(rails['od-bench']),/Do not rename it configurator\./);
+  assert.match(text(rails['od-bench']),/It never adds one\./);
+});
+
+test('Outdoor names Store Zero and the budgetary terms the same way',()=>{
+  assert.match(text(rails['od-store']),/Store Zero is a declared reference lumberyard\./);
+  assert.match(text(rails['od-store']),/The Store budgetary answer is the whole Store result\./);
+  assert.match(text(rails['od-store']),/no complete budgetary estimate\./);
+});

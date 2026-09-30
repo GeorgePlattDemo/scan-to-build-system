@@ -11,15 +11,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=ae521171"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=655ccb39"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
-<script src="stb-store-handoff-contract.js?v=b2a2f3b4"></script>
+<script src="stb-store-handoff-contract.js?v=1f5642b4"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
 <script src="stb-store-client.js?v=7eb5ab65"></script>
 <script src="stb-user-defined-board-runtime-bridge.js?v=f77a49e9"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=a852467d"></script>
+<script src="stb-build-guide-spec.js?v=c62a8ef2"></script>
 <script>
 (() => {
   const shell = document.getElementById('stb-current');
@@ -1202,7 +1202,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.2.html?v=4d09c27d"
+                  src="stb-outdoor-picnic-0.2.html?v=841463eb"
                 ></iframe>
               </div>
             `;
@@ -1234,7 +1234,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="window-seat-frame"
                   class="window-seat-shell-frame"
                   title="Space utilization · Window seat"
-                  src="stb-window-seat-0.9.html?v=88e6981d"
+                  src="stb-window-seat-0.9.html?v=fc1bd153"
                 ></iframe>
               </div>
             `;
@@ -1259,7 +1259,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         var projectClass = source === 'start-own' ? 'USER_DEFINED_BOARD' : 'BOUNDED_SOURCE_BACKED';
         var sourceAuthority = source === 'start-own'
           ? (payload.sourceAuthority || {kind:'USER-DEFINED',artifact:'three-frames.html'})
-          : {kind:'BOUNDED SOURCE-BACKED',artifact:'stb-outdoor-bench-leg-0.1.html',detail:payload.sourceAuthority||null};
+          : {kind:'BOUNDED SOURCE-BACKED',artifact:'stb-outdoor-picnic-0.2.html',detail:payload.sourceAuthority||null};
         if(payload.physicalDemand){
           physicalDemand = payload.physicalDemand;
         } else if(source === 'start-own'){
