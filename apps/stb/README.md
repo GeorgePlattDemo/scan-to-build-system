@@ -3,6 +3,8 @@
 
 # Scan-to-Build (`apps/stb`)
 
+> **CURRENT STATUS — SYSTEM APPLICATION AND PUBLICATION OWNER.** System now publishes `apps/stb/public-build/` directly from System `main`; `scan-to-build-review` is frozen history. The body below preserves earlier Build 0–8 application-development and custody context; Review → System reconciliation wording below is historical, not an open migration instruction. Current state: [`../../docs/project/CURRENT-SYSTEM-STATE.md`](../../docs/project/CURRENT-SYSTEM-STATE.md).
+
 ## Current visible-build preservation checkpoint
 
 The exact public Review composition currently opened by **OPEN SYSTEM BUILD** is preserved under [`public-build/`](public-build/) from Review commit `7b26dfc45c9832271840d134426e096787156a04`.
