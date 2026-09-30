@@ -63,7 +63,7 @@ Words the working app uses on screen or in its records. Where a term has an exac
 
 ### What the Store answers
 
-**Store request type** — The kind of question System asks the Store: `OFFERING_LOOKUP`, `BOARD_SQUARE_V1`, `USER_DEFINED_BOARD_V1`, `ALCOVE_INSERT_V1`, `CUT_PACKAGE_V1`.
+**Store request type** — The kind of question System asks the Store: `OFFERING_LOOKUP`, `BOARD_SQUARE_V1`, `USER_DEFINED_BOARD_V1`, `ALCOVE_INSERT_V1`, `CUT_PACKAGE_V1`, `SHEET_PACKAGE_V1`.
 
 **Store answer status** — `STORE_JOB_STATUSES`:
 - `SUPPORTABLE` — fits the Store's declared stock, capability and economics. Not fabrication authorization.
