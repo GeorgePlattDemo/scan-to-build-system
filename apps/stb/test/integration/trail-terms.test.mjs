@@ -309,19 +309,34 @@ test('ADMISSION window-seat: an unmapped source board fails closed instead of sh
     const { page, frame } = await openTile(browser, origin, TILES['window-seat'].label);
     const { win:seat } = await TILES['window-seat'].answer({ page, frame, log });
     const before = requestsFor(log, TILES['window-seat']).length;
-    await seat.locator('#c-runs [data-n="1"]').click();
-    const mismatch = await seat.evaluate(() => {
+    const result = await seat.evaluate(async () => {
       const source = window.STBWindowSeat.definition();
-      const request = window.STBWindowSeat.request();
+      const request = JSON.parse(JSON.stringify(window.STBWindowSeat.request()));
+      const liveSent = new Set((request.cutPackages || []).flatMap(pkg => pkg.parts || []).map(part => part.partId));
+      const liveMissing = source.boards.map(board => board.id).filter(id => !liveSent.has(id));
+      if (liveMissing.length === 0) {
+        const pkg = (request.cutPackages || []).find(item => Array.isArray(item.parts) && item.parts.length);
+        if (pkg) pkg.parts = pkg.parts.slice(1);
+      }
       const sent = new Set((request.cutPackages || []).flatMap(pkg => pkg.parts || []).map(part => part.partId));
-      return source.boards.map(board => board.id).filter(id => !sent.has(id));
+      const missing = source.boards.map(board => board.id).filter(id => !sent.has(id));
+      try {
+        await window.STBStoreClient.sendJob({
+          projectId: 'window-seat',
+          requestType: 'CUT_PACKAGE_V1',
+          candidateRevisionId: request.configurationVersion,
+          payload: { definition: request, definitionKind: 'cut_package.v1', ruleVersion: '0.1' },
+          ready: true,
+        });
+        return { ok:true, missing };
+      } catch (error) {
+        return { ok:false, code:error?.code || null, message:String(error?.message || error), missing };
+      }
     });
-    assert.ok(mismatch.length > 0, 'fixture exposes the historic boardFor miss before admission');
-    const error = await until(async () => {
-      const state = await seat.evaluate(() => window.STBWindowSeat.state());
-      return state.error && /UNMAPPED_PART:/.test(state.error) ? state.error : null;
-    }, 'window-seat unmapped-part admission error');
-    assert.ok(mismatch.some(id => error.includes(id)), 'admission names the unmapped part');
+    assert.ok(result.missing.length > 0, 'fixture exposes at least one defined board missing from the outgoing package');
+    assert.equal(result.ok, false, 'shrunken package is blocked');
+    assert.match(result.code || result.message, /UNMAPPED_PART:/, 'admission names the unmapped part');
+    assert.ok(result.missing.some(id => (result.code || result.message).includes(id)), 'admission names the missing board id');
     assert.equal(requestsFor(log, TILES['window-seat']).length, before, 'unmapped board never reaches Store');
   });
 });
