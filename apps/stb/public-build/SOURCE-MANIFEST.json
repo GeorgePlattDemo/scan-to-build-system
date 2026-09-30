@@ -474,6 +474,48 @@
       "blobSha": "0258ea654c06b7cea11de9315d47986d627de979",
       "bytes": 229196,
       "reason": "Alcove is Job 2: its tile moves second on the Shared Home and is labelled TEST 02 · FIT THE SPACE (Outdoor becomes TEST 03). Cache-buster for the updated guide."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-0.9",
+      "blobSha": "fec922c90c4572c858174d6ad82d546d0bf99db3",
+      "bytes": 229391,
+      "reason": "Window Seat 0.9 goes live: the window-seat-live iframe loads stb-window-seat-0.9.html (0.8 stays in the repo until the owner retires it), the tile opens on page 1 (her idea, where both routes are offered) instead of the long scroll, and the shell's own rail is hidden on window-seat-live because 0.9 renders its Dev/Rev rail beside each of its pages from the same guide file. Cache-buster for the new page."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "window-seat-0.9-full-pass",
+      "blobSha": "be63d251ec1f065bb7572ca3969353657ad72df8",
+      "bytes": 130309,
+      "reason": "Window Seat full pass: the six legacy donor pages (window-intake, window-space, window-span, window-resolve, window-parts, window-review) are removed; they were reachable only from each other. The Window Seat and Playhouse tile buttons keep their data-go keys, which the shell re-keys and reroutes."
+    },
+    {
+      "path": "stb-store-handoff-contract.js",
+      "pass": "window-seat-0.9-full-pass",
+      "blobSha": "00989b44a6958cff2926edbe55951faaeea86fa1",
+      "bytes": 47601,
+      "reason": "Window Seat full pass: the unused browser-side Window Seat economics (WINDOW_SEAT_RECOVERY, quoteModeledRecovery), its Store-authority entry and the stale 0.7.4 artifact entry are removed. Nothing read them; they were Store economics in the browser."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "window-seat-0.9-full-pass",
+      "blobSha": "8ab965f4f4f89e61023823983e9ace648e755246",
+      "bytes": 65125,
+      "reason": "Window Seat full pass: Job 4 Dev/Rev rails for the eight pages of stb-window-seat-0.9.html; the legacy donor guide entries go with their pages."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "window-seat-0.9-full-pass",
+      "blobSha": "f4524b3e7a6891919cf2140de888917144286100",
+      "bytes": 39662,
+      "reason": "Window Seat full pass: cache-buster for the base page without the donor pages."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-0.9-full-pass",
+      "blobSha": "6e5c0b73b4737312d6c7446e3472d8944e2ecf1d",
+      "bytes": 229391,
+      "reason": "Window Seat full pass: cache-busters for the guide, the Store handoff contract, the front door and Window Seat 0.9."
     }
   ],
   "retiredFiles": [
@@ -484,6 +526,14 @@
       "pass": "window-seat-on-the-trail",
       "replacedBy": "stb-window-seat-0.8.html",
       "reason": "Window Seat is no longer the trail exception. 0.8 keeps the drawing, the capture, every toggle and the long explanation, adds spot facing for shelf pins, and sends the job to the live Store as a cut-package request. The 0.7.4 page answered from a browser copy of Store logic pinned to Store commits that no longer exist; it is retired, not edited. Its bytes remain at the recorded Review source blob."
+    },
+    {
+      "path": "stb-window-seat-0.8.html",
+      "blobSha": "922170b1c591d3e88a18843dab63cf5f5f4b18be",
+      "bytes": 394038,
+      "pass": "window-seat-0.9-full-pass",
+      "replacedBy": "stb-window-seat-0.9.html",
+      "reason": "Window Seat 0.9 is live and carries every 0.8 behavior its tests check (edge mill, board count, depth steps, spots, version identity). 0.8 is retired, not edited; its bytes remain in git history at this blob."
     }
   ]
 }

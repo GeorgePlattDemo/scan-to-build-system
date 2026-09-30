@@ -11,15 +11,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=15a2b1a4"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=ae521171"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
-<script src="stb-store-handoff-contract.js?v=8bb29a61"></script>
+<script src="stb-store-handoff-contract.js?v=b2a2f3b4"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
 <script src="stb-store-client.js?v=7eb5ab65"></script>
 <script src="stb-user-defined-board-runtime-bridge.js?v=f77a49e9"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=063b52d6"></script>
+<script src="stb-build-guide-spec.js?v=b6638c18"></script>
 <script>
 (() => {
   const shell = document.getElementById('stb-current');
@@ -40,6 +40,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       .window-seat-shell-page.on{display:block!important}
       .window-seat-shell-main{width:100%;min-width:0;background:var(--surface)}
       .window-seat-shell-frame{display:block;width:100%;height:calc(100vh - 76px);min-height:680px;border:0;background:var(--bg)}
+      /* Window Seat draws its own Dev/Rev rail beside each of its pages, from the same guide file; one guide, not two. */
+      .window-seat-shell-page>aside.rail{display:none!important}
       .start-own-shell-page{padding:0!important;overflow:hidden;background:var(--surface)}
       /* Start your own keeps the Dev Guide rail on the right, like every other project page. */
       .start-own-shell-page.on{display:grid!important;grid-template-columns:minmax(0,1fr) 172px;align-items:stretch}
@@ -1216,8 +1218,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         const windowSeatTile = ribbon.querySelector('.tile[data-go="window-intake"]');
         if (windowSeatTile) {
           windowSeatTile.removeAttribute('data-go');
-          windowSeatTile.dataset.windowSeatArtifact = 'stb-window-seat-0.8.html';
-          windowSeatTile.title = 'Space utilization · Window seat 0.8';
+          windowSeatTile.dataset.windowSeatArtifact = 'stb-window-seat-0.9.html';
+          windowSeatTile.title = 'Space utilization · Window seat 0.9';
 
           let windowSeatPage = doc.getElementById('window-seat-live');
           if (!windowSeatPage) {
@@ -1230,7 +1232,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="window-seat-frame"
                   class="window-seat-shell-frame"
                   title="Space utilization · Window seat"
-                  src="stb-window-seat-0.8.html?v=922170b1"
+                  src="stb-window-seat-0.9.html?v=80c38edf"
                 ></iframe>
               </div>
             `;
@@ -1242,8 +1244,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
             event.stopImmediatePropagation();
             selectJourneyProject('window-seat');
             originalShow.call(win, 'window-seat-live');
-            // Every visit opens at the start: the whole job, in one scroll.
-            seatFrame()?.contentWindow?.postMessage({type:'STB_SEAT_GO', stage:'whole'}, win.location.origin);
+            // Every visit opens at page 1, her idea, where both routes are offered.
+            seatFrame()?.contentWindow?.postMessage({type:'STB_SEAT_GO', stage:'hero'}, win.location.origin);
           }, true);
         }
       }

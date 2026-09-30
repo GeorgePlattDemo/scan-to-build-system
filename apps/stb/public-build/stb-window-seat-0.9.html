@@ -1,0 +1,1547 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Window Seat · Space utilization</title>
+<style>
+  :root{
+    --bg:#faf9f7; --surface:#ffffff; --rail:#f4f2ef; --tint:#f6efe4;
+    --border:#e3ded7; --border-accent:#d9c3a2;
+    --text:#1c1917; --text-2:#57534e; --text-3:#8a8580; --accent:#7a4f22; --on-accent:#ffffff;
+    --warn:#8a6d1f; --ok:#5d7f3f; --no:#b4534a; --store:#e8f0f6; --store-line:#b9cfe0; --store-ink:#1f4f73;
+    --draw:#f2ece2; --text2:var(--text-2);
+  }
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+    --bg:#16150f; --surface:#1e1c16; --rail:#191711; --tint:#262015;
+    --border:#332f26; --border-accent:#4d4130;
+    --text:#f2efe8; --text-2:#b4aea3; --text-3:#847d72; --accent:#e0ad74; --on-accent:#16150f;
+    --warn:#d4b483; --ok:#8fb36a; --no:#d98b80; --store:#172430; --store-line:#2d4a61; --store-ink:#a9c8f0;
+    --draw:#efe7da;
+  }}
+  :root[data-theme="dark"]{
+    --bg:#16150f; --surface:#1e1c16; --rail:#191711; --tint:#262015;
+    --border:#332f26; --border-accent:#4d4130;
+    --text:#f2efe8; --text-2:#b4aea3; --text-3:#847d72; --accent:#e0ad74; --on-accent:#16150f;
+    --warn:#d4b483; --ok:#8fb36a; --no:#d98b80; --store:#172430; --store-line:#2d4a61; --store-ink:#a9c8f0;
+    --draw:#efe7da;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font:15px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1240px;margin:0 auto;padding:18px 20px 60px}
+  h1{margin:0 0 10px;font-size:24px;line-height:1.2;letter-spacing:-.01em}
+  h2{margin:0 0 10px;font-size:17px}
+  p{margin:0 0 12px}
+  b{font-weight:600}
+  a{color:var(--accent)}
+  .dim{color:var(--text-2)}
+  .small{font-size:12px}
+  button{font:inherit;font-size:13px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);
+    background:var(--bg);color:var(--text);cursor:pointer}
+  button:hover{border-color:var(--text-3)}
+  button.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:650}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  [hidden]{display:none!important}
+
+  /* top: trail nav (standalone only) and the route switch (always) */
+  .bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}
+  .pill{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:12.5px;color:var(--text-2)}
+  .pill.brand{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700;letter-spacing:.03em}
+  .pill.on{border-color:var(--accent);color:var(--text);font-weight:650}
+  .route{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;
+    border:1px solid var(--border-accent);background:var(--tint);border-radius:12px;padding:8px 12px;margin:0 0 16px}
+  .route p{margin:0;font-size:12.5px;color:var(--text-2)}
+  .route .ways{display:flex;gap:6px;flex-wrap:wrap}
+  .route .ways button{font-size:12px;padding:6px 11px}
+  .route .ways button.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:650}
+
+  /* pages */
+  .step{margin:0 0 26px}
+  .stepband{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--accent)}
+  .stepband span{color:var(--text-3);font-weight:600}
+  body[data-view="trail"] .step{display:none}
+  body[data-view="trail"] .step.on{display:block}
+  body[data-view="trail"] .whole-only{display:none!important}
+  body[data-view="whole"] .trail-only{display:none!important}
+  .page{display:grid;grid-template-columns:minmax(0,1fr) 190px;border:1px solid var(--border);
+    border-radius:12px;overflow:hidden;background:var(--surface)}
+  .main{min-width:0;border-right:1px solid var(--border)}
+  .pad{padding:20px 22px}
+  .rail{background:var(--rail);padding:18px 13px 14px;font-size:11px}
+  /* The rail's words come from the shared guide file (stb-build-guide-spec.js), styled as the app's Dev Guide rails. */
+  .dev-build-guide{display:flex;flex-direction:column;gap:0;overflow-wrap:anywhere;min-width:0}
+  .dev-build-guide p{margin:0}
+  .dev-build-guide .hd{margin:0 0 12px;font-size:9.5px;font-weight:700;letter-spacing:.09em;color:var(--text-3)}
+  .dev-build-guide .goal{margin:0 0 18px;font-size:12.5px;line-height:1.35;font-weight:600;color:var(--text)}
+  .dev-build-guide .guide-row{margin-bottom:16px}
+  .dev-build-guide .guide-row b{display:block;font-size:11.5px;letter-spacing:0;color:var(--text);margin-bottom:2px}
+  .dev-build-guide .guide-row span{display:block;font-size:10.5px;line-height:1.4;color:var(--text-2)}
+  .dev-build-guide .rev-hd{margin:0 0 8px;font-size:10.5px;line-height:1.35;letter-spacing:.04em;font-weight:700;color:var(--text)}
+  .dev-build-guide .rev-flag{margin:0 0 12px;font-size:11.5px;line-height:1.4;font-weight:400;color:var(--text)}
+  .dev-build-guide .rev-list a{color:inherit;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+  .dev-build-guide .rev-list{margin:0 0 14px;padding-left:14px;display:grid;gap:4px;font-size:10.5px;line-height:1.4;font-weight:400;color:var(--text-2)}
+  .dev-build-guide .rev-sec{margin:2px 0 5px;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:400;color:var(--text-2)}
+  .dev-build-guide .rev-sec.quiet,.dev-build-guide .rev-list.quiet{color:var(--text-3)}
+  .dev-build-guide .guide-meta{margin-top:auto;padding-top:10px;border-top:1px solid var(--border);display:grid;gap:3px;font:8.5px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-3)}
+  .actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
+  .actions .fine{font-size:11.5px;color:var(--text-3)}
+  .actions .push{margin-left:auto}
+
+  .kv{display:flex;justify-content:space-between;gap:10px;margin-bottom:3px}
+  .kv span:first-child{color:var(--text-2)}
+  .chip{font-size:9.5px;letter-spacing:.05em;font-weight:650;border-radius:20px;padding:2px 8px;white-space:nowrap;
+    border:1px solid var(--border);color:var(--text-3)}
+  .chip.ok{border-color:var(--ok);color:var(--ok)}
+  .chip.no{border-color:var(--no);color:var(--no)}
+  .chip.warn{border-color:var(--warn);color:var(--warn)}
+  .chip.store{border-color:var(--store-line);color:var(--store-ink)}
+  .box{border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+  .box h4{margin:0;padding:8px 13px;background:var(--rail);font-size:11px;letter-spacing:.06em;font-weight:650;
+    color:var(--text-3);border-bottom:1px solid var(--border)}
+  .box .bd{padding:10px 13px;font-size:12.5px}
+  .ln{display:flex;gap:9px;margin-bottom:5px;line-height:1.45;align-items:flex-start}
+  .ln:last-child{margin-bottom:0}
+  .ln>span:first-child{flex:1;min-width:0}
+  details summary{cursor:pointer;font-weight:600;padding:8px 0;font-size:12.5px}
+  table.pt{width:100%;border-collapse:collapse;font-size:11.5px}
+  table.pt th{text-align:left;font-weight:650;color:var(--text-3);font-size:10px;letter-spacing:.05em;padding:4px 6px;border-bottom:1px solid var(--border);white-space:nowrap}
+  table.pt td{padding:4px 6px;border-bottom:1px solid var(--border);vertical-align:top}
+  table.pt tr:last-child td{border-bottom:0}
+  table.pt td.id{white-space:nowrap;font-weight:650;font-variant-numeric:tabular-nums}
+  .scroll-x{overflow-x:auto}
+  pre{white-space:pre-wrap;word-break:break-word;font-size:10.5px;line-height:1.45;margin:0;overflow:auto;color:var(--text-2)}
+  code{font-size:12px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px}
+  .lead{font-size:14px;color:var(--text-2);max-width:760px}
+
+  /* page 1 · her idea */
+  .hero{position:relative;margin:0}
+  .hero img{display:block;width:100%;aspect-ratio:2/1;max-height:440px;object-fit:cover;object-position:50% 38%;border-bottom:1px solid var(--border)}
+  .hero figcaption{position:absolute;left:14px;bottom:12px;font-size:10.5px;color:#fff;background:rgba(28,25,23,.62);padding:3px 8px;border-radius:6px}
+  .idea{margin:0 0 14px;padding:12px 14px;border-left:3px solid var(--accent);background:var(--tint);border-radius:0 8px 8px 0}
+  .idea label{display:block;font-size:10.5px;font-weight:650;letter-spacing:.06em;color:var(--accent);margin:0 0 4px}
+  .idea textarea{width:100%;min-height:58px;font:inherit;font-size:15px;line-height:1.5;border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:var(--surface);color:var(--text);resize:vertical}
+  .fork{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 4px}
+  .fork .way{border:1px solid var(--border-accent);border-radius:12px;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:8px}
+  .fork .way b{font-size:15px}
+  .fork .way p{margin:0;font-size:13px;color:var(--text-2)}
+  .fork .way button{align-self:flex-start;margin-top:auto}
+  .same{font-size:12.5px;color:var(--text-2);margin:10px 0 0}
+
+  /* page 2 · intent */
+  .sketch{display:grid;grid-template-columns:minmax(0,360px) 1fr;gap:16px;align-items:start}
+  .sketch img{width:100%;display:block;border-radius:9px;border:1px solid var(--border);background:#fff}
+  #mfields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 10px}
+  #mfields>div{min-width:0}
+  .ws-h{margin:0 0 6px;font-size:10.5px;font-weight:650;letter-spacing:.06em;color:var(--accent)}
+  .ws-strip{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;padding:9px 14px;margin:10px 0 14px;background:var(--rail);border-radius:9px;font-size:12px}
+  .ws-chips{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 14px}
+  .ws-chip{font-size:11.5px;padding:5px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--text-2);line-height:1.3}
+  .ws-chip.on{border-color:var(--accent);background:var(--tint);color:var(--accent);font-weight:650}
+  .ws-m2{margin-bottom:8px}
+  .ws-m2 .r1{display:grid;grid-template-columns:1fr 64px;gap:5px;align-items:center}
+  .ws-m2 .r1 span{font-size:11.5px;color:var(--text-2);line-height:1.2}
+  .ws-m2 .r1 input{font:inherit;font-size:11.5px;padding:4px 5px;border-radius:6px;width:100%;border:1px solid var(--border);background:var(--surface);color:var(--text)}
+  .ws-m2 .r2{display:flex;gap:4px;margin-top:3px}
+  .ws-m2 select{font:inherit;font-size:10px;padding:3px;border-radius:5px;flex:1;min-width:0;border:1px solid var(--border);background:var(--surface);color:var(--text-3)}
+  .ws-m2.flag .r1 input,.ws-m2.flag select[data-sts]{border-color:var(--no);color:var(--no)}
+  .ws-m2.ctx select[data-sts]{border-color:var(--border-accent);color:var(--accent)}
+  .sec{margin:18px 0 8px;padding-top:14px;border-top:1px solid var(--border)}
+  .sec:first-child{margin-top:0;padding-top:0;border-top:0}
+  .sec h2{font-size:15px;margin:0 0 4px}
+  .sec .sub{font-size:12.5px;color:var(--text-2);margin:0 0 10px}
+  .made{font-size:9.5px;letter-spacing:.05em;font-weight:650;border-radius:5px;padding:1px 6px;white-space:nowrap;border:1px solid var(--border);color:var(--text-2)}
+  .made.sketch{border-color:var(--border-accent);color:var(--accent)}
+  .made.hand{border-color:var(--warn);color:var(--warn)}
+  .made.derived{border-color:var(--store-line);color:var(--store-ink)}
+  .made.added{border-color:var(--ok);color:var(--ok)}
+  .addk{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;margin:6px 0 10px}
+  .addk label{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--border);border-radius:9px;padding:9px 10px;font-size:12.5px;background:var(--bg);cursor:pointer}
+  .addk label.on{border-color:var(--ok);background:var(--tint)}
+  .addk input{margin-top:3px;accent-color:var(--accent);flex:none}
+  .addk small{display:block;color:var(--text-3);font-size:11px;line-height:1.35;margin-top:2px}
+
+  /* page 3 · the bench */
+  .chain{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:0 0 14px}
+  .chain .node{border:1px solid var(--border);border-radius:8px;padding:4px 8px;background:var(--bg)}
+  .chain .node b{display:block;font-size:9px;letter-spacing:.06em;color:var(--text-3)}
+  .chain .node span{font-size:11px;font-weight:650}
+  .chain i{color:var(--text-3);font-style:normal;font-size:11px}
+  .cfg{display:grid;grid-template-columns:252px minmax(0,1fr) 300px;gap:16px;padding:0 22px 14px;align-items:start}
+  .ctl{font-size:12.5px}
+  .grp{border:1px solid var(--border);border-radius:9px;padding:9px 10px 10px;margin-bottom:10px;background:var(--surface)}
+  .grp>.gh{font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--accent);margin:0 0 8px}
+  .ws-lab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;gap:8px}
+  .ws-lab span:first-child{font-weight:600}
+  .ws-lab span:last-child{font-size:11px;color:var(--text-3);white-space:nowrap}
+  input[type=range]{width:100%;accent-color:var(--accent);margin:0 0 9px}
+  .total{background:var(--tint);border:1px solid var(--border-accent);border-radius:8px;padding:7px 9px;margin:2px 0 8px}
+  .total b{display:block;font-size:19px;line-height:1.1;color:var(--accent)}
+  .total span{font-size:10.5px;color:var(--text-2)}
+  .seg{display:flex;gap:4px;margin-bottom:4px}
+  .seg button{flex:1;padding:5px 0;font-size:12px;border-radius:7px}
+  .seg button.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:650}
+  .cbx{display:flex;gap:7px;align-items:flex-start;font-size:11.5px;margin:0 0 7px;line-height:1.35}
+  .cbx input{margin-top:3px;accent-color:var(--accent);flex:none}
+  .sel{font:inherit;font-size:12px;padding:5px 7px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text)}
+  .opdet{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px}
+  .sp{cursor:pointer;border-radius:6px;padding:2px;border:1.5px solid transparent;background:none;font:inherit;color:inherit}
+  .sp.on{border-color:var(--accent);background:var(--tint)}
+  .sp div{height:20px;border-radius:4px;border:1px solid rgba(0,0,0,.2)}
+  .sp p{margin:2px 0 0;font-size:9.5px;text-align:center}
+  .ws-draw{background:var(--draw);border-radius:9px;border:1px solid var(--border);padding:6px}
+  .ws-draw svg{width:100%;display:block}
+  .fs{font-size:11.5px}
+  .feat-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:4px 16px}
+  .fs .hdr{font-weight:650;margin:8px 0 2px;font-size:11px;letter-spacing:.05em;color:var(--accent)}
+  .fs .hdr:first-child{margin-top:0}
+  .card{background:var(--tint);border:1px solid var(--border-accent);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:12.5px}
+  .card .lb{margin:0 0 6px;font-size:10.5px;font-weight:650;letter-spacing:.06em;color:var(--accent)}
+  .xbtn{font-size:11px;padding:4px 9px;border-radius:20px;white-space:nowrap}
+  .depthrow{display:grid;grid-template-columns:44px 1fr 44px;gap:6px;align-items:center;margin:2px 0 8px}
+  .depthrow input{margin:0}
+  .depthrow button{padding:5px 0;font-size:12px;font-weight:650}
+  .millnote{font-size:11px;margin:4px 0 0;padding:6px 8px;border-radius:7px;background:var(--tint);color:var(--text)}
+  .backlink{font-size:11.5px;color:var(--text-2);margin:2px 0 0}
+
+  /* page 4 · the Store answers */
+  .store{background:var(--store);border:1px solid var(--store-line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+  .store .lb{margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.07em;color:var(--store-ink)}
+  .big{font-size:clamp(26px,3.4vw,36px);font-weight:750;letter-spacing:-.02em;line-height:1.1;margin:2px 0 6px}
+  .big.none{font-size:clamp(18px,2.4vw,24px);color:var(--no)}
+  .status{font-weight:650}
+  .status.ask{color:var(--warn)} .status.bad{color:var(--no)} .status.good{color:var(--ok)}
+  .ids{font:10.5px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-2);word-break:break-all;margin:8px 0 0}
+  .verbs{font:11.5px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-2)}
+
+  /* audit copy (one long scroll only) */
+  .audit pre{max-height:none;font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px 14px;color:var(--text)}
+
+  /* Store Zero reference text: the same shared file every Store answer carries */
+  .doctrine{margin-top:14px;font-size:13.5px}
+  .doctrine .band{margin:0 0 14px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);font-size:12.5px;line-height:1.55}
+  .doctrine .band.warn{border-color:var(--warn)}
+  .doctrine h1{font-size:22px;margin:18px 0 6px;text-align:left}
+  .doctrine .lede{margin:0 0 8px;color:var(--text2)}
+  .doctrine .s{padding:12px 0;border-top:1px solid var(--border)}
+  .doctrine .s .h{display:flex;gap:9px;align-items:baseline;margin-bottom:5px;flex-wrap:wrap}
+  .doctrine .s .num{font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--text2)}
+  .doctrine .s .name{font-size:14px;font-weight:650}
+  .doctrine .s .st{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:3px;border:1px solid var(--border);color:var(--text2)}
+  .doctrine .s p{margin:0 0 6px;color:var(--text2)}
+  .doctrine .s p.q,.doctrine .s p.k{font-size:12.5px;padding-left:11px;border-left:2px solid var(--border)}
+  .doctrine .ops{border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:10px 0 4px}
+  .doctrine .ops .t{margin:0 0 6px;font-size:9.5px;font-weight:700;letter-spacing:.08em}
+  .doctrine .ops .chain{font:11.5px/1.9 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text2);margin:0 0 6px}
+  .doctrine .close{border-top:1px solid var(--border);margin-top:14px;padding-top:12px}
+  .doctrine .close p{margin:0 0 8px;color:var(--text2)}
+
+  @media (max-width:1100px){ .cfg{grid-template-columns:240px minmax(0,1fr)} .cfg>div:last-child{grid-column:1/-1} }
+  @media (max-width:800px){
+    .wrap{padding:12px 16px 48px}
+    .page{grid-template-columns:1fr}
+    .main{border-right:0;border-bottom:1px solid var(--border)}
+    .cfg,.fork,.two,.sketch{grid-template-columns:1fr}
+    .cfg>div:last-child{grid-column:auto}
+    #mfields{grid-template-columns:1fr}
+    .pad{padding:16px}
+    .cfg{padding:0 16px 12px}
+  }
+</style>
+</head>
+<body data-view="trail" data-section="hero">
+<div class="wrap">
+
+<nav class="bar" id="bar" aria-label="Window Seat trail">
+  <span class="pill brand">WINDOW SEAT · SPACE UTILIZATION</span>
+  <button class="pill" type="button" data-nav="scan">1 · Your idea</button>
+  <button class="pill" type="button" data-nav="configure">2 · The bench</button>
+  <button class="pill" type="button" data-nav="store">3 · The Store answers</button>
+  <button class="pill" type="button" data-nav="request" disabled>4 · Your call</button>
+  <button class="pill" type="button" data-nav="yard" disabled>5 · We cut it</button>
+  <button class="pill" type="button" data-nav="record" disabled>6 · Pick up &amp; build</button>
+</nav>
+
+<div class="route" id="route">
+  <p><b>Two ways through the same job.</b> One state, one definition, one Store request. Switch at any page.</p>
+  <div class="ways">
+    <button type="button" data-view-btn="trail">The regular path</button>
+    <button type="button" data-view-btn="whole">One long scroll</button>
+  </div>
+</div>
+
+<!-- ═════ PAGE 1 · STEP 1 · YOUR IDEA: HER IDEA ═════ -->
+<section class="step" id="s-hero" data-section="hero">
+  <p class="stepband">STEP 1 OF 6 · YOUR IDEA <span>page 1 of 7 · her idea</span></p>
+  <div class="page">
+    <div class="main">
+      <figure class="hero">
+        <img src="window-seat-hero-0.9.webp?v=e65dbb3d" alt="A woman celebrates at her laptop in front of a finished window seat: bookshelf towers either side of a window, a red cushioned seat below it, cubbies under the seat">
+        <figcaption>room-capture.usdz · the picture of what she wants · context, not a dimension</figcaption>
+      </figure>
+      <div class="pad">
+        <h1>Her idea</h1>
+        <div class="idea">
+          <label for="idea-text">WHAT SHE WANTS, IN HER OWN WORDS</label>
+          <textarea id="idea-text" rows="2"></textarea>
+        </div>
+        <p class="dim">The picture says what she wants. It isn’t the definition: nobody cuts to a picture. Her words carry weight, though. <b>“A seat you can sit on”</b> means a person sits on it, and that raises a question we carry with the job instead of answering it for her. The next page turns the idea into a definition: the sketch, the numbers, and the knobs this one job needs.</p>
+
+        <div class="fork" id="fork">
+          <div class="way">
+            <b>The regular path →</b>
+            <p>One page at a time, like every project: your intent, the bench, the Store’s answer, your call, the cut, pickup.</p>
+            <button class="go" type="button" data-route="trail">TAKE THE REGULAR PATH →</button>
+          </div>
+          <div class="way">
+            <b>One long scroll ↓</b>
+            <p>The whole job on one screen, every page in order, ending in a plain-text audit copy. Copy it and check it against the Store yourself.</p>
+            <button type="button" data-route="whole">READ IT AS ONE LONG SCROLL ↓</button>
+          </div>
+        </div>
+        <p class="same">Same job either way. Pick one now; the switch at the top stays with you to the end.</p>
+      </div>
+    </div>
+    <aside class="rail dev-build-guide" data-guide-id="window-seat-hero" aria-label="Build guide · developer notes"></aside>
+  </div>
+</section>
+
+<!-- ═════ PAGE 2 · STEP 1 · YOUR IDEA: YOUR INTENT ═════ -->
+<section class="step" id="s-intent" data-section="intent">
+  <p class="stepband">STEP 1 OF 6 · YOUR IDEA <span>page 2 of 7 · your intent</span></p>
+  <div class="page">
+    <div class="main">
+      <div class="pad">
+        <h1>Your intent: the sketch, the numbers, and the knobs this job needs</h1>
+        <p class="lead">Everything the bench may turn is made here, for this one job. Some knobs come straight off the sketch, some you add by hand. The bench gets these knobs and nothing else.</p>
+
+        <div class="sec">
+          <p class="ws-h">A · THE SKETCH, WITH ITS NUMBERS</p>
+          <div class="sketch">
+            <img src="window-seat-elevation-0.9.webp?v=182176cd" alt="Front elevation sketch: 103 in wide, 94 in tall; a 24 in shelving tower either side of a 55 in center module with two upper bays, a window opening, a seat and two cubbies; 14 in deep; floor slope tolerance plus or minus three quarters of an inch">
+            <div>
+              <p style="margin:0 0 6px"><b>elevation-windowseat.png</b> <span class="chip">SOURCE KEPT</span></p>
+              <p class="dim small" style="margin:0 0 8px">What the sketch says, read off as drawn. These numbers start the knobs below. They’re context until you mark a measured number controlling.</p>
+              <div id="sketch-reads"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <p class="ws-h">B · WHAT YOU MEASURED: CONTROLLING VERSUS OBSERVED</p>
+          <p class="sub">Two things for each number: where it came from, and whether it controls. A scan or a sketch records where a number came from. It never makes it the number we cut to. You say which numbers control.</p>
+          <div id="mfields"></div>
+          <div class="ws-strip">
+            <span class="dim">Narrowest controlling width <b id="m-narrow">—</b></span>
+            <span class="dim">Width variation <b id="m-vary">—</b></span>
+            <span class="dim">Lowest controlling height <b id="m-low">—</b></span>
+            <span class="dim">Controlling depth <b id="m-depth">—</b></span>
+            <span id="m-flag" class="chip warn">—</span>
+          </div>
+        </div>
+
+        <div class="sec">
+          <p class="ws-h">C · TASTE, AND WHAT’S OFF</p>
+          <p style="margin-bottom:6px"><b>Taste travels with the job. It doesn’t cut a part.</b></p>
+          <div class="ws-chips" id="ws-pref"></div>
+          <p style="margin-bottom:6px"><b>What’s off stays on the record. Recording it doesn’t mean we corrected it.</b></p>
+          <div class="ws-chips" id="ws-off"></div>
+        </div>
+
+        <div class="sec">
+          <p class="ws-h">D · OPEN QUESTIONS: CARRIED, NOT ANSWERED HERE</p>
+          <div class="box"><div class="bd" id="open-q"></div></div>
+        </div>
+
+        <div class="sec">
+          <p class="ws-h">E · THE KNOBS FOR THIS JOB</p>
+          <p class="sub">This is Window Seat’s configurator: the knobs made for this job, and only this job. Made from the sketch, by hand where the sketch is silent, or derived by a stated rule. Each one is turned on the bench.</p>
+          <div class="box"><div class="bd scroll-x"><table class="pt" id="knob-table"></table></div></div>
+          <p class="ws-h" style="margin-top:12px">ADD A KNOB BY HAND, IF THIS JOB NEEDS IT</p>
+          <p class="sub">Adding one here is the only way it reaches the bench. Some knobs bring required facts with them: until those are filled on the bench, the job can’t go to the Store.</p>
+          <div class="addk" id="add-knobs"></div>
+          <p class="ws-h" style="margin-top:12px">ASKED FOR, BUT THE STORE HAS NO LINE FOR IT</p>
+          <p class="sub">Kept on the job and shown at every page. Not sent, and nothing ever claims they were done.</p>
+          <div class="addk" id="kept-asks"></div>
+          <div id="other-wrap" class="opdet" hidden><input class="sel" id="other-text" placeholder="Tell us what you’re asking for" style="flex:1;min-width:220px" aria-label="Something else"></div>
+        </div>
+
+        <div class="sec">
+          <p class="ws-h">F · WHO OWNS WHAT</p>
+          <div class="two small" id="owners"></div>
+        </div>
+
+        <div class="sec">
+          <p class="ws-h">G · CAN THE JOB BE STATED?</p>
+          <div class="box"><div class="bd" id="intent-check"></div></div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="trail-only" data-to="hero">← Her idea</button>
+          <span class="fine" id="intent-gate">—</span>
+          <button class="go push" type="button" data-to="bench">TAKE IT TO THE BENCH →</button>
+        </div>
+      </div>
+    </div>
+    <aside class="rail dev-build-guide" data-guide-id="window-seat-intent" aria-label="Build guide · developer notes"></aside>
+  </div>
+</section>
+
+<!-- ═════ PAGE 3 · STEP 2 · THE BENCH ═════ -->
+<section class="step" id="s-bench" data-section="bench">
+  <p class="stepband">STEP 2 OF 6 · THE BENCH <span>page 3 of 7 · turn the knobs</span></p>
+  <div class="page">
+    <div class="main">
+      <div id="s-configure">
+        <div class="pad" style="padding-bottom:10px">
+          <h1>The bench: turn the knobs</h1>
+          <p class="dim">The space is the reference. Three modules as one job: <b>left tower</b>, <b>center window seat</b>, <b>right tower</b>. Every control here is a knob made on your intent page. Turn one and the drawing, the parts and the boards move together.</p>
+          <p class="ws-h" style="margin-top:4px">THE BENCH RECEIVES</p>
+          <div class="chain" id="receives"></div>
+          <div id="history-note" class="card" hidden></div>
+        </div>
+        <div class="cfg">
+          <div class="ctl"><div id="ctlcol"></div><p class="backlink">A knob you need isn’t here? <a href="#s-intent" data-to="intent">Add it on your intent page</a>. The bench never adds one.</p></div>
+          <div>
+            <div class="ws-draw"><svg id="elev" viewBox="0 0 520 400" role="img" aria-label="Window seat elevation: left tower, center window-seat module with upper storage, right tower"></svg></div>
+            <div class="box" style="margin:12px 0 0">
+              <h4>FINISHED SHELVES AND OPENINGS</h4>
+              <div class="bd fs" id="p-feat"></div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <p class="lb">THE BENCH PRODUCES</p>
+              <div id="produces"></div>
+            </div>
+            <div class="box">
+              <h4>DEPTH: YOUR NUMBER, THE BOARDS</h4>
+              <div class="bd fs" id="p-depth"></div>
+            </div>
+            <div class="box">
+              <h4>CONDITIONS: OURS TO SETTLE, NOT THE STORE’S</h4>
+              <div class="bd" id="p-cond"></div>
+            </div>
+          </div>
+        </div>
+        <div class="pad" style="padding-top:0">
+          <div class="box">
+            <h4>FROM YOUR INTENT TO PARTS, FEATURES AND OPERATIONS</h4>
+            <div class="bd scroll-x"><table class="pt" id="xform"></table></div>
+          </div>
+          <div class="box">
+            <h4>WHAT WE’LL ASK THE STORE: NOTHING DROPS OFF THIS LIST</h4>
+            <div class="bd" id="ws-reg"></div>
+          </div>
+          <details>
+            <summary>PARTS: <span id="pt-count">0</span> LINES, <span id="pt-occ">0</span> FINISHED PARTS, <span id="pt-run">0</span> BOARDS</summary>
+            <div class="scroll-x"><table class="pt" id="pt-table"></table></div>
+            <p class="dim small" style="margin:8px 0 0">Every finished part has its own id, so a label, a spot or a replacement names exactly one part. A deep shelf is not one board: the boards across the depth are the material, and each is its own cut part.</p>
+            <div id="occ-wrap" style="margin-top:8px"></div>
+          </details>
+          <details>
+            <summary>ENTERED VERSUS DERIVED</summary>
+            <div class="box"><div class="bd two" id="p-ec"></div></div>
+          </details>
+        </div>
+      </div>
+      <div class="pad" style="padding-top:0">
+        <div class="actions" style="margin-top:0">
+          <button type="button" class="trail-only" data-to="intent">← Your intent</button>
+          <span class="fine" id="bench-gate">—</span>
+          <button class="go push" type="button" id="btn-ask">ASK THE STORE →</button>
+        </div>
+      </div>
+    </div>
+    <aside class="rail dev-build-guide" data-guide-id="window-seat-bench" aria-label="Build guide · developer notes"></aside>
+  </div>
+</section>
+
+<!-- ═════ PAGE 4 · STEP 3 · THE STORE ANSWERS ═════ -->
+<section class="step" id="s-store" data-section="store">
+  <p class="stepband">STEP 3 OF 6 · THE STORE ANSWERS <span>page 4 of 7 · a fresh answer for exactly this version</span></p>
+  <div class="page">
+    <div class="main">
+      <div class="pad">
+        <h1>The Store answers</h1>
+        <p class="dim">The live Store gets exactly this version and answers each line on its own: which board, how many, the cut plan, the machine minutes, the price, or a refusal with its reason. Nothing is cached, and nothing on this page does the Store’s math.</p>
+        <div class="store" id="store-panel"></div>
+        <div id="store-lines"></div>
+        <div id="store-kept"></div>
+        <div class="doctrine" id="store-doctrine"></div>
+        <p class="small dim trail-only" style="margin-top:12px">Want the whole job as copyable text, with every identity? Switch to <a href="#s-audit" data-view-link="whole">One long scroll</a>; the audit copy is at the end.</p>
+        <div class="actions">
+          <button type="button" class="trail-only" data-to="bench">← The bench</button>
+          <span class="fine" id="store-gate">—</span>
+          <button class="go push" type="button" id="btn-call" disabled>YOUR CALL →</button>
+        </div>
+      </div>
+    </div>
+    <aside class="rail dev-build-guide" data-guide-id="window-seat-store" aria-label="Build guide · developer notes"></aside>
+  </div>
+</section>
+
+<!-- ═════ PAGE 5 · STEP 4 · YOUR CALL ═════ -->
+<section class="step" id="s-request" data-section="request">
+  <p class="stepband">STEP 4 OF 6 · YOUR CALL <span>page 5 of 7 · accept this answer, or change something</span></p>
+  <div class="page">
+    <div class="main">
+      <div class="pad">
+        <h1>Your call</h1>
+        <p class="dim" id="call-sub">Waiting on a current Store answer.</p>
+        <div id="call-body"></div>
+        <p class="verbs">Store answer ≠ offer ≠ acceptance ≠ payment ≠ allocation ≠ release ≠ cut ≠ ready ≠ custody</p>
+        <div id="call-terms" data-terms-step="call"></div>
+        <div class="actions">
+          <button type="button" data-to="bench">← Change something</button>
+        </div>
+      </div>
+    </div>
+    <aside class="rail dev-build-guide" data-guide-id="window-seat-request" aria-label="Build guide · developer notes"></aside>
+  </div>
+</section>
+
+<!-- ═════ PAGE 6 · STEP 5 · WE CUT IT ═════ -->
+<section class="step" id="s-yard" data-section="yard">
+  <p class="stepband">STEP 5 OF 6 · WE CUT IT <span>page 6 of 7 · the yard side</span></p>
+  <div class="page">
+    <div class="main">
+      <div class="pad">
+        <h1>We cut it</h1>
+        <p class="dim" id="yard-sub">Nothing is in the yard yet. This page opens after you accept the simulated offer.</p>
+        <div id="yard-terms" data-terms-step="yard"></div>
+        <div id="yard-body"></div>
+        <div class="actions">
+          <button type="button" class="trail-only" data-to="request">← Your call</button>
+        </div>
+      </div>
+    </div>
+    <aside class="rail dev-build-guide" data-guide-id="window-seat-yard" aria-label="Build guide · developer notes"></aside>
+  </div>
+</section>
+
+<!-- ═════ PAGE 7 · STEP 6 · PICK UP & BUILD ═════ -->
+<section class="step" id="s-record" data-section="record">
+  <p class="stepband">STEP 6 OF 6 · PICK UP &amp; BUILD <span>page 7 of 7 · your kit, and the record you keep</span></p>
+  <div class="page">
+    <div class="main">
+      <div class="pad">
+        <h1>Pick up &amp; build</h1>
+        <p class="dim" id="record-sub">Nothing to pick up yet. This page opens once the parts are cut and ready.</p>
+        <div id="record-terms" data-terms-step="record"></div>
+        <div id="record-body"></div>
+        <div class="actions">
+          <button type="button" class="trail-only" data-to="yard">← We cut it</button>
+          <button type="button" class="push" id="start-over">START OVER FROM HER IDEA</button>
+        </div>
+      </div>
+    </div>
+    <aside class="rail dev-build-guide" data-guide-id="window-seat-record" aria-label="Build guide · developer notes"></aside>
+  </div>
+</section>
+
+<!-- ═════ ONE LONG SCROLL ONLY · THE AUDIT COPY ═════ -->
+<section class="step whole-only audit" id="s-audit" data-section="audit">
+  <p class="stepband">THE AUDIT COPY <span>the whole job as plain text · same state as every page above</span></p>
+  <div class="page">
+    <div class="main">
+      <div class="pad">
+        <h1>The whole job, as text you can copy</h1>
+        <p class="dim">Everything above in one plain-text block: the identified definition, exactly what was sent to the Store, and the Store budgetary answer with its identities. Copy it, run the same request against the same Store version, and compare the result hash.</p>
+        <div class="actions" style="margin:0 0 10px;padding-top:0;border-top:0">
+          <button type="button" class="go" id="copy-audit">COPY THE AUDIT COPY</button>
+          <span class="fine" id="copy-note"></span>
+        </div>
+        <pre id="audit-text"></pre>
+      </div>
+    </div>
+    <aside class="rail dev-build-guide" data-guide-id="window-seat-audit" aria-label="Build guide · developer notes"></aside>
+  </div>
+</section>
+
+</div>
+<script src="store-zero-canonical-doctrine.js?v=65366367"></script>
+<script src="stb-store-client.js?v=7eb5ab65"></script>
+<script src="stb-terms-flow.js?v=850b1843"></script>
+<script src="stb-build-guide-spec.js?v=b6638c18"></script>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const $$=(s,r)=>[...(r||document).querySelectorAll(s)];
+function fmt(v){if(v==null||!isFinite(v))return'—';const n=Math.round(v*1000)/1000;const w=Math.floor(n),e=Math.round((n-w)*16);
+  if(Math.abs(n-w-e/16)>0.001)return String(Math.round(n*100)/100);
+  if(e===0)return String(w);if(e===16)return String(w+1);let d=16,q=e;while(q%2===0){q/=2;d/=2}return (w?w+' ':'')+q+'/'+d}
+const inch=v=>fmt(v)+' in';
+const money=v=>(v==null||!isFinite(Number(v)))?'—':'$'+(Math.round(Number(v)*100)/100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+function parse(s){s=String(s==null?'':s).trim();if(!s)return null;
+  let m=s.match(/^(\d+)\s+(\d+)\/(\d+)$/);if(m)return +m[1]+(+m[2])/(+m[3]);
+  m=s.match(/^(\d+)\/(\d+)$/);if(m)return(+m[1])/(+m[2]);
+  const v=Number(s);return isFinite(v)?v:null}
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const r3=v=>Math.round(v*1000)/1000;
+const clone=v=>JSON.parse(JSON.stringify(v));
+const T=0.75;
+const embedded=window.self!==window.top;
+
+/* ════════════════════════════════════════════════════════════════════
+   PAGE 1 AND 2 · INTENT. Her idea, the sketch, the measured facts, and the knobs made for this job.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* What the sketch says, as drawn. A source, kept; its numbers start knobs, they don't control. */
+const SKETCH=Object.freeze({file:'elevation-windowseat.png',overallW:103,overallH:94,sections:[24,55,24],depth:14,
+  towerShelves:4,upperBays:2,cubbies:2,floorSlope:'± ¾ in'});
+const SOURCES=Object.freeze([
+  {file:'room-capture.usdz',role:'the picture of what she wants',kept:'context, not a dimension'},
+  {file:SKETCH.file,role:'her sketch, as supplied',kept:'its numbers start knobs; context until a measured number is marked controlling'}
+]);
+const SRC=['tape, measured by you','scan','drawing or plan','other supplied source'];
+const STS=['controlling','observed: context','needs checking'];
+const INTENT_START={
+  idea:'A window seat under the window, with a seat you can sit on and bookshelves either side. The wall is about 103 inches.',
+  facts:[
+    {k:'wtop',label:'Width, top',v:'104.5',src:0,sts:0,use:'fit'},
+    {k:'wmid',label:'Width, middle',v:'104.25',src:0,sts:0,use:'fit'},
+    {k:'wbot',label:'Width, bottom',v:'104.5',src:0,sts:0,use:'fit'},
+    {k:'hl',label:'Height, left',v:'95',src:1,sts:1,use:'fit'},
+    {k:'hr',label:'Height, right',v:'94.75',src:0,sts:0,use:'fit'},
+    {k:'d',label:'Depth available',v:'28',src:0,sts:0,use:'fit'},
+    {k:'ww',label:'Window width',v:'55',src:2,sts:1,use:'context'},
+    {k:'head',label:'Window head height',v:'78',src:2,sts:1,use:'context'},
+    {k:'sill',label:'Sill height',v:'',src:0,sts:2,use:'context'}
+  ],
+  pref:[{t:'Line the upper storage up with the window head',on:true},
+        {t:'Keep the window opening clear across the center',on:true},
+        {t:'Match the shelf spacing next door',on:false}],
+  off:[{t:'Floor slopes ± ¾ in across the run (on the sketch)',on:true},
+       {t:'Wall bows out at the middle',on:false},
+       {t:'Baseboard runs through the opening',on:true},
+       {t:'Obstruction in the opening',on:false}],
+  added:{front:false,spots:false,xspot:false,screws:false},
+  kept:{label:false,inspect:false,bundle:true,pack:false,other:false},
+  otherText:''
+};
+let I=clone(INTENT_START);
+
+/* Open questions: carried with the job, owned elsewhere, never answered by this page or by the Store. */
+const OPEN_QUESTIONS=Object.freeze([
+  {k:'SEAT_LOAD',t:'A person sits on the seat',owner:'QUALIFIED PERSON',status:'UNRESOLVED',
+   d:'Her words say “a seat you can sit on”. Whether the seat board and its span carry a person is a question for a qualified person. This app doesn’t answer it, and the Store doesn’t either. It travels with the job, open, to the end.'},
+  {k:'ASSEMBLY',t:'How it goes together on site',owner:'YOU / QUALIFIED PERSON',status:'DEFERRED',
+   d:'The towers attach to the outside faces of the center module on site. Connections, fastening to the wall and anchoring are not defined here. Screws you add as a knob are merchandise you picked, not a connection design.'},
+  {k:'HEX_TRIM',t:'The hex window trim in the picture',owner:'YOU',status:'CONTEXT',
+   d:'The picture shows angled trim around the window. The sketch doesn’t. It stays context; the opening is defined as the sketch draws it. An angled or curved aperture would be a separate capability question, asked separately.'}
+]);
+
+/* The knobs. Every knob the bench can show is listed here, with how intent made it.
+   made: SKETCH (read off the sketch) · HAND (entered by hand where the sketch is silent) · DERIVED (a stated rule)
+         · ADDED (added by hand on the intent page because this job needs it). */
+const WOODS=[{k:'pine',n:'Select pine',c:'#D8BE7C'},{k:'poplar',n:'Select poplar',c:'#9FA678'},
+             {k:'oak',n:'Select red oak',c:'#C4A06A'},{k:'cherry',n:'Select cherry',c:'#A6522C'}];
+const woodName=k=>(WOODS.find(f=>f.k===k)||{n:k}).n;
+const SPOT_RULES=[
+  {k:'CENTER',label:'centered',rule:'CENTERED_ON_WIDE_FACE',inset:null},
+  {k:'1.5',label:'1½ in from the edge',rule:'INSET_FROM_EDGE',inset:1.5},
+  {k:'2',label:'2 in from the edge',rule:'INSET_FROM_EDGE',inset:2}
+];
+/* The Store's hardware-requirement vocabulary. You state the requirement; the Store would pick its own item, or refuse.
+   CURRENT GAP: System's wire to the Store carries hardware only as a Store item number, and this page holds no Store
+   item numbers. So a hardware requirement is kept on the job and marked not sent, until the wire carries it. */
+const HARDWARE_SENT=false;
+const SCREW_GAUGES=['#8','#10'];
+const SCREW_FINISHES=[['coated','coated'],['zinc-interior','zinc, interior'],['hot-dip-galvanized','hot-dip galvanized'],['stainless','stainless'],['silicon-bronze','silicon bronze']];
+const KNOBS=[
+  {id:'H',label:'Overall height',group:'SIZE',made:'SKETCH',from:'sketch: 94 in',start:SKETCH.overallH,val:()=>inch(P.H),to:'the length of every side'},
+  {id:'WL',label:'Left tower width',group:'SIZE',made:'SKETCH',from:'sketch: 24 in',start:SKETCH.sections[0],val:()=>inch(P.W.LEFT),to:'left top, bottom and shelf lengths'},
+  {id:'WC',label:'Center width',group:'SIZE',made:'SKETCH',from:'sketch: 55 in',start:SKETCH.sections[1],val:()=>inch(P.W.CENTER),to:'center top, bottom, upper shelf and seat lengths'},
+  {id:'WR',label:'Right tower width',group:'SIZE',made:'SKETCH',from:'sketch: 24 in',start:SKETCH.sections[2],val:()=>inch(P.W.RIGHT),to:'right top, bottom and shelf lengths'},
+  {id:'GAP',label:'Clearance each side',group:'SIZE',made:'HAND',from:'not on the sketch · entered: 0 in',start:0,val:()=>inch(P.gap),to:'the fit check only; cuts nothing'},
+  {id:'D',label:'Depth',group:'DEPTH',made:'SKETCH',from:'sketch: 14 in',start:SKETCH.depth,val:()=>inch(P.depth),to:'the width of every part'},
+  {id:'RUNS',label:'Boards across the depth',group:'DEPTH',made:'DERIVED',from:'rule: fewest 1× boards that cover the depth',start:'derived',val:()=>runs()+(P.runsSet==null?' (derived)':' (set by hand)'),to:'boards per part, and each board’s finished width'},
+  {id:'SEAT',label:'Seat height',group:'CENTER',made:'HAND',from:'not dimensioned on the sketch · entered: 22 in',start:22,val:()=>inch(P.seat),to:'where the seat sits; cubby divider length'},
+  {id:'UPPER',label:'Upper storage, clear',group:'CENTER',made:'HAND',from:'not dimensioned on the sketch · entered: 14 in',start:14,val:()=>inch(P.upperH),to:'upper shelf position; upper divider length'},
+  {id:'BAYS',label:'Upper bays',group:'CENTER',made:'SKETCH',from:'sketch: 2',start:SKETCH.upperBays,val:()=>P.bays,to:'upper dividers'},
+  {id:'CUB',label:'Cubbies under the seat',group:'CENTER',made:'SKETCH',from:'sketch: 2',start:SKETCH.cubbies,val:()=>P.cub,to:'cubby dividers'},
+  {id:'SHL',label:'Left tower shelves',group:'TOWERS',made:'SKETCH',from:'sketch: 4',start:SKETCH.towerShelves,val:()=>P.SH.LEFT,to:'left shelves and their positions'},
+  {id:'SHR',label:'Right tower shelves',group:'TOWERS',made:'SKETCH',from:'sketch: 4',start:SKETCH.towerShelves,val:()=>P.SH.RIGHT,to:'right shelves and their positions'},
+  {id:'WOOD',label:'Wood',group:'WOOD',made:'HAND',from:'not on the sketch · entered: select pine',start:'pine',val:()=>woodName(P.wood),to:'the material of every board'},
+  {id:'FRONT',opt:'front',label:'Front board below the seat',group:'CENTER',made:'ADDED',from:'added by hand',start:'yes',val:()=>P.front?'yes':'no',
+   needs:[],to:'one more part, center width × 3½ in',add:'A board across the front, under the seat.'},
+  {id:'SPOTS',opt:'spots',label:'Shelf-pin spot facing',group:'FEATURES',made:'ADDED',from:'added by hand',start:'placement required',val:()=>P.spots.rule?spotRule(P.spots).label:'placement not chosen',
+   needs:['where across the board'],to:'a 3/16 in spot at every tower shelf, on each board of each tower side',add:'A 3/16 in spot on the tower sides at every shelf, to drill for shelf pins.'},
+  {id:'XSPOT',opt:'xspot',label:'One more spot, on a part you pick',group:'FEATURES',made:'ADDED',from:'added by hand',start:'part, distance, placement required',val:()=>P.xspot.target?(P.xspot.target+' · '+(P.xspot.offset||'?')+' in'):'not placed yet',
+   needs:['which part','distance from its end','where across the board'],to:'one 3/16 in spot on each board of that part',add:'A single extra spot anywhere you name.'},
+  {id:'SCREWS',opt:'screws',label:'Wood screws',group:'HARDWARE',made:'ADDED',from:'added by hand',start:'gauge, length, finish, count required',val:()=>screwsText(),
+   needs:['gauge','length','finish','how many'],to:'a hardware requirement, kept on the job; not sent yet (see the gap below)',add:'Screws for assembly, stated as a requirement. Merchandise you pick, not a connection design.'}
+];
+const KEPT_ASKS=[
+  {k:'label',t:'Label every part'},{k:'inspect',t:'Inspect the finished sizes'},{k:'bundle',t:'Bundle by module'},
+  {k:'pack',t:'Pack and protect'},{k:'other',t:'Something else'}
+];
+const manifest=()=>KNOBS.filter(k=>!k.opt||I.added[k.opt]);
+const has=id=>manifest().some(k=>k.id===id);
+
+/* The bench's values: one per knob. Starting values come from the knob table above. */
+const START={wood:'pine',H:94,W:{LEFT:24,CENTER:55,RIGHT:24},SH:{LEFT:4,RIGHT:4},
+  seat:22,upperH:14,bays:2,cub:2,depth:14,runsSet:null,gap:0,
+  front:true,spots:{rule:null,inset:null},xspot:{target:'',offset:'',place:''},
+  screws:{gauge:'',lengthIn:'',finish:'',qty:''}};
+let P=clone(START);
+let rev={n:1};
+const S={view:'trail',section:'hero',asking:false,answer:null,error:null};
+
+/* One terms flow for every tile (stb-terms-flow.js): sent → arrived → answered → offered → your call → paid → queued → yard → custody. */
+const TERMS=window.STBTermsFlow.create({projectId:'window-seat',title:'Window seat'});
+window.STBTermsFlow.installStyle(document);
+
+/* Dev/Rev rails: one slot per page, filled from the app's one guide file, so every project shares one vocabulary.
+   The words are written there, not here. */
+function renderGuides(){
+  const spec=window.STBBuildGuideSpec;
+  $$('aside[data-guide-id]').forEach(a=>{a.innerHTML=spec&&typeof spec.render==='function'?spec.render(a.dataset.guideId):'<p class="hd">DEV GUIDE</p><p class="goal">Guide file not loaded</p>'});
+}
+renderGuides();
+
+/* ═════ INTENT FACTS: source and status kept apart ═════ */
+const M={};
+function renderFactFields(){
+  $('mfields').innerHTML=I.facts.map((f,i)=>'<div class="ws-m2" data-i="'+i+'">'
+    +'<div class="r1"><span>'+f.label+'</span><input type="text" aria-label="'+esc(f.label)+'" value="'+esc(f.v)+'"></div>'
+    +'<div class="r2"><select data-src aria-label="Where it came from">'+SRC.map((s,j)=>'<option value="'+j+'"'+(j===f.src?' selected':'')+'>'+s+'</option>').join('')+'</select>'
+    +'<select data-sts aria-label="Whether it controls">'+STS.map((s,j)=>'<option value="'+j+'"'+(j===f.sts?' selected':'')+'>'+s+'</option>').join('')+'</select></div></div>').join('');
+}
+function readFacts(){
+  $$('#mfields .ws-m2').forEach(row=>{
+    const f=I.facts[+row.dataset.i];
+    f.v=row.querySelector('input').value; f.src=+row.querySelector('[data-src]').value; f.sts=+row.querySelector('[data-sts]').value;
+    row.classList.toggle('flag',f.sts===2); row.classList.toggle('ctx',f.sts===1);
+  });
+  measure();
+}
+function measure(){
+  const num=f=>parse(f.v);
+  const ctl=k=>{const f=I.facts.find(x=>x.k===k);return (f.sts===0&&num(f)!==null)?num(f):null};
+  const w=['wtop','wmid','wbot'].map(ctl).filter(x=>x!==null), h=['hl','hr'].map(ctl).filter(x=>x!==null);
+  M.narrow=w.length?Math.min(...w):null; M.vary=w.length>1?Math.max(...w)-Math.min(...w):null;
+  M.low=h.length?Math.min(...h):null; M.depth=ctl('d');
+  M.checking=I.facts.filter(f=>f.sts===2).length;
+}
+
+/* ═════ DEFINITION: one truth, geometry included ═════
+   A finished part carries its finished size. The boards across the depth are the material under it. */
+/* Dressed widths of 1× boards: the lumber standard, not a Store fact. */
+const DRESSED=[{n:2,a:1.5},{n:3,a:2.5},{n:4,a:3.5},{n:6,a:5.5},{n:8,a:7.25},{n:10,a:9.25},{n:12,a:11.25}];
+const WIDEST=DRESSED[DRESSED.length-1].a;
+/* Derivation rule for boards across the depth: the fewest 1× boards, none wider than the widest 1× board. */
+function derivedRuns(depth){for(let n=1;n<=6;n++)if(depth/n<=WIDEST+1e-9)return n;return 6}
+const runs=()=>P.runsSet==null?derivedRuns(P.depth):P.runsSet;
+const spotRule=s=>SPOT_RULES.find(x=>x.rule===s.rule&&(x.inset==null||x.inset===s.inset))||SPOT_RULES.find(x=>x.k===s)||null;
+function screwsText(){const s=P.screws;if(!s.gauge&&!s.lengthIn&&!s.finish&&!s.qty)return 'not stated yet';
+  return (s.qty||'?')+' × '+(s.gauge||'?')+' wood screw, '+(s.lengthIn?fmt(parse(s.lengthIn))+' in':'? in')+', '+((SCREW_FINISHES.find(f=>f[0]===s.finish)||[0,'finish ?'])[1])}
+
+const occHistory={};
+function buildDefinition(){
+  const n=runs(),runW=r3(P.depth/n),feats=[],seq={};
+  function feat(asm,role,name,len,geom,runList){
+    const pre=asm.replace('ASM-','').charAt(0);
+    seq[pre+'-'+role]=(seq[pre+'-'+role]||0)+1;
+    const id=pre+'-'+role+'-'+('0'+seq[pre+'-'+role]).slice(-2);
+    const rl=runList||[];
+    if(!runList)for(let i=1;i<=n;i++)rl.push({id:id+'-R'+i,len:r3(len),w:runW});
+    const f={id,asm,role,name,len:r3(len),depth:P.depth,geom,runs:rl,defined:(len>0.01&&runW>0.01&&geom.w>0.001&&geom.h>0.001)};
+    occHistory[id]={name,asm};feats.push(f);return f;
+  }
+  /* Towers: full-height shelving. From the sketch: the top tower shelf lines up with the center's upper shelf
+     (the window-head line), and the shelves below divide the space under it evenly. A stated rule, not an invented one. */
+  function tower(asm,x0,w,count){
+    feat(asm,'UPRIGHT','Side',P.H,{x:x0,y:0,w:T,h:P.H});
+    feat(asm,'UPRIGHT','Side',P.H,{x:x0+w-T,y:0,w:T,h:P.H});
+    feat(asm,'TOP','Top',w-2*T,{x:x0+T,y:P.H-T,w:w-2*T,h:T});
+    feat(asm,'BOTTOM','Bottom',w-2*T,{x:x0+T,y:0,w:w-2*T,h:T});
+    const datum=P.H-T-P.upperH-T,shelfDatums=[];let bay;
+    if(count>=1){
+      bay=(datum-T-(count-1)*T)/count;
+      for(let i=1;i<count;i++){const y=T+i*bay+(i-1)*T;shelfDatums.push(r3(y));feat(asm,'SHELF','Shelf',w-2*T,{x:x0+T,y,w:w-2*T,h:T})}
+      shelfDatums.push(r3(datum));feat(asm,'SHELF','Shelf',w-2*T,{x:x0+T,y:datum,w:w-2*T,h:T});
+    }else bay=P.H-2*T;
+    return {clearBay:r3(bay),datum:r3(datum),shelfLen:r3(w-2*T),count,shelfDatums};
+  }
+  const left=tower('ASM-LEFT',0,P.W.LEFT,P.SH.LEFT);
+  const x0=P.W.LEFT,c=P.W.CENTER;
+  feat('ASM-CENTER','UPRIGHT','Side',P.H,{x:x0,y:0,w:T,h:P.H});
+  feat('ASM-CENTER','UPRIGHT','Side',P.H,{x:x0+c-T,y:0,w:T,h:P.H});
+  feat('ASM-CENTER','TOP','Top',c-2*T,{x:x0+T,y:P.H-T,w:c-2*T,h:T});
+  feat('ASM-CENTER','BOTTOM','Bottom',c-2*T,{x:x0+T,y:0,w:c-2*T,h:T});
+  const uy=P.H-T-P.upperH-T;
+  feat('ASM-CENTER','UPPER-SHELF','Upper shelf / window head',c-2*T,{x:x0+T,y:uy,w:c-2*T,h:T});
+  const upBayW=(c-2*T-(P.bays-1)*T)/P.bays;
+  for(let j=1;j<P.bays;j++){const ux=x0+T+j*upBayW+(j-1)*T;feat('ASM-CENTER','UPPER-DIVIDER','Upper divider',P.upperH,{x:ux,y:uy+T,w:T,h:P.upperH})}
+  feat('ASM-CENTER','SEAT','Seat',c-2*T,{x:x0+T,y:P.seat-T,w:c-2*T,h:T});
+  const lowH=P.seat-2*T,cubW=(c-2*T-(P.cub-1)*T)/P.cub;
+  for(let k=1;k<P.cub;k++){const cx=x0+T+k*cubW+(k-1)*T;feat('ASM-CENTER','LOWER-DIVIDER','Cubby divider',lowH,{x:cx,y:T,w:T,h:lowH})}
+  if(has('FRONT')&&P.front)feat('ASM-CENTER','FRONT','Front board',c,{x:x0,y:0,w:c,h:3.5},[{id:'C-FRONT-01-R1',len:r3(c),w:3.5}]);
+  const right=tower('ASM-RIGHT',P.W.LEFT+P.W.CENTER,P.W.RIGHT,P.SH.RIGHT);
+  const rl=[];feats.forEach(f=>{if(f.defined)f.runs.forEach(r=>{r.owner=f.id;r.asm=f.asm;r.role=f.role;rl.push(r)})});
+  return {W:P.W.LEFT+P.W.CENTER+P.W.RIGHT,H:P.H,depth:P.depth,runs:n,runW,feats,boards:rl,left,right,
+    center:{upperClearW:r3(upBayW),upperClearH:r3(P.upperH),windowW:r3(c-2*T),windowH:r3(uy-P.seat),
+      cubClearW:r3(cubW),cubClearH:r3(lowH),upperShelfLen:r3(c-2*T)}};
+}
+
+/* Which 1× board each board is cut from: an exact dressed width as it comes, or the narrowest wider board
+   edge-milled to the finished width. The requirement is never rewritten to the board. Whether the edge mill
+   can take that much off is the Store's answer, not ours. */
+function boardFor(w){
+  const exact=DRESSED.find(d=>Math.abs(d.a-w)<0.001);
+  if(exact)return {nominalW:exact.n,actual:exact.a,mill:null};
+  const wider=DRESSED.find(d=>d.a>w+0.001);
+  if(!wider)return null;
+  return {nominalW:wider.n,actual:wider.a,mill:r3(w)};
+}
+
+function spotFor(featureId,xIn,place){const s={featureId,xIn:r3(xIn),acrossWidthRule:place.rule};if(place.inset!=null)s.insetFromEdgeIn=place.inset;return s}
+function spotsByRun(def){
+  const out={};
+  const place=has('SPOTS')&&P.spots.rule?spotRule(P.spots):null;
+  if(place){
+    [['ASM-LEFT',def.left],['ASM-RIGHT',def.right]].forEach(([asm,tw])=>{
+      def.feats.filter(f=>f.asm===asm&&f.role==='UPRIGHT').forEach(f=>{
+        f.runs.forEach(r=>{tw.shelfDatums.forEach((y,i)=>{(out[r.id]=out[r.id]||[]).push(spotFor(r.id+'-S'+('0'+(i+1)).slice(-2),y,place))})});
+      });
+    });
+  }
+  if(has('XSPOT')&&P.xspot.target&&parse(P.xspot.offset)!=null&&P.xspot.place){
+    const f=def.feats.find(x=>x.id===P.xspot.target),pl=SPOT_RULES.find(s=>s.k===P.xspot.place);
+    if(f&&pl&&parse(P.xspot.offset)>0&&parse(P.xspot.offset)<f.len)f.runs.forEach(r=>{(out[r.id]=out[r.id]||[]).push(spotFor(r.id+'-X1',parse(P.xspot.offset),pl))});
+  }
+  return out;
+}
+function screwsLine(){
+  if(!has('SCREWS'))return null;
+  const s=P.screws,len=parse(s.lengthIn),q=parse(s.qty);
+  if(!s.gauge||!s.finish||!(len>0)||!(Number.isInteger(q)&&q>0))return null;
+  return {lineId:'SCREWS',qty:q,requirement:{kind:'wood-screw',gauge:s.gauge,lengthIn:len,finish:s.finish,unit:'piece'}};
+}
+
+/* ═════ THE IDENTIFIED DEFINITION AND THE STORE REQUEST: exactly what travels ═════ */
+function groupOf(role){return role==='UPRIGHT'?'SIDES':role==='FRONT'?'FRONT':'SHELVES'}
+const GROUP_LABEL={SIDES:'Sides',SHELVES:'Shelves, tops, seat & dividers',FRONT:'Front board'};
+function hash(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0}return h.toString(16).padStart(8,'0')}
+function buildRequest(def){
+  const spots=spotsByRun(def),packages={};
+  def.boards.forEach(r=>{
+    const b=boardFor(r.w);if(!b)return;
+    const key=groupOf(r.role)+'-1X'+b.nominalW+(b.mill!=null?'-TO-'+String(b.mill).replace('.','P'):'');
+    if(!packages[key]){packages[key]={packageId:key,material:{species:P.wood,form:'board',nominalT:1,nominalW:b.nominalW,grade:'select'},endCut:{angleDeg:0},parts:[]};
+      if(b.mill!=null)packages[key].finishedWidthIn=b.mill;}
+    const part={partId:r.id,lengthIn:r.len};
+    if(spots[r.id]&&spots[r.id].length)part.spots=spots[r.id];
+    packages[key].parts.push(part);
+  });
+  /* A cut package carries at most 120 parts (System wire limit); a bigger group goes as several packages. */
+  const MAX_PARTS=120,cutPackages=[];
+  Object.values(packages).forEach(pk=>{
+    if(pk.parts.length<=MAX_PARTS){cutPackages.push(pk);return}
+    for(let i=0;i*MAX_PARTS<pk.parts.length;i++)cutPackages.push({...pk,packageId:pk.packageId+(i?'-'+(i+1):''),parts:pk.parts.slice(i*MAX_PARTS,(i+1)*MAX_PARTS)});
+  });
+  const itemLines=[];const sl=HARDWARE_SENT?screwsLine():null;if(sl)itemLines.push(sl);
+  const body={cutPackages};if(itemLines.length)body.itemLines=itemLines;
+  /* The version's identity covers the whole identified definition, including what travels but isn't sent. */
+  const record=identified(def);
+  const sig=hash(JSON.stringify({record,body}));
+  const definition={configurationId:'WINDOW-SEAT',configurationVersion:'ws-r'+rev.n+'-'+sig,...body};
+  const spotCount=Object.values(spots).reduce((k,a)=>k+a.length,0);
+  return {definition,record,spotCount,sig,spots};
+}
+/* Everything that identifies this job, sent or not. */
+function identified(def){
+  return {
+    idea:I.idea,
+    sources:SOURCES.map(s=>s.file+' · '+s.kept),
+    facts:I.facts.map(f=>({fact:f.label,value:f.v,source:SRC[f.src],status:STS[f.sts],use:f.use})),
+    taste:I.pref.filter(c=>c.on).map(c=>c.t),
+    off:I.off.filter(c=>c.on).map(c=>c.t),
+    openQuestions:OPEN_QUESTIONS.map(q=>({question:q.t,owner:q.owner,status:q.status})),
+    knobs:manifest().map(k=>({knob:k.id,made:k.made,value:String(k.val())})),
+    keptNotSent:keptList().map(k=>k.t),
+    derived:{overallWidthIn:def.W,boardsAcross:def.runs,boardFinishedWidthIn:def.runW}
+  };
+}
+const keptList=()=>KEPT_ASKS.filter(k=>I.kept[k.k]).map(k=>({...k,t:k.k==='other'&&I.otherText.trim()?'Something else: '+I.otherText.trim():k.t}));
+
+/* ═════ CONDITIONS: ours to settle, not the Store's ═════ */
+function conditions(def){
+  const c=[];
+  if(!(P.depth>0))c.push({t:'Depth needs an answer',d:'depth must be positive',block:true,at:'bench'});
+  if(def.center.windowH<=2)c.push({t:'No window opening left',d:inch(P.H)+' tall, less the '+inch(P.seat)+' seat and '+inch(P.upperH)+' upper storage, leaves '+inch(Math.max(def.center.windowH,0))+'. Raise the height, lower the seat, or shrink the upper storage.',block:true,at:'bench'});
+  if(def.center.cubClearH<=1)c.push({t:'No cubby opening left under the seat',d:'a '+inch(P.seat)+' seat leaves '+inch(Math.max(def.center.cubClearH,0))+' below it',block:true,at:'bench'});
+  def.feats.filter(f=>!f.defined).forEach(f=>c.push({t:'Part needs an answer: '+f.asm+' '+f.name,d:'works out at '+fmt(f.len)+' in long × '+fmt(def.runW)+' in per board',block:true,at:'bench'}));
+  if(!boardFor(def.runW))c.push({t:'No 1× board is that wide',d:inch(def.runW)+' per board is wider than an 11¼ in 1×12 (lumber standard). Add a board across the depth.',block:true,at:'bench'});
+  if(M.narrow!=null&&def.W+P.gap*2>M.narrow)c.push({t:'Wider than your controlling width',d:'three modules plus clearance measure '+inch(def.W+P.gap*2)+'; the narrowest width you marked controlling is '+inch(M.narrow),block:true,at:'bench'});
+  if(M.low!=null&&P.H>M.low)c.push({t:'Taller than your controlling height',d:inch(P.H)+' is taller than the lowest height you marked controlling, '+inch(M.low),block:true,at:'bench'});
+  if(M.depth!=null&&P.depth>M.depth)c.push({t:'Deeper than your controlling depth',d:inch(P.depth)+' is deeper than the '+inch(M.depth)+' you marked controlling',block:true,at:'bench'});
+  if(has('SPOTS')&&!P.spots.rule)c.push({t:'Spot facing needs a placement',d:'pick where across the board the spots go. Nothing is assumed.',block:true,at:'bench'});
+  if(has('XSPOT')){
+    const f=def.feats.find(x=>x.id===P.xspot.target),off=parse(P.xspot.offset);
+    if(!P.xspot.target||off==null||!P.xspot.place)c.push({t:'The extra spot needs a part, a distance and a placement',d:'size is fixed at 3/16 in wide and 3/16 in deep.',block:true,at:'bench'});
+    else if(!f)c.push({t:'The extra spot’s part isn’t in this version',d:P.xspot.target+' no longer exists. The request is kept and marked; it is not moved to another part.',block:true,at:'bench'});
+    else if(!(off>0&&off<f.len))c.push({t:'The extra spot is off the part',d:fmt(off)+' in is not inside a '+fmt(f.len)+' in part',block:true,at:'bench'});
+  }
+  if(has('SCREWS'))c.push(screwsLine()?{t:'Wood screws: kept, not sent',d:'System’s link to the Store carries hardware only by Store item number, and this page holds none. The requirement travels with the job; the Store isn’t asked for it yet.',block:false}
+    :{t:'The screws need a gauge, a length, a finish and a count',d:'state all four so the requirement is complete. It travels with the job, not sent yet.',block:false});
+  if(I.kept.other&&!I.otherText.trim())c.push({t:'“Something else” needs a description',d:'say what you’re asking for, on your intent page',block:true,at:'intent'});
+  if(M.narrow==null)c.push({t:'Fit against the opening not checked',d:'no width is marked controlling, so the job isn’t compared to the opening. The parts are still defined.',block:false});
+  if(M.checking)c.push({t:M.checking+' measured number'+(M.checking===1?'':'s')+' still need checking',d:'not compared against the job until you mark them. They travel, marked.',block:false});
+  c.push({t:'A person sits on the seat',d:'open, for a qualified person. Not answered here or by the Store.',block:false});
+  c.push({t:'Assembly on site',d:'connections and anchoring are not defined here.',block:false});
+  return c;
+}
+
+/* ═════ RENDER · PAGE 1 AND 2 ═════ */
+function chipList(a,h){$(h).innerHTML=a.map((c,i)=>'<button type="button" class="ws-chip'+(c.on?' on':'')+'" aria-pressed="'+c.on+'" data-i="'+i+'">'+esc(c.t)+'</button>').join('')}
+function renderIntent(def,req,cond){
+  const kv=(a,b)=>'<div class="kv"><span>'+a+'</span><span>'+b+'</span></div>';
+  $('sketch-reads').innerHTML=kv('Overall',SKETCH.overallW+' in wide · '+SKETCH.overallH+' in tall')+kv('Modules',SKETCH.sections.join(' · ')+' in')
+    +kv('Depth',SKETCH.depth+' in')+kv('Center','2 upper bays · window · seat · 2 cubbies')+kv('Towers',SKETCH.towerShelves+' shelves each')
+    +kv('Note','floor slope tolerance '+SKETCH.floorSlope)+kv('Not dimensioned','seat height · upper storage height');
+  $('m-narrow').textContent=M.narrow!=null?inch(M.narrow):'none marked';
+  $('m-vary').textContent=M.vary!=null?inch(M.vary):'—';
+  $('m-low').textContent=M.low!=null?inch(M.low):'none marked';
+  $('m-depth').textContent=M.depth!=null?inch(M.depth):'none marked';
+  const fl=$('m-flag');fl.textContent=M.checking?M.checking+' NEEDS CHECKING':'NOTHING OUTSTANDING';fl.className=M.checking?'chip warn':'chip ok';
+  chipList(I.pref,'ws-pref');chipList(I.off,'ws-off');
+  $('open-q').innerHTML=OPEN_QUESTIONS.map(q=>'<div class="ln"><span><b>'+q.t+'</b> <span class="dim">'+q.d+'</span></span><span class="chip '+(q.status==='UNRESOLVED'?'warn':'')+'">'+q.status+' · '+q.owner+'</span></div>').join('');
+  const madeChip=m=>'<span class="made '+({SKETCH:'sketch',HAND:'hand',DERIVED:'derived',ADDED:'added'}[m])+'">'+({SKETCH:'FROM THE SKETCH',HAND:'BY HAND',DERIVED:'DERIVED',ADDED:'ADDED BY HAND'}[m])+'</span>';
+  $('knob-table').innerHTML='<thead><tr><th>Knob</th><th>Made</th><th>Where it starts</th><th>On the bench now</th><th>Needs</th><th>Becomes</th></tr></thead><tbody>'
+    +manifest().map(k=>'<tr data-knob="'+k.id+'"><td><b>'+k.label+'</b></td><td>'+madeChip(k.made)+'</td><td>'+esc(k.from)+'</td><td>'+esc(String(k.val()))+'</td><td>'+(k.needs&&k.needs.length?esc(k.needs.join(', ')):'—')+'</td><td class="dim">'+esc(k.to)+'</td></tr>').join('')+'</tbody>';
+  $('add-knobs').innerHTML=KNOBS.filter(k=>k.opt).map(k=>'<label class="'+(I.added[k.opt]?'on':'')+'"><input type="checkbox" data-add="'+k.opt+'"'+(I.added[k.opt]?' checked':'')+'><span><b>'+k.label+'</b><small>'+esc(k.add)+(k.needs.length?' Brings: '+esc(k.needs.join(', '))+'.':'')+'</small></span></label>').join('');
+  $('kept-asks').innerHTML=KEPT_ASKS.map(k=>'<label class="'+(I.kept[k.k]?'on':'')+'"><input type="checkbox" data-kept="'+k.k+'"'+(I.kept[k.k]?' checked':'')+'><span><b>'+k.t+'</b><small>'+(I.kept[k.k]?'KEPT · NOT SENT':'not asked')+'</small></span></label>').join('');
+  $('other-wrap').hidden=!I.kept.other;
+  if(document.activeElement!==$('other-text'))$('other-text').value=I.otherText;
+  $('owners').innerHTML=[
+    ['You','her idea, the measurements and which ones control, taste, every knob value, the wood, what to ask for'],
+    ['System (this page)','derived values by the stated rules: overall width, board widths, shelf positions, part lengths, spot locations, the version identity'],
+    ['The Store','board and its length, stock, whether a cut, mill or spot fits its machine, machine time, price, the item for a hardware requirement, refusals and their reasons'],
+    ['A qualified person','whether the seat carries a person; how it’s fastened on site']
+  ].map(r=>'<div><b>'+r[0]+'</b><br><span class="dim">'+r[1]+'</span></div>').join('');
+  const intentBlocks=cond.filter(c=>c.block&&c.at==='intent');
+  $('intent-check').innerHTML=[
+    ['Her idea',I.idea.trim()?'stated':'blank',I.idea.trim()?'ok':'warn'],
+    ['Sources kept',SOURCES.length+' kept as context','ok'],
+    ['Controlling measurements',I.facts.filter(f=>f.sts===0&&parse(f.v)!=null).length+' marked',''],
+    ['Knobs made',manifest().length+' ('+manifest().filter(k=>k.made==='ADDED').length+' added by hand)','ok'],
+    ['Open questions',OPEN_QUESTIONS.length+' carried, owned elsewhere','warn'],
+    ['Kept, not sent',keptList().length?keptList().map(k=>k.t).join('; '):'none',''],
+    ['Required facts missing here',intentBlocks.length?intentBlocks.map(c=>c.t).join('; '):'none',intentBlocks.length?'no':'ok']
+  ].map(r=>'<div class="ln"><span>'+r[0]+' <span class="dim">: '+esc(r[1])+'</span></span><span class="chip '+r[2]+'">'+(r[2]==='no'?'MISSING':r[2]==='warn'?'CARRIED':'OK')+'</span></div>').join('')
+    +'<p class="small dim" style="margin:8px 0 0">Intent-complete means the job can be stated. It doesn’t mean the Store can make it; that is the Store’s answer.</p>';
+  $('intent-gate').textContent=intentBlocks.length?intentBlocks.length+' thing'+(intentBlocks.length===1?'':'s')+' to fill here first.':'The bench gets '+manifest().length+' knobs from this page.';
+}
+
+/* ═════ PAGE 3 · THE BENCH: controls built only from the knob manifest ═════ */
+const lab=(t,id,note)=>'<div class="ws-lab"><span>'+t+(note?' <span class="dim" style="font-weight:400;font-size:10.5px">'+note+'</span>':'')+'</span><span id="'+id+'">—</span></div>';
+const rng=(id,min,max,step,val,label)=>'<input type="range" id="'+id+'" data-knob="'+label.k+'" aria-label="'+esc(label.t)+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'">';
+function controls(){
+  let h='';
+  const K=id=>has(id);
+  h+='<div class="grp"><p class="gh">SIZE</p>'
+    +lab('Overall height','v-H')+rng('c-H',60,96,1,P.H,{k:'H',t:'Overall height'})
+    +'<p class="ws-h" style="margin:6px 0 4px">WIDTH: LEFT + CENTER + RIGHT</p>'
+    +lab('Left tower','v-wL')+rng('c-wL',14,48,1,P.W.LEFT,{k:'WL',t:'Left tower width'})
+    +lab('Center window seat','v-wC')+rng('c-wC',30,84,1,P.W.CENTER,{k:'WC',t:'Center width'})
+    +lab('Right tower','v-wR')+rng('c-wR',14,48,1,P.W.RIGHT,{k:'WR',t:'Right tower width'})
+    +'<div class="total"><b id="v-W">—</b><span id="v-Wb">—</span></div>'
+    +lab('Clearance each side','v-gap')+rng('c-gap',0,4,0.25,P.gap,{k:'GAP',t:'Clearance each side'})
+    +'</div>';
+  h+='<div class="grp" id="depth-panel"><p class="gh">DEPTH</p>'
+    +'<div class="ws-lab"><span>Depth you want</span><span id="v-d" style="font-size:15px;font-weight:700;color:var(--accent)">—</span></div>'
+    +'<div class="depthrow"><button type="button" data-depth="-0.25" aria-label="A quarter inch shallower">−¼</button>'
+    +rng('c-d',6,24,0.25,P.depth,{k:'D',t:'Depth'})
+    +'<button type="button" data-depth="0.25" aria-label="A quarter inch deeper">+¼</button></div>'
+    +'<div class="ws-lab"><span>Boards across the depth</span><span id="v-runs">—</span></div>'
+    +'<div class="seg" id="c-runs" data-knob="RUNS"><button type="button" data-n="derived">Rule</button>'+[1,2,3,4].map(n=>'<button type="button" data-n="'+n+'">'+n+'</button>').join('')+'</div>'
+    +'<p class="millnote" id="v-runw"></p>'
+    +'</div>';
+  h+='<div class="grp"><p class="gh">CENTER WINDOW SEAT</p>'
+    +lab('Seat height','v-seat')+rng('c-seat',12,26,1,P.seat,{k:'SEAT',t:'Seat height'})
+    +lab('Upper storage','v-upperH',' clear')+rng('c-upperH',8,30,1,P.upperH,{k:'UPPER',t:'Upper storage height'})
+    +lab('Upper bays','v-bays')+rng('c-bays',1,4,1,P.bays,{k:'BAYS',t:'Upper bays'})
+    +lab('Cubbies under the seat','v-cub')+rng('c-cub',1,6,1,P.cub,{k:'CUB',t:'Cubbies'})
+    +(K('FRONT')?'<label class="cbx" data-knob="FRONT"><input type="checkbox" id="c-front"'+(P.front?' checked':'')+'><span>Front board below the seat</span></label>':'')
+    +'</div>';
+  h+='<div class="grp"><p class="gh">TOWERS</p>'
+    +lab('Left tower shelves','v-shL')+rng('c-shL',0,8,1,P.SH.LEFT,{k:'SHL',t:'Left tower shelves'})
+    +lab('Right tower shelves','v-shR')+rng('c-shR',0,8,1,P.SH.RIGHT,{k:'SHR',t:'Right tower shelves'})
+    +'</div>';
+  if(K('SPOTS')||K('XSPOT')){
+    h+='<div class="grp"><p class="gh">SPOTS</p>';
+    if(K('SPOTS'))h+='<div data-knob="SPOTS"><p style="margin:0 0 4px;font-size:11.5px"><b>Shelf-pin spot facing</b><br><span class="dim">A 3/16 in spot, 3/16 in deep, on each board of each tower side at every shelf. It marks the hole; you drill for the pin.</span></p>'
+      +'<p class="ws-h" style="margin:4px 0 4px">WHERE ACROSS THE BOARD</p>'
+      +'<div class="seg" id="c-spot-place">'+SPOT_RULES.map(s=>'<button type="button" data-k="'+s.k+'">'+(s.k==='CENTER'?'Center':s.k==='1.5'?'1½ in':'2 in')+'</button>').join('')+'</div>'
+      +'<p class="dim" id="v-spots" style="font-size:10.5px;margin:4px 0 8px">—</p></div>';
+    if(K('XSPOT'))h+='<div data-knob="XSPOT"><p style="margin:0 0 4px;font-size:11.5px"><b>One more spot</b></p><div class="opdet"><select class="sel" id="xs-target" aria-label="Which part" style="width:100%"></select>'
+      +'<input class="sel" id="xs-off" placeholder="in from its end" value="'+esc(P.xspot.offset)+'" style="width:110px" aria-label="Distance from the end">'
+      +'<select class="sel" id="xs-place" aria-label="Where across the board"><option value="">across the board…</option>'+SPOT_RULES.map(s=>'<option value="'+s.k+'"'+(P.xspot.place===s.k?' selected':'')+'>'+s.label+'</option>').join('')+'</select></div></div>';
+    h+='</div>';
+  }
+  h+='<div class="grp"><p class="gh">WOOD</p>'
+    +'<div id="species" data-knob="WOOD" style="display:grid;grid-template-columns:1fr 1fr;gap:4px"></div>'
+    +'<p class="dim" style="font-size:10.5px;margin:9px 0 0">Solid board, ¾ in. The Store answers whether it stocks it; it never swaps it.</p></div>';
+  if(K('SCREWS'))h+='<div class="grp" data-knob="SCREWS"><p class="gh">WOOD SCREWS</p>'
+    +'<div class="opdet"><select class="sel" id="sc-gauge" aria-label="Gauge"><option value="">gauge…</option>'+SCREW_GAUGES.map(g=>'<option'+(P.screws.gauge===g?' selected':'')+'>'+g+'</option>').join('')+'</select>'
+    +'<input class="sel" id="sc-len" placeholder="length, in" value="'+esc(P.screws.lengthIn)+'" style="width:90px" aria-label="Length in inches">'
+    +'<select class="sel" id="sc-finish" aria-label="Finish"><option value="">finish…</option>'+SCREW_FINISHES.map(f=>'<option value="'+f[0]+'"'+(P.screws.finish===f[0]?' selected':'')+'>'+f[1]+'</option>').join('')+'</select>'
+    +'<input class="sel" id="sc-qty" placeholder="how many" value="'+esc(P.screws.qty)+'" style="width:90px" aria-label="How many screws"></div>'
+    +'<p class="dim" style="font-size:10.5px;margin:4px 0 0">A requirement, not an item number. <b>Kept, not sent yet:</b> the link to the Store carries hardware only by Store item number, and this page holds none.</p></div>';
+  h+='<button type="button" class="mini2" id="btn-reset" style="width:100%;font-size:10.5px;letter-spacing:.05em;padding:6px 8px;color:var(--text-2)">RESET THE KNOBS TO WHERE THEY START</button>';
+  $('ctlcol').innerHTML=h;
+  const on=(id,fn)=>{const e=$(id);if(e)e.oninput=function(){fn(this);changed()}};
+  on('c-H',e=>{P.H=+e.value});on('c-wL',e=>{P.W.LEFT=+e.value});on('c-wC',e=>{P.W.CENTER=+e.value});on('c-wR',e=>{P.W.RIGHT=+e.value});
+  on('c-d',e=>{P.depth=+e.value});on('c-gap',e=>{P.gap=+e.value});on('c-seat',e=>{P.seat=+e.value});on('c-upperH',e=>{P.upperH=+e.value});
+  on('c-bays',e=>{P.bays=+e.value});on('c-cub',e=>{P.cub=+e.value});on('c-shL',e=>{P.SH.LEFT=+e.value});on('c-shR',e=>{P.SH.RIGHT=+e.value});
+  if($('c-front'))$('c-front').onchange=function(){P.front=this.checked;changed()};
+  if($('c-spot-place'))$('c-spot-place').onclick=e=>{const b=e.target.closest('button');if(!b)return;const s=SPOT_RULES.find(x=>x.k===b.dataset.k);P.spots={rule:s.rule,inset:s.inset};changed()};
+  if($('xs-off'))$('xs-off').oninput=function(){P.xspot.offset=this.value;changed()};
+  if($('xs-place'))$('xs-place').onchange=function(){P.xspot.place=this.value;changed()};
+  if($('sc-gauge')){$('sc-gauge').onchange=function(){P.screws.gauge=this.value;changed()};$('sc-finish').onchange=function(){P.screws.finish=this.value;changed()};
+    $('sc-len').oninput=function(){P.screws.lengthIn=this.value;changed()};$('sc-qty').oninput=function(){P.screws.qty=this.value;changed()};}
+  $('depth-panel').addEventListener('click',e=>{const b=e.target.closest('[data-depth]');if(!b)return;
+    P.depth=Math.min(24,Math.max(6,Math.round((P.depth+Number(b.dataset.depth))*4)/4));changed()});
+  $('c-runs').onclick=e=>{const b=e.target.closest('button');if(!b)return;P.runsSet=b.dataset.n==='derived'?null:+b.dataset.n;changed()};
+  const sw=$('species');
+  WOODS.forEach(f=>{const b=document.createElement('button');b.type='button';b.className='sp';b.dataset.k=f.k;
+    b.innerHTML='<div style="background:'+f.c+'"></div><p>'+f.n+'</p>';b.onclick=()=>{P.wood=f.k;changed()};sw.appendChild(b)});
+  $('btn-reset').onclick=()=>{P=clone(START);controls();changed()};
+  lastTargets='';
+}
+let lastTargets='';
+function syncControls(def){
+  const set=(id,v)=>{const e=$(id);if(e)e.textContent=v};
+  set('v-H',inch(P.H));set('v-wL',inch(P.W.LEFT));set('v-wC',inch(P.W.CENTER));set('v-wR',inch(P.W.RIGHT));
+  set('v-W',fmt(def.W)+' in overall');set('v-Wb','derived: '+fmt(P.W.LEFT)+' + '+fmt(P.W.CENTER)+' + '+fmt(P.W.RIGHT)+', never typed twice');
+  set('v-d',inch(P.depth));set('v-gap',inch(P.gap));set('v-seat',inch(P.seat));set('v-upperH',inch(P.upperH));
+  set('v-bays',P.bays);set('v-cub',P.cub);set('v-shL',P.SH.LEFT);set('v-shR',P.SH.RIGHT);
+  set('v-runs',def.runs+(P.runsSet==null?' (by the rule)':' (set by hand)'));
+  const b=boardFor(def.runW);
+  $('v-runw').innerHTML=!b?'<b>No 1× board is that wide.</b> Add a board across the depth.'
+    :b.mill!=null?'Each board: a <b>1×'+b.nominalW+'</b> ('+fmt(b.actual)+' in) <b>edge-milled to '+inch(b.mill)+'</b>, '+fmt(r3(b.actual-b.mill))+' in off one edge. Whether the mill takes that much, and its time and price, are the Store’s answer.'
+    :'Each board: a <b>1×'+b.nominalW+'</b> as it comes, '+inch(b.actual)+'. No milling.';
+  if($('v-spots')){const pl=P.spots.rule?spotRule(P.spots):null;const n=(P.SH.LEFT+P.SH.RIGHT)*2*def.runs;
+    set('v-spots',pl?n+' spots: '+(P.SH.LEFT+P.SH.RIGHT)+' shelves × 2 sides × '+def.runs+' board'+(def.runs===1?'':'s')+', '+pl.label+'.':'Pick a placement. Nothing is assumed.');}
+  [['c-H',P.H],['c-wL',P.W.LEFT],['c-wC',P.W.CENTER],['c-wR',P.W.RIGHT],['c-d',P.depth],['c-gap',P.gap],['c-seat',P.seat],['c-upperH',P.upperH],
+   ['c-bays',P.bays],['c-cub',P.cub],['c-shL',P.SH.LEFT],['c-shR',P.SH.RIGHT]].forEach(([id,v])=>{const e=$(id);if(e&&e.value!==String(v))e.value=String(v)});
+  if($('c-front'))$('c-front').checked=P.front;
+  $$('#c-runs button').forEach(x=>{const on=x.dataset.n==='derived'?P.runsSet==null:(P.runsSet!=null&&+x.dataset.n===P.runsSet);x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
+  const pl=P.spots.rule?spotRule(P.spots):null;
+  $$('#c-spot-place button').forEach(x=>{const on=!!pl&&x.dataset.k===pl.k;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
+  $$('#species .sp').forEach(x=>{const on=x.dataset.k===P.wood;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
+  const sel=$('xs-target');
+  if(sel){const ids=def.feats.map(f=>f.id).join(',');
+    if(ids!==lastTargets){lastTargets=ids;
+      sel.innerHTML='<option value="">which part…</option>'+def.feats.map(f=>'<option value="'+f.id+'"'+(f.id===P.xspot.target?' selected':'')+'>'+f.id+' · '+f.name+'</option>').join('')
+        +(P.xspot.target&&!def.feats.some(f=>f.id===P.xspot.target)?'<option value="'+esc(P.xspot.target)+'" selected>'+esc(P.xspot.target)+' (not in this version)</option>':'');
+      sel.onchange=function(){P.xspot.target=this.value;changed()};}}
+}
+
+/* ═════ DRAWING: a projection of the same definition ═════ */
+function draw(def,spots){
+  const vw=520,vh=400,ml=56,mr=86,mt=50,mb=74,W=def.W,H=def.H;
+  const Sx=Math.min((vw-ml-mr)/W,(vh-mt-mb)/H);
+  const x0=ml+((vw-ml-mr)-W*Sx)/2,yTop=mt+((vh-mt-mb)-H*Sx)/2,yb=yTop+H*Sx;
+  const X=x=>Math.round((x0+x*Sx)*100)/100,Y=y=>Math.round((yb-y*Sx)*100)/100;
+  const o=[];
+  const rect=(x,y,w,h,fill,stroke,dash,sw)=>o.push('<rect x="'+x+'" y="'+y+'" width="'+Math.max(w,0.4)+'" height="'+Math.max(h,0.4)+'" fill="'+fill+'" stroke="'+(stroke||'none')+'" stroke-width="'+(sw||0.8)+'"'+(dash?' stroke-dasharray="4 3"':'')+'/>');
+  const txt=(x,y,s,sz,col,anc,w)=>o.push('<text x="'+x+'" y="'+y+'" font-size="'+(sz||11)+'" fill="'+(col||'#57534e')+'" text-anchor="'+(anc||'middle')+'"'+(w?' font-weight="600"':'')+' font-family="ui-sans-serif,sans-serif">'+s+'</text>');
+  function dimH(x1,x2,y,s,sz){o.push('<line x1="'+x1+'" y1="'+y+'" x2="'+x2+'" y2="'+y+'" stroke="#7a4f22" stroke-width="0.9"/>');
+    o.push('<path d="M'+x1+' '+(y-3)+'l0 6M'+x2+' '+(y-3)+'l0 6" stroke="#7a4f22" stroke-width="0.9"/>');
+    const wd=String(s).length*5.6+10;rect((x1+x2)/2-wd/2,y-8,wd,16,'#f2ece2');txt((x1+x2)/2,y+4,s,sz||11.5,'#7a4f22',null,true)}
+  function dimV(x,y1,y2,val,cap){o.push('<line x1="'+x+'" y1="'+y1+'" x2="'+x+'" y2="'+y2+'" stroke="#7a4f22" stroke-width="0.9"/>');
+    o.push('<path d="M'+(x-3)+' '+y1+'l6 0M'+(x-3)+' '+y2+'l6 0" stroke="#7a4f22" stroke-width="0.9"/>');
+    const my=(y1+y2)/2;txt(x+5,my-1,val,11,'#7a4f22','start',true);if(cap)txt(x+5,my+9,cap,8.5,'#8a8580','start')}
+  [['ASM-LEFT',0,P.W.LEFT],['ASM-CENTER',P.W.LEFT,P.W.CENTER],['ASM-RIGHT',P.W.LEFT+P.W.CENTER,P.W.RIGHT]].forEach(m=>rect(X(m[1]),Y(H),m[2]*Sx,H*Sx,m[0]==='ASM-CENTER'?'#f7f1e6':'#fbf7f0','#cfc6b6',false,0.7));
+  const cx0=P.W.LEFT,c=P.W.CENTER,uy=H-T-P.upperH-T;
+  const winY1=Y(uy),winY2=Y(P.seat);
+  rect(X(cx0+T),winY1,(c-2*T)*Sx,Math.max(winY2-winY1,0),'#eef3f6','#9db4c4',true,0.9);
+  if(winY2-winY1>26)txt(X(cx0+c/2),(winY1+winY2)/2+4,'window opening',10,'#7d9bb3');
+  if(P.upperH*Sx>13)txt(X(cx0+c/2),Y(uy+T+P.upperH/2)+3.5,P.bays+(P.bays===1?' upper bay':' upper bays'),9.5,'#8a7c68');
+  if((P.seat-2*T)*Sx>13)txt(X(cx0+c/2),Y(T+(P.seat-2*T)/2)+3.5,P.cub+(P.cub===1?' cubby':' cubbies'),9.5,'#8a7c68');
+  def.feats.forEach(f=>{const g=f.geom,fill=f.role==='SEAT'?'#c9a97a':(f.role==='FRONT'?'#cdbb96':'#dfd2b8');
+    rect(X(g.x),Y(g.y+g.h),g.w*Sx,g.h*Sx,f.defined?fill:'#e8c6c0','#57534e',false,0.7)});
+  def.feats.forEach(f=>{const r=f.runs[0];if(!r||!spots[r.id])return;
+    spots[r.id].forEach(s=>{const vertical=f.geom.h>f.geom.w;const gx=vertical?f.geom.x+f.geom.w/2:f.geom.x+s.xIn;const gy=vertical?s.xIn:f.geom.y+f.geom.h/2;
+      o.push('<circle cx="'+X(gx)+'" cy="'+Y(gy)+'" r="2.4" fill="#2f6f9e" stroke="#f7f1e6" stroke-width="0.8"/>')})});
+  dimH(X(0),X(W),yTop-24,fmt(W)+'" overall',12);
+  txt((X(0)+X(W))/2,yTop-36,fmt(P.W.LEFT)+'" + '+fmt(P.W.CENTER)+'" + '+fmt(P.W.RIGHT)+'" = derived width',8.8,'#8a8580');
+  o.push('<line x1="'+(x0-32)+'" y1="'+Y(H)+'" x2="'+(x0-32)+'" y2="'+Y(0)+'" stroke="#7a4f22" stroke-width="0.9"/>');
+  o.push('<path d="M'+(x0-35)+' '+Y(H)+'l6 0M'+(x0-35)+' '+Y(0)+'l6 0" stroke="#7a4f22" stroke-width="0.9"/>');
+  txt(x0-37,(Y(H)+Y(0))/2-1,fmt(H)+'"',11.5,'#7a4f22','end',true);txt(x0-37,(Y(H)+Y(0))/2+9,'overall height',8.5,'#8a8580','end');
+  const xR=X(W)+14;dimV(xR,Y(H-T),Y(uy+T),fmt(P.upperH)+'"','upper storage');dimV(xR,Y(P.seat),Y(0),fmt(P.seat)+'"','seat height');
+  dimH(X(0),X(P.W.LEFT),yb+20,fmt(P.W.LEFT)+'"');dimH(X(P.W.LEFT),X(P.W.LEFT+P.W.CENTER),yb+20,fmt(P.W.CENTER)+'"');dimH(X(P.W.LEFT+P.W.CENTER),X(W),yb+20,fmt(P.W.RIGHT)+'"');
+  txt(X(P.W.LEFT/2),yb+36,'LEFT TOWER',9,'#7a4f22',null,true);txt(X(P.W.LEFT/2),yb+46,P.SH.LEFT+(P.SH.LEFT===1?' shelf':' shelves'),8.5,'#8a8580');
+  txt(X(cx0+c/2),yb+36,'CENTER WINDOW SEAT',9,'#7a4f22',null,true);txt(X(cx0+c/2),yb+46,P.bays+' upper '+(P.bays===1?'bay':'bays')+' · window · seat · '+P.cub+' '+(P.cub===1?'cubby':'cubbies'),8.5,'#8a8580');
+  txt(X(P.W.LEFT+c+P.W.RIGHT/2),yb+36,'RIGHT TOWER',9,'#7a4f22',null,true);txt(X(P.W.LEFT+c+P.W.RIGHT/2),yb+46,P.SH.RIGHT+(P.SH.RIGHT===1?' shelf':' shelves'),8.5,'#8a8580');
+  txt(x0-44,vh-8,'DEPTH '+fmt(P.depth)+'" · '+def.runs+' board'+(def.runs===1?'':'s')+' across at '+fmt(def.runW)+'"',9.5,'#8a8580','start');
+  txt(vw-16,vh-8,'towers attach to the center module on site',9.5,'#8a8580','end');
+  $('elev').innerHTML=o.join('');
+}
+
+/* ═════ REVISIONS: a change after an answer is a new version ═════ */
+function changed(){
+  measure();
+  const req=buildRequest(buildDefinition());
+  if(S.answer&&S.answer.sig!==req.sig&&!S.answer.stale){S.answer.stale=true;rev.n++}
+  S.error=null;
+  render();
+}
+const answerCurrent=()=>!!(S.answer&&!S.answer.stale);
+
+/* ═════ THE STORE: asked live, through the shared client. One request per version. ═════ */
+async function askStore(){
+  if(S.asking)return;
+  if(conditions(buildDefinition()).some(c=>c.block))return;
+  S.asking=true;S.error=null;render();
+  try{
+    const client=window.STBStoreClient;
+    if(!client)throw new Error('STORE_CLIENT_UNAVAILABLE');
+    const req=buildRequest(buildDefinition());
+    const sentAt=new Date().toISOString();
+    const body=await client.sendJob({projectId:'window-seat',requestType:'CUT_PACKAGE_V1',
+      candidateRevisionId:req.definition.configurationVersion,
+      payload:{definition:req.definition,definitionKind:'cut_package.v1',ruleVersion:'0.1'}});
+    S.answer={rev:rev.n,sig:req.sig,stale:false,definition:req.definition,record:req.record,
+      evaluation:body.rawEvaluation,receipt:body.evaluationReceipt||body.rawEvaluation?.evaluationReceipt||null,
+      requestId:body.requestId,storePin:body.storePin,demand:body.mappedCallInputs?.demand||null,body,sentAt};
+    /* The bench moved while the Store was answering: the answer belongs to the version that was sent. */
+    if(buildRequest(buildDefinition()).sig!==req.sig){S.answer.stale=true;rev.n++}
+  }catch(e){S.error=String(e&&e.message||e)}
+  S.asking=false;render();
+}
+/* Store reason codes in plain words. The code is the Store's; the words are only a reading of it. */
+const REASONS={
+  PART_NOT_HALF_INCH_UNDER_BOARD:'a part is too long for the boards the Store stocks in this wood',
+  COMPONENT_LENGTH_EXCEEDS_D001_TWO_SAW_SPAN:'on a board this short, a part is longer than the cell’s saw span',
+  COMPONENT_LENGTH_BELOW_TWO_ROLLER_CONTROL:'a part is too short for the rollers to hold',
+  PART_LONGER_THAN_LONGEST_STOCKED_BOARD:'a part is longer than the longest board stocked in this wood',
+  ON_HAND_SHORT:'not enough of that board on hand',
+  NO_MATCHING_BOARD_OFFERING:'the Store doesn’t stock that board in that wood',
+  GRADE_CHOICE_REQUIRED:'more than one grade is stocked; a grade must be picked',
+  NO_MATCHING_HARDWARE_OFFERING:'the Store offers nothing that matches every field of that hardware requirement',
+  HARDWARE_REQUIREMENT_INCOMPLETE:'the hardware requirement is missing a field',
+  SPOT_INSET_OUTSIDE_BOARD_WIDTH:'a spot’s edge distance is wider than the board',
+  SPOT_LOCATION_OUTSIDE_PART:'a spot falls off the end of its part',
+  EDGE_MILL_REMOVAL_EXCEEDS_D001_MAX_CUT_WIDTH:'the edge mill would have to take more off one edge than it can; try more boards across the depth',
+  FINISHED_WIDTH_EXCEEDS_BOARD_WIDTH:'the finished width is wider than the board',
+  EDGE_MILL_BOARD_BELOW_TWO_ROLLER_CONTROL:'the board is too short for the rollers to feed it past the mill',
+  'OP_NOT_ON_OFFERING:MILL_LONGITUDINAL_PROFILE':'the Store doesn’t edge-mill this wood'
+};
+const plain=code=>REASONS[code]?REASONS[code]+' ('+code+')':code;
+function lineLabel(id){const s=String(id);const g=s.split('-')[0];if(s==='SCREWS')return 'Wood screws';return (GROUP_LABEL[g]||s)+(s.includes('-1X')?' · '+s.split('-')[1].replace('X','×'):'')+(s.includes('-TO-')?' → '+s.split('-TO-')[1].replace('P','.')+' in':'')}
+function storeView(){
+  const a=S.answer,ev=a&&a.evaluation;
+  if(!ev)return null;
+  const pk=ev.packages||[],it=ev.items||[],lines=[...pk,...it];
+  const allOk=ev.status==='SUPPORTABLE'&&lines.length>0&&lines.every(l=>l.status==='SUPPORTABLE');
+  const t=ev.totals||{};
+  return {ev,pk,it,lines,allOk,t,
+    /* The complete budgetary estimate exists only when every line is supportable. */
+    estimate:allOk?(t.Q!=null?t.Q:t.sumOfSupportableLines):null,
+    minutes:pk.reduce((n,p)=>n+Number(p.time?.T_MACHINE_min||0),0),spots:pk.reduce((n,p)=>n+Number(p.spotCount||0),0)};
+}
+function identities(){
+  const a=S.answer;if(!a)return null;const b=a.body||{},v=storeView();
+  const ci=(v&&v.ev.calculationIdentity)||b.calculationIdentity||a.receipt?.calculationIdentity||{};
+  return {sent:b.payloadDigest||null,demand:b.demandSignature||null,arrived:a.receipt?.receiptHash||null,evaluatedAt:a.receipt?.evaluatedAt||null,
+    answered:ci.resultHash||null,input:ci.inputHash||null,pin:a.storePin||null,requestId:a.requestId||null,freshness:a.receipt?.freshnessRule||null};
+}
+
+/* Every current Store answer goes to the shared terms flow; a refusal ends there, with the Store's reasons. */
+function feedTerms(){
+  const v=storeView();
+  if(!v||!answerCurrent()||S.asking||S.error){TERMS.setAnswer(null);return}
+  const bad=v.lines.filter(l=>l.status!=='SUPPORTABLE');
+  const status=v.allOk?'SUPPORTABLE':(v.ev.status==='SUPPORTABLE'?'UNRESOLVED':(v.ev.status||'REFUSED'));
+  const st=TERMS.setAnswer({version:S.answer.definition.configurationVersion,status,total:v.estimate,
+    reasons:bad.map(l=>({code:l.reasonRecord?.code||(l.reasonCodes||[])[0]||l.status,text:lineLabel(l.packageId||l.lineId)+': '+plain(l.reasonRecord?.code||(l.reasonCodes||[])[0]||l.status)})),
+    body:S.answer.body,sentAt:S.answer.sentAt});
+  /* A bench touch that changed nothing can still close the terms chain for this answer. The answer is then
+     treated as used: ask again for the same version, and a new request starts a new chain. */
+  if(st.stage==='NO_ANSWER'){S.answer.stale=true;S.answer.reused=true}
+}
+
+/* ═════ RENDER: one definition, every page, both routes ═════ */
+function render(){
+  const def=buildDefinition(),req=buildRequest(def),cond=conditions(def),spots=req.spots;
+  const blocking=cond.filter(c=>c.block);
+  renderIntent(def,req,cond);
+  syncControls(def);draw(def,spots);
+  const L=def.left,R=def.right,C=def.center,dd=fmt(P.depth);
+  const hdr=t=>'<p class="hdr">'+t+'</p>',kv=(a,b)=>'<div class="kv"><span>'+a+'</span><span>'+b+'</span></div>';
+  $('p-feat').innerHTML='<div class="feat-cols"><div>'+hdr('LEFT TOWER')+kv('Shelves',P.SH.LEFT)+kv('Each shelf',fmt(L.shelfLen)+' W × '+dd+' D')+kv('Clear bay',fmt(L.shelfLen)+' × '+fmt(L.clearBay)+' H')
+    +hdr('CENTER UPPER')+kv('Bays',P.bays)+kv('Clear opening each',fmt(C.upperClearW)+' × '+fmt(C.upperClearH)+' H')
+    +hdr('CENTER WINDOW')+kv('Clear opening',fmt(C.windowW)+' × '+fmt(Math.max(C.windowH,0))+' H')+kv('Seat',fmt(C.upperShelfLen)+' W × '+dd+' D at '+inch(P.seat))
+    +'</div><div>'+hdr('CENTER LOWER')+kv('Cubbies',P.cub)+kv('Clear opening each',fmt(C.cubClearW)+' × '+fmt(Math.max(C.cubClearH,0))+' H')+(has('FRONT')&&P.front?kv('Front board',fmt(P.W.CENTER)+' × 3½ H'):'')
+    +hdr('RIGHT TOWER')+kv('Shelves',P.SH.RIGHT)+kv('Each shelf',fmt(R.shelfLen)+' W × '+dd+' D')+kv('Clear bay',fmt(R.shelfLen)+' × '+fmt(R.clearBay)+' H')
+    +hdr('SPOTS')+kv('Spots',req.spotCount?req.spotCount+' × 3/16 in':'none')+'</div></div>';
+
+  /* receives / produces */
+  const ctlFacts=I.facts.filter(f=>f.sts===0&&parse(f.v)!=null).length;
+  const v=storeView();
+  const recv=[['INTENT','rev '+rev.n],['KNOBS',manifest().length+' from intent'],['CONTROLLING',ctlFacts+' facts'],['DERIVATION','stated rules'],['OPEN',OPEN_QUESTIONS.length+' carried'],
+    ['STORE',answerCurrent()?(v&&v.allOk?'answered':'answered, not all lines'):(S.answer?'old answer':'not asked')]];
+  $('receives').innerHTML=recv.map((c,i)=>'<span class="node"><b>'+c[0]+'</b><span>'+c[1]+'</span></span>'+(i<recv.length-1?'<i>·</i>':'')).join('');
+  const b=boardFor(def.runW);
+  const ops=['Cut to length: '+def.boards.length+' boards'];
+  if(b&&b.mill!=null)ops.push('Edge mill: 1×'+b.nominalW+' to '+fmt(b.mill)+' in');
+  if(req.spotCount)ops.push('Spot: '+req.spotCount);
+  $('produces').innerHTML=kv('One identified definition',esc(req.definition.configurationVersion))
+    +kv('Finished parts',def.feats.length)+kv('Boards (cut parts)',def.boards.length)
+    +kv('Features',req.spotCount?req.spotCount+' spots':'none')
+    +kv('Operations',ops.length)+'<p class="small dim" style="margin:0 0 6px">'+ops.join(' · ')+'</p>'
+    +kv('Material','1× '+woodName(P.wood).toLowerCase()+(b?', 1×'+b.nominalW:''))
+    +kv('Hardware',has('SCREWS')?screwsText()+' (kept, not sent)':'none')
+    +'<p class="dim small" style="margin:8px 0 0">Board lengths, stock, time and price come back from the Store. The bench doesn’t guess them.</p>';
+
+  /* depth: your number versus the boards */
+  const alts=[];
+  for(let n=1;n<=4;n++)DRESSED.forEach(d=>{const dep=r3(d.a*n);if(dep>=P.depth-0.001&&dep<=P.depth+1.5&&!(n===def.runs&&Math.abs(dep-P.depth)<0.001))alts.push({depth:dep,runs:n,d})});
+  alts.sort((x,y)=>(x.depth-y.depth)||(Math.abs(x.runs-def.runs)-Math.abs(y.runs-def.runs)));
+  const pick=[];alts.forEach(x=>{if(pick.length<2&&!pick.some(p=>p.depth===x.depth))pick.push(x)});
+  $('p-depth').innerHTML=kv('You asked for',inch(P.depth)+' deep')+kv('Made from',def.runs+' × '+inch(def.runW)+' boards')
+    +(b?(b.mill==null?'<p style="margin:6px 0 0"><b>Exact board width.</b> Every board is a 1×'+b.nominalW+' as it comes. No milling.</p>'
+      :'<p style="margin:6px 0 0"><b>Edge-milled to '+inch(b.mill)+'.</b> Each 1×'+b.nominalW+' ('+fmt(b.actual)+' in) runs through the edge mill against the fence before its parts are cut. Any depth works this way; the Store says whether its mill takes it, and prices the time.</p>')
+      :'<p style="margin:6px 0 0;color:var(--no)"><b>No 1× board is that wide.</b></p>')
+    +'<p class="dim" style="margin:6px 0 0">Your number stays yours. These land on board widths exactly, if you want them:</p>'
+    +pick.map((x,i)=>'<div class="ln" style="margin-top:6px"><span><b>'+inch(x.depth)+'</b> <span class="dim">: '+x.runs+' × 1×'+x.d.n+'</span></span><button type="button" class="xbtn" data-alt="'+i+'">USE '+fmt(x.depth)+' IN</button></div>').join('');
+  $$('#p-depth [data-alt]').forEach(btn=>btn.onclick=()=>{const x=pick[+btn.dataset.alt];P.depth=x.depth;P.runsSet=x.runs===derivedRuns(x.depth)?null:x.runs;changed()});
+
+  $('p-cond').innerHTML=cond.map(c=>'<div class="ln"><span><b>'+c.t+'</b> <span class="dim">'+c.d+'</span></span><span class="chip '+(c.block?'no':'warn')+'">'+(c.block?(c.at==='intent'?'FIX ON INTENT':'BLOCKS'):'TRAVELS')+'</span></div>').join('');
+
+  /* intent → parts, features, operations */
+  const sideCount=def.feats.filter(f=>f.role==='UPRIGHT').length,shelfCount=def.feats.filter(f=>f.role==='SHELF').length;
+  const rows=[
+    ['Overall height',inch(P.H),sideCount+' sides, each '+inch(P.H)+' long','PARTS'],
+    ['Left · center · right widths',fmt(P.W.LEFT)+' · '+fmt(P.W.CENTER)+' · '+fmt(P.W.RIGHT)+' in','tops, bottoms, shelves, upper shelf and seat at width − 1½ in','PARTS'],
+    ['Depth ÷ boards across',inch(P.depth)+' ÷ '+def.runs,'every part is '+def.runs+' board'+(def.runs===1?'':'s')+' of '+inch(def.runW)+(b&&b.mill!=null?'; each 1×'+b.nominalW+' edge-milled first':''),b&&b.mill!=null?'PARTS · OPERATION':'PARTS'],
+    ['Tower shelves',P.SH.LEFT+' + '+P.SH.RIGHT,shelfCount+' shelves; the top one on the window-head line, the rest dividing the space below evenly','PARTS'],
+    ['Upper storage · bays',inch(P.upperH)+' · '+P.bays,'upper shelf position; '+(P.bays-1)+' upper divider'+(P.bays-1===1?'':'s')+' at '+inch(P.upperH),'PARTS'],
+    ['Seat height · cubbies',inch(P.seat)+' · '+P.cub,'seat position; '+(P.cub-1)+' cubby divider'+(P.cub-1===1?'':'s')+' at '+inch(Math.max(P.seat-2*T,0)),'PARTS']
+  ];
+  if(has('FRONT'))rows.push(['Front board',P.front?'yes':'no',P.front?'one 1×4 as it comes, '+inch(P.W.CENTER)+' long':'no part','PARTS']);
+  if(has('SPOTS'))rows.push(['Shelf-pin spot facing',P.spots.rule?spotRule(P.spots).label:'placement missing',P.spots.rule?((P.SH.LEFT+P.SH.RIGHT)*2*def.runs)+' spots at the shelf positions, on the tower sides':'nothing until placed','FEATURES · OPERATION']);
+  if(has('XSPOT'))rows.push(['One more spot',P.xspot.target||'not placed',P.xspot.target?'one spot on each board of '+P.xspot.target:'nothing until placed','FEATURE · OPERATION']);
+  rows.push(['Wood',woodName(P.wood),'the material of every cut package','MATERIAL']);
+  if(has('SCREWS'))rows.push(['Wood screws',screwsText(),'a hardware requirement kept on the job; not sent to the Store yet','HARDWARE · KEPT']);
+  rows.push(['Every board','—','cut to length; the Store picks the board length and plans the cuts','OPERATION']);
+  $('xform').innerHTML='<thead><tr><th>From intent</th><th>Now</th><th>Makes</th><th>Kind</th></tr></thead><tbody>'
+    +rows.map(r=>'<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td>'+r[2]+'</td><td><span class="chip">'+r[3]+'</span></td></tr>').join('')+'</tbody>';
+
+  /* request register: nothing drops off the list */
+  const reg=[];
+  if(b&&b.mill!=null)reg.push(['Edge-mill 1×'+b.nominalW+' boards to '+fmt(b.mill)+' in wide','the whole board, against the fence, before its parts are cut','SENT','ok']);
+  reg.push(['Cut every part to length',def.boards.length+' boards, in '+req.definition.cutPackages.length+' package'+(req.definition.cutPackages.length===1?'':'s'),'SENT','ok']);
+  if(has('SPOTS'))reg.push(['Shelf-pin spot facing',P.spots.rule?((P.SH.LEFT+P.SH.RIGHT)*2*def.runs)+' spots, '+spotRule(P.spots).label:'needs a placement',P.spots.rule?'SENT':'NEEDS AN ANSWER',P.spots.rule?'ok':'no']);
+  if(has('XSPOT')){const ok=!cond.some(c=>c.block&&/extra spot/.test(c.t));reg.push(['One more spot',ok?P.xspot.target+' · '+P.xspot.offset+' in from its end':'needs a part, a distance and a placement',ok?'SENT':'NEEDS AN ANSWER',ok?'ok':'no'])}
+  if(has('SCREWS'))reg.push(['Wood screws',screwsText()+'. The link to the Store carries hardware only by Store item number, and this page holds none','KEPT · NOT SENT','warn']);
+  keptList().forEach(k=>reg.push([esc(k.t),'kept on your list; the Store has no line for it, so it isn’t sent and isn’t claimed done','KEPT · NOT SENT','warn']));
+  OPEN_QUESTIONS.forEach(q=>reg.push([q.t,'travels with the job; '+q.owner.toLowerCase()+' owns it',q.status,q.status==='UNRESOLVED'?'warn':'']));
+  $('ws-reg').innerHTML=reg.map(r=>'<div class="ln"><span>'+r[0]+' <span class="dim">: '+r[1]+'</span></span><span class="chip '+r[3]+'">'+r[2]+'</span></div>').join('');
+
+  /* parts */
+  const groups={};
+  def.feats.forEach(f=>{const k=f.asm+'|'+f.role+'|'+f.len;if(!groups[k])groups[k]={asm:f.asm,role:f.role,name:f.name,len:f.len,qty:0,runs:f.runs.length,runW:f.runs[0]?f.runs[0].w:0,ids:[],defined:f.defined};groups[k].qty++;groups[k].ids.push(f.id)});
+  const gl=Object.values(groups);
+  $('pt-table').innerHTML='<thead><tr><th>Module</th><th>Part</th><th>Qty</th><th>Finished each</th><th>Boards each</th><th>Spots</th><th>Status</th></tr></thead><tbody>'
+    +gl.map(g=>{const sp=g.ids.reduce((n,id)=>n+def.feats.find(f=>f.id===id).runs.reduce((m,r)=>m+((spots[r.id]||[]).length),0),0);
+      return '<tr><td>'+g.asm.replace('ASM-','').toLowerCase()+'</td><td>'+g.name+'</td><td>'+g.qty+' ×</td><td>'+fmt(g.len)+' × '+(g.role==='FRONT'?'3½':fmt(P.depth))+' × ¾</td><td>'+g.runs+' × '+fmt(g.runW)+' in</td><td>'+(sp||'—')+'</td><td><span class="chip '+(g.defined?'ok':'no')+'">'+(g.defined?'DEFINED':'NEEDS AN ANSWER')+'</span></td></tr>'}).join('')+'</tbody>';
+  $('pt-count').textContent=gl.length;$('pt-occ').textContent=def.feats.length;$('pt-run').textContent=def.boards.length;
+  const live={};def.feats.forEach(f=>{live[f.id]=1});const hist=Object.keys(occHistory).filter(id=>!live[id]);
+  $('occ-wrap').innerHTML='<details><summary>EVERY FINISHED PART: '+def.feats.length+' IDS, '+def.boards.length+' BOARDS</summary><div class="small">'
+    +def.feats.map(f=>'<div class="kv"><span>'+f.id+'</span><span>'+f.name+' · '+fmt(f.len)+' in · boards '+f.runs.map(r=>r.id.split('-').pop()+' @ '+fmt(r.w)).join(', ')+'</span></div>').join('')
+    +(hist.length?'<div class="kv" style="margin-top:6px"><span class="dim">Not in this version, kept for the session</span><span class="dim">'+hist.join(', ')+'</span></div>':'')+'</div></details>';
+  $('p-ec').innerHTML=[['Left · center · right',inch(P.W.LEFT)+' · '+inch(P.W.CENTER)+' · '+inch(P.W.RIGHT),'ENTERED'],['Overall width',inch(def.W),'DERIVED'],
+    ['Overall height',inch(P.H),'ENTERED'],['Depth',inch(P.depth),'ENTERED'],['Boards across the depth',def.runs,P.runsSet==null?'DERIVED':'ENTERED'],['Each board finishes at',inch(def.runW),'DERIVED'],
+    ['Seat height',inch(P.seat),'ENTERED'],['Upper storage',inch(P.upperH),'ENTERED'],['Window clear opening',fmt(C.windowW)+' × '+fmt(Math.max(C.windowH,0))+' in','DERIVED'],
+    ['Cubby clear opening',fmt(C.cubClearW)+' × '+fmt(Math.max(C.cubClearH,0))+' in','DERIVED'],['Shelf positions',L.shelfDatums.map(fmt).join(', ')+' in','DERIVED'],
+    ['Width left in the opening',M.narrow!=null?inch(M.narrow-def.W-P.gap*2):'not checked','DERIVED']]
+    .map(r=>'<div style="margin-bottom:7px"><div style="display:flex;justify-content:space-between;gap:8px"><span class="dim small">'+r[0]+'</span><span class="chip">'+r[2]+'</span></div><div style="font-weight:650">'+r[1]+'</div></div>').join('');
+
+  const hs=TERMS.state().history;
+  $('history-note').hidden=!hs;
+  if(hs)$('history-note').innerHTML='<b>'+hs+' earlier answer'+(hs===1?'':'s')+' kept in history.</b> This version, revision '+rev.n+', needs its own fresh Store answer. Nothing from an earlier version carries over.';
+
+  /* bench gate */
+  $('btn-ask').disabled=blocking.length>0||S.asking;
+  $('btn-ask').textContent=S.asking?'ASKING THE STORE…':answerCurrent()?'SEE THE STORE’S ANSWER →':'ASK THE STORE →';
+  $('bench-gate').textContent=blocking.length?blocking.length+' condition'+(blocking.length===1?'':'s')+' to settle before the Store can answer.':'Revision '+rev.n+' is ready to ask. The Store gets exactly this.';
+
+  feedTerms();renderStore(req,cond);renderCall();renderYard();renderRecord(def);renderAudit();
+  syncNav();
+}
+
+/* ═════ PAGE 4 · THE STORE ANSWERS ═════ */
+function renderStore(req,cond){
+  const a=S.answer,v=storeView(),panel=$('store-panel');
+  const blocked=cond.some(c=>c.block);
+  let h='';
+  if(S.asking){h='<p class="lb">ASKING</p><p class="status ask">Sending revision '+rev.n+' to the live Store…</p>'}
+  else if(S.error){h='<p class="lb">NO ANSWER</p><p class="status bad">The Store didn’t answer ('+esc(S.error)+'). Nothing is shown in its place.</p>'
+    +(location.protocol==='file:'||/STORE_ZERO_UNAVAILABLE|Failed to fetch|NetworkError|Load failed/i.test(S.error)?'<p class="small dim">The live Store answers the published app. A copy of this page opened anywhere else can’t reach it, and a failed ask stays a failed ask.</p>':'')
+    +'<button type="button" class="go" data-ask>TRY AGAIN</button>'}
+  else if(!a){h='<p class="lb">NOT ASKED YET</p><p class="status">Revision '+rev.n+' hasn’t been sent. '+(blocked?'Settle the conditions on the bench first.':'Ask, and the live Store answers this exact version.')+'</p>'
+    +'<button type="button" class="go" data-ask'+(blocked?' disabled':'')+'>ASK THE STORE NOW</button>'}
+  else{
+    const t=v.t,stale=a.stale,id=identities();
+    h='<p class="lb">'+(stale?(a.reused?'ANSWER USED · ASK AGAIN FOR REVISION '+rev.n:'OLD ANSWER · REVISION '+a.rev+' · YOUR DEFINITION HAS CHANGED'):'STORE BUDGETARY ANSWER · STORE ZERO · REVISION '+a.rev)+'</p>'
+      +(v.estimate!=null?'<div class="big" style="'+(stale?'opacity:.5':'')+'">'+money(v.estimate)+'</div><p class="small" style="margin:0 0 6px">Complete budgetary estimate: wood '+money(t.material)+' + machine work '+money(t.machine_service)+(t.items?' + hardware '+money(t.items):'')+' · '+Math.round(v.minutes)+' min on the machine'+(v.spots?' · '+v.spots+' spots':'')+'</p>'
+        :'<div class="big none" style="'+(stale?'opacity:.5':'')+'">No complete budgetary estimate</div><p class="small" style="margin:0 0 6px">Not every line is supportable, so there is no complete price for this version. Each line’s own answer is below.</p>')
+      +'<p class="status '+(v.allOk?'good':'bad')+'">'+(v.allOk?'Every line answered: SUPPORTABLE.':(t.linesNotSupportable||v.lines.filter(l=>l.status!=='SUPPORTABLE').length)+' line(s) not supportable. The refusal is the result.')+'</p>'
+      +'<p class="small dim" style="margin:6px 0 0">A Store budgetary answer from a declared reference lumberyard. Not a quote and not an offer.</p>'
+      +'<p class="ids">SENT '+esc(String(id.sent||'—').slice(0,16))+'… · ARRIVED '+esc(String(id.arrived||'—').slice(0,16))+'… · ANSWERED '+esc(String(id.answered||'—').slice(0,16))+'… · Store '+esc(String(id.pin||'—').slice(0,12))+'</p>'
+      +(stale?'<button type="button" class="go" data-ask style="margin-top:8px"'+(blocked?' disabled':'')+'>ASK AGAIN FOR REVISION '+rev.n+'</button>':'');
+  }
+  panel.innerHTML=h;
+  $$('#store-panel [data-ask]').forEach(bt=>bt.onclick=askStore);
+
+  if(v){
+    $('store-lines').innerHTML='<div class="box"><h4>LINE BY LINE</h4><div class="bd scroll-x"><table class="pt"><thead><tr><th>Line</th><th>Store item</th><th>Qty</th><th>Min</th><th>Status</th><th>Price</th></tr></thead><tbody>'
+      +v.pk.map(p=>'<tr><td>'+lineLabel(p.packageId)+'</td><td>'+(p.storeSku?esc(p.storeSku)+' ('+p.stockLengthIn+' in)':'—')+'</td><td>'+(p.boards?p.boards+' boards':'—')+'</td><td>'+(p.time?Math.round(p.time.T_MACHINE_min):'—')+'</td><td><span class="chip '+(p.status==='SUPPORTABLE'?'ok':'no')+'">'+p.status+'</span>'
+        +(p.status!=='SUPPORTABLE'&&(p.considered||[]).length?'<br><span class="small dim">'+p.considered.map(c=>c.stockLengthIn+' in board: '+(c.status==='SUPPORTABLE'?'fits':plain(c.reason||c.status))).join('; ')+'</span>'
+          :((p.reasonCodes||[]).length?'<br><span class="small dim">'+p.reasonCodes.map(plain).join('; ')+'</span>':''))+'</td><td>'+money(p.Q)+'</td></tr>').join('')
+      +v.it.map(i=>'<tr><td>'+lineLabel(i.lineId)+'</td><td>'+esc(i.storeSku?(i.description||i.storeSku)+(i.packages?' × '+i.packages:''):'no item')+'</td><td>'+(i.piecesSupplied||i.qty)+'</td><td>—</td><td><span class="chip '+(i.status==='SUPPORTABLE'?'ok':'no')+'">'+i.status+'</span>'
+        +((i.reasonCodes||[]).length?'<br><span class="small dim">'+i.reasonCodes.map(plain).join('; ')+'</span>':'')+'</td><td>'+money(i.Q)+'</td></tr>').join('')
+      +'</tbody></table>'
+      +'<p class="small dim" style="margin:8px 0 0">Stubs come back with the parts: '+(v.pk.reduce((n,p)=>n+(p.stubs||[]).length,0)||'none')+'. The wood you chose is never swapped.</p></div></div>';
+  }else $('store-lines').innerHTML='';
+  const kept=keptList();
+  $('store-kept').innerHTML='<div class="box"><h4>ON THE JOB, NOT ASKED OF THE STORE</h4><div class="bd">'
+    +kept.map(k=>'<div class="ln"><span>'+esc(k.t)+' <span class="dim">: the Store has no line for it; kept, not claimed done</span></span><span class="chip warn">KEPT · NOT SENT</span></div>').join('')
+    +(has('SCREWS')?'<div class="ln"><span>Wood screws: '+esc(screwsText())+' <span class="dim">: kept, not sent; the link to the Store carries hardware only by Store item number</span></span><span class="chip warn">KEPT · NOT SENT</span></div>':'')
+    +OPEN_QUESTIONS.map(q=>'<div class="ln"><span>'+q.t+' <span class="dim">: not a Store question; '+q.owner.toLowerCase()+' owns it</span></span><span class="chip '+(q.status==='UNRESOLVED'?'warn':'')+'">'+q.status+'</span></div>').join('')
+    +'</div></div>';
+  const st=TERMS.state();
+  $('btn-call').disabled=!st.callOpen;
+  $('store-gate').textContent=st.callOpen?'Your call is open for revision '+rev.n+'.'
+    :!a?'Your call opens after the Store answers.'
+    :a.stale?'Ask again for revision '+rev.n+'.'
+    :'Not every line is supportable. Change something on the bench, or stop here: a refusal is a result.';
+}
+
+/* ═════ PAGE 5 · YOUR CALL ═════ */
+function renderTerms(){for(const id of ['call-terms','yard-terms','record-terms']){const h=$(id);if(h)h.innerHTML=TERMS.renderControls(h.dataset.termsStep)+TERMS.renderChain()}}
+function afterTerms(action){
+  render();
+  if(action==='accept')go('yard');
+  if(action==='yard')go('record');
+}
+function renderCall(){
+  const v=storeView(),st=TERMS.state();
+  renderTerms();
+  if(!st.callOpen||!v){$('call-sub').textContent=st.stage==='REFUSED_BY_STORE'?'The Store did not support this version. Steps 4 to 6 stay closed; the refusal is the result.':'Waiting on a current Store answer with every line supportable.';$('call-body').innerHTML='';return}
+  $('call-sub').textContent='Window seat, revision '+S.answer.rev+' · '+woodName(P.wood)+' · '+money(v.estimate)+' complete budgetary estimate';
+  $('call-body').innerHTML='<div class="box"><h4>WHAT STORE ZERO WOULD CUT AND SUPPLY</h4><div class="bd scroll-x"><table class="pt"><thead><tr><th>Line</th><th>Store item</th><th>Qty</th><th>Price</th></tr></thead><tbody>'
+    +v.pk.map(p=>'<tr><td>'+lineLabel(p.packageId)+'</td><td>'+esc(p.storeSku)+'</td><td>'+p.boards+' boards</td><td>'+money(p.Q)+'</td></tr>').join('')
+    +v.it.map(i=>'<tr><td>'+lineLabel(i.lineId)+'</td><td>'+esc(i.storeSku)+'</td><td>'+(i.packages||i.qty)+'</td><td>'+money(i.Q)+'</td></tr>').join('')
+    +'</tbody></table><div class="kv" style="margin-top:10px"><span>Machine work (inside the wood lines)</span><b>'+money(v.t.machine_service)+'</b></div>'
+    +'<div class="kv"><span><b>Complete budgetary estimate</b></span><b style="font-size:22px">'+money(v.estimate)+'</b></div>'
+    +'<p class="small dim" style="margin:6px 0 0">From the Store budgetary answer, receipt '+esc(String(S.answer.receipt?.receiptHash||'').slice(0,12))+'. The offer below is simulated and built from that exact answer.</p></div></div>'
+    +'<div class="box"><h4>STILL OPEN, AND STILL YOURS TO KNOW</h4><div class="bd">'
+    +OPEN_QUESTIONS.filter(q=>q.status!=='CONTEXT').map(q=>'<div class="ln"><span><b>'+q.t+'</b> <span class="dim">'+q.d+'</span></span><span class="chip warn">'+q.status+'</span></div>').join('')
+    +(keptList().length?'<div class="ln"><span><b>Kept, not sent</b> <span class="dim">'+keptList().map(k=>esc(k.t)).join('; ')+'. Accepting doesn’t make them done.</span></span><span class="chip warn">KEPT</span></div>':'')
+    +'</div></div>';
+}
+
+/* ═════ PAGE 6 · WE CUT IT ═════ */
+function renderYard(){
+  const st=TERMS.state(),v=storeView();
+  if(!st.yardOpen||!v){$('yard-sub').textContent='Nothing is in the yard yet. This page opens after you accept the simulated offer.';$('yard-body').innerHTML='';return}
+  $('yard-sub').textContent='Window seat, revision '+S.answer.rev+' · '+woodName(P.wood)+' · order '+st.orderId;
+  const boards=v.pk.flatMap(p=>(p.cutPlan||[]).map(bd=>({...bd,line:lineLabel(p.packageId)})));
+  $('yard-body').innerHTML='<div class="box"><h4>CUT LIST, BOARD BY BOARD: THE STORE’S PLAN</h4><div class="bd scroll-x"><table class="pt"><thead><tr><th>Board</th><th>Line</th><th>Store item</th><th>Parts, in cut order</th><th>Back to you</th></tr></thead><tbody>'
+    +boards.map(bd=>'<tr><td class="id">'+esc(bd.boardId)+'</td><td>'+bd.line+'</td><td>'+esc(bd.storeSku)+' ('+bd.stockLengthIn+' in)</td><td>'+(bd.partsInCutOrder||[]).map(p=>esc(p.partId)+' '+fmt(p.lengthIn)+'"').join(' → ')+'</td><td>'+(bd.stubIn!=null?fmt(bd.stubIn)+'" stub':(bd.offcutIn!=null?fmt(bd.offcutIn)+'" offcut':'—'))+'</td></tr>').join('')
+    +'</tbody></table><p class="small dim" style="margin:8px 0 0">'+Math.round(v.minutes)+' min on the machine'+(v.spots?' · '+v.spots+' spots':'')+' · machine work '+money(v.t.machine_service)+'. Nothing is re-planned here. SIMULATED: no machine runs, and Cycle Start stays with the person at the cell.</p></div></div>';
+}
+
+/* ═════ PAGE 7 · PICK UP & BUILD ═════ */
+function renderRecord(def){
+  const st=TERMS.state(),v=storeView();
+  if(!st.recordOpen||!v){$('record-sub').textContent='Nothing to pick up yet. This page opens once the parts are cut and ready.';$('record-body').innerHTML='';return}
+  $('record-sub').textContent='Window seat, revision '+S.answer.rev+' · '+woodName(P.wood)+' · '+money(v.estimate);
+  const where={};v.pk.forEach(p=>(p.cutPlan||[]).forEach(bd=>(bd.partsInCutOrder||[]).forEach(x=>{where[x.partId]=bd.boardId})));
+  const stubs=v.pk.reduce((n,p)=>n+(p.stubs||[]).length,0);
+  const kit=v.pk.map(p=>{const parts=(p.cutPlan||[]).reduce((n,bd)=>n+(bd.partsInCutOrder||[]).length,0);return '<tr><td>'+lineLabel(p.packageId)+'</td><td>'+parts+' cut parts from '+p.boards+' × '+esc(p.storeSku)+'</td><td>'+parts+'</td></tr>'});
+  if(stubs)kit.push('<tr><td>Stubs</td><td>Returned with your kit</td><td>'+stubs+'</td></tr>');
+  v.it.forEach(i=>kit.push('<tr><td>'+lineLabel(i.lineId)+'</td><td>'+esc(i.description||i.storeSku)+'</td><td>'+(i.packages||i.qty)+'</td></tr>'));
+  $('record-body').innerHTML='<div class="box"><h4>YOUR KIT</h4><div class="bd scroll-x"><table class="pt"><thead><tr><th>What</th><th>Details</th><th>Qty</th></tr></thead><tbody>'+kit.join('')+'</tbody></table></div></div>'
+    +'<div class="box"><h4>RECORD</h4><div class="bd"><p class="small dim" style="margin:0">Order '+esc(st.orderId)+' · '+esc(S.answer.definition.configurationVersion)+' · Store '+esc(String(S.answer.storePin).slice(0,7))+' · request '+esc(String(S.answer.requestId).slice(0,8))+'</p>'
+    +OPEN_QUESTIONS.filter(q=>q.status!=='CONTEXT').map(q=>'<p class="small" style="margin:6px 0 0"><b>'+q.t+':</b> <span class="dim">still '+q.status.toLowerCase()+'. Picking up doesn’t answer it.</span></p>').join('')+'</div></div>'
+    +'<details><summary>EVERY PART, AND THE BOARD IT CAME FROM</summary><div class="small">'
+    +def.feats.map(f=>'<div class="kv"><span>'+f.id+' · '+f.name+'</span><span>'+f.runs.map(r=>esc(r.id.split('-').pop())+' ← '+esc(where[r.id]||'—')).join(', ')+'</span></div>').join('')
+    +'</div></details>'
+    +'<p class="small" style="margin-top:10px"><b>Why keep this.</b> <span class="dim">Years out, one shelf breaks. This record names the exact part, the wood and the board it came from, so you order that one piece. A reorder still runs today’s Store answer and today’s gates.</span></p>'
+    +'<p class="small dim">Build it with the drawing. SIMULATED: no money moved and no machine ran; the boards, cuts, minutes and prices are Store Zero’s answer.</p>';
+}
+
+/* ═════ THE AUDIT COPY: the whole job as plain text, from the one state ═════ */
+function auditText(){
+  const def=buildDefinition(),req=buildRequest(def),cond=conditions(def),a=S.answer,v=storeView(),st=TERMS.state(),id=identities();
+  const L=[],hr=t=>{L.push('');L.push('── '+t+' '+'─'.repeat(Math.max(3,60-t.length)))};
+  L.push('WINDOW SEAT · SPACE UTILIZATION · AUDIT COPY');
+  L.push('One state, one definition, one Store request. This text is the same on either route.');
+  hr('1 · IDENTIFIED DEFINITION');
+  L.push('Version: '+req.definition.configurationVersion+' (revision '+rev.n+')');
+  L.push('Her idea: "'+I.idea.trim()+'"');
+  L.push('Sources kept:');SOURCES.forEach(s=>L.push('  '+s.file+' · '+s.role+' · '+s.kept));
+  L.push('Measured facts (value · where it came from · whether it controls · use):');
+  I.facts.forEach(f=>L.push('  '+f.label+': '+(f.v?f.v+' in':'(blank)')+' · '+SRC[f.src]+' · '+STS[f.sts]+' · '+f.use));
+  L.push('Taste (travels, cuts nothing): '+(I.pref.filter(c=>c.on).map(c=>c.t).join('; ')||'none'));
+  L.push('What’s off (recorded, not corrected): '+(I.off.filter(c=>c.on).map(c=>c.t).join('; ')||'none'));
+  L.push('Open questions (carried, not answered here or by the Store):');OPEN_QUESTIONS.forEach(q=>L.push('  '+q.t+' · '+q.status+' · owner: '+q.owner));
+  L.push('Knobs made at intent (knob · how made · value on the bench):');manifest().forEach(k=>L.push('  '+k.label+' · '+k.made+' ('+k.from+') · '+k.val()));
+  L.push('Derived: overall width '+fmt(def.W)+' in; '+def.runs+' board(s) across, each '+fmt(def.runW)+' in; tower shelf positions '+def.left.shelfDatums.map(fmt).join(', ')+' in (left), '+def.right.shelfDatums.map(fmt).join(', ')+' in (right); window opening '+fmt(def.center.windowW)+' × '+fmt(Math.max(def.center.windowH,0))+' in');
+  L.push('Finished parts ('+def.feats.length+'; id · name · finished length × width × thickness · boards):');
+  def.feats.forEach(f=>L.push('  '+f.id+' · '+f.name+' · '+fmt(f.len)+' × '+(f.role==='FRONT'?'3 1/2':fmt(P.depth))+' × 3/4 in · '+f.runs.map(r=>r.id+' @ '+fmt(r.w)+' in').join(', ')));
+  const b=boardFor(def.runW);
+  L.push('Operations: cut to length ('+def.boards.length+' boards)'+(b&&b.mill!=null?'; edge mill 1×'+b.nominalW+' to '+fmt(b.mill)+' in':'')+(req.spotCount?'; spot ('+req.spotCount+')':''));
+  L.push('Features: '+(req.spotCount?req.spotCount+' spots, 3/16 in wide × 3/16 in deep':'none'));
+  L.push('Material: '+woodName(P.wood)+', ¾ in solid board'+(b?', from 1×'+b.nominalW:''));
+  L.push('Hardware requirement: '+(has('SCREWS')?screwsText()+' (kept, not sent: the link to the Store carries hardware only by Store item number)':'none'));
+  L.push('Kept, not sent: '+(keptList().map(k=>k.t).join('; ')||'none'));
+  L.push('Conditions: '+cond.map(c=>(c.block?'[BLOCKS] ':'[TRAVELS] ')+c.t).join('; '));
+  hr('2 · SENT TO THE STORE');
+  if(!a)L.push('Not sent yet. This is exactly what will be sent for revision '+rev.n+':');
+  else if(a.stale)L.push('The last answer was for '+a.definition.configurationVersion+'. The definition has changed since; below is what was sent then.');
+  L.push('Request type: CUT_PACKAGE_V1 · project: window-seat · definition kind: cut_package.v1 · rule version: 0.1');
+  L.push(JSON.stringify(a?a.definition:req.definition,null,2));
+  hr('3 · STORE BUDGETARY ANSWER');
+  if(!a||!v){L.push(S.error?'No answer: '+S.error+'. Nothing stands in its place.':'Not answered yet.')}
+  else{
+    L.push('Status: '+v.ev.status+(a.stale?' (for an earlier version)':''));
+    L.push('Complete budgetary estimate: '+(v.estimate!=null?money(v.estimate):'none. Not every line is supportable.'));
+    if(v.estimate!=null)L.push('  wood '+money(v.t.material)+' + machine work '+money(v.t.machine_service)+(v.t.items?' + hardware '+money(v.t.items):'')+' · '+Math.round(v.minutes)+' min on the machine');
+    L.push('Lines:');
+    v.pk.forEach(p=>L.push('  '+p.packageId+' · '+p.status+' · '+(p.storeSku||'no item')+(p.stockLengthIn?' ('+p.stockLengthIn+' in)':'')+' · '+(p.boards||0)+' boards · '+(p.time?Math.round(p.time.T_MACHINE_min)+' min':'— min')+' · '+money(p.Q)+((p.reasonCodes||[]).length?' · reasons: '+p.reasonCodes.join(', '):'')));
+    v.it.forEach(i=>L.push('  '+i.lineId+' · '+i.status+' · '+(i.storeSku||'no item')+(i.packages?' × '+i.packages:'')+' · '+money(i.Q)+((i.reasonCodes||[]).length?' · reasons: '+i.reasonCodes.join(', '):'')));
+    L.push('Identities:');
+    L.push('  SENT      payload digest   '+(id.sent||'—'));
+    L.push('            demand signature '+(id.demand||'—'));
+    L.push('  ARRIVED   receipt hash     '+(id.arrived||'—')+(id.evaluatedAt?' · evaluated '+id.evaluatedAt:''));
+    L.push('  ANSWERED  result hash      '+(id.answered||'—'));
+    L.push('            input hash       '+(id.input||'—'));
+    L.push('  Store pin '+(id.pin||'—')+' · request '+(id.requestId||'—')+(id.freshness?' · '+id.freshness:''));
+  }
+  hr('4 · AFTER THE ANSWER · SHARED TERMS FLOW');
+  L.push('Stage: '+st.stage+(st.orderId?' · order '+st.orderId:''));
+  (st.events||[]).forEach(e=>L.push('  '+e.id+' · '+(e.at||'—')+' · '+(e.hash||'—')+(e.prevHash?' ← '+e.prevHash:'')+(e.detail?' · '+e.detail:'')));
+  if(!(st.events||[]).length)L.push('  no events yet');
+  L.push('Commerce and the yard are simulated: no money moves and no machine runs.');
+  hr('5 · CHECK IT YOURSELF');
+  const pin=(a&&a.storePin)||'(the pin in stb-store-runtime.json)';
+  const demand=a?(a.demand||{classId:'cut_package.v1',...a.definition,storeRevision:a.storePin}):null;
+  if(!demand)L.push('Ask the Store first. The exact demand it evaluated appears here.');
+  else{L.push('1. Save this as window-seat.json:');L.push(JSON.stringify(demand,null,2))}
+  L.push('2. Get the Store at the pinned commit and run the same request:');
+  L.push('   git clone https://github.com/GeorgePlattDemo/scan-to-build-store');
+  L.push('   cd scan-to-build-store && git checkout '+pin);
+  L.push('   node --input-type=module -e "import fs from \'node:fs\'; import {requestCutPackageStoreEvaluation as ask} from \'./cut-package-evaluator.mjs\'; const d=JSON.parse(fs.readFileSync(\'window-seat.json\',\'utf8\')); const r=ask(d,{requestId:\'my-check\',storeRevision:d.storeRevision}); console.log(r.status, r.totals.sumOfSupportableLines, r.calculationIdentity.resultHash)"');
+  L.push('3. Compare: the same demand and the same pin give the same result hash'+(id&&id.answered?' ('+id.answered+').':'.'));
+  return L.join('\n');
+}
+function renderAudit(){$('audit-text').textContent=auditText()}
+
+/* Every Store answer carries the same Store Zero reference text and "What happens next", from the one
+   shared file. If that file is missing or incomplete, say so; never a shortened stand-in. */
+function renderStoreDoctrine(host){
+  if(!host)return;
+  const d=window.STBStoreZeroCanonicalDoctrine;
+  const probe=document.createElement('div');if(d)probe.innerHTML=d.processStepsHtml||'';
+  const ok=!!d&&probe.querySelectorAll('.s').length===d.expectedProcessStepCount;
+  host.innerHTML=ok?'<div class="band">'+d.definitionHtml+'</div>'+d.processIntroHtml+d.processStepsHtml
+    :'<div class="band warn"><b>Store Zero reference text unavailable.</b> '+((d&&d.unavailableMessage)||'The shared Store Zero text did not load, so none is shown in its place.')+'</div>';
+}
+
+/* ═════ ROUTES: the regular path, or one long scroll. One state underneath. ═════ */
+const SECTIONS=['hero','intent','bench','store','request','yard','record'];
+const NAV_OF={hero:'scan',intent:'scan',bench:'configure',store:'store',request:'request',yard:'yard',record:'record',audit:'record'};
+const FIRST_OF={scan:'hero',configure:'bench',store:'store',request:'request',yard:'yard',record:'record'};
+function usable(){const t=TERMS.state();return {hero:true,intent:true,bench:true,store:true,request:t.callOpen,yard:t.yardOpen,record:t.recordOpen,audit:true}}
+function setView(view,section){
+  S.view=view;if(section)S.section=section;
+  document.body.dataset.view=view;document.body.dataset.section=S.section;
+  $$('.step').forEach(s=>s.classList.toggle('on',s.dataset.section===S.section));
+  $$('[data-view-btn]').forEach(bt=>{const on=bt.dataset.viewBtn===view;bt.classList.toggle('on',on);bt.setAttribute('aria-pressed',on)});
+  syncNav();
+}
+function go(section){
+  if(!SECTIONS.includes(section)&&section!=='audit')return;
+  if(!usable()[section])return;
+  if(S.view==='whole'){S.section=section;syncNav();$('s-'+section).scrollIntoView({behavior:'smooth',block:'start'});return}
+  setView('trail',section);window.scrollTo(0,0);
+  if(section==='store'&&(!S.answer||S.answer.stale)&&!S.asking&&!S.error&&!conditions(buildDefinition()).some(c=>c.block))askStore();
+}
+/* Which page is on screen in the long scroll: the last one whose top has passed the route bar. */
+function visibleSection(){let cur='hero';for(const s of SECTIONS){const r=$('s-'+s).getBoundingClientRect();if(r.top<120)cur=s}return cur}
+function syncNav(){
+  const u=usable(),navU={scan:true,configure:true,store:true,request:u.request,yard:u.yard,record:u.record};
+  $$('[data-nav]').forEach(bt=>{const st=bt.dataset.nav;bt.disabled=!navU[st];bt.classList.toggle('on',S.view==='trail'&&NAV_OF[S.section]===st)});
+  if(embedded&&window.parent!==window)window.parent.postMessage({type:'STB_SEAT_STATE',projectId:'window-seat',view:S.view,step:NAV_OF[S.section],section:S.section,usable:navU},location.origin);
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-to]');if(t){e.preventDefault();go(t.dataset.to);return}
+  const r=e.target.closest('[data-route]');if(r){if(r.dataset.route==='whole'){setView('whole');$('s-intent').scrollIntoView({behavior:'smooth',block:'start'})}else{setView('trail','intent');window.scrollTo(0,0)}return}
+  const n=e.target.closest('[data-nav]');if(n){const target=FIRST_OF[n.dataset.nav];if(S.view==='whole'){go(target)}else{go(target)}return}
+  const vl=e.target.closest('[data-view-link]');if(vl){e.preventDefault();setView('whole');$('s-audit').scrollIntoView({behavior:'smooth',block:'start'});return}
+  const vb=e.target.closest('[data-view-btn]');if(vb){
+    if(vb.dataset.viewBtn==='whole'){const at=S.section;setView('whole');$('s-'+at).scrollIntoView({block:'start'})}
+    else{const at=S.view==='whole'?visibleSection():S.section;setView('trail',usable()[at]?at:'hero');window.scrollTo(0,0)}
+    return}
+});
+window.addEventListener('scroll',()=>{if(S.view!=='whole')return;const s=visibleSection();if(s!==S.section){S.section=s;document.body.dataset.section=s;syncNav()}},{passive:true});
+
+/* Intent-page inputs: every change is a change of definition. */
+$('idea-text').addEventListener('input',function(){I.idea=this.value;changed()});
+$('mfields').addEventListener('input',()=>{readFacts();changed()});
+$('mfields').addEventListener('change',()=>{readFacts();changed()});
+['ws-pref','ws-off'].forEach(h=>$(h).addEventListener('click',e=>{const b=e.target.closest('.ws-chip');if(!b)return;
+  const a=h==='ws-pref'?I.pref:I.off;a[+b.dataset.i].on=!a[+b.dataset.i].on;changed()}));
+$('add-knobs').addEventListener('change',e=>{const c=e.target.closest('[data-add]');if(!c)return;
+  const k=c.dataset.add;I.added[k]=c.checked;
+  /* A knob added by hand starts with its required facts empty. No hidden defaults. */
+  if(c.checked){if(k==='front')P.front=true;if(k==='spots')P.spots={rule:null,inset:null};if(k==='xspot')P.xspot={target:'',offset:'',place:''};if(k==='screws')P.screws={gauge:'',lengthIn:'',finish:'',qty:''}}
+  controls();changed()});
+$('kept-asks').addEventListener('change',e=>{const c=e.target.closest('[data-kept]');if(!c)return;I.kept[c.dataset.kept]=c.checked;changed()});
+$('other-text').addEventListener('input',function(){I.otherText=this.value;changed()});
+
+$('btn-ask').onclick=()=>{if(answerCurrent()){go('store');return}if(S.view==='trail')go('store');else{$('s-store').scrollIntoView({behavior:'smooth',block:'start'});askStore()}};
+$('btn-call').onclick=()=>go('request');
+$('copy-audit').onclick=()=>{const txt=$('audit-text').textContent;(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>{$('copy-note').textContent='Copied.'},()=>{$('copy-note').textContent='Select the text below and copy it.'})};
+for(const id of ['call-terms','yard-terms','record-terms'])TERMS.bind($(id),afterTerms);
+TERMS.onChange(()=>{renderTerms();syncNav()});
+$('start-over').onclick=()=>{TERMS.setAnswer(null);S.answer=null;S.error=null;I=clone(INTENT_START);P=clone(START);rev.n++;
+  $('idea-text').value=I.idea;renderFactFields();readFacts();controls();render();setView('trail','hero');window.scrollTo(0,0)};
+window.addEventListener('message',event=>{
+  /* The System shell (the parent frame, or the top window that drives it) may choose the page. */
+  if(event.origin!==location.origin||(event.source!==window.parent&&event.source!==window.top))return;
+  if(event.data?.type!=='STB_SEAT_GO')return;
+  const st=String(event.data.stage||'');
+  if(st==='whole'){setView('whole');window.scrollTo(0,0);return}
+  const map={hero:'hero',scan:'hero',intent:'intent',configure:'bench',bench:'bench',store:'store',review:'store',request:'request',yard:'yard',terms:'yard',recap:'record',record:'record'};
+  if(map[st]){if(S.view==='whole')setView('trail',S.section);go(map[st])}
+});
+if(embedded)$('bar').hidden=true;
+
+$('idea-text').value=I.idea;
+renderFactFields();readFacts();controls();renderStoreDoctrine($('store-doctrine'));render();setView('trail','hero');
+window.STBWindowSeat=Object.freeze({version:'0.9',
+  definition:()=>buildDefinition(),
+  request:()=>buildRequest(buildDefinition()).definition,
+  record:()=>buildRequest(buildDefinition()).record,
+  conditions:()=>conditions(buildDefinition()),
+  knobs:()=>manifest().map(k=>k.id),
+  benchKnobs:()=>[...new Set($$('#s-configure [data-knob]').map(e=>e.dataset.knob))],
+  auditText:()=>auditText(),
+  state:()=>({view:S.view,section:S.section,rev:rev.n,asking:S.asking,error:S.error,answered:!!S.answer,current:answerCurrent(),terms:TERMS.state()})});
+})();
+</script>
+</body>
+</html>

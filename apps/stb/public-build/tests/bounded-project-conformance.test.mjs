@@ -62,7 +62,7 @@ assert.match(shell,/request:'4 · Your call'/);
 assert.match(shell,/Confirmed version sent to Store Zero\./);
 
 // Every live Store answer page carries the one shared Store Zero text (never a local copy).
-for(const file of ['stb-window-seat-0.8.html','stb-outdoor-picnic-0.1.html']){
+for(const file of ['stb-window-seat-0.9.html','stb-outdoor-picnic-0.1.html']){
   const page=read(file);
   assert.match(page,/store-zero-canonical-doctrine\.js\?v=/,file+' loads the shared Store Zero text');
   assert.match(page,/function renderStoreDoctrine/,file+' renders it with its Store answer');
