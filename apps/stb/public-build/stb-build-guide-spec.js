@@ -834,10 +834,10 @@
       ]
     }
   };
-  // Job 4 (Window Seat) rails: one per page of stb-window-seat-0.9.html, rendered inside that page.
+  // Job 3 (Window Seat) rails: one per page of stb-window-seat-0.9.html, rendered inside that page.
   const JOB4={
     "ws-hero": {
-      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 1 · HER IDEA",
+      "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 1 · HER IDEA",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
@@ -889,7 +889,7 @@
       ]
     },
     "ws-intent": {
-      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 2 · YOUR INTENT",
+      "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 2 · YOUR INTENT",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
@@ -1007,7 +1007,7 @@
       ]
     },
     "ws-bench": {
-      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 3 · THE BENCH",
+      "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 3 · THE BENCH",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
@@ -1094,7 +1094,7 @@
       ]
     },
     "ws-store": {
-      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 4 · STORE ANSWER",
+      "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 4 · STORE ANSWER",
       "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
       "bullets": [],
       "sections": [
@@ -1172,7 +1172,7 @@
       ]
     },
     "ws-request": {
-      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 5 · YOUR CALL",
+      "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 5 · YOUR CALL",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
@@ -1208,7 +1208,7 @@
       ]
     },
     "ws-yard": {
-      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 6 · WE CUT IT",
+      "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 6 · WE CUT IT",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
@@ -1231,7 +1231,7 @@
       ]
     },
     "ws-record": {
-      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · PAGE 7 · PICK UP & BUILD",
+      "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 7 · PICK UP & BUILD",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
@@ -1254,7 +1254,7 @@
       ]
     },
     "ws-audit": {
-      "header": "DEV/REV GUIDE — JOB 4 · WINDOW SEAT · AUDIT COPY",
+      "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · AUDIT COPY",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
@@ -1358,7 +1358,7 @@
     ]),
     projects:guide('Library',[
       ['Don’t overcrowd','Live, bounded or deferred. Say which.'],
-      ['Tiles = tests','Board · fit · plan · assembly · sheet.'],
+      ['Tiles = tests','Board · fit · assembly · plan · sheet.'],
       ['Start your own','First. Never moves.'],
       ['One project at a time','Switch tile → clear route + state.'],
       ['No cross-talk','Job 1 facts stay in Job 1.'],
