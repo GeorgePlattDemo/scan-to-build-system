@@ -1,3 +1,5 @@
+> **STATUS — HISTORICAL CUSTODY RECORD.** This file contains publication and reconciliation statements from the original Review → System custody transfer. Current publication comes from `apps/stb/public-build/` in System through `.github/workflows/publish-system-build.yml`; Review is frozen. Keep the body below as provenance, but do not treat its publication or reconciliation statements as current instructions. See [`CURRENT-SYSTEM-STATE.md`](../project/CURRENT-SYSTEM-STATE.md).
+
 # Public-build custody
 
 Consumed: YES

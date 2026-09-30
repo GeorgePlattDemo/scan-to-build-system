@@ -4,6 +4,18 @@
 **Scope:** current accepted baseline, current application candidate, and parallel machine-safety candidate.  
 **Rule:** PASS proves only the stated claim under the stated pins and boundaries.
 
+## Current public surface — navigation
+
+Start with [`CURRENT-SYSTEM-STATE.md`](CURRENT-SYSTEM-STATE.md) for the current publication source, current Store-pin owner, and current simulation/commissioning limits.
+
+At the documentation-reconciliation baseline `scan-to-build-system@494c50048cf68dc32651bfd6c44ed2fb6d02410f`:
+
+- `.github/workflows/publish-system-build.yml` is configured to test and publish `apps/stb/public-build/` from System `main` to GitHub Pages.
+- `STORE_PIN` in `apps/stb/shared/contracts.mjs` is the current Store-source authority; at that baseline it is `9c62d9d6f7775deef83d47196d32c9b5174a352c`.
+- `scan-to-build-review` is frozen history and is not the source published by the System Pages workflow.
+
+These bullets are **current-state navigation, not new PASS rows**. The proof rows below keep the exact identities they originally proved. Current five-project/public-build evidence still needs to be added as separately scoped rows rather than inferred from older acceptance or candidate evidence.
+
 | Claim | App / system pin | Store / other pin | Proof | Status |
 | --- | --- | --- | --- | --- |
 | transferred accepted application tree exists in this repository | `main` ancestry through merged PR #3; source `4595b4785a2686486e477ce2e70fb3f476285a8d` | Stage-2 Store path `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` when Store is used | merged PR #3; transfer/provenance records | PROVEN FOR ACCEPTED TRANSFER BASELINE |

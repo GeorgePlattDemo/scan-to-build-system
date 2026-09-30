@@ -1,3 +1,5 @@
+> **CURRENT STATUS — SYSTEM PUBLICATION SOURCE.** `apps/stb/public-build/` is now the System-owned source published from System `main` by `.github/workflows/publish-system-build.yml`. `scan-to-build-review` is frozen history. The body below is preserved as the historical custody record from the original byte-for-byte import; its **Next reconciliation** section is not an open instruction. See [`docs/project/CURRENT-SYSTEM-STATE.md`](../../../docs/project/CURRENT-SYSTEM-STATE.md).
+
 # Current visible build — exact preservation checkpoint
 
 This directory is a **byte-for-byte import** of the current human-visible Scan-to-Build composition from:
