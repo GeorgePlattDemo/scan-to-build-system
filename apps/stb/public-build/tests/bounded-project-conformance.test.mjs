@@ -62,7 +62,7 @@ assert.match(shell,/request:'4 · Your call'/);
 assert.match(shell,/Confirmed version sent to Store Zero\./);
 
 // Every live Store answer page carries the one shared Store Zero text (never a local copy).
-for(const file of ['stb-window-seat-0.9.html','stb-outdoor-picnic-0.2.html']){
+for(const file of ['stb-window-seat-0.9.html','stb-outdoor-picnic-0.4.html']){
   const page=read(file);
   assert.match(page,/store-zero-canonical-doctrine\.js\?v=/,file+' loads the shared Store Zero text');
   assert.match(page,/function renderStoreDoctrine/,file+' renders it with its Store answer');
@@ -98,19 +98,19 @@ assert.match(shell,/canonicalDoctrine\.processStepsHtml/);
 for(const id of ['picnic-store','picnic-request','picnic-yard','picnic-terms','picnic-recap','picnic-record']) assert.equal(shell.includes("ensureProjectJourneyPage('"+id+"'"),false,'old picnic page still built: '+id);
 assert.equal(shell.includes('DEFERRED · BRIDGE-GAP'),false);
 assert.equal(shell.includes("type === 'STB_OUTDOOR_CONFIRMED'"),false,'Outdoor must not hand off into Job 1 proof pages');
-assert.match(shell,/src="stb-outdoor-picnic-0\.2\.html\?v=[0-9a-f]{8}"/);
+assert.match(shell,/src="stb-outdoor-picnic-0\.4\.html\?v=[0-9a-f]{8}"/);
 assert.match(shell,/QUARANTINED_OUTDOOR_TARGETS\.has\(target\)[\s\S]*openCurrentOutdoorBuildFromLegacyRoute\(\)/);
-const outdoorPage = fs.readFileSync(new URL('../stb-outdoor-picnic-0.2.html', import.meta.url),'utf8');
+const outdoorPage = fs.readFileSync(new URL('../stb-outdoor-picnic-0.4.html', import.meta.url),'utf8');
 assert.match(outdoorPage,/CUT_PACKAGE_V1/);
 assert.match(outdoorPage,/stb-store-client\.js/);
 assert.equal(/Math\.min\(14/.test(outdoorPage),false,'no length ceiling of our own in the Outdoor page');
-// 0.2: the only length bounds are the plan rule's (picnic-rule.mjs, kept in step by test/unit/outdoor-picnic-rule-sync).
-assert.match(outdoorPage,/Math\.min\(RULE\.lengthIn\.max,Math\.max\(RULE\.lengthIn\.min,n\)\)/);
+// 0.4: the only length bounds are the plan rule's (picnic-rule.mjs, kept in step by test/unit/outdoor-picnic-rule-sync).
+assert.match(outdoorPage,/Math\.min\(RULE\.lengthIn\.max,Math\.max\(RULE\.lengthIn\.min,Math\.round\(Number\(n\)\)\)\)/);
 // No Store item numbers in the page: hardware packs travel as requirements the Store resolves.
 assert.equal(/STB-ZERO-HW/.test(outdoorPage),false,'Outdoor page names no Store hardware item');
 // One guide, not two: the shell's own rail is hidden on the Outdoor page, which fills its own rail slots.
 assert.match(shell,/\.outdoor-build-shell-page>aside\.rail\{display:none!important\}/);
-for(const id of ['outdoor-plan','outdoor-yours','outdoor-bench','outdoor-store','outdoor-call','outdoor-yard','outdoor-record']) assert.match(outdoorPage,new RegExp('data-guide-id="'+id+'"'));
+for(const id of ['outdoor-plan','outdoor-bench','outdoor-edge','outdoor-call','outdoor-yard','outdoor-record']) assert.match(outdoorPage,new RegExp('data-guide-id="'+id+'"'));
 
 // Start Your Own remains broad intake and is not falsely declared to be a bounded project.
 assert.match(base,/id="start-own"/);

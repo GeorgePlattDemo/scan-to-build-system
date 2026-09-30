@@ -1,13 +1,15 @@
-// Outdoor picnic page 0.2 wiring, in a real browser, through the real System shell.
+// Outdoor picnic page 0.4 wiring, in a real browser, through the real System shell.
 // A scripted Store answers every request so the test checks the page's wiring, not Store prices:
 //  - the top nav is the six trail steps on the Outdoor page only; steps it cannot use yet are inert
-//  - page 1 (your plan) and page 2 (make it yours) both sit on step 1
-//  - the plan road sends only the plan: its parts, its lengths (slats follow the table length), its angles
-//  - sizes stay inside the plan rule, to the inch; the Store decides what it can cut
-//  - additions (a decorative slat-end angle, holes for hardware) are made on page 2 only, and never travel on the plan road
+//  - screen 1: two plan cards, each with a "From" price the Store answered
+//  - screen 2: the plan as published. Grow or shrink to the inch inside the plan rule, pick wood and hardware,
+//    the Store's live total, "Confirm & send". Only the plan is sent: its boards, lengths and angles, no holes
+//  - the pill takes the plan to the edge of the envelope: every board drawn, spot holes and decorative cuts per
+//    kind of board, the Store's answer for each thing tried, and who upstream could move the edge
+//  - "Back to the plan as is" drops the work and asks the Store for the plan again
+//  - hole locations are not published by the plans: none are drawn or sent until the customer places them
 //  - hardware packs travel as requirements; the page names no Store item
 //  - every change is a new exact request with a new version identity
-//  - "Your call" shows the receipt of the exact request, never the option prices
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
@@ -55,7 +57,7 @@ function answer(wire) {
 
 async function outdoorFrame(page) {
   for (let i = 0; i < 60; i++) {
-    const f = page.frames().find(fr => fr.url().includes('stb-outdoor-picnic-0.2.html'));
+    const f = page.frames().find(fr => fr.url().includes('stb-outdoor-picnic-0.4.html'));
     if (f && await f.$('#plans .plan').catch(() => null)) return f;
     await page.waitForTimeout(150);
   }
@@ -76,20 +78,20 @@ const BENCHES_FIXED = { 'TABLE-LEG': 26, 'TABLE-SUPPORT': 27.5, 'BENCH-LEG': 16.
 const A_FRAME_FIXED = { LEG: 31.375, BRACE: 32.875, SUPPORT: 61, 'CLEAT-END': 34.25, 'CLEAT-MID': 29.25 };
 const partsOf = def => def.cutPackages.flatMap(p => p.parts.map(x => ({ ...x, pkg: p.packageId, angle: p.endCut.angleDeg })));
 const prefix = id => id.replace(/-\d+$/, '');
-// The plan, and only the plan: every part at the plan's length (slats at the table length), the plan's angles, no holes.
+// The plan, and only the plan: every board at the plan's length (slats at the table length), the plan's angles, no holes.
 function assertOnlyThePlan(def, lengthIn, fixed, angles) {
   for (const x of partsOf(def)) {
     const kind = prefix(x.partId);
     if (fixed[kind] != null) assert.equal(x.lengthIn, fixed[kind], kind + ' stays as the plan gives it');
     else assert.equal(x.lengthIn, lengthIn, kind + ' follows the table length');
-    assert.equal(x.spots, undefined, 'the plan road sends no holes: ' + x.partId);
+    assert.equal(x.spots, undefined, 'no holes until the customer places them: ' + x.partId);
     assert.equal(x.angle, angles[kind] || 0, 'the plan\'s angle for ' + kind);
   }
   assert.ok(def.cutPackages.every(p => p.finishedWidthIn === undefined));
   assert.ok((def.itemLines || []).every(l => l.requirement && l.storeSku === undefined), 'hardware travels as requirements, never item numbers');
 }
 
-test('Outdoor 0.2: two roads, the plan road sends only the plan, additions made at intent', { timeout: 180000 }, async () => {
+test('Outdoor 0.4: the plan as published, the edge of the envelope, and back', { timeout: 180000 }, async () => {
   const server = await serve();
   const origin = `http://127.0.0.1:${server.address().port}`;
   const browser = await chromium.launch(process.env.STB_CHROMIUM_PATH ? { executablePath: process.env.STB_CHROMIUM_PATH } : {});
@@ -112,68 +114,60 @@ test('Outdoor 0.2: two roads, the plan road sends only the plan, additions made 
     const outdoor = await outdoorFrame(page);
     const od = () => outdoor.evaluate(() => window.STBOutdoorPicnic.state());
     const settle = async label => { for (let i = 0; i < 120; i++) { const s = await od(); if (!s.asking && s.current) return s; await page.waitForTimeout(100); } throw new Error('no answer: ' + label); };
-    const exactOf = () => requests.filter(r => r.payload.definition.configurationId !== 'OUTDOOR-PICNIC-OPTIONS');
+    const exactOf = () => requests.filter(r => /^od-r\d+-/.test(r.payload.definition.configurationVersion));
+    const optionsOf = () => requests.filter(r => r.payload.definition.configurationId === 'OUTDOOR-PICNIC-OPTIONS');
     const steps = async () => (await navState(base)).filter(b => /^\d · /.test(b.label));
 
-    // Six steps, all on the Outdoor page; only "Your idea" usable before a plan is chosen.
-    let nav = await navState(base);
+    // Six steps, all on the Outdoor page; only "Your idea" usable before a plan is picked.
+    const nav = await navState(base);
     assert.deepEqual((await steps()).map(b => b.label.replace(/^\d · /, '')), ['Your idea', 'The bench', 'The Store answers', 'Your call', 'We cut it', 'Pick up & build']);
     assert.ok((await steps()).every(b => b.go === 'outdoor-build-live'));
     assert.deepEqual((await steps()).map(b => b.inert), [false, true, true, true, true, true]);
     assert.ok(nav.every(b => /^\d · /.test(b.label) || b.go === 'projects'), 'no buttons into other jobs: ' + JSON.stringify(nav));
     assert.equal(await outdoor.locator('.step:visible').count(), 0, 'the page\'s own step buttons are hidden inside the shell');
-    // One guide, not two: the page's rail slots are filled from the guide file, the shell's own rail is hidden here.
-    assert.equal(await outdoor.locator('aside.rail[data-guide-id]').count(), 7);
-    assert.match(await outdoor.locator('#s-plan aside.rail').innerText(), /outdoor-plan/);
+    // One guide, not two: six rail slots filled from the guide file; the shell's own rail hidden here.
+    assert.equal(await outdoor.locator('aside.rail[data-guide-id]').count(), 6);
     assert.equal(await base.locator('#outdoor-build-live > aside.rail').isVisible(), false);
 
-    // Page 1: two plans, their pictures named as photos, not drawings.
+    // Screen 1: two cards, photos named as photos, each with a "From" price the Store answered for the plan as published.
     assert.equal(await outdoor.locator('#plans .plan').count(), 2);
     assert.equal(await outdoor.locator('#plans .plan .cap', { hasText: 'A photo of a finished table, not a drawing' }).count(), 2);
+    await outdoor.waitForFunction(() => [...document.querySelectorAll('[data-from]')].every(e => /From/.test(e.textContent)), null, { timeout: 10000 });
+    for (const r of optionsOf().slice(0, 2)) assert.equal(r.payload.definition.itemLines, undefined, '"From" is your own hardware');
+    const fromAF = optionsOf().slice(0, 2).find(r => r.payload.definition.cutPackages.some(p => p.packageId.endsWith('|LEGS')));
+    assertOnlyThePlan({ cutPackages: fromAF.payload.definition.cutPackages.filter(p => p.packageId.startsWith('treated|')) }, 72, A_FRAME_FIXED, { LEG: 25, BRACE: 25 });
 
-    // Pick the table + benches: the instant price is the Store's answer to exactly this table.
-    await outdoor.locator('[data-plan="table-benches"]').click();
-    await settle('benches');
+    // Screen 2: the plan as published, at 6 ft, nothing added.
+    await outdoor.locator('[data-plan="a-frame"]').click();
+    await settle('build');
+    assert.equal((await od()).section, 'build');
     let exact = exactOf().at(-1);
     assert.match(exact.payload.definition.configurationVersion, /^od-r\d+-[0-9a-f]{8}$/);
-    assert.ok(exact.payload.definition.cutPackages.every(p => p.packageId.startsWith('ground-contact|')));
-    assert.deepEqual(exact.payload.definition.itemLines.map(l => l.requirement.finish), ['coated', 'coated', 'coated']);
-    assertOnlyThePlan(exact.payload.definition, 72, BENCHES_FIXED, {});
+    assertOnlyThePlan(exact.payload.definition, 72, A_FRAME_FIXED, { LEG: 25, BRACE: 25 });
     assert.equal(exact.expectedStorePin, RUNTIME.storePin);
-    assert.match(await outdoor.locator('#instant').innerText(), /Complete budgetary estimate/);
-    // Option prices come from one Store request covering every wood and every pack; it never feeds your call.
-    for (let i = 0; i < 60 && !requests.some(r => r.payload.definition.configurationId === 'OUTDOOR-PICNIC-OPTIONS'); i++) await page.waitForTimeout(100);
-    const options = requests.find(r => r.payload.definition.configurationId === 'OUTDOOR-PICNIC-OPTIONS');
-    assert.ok(options, 'one options request');
-    assert.equal(new Set(options.payload.definition.cutPackages.map(p => p.packageId.split('|')[0])).size, 5, 'every wood');
-    assert.deepEqual([...new Set(options.payload.definition.itemLines.map(l => l.requirement.finish))], ['coated', 'hot-dip-galvanized', 'stainless', 'silicon-bronze'], 'every pack, cheap to good');
     assert.deepEqual((await steps()).map(b => b.inert), [false, false, false, false, true, true]);
+    assert.match(await outdoor.locator('#photo').getAttribute('src'), /plan-a-frame-photo/);
+    assert.equal(await outdoor.locator('#parts tr').count(), 7);
+    assert.equal(await outdoor.locator('#s-build [data-tool]').count(), 0, 'screen 2 adds no work: it is the plan as published');
+    assert.equal(await outdoor.locator('#confirm').isDisabled(), false);
+    assert.match(await outdoor.locator('#to-edge').innerText(), /TAKE IT TO THE BENCH TO DO MORE WORK/);
 
-    // Grow it to the inch: 85 in. Only the slats follow; every other part and every angle stays as the plan gives it.
-    await outdoor.locator('#s-plan [data-size="12"]').click();
-    await outdoor.locator('#s-plan [data-size="1"]').click();
-    await settle('85 in');
-    exact = exactOf().at(-1);
-    assertOnlyThePlan(exact.payload.definition, 85, BENCHES_FIXED, {});
+    // Grow to the inch: 85 in. Only the slats follow; the Store is asked again for exactly that size.
+    await outdoor.locator('#s-build [data-size="12"]').click();
+    await outdoor.locator('#s-build [data-size="1"]').click();
+    await settle('85');
+    assertOnlyThePlan(exactOf().at(-1).payload.definition, 85, A_FRAME_FIXED, { LEG: 25, BRACE: 25 });
+    assert.match(await outdoor.locator('#len-val').innerText(), /7 ft 1 in/);
     // Sizes stay inside the plan rule.
     await outdoor.evaluate(() => window.STBOutdoorPicnic.setLength(400));
     assert.equal((await od()).lengthIn, 216);
     await outdoor.evaluate(() => window.STBOutdoorPicnic.setLength(10));
     assert.equal((await od()).lengthIn, 60);
-    await outdoor.locator('#size-chips [data-size-to="96"]').click();
-    await settle('96 in');
+    await outdoor.evaluate(() => window.STBOutdoorPicnic.setLength(96));
+    await settle('96');
 
-    // The A-frame keeps its 25° legs and cross supports at any size.
-    await outdoor.locator('[data-plan="a-frame"]').click();
-    await settle('a-frame');
-    await outdoor.locator('#size-chips [data-size-to="96"]').click();
-    await settle('a-frame 96');
-    exact = exactOf().at(-1);
-    assertOnlyThePlan(exact.payload.definition, 96, A_FRAME_FIXED, { LEG: 25, BRACE: 25 });
-    assert.ok(exact.payload.definition.cutPackages.every(p => p.packageId.startsWith('treated|')));
-
-    // A different wood and bring-your-own hardware: a new exact request with a new version.
-    const before = exact.payload.definition.configurationVersion;
+    // Wood and hardware: a new exact request each time.
+    const before = exactOf().at(-1).payload.definition.configurationVersion;
     await outdoor.locator('#woods [data-wood="cedar"]').click();
     await outdoor.locator('#tiers [data-tier="BYO"]').click();
     await settle('cedar byo');
@@ -184,48 +178,70 @@ test('Outdoor 0.2: two roads, the plan road sends only the plan, additions made 
     await outdoor.locator('#tiers [data-tier="STAINL"]').click();
     await settle('stainless');
     assert.deepEqual(exactOf().at(-1).payload.definition.itemLines.map(l => l.requirement), [{ kind: 'wood-screw', gauge: '#10', lengthIn: 2.5, finish: 'stainless', unit: 'piece' }]);
-
-    // Make it yours: additions are made on page 2 only. The bench turns what it arrives with and adds nothing.
-    await outdoor.locator('[data-road="yours"]').click();
-    assert.equal((await od()).section, 'yours');
-    assert.equal((await steps()).find(b => /Your idea/.test(b.label)).inert, false);
-    await outdoor.locator('#add-miter [data-add]').check();
-    await outdoor.locator('#add-holes [data-add]').check();
-    assert.deepEqual(await outdoor.evaluate(() => window.STBOutdoorPicnic.knobs()), ['SIZE', 'WOOD', 'HARDWARE', 'MITER', 'HOLES']);
-    await outdoor.locator('#s-yours [data-to="bench"]').click();
-    assert.deepEqual((await outdoor.evaluate(() => window.STBOutdoorPicnic.benchKnobs())).sort(), ['HARDWARE', 'HOLES', 'MITER', 'SIZE', 'WOOD']);
-    assert.equal(await outdoor.locator('#s-bench [data-add]').count(), 0, 'the bench has no control that adds a setting');
-    // An addition brings its facts empty: the Store isn't asked until they're set.
-    assert.deepEqual((await outdoor.evaluate(() => window.STBOutdoorPicnic.conditions())).filter(c => c.block).map(c => c.t),
-      ['The decorative angle needs a number', 'The holes need a distance from each end and a placement']);
-    assert.equal(await outdoor.locator('#btn-store').isDisabled(), true);
-    await outdoor.locator('#b-miter').fill('30');
-    await outdoor.locator('#b-hole-end').fill('4');
-    await outdoor.locator('#b-hole-place').selectOption('CENTER');
-    await outdoor.locator('#s-bench h1').click();
-    await settle('additions');
+    // "The set" puts back the plan's wood, the coated pack and 6 ft.
+    await outdoor.locator('#the-set').click();
+    await settle('the set');
     exact = exactOf().at(-1);
-    const slats = exact.payload.definition.cutPackages.find(p => p.packageId.endsWith('|SLATS'));
-    assert.equal(slats.endCut.angleDeg, 30, 'the decorative angle goes to the Store; the Store decides');
-    for (const x of slats.parts) assert.deepEqual(x.spots, [{ xIn: 4, acrossWidthRule: 'CENTERED_ON_WIDE_FACE' }, { xIn: 92, acrossWidthRule: 'CENTERED_ON_WIDE_FACE' }], 'holes where you said, on every slat');
-    for (const p of exact.payload.definition.cutPackages.filter(p => !p.packageId.endsWith('|SLATS'))) {
-      assert.equal(p.endCut.angleDeg, { LEGS: 25, BRACES: 25 }[p.packageId.split('|')[1]] || 0, 'the plan\'s own angles are untouched');
-      assert.ok(p.parts.every(x => !x.spots));
-    }
-    // Back on the plan road, the additions are not sent: only the plan travels.
-    await outdoor.locator('#s-bench [data-back-from-bench]').click();
-    await outdoor.locator('#s-yours [data-to="plan"]').click();
-    await outdoor.locator('[data-road="plan"]').click();
-    await settle('plan road again');
-    assertOnlyThePlan(exactOf().at(-1).payload.definition, 96, A_FRAME_FIXED, { LEG: 25, BRACE: 25 });
-    assert.deepEqual(await outdoor.evaluate(() => window.STBOutdoorPicnic.benchKnobs()), ['SIZE', 'WOOD', 'HARDWARE']);
+    assertOnlyThePlan(exact.payload.definition, 72, A_FRAME_FIXED, { LEG: 25, BRACE: 25 });
+    assert.ok(exact.payload.definition.cutPackages.every(p => p.packageId.startsWith('treated|')));
+    assert.equal(exact.payload.definition.itemLines[0].requirement.finish, 'coated');
+    const planVersion = exact.payload.definition.configurationVersion.replace(/^od-r\d+-/, '');
 
-    // "Your call" from the top nav shows the receipt of that exact request.
+    // The pill: the edge of the envelope. The photo top left, every board drawn, no holes until you place them.
+    await outdoor.locator('#to-edge').click();
+    assert.equal((await od()).section, 'edge');
+    assert.equal(await outdoor.locator('#s-edge:not([hidden])').count(), 1);
+    assert.match(await outdoor.locator('#edge-photo').getAttribute('src'), /plan-a-frame-photo/);
+    assert.equal(await outdoor.locator('#parts-bench [data-part]').count(), 7);
+    assert.equal(await outdoor.locator('#parts-bench svg text', { hasText: 'hole locations: not published by the plan' }).count(), 7);
+    assert.match(await outdoor.locator('#edge-list').innerText(), /Neither plan publishes them/);
+    assert.match(await outdoor.locator('#s-edge .edge-head').innerText(), /Information travels before atoms/);
+    assert.equal(await outdoor.locator('#send-work').isDisabled(), true, 'nothing tried yet');
+    // The edge shows exactly the settings the plan's configurator made; no decorative cut on the plan's 25° boards.
+    const knobs = await outdoor.evaluate(() => window.STBOutdoorPicnic.knobs());
+    assert.deepEqual((await outdoor.evaluate(() => window.STBOutdoorPicnic.benchKnobs())).sort(), [...knobs].sort());
+    assert.ok(!knobs.includes('DECO:LEG') && !knobs.includes('DECO:BRACE'));
+    assert.equal(await outdoor.locator('[data-part="LEG"] [data-tool="deco"]').count(), 0);
+
+    // Spot holes on the seat boards: nothing is sent until you place them.
+    await outdoor.locator('[data-part="SEAT"] [data-tool="spots"]').click();
+    assert.ok((await outdoor.evaluate(() => window.STBOutdoorPicnic.conditions())).some(c => c.block && /Spot holes on Seat board/.test(c.t)));
+    assert.match(await outdoor.locator('#tried').innerText(), /WAITING/);
+    await outdoor.locator('[data-part="SEAT"] [data-in="fromEndIn"]').fill('4');
+    await outdoor.locator('[data-part="SEAT"] [data-in="place"]').selectOption('CENTER');
+    // A decorative cut on the tabletop boards, 45° to start.
+    await outdoor.locator('[data-part="TOP"] [data-tool="deco"]').click();
+    await settle('spots and cut');
     exact = exactOf().at(-1);
-    nav = await navState(base);
-    await base.locator('.recovery-nav button:visible', { hasText: '4 · Your call' }).first().click();
-    // Top-nav clicks reach the Outdoor page as a message; wait for it to switch, then check.
-    await outdoor.locator('#s-call').waitFor({ state: 'visible', timeout: 5000 });
+    const byKind = kind => partsOf(exact.payload.definition).filter(x => prefix(x.partId) === kind);
+    for (const x of byKind('SEAT')) { assert.deepEqual(x.spots, [{ xIn: 4, acrossWidthRule: 'CENTERED_ON_WIDE_FACE' }, { xIn: 68, acrossWidthRule: 'CENTERED_ON_WIDE_FACE' }]); assert.equal(x.angle, 0); }
+    for (const x of byKind('TOP')) { assert.equal(x.angle, 45, 'decorative cut goes to the Store; the Store decides'); assert.equal(x.spots, undefined); }
+    assert.ok(byKind('LEG').every(x => x.angle === 25) && byKind('BRACE').every(x => x.angle === 25), 'the plan\'s 25° is untouched');
+    assert.ok(['SUPPORT', 'CLEAT-END', 'CLEAT-MID'].every(k => byKind(k).every(x => x.angle === 0 && !x.spots)), 'other boards untouched');
+    assert.match(await outdoor.locator('[data-part="SEAT"] svg').innerHTML(), /circle/);
+    assert.match(await outdoor.locator('[data-part="TOP"] svg').innerHTML(), /45°/);
+    assert.equal(await outdoor.locator('#tried .res.ok').count(), 2, 'each thing tried gets the Store\'s answer');
+    assert.equal(await outdoor.locator('#send-work').isDisabled(), false);
+    // Screen 2 says the answer includes the work, and offers to drop it.
+    assert.equal((await outdoor.evaluate(() => window.STBOutdoorPicnic.work())).length, 2);
+
+    // Back to the plan as is: the work is dropped and only the plan is asked again.
+    await outdoor.locator('#back-plan').click();
+    await settle('back');
+    assert.equal((await od()).section, 'build');
+    assert.deepEqual(await outdoor.evaluate(() => window.STBOutdoorPicnic.work()), []);
+    exact = exactOf().at(-1);
+    assertOnlyThePlan(exact.payload.definition, 72, A_FRAME_FIXED, { LEG: 25, BRACE: 25 });
+    assert.equal(exact.payload.definition.configurationVersion.replace(/^od-r\d+-/, ''), planVersion, 'the same plan as before the bench');
+    await outdoor.locator('#to-edge').click();
+    assert.equal(await outdoor.locator('#parts-bench [data-part].worked').count(), 0, 'the work was dropped');
+
+    // Try it again, and send it with the work: your call shows the receipt of that exact request.
+    await outdoor.locator('[data-part="TOP"] [data-tool="deco"]').click();
+    await settle('cut again');
+    exact = exactOf().at(-1);
+    await outdoor.locator('#send-work').click();
+    await outdoor.waitForSelector('#s-call:not([hidden])', { timeout: 5000 });
     const receiptText = await outdoor.locator('#call-receipt').innerText();
     assert.ok(receiptText.includes(('receipt-' + exact.requestId).slice(0, 12)), receiptText);
     assert.ok(receiptText.includes(exact.payload.definition.configurationVersion), receiptText);
@@ -245,16 +261,13 @@ test('Outdoor 0.2: two roads, the plan road sends only the plan, additions made 
     assert.equal(await outdoor.locator('#record-terms [data-terms-state="done"]').count(), 13, 'every event recorded');
     assert.deepEqual((await steps()).map(b => b.inert), [false, false, false, false, false, false]);
     await base.locator('.recovery-nav button:visible', { hasText: '5 · We cut it' }).first().click();
-    // Top-nav clicks reach the Outdoor page as a message; wait for it to switch, then check.
-    await outdoor.locator('#s-yard').waitFor({ state: 'visible', timeout: 5000 });
+    await outdoor.waitForSelector('#s-yard:not([hidden])', { timeout: 5000 });
     await base.locator('.recovery-nav button:visible', { hasText: '6 · Pick up & build' }).first().click();
-    // Top-nav clicks reach the Outdoor page as a message; wait for it to switch, then check.
-    await outdoor.locator('#s-record').waitFor({ state: 'visible', timeout: 5000 });
+    await outdoor.waitForSelector('#s-record:not([hidden])', { timeout: 5000 });
 
-    // "Your idea" returns to page 1, still on the Outdoor page.
+    // "Your idea" returns to the cards, still on the Outdoor page.
     await base.locator('.recovery-nav button:visible', { hasText: '1 · Your idea' }).first().click();
-    // Top-nav clicks reach the Outdoor page as a message; wait for it to switch, then check.
-    await outdoor.locator('#s-plan').waitFor({ state: 'visible', timeout: 5000 });
+    await outdoor.waitForSelector('#s-plans:not([hidden])', { timeout: 5000 });
     assert.equal(await base.evaluate(() => [...document.querySelectorAll('.page.on')].pop()?.id), 'outdoor-build-live');
     assert.deepEqual(errors, []);
   } finally {
