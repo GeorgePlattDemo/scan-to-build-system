@@ -20,7 +20,7 @@ import { buildCutPackageRequest, cutPackageDemandSignature, cutPackageJobPayload
 
 const ROOT = fileURLToPath(new URL('../../public-build/', import.meta.url));
 const FILE = 'stb-window-seat-0.9.html';
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png' };
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png' };
 
 // Serves public-build. Store requests are recorded exactly as sent and answered "unavailable": this test checks what
 // the page sends, never a Store answer.
