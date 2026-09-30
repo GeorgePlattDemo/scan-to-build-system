@@ -70,7 +70,7 @@ In the issued patents, this is the customer-facing half: the interface where a p
 | What happens to my measurements, scans and files? | [Information custody](docs/application/INFORMATION-CUSTODY-BOUNDARY.md) | What's kept, what's shared, what stays yours |
 | What exactly crosses to the Store? | [Store foundation](docs/store/CURRENT-STORE-FOUNDATION.md) | The request, the answer, and why every question is fresh |
 | What does a word mean? | [Definitions](docs/definitions/README.md) | The one authority for shared meaning across Program, System and Store, backed by code in [`apps/stb/shared/`](apps/stb/shared/) |
-| Where does each screen come from, and what's still being cleaned up? | [Visible-build reconciliation](docs/application/CURRENT-VISIBLE-BUILD-RECONCILIATION-0.1.md) | The public build is a preserved copy being folded into the main app; this lists what moves where |
+| What is current, published, modeled, and historical? | [Current System state](docs/project/CURRENT-SYSTEM-STATE.md) | Current publication source, Store-pin owner, simulation/commissioning limits, and pointers to historical records |
 | What do the patents disclose? | [Patent sources](docs/patents/README.md) | The issued grants and how this work maps to them |
 
 ## The fine print
