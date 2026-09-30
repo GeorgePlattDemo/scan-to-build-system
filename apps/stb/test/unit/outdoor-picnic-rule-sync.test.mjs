@@ -1,4 +1,4 @@
-// Outdoor 0.2 carries the plan rule's sizes and unresolved notes, because the published site can't load
+// Outdoor 0.3 carries the plan rule's sizes and unresolved notes, because the published site can't load
 // apps/stb/shared/picnic-rule.mjs. This test keeps the page identical to the rule, and checks the page's own
 // promises in its source: the plans' angles are the plans', and the page holds no Store logic.
 import test from 'node:test';
@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import { PICNIC_FIXTURE, evaluatePicnicConfiguration, normalizePicnicConfiguration } from '../../shared/picnic-rule.mjs';
 
-const page = fs.readFileSync(new URL('../../public-build/stb-outdoor-picnic-0.2.html', import.meta.url), 'utf8');
+const page = fs.readFileSync(new URL('../../public-build/stb-outdoor-picnic-0.3.html', import.meta.url), 'utf8');
 const script = page.slice(page.indexOf('<script>\n'));
 const ruleSource = script.match(/const RULE=(Object\.freeze\(\{[\s\S]*?\}\));\n/)[1];
 const RULE = vm.runInNewContext('(' + ruleSource + ')');
@@ -16,9 +16,11 @@ const ruled = evaluatePicnicConfiguration(normalizePicnicConfiguration({ product
 test('sizes come from the plan rule: its range, to the inch, and its reference lengths', () => {
   assert.deepEqual({ ...RULE.lengthIn }, { min: PICNIC_FIXTURE.candidateProductLengthRange.min, max: PICNIC_FIXTURE.candidateProductLengthRange.max });
   assert.deepEqual([...RULE.referenceLengthsIn], [...PICNIC_FIXTURE.referenceProductLengths]);
-  assert.match(page, /id="size"[^>]*step="1"/, 'the length moves to the inch');
+  assert.match(page, /data-card-size="1"/, 'the card moves to the inch');
+  assert.match(page, /data-size="1"/, 'the bench moves to the inch');
   // Nothing outside the rule is offered: every way of changing the length clamps to the rule's range.
-  assert.match(script, /n=Math\.min\(RULE\.lengthIn\.max,Math\.max\(RULE\.lengthIn\.min,n\)\)/);
+  assert.match(script, /const clampLen=n=>Math\.min\(RULE\.lengthIn\.max,Math\.max\(RULE\.lengthIn\.min,Math\.round\(Number\(n\)\)\)\)/);
+  assert.equal((script.match(/clampLen\(n\)/g) || []).length, 2, 'the card and the bench both clamp');
 });
 
 test('the rule\'s unresolved notes and disclosure are carried whole', () => {
@@ -42,4 +44,10 @@ test('no Store logic and no automatic holes in the page', () => {
   assert.doesNotMatch(script, /centered\(/, 'no automatic screw-hole spots');
   assert.doesNotMatch(page, /every screw hole/i);
   assert.match(page, /photo of a finished table, not a drawing/i, 'the pictures are named as photos');
+  // Hole locations: the plans don't publish them. The page says so, and draws none until the customer places them.
+  assert.match(page, /Neither plan publishes hole locations/);
+  assert.match(script, /hole locations: not published by the plan · none until you place them/);
+  // A decorative cut is offered only on boards whose ends are square in the plan.
+  assert.match(script, /if\(p\.g\.angle===0\)k\.push\('DECO:'\+p\.kind\)/);
+  assert.match(script, /const decoAngle=\(p,g\)=>g\.angle===0&&/);
 });

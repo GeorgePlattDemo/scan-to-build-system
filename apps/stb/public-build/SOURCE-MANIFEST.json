@@ -574,6 +574,13 @@
       "blobSha": "b059245a2e2782e39fb69d628b962d6c85553a99",
       "bytes": 229574,
       "reason": "Cache-buster for Outdoor 0.2: the two roads sit right under the plan cards, the bench shows the photo of the chosen table, and \"Make it yours\" on the bench is a button."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-0.3",
+      "blobSha": "e3b34b70ccb82e176f8c6660304b072b0f0a7739",
+      "bytes": 229574,
+      "reason": "Outdoor 0.3 goes live: the outdoor-build-live iframe loads stb-outdoor-picnic-0.3.html (each plan card resizes and prices; 'take it to the bench to do more work' opens a bench with every board drawn, spot holes and decorative cuts per board). 0.2 stays in the repo until the owner retires it. Cache-buster for the new page."
     }
   ],
   "retiredFiles": [

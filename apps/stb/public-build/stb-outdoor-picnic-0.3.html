@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Picnic Table · Outdoor</title>
+<style>
+:root{
+  --bg:#f5f0e9;--card:#fbf8f3;--line:#e3d9cc;--ink:#26190f;--ink2:#5b4a3b;--muted:#8a7a6a;
+  --brand:#8a5a2b;--brand-ink:#fff;--brand-soft:#efe3d3;--ok:#2f6b3a;--warn:#9b5a14;--bad:#9b2c1f;
+  --link-bg:#e4eefb;--link-ink:#1f4f8a;--rail:#efe8de;--wood:#e8d2ac;--wood-line:#9b7540;--spot:#2f6f9e;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1c1712;--card:#241e18;--line:#3a3129;--ink:#f3ebe1;--ink2:#cdbfae;--muted:#9d8f80;
+  --brand:#c88b4f;--brand-ink:#1c1712;--brand-soft:#3a2c1f;--ok:#7fc28b;--warn:#e0a45c;--bad:#ef8a7c;
+  --link-bg:#1f2c3d;--link-ink:#a9c8f0;--rail:#211b15;--wood:#5a4630;--wood-line:#c8a06a;--spot:#8fc0ea;}}
+:root[data-theme="dark"]{
+  --bg:#1c1712;--card:#241e18;--line:#3a3129;--ink:#f3ebe1;--ink2:#cdbfae;--muted:#9d8f80;
+  --brand:#c88b4f;--brand-ink:#1c1712;--brand-soft:#3a2c1f;--ok:#7fc28b;--warn:#e0a45c;--bad:#ef8a7c;
+  --link-bg:#1f2c3d;--link-ink:#a9c8f0;--rail:#211b15;--wood:#5a4630;--wood-line:#c8a06a;--spot:#8fc0ea;}
+:root{--text:var(--ink);--text2:var(--ink2);--text3:var(--muted);--border:var(--line)}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed}
+a{color:var(--link-ink)}
+[hidden]{display:none!important}
+.wrap{max-width:1320px;margin:0 auto;padding:16px 20px 48px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px}
+.pill{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;font-size:13px;color:var(--ink2)}
+.pill.brand{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);font-weight:700;letter-spacing:.02em}
+.pill.step.on{border-color:var(--brand);color:var(--ink);font-weight:650}
+.pill:disabled{opacity:.45}
+.pill.rule{background:var(--link-bg);color:var(--link-ink);border-color:transparent;font-weight:600;text-decoration:none}
+.rulebar{display:flex;justify-content:flex-end;margin:0 0 10px}
+
+.pg{display:grid;grid-template-columns:minmax(0,1fr) 190px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card)}
+.pg>.main{min-width:0;padding:16px 18px 20px;border-right:1px solid var(--line);background:var(--bg)}
+.stepband{margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--brand)}
+.stepband span{color:var(--muted);font-weight:600}
+h1{font-size:clamp(26px,3.6vw,42px);line-height:1.08;margin:4px 0 6px;text-align:center;letter-spacing:-.02em}
+h2{font-size:20px;margin:0 0 6px}
+.sub{text-align:center;color:var(--ink2);margin:0 auto 18px;font-size:clamp(14px,1.5vw,17px);max-width:860px}
+.cta{background:var(--brand);color:var(--brand-ink);border:0;border-radius:10px;padding:12px 20px;font-weight:700;letter-spacing:.02em}
+.cta:disabled{opacity:.45}
+.cta.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.go-bench{background:var(--brand);color:var(--brand-ink);border:0;border-radius:999px;padding:12px 20px;font-weight:700;letter-spacing:.02em;width:100%}
+.note{color:var(--ink2);font-size:13px}
+.hint{color:var(--muted);font-size:12.5px;margin:6px 0 0}
+.meta{color:var(--ink2);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:17px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px}
+th,td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--brand-soft);font-weight:650;font-size:12.5px}
+tr:last-child td{border-bottom:0}
+.tag{font-size:10px;letter-spacing:.05em;font-weight:700;border-radius:999px;padding:2px 8px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.tag.ok{border-color:var(--ok);color:var(--ok)}
+.tag.warn{border-color:var(--warn);color:var(--warn)}
+.tag.bad{border-color:var(--bad);color:var(--bad)}
+.tag.yours{border-color:var(--brand);color:var(--brand)}
+.ln{display:flex;gap:9px;align-items:flex-start;margin-bottom:6px;font-size:13.5px}
+.ln>span:first-child{flex:1;min-width:0}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.actions .fine{font-size:12px;color:var(--muted)}
+.actions .push{margin-left:auto}
+.ids{font:10.5px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink2);word-break:break-all;margin:6px 0 0}
+.verbs{font:11.5px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink2)}
+.honest{border-left:3px solid var(--warn);background:var(--card);padding:10px 12px;border-radius:0 10px 10px 0;margin:0 0 12px;font-size:13px;color:var(--ink2)}
+.honest b{color:var(--ink)}
+
+/* page 1 · the two plans */
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.plan{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.plan img{width:100%;aspect-ratio:774/428;object-fit:cover;border-radius:10px;display:block;background:var(--brand-soft)}
+.plan .cap{margin:-2px 4px 0;font-size:11.5px;color:var(--muted)}
+.plan h2{margin:4px 6px 0;font-size:clamp(20px,2.2vw,28px);letter-spacing:-.01em}
+.plan .src{margin:0 6px;color:var(--ink2);font-size:13.5px}
+.plan .facts{margin:0 6px;color:var(--ink2);font-size:13.5px}
+.resize{display:grid;grid-template-columns:auto auto 1fr auto auto;gap:6px;align-items:center;margin:4px 6px 0}
+.resize button{height:38px;min-width:46px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:13.5px;font-weight:650}
+.resize .val{text-align:center;font-weight:750;font-size:18px;line-height:1.1}
+.resize .val small{display:block;font-weight:500;font-size:11.5px;color:var(--ink2)}
+.price{margin:0 6px;background:var(--brand-soft);border-radius:12px;padding:10px 12px;min-height:66px}
+.price small{display:block;color:var(--ink2);font-size:12px}
+.price b{font-size:26px;letter-spacing:-.01em}
+.price .no{color:var(--bad);font-weight:650;font-size:13.5px}
+.plan .knobs{margin:0 6px;font-size:12px;color:var(--muted)}
+.plan .go-bench{margin-top:auto}
+
+/* page 2 · the bench */
+.benchtop{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:start;margin:0 0 14px}
+.benchtop figure{margin:0}
+.benchtop figure img{width:100%;border-radius:12px;border:1px solid var(--line);display:block;background:var(--brand-soft)}
+.benchtop figcaption{font-size:12px;color:var(--muted);margin:5px 2px 0}
+.opts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.opt{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:7px 4px;text-align:center;min-height:52px}
+.opt span{display:block;font-size:12.5px;color:var(--ink2)}
+.opt b{display:block;font-size:15px;margin-top:1px}
+.opt.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.opt.on span{color:var(--brand-ink)}
+.opt .no{font-size:11.5px;font-weight:600;color:var(--bad)}
+.opt.on .no{color:var(--brand-ink)}
+.answer{border:2px solid var(--brand);border-radius:14px;padding:12px 14px;background:var(--card);margin-bottom:12px}
+.answer h3{margin:0 0 4px;font-size:18px}
+.total{font-size:clamp(28px,3.6vw,40px);font-weight:800;letter-spacing:-.02em;margin:2px 0 4px}
+.total.none{font-size:clamp(17px,2vw,22px);color:var(--bad)}
+.status{font-weight:600}
+.status.ask{color:var(--warn)} .status.bad{color:var(--bad)}
+.refusals{margin:6px 0 0;padding-left:18px;color:var(--bad);font-size:13px}
+.part{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:10px 12px;margin-bottom:10px}
+.part.worked{border-color:var(--brand)}
+.part .ph{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;margin:0 0 4px}
+.part .ph b{font-size:15px}
+.part svg{width:100%;height:auto;display:block}
+.part .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 0}
+.tool{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:650}
+.tool.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.tool:disabled{opacity:.5}
+.set{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 0;padding:8px 10px;border-radius:10px;background:var(--bg)}
+.set input,.set select{font:inherit;font-size:13px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.set .meta{font-size:12px}
+.sizebar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sizebar button{height:34px;min-width:44px;border-radius:9px;border:1px solid var(--line);background:var(--bg);font-weight:650;font-size:13px}
+.sizebar .val{font-weight:750;font-size:17px;margin:0 6px}
+
+/* Dev/Rev rail slot: its words come from the shared guide file, styled as the app's Dev Guide rails. */
+.rail{background:var(--rail);padding:18px 13px 14px;font-size:11px}
+.dev-build-guide{display:flex;flex-direction:column;gap:0;overflow-wrap:anywhere;min-width:0}
+.dev-build-guide p{margin:0}
+.dev-build-guide .hd{margin:0 0 12px;font-size:9.5px;font-weight:700;letter-spacing:.09em;color:var(--text3)}
+.dev-build-guide .goal{margin:0 0 18px;font-size:12.5px;line-height:1.35;font-weight:600;color:var(--text)}
+.dev-build-guide .guide-row{margin-bottom:16px}
+.dev-build-guide .guide-row b{display:block;font-size:11.5px;color:var(--text);margin-bottom:2px}
+.dev-build-guide .guide-row span{display:block;font-size:10.5px;line-height:1.4;color:var(--text2)}
+.dev-build-guide .rev-hd{margin:0 0 8px;font-size:10.5px;line-height:1.35;letter-spacing:.04em;font-weight:700;color:var(--text)}
+.dev-build-guide .rev-flag{margin:0 0 12px;font-size:11.5px;line-height:1.4;font-weight:400;color:var(--text)}
+.dev-build-guide .rev-list a{color:inherit;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+.dev-build-guide .rev-list{margin:0 0 14px;padding-left:14px;display:grid;gap:4px;font-size:10.5px;line-height:1.4;font-weight:400;color:var(--text2)}
+.dev-build-guide .rev-sec{margin:2px 0 5px;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:400;color:var(--text2)}
+.dev-build-guide .rev-sec.quiet,.dev-build-guide .rev-list.quiet{color:var(--text3)}
+.dev-build-guide .guide-meta{margin-top:auto;padding-top:10px;border-top:1px solid var(--line);display:grid;gap:3px;font:8.5px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text3)}
+
+/* Store Zero reference text: the same shared file every Store answer carries */
+.doctrine{margin-top:14px;font-size:13.5px}
+.doctrine .band{margin:0 0 14px;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-size:12.5px;line-height:1.55}
+.doctrine .band.warn{border-color:var(--warn)}
+.doctrine h1{font-size:22px;margin:18px 0 6px;text-align:left}
+.doctrine .lede{margin:0 0 8px;color:var(--text2)}
+.doctrine .s{padding:12px 0;border-top:1px solid var(--line)}
+.doctrine .s .h{display:flex;gap:9px;align-items:baseline;margin-bottom:5px;flex-wrap:wrap}
+.doctrine .s .num{font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--text2)}
+.doctrine .s .name{font-size:14px;font-weight:650}
+.doctrine .s .st{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:3px;border:1px solid var(--line);color:var(--text2)}
+.doctrine .s p{margin:0 0 6px;color:var(--text2)}
+.doctrine .s p.q,.doctrine .s p.k{font-size:12.5px;padding-left:11px;border-left:2px solid var(--line)}
+.doctrine .ops{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0 4px}
+.doctrine .ops .t{margin:0 0 6px;font-size:9.5px;font-weight:700;letter-spacing:.08em}
+.doctrine .ops .chain{font:11.5px/1.9 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text2);margin:0 0 6px}
+.doctrine .close{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.doctrine .close p{margin:0 0 8px;color:var(--text2)}
+
+@media (max-width:760px){.pg{grid-template-columns:1fr}.pg>.main{border-right:0;border-bottom:1px solid var(--line)}.plans,.benchtop{grid-template-columns:1fr}.opts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:520px){.wrap{padding:12px 16px 40px}.opts{grid-template-columns:repeat(2,minmax(0,1fr))}th,td{padding:7px 6px}}
+</style>
+</head>
+<body data-section="plan">
+<div class="wrap">
+  <nav class="bar" id="bar" aria-label="Outdoor trail">
+    <span class="pill brand">PICNIC TABLE · OUTDOOR</span>
+    <button class="pill step" data-nav="scan" type="button">1 · Your idea</button>
+    <button class="pill step" data-nav="configure" type="button" disabled>2 · The bench</button>
+    <button class="pill step" data-nav="store" type="button" disabled>3 · The Store answers</button>
+    <button class="pill step" data-nav="request" type="button" disabled>4 · Your call</button>
+    <button class="pill step" data-nav="yard" type="button" disabled>5 · We cut it</button>
+    <button class="pill step" data-nav="record" type="button" disabled>6 · Pick up &amp; build</button>
+  </nav>
+  <div class="rulebar"><a class="pill rule" href="stb-outdoor-reference-authority-0.3.html" target="_blank" rel="noopener">📘 RULE BOOK: Picnic table authorities →</a></div>
+
+  <!-- ═════ PAGE 1 · STEP 1 · YOUR PLAN ═════ -->
+  <section class="view" id="s-plan" data-section="plan">
+    <div class="pg"><div class="main">
+      <p class="stepband">STEP 1 OF 6 · YOUR IDEA <span>pick a plan</span></p>
+      <h1>Two proven plans. Pick one. Make it yours.</h1>
+      <p class="sub">Real public plans, turned into a kit: every board cut to the plan, at the plan’s angles. Resize it right here and the Store prices it. Want more? Take it to the bench.</p>
+      <div class="plans" id="plans"></div>
+    </div><aside class="rail dev-build-guide" data-guide-id="outdoor-plan" aria-label="Build guide · developer notes"></aside></div>
+  </section>
+
+  <!-- ═════ PAGE 2 · STEP 2 · THE BENCH ═════ -->
+  <section class="view" id="s-bench" data-section="bench" hidden>
+    <div class="pg"><div class="main">
+      <p class="stepband">STEP 2 OF 6 · THE BENCH <span>every board, and what you want done to it</span></p>
+      <div class="benchtop">
+        <figure><img id="bench-photo" alt=""><figcaption>What you chose. A photo of a finished table, not a drawing. Nobody cuts to a photo; the boards below come from the plan.</figcaption></figure>
+        <div>
+          <h2 id="bench-title">The bench</h2>
+          <p class="note" id="bench-source"></p>
+          <div class="card" data-knob="SIZE"><h3>Size</h3>
+            <div class="sizebar"><button type="button" data-size="-12">−1 ft</button><button type="button" data-size="-1">−1 in</button><span class="val" id="b-size-val">—</span><button type="button" data-size="1">+1 in</button><button type="button" data-size="12">+1 ft</button></div>
+            <p class="hint" id="b-size-hint"></p></div>
+          <div class="card" data-knob="WOOD"><h3>Wood</h3><div class="opts" id="woods"></div><p class="hint" id="wood-hint"></p></div>
+          <div class="card" data-knob="HARDWARE"><h3>Hardware pack</h3><div class="opts" id="tiers"></div><p class="hint" id="tier-hint"></p></div>
+          <div class="answer" id="instant"></div>
+        </div>
+      </div>
+
+      <h2>Every board, on the bench</h2>
+      <div class="honest"><b>Where do the holes go? The plans don’t say.</b> Neither plan publishes hole locations. Ana White says “predrill and countersink”; MyOutdoorPlans names pilot holes and carriage bolts, with no measurements. So no holes are drawn or sent until you place them. If a plan publishes them later, they can come from the plan.</div>
+      <p class="note" style="margin:0 0 10px">Each board is drawn to its length, with its ends as cut. <b>Spot holes</b> marks a 3/16 in drill spot where you say; you drill. <b>Add a decorative cut</b> angles both ends of a square-cut board. The Store says whether it can do each one; some won’t work, and it says why.</p>
+      <div id="parts-bench"></div>
+
+      <div class="actions">
+        <button class="cta ghost" type="button" data-to="plan">← Your plan</button>
+        <span class="fine" id="bench-gate"></span>
+        <button class="cta push" type="button" id="btn-store">SEE THE STORE’S ANSWER →</button>
+      </div>
+    </div><aside class="rail dev-build-guide" data-guide-id="outdoor-bench" aria-label="Build guide · developer notes"></aside></div>
+  </section>
+
+  <!-- ═════ PAGE 3 · STEP 3 · THE STORE ANSWERS ═════ -->
+  <section class="view" id="s-store" data-section="store" hidden>
+    <div class="pg"><div class="main">
+      <p class="stepband">STEP 3 OF 6 · THE STORE ANSWERS <span>a fresh answer for exactly this table</span></p>
+      <h1>The Store answers</h1>
+      <p class="sub">The live Store gets exactly this version and answers each line on its own: which board, how many, the cut plan, the machine minutes, the price, or a refusal with its reason. Nothing on this page does the Store’s math.</p>
+      <div class="answer" id="store-panel"></div>
+      <table aria-label="Line by line"><thead><tr><th>Line</th><th>Store item</th><th>Qty</th><th>Min</th><th>Status</th><th>Price</th></tr></thead><tbody id="store-lines"></tbody></table>
+      <div class="doctrine card" id="store-doctrine"></div>
+      <div class="actions">
+        <button class="cta ghost" type="button" data-to="bench">← The bench</button>
+        <span class="fine" id="store-gate"></span>
+        <button class="cta push" type="button" id="btn-call" disabled>YOUR CALL →</button>
+      </div>
+    </div><aside class="rail dev-build-guide" data-guide-id="outdoor-store" aria-label="Build guide · developer notes"></aside></div>
+  </section>
+
+  <!-- ═════ PAGE 4 · STEP 4 · YOUR CALL ═════ -->
+  <section class="view" id="s-call" data-section="call" hidden>
+    <div class="pg"><div class="main">
+      <p class="stepband">STEP 4 OF 6 · YOUR CALL</p>
+      <h1>Your call</h1>
+      <p class="sub" id="call-sub"></p>
+      <div class="card">
+        <h3>What Store Zero would cut and supply</h3>
+        <table aria-label="Order lines"><thead><tr><th>Line</th><th>Store item</th><th>Qty</th><th>Price</th></tr></thead><tbody id="call-lines"></tbody></table>
+        <div class="ln" style="margin-top:12px"><span>Machine work (inside the wood lines)</span><b id="call-machine"></b></div>
+        <div class="ln"><span><b>Complete budgetary estimate</b></span><b class="total" id="call-total" style="font-size:28px;margin:0"></b></div>
+        <p class="note" id="call-receipt"></p>
+        <p class="note">A Store budgetary answer from a declared reference lumberyard, not a quote. The offer below is simulated and built from that exact answer. Nothing is cut until you accept and send it to the Store.</p>
+        <p class="verbs">Store answer ≠ offer ≠ acceptance ≠ payment ≠ allocation ≠ release ≠ cut ≠ ready ≠ custody</p>
+        <div id="call-terms" data-terms-step="call"></div>
+      </div>
+      <div class="actions"><button class="cta ghost" type="button" data-to="bench">← Change something</button></div>
+    </div><aside class="rail dev-build-guide" data-guide-id="outdoor-call" aria-label="Build guide · developer notes"></aside></div>
+  </section>
+
+  <!-- ═════ PAGE 5 · STEP 5 · WE CUT IT ═════ -->
+  <section class="view" id="s-yard" data-section="yard" hidden>
+    <div class="pg"><div class="main">
+      <p class="stepband">STEP 5 OF 6 · WE CUT IT</p>
+      <h1>We cut it</h1>
+      <p class="sub" id="yard-sub"></p>
+      <div class="card">
+        <div id="yard-terms" data-terms-step="yard"></div>
+        <p class="note">SIMULATED: offer, acceptance, payment and the yard queue are a demonstration. The cut list below is Store Zero’s own answer for your exact table.</p>
+      </div>
+      <div class="card">
+        <h3>Cut list, board by board</h3>
+        <table aria-label="Cut list"><thead><tr><th>Board</th><th>Store item</th><th>Parts, in cut order</th><th>Stub back</th></tr></thead><tbody id="yard-boards"></tbody></table>
+        <p class="note" id="yard-machine"></p>
+      </div>
+    </div><aside class="rail dev-build-guide" data-guide-id="outdoor-yard" aria-label="Build guide · developer notes"></aside></div>
+  </section>
+
+  <!-- ═════ PAGE 6 · STEP 6 · PICK UP & BUILD ═════ -->
+  <section class="view" id="s-record" data-section="record" hidden>
+    <div class="pg"><div class="main">
+      <p class="stepband">STEP 6 OF 6 · PICK UP &amp; BUILD</p>
+      <h1>Pick up &amp; build</h1>
+      <p class="sub" id="record-sub"></p>
+      <div class="card">
+        <h3>Your kit</h3>
+        <table aria-label="Kit contents"><thead><tr><th>What</th><th>Details</th><th>Qty</th></tr></thead><tbody id="record-kit"></tbody></table>
+      </div>
+      <div class="card">
+        <h3>Record</h3>
+        <div id="record-terms" data-terms-step="record"></div>
+        <p class="note" id="record-ids"></p>
+        <div id="record-open"></div>
+        <p class="note">Build it with the plan and the rule book. SIMULATED: no money moved and no machine ran; the boards, cuts, minutes and prices are Store Zero’s answer.</p>
+        <div class="actions"><button class="cta ghost" type="button" id="start-over">Start another table</button></div>
+      </div>
+    </div><aside class="rail dev-build-guide" data-guide-id="outdoor-record" aria-label="Build guide · developer notes"></aside></div>
+  </section>
+</div>
+
+<script src="store-zero-canonical-doctrine.js?v=65366367"></script>
+<script src="stb-store-client.js?v=7eb5ab65"></script>
+<script src="stb-terms-flow.js?v=850b1843"></script>
+<script src="stb-build-guide-spec.js?v=063b52d6"></script>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const $$=(s,r)=>[...(r||document).querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const money=n=>(n==null||!isFinite(Number(n)))?'—':'$'+Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+const clone=v=>JSON.parse(JSON.stringify(v));
+function fmt(n){
+  if(typeof n==='string')return n;
+  const whole=Math.floor(n+1e-9),frac=n-whole,eighths=Math.round(frac*8);
+  const map={0:'',1:'⅛',2:'¼',3:'⅜',4:'½',5:'⅝',6:'¾',7:'⅞'};
+  return eighths===8?String(whole+1):whole+(map[eighths]||'');
+}
+const ftin=n=>{const f=Math.floor(n/12),i=n-f*12;return f+' ft'+(i?' '+fmt(i)+' in':'')};
+const num=v=>{const t=String(v==null?'':v).trim();const n=Number(t);return t!==''&&isFinite(n)?n:null};
+const embedded=window.self!==window.top;
+
+/* ═════ THE PLAN RULE (apps/stb/shared/picnic-rule.mjs) ═════
+   The published site can't load that module, so its sizes and its unresolved notes are carried here, and a unit test
+   (test/unit/outdoor-picnic-rule-sync.test.mjs) keeps them identical to the rule. */
+const RULE=Object.freeze({
+  lengthIn:Object.freeze({min:60,max:216}),
+  referenceLengthsIn:Object.freeze([72,84,96,144]),
+  disclosure:'Candidate geometry only. The 60–216 in input range is not a structural rule, Store stock limit, machine envelope, or fulfillment promise. Material text is a holder preference, not material identity. Structural span remains unresolved until an attributed rule or qualified person resolves the exact condition.',
+  unresolved:Object.freeze(['STRUCTURAL_SPAN_NOT_EVALUATED','ENGINEERING_NOT_EVALUATED','HARDWARE_SUITABILITY_UNRESOLVED','LEG_END_CUT_ANGLES_UNRESOLVED',
+    'DRILL_DIAMETER_DEPTH_UNRESOLVED','MATERIAL_IDENTITY_UNRESOLVED','STORE_RESOLUTION_NOT_EVALUATED','GOVERNED_MAKE_PATH_ABSENT'])
+});
+const UNRESOLVED_WORDS={
+  STRUCTURAL_SPAN_NOT_EVALUATED:'Whether the table is strong enough at this length is not evaluated.',
+  ENGINEERING_NOT_EVALUATED:'No engineering review of this table.',
+  HARDWARE_SUITABILITY_UNRESOLVED:'Whether a hardware pack suits your wood and weather is not evaluated.',
+  LEG_END_CUT_ANGLES_UNRESOLVED:'The rule’s own fixture leaves leg angles open. Where a plan gives an angle (the A-frame’s 25°), the plan’s angle is what’s sent.',
+  DRILL_DIAMETER_DEPTH_UNRESOLVED:'Hole diameter and depth are not defined. A spot marks where; you drill.',
+  MATERIAL_IDENTITY_UNRESOLVED:'The wood you pick is a request; the Store says what it has.',
+  STORE_RESOLUTION_NOT_EVALUATED:'Nothing is resolved until the Store answers this exact table.',
+  GOVERNED_MAKE_PATH_ABSENT:'No governed make path: the yard steps here are simulated.'
+};
+
+/* ═════ THE TWO PLANS, as published ═════
+   Only the long boards (the slats) follow the table's length; every other board and every angle stays as the plan gives it. */
+const PLANS={
+  'a-frame':{
+    title:'Classic A-frame',
+    source:'Plan: Ana White, “Easiest to Build Picnic Table”',
+    sourceUrl:'https://www.ana-white.com/woodworking-projects/easiest-build-picnic-table-plans-free-pdf',
+    facts:'6 ft · seats 8 · 2×6 + 2×4 + 2×2 · screws only',
+    photo:'assets/outdoor/plan-a-frame-photo.webp',
+    wood:'treated',
+    angleNote:'Legs and cross supports: both ends 25° off square, ends parallel, measured long point to short point, as the plan publishes.',
+    groups:L=>[
+      {id:'SLATS',label:'Tabletop and seat boards',board:[2,6],angle:0,scales:true,parts:[['TOP',6,L],['SEAT',6,L]]},
+      {id:'LEGS',label:'Legs',board:[2,6],angle:25,parts:[['LEG',4,31.375]]},
+      {id:'BRACES',label:'Cross supports',board:[2,4],angle:25,parts:[['BRACE',2,32.875]]},
+      {id:'SUPPORTS',label:'Under-seat supports',board:[2,4],angle:0,parts:[['SUPPORT',2,61]]},
+      {id:'CLEATS',label:'Tabletop supports',board:[2,2],angle:0,parts:[['CLEAT-END',2,34.25],['CLEAT-MID',1,29.25]]}
+    ],
+    hardware:[{id:'S25',label:'2½ in wood screws',need:100,req:{kind:'wood-screw',gauge:'#10',lengthIn:2.5}}],
+    hardwareNote:'The plan lists 100 2½ in exterior screws. It gives no gauge; the packs ask the Store for #10.'
+  },
+  'table-benches':{
+    title:'Table + two benches',
+    source:'Plan: MyOutdoorPlans, “Picnic Table with Detached Benches”',
+    sourceUrl:'https://myoutdoorplans.com/furniture/picnic-table-with-detached-benches-plans/',
+    facts:'6 ft · all 2×4 · no angle cuts',
+    photo:'assets/outdoor/plan-table-benches-photo.webp',
+    wood:'ground-contact',
+    angleNote:'Every cut is square, as the plan publishes.',
+    groups:L=>[
+      {id:'SLATS',label:'Table and bench slats',board:[2,4],angle:0,scales:true,parts:[['TABLE-SLAT',7,L],['BENCH-SLAT',6,L]]},
+      {id:'FRAMES',label:'Legs and supports',board:[2,4],angle:0,parts:[['TABLE-LEG',4,26],['TABLE-SUPPORT',4,27.5],['BENCH-LEG',8,16.5],['BENCH-SUPPORT',8,11.5]]}
+    ],
+    hardware:[
+      {id:'S45',label:'4½ in wood screws',need:26,req:{kind:'wood-screw',gauge:'#10',lengthIn:4.5}},
+      {id:'S25',label:'2½ in wood screws',need:48,req:{kind:'wood-screw',gauge:'#10',lengthIn:2.5}},
+      {id:'CB',label:'3/8 × 5 in carriage bolts',need:8,req:{kind:'carriage-bolt',diameterIn:0.375,lengthIn:5}}
+    ],
+    hardwareNote:'The plan names 2½ in and 4½ in screws and 5 in carriage bolts, but publishes no totals or gauge. The counts are this project’s reading of the plan’s text; the packs ask the Store for #10 screws.'
+  }
+};
+const PART_NAMES={TOP:'Tabletop board',SEAT:'Seat board',LEG:'Leg',BRACE:'Cross support',SUPPORT:'Under-seat support','CLEAT-END':'Tabletop support, end','CLEAT-MID':'Tabletop support, middle',
+  'TABLE-SLAT':'Table slat','BENCH-SLAT':'Bench slat','TABLE-LEG':'Table leg','TABLE-SUPPORT':'Table support','BENCH-LEG':'Bench leg','BENCH-SUPPORT':'Bench support'};
+/* Dressed width of the plans' boards: the lumber standard, used only to draw them. */
+const DRESSED_W={2:1.5,4:3.5,6:5.5};
+/* Wood: your request in the Store's material words. The Store says what it stocks and what it costs. */
+const WOODS=[
+  {key:'construction',label:'Construction',species:'spf',grade:'construction'},
+  {key:'treated',label:'Treated',species:'syp-treated',grade:'above-ground'},
+  {key:'ground-contact',label:'Ground-contact',species:'syp-treated',grade:'ground-contact'},
+  {key:'cedar-tone',label:'Cedar-tone',species:'syp-treated',grade:'ground-contact-cedartone'},
+  {key:'cedar',label:'Cedar',species:'cedar',grade:'S4S'}
+];
+/* Hardware packs, from the cheap stuff to the good stuff. Each is a finish in the Store's hardware-requirement words;
+   the Store picks its own item and package count, or says no. No item number is chosen here. */
+const TIERS=[
+  {key:'BYO',label:'Bring your own',finish:null},
+  {key:'COATED',label:'Coated',finish:'coated'},
+  {key:'HOTDIP',label:'Galvanized',finish:'hot-dip-galvanized'},
+  {key:'STAINL',label:'Stainless',finish:'stainless'},
+  {key:'SILICO',label:'Silicon bronze',finish:'silicon-bronze'}
+];
+const SPOT_PLACES=[{k:'CENTER',label:'centered',rule:'CENTERED_ON_WIDE_FACE',inset:null},{k:'1.5',label:'1½ in from an edge',rule:'INSET_FROM_EDGE',inset:1.5}];
+const DECO_START=45;
+
+/* ═════ THE CONFIGURATOR FOR THIS JOB: made from the plan you pick (intent), turned on the bench ═════
+   Every plan gets: size, wood, hardware pack, spot holes on each kind of board, and a decorative cut on each kind of
+   square-cut board. Boards whose ends are the plan's angle get no decorative cut: the plan's angles are the plan's. */
+function kindsOf(cfg){const out=[];PLANS[cfg.plan].groups(cfg.lengthIn).forEach(g=>g.parts.forEach(([kind,n,len])=>out.push({kind,n,len,g})));return out}
+function manifest(cfg){
+  if(!cfg)return [];
+  const k=['SIZE','WOOD','HARDWARE'];
+  kindsOf(cfg).forEach(p=>{k.push('SPOTS:'+p.kind);if(p.g.angle===0)k.push('DECO:'+p.kind)});
+  return k;
+}
+
+/* ═════ STATE: one definition ═════ */
+const S={section:'plan',
+  cards:Object.fromEntries(Object.keys(PLANS).map(k=>[k,{lengthIn:72,answer:null,asking:false,error:null,token:0}])),
+  cfg:null,rev:1,answer:null,asking:false,error:null,token:0,options:null,optionsKey:'',optionsAsking:false,optionsError:null};
+const TERMS=window.STBTermsFlow.create({projectId:'outdoor',title:'Outdoor · picnic table'});
+window.STBTermsFlow.installStyle(document);
+const partOf=(cfg,kind)=>cfg.parts[kind]||(cfg.parts[kind]={spots:{on:false,fromEndIn:'',place:'',middle:false},deco:{on:false,angle:''}});
+
+/* ═════ THE DEFINITION AND THE STORE REQUEST ═════ */
+function hash(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0}return h.toString(16).padStart(8,'0')}
+function spotsFor(p,len){
+  const s=p&&p.spots;if(!s||!s.on)return null;
+  const d=num(s.fromEndIn),pl=SPOT_PLACES.find(x=>x.k===s.place);
+  if(d==null||!pl||!(d>0&&d<len/2))return null;
+  const at=[d,len-d];if(s.middle)at.splice(1,0,len/2);
+  return at.map(x=>{const o={xIn:Math.round(x*1000)/1000,acrossWidthRule:pl.rule};if(pl.inset!=null)o.insetFromEdgeIn=pl.inset;return o});
+}
+const decoAngle=(p,g)=>g.angle===0&&p&&p.deco&&p.deco.on&&num(p.deco.angle)!=null?num(p.deco.angle):null;
+function packagesFor(cfg,woodKeys){
+  const out=[];
+  for(const wood of WOODS.filter(w=>woodKeys.includes(w.key))){
+    const byId={};
+    for(const {kind,n,len,g} of kindsOf(cfg)){
+      const p=cfg.parts[kind],da=decoAngle(p,g),angle=da==null?g.angle:da;
+      const id=wood.key+'|'+g.id+(da==null?'':'|A'+angle);
+      if(!byId[id]){byId[id]={packageId:id,material:{species:wood.species,form:'board',nominalT:g.board[0],nominalW:g.board[1],grade:wood.grade},endCut:{angleDeg:angle},parts:[]};out.push(byId[id])}
+      const spots=spotsFor(p,len);
+      for(let i=1;i<=n;i++){const part={partId:kind+'-'+String(i).padStart(2,'0'),lengthIn:len};if(spots)part.spots=spots;byId[id].parts.push(part)}
+    }
+  }
+  return out;
+}
+function itemsFor(cfg,tierKeys){
+  const out=[];
+  for(const t of TIERS.filter(t=>t.finish&&tierKeys.includes(t.key)))
+    for(const h of PLANS[cfg.plan].hardware)out.push({lineId:t.key+'|'+h.id,qty:h.need,requirement:{...h.req,finish:t.finish,unit:'piece'}});
+  return out;
+}
+function work(cfg){
+  return kindsOf(cfg).map(({kind,g,len})=>{const p=cfg.parts[kind];return {kind,spots:spotsFor(p,len)?(p.spots.middle?3:2):0,deco:decoAngle(p,g)}}).filter(w=>w.spots||w.deco!=null);
+}
+/* Everything that identifies this table, sent or not. */
+function record(cfg){
+  const p=PLANS[cfg.plan];
+  return {plan:cfg.plan,source:p.source,lengthIn:cfg.lengthIn,wood:cfg.wood,hardware:cfg.tier,
+    work:work(cfg),angleConvention:p.angleNote,unresolved:RULE.unresolved.slice(),
+    holeLocations:'not published by the plan; only where the customer places them'};
+}
+function definitionFor(cfg,prefix){
+  const body={cutPackages:packagesFor(cfg,[cfg.wood])};
+  const items=itemsFor(cfg,[cfg.tier]);if(items.length)body.itemLines=items;
+  const rec=record(cfg),sig=hash(JSON.stringify({rec,body}));
+  return {definition:{configurationId:'OUTDOOR-PICNIC-'+cfg.plan.toUpperCase(),configurationVersion:prefix+sig,...body},record:rec,sig};
+}
+const cardCfg=plan=>({plan,lengthIn:S.cards[plan].lengthIn,wood:PLANS[plan].wood,tier:'COATED',parts:{}});
+const buildRequest=()=>S.cfg?definitionFor(S.cfg,'od-r'+S.rev+'-'):null;
+/* One request for the option prices on the bench: every wood and every hardware pack, for this table and this work.
+   These are the Store's own line prices; your call only ever uses the exact answer. */
+function optionsRequest(){
+  const body={cutPackages:packagesFor(S.cfg,WOODS.map(w=>w.key)),itemLines:itemsFor(S.cfg,TIERS.map(t=>t.key))};
+  return {configurationId:'OUTDOOR-PICNIC-OPTIONS',configurationVersion:'od-options-'+hash(JSON.stringify(body)),...body};
+}
+
+/* ═════ CONDITIONS: ours to settle, not the Store's ═════ */
+function conditions(){
+  const c=[];const cfg=S.cfg;
+  if(!cfg){c.push({t:'Pick a plan',d:'',block:true});return c}
+  for(const {kind,len,g} of kindsOf(cfg)){
+    const p=cfg.parts[kind];if(!p)continue;const name=PART_NAMES[kind];
+    if(p.spots.on){const d=num(p.spots.fromEndIn);
+      if(d==null||!p.spots.place)c.push({t:'Spot holes on '+name+': set a distance from each end and a placement',d:'nothing is assumed.',block:true,kind});
+      else if(!(d>0&&d<len/2))c.push({t:'Spot holes on '+name+' fall off the board',d:fmt(d)+' in from each end doesn’t fit a '+fmt(len)+' in board.',block:true,kind});}
+    if(p.deco.on&&g.angle===0){const a=num(p.deco.angle);
+      if(a==null||!(a>0&&a<90))c.push({t:'The decorative cut on '+name+' needs an angle between 0° and 90°',d:'the Store says which angles it can cut.',block:true,kind});}
+  }
+  c.push({t:'Strength at this length',d:'not evaluated (STRUCTURAL_SPAN_NOT_EVALUATED).',block:false});
+  if(cfg.tier==='BYO')c.push({t:'Hardware',d:'you bring your own; nothing is asked of the Store for it.',block:false});
+  return c;
+}
+const blocked=()=>conditions().some(c=>c.block);
+
+/* ═════ THE STORE: asked live, through the shared client ═════ */
+async function send(definition){
+  const client=window.STBStoreClient;
+  if(!client)throw new Error('STORE_CLIENT_UNAVAILABLE');
+  return client.sendJob({projectId:'outdoor',requestType:'CUT_PACKAGE_V1',candidateRevisionId:definition.configurationVersion,
+    payload:{definition,definitionKind:'cut_package.v1',ruleVersion:'0.1'}});
+}
+/* Page 1: each card's price is the Store's answer for that plan, as published, at the size on the card. */
+const cardTimers={};
+function askCard(plan){
+  const c=S.cards[plan],token=++c.token;
+  c.asking=true;c.error=null;c.answer=null;renderCards();
+  clearTimeout(cardTimers[plan]);
+  cardTimers[plan]=setTimeout(async()=>{
+    try{const r=definitionFor(cardCfg(plan),'od-card-');const body=await send(r.definition);if(token!==c.token)return;c.answer={definition:r.definition,evaluation:body.rawEvaluation}}
+    catch(e){if(token!==c.token)return;c.error=String(e&&e.message||e)}
+    c.asking=false;renderCards();
+  },300);
+}
+let askTimer=null,optTimer=null;
+function changed(){
+  const req=buildRequest();
+  if(S.answer&&req&&S.answer.sig!==req.sig&&!S.answer.stale){S.answer.stale=true;S.rev++}
+  S.error=null;
+  scheduleAsk();scheduleOptions();render();
+}
+function scheduleAsk(){
+  clearTimeout(askTimer);
+  if(!S.cfg||blocked())return;
+  const req=buildRequest();if(S.answer&&!S.answer.stale&&S.answer.sig===req.sig)return;
+  askTimer=setTimeout(askExact,250);
+}
+async function askExact(){
+  if(!S.cfg||blocked())return;
+  const req=buildRequest(),token=++S.token;
+  S.asking=true;S.error=null;render();
+  try{
+    const sentAt=new Date().toISOString();
+    const body=await send(req.definition);
+    if(token!==S.token)return;
+    S.answer={rev:S.rev,sig:req.sig,stale:false,definition:req.definition,record:req.record,
+      evaluation:body.rawEvaluation,receipt:body.evaluationReceipt||body.rawEvaluation?.evaluationReceipt||null,
+      requestId:body.requestId,storePin:body.storePin,body,sentAt};
+    if(buildRequest().sig!==req.sig){S.answer.stale=true;S.rev++;scheduleAsk()}
+  }catch(e){if(token!==S.token)return;S.error=String(e&&e.message||e)}
+  S.asking=false;render();
+}
+function scheduleOptions(){
+  if(!S.cfg)return;
+  const key=JSON.stringify(optionsRequest().cutPackages.map(p=>[p.packageId,p.endCut,p.parts]));
+  if(key===S.optionsKey)return;
+  S.optionsKey=key;S.options=null;S.optionsError=null;S.optionsAsking=true;
+  clearTimeout(optTimer);
+  optTimer=setTimeout(async()=>{
+    const mine=S.optionsKey,def=optionsRequest();
+    try{const body=await send(def);if(mine!==S.optionsKey)return;S.options=body.rawEvaluation}
+    catch(e){if(mine!==S.optionsKey)return;S.optionsError=String(e&&e.message||e)}
+    S.optionsAsking=false;render();
+  },350);
+}
+const answerCurrent=()=>!!(S.answer&&!S.answer.stale);
+
+/* ═════ READING THE STORE'S ANSWER ═════ */
+const REASONS={
+  NO_MATCHING_BOARD_OFFERING:'Store Zero doesn’t stock this size in this wood',
+  PART_LONGER_THAN_LONGEST_STOCKED_BOARD:'no board in this wood is long enough',
+  PART_NOT_HALF_INCH_UNDER_BOARD:'no board in this wood is long enough',
+  NO_MATCHING_HARDWARE_OFFERING:'Store Zero has no hardware that matches this pack yet',
+  NO_OFFERING:'not stocked',NOT_OFFERED:'not offered',
+  MITER_ANGLE_OUTSIDE_D001_STAGE2_ENVELOPE:'the Store’s cell doesn’t cut that angle',
+  ANGLED_PART_LEAVES_LESS_THAN_CONTROL_LENGTH:'at that angle, too little board is left to hold',
+  COMPONENT_LENGTH_BELOW_TWO_ROLLER_CONTROL:'a board is too short for the rollers to hold',
+  SPOT_LOCATION_OUTSIDE_PART:'a spot falls off the end of its board',
+  SPOT_INSET_OUTSIDE_BOARD_WIDTH:'a spot’s edge distance is wider than the board'
+};
+const lineCodes=l=>[...new Set([...(l.reasonCodes||[]),...(l.considered||[]).map(c=>c.reason).filter(Boolean),...(l.reasonRecord?.code?[l.reasonRecord.code]:[])])].filter(Boolean);
+const reasonText=code=>REASONS[code]?REASONS[code]+' ('+code+')':String(code||'').replace(/_/g,' ').toLowerCase();
+function groupLabel(id,plan){const s=String(id);const [w,g,a]=s.split('|');const grp=plan&&PLANS[plan].groups(72).find(x=>x.id===g);
+  if(grp)return grp.label+' ('+grp.board.join('×')+')'+(a?' · decorative '+a.slice(1)+'° cut':'');
+  const t=TIERS.find(x=>x.key===w);const h=plan&&PLANS[plan].hardware.find(x=>x.id===g);if(t&&h)return h.label+' · '+t.label;return s}
+function summarize(ev){
+  if(!ev)return null;
+  const pk=ev.packages||[],it=ev.items||[],lines=[...pk,...it];
+  const allOk=ev.status==='SUPPORTABLE'&&lines.length>0&&lines.every(l=>l.status==='SUPPORTABLE');
+  const t=ev.totals||{};
+  return {ev,pk,it,lines,allOk,t,estimate:allOk?t.sumOfSupportableLines:null,
+    minutes:pk.reduce((n,p)=>n+Number(p.time?.T_MACHINE_min||0),0),spots:pk.reduce((n,p)=>n+Number(p.spotCount||0),0),
+    stubs:pk.reduce((n,p)=>n+(p.stubs||[]).length,0),bad:lines.filter(l=>l.status!=='SUPPORTABLE')};
+}
+const view=()=>S.answer?summarize(S.answer.evaluation):null;
+function optionPrice(kind,key){
+  const ev=S.options;if(!ev)return null;
+  if(kind==='tier'){if(key==='BYO')return {ok:true,Q:0};
+    const ls=(ev.items||[]).filter(i=>String(i.lineId).startsWith(key+'|'));
+    return {ok:ls.length>0&&ls.every(l=>l.status==='SUPPORTABLE'),Q:ls.reduce((s,l)=>s+Number(l.Q||0),0)};}
+  const ls=(ev.packages||[]).filter(p=>String(p.packageId).startsWith(key+'|'));
+  return {ok:ls.length>0&&ls.every(l=>l.status==='SUPPORTABLE'),Q:ls.reduce((s,l)=>s+Number(l.Q||0),0)};
+}
+
+/* Every current Store answer goes to the shared terms flow; a refusal ends there, with the Store's reasons. */
+function feedTerms(){
+  const v=view();
+  if(!v||!answerCurrent()||S.asking||S.error){TERMS.setAnswer(null);return}
+  const st=TERMS.setAnswer({version:S.answer.definition.configurationVersion,status:v.allOk?'SUPPORTABLE':(v.ev.status==='SUPPORTABLE'?'UNRESOLVED':(v.ev.status||'REFUSED')),
+    total:v.estimate,reasons:v.bad.map(l=>{const codes=lineCodes(l).length?lineCodes(l):[l.status];return {code:codes.join(','),text:groupLabel(l.packageId||l.lineId,S.cfg.plan)+': '+codes.map(reasonText).join('; ')}}),
+    body:S.answer.body,sentAt:S.answer.sentAt});
+  if(st.stage==='NO_ANSWER'){S.answer.stale=true;scheduleAsk()}
+}
+
+/* ═════ DRAWINGS: each board, to its length, with its ends and its spots ═════
+   Length runs left to right and is labelled; the board's width is drawn larger than true so spots and angles read. */
+function boardSvg(len,board,angle,spots,deco){
+  const W=720,x0=40,x1=W-40,h=board[1]>=6?52:board[1]>=4?38:22,y0=34,y1=y0+h;
+  const off=angle?Math.tan(angle*Math.PI/180)*h:0;
+  const pts=[[x0+off,y0],[x1,y0],[x1-off,y1],[x0,y1]];
+  const sx=(x1-x0-off)/len;
+  const o=[];
+  o.push('<svg viewBox="0 0 '+W+' '+(y1+42)+'" role="img" aria-label="'+esc(fmt(len)+' in board'+(angle?', ends '+angle+'° off square':', square ends')+(spots?', '+spots.length+' spots':''))+'">');
+  o.push('<polygon points="'+pts.map(p=>p.join(',')).join(' ')+'" fill="var(--wood)" stroke="var(--wood-line)" stroke-width="1.5"/>');
+  if(angle){const col=deco?'var(--brand)':'var(--wood-line)';
+    o.push('<line x1="'+(x0+off)+'" y1="'+y0+'" x2="'+x0+'" y2="'+y1+'" stroke="'+col+'" stroke-width="3"/>');
+    o.push('<line x1="'+x1+'" y1="'+y0+'" x2="'+(x1-off)+'" y2="'+y1+'" stroke="'+col+'" stroke-width="3"/>');
+    o.push('<text x="'+(x0+off+6)+'" y="'+(y0-6)+'" font-size="12" fill="'+col+'" font-weight="700">'+angle+'°'+(deco?' · yours':' · plan')+'</text>');
+    o.push('<text x="'+(x1-off-6)+'" y="'+(y1+14)+'" font-size="12" fill="'+col+'" font-weight="700" text-anchor="end">'+angle+'°</text>');}
+  o.push('<line x1="'+x0+'" y1="'+(y1+26)+'" x2="'+x1+'" y2="'+(y1+26)+'" stroke="var(--muted)" stroke-width="1"/><path d="M'+x0+' '+(y1+21)+'v10M'+x1+' '+(y1+21)+'v10" stroke="var(--muted)"/>');
+  o.push('<text x="'+((x0+x1)/2)+'" y="'+(y1+39)+'" font-size="13" fill="var(--ink)" font-weight="700" text-anchor="middle">'+fmt(len)+' in</text>');
+  if(spots){spots.forEach((s,i)=>{const x=x0+off/2+s.xIn*sx,y=s.acrossWidthRule==='CENTERED_ON_WIDE_FACE'?(y0+y1)/2:y0+Math.min(h-6,Math.max(6,(s.insetFromEdgeIn||0)/DRESSED_W[board[1]]*h));
+    o.push('<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="4.5" fill="var(--spot)" stroke="var(--card)" stroke-width="1.2"/>');
+    if(i===0)o.push('<text x="'+x.toFixed(1)+'" y="'+(y1+14)+'" font-size="11.5" fill="var(--spot)" font-weight="700" text-anchor="middle">spot '+fmt(s.xIn)+' in from the end</text>');});}
+  else o.push('<text x="'+((x0+x1)/2)+'" y="'+(y0-8)+'" font-size="11.5" fill="var(--muted)" text-anchor="middle">hole locations: not published by the plan · none until you place them</text>');
+  o.push('</svg>');
+  return o.join('');
+}
+
+/* ═════ RENDER ═════ */
+function render(){
+  renderCards();
+  if(S.cfg)renderBench();
+  feedTerms();renderStore();renderCall();renderYard();renderRecord();renderTerms();syncNav();
+}
+function cardPrice(plan){
+  const c=S.cards[plan];
+  if(c.asking||(!c.answer&&!c.error))return '<small>Asking Store Zero…</small>';
+  if(c.error)return '<small>Store Zero could not answer ('+esc(c.error)+'). No earlier answer is reused.</small>';
+  const v=summarize(c.answer.evaluation);
+  const label='<small>Store Zero · '+ftin(c.lengthIn)+' · '+(WOODS.find(w=>w.key===PLANS[plan].wood)||{}).label+' wood · coated pack</small>';
+  if(v.estimate!=null)return label+'<b>'+money(v.estimate)+'</b>';
+  return label+'<span class="no">Can’t be cut at this size: '+esc(v.bad.map(l=>(lineCodes(l).length?lineCodes(l):[l.status]).map(reasonText).join('; ')).join(' · '))+'</span>';
+}
+function renderCards(){
+  const host=$('plans');
+  if(!host.dataset.built){
+    host.innerHTML=Object.entries(PLANS).map(([key,p])=>`
+      <article class="plan" data-card="${key}">
+        <img src="${p.photo}" alt="Photo of a finished ${esc(p.title)} picnic table">
+        <p class="cap">A photo of a finished table, not a drawing. Nobody cuts to a photo; the boards come from the plan.</p>
+        <h2>${esc(p.title)}</h2>
+        <p class="src"><a href="${p.sourceUrl}" target="_blank" rel="noopener">${esc(p.source)}</a></p>
+        <p class="facts">${esc(p.facts)}</p>
+        <div class="resize" data-knob="SIZE">
+          <button type="button" data-card-size="-12" aria-label="One foot shorter">−1 ft</button>
+          <button type="button" data-card-size="-1" aria-label="One inch shorter">−1 in</button>
+          <div class="val" data-card-val></div>
+          <button type="button" data-card-size="1" aria-label="One inch longer">+1 in</button>
+          <button type="button" data-card-size="12" aria-label="One foot longer">+1 ft</button>
+        </div>
+        <div class="price" data-card-price></div>
+        <p class="knobs">On the bench for this plan: size, wood, hardware pack, spot holes on any board, and a decorative cut on any square-cut board.</p>
+        <button class="go-bench" type="button" data-to-bench="${key}">TAKE IT TO THE BENCH TO DO MORE WORK →</button>
+      </article>`).join('');
+    host.dataset.built='1';
+  }
+  for(const key of Object.keys(PLANS)){
+    const card=host.querySelector('[data-card="'+key+'"]'),c=S.cards[key];
+    card.querySelector('[data-card-val]').innerHTML=ftin(c.lengthIn)+'<small>'+c.lengthIn+' in · '+RULE.lengthIn.min+'–'+RULE.lengthIn.max+' in, to the inch</small>';
+    card.querySelector('[data-card-price]').innerHTML=cardPrice(key);
+  }
+}
+function optionButtons(){
+  const pend=S.optionsAsking?'…':S.optionsError?'?':'…';
+  $('woods').innerHTML=WOODS.map(w=>{const o=optionPrice('wood',w.key);
+    const price=!S.options?pend:o.ok?'$'+Math.round(o.Q):'<span class="no">Not as stocked</span>';
+    return `<button type="button" class="opt ${S.cfg.wood===w.key?'on':''}" data-wood="${w.key}" aria-pressed="${S.cfg.wood===w.key}"><span>${w.label}</span><b>${price}</b></button>`}).join('');
+  $('tiers').innerHTML=TIERS.map(t=>{const o=optionPrice('tier',t.key);
+    const price=t.key==='BYO'?'You supply':!S.options?pend:o.ok?'+$'+Math.round(o.Q):'<span class="no">Not stocked yet</span>';
+    return `<button type="button" class="opt ${S.cfg.tier===t.key?'on':''}" data-tier="${t.key}" aria-pressed="${S.cfg.tier===t.key}"><span>${t.label}</span><b>${price}</b></button>`}).join('');
+  $('wood-hint').textContent='Neither plan names a species or treatment; this project starts you on '+(WOODS.find(w=>w.key===PLANS[S.cfg.plan].wood)||{}).label+'. Prices are the Store’s, for this table and this work.';
+  $('tier-hint').textContent=PLANS[S.cfg.plan].hardwareNote+(S.optionsError?' The Store couldn’t price the options ('+S.optionsError+').':'');
+}
+function answerPanel(){
+  const v=view(),a=S.answer;
+  if(!S.cfg)return '';
+  if(blocked())return '<h3>Store Zero answers</h3><p class="status ask">Finish the settings marked below first. The Store is asked for a complete table only.</p>';
+  if(S.asking&&!answerCurrent())return '<h3>Store Zero answers</h3><p class="status ask">Asking Store Zero for this exact table…</p>';
+  if(S.error)return '<h3>Store Zero answers</h3><p class="status bad">Store Zero could not answer ('+esc(S.error)+'). No earlier answer is reused.</p><button type="button" class="cta ghost" data-ask>TRY AGAIN</button>';
+  if(!v)return '<h3>Store Zero answers</h3><p class="status ask">Asking…</p>';
+  const head='<h3>Store Zero answers'+(a.stale?' · this table has changed':'')+'</h3>';
+  if(v.estimate!=null)return head+'<div class="total" style="'+(a.stale?'opacity:.5':'')+'">'+money(v.estimate)+'</div>'
+    +'<p class="meta">Complete budgetary estimate: wood '+money(v.t.material)+' + machine work '+money(v.t.machine_service)+(v.t.items?' + hardware '+money(v.t.items):'')+' · '+Math.round(v.minutes)+' min on the machine'+(v.spots?' · '+v.spots+' spots':'')+(v.stubs?' · '+v.stubs+' stubs returned':'')+'</p>'
+    +'<p class="meta">A Store budgetary answer, not a quote. Revision '+a.rev+'.</p>';
+  return head+'<div class="total none">No complete budgetary estimate</div><p class="status bad">Store Zero can’t do every line for this table:</p><ul class="refusals">'
+    +v.bad.map(l=>'<li>'+esc(groupLabel(l.packageId||l.lineId,S.cfg.plan))+': '+esc((lineCodes(l).length?lineCodes(l):[l.status]).map(reasonText).join('; '))+'</li>').join('')+'</ul>';
+}
+function partCard(kind,n,len,g){
+  const p=partOf(S.cfg,kind),da=decoAngle(p,g),angle=da==null?g.angle:da,spots=spotsFor(p,len);
+  const worked=p.spots.on||p.deco.on;
+  const ends=g.angle?g.angle+'° off square, ends parallel · the plan’s':(da!=null?da+'° decorative, both ends parallel · yours':'square · the plan’s');
+  let h='<div class="part'+(worked?' worked':'')+'" data-part="'+kind+'">'
+    +'<div class="ph"><b>'+PART_NAMES[kind]+' × '+n+'</b><span class="meta">'+g.board.join('×')+' · '+fmt(len)+' in'+(g.scales?' · follows the table length':'')+' · ends '+ends+'</span></div>'
+    +'<div data-draw>'+boardSvg(len,g.board,angle,spots,da!=null)+'</div>'
+    +'<div class="tools">'
+    +'<button type="button" class="tool'+(p.spots.on?' on':'')+'" data-knob="SPOTS:'+kind+'" data-tool="spots" aria-pressed="'+p.spots.on+'">'+(p.spots.on?'✓ SPOT HOLES':'+ SPOT HOLES')+'</button>'
+    +(g.angle===0?'<button type="button" class="tool'+(p.deco.on?' on':'')+'" data-knob="DECO:'+kind+'" data-tool="deco" aria-pressed="'+p.deco.on+'">'+(p.deco.on?'✓ DECORATIVE CUT':'+ ADD DECORATIVE CUT')+'</button>'
+      :'<span class="meta">No decorative cut: these ends are the plan’s '+g.angle+'°, not changed.</span>')
+    +'</div>';
+  if(p.spots.on)h+='<div class="set"><b class="meta">Spot holes</b><input type="number" min="0" step="0.25" placeholder="in from each end" value="'+esc(p.spots.fromEndIn)+'" data-in="fromEndIn" style="width:150px" aria-label="Inches from each end">'
+    +'<select data-in="place" aria-label="Where across the board"><option value="">across the board…</option>'+SPOT_PLACES.map(x=>'<option value="'+x.k+'"'+(p.spots.place===x.k?' selected':'')+'>'+x.label+'</option>').join('')+'</select>'
+    +'<label class="meta"><input type="checkbox" data-in="middle"'+(p.spots.middle?' checked':'')+'> one in the middle too</label>'
+    +'<span class="meta">3/16 in spot on every '+PART_NAMES[kind].toLowerCase()+'. Your locations, not the plan’s.</span></div>';
+  if(p.deco.on&&g.angle===0)h+='<div class="set"><b class="meta">Decorative cut</b><input type="number" min="0" max="90" step="0.5" value="'+esc(p.deco.angle)+'" data-in="angle" style="width:90px" aria-label="Decorative cut angle in degrees"><span class="meta">° off square, both ends, parallel, as the Store cuts a board. The Store decides whether it can (<a href="https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/D-001-STAGE2-ENVELOPE-0.1.md" target="_blank" rel="noopener">its envelope</a>).</span></div>';
+  return h+'</div>';
+}
+let partsSig='';
+function renderBench(){
+  const cfg=S.cfg,p=PLANS[cfg.plan];
+  $('bench-photo').src=p.photo;$('bench-photo').alt='A photo of a finished '+p.title+' table, not a drawing';
+  $('bench-title').textContent=p.title+' · on the bench';
+  $('bench-source').innerHTML='Every board, length and angle from <a href="'+p.sourceUrl+'" target="_blank" rel="noopener">'+esc(p.source)+'</a>. '+esc(p.angleNote);
+  $('b-size-val').textContent=ftin(cfg.lengthIn)+' · '+cfg.lengthIn+' in';
+  $('b-size-hint').textContent='From '+RULE.lengthIn.min+' to '+RULE.lengthIn.max+' in, to the inch: the plan rule’s range. The slats follow the length; the end frames and every angle stay as the plan gives them. The range is not a strength rule.';
+  optionButtons();
+  $('instant').innerHTML=answerPanel();
+  /* Rebuild the board cards when their structure changes; otherwise only redraw, so typing isn't interrupted. */
+  const sig=cfg.plan+'|'+cfg.lengthIn+'|'+kindsOf(cfg).map(({kind})=>{const x=partOf(cfg,kind);return kind+(x.spots.on?'S':'')+(x.deco.on?'D':'')}).join(',');
+  const host=$('parts-bench');
+  if(sig!==partsSig){partsSig=sig;host.innerHTML=kindsOf(cfg).map(({kind,n,len,g})=>partCard(kind,n,len,g)).join('')}
+  else kindsOf(cfg).forEach(({kind,len,g})=>{const x=partOf(cfg,kind),da=decoAngle(x,g);const el=host.querySelector('[data-part="'+kind+'"] [data-draw]');if(el)el.innerHTML=boardSvg(len,g.board,da==null?g.angle:da,spotsFor(x,len),da!=null)});
+  const bl=conditions().filter(c=>c.block);
+  $('bench-gate').textContent=bl.length?bl.map(c=>c.t).join(' · '):'Revision '+S.rev+' goes to the Store exactly as shown.';
+  $('btn-store').disabled=bl.length>0;
+}
+function renderStore(){
+  $('store-panel').innerHTML=S.cfg?answerPanel().replace('<h3>Store Zero answers','<h3>Store budgetary answer · Store Zero'):'';
+  const v=view(),b=S.answer&&S.answer.body;
+  if(v&&b)$('store-panel').insertAdjacentHTML('beforeend','<p class="ids">SENT '+esc(String(b.payloadDigest||'—').slice(0,16))+'… · ARRIVED '+esc(String(S.answer.receipt?.receiptHash||'—').slice(0,16))+'… · ANSWERED '+esc(String((v.ev.calculationIdentity||b.calculationIdentity||{}).resultHash||'—').slice(0,16))+'… · Store '+esc(String(S.answer.storePin||'—').slice(0,12))+'</p>');
+  const plan=S.cfg&&S.cfg.plan;
+  $('store-lines').innerHTML=v?v.pk.map(p=>'<tr><td>'+esc(groupLabel(p.packageId,plan))+'</td><td>'+(p.storeSku?esc(p.storeSku)+' ('+p.stockLengthIn+'")':'—')+'</td><td>'+(p.boards||'—')+'</td><td>'+(p.time?Math.round(p.time.T_MACHINE_min):'—')+'</td><td><span class="tag '+(p.status==='SUPPORTABLE'?'ok':'bad')+'">'+p.status+'</span>'
+      +(lineCodes(p).length&&p.status!=='SUPPORTABLE'?'<br><span class="meta">'+lineCodes(p).map(reasonText).join('; ')+'</span>':'')+'</td><td>'+money(p.Q)+'</td></tr>').join('')
+    +v.it.map(i=>'<tr><td>'+esc(groupLabel(i.lineId,plan))+'</td><td>'+esc(i.storeSku?(i.description||i.storeSku):'no match')+'</td><td>'+(i.packages||i.qty)+'</td><td>—</td><td><span class="tag '+(i.status==='SUPPORTABLE'?'ok':'bad')+'">'+i.status+'</span>'
+      +((i.reasonCodes||[]).length?'<br><span class="meta">'+i.reasonCodes.map(reasonText).join('; ')+'</span>':'')+'</td><td>'+money(i.Q)+'</td></tr>').join(''):'';
+  const st=TERMS.state();
+  $('btn-call').disabled=!st.callOpen;
+  $('store-gate').textContent=st.callOpen?'Your call is open for revision '+S.rev+'.':!S.answer?'Your call opens after the Store answers.':S.answer.stale?'Asking again for revision '+S.rev+'.':'Not every line can be done. Change something on the bench, or stop here: a refusal is a result.';
+}
+function renderTerms(){for(const id of ['call-terms','yard-terms','record-terms']){const h=$(id);if(h)h.innerHTML=TERMS.renderControls(h.dataset.termsStep)+TERMS.renderChain()}}
+function title(){const c=S.cfg;return PLANS[c.plan].title+' · '+ftin(c.lengthIn)+' · '+(WOODS.find(w=>w.key===c.wood)||{}).label+' · '+(TIERS.find(t=>t.key===c.tier)||{}).label+(work(c).length?' · with your work':'')}
+function renderCall(){
+  const v=view(),st=TERMS.state();
+  if(!st.callOpen||!v){$('call-sub').textContent=st.stage==='REFUSED_BY_STORE'?'The Store did not support this version. Steps 4 to 6 stay closed; the refusal is the result.':'Waiting on a current Store answer with every line supportable.';$('call-lines').innerHTML='';$('call-machine').textContent=$('call-total').textContent=$('call-receipt').textContent='';return}
+  const plan=S.cfg.plan;
+  $('call-sub').textContent=title()+' · revision '+S.answer.rev;
+  $('call-lines').innerHTML=v.pk.map(p=>'<tr><td>'+esc(groupLabel(p.packageId,plan))+', cut</td><td>'+esc(p.storeSku)+'</td><td>'+p.boards+' board'+(p.boards===1?'':'s')+'</td><td>'+money(p.Q)+'</td></tr>').join('')
+    +v.it.map(i=>'<tr><td>'+esc(groupLabel(i.lineId,plan))+'</td><td>'+esc(i.storeSku)+'</td><td>'+(i.packages||i.qty)+'</td><td>'+money(i.Q)+'</td></tr>').join('')
+    +(S.cfg.tier==='BYO'?'<tr><td>Hardware</td><td>You supply</td><td>—</td><td>—</td></tr>':'');
+  $('call-machine').textContent=money(v.t.machine_service);
+  $('call-total').textContent=money(v.estimate);
+  const r=S.answer.receipt||{};
+  $('call-receipt').textContent='Store receipt '+String(r.receiptHash||'').slice(0,12)+' for exactly this table ('+S.answer.definition.configurationVersion+') · request '+String(S.answer.requestId).slice(0,8)+' · Store '+String(S.answer.storePin).slice(0,7)+' · '+(r.evaluatedAt||'');
+}
+function renderYard(){
+  const st=TERMS.state(),v=view();
+  if(!st.yardOpen||!v){$('yard-sub').textContent='Nothing is in the yard yet. This page opens after you accept the simulated offer.';$('yard-boards').innerHTML='';$('yard-machine').textContent='';return}
+  $('yard-sub').textContent=title()+' · order '+st.orderId;
+  const boards=v.pk.flatMap(p=>(p.cutPlan||[]).map(b=>({...b,group:p.packageId})));
+  $('yard-boards').innerHTML=boards.map(b=>'<tr><td>'+esc(b.boardId)+'</td><td>'+esc(b.storeSku)+' ('+b.stockLengthIn+'")</td><td>'+(b.partsInCutOrder||[]).map(p=>esc(p.partId)+' '+fmt(p.lengthIn)+'"').join(' → ')+'</td><td>'+(b.stubIn!=null?fmt(b.stubIn)+'"':(b.offcutIn!=null?fmt(b.offcutIn)+'" offcut':'—'))+'</td></tr>').join('');
+  $('yard-machine').textContent=Math.round(v.minutes)+' min on the machine'+(v.spots?' · '+v.spots+' spots':'')+' · machine work '+money(v.t.machine_service)+'. SIMULATED: no machine runs; Cycle Start stays with the person at the cell.';
+}
+function renderRecord(){
+  const st=TERMS.state(),v=view();
+  if(!st.recordOpen||!v){$('record-sub').textContent='Nothing to pick up yet. This page opens once the parts are cut and ready.';$('record-kit').innerHTML='';$('record-ids').textContent='';$('record-open').innerHTML='';return}
+  const plan=S.cfg.plan;
+  $('record-sub').textContent=title()+' · '+money(v.estimate);
+  const rows=v.pk.map(p=>{const parts=(p.cutPlan||[]).reduce((n,b)=>n+(b.partsInCutOrder||[]).length,0);return '<tr><td>'+esc(groupLabel(p.packageId,plan))+'</td><td>'+parts+' cut parts from '+p.boards+' × '+esc(p.storeSku)+'</td><td>'+parts+'</td></tr>'});
+  if(v.stubs)rows.push('<tr><td>Stubs</td><td>Returned with your kit</td><td>'+v.stubs+'</td></tr>');
+  rows.push(...v.it.map(i=>'<tr><td>'+esc(groupLabel(i.lineId,plan))+'</td><td>'+esc(i.description||i.storeSku)+'</td><td>'+(i.packages||i.qty)+'</td></tr>'));
+  if(S.cfg.tier==='BYO')rows.push('<tr><td>Hardware</td><td>You supply</td><td>—</td></tr>');
+  $('record-kit').innerHTML=rows.join('');
+  $('record-ids').textContent='Order '+st.orderId+' · '+S.answer.definition.configurationVersion+' · Store '+String(S.answer.storePin).slice(0,7)+' · request '+String(S.answer.requestId).slice(0,8);
+  $('record-open').innerHTML='<p class="note"><b>Still not evaluated:</b> '+RULE.unresolved.slice(0,3).map(c=>UNRESOLVED_WORDS[c]).join(' ')+' Picking up doesn’t settle them.</p>';
+}
+
+/* ═════ PAGES ═════ */
+const SECTIONS=['plan','bench','store','call','yard','record'];
+const NAV_OF={plan:'scan',bench:'configure',store:'store',call:'request',yard:'yard',record:'record'};
+function usable(){const t=TERMS.state();return {plan:true,bench:!!S.cfg,store:!!S.cfg,call:t.callOpen,yard:t.yardOpen,record:t.recordOpen}}
+function go(section){
+  if(!SECTIONS.includes(section)||!usable()[section])return;
+  S.section=section;document.body.dataset.section=section;
+  SECTIONS.forEach(s=>{$('s-'+s).hidden=s!==section});
+  window.scrollTo(0,0);syncNav();
+}
+function syncNav(){
+  const u=usable(),nu={scan:true,configure:u.bench,store:u.store,request:u.call,yard:u.yard,record:u.record};
+  $$('[data-nav]').forEach(b=>{b.disabled=!nu[b.dataset.nav];b.classList.toggle('on',NAV_OF[S.section]===b.dataset.nav)});
+  if(embedded&&window.parent!==window){const t=TERMS.state();
+    window.parent.postMessage({type:'STB_OUTDOOR_STATE',projectId:'outdoor',view:S.section,planChosen:!!S.cfg,callReady:t.callOpen,paid:t.yardOpen,cut:t.recordOpen,terms:t.stage},location.origin);}
+}
+const clampLen=n=>Math.min(RULE.lengthIn.max,Math.max(RULE.lengthIn.min,Math.round(Number(n))));
+function setCardLength(plan,n){n=clampLen(n);if(!isFinite(n)||n===S.cards[plan].lengthIn)return;S.cards[plan].lengthIn=n;askCard(plan)}
+function setLength(n){if(!S.cfg)return;n=clampLen(n);if(!isFinite(n)||n===S.cfg.lengthIn)return;S.cfg.lengthIn=n;S.cards[S.cfg.plan].lengthIn=n;changed()}
+function takeToBench(plan){
+  const same=S.cfg&&S.cfg.plan===plan;
+  if(!same)S.cfg=cardCfg(plan);else S.cfg.lengthIn=S.cards[plan].lengthIn;
+  changed();go('bench');
+}
+
+document.addEventListener('click',e=>{
+  const cs=e.target.closest('[data-card-size]');if(cs){setCardLength(cs.closest('[data-card]').dataset.card,S.cards[cs.closest('[data-card]').dataset.card].lengthIn+Number(cs.dataset.cardSize));return}
+  const tb=e.target.closest('[data-to-bench]');if(tb){takeToBench(tb.dataset.toBench);return}
+  const sz=e.target.closest('#s-bench [data-size]');if(sz){setLength(S.cfg.lengthIn+Number(sz.dataset.size));return}
+  const w=e.target.closest('#woods [data-wood]');if(w){if(S.cfg.wood!==w.dataset.wood){S.cfg.wood=w.dataset.wood;changed()}return}
+  const t=e.target.closest('#tiers [data-tier]');if(t){if(S.cfg.tier!==t.dataset.tier){S.cfg.tier=t.dataset.tier;changed()}return}
+  const tool=e.target.closest('[data-tool]');if(tool){const kind=tool.closest('[data-part]').dataset.part,p=partOf(S.cfg,kind);
+    if(tool.dataset.tool==='spots'){p.spots.on=!p.spots.on;if(p.spots.on)p.spots={on:true,fromEndIn:'',place:'',middle:false}}
+    else{p.deco.on=!p.deco.on;if(p.deco.on)p.deco={on:true,angle:String(DECO_START)}}
+    changed();return}
+  const to=e.target.closest('[data-to]');if(to){e.preventDefault();go(to.dataset.to);return}
+  const ak=e.target.closest('[data-ask]');if(ak){askExact();return}
+  const nv=e.target.closest('[data-nav]');if(nv){goStage(nv.dataset.nav);return}
+});
+$('parts-bench').addEventListener('input',e=>{const f=e.target.closest('[data-in]');if(!f)return;const kind=f.closest('[data-part]').dataset.part,p=partOf(S.cfg,kind);
+  const k=f.dataset.in;if(k==='angle')p.deco.angle=f.value;else if(k==='middle')p.spots.middle=f.checked;else p.spots[k]=f.value;changed()});
+$('parts-bench').addEventListener('change',e=>{const f=e.target.closest('[data-in]');if(!f)return;const kind=f.closest('[data-part]').dataset.part,p=partOf(S.cfg,kind);
+  const k=f.dataset.in;if(k==='middle')p.spots.middle=f.checked;else if(k==='place')p.spots.place=f.value;else return;changed()});
+$('btn-store').onclick=()=>{go('store');if(!answerCurrent()&&!S.asking&&!blocked())askExact()};
+$('btn-call').onclick=()=>go('call');
+function afterTerms(action){render();if(action==='accept')go('yard');if(action==='yard')go('record')}
+for(const id of ['call-terms','yard-terms','record-terms'])TERMS.bind($(id),afterTerms);
+TERMS.onChange(()=>{renderTerms();syncNav()});
+$('start-over').onclick=()=>{TERMS.setAnswer(null);S.cfg=null;S.answer=null;S.error=null;S.options=null;S.optionsKey='';S.rev++;partsSig='';render();go('plan')};
+
+/* The host's top nav drives this page; the page tells the host which steps can be used right now. */
+function goStage(stage){
+  const map={scan:'plan',plan:'plan',configure:'bench',bench:'bench',store:'store',review:'store',request:'call',yard:'yard',terms:'yard',recap:'record',record:'record'};
+  const s=map[stage];if(!s)return;
+  if(s==='store'&&S.cfg&&!answerCurrent()&&!S.asking&&!blocked())askExact();
+  go(s);
+}
+window.addEventListener('message',event=>{
+  if(event.origin!==location.origin||(event.source!==window.parent&&event.source!==window.top))return;
+  if(event.data?.type==='STB_OUTDOOR_GO')goStage(String(event.data.stage||''));
+});
+if(embedded)$('bar').hidden=true;
+
+/* Dev/Rev rails: one slot per page, filled from the app's one guide file. The words are written there, not here. */
+$$('aside[data-guide-id]').forEach(a=>{const spec=window.STBBuildGuideSpec;a.innerHTML=spec&&typeof spec.render==='function'?spec.render(a.dataset.guideId):'<p class="hd">DEV GUIDE</p><p class="goal">Guide file not loaded</p>'});
+
+/* Every Store answer carries the same Store Zero reference text and "What happens next", from the one
+   shared file. If that file is missing or incomplete, say so; never a shortened stand-in. */
+function renderStoreDoctrine(host){
+  if(!host)return;
+  const d=window.STBStoreZeroCanonicalDoctrine;
+  const probe=document.createElement('div');if(d)probe.innerHTML=d.processStepsHtml||'';
+  const ok=!!d&&probe.querySelectorAll('.s').length===d.expectedProcessStepCount;
+  host.innerHTML=ok?'<div class="band">'+d.definitionHtml+'</div>'+d.processIntroHtml+d.processStepsHtml
+    :'<div class="band warn"><b>Store Zero reference text unavailable.</b> '+((d&&d.unavailableMessage)||'The shared Store Zero text did not load, so none is shown in its place.')+'</div>';
+}
+renderStoreDoctrine($('store-doctrine'));
+render();go('plan');
+Object.keys(PLANS).forEach(askCard);
+window.STBOutdoorPicnic=Object.freeze({version:'0.3',rule:RULE,plans:Object.keys(PLANS),
+  takeToBench,setLength,setCardLength,
+  request:()=>{const r=buildRequest();return r&&r.definition},
+  cardRequest:plan=>definitionFor(cardCfg(plan),'od-card-').definition,
+  optionsRequest:()=>S.cfg?optionsRequest():null,
+  record:()=>{const r=buildRequest();return r&&r.record},
+  conditions,knobs:()=>manifest(S.cfg),
+  benchKnobs:()=>[...new Set($$('#s-bench [data-knob]').map(e=>e.dataset.knob))],
+  state:()=>({section:S.section,plan:S.cfg&&S.cfg.plan,lengthIn:S.cfg&&S.cfg.lengthIn,cards:Object.fromEntries(Object.entries(S.cards).map(([k,c])=>[k,{lengthIn:c.lengthIn,asking:c.asking,answered:!!c.answer,error:c.error}])),
+    rev:S.rev,asking:S.asking,error:S.error,answered:!!S.answer,current:answerCurrent(),terms:TERMS.state()})});
+})();
+</script>
+</body>
+</html>
