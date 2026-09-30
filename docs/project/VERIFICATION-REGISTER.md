@@ -4,6 +4,12 @@
 **Scope:** current accepted baseline, current application candidate, and parallel machine-safety candidate.  
 **Rule:** PASS proves only the stated claim under the stated pins and boundaries.
 
+## Current public-build rows
+
+Candidate rows are not yet added in this commit. The pull request body must name the exact claim, exact test file and assertion, exact System commit, exact Store pin (or `not applicable`), and exact limit before any row appears here.
+
+A green workflow is not a row.
+
 ## Current public surface — navigation
 
 Start with [`CURRENT-SYSTEM-STATE.md`](CURRENT-SYSTEM-STATE.md) for the current publication source, current Store-pin owner, and current simulation/commissioning limits.
