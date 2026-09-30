@@ -366,7 +366,7 @@ tr:last-child td{border-bottom:0}
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
 <script src="stb-store-client.js?v=7eb5ab65"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
-<script src="stb-build-guide-spec.js?v=063b52d6"></script>
+<script src="stb-build-guide-spec.js?v=f9620c41"></script>
 <script>
 (function(){
 'use strict';
@@ -824,6 +824,7 @@ function upstreamFor(codes){
 }
 function edgeListHtml(){
   const items=[
+    ['gap','Getting to a defined plan','This app starts where a plan is defined: its parts, lengths and angles. Both plans here were read by a person and entered by hand, then checked against the published pages. Reading a plan file for you, or turning an idea into a plan, is design and CAD/CAM work: a mature field, and not this app’s job.','design and CAD/CAM tools, and plan publishers with a cut list a machine can read. Hand this app a defined plan, and the job starts here.'],
     ['gap','Hole locations','Neither plan publishes them. Ana White says “predrill and countersink”; MyOutdoorPlans names pilot holes and carriage bolts, with no measurements. You can place spots, but they’re yours, not the plan’s.','the plan’s author. A plan that publishes hole centers, measured from a stated end, would put them here automatically.'],
     ['gap','Hole size and depth','Not defined (DRILL_DIAMETER_DEPTH_UNRESOLVED). A spot marks where; you drill.','the plan or the hardware maker: name the fastener and its pilot hole.'],
     ['gap','A different angle on each end, compound cuts, clipped corners','Not built. The Store takes one angle per set of boards, cut on one plane.','the Store and its machine: declare those cuts, and the bench can offer them.'],
