@@ -224,12 +224,16 @@ function windowSeatProfile({ root, payload, candidateRevisionId, storePin }) {
     row('window-seat.scope-accounting', 'Every defined Window Seat board must survive translation into the Store request', missing.length === 0, { condition: missing.length ? missing.map(id => `UNMAPPED_PART:${id}`).join(', ') : null }),
     row('window-seat.generator-consistency', 'Window Seat sends the exact request generated for its current definition', !!expected && same(payload?.definition, expected)),
     screwsInScope
-      ? deferredRow('window-seat.hardware-withheld', 'Window Seat screws are explicitly withheld from Store scope in this version', 'WITHHELD_SCOPE:HARDWARE_SENT=false')
-      : notRequiredRow('window-seat.hardware-withheld', 'Window Seat screws are outside the selected project scope'),
+      ? row('window-seat.hardware', 'Window Seat screws in scope must travel as a complete hardware requirement', (() => {
+          const line = (Array.isArray(payload?.definition?.itemLines) ? payload.definition.itemLines : []).find(item => item?.lineId === 'SCREWS');
+          const req = line?.requirement;
+          return !!line && isObject(req) && req.kind === 'wood-screw' && text(req.gauge) && positive(req.lengthIn) && text(req.finish) && Number.isInteger(line.qty) && line.qty > 0;
+        })(), { owner: OWNER.USER, condition: (Array.isArray(payload?.definition?.itemLines) && payload.definition.itemLines.some(item => item?.lineId === 'SCREWS' && isObject(item.requirement) && item.requirement.kind === 'wood-screw' && text(item.requirement.gauge) && positive(item.requirement.lengthIn) && text(item.requirement.finish) && Number.isInteger(item.qty) && item.qty > 0)) ? null : 'SCREWS_REQUIREMENT_INCOMPLETE' })
+      : notRequiredRow('window-seat.hardware', 'Window Seat screws are outside the selected project scope'),
     row('window-seat.scope', 'Window Seat committed request scope must remain CUT_PACKAGE_V1', payload?.definitionKind === 'cut_package.v1' && payload?.ruleVersion === '0.1' && Array.isArray(payload?.definition?.cutPackages) && payload.definition.cutPackages.length > 0),
   ];
   const requiredIds = rows.map(item => item.id);
-  return runReadiness({ projectId:'window-seat', requestType:'CUT_PACKAGE_V1', scope:'WINDOW_SEAT_COMMITTED', definitionKind:'cut_package.v1', ruleVersion:'0.1', candidateRevisionId, storePin, requiredIds, rows, withheldScope:screwsInScope ? ['WINDOW_SEAT_HARDWARE'] : [] });
+  return runReadiness({ projectId:'window-seat', requestType:'CUT_PACKAGE_V1', scope:'WINDOW_SEAT_COMMITTED', definitionKind:'cut_package.v1', ruleVersion:'0.1', candidateRevisionId, storePin, requiredIds, rows });
 }
 
 function outdoorProfile({ root, payload, candidateRevisionId, storePin }) {

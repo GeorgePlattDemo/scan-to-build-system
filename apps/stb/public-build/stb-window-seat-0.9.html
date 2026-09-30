@@ -646,10 +646,9 @@ const SPOT_RULES=[
   {k:'1.5',label:'1½ in from the edge',rule:'INSET_FROM_EDGE',inset:1.5},
   {k:'2',label:'2 in from the edge',rule:'INSET_FROM_EDGE',inset:2}
 ];
-/* The Store's hardware-requirement vocabulary. You state the requirement; the Store would pick its own item, or refuse.
-   CURRENT GAP: System's wire to the Store carries hardware only as a Store item number, and this page holds no Store
-   item numbers. So a hardware requirement is kept on the job and marked not sent, until the wire carries it. */
-const HARDWARE_SENT=false;
+/* The Store's hardware-requirement vocabulary. You state the requirement; the Store picks its own item, or refuses.
+   #8 remains selectable. If Store Zero does not stock that gauge, Store owns the refusal. */
+const HARDWARE_SENT=true;
 const SCREW_GAUGES=['#8','#10'];
 const SCREW_FINISHES=[['coated','coated'],['zinc-interior','zinc, interior'],['hot-dip-galvanized','hot-dip galvanized'],['stainless','stainless'],['silicon-bronze','silicon bronze']];
 const KNOBS=[
@@ -674,7 +673,7 @@ const KNOBS=[
   {id:'XSPOT',opt:'xspot',label:'One more spot, on a part you pick',group:'FEATURES',made:'ADDED',from:'added by hand',start:'part, distance, placement required',val:()=>P.xspot.target?(P.xspot.target+' · '+(P.xspot.offset||'?')+' in'):'not placed yet',
    needs:['which part','distance from its end','where across the board'],to:'one 3/16 in spot on each board of that part',add:'A single extra spot anywhere you name.'},
   {id:'SCREWS',opt:'screws',label:'Wood screws',group:'HARDWARE',made:'ADDED',from:'added by hand',start:'gauge, length, finish, count required',val:()=>screwsText(),
-   needs:['gauge','length','finish','how many'],to:'a hardware requirement, kept on the job; not sent yet (see the gap below)',add:'Screws for assembly, stated as a requirement. Merchandise you pick, not a connection design.'}
+   needs:['gauge','length','finish','how many'],to:'a hardware requirement sent to the Store; Store picks the item or refuses',add:'Screws for assembly, stated as a requirement. Merchandise you pick, not a connection design.'}
 ];
 const KEPT_ASKS=[
   {k:'label',t:'Label every part'},{k:'inspect',t:'Inspect the finished sizes'},{k:'bundle',t:'Bundle by module'},
@@ -888,8 +887,8 @@ function conditions(def){
     else if(!f)c.push({t:'The extra spot’s part isn’t in this version',d:P.xspot.target+' no longer exists. The request is kept and marked; it is not moved to another part.',block:true,at:'bench'});
     else if(!(off>0&&off<f.len))c.push({t:'The extra spot is off the part',d:fmt(off)+' in is not inside a '+fmt(f.len)+' in part',block:true,at:'bench'});
   }
-  if(has('SCREWS'))c.push(screwsLine()?{t:'Wood screws: kept, not sent',d:'System’s link to the Store carries hardware only by Store item number, and this page holds none. The requirement travels with the job; the Store isn’t asked for it yet.',block:false}
-    :{t:'The screws need a gauge, a length, a finish and a count',d:'state all four so the requirement is complete. It travels with the job, not sent yet.',block:false});
+  if(has('SCREWS'))c.push(screwsLine()?{t:'Wood screws: sent as a requirement',d:'gauge, length, finish and count travel on the Store request. Store picks its own item or refuses. #8 may be refused if it is not stocked.',block:false}
+    :{t:'The screws need a gauge, a length, a finish and a count',d:'state all four before the Store is asked. Incomplete screws block the ask.',block:true,at:'bench'});
   if(I.kept.other&&!I.otherText.trim())c.push({t:'“Something else” needs a description',d:'say what you’re asking for, on your intent page',block:true,at:'intent'});
   if(M.narrow==null)c.push({t:'Fit against the opening not checked',d:'no width is marked controlling, so the job isn’t compared to the opening. The parts are still defined.',block:false});
   if(M.checking)c.push({t:M.checking+' measured number'+(M.checking===1?'':'s')+' still need checking',d:'not compared against the job until you mark them. They travel, marked.',block:false});
@@ -993,7 +992,7 @@ function controls(){
     +'<input class="sel" id="sc-len" placeholder="length, in" value="'+esc(P.screws.lengthIn)+'" style="width:90px" aria-label="Length in inches">'
     +'<select class="sel" id="sc-finish" aria-label="Finish"><option value="">finish…</option>'+SCREW_FINISHES.map(f=>'<option value="'+f[0]+'"'+(P.screws.finish===f[0]?' selected':'')+'>'+f[1]+'</option>').join('')+'</select>'
     +'<input class="sel" id="sc-qty" placeholder="how many" value="'+esc(P.screws.qty)+'" style="width:90px" aria-label="How many screws"></div>'
-    +'<p class="dim" style="font-size:10.5px;margin:4px 0 0">A requirement, not an item number. <b>Kept, not sent yet:</b> the link to the Store carries hardware only by Store item number, and this page holds none.</p></div>';
+    +'<p class="dim" style="font-size:10.5px;margin:4px 0 0">A requirement, not an item number. <b>Sent with the ask:</b> Store picks its own item or refuses.</p></div>';
   h+='<button type="button" class="mini2" id="btn-reset" style="width:100%;font-size:10.5px;letter-spacing:.05em;padding:6px 8px;color:var(--text-2)">RESET THE KNOBS TO WHERE THEY START</button>';
   $('ctlcol').innerHTML=h;
   const on=(id,fn)=>{const e=$(id);if(e)e.oninput=function(){fn(this);changed()}};
@@ -1199,7 +1198,7 @@ function render(){
     +kv('Features',req.spotCount?req.spotCount+' spots':'none')
     +kv('Operations',ops.length)+'<p class="small dim" style="margin:0 0 6px">'+ops.join(' · ')+'</p>'
     +kv('Material','1× '+woodName(P.wood).toLowerCase()+(b?', 1×'+b.nominalW:''))
-    +kv('Hardware',has('SCREWS')?screwsText()+' (kept, not sent)':'none')
+    +kv('Hardware',has('SCREWS')?screwsText()+' (sent as a requirement)':'none')
     +'<p class="dim small" style="margin:8px 0 0">Board lengths, stock, time and price come back from the Store. The bench doesn’t guess them.</p>';
 
   /* depth: your number versus the boards */
@@ -1231,7 +1230,7 @@ function render(){
   if(has('SPOTS'))rows.push(['Shelf-pin spot facing',P.spots.rule?spotRule(P.spots).label:'placement missing',P.spots.rule?((P.SH.LEFT+P.SH.RIGHT)*2*def.runs)+' spots at the shelf positions, on the tower sides':'nothing until placed','FEATURES · OPERATION']);
   if(has('XSPOT'))rows.push(['One more spot',P.xspot.target||'not placed',P.xspot.target?'one spot on each board of '+P.xspot.target:'nothing until placed','FEATURE · OPERATION']);
   rows.push(['Wood',woodName(P.wood),'the material of every cut package','MATERIAL']);
-  if(has('SCREWS'))rows.push(['Wood screws',screwsText(),'a hardware requirement kept on the job; not sent to the Store yet','HARDWARE · KEPT']);
+  if(has('SCREWS'))rows.push(['Wood screws',screwsText(),'a hardware requirement sent to the Store; Store picks the item or refuses','HARDWARE · KEPT']);
   rows.push(['Every board','—','cut to length; the Store picks the board length and plans the cuts','OPERATION']);
   $('xform').innerHTML='<thead><tr><th>From intent</th><th>Now</th><th>Makes</th><th>Kind</th></tr></thead><tbody>'
     +rows.map(r=>'<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td>'+r[2]+'</td><td><span class="chip">'+r[3]+'</span></td></tr>').join('')+'</tbody>';
@@ -1316,7 +1315,7 @@ function renderStore(req,cond){
   const kept=keptList();
   $('store-kept').innerHTML='<div class="box"><h4>ON THE JOB, NOT ASKED OF THE STORE</h4><div class="bd">'
     +kept.map(k=>'<div class="ln"><span>'+esc(k.t)+' <span class="dim">: the Store has no line for it; kept, not claimed done</span></span><span class="chip warn">KEPT · NOT SENT</span></div>').join('')
-    +(has('SCREWS')?'<div class="ln"><span>Wood screws: '+esc(screwsText())+' <span class="dim">: kept, not sent; the link to the Store carries hardware only by Store item number</span></span><span class="chip warn">KEPT · NOT SENT</span></div>':'')
+    +(has('SCREWS')?'<div class="ln"><span>Wood screws: '+esc(screwsText())+' <span class="dim">: sent as a requirement; Store picks the item or refuses</span></span><span class="chip ok">SENT</span></div>':'')
     +OPEN_QUESTIONS.map(q=>'<div class="ln"><span>'+q.t+' <span class="dim">: not a Store question; '+q.owner.toLowerCase()+' owns it</span></span><span class="chip '+(q.status==='UNRESOLVED'?'warn':'')+'">'+q.status+'</span></div>').join('')
     +'</div></div>';
   const st=TERMS.state();
@@ -1405,7 +1404,7 @@ function auditText(){
   L.push('Operations: cut to length ('+def.boards.length+' boards)'+(b&&b.mill!=null?'; edge mill 1×'+b.nominalW+' to '+fmt(b.mill)+' in':'')+(req.spotCount?'; spot ('+req.spotCount+')':''));
   L.push('Features: '+(req.spotCount?req.spotCount+' spots, 3/16 in wide × 3/16 in deep':'none'));
   L.push('Material: '+woodName(P.wood)+', ¾ in solid board'+(b?', from 1×'+b.nominalW:''));
-  L.push('Hardware requirement: '+(has('SCREWS')?screwsText()+' (kept, not sent: the link to the Store carries hardware only by Store item number)':'none'));
+  L.push('Hardware requirement: '+(has('SCREWS')?screwsText()+' (sent as a requirement; Store picks the item or refuses)':'none'));
   L.push('Kept, not sent: '+(keptList().map(k=>k.t).join('; ')||'none'));
   L.push('Conditions: '+cond.map(c=>(c.block?'[BLOCKS] ':'[TRAVELS] ')+c.t).join('; '));
   hr('2 · SENT TO THE STORE');
