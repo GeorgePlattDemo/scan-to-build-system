@@ -99,6 +99,11 @@ tr:last-child td{border-bottom:0}
 .road{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--card);display:flex;flex-direction:column;gap:8px}
 .road p{margin:0;font-size:13.5px;color:var(--ink2)}
 .road .cta{align-self:flex-start;margin-top:auto}
+.roads-top{margin:18px 0 4px}
+.want{margin:10px 0 14px;display:grid;grid-template-columns:minmax(0,260px) 1fr;gap:12px;align-items:center}
+.want img{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block}
+.want figcaption{font-size:12.5px;color:var(--ink2)}
+.bench-yours{margin-top:12px}
 .ln{display:flex;gap:9px;align-items:flex-start;margin-bottom:6px;font-size:13.5px}
 .ln>span:first-child{flex:1;min-width:0}
 .add{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--card);margin-bottom:10px}
@@ -155,7 +160,7 @@ tr:last-child td{border-bottom:0}
 .doctrine .close p{margin:0 0 8px;color:var(--text2)}
 
 @media (max-width:1000px){.two{grid-template-columns:1fr}}
-@media (max-width:800px){.pg{grid-template-columns:1fr}.pg>.main{border-right:0;border-bottom:1px solid var(--line)}.plans,.roads{grid-template-columns:1fr}.opts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:800px){.want{grid-template-columns:1fr}.pg{grid-template-columns:1fr}.pg>.main{border-right:0;border-bottom:1px solid var(--line)}.plans,.roads{grid-template-columns:1fr}.opts{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:520px){.wrap{padding:12px 16px 40px}.opts{grid-template-columns:repeat(2,minmax(0,1fr))}th,td{padding:7px 6px}}
 </style>
 </head>
@@ -181,6 +186,18 @@ tr:last-child td{border-bottom:0}
       <div class="plans" id="plans"></div>
 
       <div id="plan-detail" hidden>
+        <div class="roads roads-top" id="roads">
+          <div class="road">
+            <b>Resize it and send it →</b>
+            <p>The plan as it is, at your size, in your wood, with your hardware pack. The plan’s cuts and angles go to the Store unchanged. Nothing is added.</p>
+            <button class="cta" type="button" data-road="plan">RESIZE IT AND SEND IT →</button>
+          </div>
+          <div class="road">
+            <b>Make it yours →</b>
+            <p>Add what the plan doesn’t have: a decorative angle on the slat ends, or holes where you want hardware. Each addition becomes a setting for this one job.</p>
+            <button class="cta ghost" type="button" data-road="yours">MAKE IT YOURS →</button>
+          </div>
+        </div>
         <div class="two" style="margin-top:18px">
           <div>
             <h2 id="pd-title">The plan, as it gives it</h2>
@@ -212,18 +229,6 @@ tr:last-child td{border-bottom:0}
             <div class="card"><h3>Wood</h3><div class="opts" id="woods" data-knob="WOOD"></div><p class="hint" id="wood-hint"></p></div>
             <div class="card"><h3>Hardware pack</h3><div class="opts" id="tiers" data-knob="HARDWARE"></div><p class="hint" id="tier-hint"></p></div>
             <div class="answer" id="instant"></div>
-          </div>
-        </div>
-        <div class="roads" id="roads">
-          <div class="road">
-            <b>Resize it and send it →</b>
-            <p>The plan as it is, at your size, in your wood, with your hardware pack. The plan’s cuts and angles go to the Store unchanged. Nothing is added.</p>
-            <button class="cta" type="button" data-road="plan">RESIZE IT AND SEND IT →</button>
-          </div>
-          <div class="road">
-            <b>Make it yours →</b>
-            <p>Add what the plan doesn’t have: a decorative angle on the slat ends, or holes where you want hardware. Each addition becomes a setting for this one job.</p>
-            <button class="cta ghost" type="button" data-road="yours">MAKE IT YOURS →</button>
           </div>
         </div>
       </div>
@@ -275,6 +280,7 @@ tr:last-child td{border-bottom:0}
       <p class="stepband">STEP 2 OF 6 · THE BENCH <span>page 3 of 7 · turn the settings you arrived with</span></p>
       <h1>The bench</h1>
       <p class="sub" id="bench-sub"></p>
+      <figure class="want" id="bench-want"><img id="bench-photo" alt=""><figcaption>What you chose. A photo of a finished table, not a drawing. Nobody cuts to a photo; the parts below come from the plan.</figcaption></figure>
       <div class="chain" id="receives"></div>
       <div class="two">
         <div id="bench-ctl"></div>
@@ -287,7 +293,7 @@ tr:last-child td{border-bottom:0}
         <thead><tr><th>Part</th><th>Qty</th><th>Board</th><th>Length</th><th>Ends</th><th>Holes</th><th>From</th></tr></thead>
         <tbody id="bench-parts"></tbody>
       </table>
-      <p class="hint"><a href="#s-yours" data-to="yours" data-backlink>Want something the plan doesn’t have? Add it on “Make it yours”.</a> The bench never adds a setting.</p>
+      <div class="road bench-yours"><b>Want something the plan doesn’t have?</b><p>Additions are made on “Make it yours”, not here. The bench never adds a setting.</p><button class="cta ghost" type="button" data-to="yours" data-backlink>MAKE IT YOURS →</button></div>
       <div class="actions">
         <button class="cta ghost" type="button" data-back-from-bench>← Back</button>
         <span class="fine" id="bench-gate"></span>
@@ -750,6 +756,7 @@ function renderYours(){
   $('yours-gate').textContent=n?n+' addition'+(n===1?'':'s')+' made here. The bench gets them with your plan’s settings.':'Nothing added yet. The bench gets your plan’s settings only.';
 }
 function renderBench(){
+  $('bench-photo').src=PLANS[S.plan].photo;$('bench-photo').alt='A photo of a finished '+PLANS[S.plan].title+' table, not a drawing';
   $('bench-sub').textContent=(S.road==='yours'?'Make it yours':'Resize it and send it')+' · '+PLANS[S.plan].title+'. Every control here is a setting made on page 1 or page 2. Turn one and the parts, and the Store’s answer, follow.';
   const req=buildRequest(),v=view();
   const recv=[['PLAN',PLANS[S.plan].title],['ROAD',S.road==='yours'?'make it yours':'resize it and send it'],['SETTINGS',manifest().length],['VERSION','rev '+S.rev],

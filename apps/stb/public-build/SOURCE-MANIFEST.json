@@ -567,6 +567,13 @@
       "blobSha": "236ba2c23ae49ab6bf0bb1a78676dc524e0eff1f",
       "bytes": 229574,
       "reason": "Outdoor full pass: the unused comparison handoff names stb-outdoor-picnic-0.2.html (was the retired bench-leg page); cache-busters for the guide, the Store handoff contract, the front door, Window Seat 0.9 and Outdoor 0.2."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-0.2-roads-photo",
+      "blobSha": "b059245a2e2782e39fb69d628b962d6c85553a99",
+      "bytes": 229574,
+      "reason": "Cache-buster for Outdoor 0.2: the two roads sit right under the plan cards, the bench shows the photo of the chosen table, and \"Make it yours\" on the bench is a button."
     }
   ],
   "retiredFiles": [
