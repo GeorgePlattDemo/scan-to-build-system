@@ -335,8 +335,9 @@ test('ADMISSION window-seat: an unmapped source board fails closed instead of sh
     });
     assert.ok(result.missing.length > 0, 'fixture exposes at least one defined board missing from the outgoing package');
     assert.equal(result.ok, false, 'shrunken package is blocked');
-    assert.match(result.code || result.message, /UNMAPPED_PART:/, 'admission names the unmapped part');
-    assert.ok(result.missing.some(id => (result.code || result.message).includes(id)), 'admission names the missing board id');
+    assert.match(String(result.message || ''), /SYSTEM_ADMISSION_/, 'shared seam names an admission failure');
+    assert.match(String(result.message || ''), /UNMAPPED_PART:/, 'admission names the unmapped part');
+    assert.ok(result.missing.some(id => String(result.message || '').includes(id)), 'admission names the missing board id');
     assert.equal(requestsFor(log, TILES['window-seat']).length, before, 'unmapped board never reaches Store');
   });
 });
