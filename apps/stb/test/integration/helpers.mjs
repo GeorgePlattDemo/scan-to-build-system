@@ -12,7 +12,7 @@ import { createStoreAdapter } from '../../server/store-adapter.mjs';
 import { requireCleanPinnedStore } from '../store/helpers.mjs';
 
 const ROOT = fileURLToPath(new URL('../../public-build/', import.meta.url));
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css' };
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css' };
 
 // Serves the public build, answers stb-store-runtime.json with a loopback endpoint, and passes every Store
 // POST to the real adapter. `tamper` lets one test hand the page an answer meant for someone else.
