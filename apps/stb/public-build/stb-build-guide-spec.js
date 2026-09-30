@@ -1364,7 +1364,7 @@
           "title": "CORE RULE",
           "items": [
             "This page is always the bench. Do not rename it configurator.",
-            "The plan as published: resize it, pick the wood and hardware, get the Store’s price.",
+            "The plan as published: resize it, pick the wood and hardware, get the Store’s price. Kept compact on purpose: the quick road stays quick.",
             "The bench turns the knobs made from the plan. It never adds one.",
             "Nothing is added to the plan here: no holes, no extra cuts."
           ]
@@ -1375,7 +1375,7 @@
             "Made from the plan you pick. No universal configurator.",
             "Every plan gets: size · wood · hardware pack · spot holes for each kind of board · a decorative cut for each kind of square-cut board.",
             "Boards with the plan’s own angle get no decorative-cut knob. The plan’s angles are the plan’s.",
-            "This page turns size, wood and hardware. The rest are turned after “Take it to the bench to do more work”."
+            "This page turns size, wood and hardware. The rest are turned on the bigger bench."
           ]
         },
         {
@@ -1394,6 +1394,16 @@
             "Every price is a live Store answer. None is cached.",
             "Change anything, and the Store is asked again.",
             "Hardware travels as requirements. The Store picks the item and the number of boxes. Bring your own sends none."
+          ]
+        },
+        {
+          "title": "NOTES THE PAGE LEAVES TO THE RAIL",
+          "items": [
+            "Neither plan names a species or treatment. This project starts each plan on one wood; the Store prices every choice.",
+            "The A-frame plan lists 100 2½ in exterior screws, with no gauge. The benches plan names 2½ in and 4½ in screws and 5 in carriage bolts, with no totals. The packs ask the Store for #10; counts are this project’s reading.",
+            "The size range is the plan rule’s, not a strength rule. The Store says if a size can’t be cut.",
+            "Legs and cross supports: both ends 25° off square, ends parallel, measured long point to short point, as the plan publishes. The Store is sent the 25°; the plan’s wording travels with the job.",
+            "One small button, “Bring this to a bigger bench for more work”, leads to the deeper page. Fast readers can pass it by."
           ]
         },
         {
@@ -1431,7 +1441,7 @@
       ]
     },
     "od-edge": {
-      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 3 · THE EDGE OF THE ENVELOPE",
+      "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 3 · A BIGGER BENCH",
       "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
       "bullets": [],
       "sections": [
@@ -1439,7 +1449,7 @@
           "title": "CORE RULE",
           "items": [
             "Say where the app stops.",
-            "The same bench, for more work: holes and decorative cuts.",
+            "A bigger bench, for more work: holes and decorative cuts. Here the reader meets the disclaimers and the limits.",
             "The knobs here were made from the plan, one per kind of board. The bench turns them on. It never adds one.",
             "Each thing tried gets one answer: the Store can do it · waiting on a detail from you · past the edge.",
             "Past the edge is a result, not an error. It comes with the Store’s reason, and who could move the edge.",
@@ -1450,7 +1460,7 @@
         {
           "title": "THE TWO CLEAR UNCERTAINTIES",
           "items": [
-            "Hole locations. No plan here publishes them. Any spot is yours, never the plan’s.",
+            "Hole locations. Published plans aren’t detailed enough to drill from. Any spot is yours, never the plan’s. That may change, or come from other software that produces a valid definition.",
             "Decorative cuts. The Store decides which angles its cell cuts. The page holds no copy of that limit."
           ]
         },
@@ -1466,7 +1476,7 @@
           "title": "THE EDGE TODAY, AND WHO COULD MOVE IT",
           "items": [
             "Getting to a defined plan: design and CAD/CAM tools, and plan publishers.",
-            "Hole locations: the plan’s author.",
+            "Hole locations: the plan’s author, or other software that produces a valid definition.",
             "Hole size and depth: the plan or the hardware maker.",
             "A different angle on each end, compound cuts, clipped corners: the Store and its machine.",
             "Angles past the envelope: the Store.",
@@ -1490,7 +1500,7 @@
             "The page shows exactly the knobs made from the plan; no decorative cut on the plan’s 25° boards. Test: outdoor-picnic.test.mjs.",
             "No hole is drawn or sent until you place it. Test: outdoor-picnic.test.mjs.",
             "Back to the plan as is: the work is dropped and the same plan is asked again. Test: outdoor-picnic.test.mjs.",
-            "The edge list and “Information travels before atoms” are on the page. Test: outdoor-picnic.test.mjs."
+            "The limits list and “Information travels before atoms” are on the page. Test: outdoor-picnic.test.mjs."
           ]
         },
         {
@@ -1593,7 +1603,7 @@
         {
           "title": "CORE RULE",
           "items": [
-            "Kit, record, every part and its board.",
+            "Your project: the record, every part and its board. Parts to get you closer, not a finished package.",
             "Staged ≠ picked up.",
             "Custody closes the handoff.",
             "The record appends. It is never rewritten."

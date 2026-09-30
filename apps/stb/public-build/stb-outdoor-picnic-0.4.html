@@ -178,9 +178,8 @@ tr:last-child td{border-bottom:0}
 .from small{color:var(--ink2);display:block;font-size:11.5px}
 .from b{font-size:22px}
 .plan .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:auto 6px 6px}
-.edge-pill{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px dashed var(--brand);border-radius:14px;padding:12px 14px;background:var(--card)}
-.edge-pill p{margin:0;font-size:13px;color:var(--ink2);flex:1 1 220px}
-.edge-pill .go-bench{width:auto}
+.more{margin:8px 2px 0;text-align:right}
+.quiet-more{background:none;border:0;padding:4px 0;color:var(--brand);font:inherit;font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 /* the edge of the envelope */
 .edge-head{border-left:4px solid var(--brand);background:var(--card);border-radius:0 12px 12px 0;padding:12px 14px;margin:0 0 14px}
 .edge-head p{margin:0 0 6px;font-size:13.5px;color:var(--ink2)}
@@ -214,7 +213,7 @@ tr:last-child td{border-bottom:0}
     <div class="pg"><div class="main">
       <p class="stepband">STEP 1 OF 6 · YOUR IDEA <span>pick a plan</span></p>
       <h1>Two proven plans. Pick one. Make it yours.</h1>
-      <p class="sub">Real public plans, turned into a kit: every board cut to the plan, at the plan’s angles. You build it.</p>
+      <p class="sub">Real public plans, turned into a project: every board cut to the plan. You build it.</p>
       <div class="plans" id="plans"></div>
     </div><aside class="rail dev-build-guide" data-guide-id="outdoor-plan" aria-label="Build guide · developer notes"></aside></div>
   </section>
@@ -227,7 +226,7 @@ tr:last-child td{border-bottom:0}
       <div class="build">
         <div>
           <img class="photo" id="photo" alt="">
-          <p class="hint" style="margin:5px 2px 10px">A photo of a finished table, not a drawing. Nobody cuts to a photo; the parts below come from the plan.</p>
+          <p class="hint" style="margin:5px 2px 10px">A photo, not a drawing.</p>
           <table aria-label="Parts, as the plan gives them">
             <thead><tr><th>Part</th><th>Qty</th><th>Wood</th><th>Length</th><th>Ends</th></tr></thead>
             <tbody id="parts"></tbody>
@@ -236,7 +235,7 @@ tr:last-child td{border-bottom:0}
         </div>
         <div>
           <div class="card kit">
-            <div style="flex:1 1 220px"><h3>THE KIT: “The plan, as designed”</h3><p id="kit-text"></p></div>
+            <div style="flex:1 1 220px"><h3>THE PROJECT: “The plan, as designed”</h3><p id="kit-text"></p></div>
             <button class="cta" id="the-set" type="button">ONE CLICK: THE SET</button>
           </div>
           <div class="card" data-knob="WOOD"><h3>WOOD: one click</h3><div class="opts" id="woods"></div><p class="hint" id="wood-hint"></p></div>
@@ -257,10 +256,7 @@ tr:last-child td{border-bottom:0}
             <div id="instant"></div>
             <button class="cta" id="confirm" type="button" disabled style="margin-top:8px">CONFIRM &amp; SEND →</button>
           </div>
-          <div class="edge-pill">
-            <p><b>Want more than the plan gives?</b> Holes where you want them, a decorative cut on the ends. See how far this goes, and where it stops.</p>
-            <button class="go-bench" type="button" id="to-edge">TAKE IT TO THE BENCH TO DO MORE WORK →</button>
-          </div>
+          <p class="more"><button class="quiet-more" type="button" id="to-edge">Bring this to a bigger bench for more work →</button></p>
         </div>
       </div>
       <div class="doctrine card" id="store-doctrine"></div>
@@ -270,11 +266,11 @@ tr:last-child td{border-bottom:0}
   <!-- ═════ THE BENCH · STEP 2 · THE EDGE OF THE ENVELOPE ═════ -->
   <section class="view" id="s-edge" data-section="edge" hidden>
     <div class="pg"><div class="main">
-      <p class="stepband">STEP 2 OF 6 · THE BENCH <span>the edge of the envelope</span></p>
+      <p class="stepband">STEP 2 OF 6 · THE BENCH <span>a bigger bench, for more work</span></p>
       <div class="benchtop">
         <figure><img id="edge-photo" alt=""><figcaption>What you chose. A photo of a finished table, not a drawing.</figcaption></figure>
         <div>
-          <h2>The edge of the envelope</h2>
+          <h2>A bigger bench: more work, and where it stops</h2>
           <div class="edge-head">
             <p><b>This is where the plan runs out, and where this app stops today.</b> Try the extra work below. The Store answers what it can do. Where something can’t be done, this page says why, and who upstream could add it.</p>
             <p>Information travels before atoms. What’s missing here is missing information: a plan that doesn’t say where the holes go, a machine that doesn’t declare a cut. Add it upstream, and the edge moves.</p>
@@ -348,8 +344,8 @@ tr:last-child td{border-bottom:0}
       <h1>Pick up &amp; build</h1>
       <p class="sub" id="record-sub"></p>
       <div class="card">
-        <h3>Your kit</h3>
-        <table aria-label="Kit contents"><thead><tr><th>What</th><th>Details</th><th>Qty</th></tr></thead><tbody id="record-kit"></tbody></table>
+        <h3>Your project</h3>
+        <table aria-label="Project parts"><thead><tr><th>What</th><th>Details</th><th>Qty</th></tr></thead><tbody id="record-kit"></tbody></table>
       </div>
       <div class="card">
         <h3>Record</h3>
@@ -366,7 +362,7 @@ tr:last-child td{border-bottom:0}
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
 <script src="stb-store-client.js?v=7eb5ab65"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
-<script src="stb-build-guide-spec.js?v=f9620c41"></script>
+<script src="stb-build-guide-spec.js?v=29069b39"></script>
 <script>
 (function(){
 'use strict';
@@ -416,7 +412,7 @@ const PLANS={
     photo:'assets/outdoor/plan-a-frame-photo.webp',
     wood:'treated',
     lenHint:'The slats follow the length; the end frames and every angle stay as the plan built them.',
-    kitText:L=>'12 boards at '+fmt(L)+' in, legs and cross supports cut at 25° as the plan gives them, short parts nested, stubs returned. No holes: the plan doesn’t publish where they go.',
+    kitText:L=>'12 boards at '+fmt(L)+' in, legs and cross supports cut at 25°, as the plan gives them.',
     angleNote:'Legs and cross supports: both ends 25° off square, ends parallel, measured long point to short point, as the plan publishes.',
     groups:L=>[
       {id:'SLATS',label:'Tabletop and seat boards',board:[2,6],angle:0,scales:true,parts:[['TOP',6,L],['SEAT',6,L]]},
@@ -436,7 +432,7 @@ const PLANS={
     photo:'assets/outdoor/plan-table-benches-photo.webp',
     wood:'ground-contact',
     lenHint:'Table and benches grow together; the legs and supports stay as the plan built them.',
-    kitText:L=>'13 slats at '+fmt(L)+' in, all square cuts, short parts nested, stubs returned. No holes: the plan doesn’t publish where they go.',
+    kitText:L=>'13 slats at '+fmt(L)+' in, all square cuts, as the plan gives them.',
     angleNote:'Every cut is square, as the plan publishes.',
     groups:L=>[
       {id:'SLATS',label:'Table and bench slats',board:[2,4],angle:0,scales:true,parts:[['TABLE-SLAT',7,L],['BENCH-SLAT',6,L]]},
@@ -736,8 +732,8 @@ function optionButtons(){
   $('tiers').innerHTML=TIERS.map(t=>{const o=optionPrice('tier',t.key);
     const price=t.key==='BYO'?'You supply':!S.options?pend:o.ok?'+$'+Math.round(o.Q):'<span class="no">Not stocked yet</span>';
     return `<button type="button" class="opt ${S.cfg.tier===t.key?'on':''}" data-tier="${t.key}" aria-pressed="${S.cfg.tier===t.key}"><span>${t.label}</span><b>${price}</b></button>`}).join('');
-  $('wood-hint').textContent='Neither plan names a species or treatment; this project starts you on '+(WOODS.find(w=>w.key===PLANS[S.cfg.plan].wood)||{}).label+'. Prices are the Store’s, for this table.';
-  $('tier-hint').textContent=PLANS[S.cfg.plan].hardwareNote+(S.optionsError?' The Store couldn’t price the options ('+S.optionsError+').':'');
+  $('wood-hint').textContent='';
+  $('tier-hint').textContent=S.optionsError?'The Store couldn’t price the options ('+S.optionsError+').':'';
 }
 function answerHtml(){
   const v=view(),a=S.answer;
@@ -749,24 +745,23 @@ function answerHtml(){
   const head='<h3>Store Zero answers'+(a.stale?' · this table has changed':'')+'</h3>';
   const ids='<p class="ids">SENT '+esc(String(a.body.payloadDigest||'—').slice(0,12))+'… · ARRIVED '+esc(String(a.receipt?.receiptHash||'—').slice(0,12))+'… · ANSWERED '+esc(String((v.ev.calculationIdentity||a.body.calculationIdentity||{}).resultHash||'—').slice(0,12))+'… · Store '+esc(String(a.storePin||'—').slice(0,7))+'</p>';
   if(v.estimate!=null)return head+'<div class="total" style="'+(a.stale?'opacity:.5':'')+'">'+money(v.estimate)+'</div>'
-    +'<p class="meta">Wood '+money(v.t.material)+' + machine work '+money(v.t.machine_service)+(v.t.items?' + hardware '+money(v.t.items):'')+' · '+Math.round(v.minutes)+' min on the machine'+(v.spots?' · '+v.spots+' spots':'')+(v.stubs?' · '+v.stubs+' stubs returned with your kit':'')+'</p>'
+    +'<p class="meta">Wood '+money(v.t.material)+' + machine work '+money(v.t.machine_service)+(v.t.items?' + hardware '+money(v.t.items):'')+' · '+Math.round(v.minutes)+' min on the machine'+(v.spots?' · '+v.spots+' spots':'')+(v.stubs?' · '+v.stubs+' stubs returned with your parts':'')+'</p>'
     +'<p class="meta">Complete budgetary estimate for revision '+a.rev+'. A Store budgetary answer, not a quote.</p>'+ids;
   return head+'<div class="total none">No complete budgetary estimate</div><p class="status bad">Store Zero can’t do every line for this table:</p><ul class="refusals">'
     +v.bad.map(l=>'<li>'+esc(groupLabel(l.packageId||l.lineId,S.cfg.plan))+': '+esc((lineCodes(l).length?lineCodes(l):[l.status]).map(reasonText).join('; '))+'</li>').join('')+'</ul>'+ids;
 }
 function renderBuild(){
   const cfg=S.cfg,p=PLANS[cfg.plan];
-  $('build-title').textContent=p.title+': the plan, as published';
   $('photo').src=p.photo;$('photo').alt='A photo of a finished '+p.title+' table, not a drawing';
   const rows=[];
   PLANS[cfg.plan].groups(cfg.lengthIn).forEach(g=>g.parts.forEach(([kind,n,len])=>rows.push('<tr><td>'+PART_NAMES[kind]+'</td><td>'+n+'</td><td>'+g.board.join('×')+'</td><td>'+fmt(len)+'"</td><td>'+(g.angle?g.angle+'°, ends parallel':'square')+'</td></tr>')));
   $('parts').innerHTML=rows.join('');
-  $('plan-source').innerHTML='<a href="'+p.sourceUrl+'" target="_blank" rel="noopener">'+esc(p.source)+'</a>. '+esc(p.angleNote)+' Every board, cut, minute and price comes from Store Zero.';
+  $('plan-source').innerHTML='<a href="'+p.sourceUrl+'" target="_blank" rel="noopener">'+esc(p.source)+'</a>. The plan is the project’s; every board, cut, minute and price comes from Store Zero.';
   $('kit-text').textContent=p.kitText(cfg.lengthIn);
   optionButtons();
   const lr=$('len');if(lr.value!==String(cfg.lengthIn)&&document.activeElement!==lr)lr.value=cfg.lengthIn;
   $('len-val').innerHTML=ftin(cfg.lengthIn)+'<small>'+cfg.lengthIn+' in · '+RULE.lengthIn.min+'–'+RULE.lengthIn.max+' in, to the inch</small>';
-  $('len-hint').textContent=p.lenHint+' The range is the plan rule’s, not a strength rule. Store Zero says if a size can’t be cut.';
+  $('len-hint').textContent='';
   const w=work(cfg).length;
   $('instant').innerHTML=answerHtml()+(w?'<p class="status ask" style="margin-top:6px">This includes the extra work you tried on the bench. <a href="#" data-drop-work>Drop it and go back to the plan as is.</a></p>':'');
   $('confirm').disabled=!TERMS.state().callOpen;
@@ -825,7 +820,7 @@ function upstreamFor(codes){
 function edgeListHtml(){
   const items=[
     ['gap','Getting to a defined plan','This app starts where a plan is defined: its parts, lengths and angles. Both plans here were read by a person and entered by hand, then checked against the published pages. Reading a plan file for you, or turning an idea into a plan, is design and CAD/CAM work: a mature field, and not this app’s job.','design and CAD/CAM tools, and plan publishers with a cut list a machine can read. Hand this app a defined plan, and the job starts here.'],
-    ['gap','Hole locations','Neither plan publishes them. Ana White says “predrill and countersink”; MyOutdoorPlans names pilot holes and carriage bolts, with no measurements. You can place spots, but they’re yours, not the plan’s.','the plan’s author. A plan that publishes hole centers, measured from a stated end, would put them here automatically.'],
+    ['gap','Hole locations','Published plans aren’t detailed enough to drill from. Ana White says “predrill and countersink”; MyOutdoorPlans names pilot holes and carriage bolts, with no measurements. You can place spots, but they’re yours, not the plan’s.','the plan’s author, or other software that produces a valid definition. A plan that publishes hole centers, measured from a stated end, would put them here automatically. That may change.'],
     ['gap','Hole size and depth','Not defined (DRILL_DIAMETER_DEPTH_UNRESOLVED). A spot marks where; you drill.','the plan or the hardware maker: name the fastener and its pilot hole.'],
     ['gap','A different angle on each end, compound cuts, clipped corners','Not built. The Store takes one angle per set of boards, cut on one plane.','the Store and its machine: declare those cuts, and the bench can offer them.'],
     ['gap','Angles past the Store’s envelope','The Store decides which angles its cell cuts (<a href="'+ENVELOPE_DOC+'" target="_blank" rel="noopener">its envelope</a>). Try a steep one: the Store refuses it with its reason.','the Store: a cell that declares steeper cuts.'],
@@ -878,7 +873,7 @@ function renderRecord(){
   const plan=S.cfg.plan;
   $('record-sub').textContent=title()+' · '+money(v.estimate);
   const rows=v.pk.map(p=>{const parts=(p.cutPlan||[]).reduce((n,b)=>n+(b.partsInCutOrder||[]).length,0);return '<tr><td>'+esc(groupLabel(p.packageId,plan))+'</td><td>'+parts+' cut parts from '+p.boards+' × '+esc(p.storeSku)+'</td><td>'+parts+'</td></tr>'});
-  if(v.stubs)rows.push('<tr><td>Stubs</td><td>Returned with your kit</td><td>'+v.stubs+'</td></tr>');
+  if(v.stubs)rows.push('<tr><td>Stubs</td><td>Returned with your parts</td><td>'+v.stubs+'</td></tr>');
   rows.push(...v.it.map(i=>'<tr><td>'+esc(groupLabel(i.lineId,plan))+'</td><td>'+esc(i.description||i.storeSku)+'</td><td>'+(i.packages||i.qty)+'</td></tr>'));
   if(S.cfg.tier==='BYO')rows.push('<tr><td>Hardware</td><td>You supply</td><td>—</td></tr>');
   $('record-kit').innerHTML=rows.join('');

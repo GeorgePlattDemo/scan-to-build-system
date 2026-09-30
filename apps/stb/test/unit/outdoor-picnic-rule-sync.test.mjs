@@ -44,8 +44,8 @@ test('no Store logic and no automatic holes in the page', () => {
   assert.doesNotMatch(script, /centered\(/, 'no automatic screw-hole spots');
   assert.doesNotMatch(page, /every screw hole/i);
   assert.match(page, /photo of a finished table, not a drawing/i, 'the pictures are named as photos');
-  // Hole locations: the plans don't publish them. The page says so, and draws none until the customer places them.
-  assert.match(script, /'Hole locations','Neither plan publishes them/);
+  // Hole locations: published plans aren't detailed enough to drill from. The page says so, and draws none until the customer places them.
+  assert.match(script, /'Hole locations','Published plans aren’t detailed enough to drill from/);
   assert.match(script, /hole locations: not published by the plan · none until you place them/);
   // A decorative cut is offered only on boards whose ends are square in the plan.
   assert.match(script, /if\(p\.g\.angle===0\)k\.push\('DECO:'\+p\.kind\)/);

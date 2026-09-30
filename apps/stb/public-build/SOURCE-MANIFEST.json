@@ -602,6 +602,20 @@
       "blobSha": "640daa8a939a3dd9bb549d3714db299577e5fd40",
       "bytes": 229574,
       "reason": "Outdoor 0.4 full pass: the unused comparison handoff names stb-outdoor-picnic-0.4.html; cache-busters for the guide, the Store handoff contract, Window Seat 0.9 and Outdoor 0.4."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "outdoor-compact",
+      "blobSha": "ce0cf64d14da85a94e0482feb2a4182fec37c7f6",
+      "bytes": 79305,
+      "reason": "Outdoor compact pass: the bench rail carries the notes the page no longer spells out; the deeper page is \"a bigger bench\", and hole locations may come from other software that produces a valid definition. \"Kit\" becomes \"project\" on Outdoor: parts to get you closer, not a finished package."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-compact",
+      "blobSha": "d1af637d611386017cc07ab624eb51d3fe6d1b92",
+      "bytes": 229574,
+      "reason": "Outdoor compact pass: cache-busters for the guide, Window Seat 0.9 and Outdoor 0.4."
     }
   ],
   "retiredFiles": [
