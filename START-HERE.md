@@ -12,11 +12,12 @@ Program investigates and records why. System defines what the job means. Store d
 
 ## First read
 
-1. [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md) — one answer for the accepted source tree, promotion event, Store pins, capability status, and parallel work.
+1. [`docs/project/CURRENT-SYSTEM-STATE.md`](docs/project/CURRENT-SYSTEM-STATE.md) — current published source, current Store-pin owner, current simulation/commissioning limits, and where to inspect current claims.
 2. [`docs/project/VERIFICATION-REGISTER.md`](docs/project/VERIFICATION-REGISTER.md) — what is actually proven, under which exact pins, and what remains not validated / not measured / not authorized.
-3. [`docs/project/BRANCH-PR-GENEALOGY.md`](docs/project/BRANCH-PR-GENEALOGY.md) — accepted ancestry, parallel work, superseded work, and historical work.
+3. [`STB-CURRENT-BASELINE.md`](STB-CURRENT-BASELINE.md) — historical accepted source tree, promotion event, Store pins, capability status, and parallel work.
+4. [`docs/project/BRANCH-PR-GENEALOGY.md`](docs/project/BRANCH-PR-GENEALOGY.md) — accepted ancestry, parallel work, superseded work, and historical work.
 
-Do not infer current status from PR chronology alone.
+Do not infer current status from PR chronology alone. The accepted baseline below is historical acceptance provenance; it is not a claim that those SHAs are the current tip of `main`.
 
 ## Repository status
 
@@ -76,6 +77,7 @@ Do not start in `grok-file`, a public exhibit, or a new demo folder.
 
 | Need | Place |
 | --- | --- |
+| Current operational / publication state | `docs/project/CURRENT-SYSTEM-STATE.md` |
 | Accepted baseline / promotion status | `STB-CURRENT-BASELINE.md` |
 | Verification evidence | `docs/project/VERIFICATION-REGISTER.md` |
 | Branch / PR genealogy | `docs/project/BRANCH-PR-GENEALOGY.md` |
