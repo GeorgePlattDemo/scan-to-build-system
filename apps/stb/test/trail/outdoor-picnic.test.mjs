@@ -224,7 +224,8 @@ test('Outdoor 0.2: two roads, the plan road sends only the plan, additions made 
     exact = exactOf().at(-1);
     nav = await navState(base);
     await base.locator('.recovery-nav button:visible', { hasText: '4 · Your call' }).first().click();
-    assert.equal(await outdoor.locator('#s-call').isVisible(), true);
+    // Top-nav clicks reach the Outdoor page as a message; wait for it to switch, then check.
+    await outdoor.locator('#s-call').waitFor({ state: 'visible', timeout: 5000 });
     const receiptText = await outdoor.locator('#call-receipt').innerText();
     assert.ok(receiptText.includes(('receipt-' + exact.requestId).slice(0, 12)), receiptText);
     assert.ok(receiptText.includes(exact.payload.definition.configurationVersion), receiptText);
@@ -244,13 +245,16 @@ test('Outdoor 0.2: two roads, the plan road sends only the plan, additions made 
     assert.equal(await outdoor.locator('#record-terms [data-terms-state="done"]').count(), 13, 'every event recorded');
     assert.deepEqual((await steps()).map(b => b.inert), [false, false, false, false, false, false]);
     await base.locator('.recovery-nav button:visible', { hasText: '5 · We cut it' }).first().click();
-    assert.equal(await outdoor.locator('#s-yard').isVisible(), true);
+    // Top-nav clicks reach the Outdoor page as a message; wait for it to switch, then check.
+    await outdoor.locator('#s-yard').waitFor({ state: 'visible', timeout: 5000 });
     await base.locator('.recovery-nav button:visible', { hasText: '6 · Pick up & build' }).first().click();
-    assert.equal(await outdoor.locator('#s-record').isVisible(), true);
+    // Top-nav clicks reach the Outdoor page as a message; wait for it to switch, then check.
+    await outdoor.locator('#s-record').waitFor({ state: 'visible', timeout: 5000 });
 
     // "Your idea" returns to page 1, still on the Outdoor page.
     await base.locator('.recovery-nav button:visible', { hasText: '1 · Your idea' }).first().click();
-    assert.equal(await outdoor.locator('#s-plan').isVisible(), true);
+    // Top-nav clicks reach the Outdoor page as a message; wait for it to switch, then check.
+    await outdoor.locator('#s-plan').waitFor({ state: 'visible', timeout: 5000 });
     assert.equal(await base.evaluate(() => [...document.querySelectorAll('.page.on')].pop()?.id), 'outdoor-build-live');
     assert.deepEqual(errors, []);
   } finally {
