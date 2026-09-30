@@ -65,11 +65,6 @@
       "bytes": 88414
     },
     {
-      "path": "stb-outdoor-bench-leg-0.1.html",
-      "sourceBlobSha": "cbe96b599085bfa0bcffebd6f544e2718220e47a",
-      "bytes": 71279
-    },
-    {
       "path": "stb-start-own-bench-leg-0.1.html",
       "sourceBlobSha": "4ca2cb591b98b8d6f1621fc7b9ea7d3fd1788590",
       "bytes": 70244
@@ -530,6 +525,48 @@
       "blobSha": "e58617e19f52993c117f515422d2e79db8ee0d0e",
       "bytes": 65125,
       "reason": "Tile order: Window Seat rails are headed JOB 3; the Library note reads Board · fit · assembly · plan · sheet."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-0.2",
+      "blobSha": "53dc3b6b6e1430852bcfad839d8d7fe01fb4abc5",
+      "bytes": 229577,
+      "reason": "Outdoor 0.2 goes live: the outdoor-build-live iframe loads stb-outdoor-picnic-0.2.html (0.1 stays in the repo until the owner retires it), and the shell's own rail is hidden on outdoor-build-live because 0.2 renders its Dev/Rev rail beside each of its pages from the same guide file. Cache-buster for the new page."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "outdoor-0.2-full-pass",
+      "blobSha": "f12195eceb18aca74db6e8f4c28b67ab167f0904",
+      "bytes": 122701,
+      "reason": "Outdoor full pass: the three legacy picnic pages (picnic-chooser, picnic-config, picnic-review) and their code (the picnic state, syncPicnic, its click branches and startup call) are removed. The Outdoor tile keeps its data-go key, which the shell reroutes to outdoor-build-live."
+    },
+    {
+      "path": "stb-store-handoff-contract.js",
+      "pass": "outdoor-0.2-full-pass",
+      "blobSha": "eed33f006991efdac84c05b48d0cdec864c9c06c",
+      "bytes": 47598,
+      "reason": "Outdoor full pass: CURRENT_ARTIFACTS.outdoor names stb-outdoor-picnic-0.2.html (was the retired bench-leg page)."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "outdoor-0.2-full-pass",
+      "blobSha": "31f4b8cae84363db5a12043a447ff7c22f92e801",
+      "bytes": 79867,
+      "reason": "Outdoor full pass: Job 4 Dev/Rev rails for the seven pages of stb-outdoor-picnic-0.2.html; guide entries for the removed legacy picnic pages go with them."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "outdoor-0.2-full-pass",
+      "blobSha": "f15e9e191c7d912732c566547d26ddfdda7c8613",
+      "bytes": 39662,
+      "reason": "Outdoor full pass: cache-buster for the base page without the legacy picnic pages."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-0.2-full-pass",
+      "blobSha": "236ba2c23ae49ab6bf0bb1a78676dc524e0eff1f",
+      "bytes": 229574,
+      "reason": "Outdoor full pass: the unused comparison handoff names stb-outdoor-picnic-0.2.html (was the retired bench-leg page); cache-busters for the guide, the Store handoff contract, the front door, Window Seat 0.9 and Outdoor 0.2."
     }
   ],
   "retiredFiles": [
@@ -548,6 +585,36 @@
       "pass": "window-seat-0.9-full-pass",
       "replacedBy": "stb-window-seat-0.9.html",
       "reason": "Window Seat 0.9 is live and carries every 0.8 behavior its tests check (edge mill, board count, depth steps, spots, version identity). 0.8 is retired, not edited; its bytes remain in git history at this blob."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.1.html",
+      "blobSha": "6d3f7a51e0b34965b6b3219c949bbb8e27f11153",
+      "bytes": 39761,
+      "pass": "outdoor-0.2-full-pass",
+      "reason": "Outdoor 0.2 is live: two roads (resize and send, or make it yours), plan cuts as published, additions made at intent. 0.1 is retired, not edited; its bytes remain in git history at this blob.",
+      "replacedBy": "stb-outdoor-picnic-0.2.html"
+    },
+    {
+      "path": "assets/outdoor/a-frame-render.webp",
+      "blobSha": "58b35dc3a9169c342827b6e0b655f779c6256343",
+      "bytes": 26710,
+      "pass": "outdoor-0.2-full-pass",
+      "reason": "Used only by Outdoor 0.1. 0.2 shows the plan photos, named as photos, not drawings."
+    },
+    {
+      "path": "assets/outdoor/table-benches-render.webp",
+      "blobSha": "e3e93d496487ff6d604575cdeb9b3c9d98215ee3",
+      "bytes": 23862,
+      "pass": "outdoor-0.2-full-pass",
+      "reason": "Used only by Outdoor 0.1."
+    },
+    {
+      "path": "stb-outdoor-bench-leg-0.1.html",
+      "sourceBlobSha": "cbe96b599085bfa0bcffebd6f544e2718220e47a",
+      "bytes": 71279,
+      "pass": "outdoor-0.2-full-pass",
+      "reason": "No tile or page opens it; the two places that still named it now name Outdoor 0.2. Its bytes remain at the recorded Review source blob.",
+      "replacedBy": "stb-outdoor-picnic-0.2.html"
     }
   ]
 }

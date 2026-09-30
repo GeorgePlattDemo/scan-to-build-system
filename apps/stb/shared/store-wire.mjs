@@ -597,9 +597,26 @@ function validateCutPackagePayload(payload) {
     }
   }
   for (const line of items) {
-    if (!isPlainObject(line) || !onlyKeys(line, ['lineId', 'storeSku', 'qty'])) return scope('unexpected item-line fields');
-    if (requireNonemptyString('lineId', line.lineId) || requireNonemptyString('storeSku', line.storeSku)) return bad('item lines need lineId and storeSku');
+    // Two forms, as the pinned Store takes them: an exact Store item number and a count, or a neutral hardware
+    // requirement counted in pieces that the Store resolves to its own item (or refuses). Shape only here: which
+    // kinds, sizes and finishes exist, and at what price, is the Store's answer.
+    if (!isPlainObject(line)) return scope('unexpected item-line fields');
+    if (requireNonemptyString('lineId', line.lineId)) return bad('item lines need lineId');
     if (!Number.isInteger(line.qty) || line.qty <= 0) return bad('item-line qty must be a positive whole number');
+    if (line.requirement === undefined) {
+      if (!onlyKeys(line, ['lineId', 'storeSku', 'qty'])) return scope('unexpected item-line fields');
+      if (requireNonemptyString('storeSku', line.storeSku)) return bad('item lines need lineId and storeSku, or a requirement');
+      continue;
+    }
+    if (!onlyKeys(line, ['lineId', 'requirement', 'qty'])) return scope('an item line names a storeSku or a requirement, not both');
+    const req = line.requirement;
+    if (!isPlainObject(req) || !onlyKeys(req, ['kind', 'gauge', 'diameterIn', 'lengthIn', 'finish', 'unit'])) return scope('unexpected hardware requirement fields');
+    if (requireNonemptyString('requirement.kind', req.kind) || requireNonemptyString('requirement.finish', req.finish)) return bad('a hardware requirement states kind and finish');
+    if (!finiteNumber(req.lengthIn) || req.lengthIn <= 0) return bad('requirement.lengthIn must be a positive number');
+    if ((req.gauge === undefined) === (req.diameterIn === undefined)) return bad('a hardware requirement states exactly one of gauge or diameterIn');
+    if (req.gauge !== undefined && requireNonemptyString('requirement.gauge', req.gauge)) return bad('requirement.gauge must be a string');
+    if (req.diameterIn !== undefined && (!finiteNumber(req.diameterIn) || req.diameterIn <= 0)) return bad('requirement.diameterIn must be a positive number');
+    if (req.unit !== undefined && req.unit !== 'piece') return bad('hardware requirements are counted in pieces');
   }
   return { ok: true, definition, definitionKind: payload.definitionKind, ruleVersion: payload.ruleVersion };
 }
