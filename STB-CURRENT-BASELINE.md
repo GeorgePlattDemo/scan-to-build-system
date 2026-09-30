@@ -1,5 +1,7 @@
 # Scan-to-Build Current Baseline
 
+> **STATUS — HISTORICAL ACCEPTANCE BASELINE.** This file records the 2026-09-13 accepted baseline and promotion history. It is not the current tip of `main`, and its **Next authorized change** section is not an open instruction. Current operational/publication state: [`docs/project/CURRENT-SYSTEM-STATE.md`](docs/project/CURRENT-SYSTEM-STATE.md). Historical pin rows below remain bound to the identities they originally recorded and are not repinned by this banner.
+
 **Purpose:** one dry project-order manifest for the repository.  
 **Scope:** status and source-of-truth only; this file does not promote capability or authorize execution.  
 **Rule:** acceptance is an explicit repository event; test success alone does not create physical, Store, machine, controller, or commercial authority.
