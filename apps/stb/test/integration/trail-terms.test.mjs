@@ -9,6 +9,7 @@
 //       the Store answer hash-linked to the one before. Declining ends the chain at "your call".
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
 import { withBrowser, openTile, STORE_PIN } from './helpers.mjs';
 
@@ -49,6 +50,21 @@ function assertAnswered(state, log, requestType, projectId, label) {
   assert.equal(state.events[0].hash, last.request.payloadDigest, label + ': sent hash is the request payload digest');
   assert.equal(state.events.length, 3, label + ': Store answer is not silently promoted into a simulated offer');
 }
+function requestsFor(log, tile) {
+  return log.filter(e => e.request.requestType === tile.requestType && e.request.projectId === tile.projectId);
+}
+function committedRequestFor(tile, entries) {
+  if (tile.projectId !== 'outdoor') return entries.at(-1) ?? null;
+  return [...entries].reverse().find(e => e.request.payload?.definition?.configurationId !== 'OUTDOOR-PICNIC-OPTIONS') ?? null;
+}
+function omittedPayload(tile, payload) {
+  const copy = JSON.parse(JSON.stringify(payload));
+  if (tile.projectId === 'start-own') delete copy.line.parts;
+  else if (tile.projectId === 'alcove') delete copy.definition.boardRequirements;
+  else if (tile.projectId === 'playhouse') delete copy.definition.sheet;
+  else delete copy.definition.cutPackages;
+  return copy;
+}
 
 // ---------- Tile drivers: each reaches a fresh Store answer the way a customer would ----------
 const TILES = {
@@ -60,9 +76,11 @@ const TILES = {
     },
     call: frame => frame.evaluate(() => window.show('playhouse-request')),
     hosts: { call: '#playhouse-request .s001-terms-host', yard: '#playhouse-yard .s001-terms-host', record: '#playhouse-record .s001-terms-host' },
-    async invalid({ page, frame }) {
+    async invalid({ page, frame, log }) {
+      const before = requestsFor(log, TILES.playhouse).length;
       await frame.evaluate(() => { const e = document.getElementById('s001-straight-height'); e.value = '30'; e.dispatchEvent(new Event('input')); });
       await until(() => frame.evaluate(() => { const s = window.STBPlayhouseLive.state(); return !s.asking && s.answer?.evaluation?.status === 'REFUSED'; }), 'playhouse refusal');
+      assert.ok(requestsFor(log, TILES.playhouse).length > before, 'playhouse: complete out-of-envelope geometry still reaches Store');
       return { win: page, reason: 'CENTER_WORK_FIELD_EXCEEDED' };
     },
   },
@@ -241,3 +259,101 @@ for (const [id, tile] of Object.entries(TILES)) {
     });
   });
 }
+
+// ---------- Shared admission seam: same assertions, project-specific fixtures ----------
+test('public admission deployment uses the exact shared definition contract bytes', () => {
+  const canonical = fs.readFileSync(new URL('../../shared/definition-contract.mjs', import.meta.url));
+  const deployed = fs.readFileSync(new URL('../../public-build/shared/definition-contract.mjs', import.meta.url));
+  assert.deepEqual(deployed, canonical);
+});
+
+for (const [id, tile] of Object.entries(TILES)) {
+  test(`ADMISSION ${id}: an omitted required fact cannot reach the Store even if caller says ready`, { timeout: 240000 }, async () => {
+    await withBrowser(async ({ browser, origin, log }) => {
+      const { page, frame } = await openTile(browser, origin, tile.label);
+      const { win } = await tile.answer({ page, frame, log });
+      const entries = requestsFor(log, tile);
+      const baseline = committedRequestFor(tile, entries);
+      assert.ok(baseline, id + ': baseline request exists before omission test');
+      const before = log.length;
+      const payload = omittedPayload(tile, baseline.request.payload);
+      const clientWindow = (id === 'window-seat' || id === 'outdoor') ? win : page;
+      const result = await clientWindow.evaluate(async input => {
+        try {
+          await window.STBStoreClient.sendJob({
+            projectId: input.projectId,
+            requestType: input.requestType,
+            candidateRevisionId: input.candidateRevisionId,
+            payload: input.payload,
+            ready: true,
+          });
+          return { ok:true };
+        } catch (error) {
+          return { ok:false, code:error?.code || null, message:String(error?.message || error) };
+        }
+      }, {
+        projectId:tile.projectId,
+        requestType:tile.requestType,
+        candidateRevisionId:baseline.request.candidateRevisionId,
+        payload,
+      });
+      assert.equal(result.ok, false, id + ': omitted fact is blocked');
+      assert.match(result.code || result.message, /SYSTEM_ADMISSION_/, id + ': shared seam names an admission failure');
+      assert.equal(log.length, before, id + ': omitted fact never creates a Store POST');
+    });
+  });
+}
+
+test('ADMISSION window-seat: an unmapped source board fails closed instead of shrinking the Store package', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { page, frame } = await openTile(browser, origin, TILES['window-seat'].label);
+    const { win:seat } = await TILES['window-seat'].answer({ page, frame, log });
+    const before = requestsFor(log, TILES['window-seat']).length;
+    const result = await seat.evaluate(async () => {
+      const source = window.STBWindowSeat.definition();
+      const request = JSON.parse(JSON.stringify(window.STBWindowSeat.request()));
+      const liveSent = new Set((request.cutPackages || []).flatMap(pkg => pkg.parts || []).map(part => part.partId));
+      const liveMissing = source.boards.map(board => board.id).filter(id => !liveSent.has(id));
+      if (liveMissing.length === 0) {
+        const pkg = (request.cutPackages || []).find(item => Array.isArray(item.parts) && item.parts.length);
+        if (pkg) pkg.parts = pkg.parts.slice(1);
+      }
+      const sent = new Set((request.cutPackages || []).flatMap(pkg => pkg.parts || []).map(part => part.partId));
+      const missing = source.boards.map(board => board.id).filter(id => !sent.has(id));
+      try {
+        await window.STBStoreClient.sendJob({
+          projectId: 'window-seat',
+          requestType: 'CUT_PACKAGE_V1',
+          candidateRevisionId: request.configurationVersion,
+          payload: { definition: request, definitionKind: 'cut_package.v1', ruleVersion: '0.1' },
+          ready: true,
+        });
+        return { ok:true, missing };
+      } catch (error) {
+        return { ok:false, code:error?.code || null, message:String(error?.message || error), missing };
+      }
+    });
+    assert.ok(result.missing.length > 0, 'fixture exposes at least one defined board missing from the outgoing package');
+    assert.equal(result.ok, false, 'shrunken package is blocked');
+    assert.match(String(result.message || ''), /SYSTEM_ADMISSION_/, 'shared seam names an admission failure');
+    assert.match(String(result.message || ''), /UNMAPPED_PART:/, 'admission names the unmapped part');
+    assert.ok(result.missing.some(id => String(result.message || '').includes(id)), 'admission names the missing board id');
+    assert.equal(requestsFor(log, TILES['window-seat']).length, before, 'unmapped board never reaches Store');
+  });
+});
+
+test('ADMISSION outdoor: options inquiry cannot satisfy the committed job answer', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { page, frame } = await openTile(browser, origin, TILES.outdoor.label);
+    const { win } = await TILES.outdoor.answer({ page, frame, log });
+    const entries = requestsFor(log, TILES.outdoor);
+    const options = entries.filter(entry => entry.request.payload?.definition?.configurationId === 'OUTDOOR-PICNIC-OPTIONS');
+    const committed = entries.filter(entry => entry.request.payload?.definition?.configurationId !== 'OUTDOOR-PICNIC-OPTIONS');
+    assert.ok(options.length > 0, 'outdoor: options inquiry reached Store under its own scope');
+    assert.ok(committed.length > 0, 'outdoor: committed job reached Store');
+    const state = await terms(win, 'outdoor');
+    const sentHash = state.events.find(event => event.id === 'sent')?.hash;
+    assert.ok(committed.some(entry => entry.request.payloadDigest === sentHash), 'outdoor: terms flow is bound to committed request');
+    assert.ok(options.every(entry => entry.request.payloadDigest !== sentHash), 'outdoor: options answer cannot satisfy committed job');
+  });
+});
