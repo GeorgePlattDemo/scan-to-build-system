@@ -86,15 +86,18 @@ const TILES = {
   outdoor: {
     label:'Outdoor build', projectId:'outdoor', inner:true,
     async answer({ page }) {
-      const win=await until(async()=>{const f=frameOf(page,'stb-outdoor-picnic-0.1.html');return f&&await f.$('#plans .plan')?f:null},'outdoor frame');
+      const win=await until(async()=>{const f=frameOf(page,'stb-outdoor-picnic-0.2.html');return f&&await f.$('#plans .plan')?f:null},'outdoor frame');
       await win.locator('[data-plan="table-benches"]').click();
       await until(async()=> (await terms(win,'outdoor'))?.stage==='ANSWERED','outdoor answer');
       return { win };
     },
-    call:(frame,win)=>win.locator('#confirm').click(),
+    // 0.2: the plan road goes through the bench and the Store's answer to your call.
+    call:async(frame,win)=>{await win.locator('[data-road="plan"]').click();await win.locator('#btn-store').click();await win.locator('#btn-call').click();},
     callHost:'#call-terms',
-    async change({ win }) {
-      await win.evaluate(()=>{const e=document.getElementById('len'); e.value='7'; e.dispatchEvent(new Event('input'));});
+    async change({ page, frame, win }) {
+      await frame.locator('.recovery-nav button[data-journey-stage="configure"]').click();
+      await wait(page,350);
+      await win.locator('#bench-ctl [data-size="1"]').click();
     },
     async fresh({ win }) {
       await until(async()=> (await terms(win,'outdoor'))?.stage==='ANSWERED','outdoor fresh answer');

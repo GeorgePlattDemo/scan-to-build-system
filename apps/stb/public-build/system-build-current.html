@@ -52,6 +52,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       .outdoor-build-shell-page.on{display:block!important}
       .outdoor-build-shell-main{width:100%;min-width:0;background:var(--surface)}
       .outdoor-build-shell-frame{display:block;width:100%;height:calc(100vh - 76px);min-height:680px;border:0;background:var(--bg)}
+      /* Outdoor draws its own Dev/Rev rail beside each of its pages, from the same guide file; one guide, not two. */
+      .outdoor-build-shell-page>aside.rail{display:none!important}
       .proof-shell-return{display:block;margin:8px 14px;padding:6px 0;border:0;background:transparent;color:var(--text2);font-size:11px;font-weight:700;cursor:pointer}
       .proof-actor-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin:12px 0}
       .proof-actor-grid>div{border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--surface)}
@@ -1186,8 +1188,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         const outdoorTile = ribbon.querySelector('.tile[data-go="picnic-chooser"]');
         if (outdoorTile) {
           outdoorTile.removeAttribute('data-go');
-          outdoorTile.dataset.outdoorBuildArtifact = 'stb-outdoor-picnic-0.1.html';
-          outdoorTile.title = 'Outdoor Build · picnic table 0.1';
+          outdoorTile.dataset.outdoorBuildArtifact = 'stb-outdoor-picnic-0.2.html';
+          outdoorTile.title = 'Outdoor Build · picnic table 0.2';
 
           let outdoorPage = doc.getElementById('outdoor-build-live');
           if (!outdoorPage) {
@@ -1200,7 +1202,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.1.html?v=6d3f7a51"
+                  src="stb-outdoor-picnic-0.2.html?v=4d09c27d"
                 ></iframe>
               </div>
             `;

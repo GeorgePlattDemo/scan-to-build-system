@@ -530,6 +530,13 @@
       "blobSha": "e58617e19f52993c117f515422d2e79db8ee0d0e",
       "bytes": 65125,
       "reason": "Tile order: Window Seat rails are headed JOB 3; the Library note reads Board · fit · assembly · plan · sheet."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-0.2",
+      "blobSha": "53dc3b6b6e1430852bcfad839d8d7fe01fb4abc5",
+      "bytes": 229577,
+      "reason": "Outdoor 0.2 goes live: the outdoor-build-live iframe loads stb-outdoor-picnic-0.2.html (0.1 stays in the repo until the owner retires it), and the shell's own rail is hidden on outdoor-build-live because 0.2 renders its Dev/Rev rail beside each of its pages from the same guide file. Cache-buster for the new page."
     }
   ],
   "retiredFiles": [
