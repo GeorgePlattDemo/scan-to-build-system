@@ -4,6 +4,18 @@
 **Scope:** current accepted baseline, current application candidate, and parallel machine-safety candidate.  
 **Rule:** PASS proves only the stated claim under the stated pins and boundaries.
 
+## Current public-build rows
+
+These rows are separately scoped to the current five-tile public build. Each row names the exact claim, exact test/assertion, exact System commit, exact Store pin (or `not applicable`), and exact limit. A green workflow is not a row.
+
+| Claim | Exact test / assertion | Exact System commit | Exact Store pin | Exact limit | Status |
+| --- | --- | --- | --- | --- | --- |
+| The five declared public tiles — Start your own, Critical fit, Space utilization, Outdoor build, and Playhouse arched window — expose the same six trail labels in the same order, with no current R1–R3/R8/R9 scoreboard violation. | `apps/stb/test/trail/trail-rules.test.mjs`, test `trail scoreboard: every tile against the trail rules`; after checking every `contract.tiles` entry: `assert.deepEqual(unexpected, [])` and `assert.deepEqual(fixed, [])`; `KNOWN_FAILING` is empty. | `495412f749272baa3a9b76b5b3aa6e333801a5e0` | `not applicable` | Public-build trail/navigation contract only: labels/order, tile/page containment, inert unavailable steps, Shared Home declaration matching, and no demo-account names. Does not prove Store freshness/refusal behavior, commerce/yard events, hosted deployment, physical fabrication, or commissioning. | PROVEN FOR CURRENT FIVE-TILE TRAIL CONTRACT |
+| On the mapped in-envelope path for each of the five public tiles, the public build sends that tile's Store request and reaches a fresh `SUPPORTABLE` answer from the exact pinned Store; at that point the shared terms flow remains at `ANSWERED` and the Store answer has not been silently promoted into a simulated offer. | `apps/stb/test/integration/trail-terms.test.mjs`, generated `R4–R6 ${id}` test for every `TILES` entry through `assertAnswered()`: `state.stage === 'ANSWERED'`; a logged request matches the tile/request type; `last.answer.evaluationReceipt.authority.storeRevision === STORE_PIN`; arrival hash equals Store receipt hash; sent hash equals request payload digest; `state.events.length === 3`. | `495412f749272baa3a9b76b5b3aa6e333801a5e0` | `9c62d9d6f7775deef83d47196d32c9b5174a352c` | Software integration proof for the five mapped happy-path definitions through the real System adapter against the exact Store checkout. Does not prove every possible definition, the public Railway deployment, binding quotation/payment/inventory, production release, physical cutting, pickup, or commissioned machinery. | PROVEN FOR MAPPED FIVE-TILE STORE INTEGRATION PATHS |
+| After a fresh supportable Store answer, each of the five public tiles uses the same simulated thirteen-event terms/handoff chain through custody; post-answer events are hash-linked, the receipt names the pinned Store, and declining the simulated offer ends at `Your call` with yard and record closed. | `apps/stb/test/integration/trail-terms.test.mjs`: `assertFullChain()` asserts `HANDED_OFF`, the exact thirteen event IDs in order, Store hashes for sent/arrived/answered, `SIMULATED_OFFER`, hash linkage, `ACCEPTED`, a thirteen-event receipt, and `receipt.storePin === STORE_PIN`; generated `R5 ${id}: declining...` test asserts five events, `DECLINED`, linked decision hash, `yardOpen === false`, and `recordOpen === false` for every tile. | `495412f749272baa3a9b76b5b3aa6e333801a5e0` | `9c62d9d6f7775deef83d47196d32c9b5174a352c` | Shared simulated post-Store chain and custody receipt only. Offer, acceptance, payment, allocation, production release, cut, staging, ready notice, and pickup are simulated; no money movement, physical work, real yard action, or commercial fulfillment is proved. | PROVEN FOR SHARED SIMULATED POST-STORE FLOW |
+
+No current public-build row claims that **definition blockers cannot reach Store across all five tiles**. `storeSubmissionReadiness()` is defined and unit-tested, but no live consumer was found on the five public Store-call paths; tile-specific guards differ. That missing universal gate is not promoted into a PASS row here.
+
 ## Current public surface — navigation
 
 Start with [`CURRENT-SYSTEM-STATE.md`](CURRENT-SYSTEM-STATE.md) for the current publication source, current Store-pin owner, and current simulation/commissioning limits.
@@ -14,7 +26,7 @@ At the documentation-reconciliation baseline `scan-to-build-system@494c50048cf68
 - `STORE_PIN` in `apps/stb/shared/contracts.mjs` is the current Store-source authority; at that baseline it is `9c62d9d6f7775deef83d47196d32c9b5174a352c`.
 - `scan-to-build-review` is frozen history and is not the source published by the System Pages workflow.
 
-These bullets are **current-state navigation, not new PASS rows**. The proof rows below keep the exact identities they originally proved. Current five-project/public-build evidence still needs to be added as separately scoped rows rather than inferred from older acceptance or candidate evidence.
+These bullets are **current-state navigation, not new PASS rows**. The historical proof rows below keep the exact identities they originally proved; the separately scoped current public-build rows are above.
 
 | Claim | App / system pin | Store / other pin | Proof | Status |
 | --- | --- | --- | --- | --- |
