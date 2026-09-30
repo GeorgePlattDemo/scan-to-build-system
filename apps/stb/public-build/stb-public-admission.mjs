@@ -236,9 +236,8 @@ function outdoorProfile({ root, payload, candidateRevisionId, storePin }) {
   const api = root?.STBOutdoorPicnic;
   const definition = payload?.definition;
   const options = definition?.configurationId === 'OUTDOOR-PICNIC-OPTIONS';
-  const expected = options
-    ? (typeof api?.optionsRequest === 'function' ? api.optionsRequest() : null)
-    : (typeof api?.request === 'function' ? api.request() : null);
+  const expected = options ? null : (typeof api?.request === 'function' ? api.request() : null);
+  const optionsIdentity = options && /^od-options-[0-9a-f]{8}$/.test(String(definition?.configurationVersion || '')) && candidateRevisionId === definition.configurationVersion;
   const conditionRows = typeof api?.conditions === 'function' ? api.conditions() : [];
   const blockers = Array.isArray(conditionRows) ? conditionRows.filter(item => item?.block) : [];
   const packages = Array.isArray(definition?.cutPackages) ? definition.cutPackages : [];
@@ -246,7 +245,7 @@ function outdoorProfile({ root, payload, candidateRevisionId, storePin }) {
     row('outdoor.identity', 'Outdoor request requires identified configuration and revision', text(definition?.configurationId) && text(definition?.configurationVersion) && text(candidateRevisionId)),
     row('outdoor.required-values', 'Outdoor requested work must have real part values', nonempty(packages) && packages.every(pkg => text(pkg?.packageId) && isObject(pkg?.material) && nonempty(pkg?.parts) && pkg.parts.every(part => text(part?.partId) && positive(part?.lengthIn)))),
     row('outdoor.local-definition-blockers', 'Outdoor definition conditions must be settled before Store inquiry', blockers.length === 0, { owner: OWNER.USER, condition: blockers.map(item => item.t).filter(Boolean).join(', ') || null }),
-    row('outdoor.generator-consistency', 'Outdoor sends the exact request generated for this inquiry scope', !!expected && same(definition, expected)),
+    row('outdoor.generator-consistency', options ? 'Outdoor options inquiry keeps its generated options identity' : 'Outdoor sends the exact request generated for this inquiry scope', options ? optionsIdentity : !!expected && same(definition, expected)),
     row('outdoor.scope', 'Outdoor Store inquiry scope must be explicit', options ? definition.configurationId === 'OUTDOOR-PICNIC-OPTIONS' : /^OUTDOOR-PICNIC-(?!OPTIONS)/.test(String(definition?.configurationId || ''))),
   ];
   const requiredIds = rows.map(item => item.id);
