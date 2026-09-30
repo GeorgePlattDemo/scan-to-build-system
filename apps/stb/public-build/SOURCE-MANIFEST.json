@@ -616,6 +616,20 @@
       "blobSha": "d1af637d611386017cc07ab624eb51d3fe6d1b92",
       "bytes": 229574,
       "reason": "Outdoor compact pass: cache-busters for the guide, Window Seat 0.9 and Outdoor 0.4."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "playhouse-rails",
+      "blobSha": "f8e2c0c072400e0935e087d19de48cc647012f1b",
+      "bytes": 90436,
+      "reason": "Playhouse rails: Job 5 Dev/Rev rails for all nine Playhouse pages, replacing the old short guides. They state the pinned Store's actual answer (SUPPORTABLE, complete, four operations answered, inside the S-001 work field) and what it does not claim."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "playhouse-rails",
+      "blobSha": "8c2a6ae10bdb00f0b603110f6d92fcb85c59630a",
+      "bytes": 229574,
+      "reason": "Playhouse rails: cache-busters for the guide, Window Seat 0.9 and Outdoor 0.4."
     }
   ],
   "retiredFiles": [

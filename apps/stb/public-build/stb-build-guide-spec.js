@@ -1625,6 +1625,327 @@
       ]
     }
   };
+  // Job 5 (Playhouse) rails: one per Playhouse page in the shell.
+  const JOB5={
+    "ph-idea": {
+      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 1 · YOUR IDEA",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "The sheet is the input. The outcome is the parts.",
+            "User 1 wants an arched opening in a playhouse wall, the center kept for shutters, and every remnant returned.",
+            "This page keeps the human reason. It creates no machine motion.",
+            "Intent defines the features: the opening, a center split, two straight cuts, keep the center on tabs, return the rest.",
+            "Those features make this job’s knobs. The bench only turns them."
+          ]
+        },
+        {
+          "title": "WHY SHEET WORK IS HERE",
+          "items": [
+            "A second material stream, on the same trail and the same rules.",
+            "Kept small on purpose: enough to start the conversation.",
+            "The route is to plug in existing sheet machines, with interchangeable heads, later. This app does not design a sheet machine."
+          ]
+        },
+        {
+          "title": "LEFT TO USER 1",
+          "items": [
+            "Hinges and hardware: not in this order.",
+            "Trimming the retained tabs: User 1, after pickup."
+          ]
+        },
+        {
+          "title": "PLUMBING",
+          "items": [
+            "Preserve the working artifact.",
+            "Parent routes. Child owns the bounded definition."
+          ],
+          "quiet": true
+        }
+      ]
+    },
+    "ph-bench": {
+      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 2 · THE BENCH",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "This page is always the bench. Do not rename it configurator.",
+            "The story stops here. Only material, geometry and operations go on.",
+            "Three knobs, made from User 1’s intent: opening width, straight side height, arch rise.",
+            "Reset returns to User 1’s 36 / 24 / 12.",
+            "The bench turns the knobs. It never adds one.",
+            "Every turn is a new version. The Store is asked again."
+          ]
+        },
+        {
+          "title": "WHAT THE BENCH PRODUCES",
+          "items": [
+            "One sheet definition: 48 × 96 in, ½ in plywood.",
+            "Four operations: route the arched opening, route the center split, and two straight cuts 18 in from each end.",
+            "The center retained by tabs. Every remnant returned."
+          ]
+        },
+        {
+          "title": "THE STORE DECIDES",
+          "items": [
+            "The drawing shows the Store’s current routed field. The page does not decide fit.",
+            "An opening past the working field comes back REFUSED, with the Store’s reason.",
+            "An arch too tall for its width comes back REFUSED. The page does not correct it."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "A changed opening is a new calculation; returning to it asks fresh again. Test: playhouse-live-store.test.mjs.",
+            "Past the working field: REFUSED with its reason, steps 4–6 closed. Test: playhouse-live-store.test.mjs.",
+            "Too tall for its width: REFUSED; the page does not correct it. Test: playhouse-live-store.test.mjs.",
+            "An accepted version cannot authorize a changed one. Test: trail-stale-version.test.mjs."
+          ]
+        },
+        {
+          "title": "PLUMBING",
+          "items": [
+            "Preserve the working artifact.",
+            "Parent routes. Child owns the bounded definition.",
+            "The shell holds the live Store answer and the shared terms flow for Playhouse.",
+            "Known wart. Injected pages in the shell, not their own file yet."
+          ],
+          "quiet": true
+        }
+      ]
+    },
+    "ph-store": {
+      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 3 · STORE ANSWER",
+      "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "One fresh Store answer to this exact version, on its own request type: SHEET_PACKAGE_V1.",
+            "Viewing it creates no event.",
+            "The Store answers the job. It does not redefine the job."
+          ]
+        },
+        {
+          "title": "THE STORE’S ANSWER TODAY",
+          "items": [
+            "At User 1’s 36 / 24 / 12: SUPPORTABLE and complete.",
+            "Every operation answered: arched opening, center split, both straight cuts.",
+            "No refusals. No unresolved conditions.",
+            "The opening sits inside the S-001 work field (envelope S001-STAGE2-ENVELOPE-0.1).",
+            "Routing on the S-001 router; straight cuts on the yard panel saw."
+          ]
+        },
+        {
+          "title": "WHAT THE ANSWER DOES NOT CLAIM",
+          "items": [
+            "The tab plan is a reference plan. Physical retention is not measured.",
+            "Machine time is the declared Stage-2 model, not measured.",
+            "Stock is fixture-declared, not live inventory."
+          ]
+        },
+        {
+          "title": "THE STORE",
+          "items": [
+            "Store owns capability, time, economics, and retained-control truth.",
+            "Store Zero is a declared reference lumberyard. Not live inventory. Not a dealer commitment. Not a quote.",
+            "The Store budgetary answer is the whole Store result.",
+            "The complete budgetary estimate is the number inside it, only when every line is supportable.",
+            "Missing required component → no complete budgetary estimate."
+          ]
+        },
+        {
+          "title": "FIRST THREE IDENTITIES",
+          "items": [
+            "SENT · ARRIVED · ANSWERED.",
+            "Three events, three hashes. Do not collapse them."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "Playhouse asks the live Store for its own definition and shows that fresh answer. Test: playhouse-live-store.test.mjs.",
+            "It will not show an answer meant for another project or another version. Test: playhouse-live-store.test.mjs.",
+            "A Store that cannot answer leaves no answer and closed steps, never a reference answer. Test: playhouse-live-store.test.mjs."
+          ]
+        },
+        {
+          "title": "CHECKED BY HAND",
+          "items": [
+            "Against the pinned Store 9c62d9d: SUPPORTABLE, complete, four operations answered, Q $65.04."
+          ]
+        },
+        {
+          "title": "AUTHORITY LINKS",
+          "items": [
+            "Store Zero: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/README.md",
+            "Travel standard: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md"
+          ]
+        }
+      ]
+    },
+    "ph-review": {
+      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 4 · REVIEW",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "Freeze the whole ask: every requested operation, supported or not.",
+            "Confirming keeps the definition. It is not payment, reservation, release, readiness or execution.",
+            "Only a SUPPORTABLE answer for this version can be confirmed.",
+            "Nothing unresolved is turned into capability."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "Confirm stays closed until the Store answers SUPPORTABLE for this version. Test: playhouse-live-store.test.mjs."
+          ]
+        }
+      ]
+    },
+    "ph-call": {
+      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 5 · YOUR CALL",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "Your call on exactly this version: accept and send it, or decline.",
+            "ACCEPT creates the next event. It does not move money, allocate material, release production or start a machine.",
+            "Request ≠ order.",
+            "DECLINE is a result too."
+          ]
+        },
+        {
+          "title": "SHARED TERMS FLOW",
+          "items": [
+            "One shared 13-event terms flow, hash-linked.",
+            "No Playhouse commerce of its own."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "Fresh answer → simulated offer → accept & send → yard → pickup → receipt. Test: trail-terms.test.mjs.",
+            "Declining ends the chain at your call. Test: trail-terms.test.mjs.",
+            "An invalid choice is declined with its reason; steps 4–6 stay inert. Test: trail-terms.test.mjs."
+          ]
+        },
+        {
+          "title": "STATED ONLY",
+          "items": [
+            "Commerce is simulated. No money moves."
+          ]
+        }
+      ]
+    },
+    "ph-yard": {
+      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 6 · WE CUT IT",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "The yard works from the Store answer for this exact version.",
+            "Only an accepted, SUPPORTABLE answer reaches the yard.",
+            "The yard is simulated. No machine runs.",
+            "Allocation ≠ release ≠ Cycle Start.",
+            "Cycle Start belongs to the person at the cell."
+          ]
+        },
+        {
+          "title": "STATED ONLY",
+          "items": [
+            "No toolpath, controller code or postprocessor here. Those belong to the commissioned cell."
+          ]
+        }
+      ]
+    },
+    "ph-terms": {
+      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 7 · THE EVENTS",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "Every event for this version, in order, each with its hash.",
+            "Open events stay open until they happen.",
+            "Missing events stay missing. Nothing is filled in by assumption.",
+            "Events stay separate. A changed definition starts a new chain."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "The shared chain verifies, hash by hash. Test: trail-terms.test.mjs."
+          ]
+        }
+      ]
+    },
+    "ph-recap": {
+      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 8 · RECAP",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "Read forward, it is the chronology. Read backward, it is the audit.",
+            "Say what this proved: a sheet definition the Store can answer, carried through the shared trail.",
+            "Physical status: not claimed, not authorized."
+          ]
+        },
+        {
+          "title": "NEXT PROOF",
+          "items": [
+            "Measured tab retention, real yield, toolpath and inspection evidence, from a commissioned cell."
+          ]
+        }
+      ]
+    },
+    "ph-record": {
+      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 9 · PICK UP & RECORD",
+      "flag": "Intent makes the knobs. The bench only turns them.",
+      "bullets": [],
+      "sections": [
+        {
+          "title": "CORE RULE",
+          "items": [
+            "Only the facts this journey established.",
+            "The record appends. It is never rewritten.",
+            "Staged ≠ picked up. Custody closes the handoff.",
+            "The center piece and every remnant go back to User 1."
+          ]
+        },
+        {
+          "title": "ENFORCED",
+          "items": [
+            "The record carries the Store pin of the answer it used. Test: playhouse-live-store.test.mjs."
+          ]
+        },
+        {
+          "title": "CURRENT GAP",
+          "items": [
+            "Physical execution: false. Simulated yard events only.",
+            "Hardware: not in this order."
+          ]
+        }
+      ]
+    }
+  };
   const asRail=r=>Object.freeze(Object.assign({},r,{rows:Object.freeze(r.bullets.map(b=>Object.freeze([b,'']))),later:Object.freeze([])}));
   const RAILS=Object.freeze({
     'job1-idea':asRail(JOB1['job1-idea']),
@@ -1646,7 +1967,16 @@
     'od-edge':asRail(JOB4['od-edge']),
     'od-call':asRail(JOB4['od-call']),
     'od-yard':asRail(JOB4['od-yard']),
-    'od-record':asRail(JOB4['od-record'])
+    'od-record':asRail(JOB4['od-record']),
+    'ph-idea':asRail(JOB5['ph-idea']),
+    'ph-bench':asRail(JOB5['ph-bench']),
+    'ph-store':asRail(JOB5['ph-store']),
+    'ph-review':asRail(JOB5['ph-review']),
+    'ph-call':asRail(JOB5['ph-call']),
+    'ph-yard':asRail(JOB5['ph-yard']),
+    'ph-terms':asRail(JOB5['ph-terms']),
+    'ph-recap':asRail(JOB5['ph-recap']),
+    'ph-record':asRail(JOB5['ph-record'])
   });
 
   const PAGES=Object.freeze({
@@ -1797,51 +2127,15 @@
       ['Rebuild from receipts','Final state should be derivable.'],
       ['Still browser-held','Full build needs durable signed storage.']
     ]),
-    'playhouse-s001':guide('Define the sheet job first',[
-      ['Geometry first','Machine answer comes later.'],
-      ['Keep extra ops','Don’t drop the hard parts to get green.'],
-      ['No controller code','This is still a project definition.']
-    ]),
-    'playhouse-machine':guide('Only machine-facing facts',[
-      ['Keep it portable','Part geometry, not controller registers.'],
-      ['Test the math','Geometry kernels need tolerance tests.'],
-      ['Controller stays local','Postprocessor belongs at the commissioned cell.']
-    ]),
-    'playhouse-store':guide('Mixed answer is okay',[
-      ['Green what is green','Supported route stays supported.'],
-      ['Keep the red lines','Unresolved ops stay visible.'],
-      ['No scope trimming','Store cannot quietly delete work.']
-    ]),
-    'playhouse-review':guide('Freeze the whole ask',[
-      ['Keep unresolved work','Version includes every requested op.'],
-      ['No silent partial order','Partial acceptance needs an explicit rule.'],
-      ['Show the boundary','Supported ≠ fully fulfilled.']
-    ]),
-    'playhouse-request':guide('Carry the exact ask',[
-      ['Send all lines','Not just the supported ones.'],
-      ['Request ≠ order','No commercial promotion.'],
-      ['Still incomplete','Mixed-job commerce is not built yet.']
-    ]),
-    'playhouse-yard':guide('Return the mixed answer',[
-      ['Don’t fake completeness','Supported + unresolved can coexist.'],
-      ['Reason every gap','Line-level reasons, not generic refusal.'],
-      ['No seller yet','Reference answer is not an offer.']
-    ]),
-    'playhouse-terms':guide('Null is valid',[
-      ['Don’t fill blanks','No offer means no payment/allocation.'],
-      ['No action here','Chronology only.'],
-      ['Keep it boring','Truth beats a green timeline.']
-    ]),
-    'playhouse-result':guide('Say what the proof proved',[
-      ['Geometry proof only','Do not imply physical execution.'],
-      ['Keep unresolved ops','They still belong to the job.'],
-      ['Next proof','Need real yield, toolpath and inspection evidence.']
-    ]),
-    'playhouse-record':guide('Keep the incomplete record',[
-      ['Missing stays missing','No physical completion claim.'],
-      ['Keep the definition','A useful record can still stop early.'],
-      ['Full build','Same durable owner-record service as every project.']
-    ]),
+    'playhouse-s001':RAILS['ph-idea'],
+    'playhouse-machine':RAILS['ph-bench'],
+    'playhouse-store':RAILS['ph-store'],
+    'playhouse-review':RAILS['ph-review'],
+    'playhouse-request':RAILS['ph-call'],
+    'playhouse-yard':RAILS['ph-yard'],
+    'playhouse-terms':RAILS['ph-terms'],
+    'playhouse-result':RAILS['ph-recap'],
+    'playhouse-record':RAILS['ph-record'],
     'alcove-store-order-surface':guide('Store seam',[
       ['Store facts only','No customer geometry rewrite.'],
       ['Bind to the request','No floating answer.'],
