@@ -4,7 +4,7 @@
 //  - screen 1: two plan cards, each with a "From" price the Store answered
 //  - screen 2: the plan as published. Grow or shrink to the inch inside the plan rule, pick wood and hardware,
 //    the Store's live total, "Confirm & send". Only the plan is sent: its boards, lengths and angles, no holes
-//  - the pill takes the plan to the edge of the envelope: every board drawn, spot holes and decorative cuts per
+//  - one small button takes the plan to a bigger bench: every board drawn, spot holes and decorative cuts per
 //    kind of board, the Store's answer for each thing tried, and who upstream could move the edge
 //  - "Back to the plan as is" drops the work and asks the Store for the plan again
 //  - hole locations are not published by the plans: none are drawn or sent until the customer places them
@@ -91,7 +91,7 @@ function assertOnlyThePlan(def, lengthIn, fixed, angles) {
   assert.ok((def.itemLines || []).every(l => l.requirement && l.storeSku === undefined), 'hardware travels as requirements, never item numbers');
 }
 
-test('Outdoor 0.4: the plan as published, the edge of the envelope, and back', { timeout: 180000 }, async () => {
+test('Outdoor 0.4: the plan as published, a bigger bench, and back', { timeout: 180000 }, async () => {
   const server = await serve();
   const origin = `http://127.0.0.1:${server.address().port}`;
   const browser = await chromium.launch(process.env.STB_CHROMIUM_PATH ? { executablePath: process.env.STB_CHROMIUM_PATH } : {});
@@ -150,7 +150,7 @@ test('Outdoor 0.4: the plan as published, the edge of the envelope, and back', {
     assert.equal(await outdoor.locator('#parts tr').count(), 7);
     assert.equal(await outdoor.locator('#s-build [data-tool]').count(), 0, 'screen 2 adds no work: it is the plan as published');
     assert.equal(await outdoor.locator('#confirm').isDisabled(), false);
-    assert.match(await outdoor.locator('#to-edge').innerText(), /TAKE IT TO THE BENCH TO DO MORE WORK/);
+    assert.match(await outdoor.locator('#to-edge').innerText(), /Bring this to a bigger bench for more work/);
 
     // Grow to the inch: 85 in. Only the slats follow; the Store is asked again for exactly that size.
     await outdoor.locator('#s-build [data-size="12"]').click();
@@ -187,14 +187,14 @@ test('Outdoor 0.4: the plan as published, the edge of the envelope, and back', {
     assert.equal(exact.payload.definition.itemLines[0].requirement.finish, 'coated');
     const planVersion = exact.payload.definition.configurationVersion.replace(/^od-r\d+-/, '');
 
-    // The pill: the edge of the envelope. The photo top left, every board drawn, no holes until you place them.
+    // The button: a bigger bench. The photo top left, every board drawn, no holes until you place them.
     await outdoor.locator('#to-edge').click();
     assert.equal((await od()).section, 'edge');
     assert.equal(await outdoor.locator('#s-edge:not([hidden])').count(), 1);
     assert.match(await outdoor.locator('#edge-photo').getAttribute('src'), /plan-a-frame-photo/);
     assert.equal(await outdoor.locator('#parts-bench [data-part]').count(), 7);
     assert.equal(await outdoor.locator('#parts-bench svg text', { hasText: 'hole locations: not published by the plan' }).count(), 7);
-    assert.match(await outdoor.locator('#edge-list').innerText(), /Neither plan publishes them/);
+    assert.match(await outdoor.locator('#edge-list').innerText(), /Published plans aren’t detailed enough to drill from/);
     assert.match(await outdoor.locator('#s-edge .edge-head').innerText(), /Information travels before atoms/);
     assert.equal(await outdoor.locator('#send-work').isDisabled(), true, 'nothing tried yet');
     // The edge shows exactly the settings the plan's configurator made; no decorative cut on the plan's 25° boards.
