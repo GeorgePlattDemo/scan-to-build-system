@@ -2,13 +2,20 @@
   'use strict';
 
   // One browser Store client for every project page. It knows how to reach the live Store, which Store
-  // version System is pinned to, and how to check that an answer is fresh and meant for this request.
-  // It knows nothing about any project. The Store address and the Store version both come from
-  // stb-store-runtime.json, so a Store repin changes that one file here, never each project page.
-  const CONFIG_URL = new URL('stb-store-runtime.json', document.currentScript.src).href;
+  // version System is pinned to, how to admit the exact current public definition, and how to check that
+  // an answer is fresh and meant for this request. Store capability remains Store-owned.
+  const SCRIPT_URL = document.currentScript.src;
+  const CONFIG_URL = new URL('stb-store-runtime.json', SCRIPT_URL).href;
+  const ADMISSION_URL = new URL('stb-public-admission.mjs', SCRIPT_URL).href;
   const PROTOCOL_VERSION = 'stb-store-zero-http/1';
   const FRESHNESS_RULE = 'STB-STORE-FRESH-EVALUATION-0.1';
   const PIN_PATTERN = /^[0-9a-f]{40}$/;
+  let admissionModulePromise = null;
+
+  function admissionModule(){
+    if(!admissionModulePromise) admissionModulePromise = import(ADMISSION_URL);
+    return admissionModulePromise;
+  }
 
   async function loadConfig(){
     const response = await fetch(CONFIG_URL, {cache:'no-store'});
@@ -57,19 +64,28 @@
   }
   function clone(value){ return value == null ? value : JSON.parse(JSON.stringify(value)); }
 
-  // Send one formal job request. `payload` is the request type's payload, e.g. { definition, definitionKind, ruleVersion }.
-  // `signatureBody` is what the request type signs; by default the definition form used by Alcove and cut packages.
-  // The answer is returned only if it is correlated to this request, comes from the pinned Store,
-  // and (unless freshReceipt is false) carries a fresh evaluation receipt for this request.
+  // Send one formal public-build job request. Every five-tile request passes the same admission seam here.
+  // `payload` remains the existing request-type payload; admission evidence is local and is not added to the wire.
+  // A caller-provided readiness flag has no authority because this function derives admission itself.
   async function sendJob({projectId, requestType, payload, signatureBody = null, candidateRevisionId, requestId, freshReceipt = true, timeoutMs = 25000}){
     if(!projectId || !requestType || !payload) throw new Error('STORE_CLIENT_REQUEST_INCOMPLETE');
     const config = await loadConfig();
     const body = clone(payload);
+    const revision = String(candidateRevisionId || body.definition?.configurationVersion || body.line?.configurationVersion || '');
+    const admission = await admissionModule();
+    await admission.admitPublicStoreRequest({
+      root,
+      projectId,
+      requestType,
+      payload:body,
+      candidateRevisionId:revision,
+      storePin:config.storePin
+    });
     const wire = {
       protocolVersion:PROTOCOL_VERSION,
       requestId:String(requestId || crypto.randomUUID()),
       projectId,
-      candidateRevisionId:String(candidateRevisionId || body.definition?.configurationVersion || crypto.randomUUID()),
+      candidateRevisionId:revision,
       requestType,
       scope:requestType,
       demandSignature:await sha256(signatureBody || {
@@ -117,8 +133,9 @@
   }
 
   root.STBStoreClient = Object.freeze({
-    version:'0.1',
+    version:'0.2',
     configurationUrl:CONFIG_URL,
+    admissionUrl:ADMISSION_URL,
     protocolVersion:PROTOCOL_VERSION,
     freshnessRule:FRESHNESS_RULE,
     loadConfig,
