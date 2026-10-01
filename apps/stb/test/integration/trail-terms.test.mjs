@@ -144,7 +144,7 @@ const TILES = {
     label: 'Space utilization', projectId: 'window-seat', requestType: 'CUT_PACKAGE_V1',
     async answer({ page }) {
       const seat = await until(() => frameOf(page, 'stb-window-seat-0.9.html'), 'seat frame');
-      await seat.locator('#s-hero [data-to="intent"]').click();
+      await frameOf(page, 'system-build-base-8d8a9dd.html').locator('.recovery-nav [data-seat-fork="intent"]').click();
       await seat.locator('#s-intent [data-to="bench"]').click();
       await seat.locator('#btn-ask').click();
       await until(async () => (await terms(seat, 'window-seat'))?.stage === 'ANSWERED', 'window seat answer');
@@ -157,7 +157,7 @@ const TILES = {
       // Window Seat checks its own geometry first: a bench past what the drawing allows is declined with its
       // reason before any Store request, and the Store is never asked for it.
       const seat = await until(() => frameOf(page, 'stb-window-seat-0.9.html'), 'seat frame');
-      await seat.locator('#s-hero [data-to="intent"]').click();
+      await frameOf(page, 'system-build-base-8d8a9dd.html').locator('.recovery-nav [data-seat-fork="intent"]').click();
       await seat.locator('#s-intent [data-to="bench"]').click();
       await seat.evaluate(() => { const e = document.getElementById('c-wC'); e.value = '84'; e.dispatchEvent(new Event('input')); });
       await wait(page, 300);

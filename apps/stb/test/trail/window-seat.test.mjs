@@ -1,6 +1,7 @@
 // Window Seat 0.9 on the trail: the fully worked example follows the same rules as every tile.
-// - Page 1 is the want, kept behind the trail: no nav step is current there. The two routes are the top pills, and
-//   page 1 has one forward control, Intent. Step 1, Intent, is the next page.
+// - Idea is the intake, not a step: no nav step is current there and no step shows. Its one nav line carries the fork,
+//   "Two ways through this job: Intent | One full scroll", and nothing else leads on. Step 1, Intent, is next.
+// - From Intent on, the one nav line is Idea (a back control, never current), then the six steps. No step line.
 // - Intent makes the knobs, including any added by hand. The bench only turns them; it has no way to add one.
 // - Both routes are one state, one definition and one Store request: the request is identical from either.
 // - The request is a plain cut-package request the System wire accepts (rule 4: the live Store answers).
@@ -82,13 +83,17 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     page.on('pageerror', e => errors.push(e.message));
     await page.goto(`${origin}/${FILE}`, { waitUntil: 'load' });
 
-    // Page 1 is the want, alone, outside the trail steps. The routes are the pills; one forward control, Intent.
+    // Idea: the intake, alone, outside the trail steps. One nav line, carrying only the fork; no step buttons,
+    // no step line, no button on the page that repeats the fork.
     assert.equal(await page.evaluate(() => document.body.dataset.view), 'trail');
     assert.deepEqual(await page.locator('.step:visible').evaluateAll(els => els.map(e => e.id)), ['s-hero']);
-    assert.equal(await page.locator('[data-view-btn="trail"]').count(), 1);
-    assert.equal(await page.locator('[data-view-btn="whole"]').count(), 1);
-    assert.deepEqual(await page.locator('#s-hero button').evaluateAll(els => els.map(e => [e.dataset.to, e.innerText.trim()])), [['intent', 'Intent →']]);
-    assert.equal(await page.locator('[data-nav].on').count(), 0, 'page 1 is not a trail step');
+    assert.equal(await page.locator('#bar').isVisible(), true, 'one nav line');
+    assert.deepEqual(await page.locator('#bar button:visible').evaluateAll(els => els.map(e => e.innerText.trim())), ['Intent', 'One full scroll'], 'Idea shows the fork and no steps');
+    assert.match(await page.locator('#bar .fork').innerText(), /^Two ways through this job:/);
+    assert.equal(await page.locator('#bar [data-view-btn="trail"]').getAttribute('aria-pressed'), 'true', 'Intent is the default');
+    assert.equal(await page.locator('#s-hero button:visible').count(), 0, 'no repeated buttons on Idea');
+    assert.equal(await page.locator('.stepband:visible').count(), 0, 'no step line');
+    assert.equal(await page.locator('[data-nav].on').count(), 0, 'Idea is not a trail step');
     assert.equal(await page.locator('[data-nav="scan"]').innerText(), '1 · Intent');
     assert.equal(await page.locator('[data-nav="request"]').isDisabled(), true, 'your call is inert before a Store answer');
     // Each page's Dev/Rev rail is a slot filled from the app's one guide file.
@@ -96,26 +101,35 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     assert.match(await page.locator('#s-hero aside.rail').innerText(), /DEV GUIDE|DEV\/REV GUIDE/);
     assert.match(await page.locator('#s-hero aside.rail').innerText(), /window-seat-hero/);
 
-    await page.locator('#s-hero [data-to="intent"]').click();
+    await page.locator('#bar [data-view-btn="trail"]').click();
     assert.deepEqual(await page.locator('.step:visible').evaluateAll(els => els.map(e => e.id)), ['s-intent']);
     assert.equal(await page.locator('[data-nav="scan"]').getAttribute('class'), 'pill on', 'step 1, Intent, starts on the intent page');
+    // From Intent on, the one nav line is Idea, a back control, then the six steps. The fork stays on Idea.
+    assert.deepEqual(await page.locator('#bar button:visible').evaluateAll(els => els.map(e => e.innerText.trim())),
+      ['Idea', '1 · Intent', '2 · The bench', '3 · The Store answers', '4 · Your call', '5 · We cut it', '6 · Pick up & build']);
+    assert.equal(await page.locator('#nav-idea').getAttribute('class'), 'pill', 'Idea is never the current step');
+    assert.equal(await page.locator('.stepband:visible').count(), 0, 'no step line');
+    // No qualified person: the seat is the customer's seat. Assembly on site is the customer's.
+    assert.doesNotMatch(await page.locator('#s-intent .main').innerText(), /qualified person|connection design/i);
 
     // The knob rule: every knob, including those added by hand, is made on the intent page. The bench shows exactly
     // those knobs and has no control that adds one.
     const knobs = await page.evaluate(() => window.STBWindowSeat.knobs());
-    assert.equal(knobs.length, 14);
-    assert.equal(await page.locator('#knob-table tbody tr').count(), 14);
-    assert.ok(await page.locator('#s-intent [data-add]').count() >= 4, 'add a knob by hand lives on the intent page');
+    assert.equal(knobs.length, 15);
+    assert.equal(await page.locator('#knob-table tbody tr').count(), 15);
+    assert.ok(knobs.includes('SPOTS'), 'drill spotting is one of this job’s knobs, made at intent');
+    assert.equal(await page.locator('#add-knobs [data-add="spots"]').count(), 0, 'not an add-by-hand option');
+    assert.ok(await page.locator('#s-intent [data-add]').count() >= 3, 'add a knob by hand lives on the intent page');
     assert.equal(await page.locator('#s-bench [data-add], #s-bench [data-kept]').count(), 0, 'the bench adds no knob');
     assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), [...knobs].sort());
-    // Wood is Alcove's material block, on the bench, pine already selected, directly beneath the bench's one price.
-    // The Store-answer page shows the answer and holds no wood control.
+    // As Alcove: wood is the material block on the bench, pine already selected, and the bench's one price sits directly
+    // beneath it. The Store-answer page shows the answer and holds no wood control.
     assert.equal(await page.locator('#species').count(), 1, 'one wood control');
     assert.equal(await page.locator('#s-configure [data-knob="WOOD"]').count(), 1, 'on the bench');
     assert.equal(await page.locator('#s-store [data-knob="WOOD"], #store-wood').count(), 0, 'not on the Store-answer page');
     assert.deepEqual(await page.locator('#species .swatch').evaluateAll(els => els.map(e => [e.dataset.material, e.innerText.trim()])), [['pine', 'Pine'], ['poplar', 'Poplar'], ['cherry', 'Cherry'], ['oak', 'Oak']]);
     assert.equal(await page.locator('#species .swatch.on').getAttribute('data-material'), 'pine', 'wood starts resolved as pine');
-    assert.equal(await page.evaluate(() => document.getElementById('bench-money-box').nextElementSibling.querySelector('#species') !== null), true, 'the wood sits directly beneath the price');
+    assert.deepEqual(await page.evaluate(() => [...document.getElementById('species').closest('.matprice').children].map(e => e.dataset.knob || e.id)), ['WOOD', 'SPOTS', 'bench-money-box'], 'one frame: wood, then spotting, then the Store price');
     assert.equal(await page.locator('#bench-money-box').count(), 1, 'one money block on the bench');
 
     // The sketch's 14 in depth over two boards is 7 in each: 1×8 select pine, edge-milled to 7 in.
@@ -153,32 +167,61 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
 
     // Depth is the customer's number, a quarter inch at a time; the boards are milled to match.
     await page.locator('#depth-panel [data-depth="0.25"]').click();
-    assert.equal(await page.locator('#v-d').innerText(), '14 1/4 in');
+    assert.equal(await page.locator('#v-d').inputValue(), '14 1/4');
     assert.match(await page.locator('#v-runw').innerText(), /1×8 .* edge-milled to 7 1\/8 in/);
     assert.ok((await request(page)).cutPackages.every(p => p.finishedWidthIn === 7.125));
     await page.locator('#depth-panel [data-depth="-0.25"]').click();
+    // Every slider has a typed box. A typed number (decimal or fraction) moves the knob, within its range and step.
+    assert.equal(await page.locator('#ctlcol input[type=range]').count(), await page.locator('#ctlcol [data-exact]').count(), 'one typed box per slider');
+    await page.locator('#v-d').fill('15 1/2');
+    await page.locator('#v-d').press('Enter');
+    assert.equal(await page.locator('#c-d').inputValue(), '15.5');
+    assert.ok((await request(page)).cutPackages.every(p => p.finishedWidthIn === 7.75), 'a typed depth is the depth');
+    // What's typed is the value: 60.5 stays 60.5, though the slider moves in whole inches.
+    await page.locator('#v-wC').fill('60.5');
+    await page.locator('#v-wC').press('Enter');
+    assert.equal(await page.locator('#v-wC').inputValue(), '60 1/2');
+    assert.equal(await page.evaluate(() => window.STBWindowSeat.definition().W), 108.5, '24 + 60.5 + 24');
+    // Outside the knob's range: kept as typed, not applied, and the box says why.
+    await page.locator('#v-wC').fill('200');
+    await page.locator('#v-wC').press('Enter');
+    assert.equal(await page.locator('#v-wC').inputValue(), '200');
+    assert.match(await page.locator('#ctlcol .exactnote').innerText(), /runs from 30 to 84 in\. Not applied/);
+    assert.equal(await page.evaluate(() => window.STBWindowSeat.definition().W), 108.5, 'nothing changed behind your back');
+    await page.locator('#v-wC').fill('55');
+    await page.locator('#v-wC').press('Enter');
+    assert.equal(await page.locator('#ctlcol .exactnote').count(), 0);
+    await setRange(page, 'c-d', 14);
 
     // A depth that lands on a board sends no milling.
     await page.locator('#p-depth button', { hasText: 'USE 14 1/2 IN' }).click();
     assert.doesNotMatch(await page.locator('#ws-reg').innerText(), /Edge-mill/);
     assert.ok((await request(page)).cutPackages.every(p => p.finishedWidthIn === undefined));
 
-    // Spot facing for shelf pins is a knob added by hand on the intent page, then turned on the bench:
-    // 2 in from the edge, one spot per board, per tower side, per shelf.
-    assert.equal(await page.locator('#c-spot-place').count(), 0, 'not on the bench until intent adds it');
     // A missing knob sends you back to intent; the bench has no way to add it.
     await page.locator('#s-bench .backlink [data-to="intent"]').click();
     assert.deepEqual(await page.locator('.step:visible').evaluateAll(els => els.map(e => e.id)), ['s-intent']);
-    await page.locator('#add-knobs [data-add="spots"]').check();
     await page.locator('#s-intent [data-to="bench"]').click();
-    assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.knobs())).filter(k => !knobs.includes(k)), ['SPOTS']);
-    await page.locator('#c-spot-place button', { hasText: '2 in' }).click();
+
+    // Drill spotting sits with the wood, over the price, and starts off: no spots are sent.
+    assert.equal((await request(page)).cutPackages.flatMap(p => p.parts).filter(part => part.spots).length, 0, 'off to start');
+    // Tower sides, 2 in from the edge: one spot per board, per tower side, per shelf.
+    await page.locator('#c-spot-sides [data-k="2"]').click();
     req = await request(page);
-    const spots = req.cutPackages.flatMap(p => p.parts).flatMap(part => part.spots || []);
+    let spots = req.cutPackages.flatMap(p => p.parts).flatMap(part => part.spots || []);
     assert.equal(spots.length, (4 + 4) * 2 * 2);
     assert.ok(spots.every(s => s.acrossWidthRule === 'INSET_FROM_EDGE' && s.insetFromEdgeIn === 2));
     const spotted = req.cutPackages.flatMap(p => p.parts).filter(part => part.spots);
-    assert.ok(spotted.every(part => /^[LR]-UPRIGHT-/.test(part.partId)), 'spots only on tower sides');
+    assert.ok(spotted.every(part => /^[LR]-UPRIGHT-/.test(part.partId)), 'side spots only on tower sides');
+    // Dividers, centered: where each divider meets the board above and below it, centered on the divider, one per board.
+    await page.locator('#c-spot-div [data-k="on"]').click();
+    req = await request(page);
+    const div = req.cutPackages.flatMap(p => p.parts).flatMap(part => (part.spots || []).filter(s => s.acrossWidthRule === 'CENTERED_ON_WIDE_FACE').map(s => [part.partId, s.xIn]));
+    assert.equal(div.length, (1 + 1) * 2 * 2, 'one upper divider and one cubby divider, two boards each, above and below');
+    assert.ok(div.every(([id]) => /^C-(TOP|BOTTOM|SEAT|UPPER-SHELF)-/.test(id)), 'on the center module’s horizontal boards');
+    assert.ok(div.every(([, x]) => x === 26.75), 'centered on the divider: halfway along a 53½ in board');
+    spots = req.cutPackages.flatMap(p => p.parts).flatMap(part => part.spots || []);
+    assert.equal(spots.length, 32 + 8);
     assert.ok((await wireOk(req)).ok, 'System wire accepts spotted parts');
     assert.match(req.configurationVersion, /^ws-r\d+-[0-9a-f]{8}$/);
 
@@ -202,18 +245,18 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     assert.equal(await page.locator('[data-nav="request"]').isDisabled(), true);
     assert.deepEqual(errors, []);
 
+    const trailLast = sent[sent.length - 1];
     // ── One long scroll: the same job, set the same way ──
     const whole = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
     const errors2 = [];
     whole.on('pageerror', e => errors2.push(e.message));
     await whole.goto(`${origin}/${FILE}`, { waitUntil: 'load' });
-    await whole.locator('[data-view-btn="whole"]').click();
+    await whole.locator('#bar [data-view-btn="whole"]').click();
     assert.equal(await whole.evaluate(() => document.body.dataset.view), 'whole');
     assert.equal(await whole.locator('.step:visible').count(), 8, 'seven pages and the audit copy');
     await whole.locator('#p-depth button', { hasText: 'USE 14 1/2 IN' }).click();
-    await whole.locator('#add-knobs [data-add="spots"]').check();
-    await whole.locator('#c-spot-place button', { hasText: '2 in' }).click();
-    const trailLast = sent[sent.length - 1];
+    await whole.locator('#c-spot-sides [data-k="2"]').click();
+    await whole.locator('#c-spot-div [data-k="on"]').click();
     n = sent.length;
     await whole.locator('#btn-ask').click();
     await asked(whole);
@@ -232,11 +275,15 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     assert.ok(audit.includes('Version: ' + trailRequest.configurationVersion));
     assert.ok(audit.includes(JSON.stringify(trailRequest, null, 2)), 'the exact request, as sent');
     assert.match(audit, /Knobs made at intent/);
-    assert.match(audit, /A person sits on the seat · UNRESOLVED · owner: QUALIFIED PERSON/);
+    assert.match(audit, /How it goes together on site · YOURS · owner: YOU/);
+    assert.doesNotMatch(audit, /QUALIFIED PERSON|A person sits on the seat/);
     assert.match(audit, /No answer: STORE_ZERO_UNAVAILABLE/);
-    // Switching route keeps the one state.
+    // Switching route keeps the one state. The fork lives on the Idea line only: back to the top, then switch.
     const before = await whole.evaluate(() => window.STBWindowSeat.state());
-    await whole.locator('[data-view-btn="trail"]').click();
+    assert.equal(await whole.locator('#bar .fork').isVisible(), false, 'no fork past Idea');
+    await whole.evaluate(() => window.scrollTo(0, 0));
+    await whole.waitForFunction(() => window.STBWindowSeat.state().section === 'hero');
+    await whole.locator('#bar [data-view-btn="trail"]').click();
     const after = await whole.evaluate(() => window.STBWindowSeat.state());
     assert.equal(after.view, 'trail');
     assert.equal(after.rev, before.rev);
