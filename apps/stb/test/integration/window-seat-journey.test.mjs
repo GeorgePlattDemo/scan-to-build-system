@@ -97,7 +97,7 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     assert.equal(log.length - n0, 1, 'arriving at the bench asks the Store once');
     assert.ok(first.request.payload.definition.cutPackages.every(p => p.material.species === 'pine'), 'pine, already selected');
     assert.equal(await page.locator('#bench-money button, #s-configure [data-ask]').count(), 0, 'no ask button on the bench');
-    await page.locator('#btn-ask').click();
+    await page.locator('[data-nav="store"]').click();
     assert.equal(log.length - n0, 1, 'going on to the Store page sends no duplicate');
     const trailSent = first.request.payload.definition;
     const trailHash = first.answer.calculationIdentity.resultHash;
@@ -128,7 +128,7 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     page = b.page;
     await page.locator('[data-view-btn="whole"]').click();
     assert.equal(await page.evaluate(() => [...document.querySelectorAll('.step')].filter(s => s.offsetParent).length), 8, 'seven pages and the audit copy, one scroll');
-    await page.locator('#btn-ask').click();
+    await page.locator('[data-nav="store"]').click();
     const w1 = await answered(page, log, fromB);
     assert.deepEqual(w1.request.payload.definition, trailSent, 'both routes send the same definition');
     assert.equal(w1.answer.calculationIdentity.resultHash, trailHash, 'and get the same Store calculation');
@@ -153,7 +153,7 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     assert.equal(await page.locator('[data-nav="yard"]').isDisabled(), true);
     // 15 in over 2 boards means 7½ in from a 1×10. Whether the edge mill takes 1¾ in is the Store's call, not ours.
     assert.equal((await page.evaluate(() => window.STBWindowSeat.conditions())).some(c => c.block), false, 'the page does not pre-judge the mill');
-    await page.locator('#btn-ask').click();
+    await page.locator('[data-nav="store"]').click();
     const r2 = await answered(page, log, fromB);
     assert.match(r2.request.payload.definition.configurationVersion, /^ws-r2-/);
     assert.notEqual(r2.answer.rawEvaluation.status, 'SUPPORTABLE');
@@ -164,7 +164,7 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     assert.equal(await page.locator('[data-nav="request"]').isDisabled(), true, 'steps 4–6 stay inert past the envelope');
     // Turn the knob, not the rule: three boards across, and the Store answers again.
     await page.locator('#c-runs [data-n="3"]').click();
-    await page.locator('#btn-ask').click();
+    await page.locator('[data-nav="store"]').click();
     await answered(page, log, fromB);
     assert.equal((await seat(page)).terms.stage, 'ANSWERED');
 
@@ -182,7 +182,7 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.request())).itemLines, [screws], 'the requirement, not an item number');
     assert.match(await page.locator('#ws-reg').innerText(), /Wood screws[^\n]*sent as a requirement[\s\S]*?SENT/);
     assert.doesNotMatch(await page.locator('#ws-reg').innerText(), /Wood screws[^\n]*\n?KEPT · NOT SENT/);
-    await page.locator('#btn-ask').click();
+    await page.locator('[data-nav="store"]').click();
     const r3 = await answered(page, log, fromB);
     assert.deepEqual(r3.request.payload.definition.itemLines, [screws], 'the requirement is on the wire');
     assert.equal(r3.answer.rawEvaluation.status, 'SUPPORTABLE');
@@ -196,7 +196,7 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     // #8 stays selectable. The pinned Store stocks no #8 wood screw, so the refusal is the Store's, with its reason.
     await page.locator('#sc-gauge').selectOption('#8');
     assert.equal((await page.evaluate(() => window.STBWindowSeat.conditions())).some(c => c.block), false, 'the page does not pre-judge the gauge');
-    await page.locator('#btn-ask').click();
+    await page.locator('[data-nav="store"]').click();
     const r4 = await answered(page, log, fromB);
     assert.equal(r4.request.payload.definition.itemLines[0].requirement.gauge, '#8');
     const refused = r4.answer.rawEvaluation.items.find(i => i.lineId === 'SCREWS');

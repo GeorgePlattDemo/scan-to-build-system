@@ -196,7 +196,7 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     assert.equal(await page.locator('#s-configure button[data-ask], #bench-money button').count(), 0, 'no ask button on the bench');
     // Going on to the Store's page sends no duplicate for the same version.
     let n = sent.length;
-    await page.locator('#btn-ask').click();
+    await page.locator('[data-nav="store"]').click();
     assert.equal(sent.length - n, 0, 'no second request for the same version');
     assert.match(await page.locator('#store-panel').innerText(), /Nothing is shown in its place/);
     assert.equal(await page.locator('[data-nav="request"]').isDisabled(), true);
@@ -215,7 +215,7 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     await whole.locator('#c-spot-place button', { hasText: '2 in' }).click();
     const trailLast = sent[sent.length - 1];
     n = sent.length;
-    await whole.locator('#btn-ask').click();
+    await whole.locator('[data-nav="store"]').click();
     await asked(whole);
     assert.ok(sent.length > n, 'the long scroll asks the Store too');
     // The fork: one state, one definition, one Store request, whichever route.
