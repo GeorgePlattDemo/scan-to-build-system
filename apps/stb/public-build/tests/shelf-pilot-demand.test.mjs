@@ -81,13 +81,17 @@ assert.match(alcove,/requirementId:'ALCOVE-PINS-AND-SCREWS'/);
 
 // Window Seat: spots derived from the actual generated tower shelf datums, sent to the live Store inside each
 // board's own part (cut-package spots). No local price path.
-// Window Seat 0.9 (the live page): the same spots, but spot facing is a knob added by hand on the intent page and
-// only turned on the bench. No placement is assumed until one is picked.
-assert.match(seat9,/\{id:'SPOTS',opt:'spots'/);
-assert.match(seat9,/spots:\{rule:null,inset:null\}/);
+// Window Seat 0.9 (the live page): the same spots. Drill spotting is a knob made on the intent page (by hand, not
+// on the sketch), off to start, and only turned on the bench: tower sides off, 1½ or 2 in from the edge; dividers
+// off or centered. It is one of the knobs Intent makes, not an extra added by hand; the bench adds none.
+assert.match(seat9,/\{id:'SPOTS',label:'Drill spotting',group:'SPOTS',made:'HAND',from:'not on the sketch · entered: off',start:'off',/);
+assert.doesNotMatch(seat9,/\{id:'SPOTS',[^\n]*opt:/, 'drill spotting is made on Intent, not added by hand');
+assert.match(seat9,/spots:\{sides:null,dividers:false\}/);
 assert.match(seat9,/data-add="'\+k\.opt\+'"/);
-assert.match(seat9,/id="c-spot-place"/);
-assert.match(seat9,/if\(K\('SPOTS'\)\|\|K\('XSPOT'\)\)/);
+assert.match(seat9,/<div data-knob="SPOTS" class="spotting">/);
+assert.match(seat9,/id="c-spot-sides"><button type="button" data-k="">Off<\/button><button type="button" data-k="1\.5">/);
+assert.match(seat9,/id="c-spot-div"><button type="button" data-k="">Off<\/button><button type="button" data-k="on">Centered/);
+assert.match(seat9,/if\(K\('XSPOT'\)\)\{/);
 assert.match(seat9,/shelfDatums=\[\]/);
 assert.match(seat9,/shelfDatums\.push\(r3\(y\)\)/);
 assert.match(seat9,/shelfDatums\.push\(r3\(datum\)\)/);
