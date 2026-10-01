@@ -7,8 +7,10 @@
 //   (once a tile is fixed, it stays fixed).
 //
 // Checks per tile (no tile is excepted):
-//   R1  the top nav shows the six trail steps, with the contract labels (a tile's own `steps`, if declared), in order
-//   R2  every visible nav button lands on this tile's own pages (or Landing / Home); no other buttons
+//   R1  Idea, where the tile opens, shows no numbered step. From Intent on, the nav reads Idea (an unnumbered back
+//       control, never current), then the six trail steps with the contract labels, in order, exactly one current.
+//   R2  every visible nav button lands on this tile's own pages (or Landing / Home); no other buttons. The fork options
+//       a tile declares for its Idea line (contract presentationForks) are that declared exception, not extra nav.
 //   R3  a step you cannot use yet is shown inert (disabled); steps 2-6 never silently do nothing
 //   R8  every tile on the Shared Home is declared in the contract, and every declared tile is on the Shared Home
 //   R9  no demo-account names on the tile's pages
@@ -96,7 +98,24 @@ async function visibleNav(frame) {
       label: e.innerText.trim(),
       go: e.getAttribute('data-go') || e.getAttribute('data-canonical-go') || '',
       inert: e.disabled || e.getAttribute('aria-disabled') === 'true',
+      current: e.getAttribute('aria-current') === 'step',
     })));
+}
+
+const NUMBERED = /^\s*\d+\s*·/;
+const IDEA = contract.idea.label;
+// The fork options a tile declares for its Idea line. On Idea they are the declared exception, not extra nav.
+const forkOptions = tile => new Set(contract.presentationForks
+  .filter(f => f.tileId === tile.id && f.line === IDEA)
+  .flatMap(f => [...f.options]));
+
+// From Idea to Intent: the Idea line's own control for step 1 (a declared fork option, or an unnumbered button).
+async function toIntent(frame, page, nav, tileSteps, forks) {
+  const way = nav.find(b => !NUMBERED.test(b.label) && b.label === tileSteps[0] && (forks.has(b.label) || !b.go));
+  if (!way) return false;
+  await frame.locator('.recovery-nav button:visible', { hasText: way.label }).first().click();
+  await page.waitForTimeout(1000);
+  return true;
 }
 
 async function pageText(page) {
@@ -159,15 +178,33 @@ test('trail scoreboard: every tile against the trail rules', { timeout: 600000 }
       if (!tile.pages.includes(entry)) add(tile.id, 'R2', `entering the tile lands on "${entry}", not one of its pages`);
       if (ACCOUNT_NAMES.test(await pageText(page))) add(tile.id, 'R9', `account name on entry page "${entry}"`);
 
+      const forks = forkOptions(tile);
       const nav = await visibleNav(frame);
-      const steps = nav.filter(b => tileSteps.includes(stripNumber(b.label)));
-      const stepLabels = steps.map(b => stripNumber(b.label));
-      if (JSON.stringify(stepLabels) !== JSON.stringify([...tileSteps])) {
-        add(tile.id, 'R1', `nav steps are [${nav.map(b => b.label).join(' | ')}]`);
-      }
+      // R1 on Idea: the intake, not a step. No numbered step shows and none is current.
+      const ideaOk = !nav.some(b => NUMBERED.test(b.label) || b.current);
+      if (!ideaOk) add(tile.id, 'R1', `Idea shows numbered steps: nav is [${nav.map(b => b.label).join(' | ')}]`);
       for (const b of nav) {
         const isStep = tileSteps.includes(stripNumber(b.label));
-        if (!isStep && !contract.sharedPages.includes(b.go)) add(tile.id, 'R2', `extra nav button "${b.label}" → ${b.go}`);
+        if (!isStep && !forks.has(b.label) && !contract.sharedPages.includes(b.go)) add(tile.id, 'R2', `extra nav button "${b.label}" → ${b.go}`);
+      }
+
+      // R1 from Intent on: Idea (never current), then the six steps in order, exactly one current: step 1 here.
+      let intentNav = [];
+      if (ideaOk) {
+        if (!await toIntent(frame, page, nav, tileSteps, forks)) add(tile.id, 'R1', 'Idea has no way to Intent');
+        else {
+          intentNav = await visibleNav(frame);
+          const want = [IDEA, ...tileSteps.map((st, i) => `${i + 1} · ${st}`)];
+          const got = intentNav.filter(b => !contract.sharedPages.includes(b.go)).map(b => b.label.replace(/\s+/g, ' '));
+          if (JSON.stringify(got) !== JSON.stringify(want)) add(tile.id, 'R1', `from Intent the nav is [${intentNav.map(b => b.label).join(' | ')}]`);
+          const current = intentNav.filter(b => b.current).map(b => b.label);
+          if (current.length !== 1 || current[0] !== want[1]) add(tile.id, 'R1', `on Intent the current step is [${current.join(' | ')}]`);
+          for (const b of intentNav) {
+            if (forks.has(b.label) && !NUMBERED.test(b.label)) add(tile.id, 'R2', `fork option "${b.label}" off the Idea line`);
+            const isStep = NUMBERED.test(b.label) && tileSteps.includes(stripNumber(b.label));
+            if (!isStep && b.label !== IDEA && !contract.sharedPages.includes(b.go)) add(tile.id, 'R2', `extra nav button "${b.label}" from Intent → ${b.go}`);
+          }
+        }
       }
       await page.close();
 
@@ -183,6 +220,23 @@ test('trail scoreboard: every tile against the trail rules', { timeout: 600000 }
         if (!allowed.has(landed)) add(tile.id, 'R2', `"${b.label}" crosses to "${landed}"`);
         const stepIndex = tileSteps.indexOf(stripNumber(b.label));
         if (stepIndex >= 1 && before === after) add(tile.id, 'R3', `"${b.label}" does nothing and is not shown inert`);
+        if (allowed.has(landed) && ACCOUNT_NAMES.test(await pageText(page))) add(tile.id, 'R9', `account name on "${landed}"`);
+        await page.close();
+      }
+
+      // From Intent: every enabled nav button opens this tile's own page; steps 2-6 never silently do nothing.
+      for (const b of intentNav) {
+        if (b.inert) continue;
+        ({ page, frame } = await enterTile(browser, origin, tile));
+        await toIntent(frame, page, await visibleNav(frame), tileSteps, forks);
+        const before = await fingerprint(page, frame);
+        await frame.locator('.recovery-nav button:visible', { hasText: b.label }).first().click();
+        await page.waitForTimeout(1000);
+        const landed = await activePage(frame);
+        const after = await fingerprint(page, frame);
+        if (!allowed.has(landed)) add(tile.id, 'R2', `"${b.label}" from Intent crosses to "${landed}"`);
+        const stepIndex = NUMBERED.test(b.label) ? tileSteps.indexOf(stripNumber(b.label)) : -1;
+        if ((stepIndex >= 1 || b.label === IDEA) && before === after) add(tile.id, 'R3', `"${b.label}" from Intent does nothing and is not shown inert`);
         if (allowed.has(landed) && ACCOUNT_NAMES.test(await pageText(page))) add(tile.id, 'R9', `account name on "${landed}"`);
         await page.close();
       }
