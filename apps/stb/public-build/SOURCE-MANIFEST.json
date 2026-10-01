@@ -672,6 +672,13 @@
       "blobSha": "9fcdbf2860aa863c524f860241ae60af238d62a5",
       "bytes": 229947,
       "reason": "Cache-buster for Window Seat 0.9: wood is Alcove's material block on the bench, pine selected, directly beneath the bench's one Store price; the bench asks the Store by itself on arrival and on each change."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-two-pages",
+      "blobSha": "a9d9ee26093cbc4889c4183f6857f9536aa18dd4",
+      "bytes": 231599,
+      "reason": "Window Seat nav: on Idea the page's two-route bar shows and the step bar's steps are hidden; from Intent on, the step bar reads Project Library, Idea (not a step), then the six steps, and marks the current one. Cache-buster for Window Seat 0.9."
     }
   ],
   "retiredFiles": [

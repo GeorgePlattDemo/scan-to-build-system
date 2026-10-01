@@ -65,8 +65,13 @@
   body[data-view="trail"] .step.on{display:block}
   body[data-view="trail"] .whole-only{display:none!important}
   body[data-view="whole"] .trail-only{display:none!important}
+  /* One bar at a time. On page 1 (Idea): the two routes, at the top and again at the bottom, and no step bar.
+     From Intent on: the step bar only. */
+  body:not([data-section="hero"]) .route{display:none!important}
+  body[data-section="hero"] #bar{display:none!important}
+  .route.foot{position:static;margin:16px 0 0}
   .page{display:grid;grid-template-columns:minmax(0,1fr) 190px;border:1px solid var(--border);
-    border-radius:12px;overflow:hidden;background:var(--surface)}
+    border-radius:12px;overflow:hidden;overflow:clip;background:var(--surface)}
   .main{min-width:0;border-right:1px solid var(--border)}
   .pad{padding:20px 22px}
   .rail{background:var(--rail);padding:18px 13px 14px;font-size:11px}
@@ -163,13 +168,44 @@
   .chain .node b{display:block;font-size:9px;letter-spacing:.06em;color:var(--text-3)}
   .chain .node span{font-size:11px;font-weight:650}
   .chain i{color:var(--text-3);font-style:normal;font-size:11px}
-  .cfg{display:grid;grid-template-columns:252px minmax(0,1fr) 300px;gap:16px;padding:0 22px 14px;align-items:start}
+  /* As Alcove: the drawing on the left with the material and the Store's price right under it; the knobs on the right.
+     The drawing, the wood and the price stay in view while the knobs scroll, so every turn shows its price. */
+  .cfg{display:grid;grid-template-columns:minmax(0,1fr) 272px;gap:18px;padding:0 22px 16px;align-items:start}
+  .stage{min-width:0}
+  .stage .ws-draw svg{max-height:max(220px,calc(100vh - 440px))}
+  .matprice{margin-top:10px;border:1px solid var(--border-accent);background:var(--tint);border-radius:10px;padding:10px 12px 12px}
+  .mat-h{margin:0 0 6px;font-weight:650;font-size:12.5px}
+  .matprice .swatches{grid-template-columns:repeat(4,minmax(0,1fr));margin:0}
+  .spotting{margin-top:10px}
+  .spotgrid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 10px;align-items:center;font-size:12px}
+  .spotgrid .dim{font-size:10.5px}
+  .spotgrid .seg{margin:0}
+  .spotgrid .seg button{font-size:11.5px;padding:4px 0}
+  .pricebar{border-top:1px solid var(--border-accent);margin-top:10px;padding-top:10px}
+  .pb{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+  .pb>div{min-width:0}
+  .pb .lb{margin:0 0 3px;font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--accent)}
+  .pb .basis{margin:0;font-size:11.5px;color:var(--text-2);max-width:34em}
+  .pricebar .big{margin:0;white-space:nowrap;font-size:clamp(24px,2.6vw,34px);font-weight:700;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums;transition:opacity .15s}
+  .pricebar .big.none{font-size:clamp(15px,1.6vw,20px);white-space:normal;text-align:right;color:var(--no)}
+  .pricebar .big.old{opacity:.4}
+  .pricebar .why{margin:8px 0 0;font-size:12px}
+  .pricebar .more{margin:8px 0 0;font-size:12px}
+  .exact{display:inline-flex;align-items:center;gap:4px;flex:none}
+  .exact input{width:64px;font:inherit;font-size:12px;font-weight:600;text-align:right;padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums}
+  .exact input:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+  .exact input.bad{border-color:var(--no);outline-color:var(--no)}
+  .exactnote{margin:-2px 0 6px;font-size:11px;color:var(--no)}
+  .exact i{font-style:normal;font-size:11px;color:var(--text-3);min-width:12px}
+  .ws-lab label{font-weight:600}
+  .detail2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:12px;align-items:start;margin-bottom:12px}
+  .detail2>.box{margin:0}
   .ctl{font-size:12.5px}
   .grp{border:1px solid var(--border);border-radius:9px;padding:9px 10px 10px;margin-bottom:10px;background:var(--surface)}
   .grp>.gh{font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--accent);margin:0 0 8px}
-  .ws-lab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;gap:8px}
-  .ws-lab span:first-child{font-weight:600}
-  .ws-lab span:last-child{font-size:11px;color:var(--text-3);white-space:nowrap}
+  .ws-lab{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;gap:8px}
+  .ws-lab>span:first-child{font-weight:600}
+  .ws-lab>span:last-child:not(.exact){font-size:11px;color:var(--text-3);white-space:nowrap}
   input[type=range]{width:100%;accent-color:var(--accent);margin:0 0 9px}
   .total{background:var(--tint);border:1px solid var(--border-accent);border-radius:8px;padding:7px 9px;margin:2px 0 8px}
   .total b{display:block;font-size:19px;line-height:1.1;color:var(--accent)}
@@ -232,13 +268,12 @@
   .doctrine .close{border-top:1px solid var(--border);margin-top:14px;padding-top:12px}
   .doctrine .close p{margin:0 0 8px;color:var(--text2)}
 
-  @media (max-width:1100px){ .cfg{grid-template-columns:240px minmax(0,1fr)} .cfg>div:last-child{grid-column:1/-1} }
+  @media (max-width:1100px){ .detail2{grid-template-columns:1fr} }
   @media (max-width:800px){
     .wrap{padding:12px 16px 48px}
     .page{grid-template-columns:1fr}
     .main{border-right:0;border-bottom:1px solid var(--border)}
-    .cfg,.two,.sketch{grid-template-columns:1fr}
-    .cfg>div:last-child{grid-column:auto}
+    .cfg,.two,.sketch,.detail2{grid-template-columns:1fr}
     #mfields{grid-template-columns:1fr}
     .pad{padding:16px}
     .cfg{padding:0 16px 12px}
@@ -250,6 +285,7 @@
 
 <nav class="bar" id="bar" aria-label="Window Seat trail">
   <span class="pill brand">WINDOW SEAT · SPACE UTILIZATION</span>
+  <button class="pill" type="button" data-to="hero" id="nav-idea">Idea</button>
   <button class="pill" type="button" data-nav="scan">1 · Intent</button>
   <button class="pill" type="button" data-nav="configure">2 · The bench</button>
   <button class="pill" type="button" data-nav="store">3 · The Store answers</button>
@@ -259,7 +295,7 @@
 </nav>
 
 <div class="route" id="route">
-  <p><b>Two ways through the same job.</b> One state, one definition, one Store request. Switch at any page.</p>
+  <p><b>Two ways through the same job.</b> One state, one definition, one Store request.</p>
   <div class="ways">
     <button type="button" data-view-btn="trail">The regular path</button>
     <button type="button" data-view-btn="whole">One long scroll</button>
@@ -285,6 +321,13 @@
         <div class="actions">
           <button class="go push" type="button" data-to="intent">Intent →</button>
         </div>
+        <div class="route foot" aria-label="Two ways through the same job">
+          <p><b>Two ways through the same job.</b> One state, one definition, one Store request.</p>
+          <div class="ways">
+            <button type="button" data-view-btn="trail">The regular path</button>
+            <button type="button" data-view-btn="whole">One long scroll</button>
+          </div>
+        </div>
       </div>
     </div>
     <aside class="rail dev-build-guide" data-guide-id="window-seat-hero" aria-label="Build guide · developer notes"></aside>
@@ -293,7 +336,6 @@
 
 <!-- ═════ PAGE 2 · STEP 1 · YOUR IDEA: YOUR INTENT ═════ -->
 <section class="step" id="s-intent" data-section="intent">
-  <p class="stepband">STEP 1 OF 6 · YOUR IDEA <span>page 2 of 7 · your intent</span></p>
   <div class="page">
     <div class="main">
       <div class="pad">
@@ -374,42 +416,58 @@
 
 <!-- ═════ PAGE 3 · STEP 2 · THE BENCH ═════ -->
 <section class="step" id="s-bench" data-section="bench">
-  <p class="stepband">STEP 2 OF 6 · THE BENCH <span>page 3 of 7 · turn the knobs</span></p>
   <div class="page">
     <div class="main">
       <div id="s-configure">
         <div class="pad" style="padding-bottom:10px">
-          <h1>The bench: turn the knobs</h1>
-          <p class="dim">The space is the reference. Three modules as one job: <b>left tower</b>, <b>center window seat</b>, <b>right tower</b>. Every control here is a knob made on your intent page. Turn one and the drawing, the parts and the boards move together.</p>
-          <p class="ws-h" style="margin-top:4px">THE BENCH RECEIVES</p>
-          <div class="chain" id="receives"></div>
-          <div id="history-note" class="card" hidden></div>
+          <h1>The bench</h1>
         </div>
         <div class="cfg">
-          <div class="ctl"><div id="ctlcol"></div><p class="backlink">A knob you need isn’t here? <a href="#s-intent" data-to="intent">Add it on your intent page</a>. The bench never adds one.</p></div>
-          <div>
+          <div class="stage">
             <div class="ws-draw"><svg id="elev" viewBox="0 0 520 400" role="img" aria-label="Window seat elevation: left tower, center window-seat module with upper storage, right tower"></svg></div>
-            <div class="box" style="margin:12px 0 0">
-              <h4>FINISHED SHELVES AND OPENINGS</h4>
-              <div class="bd fs" id="p-feat"></div>
+            <div class="matprice">
+              <div data-knob="WOOD"><p class="mat-h">Material</p><div id="species" class="swatches">
+                <button type="button" class="swatch" data-material="pine"><span class="dot" style="background:#C9A227"></span>Pine</button>
+                <button type="button" class="swatch" data-material="poplar"><span class="dot" style="background:#9FA678"></span>Poplar</button>
+                <button type="button" class="swatch" data-material="cherry"><span class="dot" style="background:#A6522C"></span>Cherry</button>
+                <button type="button" class="swatch" data-material="oak"><span class="dot" style="background:#C4A06A"></span>Oak</button>
+              </div></div>
+              <div data-knob="SPOTS" class="spotting">
+                <p class="mat-h">Drill spotting <span class="dim" style="font-weight:400;font-size:11px">3/16 in · <span id="v-spots">—</span></span></p>
+                <div class="spotgrid">
+                  <span>Tower sides <span class="dim">shelf pins</span></span>
+                  <div class="seg" id="c-spot-sides"><button type="button" data-k="">Off</button><button type="button" data-k="1.5">1½ in from edge</button><button type="button" data-k="2">2 in from edge</button></div>
+                  <span>Dividers <span class="dim">centered</span></span>
+                  <div class="seg" id="c-spot-div"><button type="button" data-k="">Off</button><button type="button" data-k="on">Centered</button></div>
+                </div>
+              </div>
+              <div class="pricebar" id="bench-money-box"><div id="bench-money" aria-live="polite"></div></div>
             </div>
-          </div>
-          <div>
-            <div class="card">
+            <div class="card" style="margin:12px 0 0">
               <p class="lb">THE BENCH PRODUCES</p>
               <div id="produces"></div>
             </div>
+            <div class="box" style="margin:12px 0 0">
+              <h4>STILL TO SETTLE</h4>
+              <div class="bd" id="p-cond"></div>
+            </div>
+            <p class="ws-h" style="margin:14px 0 6px">THE BENCH RECEIVES</p>
+            <div class="chain" id="receives"></div>
+          </div>
+          <div class="ctl"><div id="ctlcol"></div><p class="backlink">A knob you need isn’t here? <a href="#s-intent" data-to="intent">Add it on your intent page</a>. The bench never adds one.</p></div>
+        </div>
+        <div class="pad" style="padding-top:0">
+          <div id="history-note" class="card" hidden></div>
+          <div class="detail2">
             <div class="box">
               <h4>DEPTH: YOUR NUMBER, THE BOARDS</h4>
               <div class="bd fs" id="p-depth"></div>
             </div>
             <div class="box">
-              <h4>CONDITIONS: OURS TO SETTLE, NOT THE STORE’S</h4>
-              <div class="bd" id="p-cond"></div>
+              <h4>FINISHED SHELVES AND OPENINGS</h4>
+              <div class="bd fs" id="p-feat"></div>
             </div>
           </div>
-        </div>
-        <div class="pad" style="padding-top:0">
           <div class="box">
             <h4>FROM YOUR INTENT TO PARTS, FEATURES AND OPERATIONS</h4>
             <div class="bd scroll-x"><table class="pt" id="xform"></table></div>
@@ -434,7 +492,7 @@
         <div class="actions" style="margin-top:0">
           <button type="button" class="trail-only" data-to="intent">← Your intent</button>
           <span class="fine" id="bench-gate">—</span>
-          <button class="go push" type="button" id="btn-ask">ASK THE STORE →</button>
+          <button class="go push" type="button" id="btn-ask">SEE THE STORE’S ANSWER →</button>
         </div>
       </div>
     </div>
@@ -602,7 +660,7 @@ const INTENT_START={
        {t:'Wall bows out at the middle',on:false},
        {t:'Baseboard runs through the opening',on:true},
        {t:'Obstruction in the opening',on:false}],
-  added:{front:false,spots:false,xspot:false,screws:false},
+  added:{front:false,xspot:false,screws:false},
   kept:{label:false,inspect:false,bundle:true,pack:false,other:false},
   otherText:''
 };
@@ -610,10 +668,8 @@ let I=clone(INTENT_START);
 
 /* Open questions: carried with the job, owned elsewhere, never answered by this page or by the Store. */
 const OPEN_QUESTIONS=Object.freeze([
-  {k:'SEAT_LOAD',t:'A person sits on the seat',owner:'QUALIFIED PERSON',status:'UNRESOLVED',
-   d:'Her words say “a seat you can sit on”. Whether the seat board and its span carry a person is a question for a qualified person. This app doesn’t answer it, and the Store doesn’t either. It travels with the job, open, to the end.'},
-  {k:'ASSEMBLY',t:'How it goes together on site',owner:'YOU / QUALIFIED PERSON',status:'DEFERRED',
-   d:'The towers attach to the outside faces of the center module on site. Connections, fastening to the wall and anchoring are not defined here. Screws you add as a knob are merchandise you picked, not a connection design.'},
+  {k:'ASSEMBLY',t:'How it goes together on site',owner:'YOU',status:'YOURS',
+   d:'The towers attach to the outside faces of the center module on site. How you fasten them, and fix it to the wall, is your call.'},
   {k:'HEX_TRIM',t:'The hex window trim in the picture',owner:'YOU',status:'CONTEXT',
    d:'The picture shows angled trim around the window. The sketch doesn’t. It stays context; the opening is defined as the sketch draws it. An angled or curved aperture would be a separate capability question, asked separately.'}
 ]);
@@ -649,14 +705,14 @@ const KNOBS=[
   {id:'SHL',label:'Left tower shelves',group:'TOWERS',made:'SKETCH',from:'sketch: 4',start:SKETCH.towerShelves,val:()=>P.SH.LEFT,to:'left shelves and their positions'},
   {id:'SHR',label:'Right tower shelves',group:'TOWERS',made:'SKETCH',from:'sketch: 4',start:SKETCH.towerShelves,val:()=>P.SH.RIGHT,to:'right shelves and their positions'},
   {id:'WOOD',label:'Wood',group:'WOOD',made:'HAND',from:'not on the sketch · entered: select pine',start:'pine',val:()=>woodName(P.wood),to:'the material of every board'},
+  {id:'SPOTS',label:'Drill spotting',group:'SPOTS',made:'HAND',from:'not on the sketch · entered: off',start:'off',val:()=>spotsText(),
+   to:'3/16 in spots: tower sides at the shelf heights, 1½ or 2 in from the edge, for shelf pins; and centered where each divider meets the boards above and below it'},
   {id:'FRONT',opt:'front',label:'Front board below the seat',group:'CENTER',made:'ADDED',from:'added by hand',start:'yes',val:()=>P.front?'yes':'no',
    needs:[],to:'one more part, center width × 3½ in',add:'A board across the front, under the seat.'},
-  {id:'SPOTS',opt:'spots',label:'Shelf-pin spot facing',group:'FEATURES',made:'ADDED',from:'added by hand',start:'placement required',val:()=>P.spots.rule?spotRule(P.spots).label:'placement not chosen',
-   needs:['where across the board'],to:'a 3/16 in spot at every tower shelf, on each board of each tower side',add:'A 3/16 in spot on the tower sides at every shelf, to drill for shelf pins.'},
   {id:'XSPOT',opt:'xspot',label:'One more spot, on a part you pick',group:'FEATURES',made:'ADDED',from:'added by hand',start:'part, distance, placement required',val:()=>P.xspot.target?(P.xspot.target+' · '+(P.xspot.offset||'?')+' in'):'not placed yet',
    needs:['which part','distance from its end','where across the board'],to:'one 3/16 in spot on each board of that part',add:'A single extra spot anywhere you name.'},
   {id:'SCREWS',opt:'screws',label:'Wood screws',group:'HARDWARE',made:'ADDED',from:'added by hand',start:'gauge, length, finish, count required',val:()=>screwsText(),
-   needs:['gauge','length','finish','how many'],to:'a hardware requirement sent to the Store; Store picks the item or refuses',add:'Screws for assembly, stated as a requirement. Merchandise you pick, not a connection design.'}
+   needs:['gauge','length','finish','how many'],to:'a hardware requirement sent to the Store; Store picks the item or refuses',add:'Screws for assembly, stated as a requirement. The Store picks its own item.'}
 ];
 const KEPT_ASKS=[
   {k:'label',t:'Label every part'},{k:'inspect',t:'Inspect the finished sizes'},{k:'bundle',t:'Bundle by module'},
@@ -668,7 +724,7 @@ const has=id=>manifest().some(k=>k.id===id);
 /* The bench's values: one per knob. Starting values come from the knob table above. */
 const START={wood:'pine',H:94,W:{LEFT:24,CENTER:55,RIGHT:24},SH:{LEFT:4,RIGHT:4},
   seat:22,upperH:14,bays:2,cub:2,depth:14,runsSet:null,gap:0,
-  front:true,spots:{rule:null,inset:null},xspot:{target:'',offset:'',place:''},
+  front:true,spots:{sides:null,dividers:false},xspot:{target:'',offset:'',place:''},
   screws:{gauge:'',lengthIn:'',finish:'',qty:''}};
 let P=clone(START);
 let rev={n:1};
@@ -782,16 +838,29 @@ function boardFor(w){
   return {nominalW:wider.n,actual:wider.a,mill:r3(w)};
 }
 
+/* Drill spotting, both off to start. Tower sides: at every shelf height, inset 1½ or 2 in from the edge, to line up
+   with shelf-pin hardware. Dividers: a centered spot where each divider meets the board above and below it. */
+const SIDE_PLACES={'1.5':SPOT_RULES.find(x=>x.k==='1.5'),'2':SPOT_RULES.find(x=>x.k==='2')};
+const CENTERED=SPOT_RULES.find(x=>x.k==='CENTER');
+function spotsText(){const a=[];if(P.spots.sides)a.push('tower sides, '+SIDE_PLACES[P.spots.sides].label);if(P.spots.dividers)a.push('dividers, centered');return a.length?a.join(' · '):'off'}
 function spotFor(featureId,xIn,place){const s={featureId,xIn:r3(xIn),acrossWidthRule:place.rule};if(place.inset!=null)s.insetFromEdgeIn=place.inset;return s}
 function spotsByRun(def){
   const out={};
-  const place=has('SPOTS')&&P.spots.rule?spotRule(P.spots):null;
+  const place=P.spots.sides?SIDE_PLACES[P.spots.sides]:null;
   if(place){
     [['ASM-LEFT',def.left],['ASM-RIGHT',def.right]].forEach(([asm,tw])=>{
       def.feats.filter(f=>f.asm===asm&&f.role==='UPRIGHT').forEach(f=>{
         f.runs.forEach(r=>{tw.shelfDatums.forEach((y,i)=>{(out[r.id]=out[r.id]||[]).push(spotFor(r.id+'-S'+('0'+(i+1)).slice(-2),y,place))})});
       });
     });
+  }
+  if(P.spots.dividers){
+    const at=(role,below,above)=>def.feats.filter(f=>f.role===role).forEach((d,i)=>{
+      const cx=d.geom.x+d.geom.w/2;
+      [below,above].forEach(r=>{const h=def.feats.find(f=>f.asm==='ASM-CENTER'&&f.role===r);if(!h)return;
+        h.runs.forEach(run=>{(out[run.id]=out[run.id]||[]).push(spotFor(run.id+'-D'+role.charAt(0)+(i+1),cx-h.geom.x,CENTERED))})});
+    });
+    at('UPPER-DIVIDER','UPPER-SHELF','TOP');at('LOWER-DIVIDER','BOTTOM','SEAT');
   }
   if(has('XSPOT')&&P.xspot.target&&parse(P.xspot.offset)!=null&&P.xspot.place){
     const f=def.feats.find(x=>x.id===P.xspot.target),pl=SPOT_RULES.find(s=>s.k===P.xspot.place);
@@ -863,20 +932,17 @@ function conditions(def){
   if(M.narrow!=null&&def.W+P.gap*2>M.narrow)c.push({t:'Wider than your controlling width',d:'three modules plus clearance measure '+inch(def.W+P.gap*2)+'; the narrowest width you marked controlling is '+inch(M.narrow),block:true,at:'bench'});
   if(M.low!=null&&P.H>M.low)c.push({t:'Taller than your controlling height',d:inch(P.H)+' is taller than the lowest height you marked controlling, '+inch(M.low),block:true,at:'bench'});
   if(M.depth!=null&&P.depth>M.depth)c.push({t:'Deeper than your controlling depth',d:inch(P.depth)+' is deeper than the '+inch(M.depth)+' you marked controlling',block:true,at:'bench'});
-  if(has('SPOTS')&&!P.spots.rule)c.push({t:'Spot facing needs a placement',d:'pick where across the board the spots go. Nothing is assumed.',block:true,at:'bench'});
   if(has('XSPOT')){
     const f=def.feats.find(x=>x.id===P.xspot.target),off=parse(P.xspot.offset);
     if(!P.xspot.target||off==null||!P.xspot.place)c.push({t:'The extra spot needs a part, a distance and a placement',d:'size is fixed at 3/16 in wide and 3/16 in deep.',block:true,at:'bench'});
     else if(!f)c.push({t:'The extra spot’s part isn’t in this version',d:P.xspot.target+' no longer exists. The request is kept and marked; it is not moved to another part.',block:true,at:'bench'});
     else if(!(off>0&&off<f.len))c.push({t:'The extra spot is off the part',d:fmt(off)+' in is not inside a '+fmt(f.len)+' in part',block:true,at:'bench'});
   }
-  if(has('SCREWS'))c.push(screwsLine()?{t:'Wood screws: sent as a requirement',d:'gauge, length, finish and count travel on the Store request. Store picks its own item or refuses. #8 may be refused if it is not stocked.',block:false}
-    :{t:'The screws need a gauge, a length, a finish and a count',d:'state all four before the Store is asked. Incomplete screws block the ask.',block:true,at:'bench'});
+  if(has('SCREWS')&&!screwsLine())c.push({t:'The screws need a gauge, a length, a finish and a count',d:'state all four before the Store is asked. Incomplete screws block the ask.',block:true,at:'bench'});
   if(I.kept.other&&!I.otherText.trim())c.push({t:'“Something else” needs a description',d:'say what you’re asking for, on your intent page',block:true,at:'intent'});
   if(M.narrow==null)c.push({t:'Fit against the opening not checked',d:'no width is marked controlling, so the job isn’t compared to the opening. The parts are still defined.',block:false});
   if(M.checking)c.push({t:M.checking+' measured number'+(M.checking===1?'':'s')+' still need checking',d:'not compared against the job until you mark them. They travel, marked.',block:false});
-  c.push({t:'A person sits on the seat',d:'open, for a qualified person. Not answered here or by the Store.',block:false});
-  c.push({t:'Assembly on site',d:'connections and anchoring are not defined here.',block:false});
+  c.push({t:'Assembly on site',d:'yours: how the towers fasten to the center and the unit to the wall.',block:false});
   return c;
 }
 
@@ -902,10 +968,9 @@ function renderIntent(def,req,cond){
   $('other-wrap').hidden=!I.kept.other;
   if(document.activeElement!==$('other-text'))$('other-text').value=I.otherText;
   $('owners').innerHTML=[
-    ['You','her idea, the measurements and which ones control, taste, every knob value, the wood, what to ask for'],
+    ['You','her idea, the measurements and which ones control, taste, every knob value, the wood, what to ask for, and how it goes together on site'],
     ['System (this page)','derived values by the stated rules: overall width, board widths, shelf positions, part lengths, spot locations, the version identity'],
-    ['The Store','board and its length, stock, whether a cut, mill or spot fits its machine, machine time, price, the item for a hardware requirement, refusals and their reasons'],
-    ['A qualified person','whether the seat carries a person; how it’s fastened on site']
+    ['The Store','board and its length, stock, whether a cut, mill or spot fits its machine, machine time, price, the item for a hardware requirement, refusals and their reasons']
   ].map(r=>'<div><b>'+r[0]+'</b><br><span class="dim">'+r[1]+'</span></div>').join('');
   const intentBlocks=cond.filter(c=>c.block&&c.at==='intent');
   $('intent-check').innerHTML=[
@@ -913,7 +978,7 @@ function renderIntent(def,req,cond){
     ['Sources kept',SOURCES.length+' kept as context','ok'],
     ['Controlling measurements',I.facts.filter(f=>f.sts===0&&parse(f.v)!=null).length+' marked',''],
     ['Knobs made',manifest().length+' ('+manifest().filter(k=>k.made==='ADDED').length+' added by hand)','ok'],
-    ['Open questions',OPEN_QUESTIONS.length+' carried, owned elsewhere','warn'],
+    ['Open questions',OPEN_QUESTIONS.length+' carried with the job','warn'],
     ['Kept, not sent',keptList().length?keptList().map(k=>k.t).join('; '):'none',''],
     ['Required facts missing here',intentBlocks.length?intentBlocks.map(c=>c.t).join('; '):'none',intentBlocks.length?'no':'ok']
   ].map(r=>'<div class="ln"><span>'+r[0]+' <span class="dim">: '+esc(r[1])+'</span></span><span class="chip '+r[2]+'">'+(r[2]==='no'?'MISSING':r[2]==='warn'?'CARRIED':'OK')+'</span></div>').join('')
@@ -922,7 +987,10 @@ function renderIntent(def,req,cond){
 }
 
 /* ═════ PAGE 3 · THE BENCH: controls built only from the knob manifest ═════ */
-const lab=(t,id,note)=>'<div class="ws-lab"><span>'+t+(note?' <span class="dim" style="font-weight:400;font-size:10.5px">'+note+'</span>':'')+'</span><span id="'+id+'">—</span></div>';
+/* Every slider has one typed box on its label row: type an exact number (decimal or fraction), Enter or leave the box.
+   The slider's own range and step apply to what's typed. Counts take whole numbers. */
+const lab=(t,id,note,unit)=>'<div class="ws-lab"><label for="'+id+'">'+t+(note?' <span class="dim" style="font-weight:400;font-size:10.5px">'+note+'</span>':'')+'</label>'
+  +'<span class="exact"><input type="text" inputmode="decimal" id="'+id+'" data-exact="'+id.replace(/^v-/,'c-')+'" aria-label="'+esc(t)+', exact'+'" autocomplete="off"><i>'+(unit==null?'in':unit)+'</i></span></div>';
 const rng=(id,min,max,step,val,label)=>'<input type="range" id="'+id+'" data-knob="'+label.k+'" aria-label="'+esc(label.t)+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'">';
 function controls(){
   let h='';
@@ -937,7 +1005,7 @@ function controls(){
     +lab('Clearance each side','v-gap')+rng('c-gap',0,4,0.25,P.gap,{k:'GAP',t:'Clearance each side'})
     +'</div>';
   h+='<div class="grp" id="depth-panel"><p class="gh">DEPTH</p>'
-    +'<div class="ws-lab"><span>Depth you want</span><span id="v-d" style="font-size:15px;font-weight:700;color:var(--accent)">—</span></div>'
+    +lab('Depth you want','v-d')
     +'<div class="depthrow"><button type="button" data-depth="-0.25" aria-label="A quarter inch shallower">−¼</button>'
     +rng('c-d',6,24,0.25,P.depth,{k:'D',t:'Depth'})
     +'<button type="button" data-depth="0.25" aria-label="A quarter inch deeper">+¼</button></div>'
@@ -948,31 +1016,21 @@ function controls(){
   h+='<div class="grp"><p class="gh">CENTER WINDOW SEAT</p>'
     +lab('Seat height','v-seat')+rng('c-seat',12,26,1,P.seat,{k:'SEAT',t:'Seat height'})
     +lab('Upper storage','v-upperH',' clear')+rng('c-upperH',8,30,1,P.upperH,{k:'UPPER',t:'Upper storage height'})
-    +lab('Upper bays','v-bays')+rng('c-bays',1,4,1,P.bays,{k:'BAYS',t:'Upper bays'})
-    +lab('Cubbies under the seat','v-cub')+rng('c-cub',1,6,1,P.cub,{k:'CUB',t:'Cubbies'})
+    +lab('Upper bays','v-bays',null,'')+rng('c-bays',1,4,1,P.bays,{k:'BAYS',t:'Upper bays'})
+    +lab('Cubbies under the seat','v-cub',null,'')+rng('c-cub',1,6,1,P.cub,{k:'CUB',t:'Cubbies'})
     +(K('FRONT')?'<label class="cbx" data-knob="FRONT"><input type="checkbox" id="c-front"'+(P.front?' checked':'')+'><span>Front board below the seat</span></label>':'')
     +'</div>';
   h+='<div class="grp"><p class="gh">TOWERS</p>'
-    +lab('Left tower shelves','v-shL')+rng('c-shL',0,8,1,P.SH.LEFT,{k:'SHL',t:'Left tower shelves'})
-    +lab('Right tower shelves','v-shR')+rng('c-shR',0,8,1,P.SH.RIGHT,{k:'SHR',t:'Right tower shelves'})
+    +lab('Left tower shelves','v-shL',null,'')+rng('c-shL',0,8,1,P.SH.LEFT,{k:'SHL',t:'Left tower shelves'})
+    +lab('Right tower shelves','v-shR',null,'')+rng('c-shR',0,8,1,P.SH.RIGHT,{k:'SHR',t:'Right tower shelves'})
     +'</div>';
-  if(K('SPOTS')||K('XSPOT')){
-    h+='<div class="grp"><p class="gh">SPOTS</p>';
-    if(K('SPOTS'))h+='<div data-knob="SPOTS"><p style="margin:0 0 4px;font-size:11.5px"><b>Shelf-pin spot facing</b><br><span class="dim">A 3/16 in spot, 3/16 in deep, on each board of each tower side at every shelf. It marks the hole; you drill for the pin.</span></p>'
-      +'<p class="ws-h" style="margin:4px 0 4px">WHERE ACROSS THE BOARD</p>'
-      +'<div class="seg" id="c-spot-place">'+SPOT_RULES.map(s=>'<button type="button" data-k="'+s.k+'">'+(s.k==='CENTER'?'Center':s.k==='1.5'?'1½ in':'2 in')+'</button>').join('')+'</div>'
-      +'<p class="dim" id="v-spots" style="font-size:10.5px;margin:4px 0 8px">—</p></div>';
+  if(K('XSPOT')){
+    h+='<div class="grp"><p class="gh">ONE MORE SPOT</p>';
     if(K('XSPOT'))h+='<div data-knob="XSPOT"><p style="margin:0 0 4px;font-size:11.5px"><b>One more spot</b></p><div class="opdet"><select class="sel" id="xs-target" aria-label="Which part" style="width:100%"></select>'
       +'<input class="sel" id="xs-off" placeholder="in from its end" value="'+esc(P.xspot.offset)+'" style="width:110px" aria-label="Distance from the end">'
       +'<select class="sel" id="xs-place" aria-label="Where across the board"><option value="">across the board…</option>'+SPOT_RULES.map(s=>'<option value="'+s.k+'"'+(P.xspot.place===s.k?' selected':'')+'>'+s.label+'</option>').join('')+'</select></div></div>';
     h+='</div>';
   }
-  h+='<div class="box" style="margin:0 0 10px" id="bench-money-box"><h4>THE STORE’S ANSWER FOR THIS VERSION</h4><div class="bd" id="bench-money"></div></div>'
-    +'<div class="grp" data-knob="WOOD"><p style="margin:0 0 6px;font-weight:600">Material</p><div id="species" class="swatches">'
-    +'<button class="swatch" data-material="pine"><span class="dot" style="background:#C9A227"></span>Pine</button>'
-    +'<button class="swatch" data-material="poplar"><span class="dot" style="background:#9FA678"></span>Poplar</button>'
-    +'<button class="swatch" data-material="cherry"><span class="dot" style="background:#A6522C"></span>Cherry</button>'
-    +'<button class="swatch" data-material="oak"><span class="dot" style="background:#C4A06A"></span>Oak</button></div></div>';
   if(K('SCREWS'))h+='<div class="grp" data-knob="SCREWS"><p class="gh">WOOD SCREWS</p>'
     +'<div class="opdet"><select class="sel" id="sc-gauge" aria-label="Gauge"><option value="">gauge…</option>'+SCREW_GAUGES.map(g=>'<option'+(P.screws.gauge===g?' selected':'')+'>'+g+'</option>').join('')+'</select>'
     +'<input class="sel" id="sc-len" placeholder="length, in" value="'+esc(P.screws.lengthIn)+'" style="width:90px" aria-label="Length in inches">'
@@ -981,12 +1039,14 @@ function controls(){
     +'<p class="dim" style="font-size:10.5px;margin:4px 0 0">A requirement, not an item number. <b>Sent with the ask:</b> Store picks its own item or refuses.</p></div>';
   h+='<button type="button" class="mini2" id="btn-reset" style="width:100%;font-size:10.5px;letter-spacing:.05em;padding:6px 8px;color:var(--text-2)">RESET THE KNOBS TO WHERE THEY START</button>';
   $('ctlcol').innerHTML=h;
-  const on=(id,fn)=>{const e=$(id);if(e)e.oninput=function(){fn(this);changed()}};
+  const setters={};
+  const on=(id,fn)=>{setters[id]=fn;const e=$(id);if(e)e.oninput=function(){fn(this);changed()}};
   on('c-H',e=>{P.H=+e.value});on('c-wL',e=>{P.W.LEFT=+e.value});on('c-wC',e=>{P.W.CENTER=+e.value});on('c-wR',e=>{P.W.RIGHT=+e.value});
   on('c-d',e=>{P.depth=+e.value});on('c-gap',e=>{P.gap=+e.value});on('c-seat',e=>{P.seat=+e.value});on('c-upperH',e=>{P.upperH=+e.value});
   on('c-bays',e=>{P.bays=+e.value});on('c-cub',e=>{P.cub=+e.value});on('c-shL',e=>{P.SH.LEFT=+e.value});on('c-shR',e=>{P.SH.RIGHT=+e.value});
   if($('c-front'))$('c-front').onchange=function(){P.front=this.checked;changed()};
-  if($('c-spot-place'))$('c-spot-place').onclick=e=>{const b=e.target.closest('button');if(!b)return;const s=SPOT_RULES.find(x=>x.k===b.dataset.k);P.spots={rule:s.rule,inset:s.inset};changed()};
+  $('c-spot-sides').onclick=e=>{const b=e.target.closest('button');if(!b)return;P.spots.sides=b.dataset.k||null;changed()};
+  $('c-spot-div').onclick=e=>{const b=e.target.closest('button');if(!b)return;P.spots.dividers=b.dataset.k==='on';changed()};
   if($('xs-off'))$('xs-off').oninput=function(){P.xspot.offset=this.value;changed()};
   if($('xs-place'))$('xs-place').onchange=function(){P.xspot.place=this.value;changed()};
   if($('sc-gauge')){$('sc-gauge').onchange=function(){P.screws.gauge=this.value;changed()};$('sc-finish').onchange=function(){P.screws.finish=this.value;changed()};
@@ -996,28 +1056,48 @@ function controls(){
   $('c-runs').onclick=e=>{const b=e.target.closest('button');if(!b)return;P.runsSet=b.dataset.n==='derived'?null:+b.dataset.n;changed()};
   $$('#species [data-material]').forEach(b=>b.onclick=()=>{P.wood=b.dataset.material;changed()});
   $('btn-reset').onclick=()=>{P=clone(START);controls();changed()};
+  /* A typed number is the number: 60.5 stays 60.5. The slider is only a quicker way to move it. A number outside the
+     knob's range, or a fraction of a count, is not applied and the box says why; nothing is changed behind your back. */
+  const COUNTS=['c-bays','c-cub','c-shL','c-shR'];
+  $$('#ctlcol [data-exact]').forEach(box=>{
+    const note=msg=>{const lab=box.closest('.ws-lab');let p=lab.nextElementSibling;
+      if(!p||!p.classList.contains('exactnote')){if(!msg)return;p=document.createElement('p');p.className='exactnote';lab.after(p)}
+      if(msg){p.textContent=msg;box.classList.add('bad')}else{p.remove();box.classList.remove('bad')}};
+    const commit=()=>{const r=$(box.dataset.exact),v=parse(box.value);
+      if(!r)return;
+      if(v==null){note('Type a number, like 60.5 or 60 1/2.');return}
+      const lo=+r.min,hi=+r.max,count=COUNTS.includes(r.id);
+      if(count&&!Number.isInteger(v)){note('A whole number, from '+lo+' to '+hi+'.');return}
+      if(v<lo||v>hi){note('This knob runs from '+fmt(lo)+' to '+fmt(hi)+(count?'':' in')+'. Not applied.');return}
+      note(null);setters[r.id]({value:v});changed();box.value=fmt(v)};
+    box.onchange=commit;box.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();commit();box.select()}};
+    box.onfocus=()=>box.select()});
   lastTargets='';
 }
 let lastTargets='';
 function syncControls(def){
   const set=(id,v)=>{const e=$(id);if(e)e.textContent=v};
-  set('v-H',inch(P.H));set('v-wL',inch(P.W.LEFT));set('v-wC',inch(P.W.CENTER));set('v-wR',inch(P.W.RIGHT));
+  /* Any applied change sets every box back to the knob's real value; an unapplied number's note goes with it. */
+  $$('#ctlcol .exactnote').forEach(p=>p.remove());$$('#ctlcol [data-exact].bad').forEach(e=>e.classList.remove('bad'));
+  const box=(id,v)=>{const e=$(id);if(e&&document.activeElement!==e)e.value=fmt(v)};
+  box('v-H',P.H);box('v-wL',P.W.LEFT);box('v-wC',P.W.CENTER);box('v-wR',P.W.RIGHT);
   set('v-W',fmt(def.W)+' in overall');set('v-Wb','derived: '+fmt(P.W.LEFT)+' + '+fmt(P.W.CENTER)+' + '+fmt(P.W.RIGHT)+', never typed twice');
-  set('v-d',inch(P.depth));set('v-gap',inch(P.gap));set('v-seat',inch(P.seat));set('v-upperH',inch(P.upperH));
-  set('v-bays',P.bays);set('v-cub',P.cub);set('v-shL',P.SH.LEFT);set('v-shR',P.SH.RIGHT);
+  box('v-d',P.depth);box('v-gap',P.gap);box('v-seat',P.seat);box('v-upperH',P.upperH);
+  box('v-bays',P.bays);box('v-cub',P.cub);box('v-shL',P.SH.LEFT);box('v-shR',P.SH.RIGHT);
   set('v-runs',def.runs+(P.runsSet==null?' (by the rule)':' (set by hand)'));
   const b=boardFor(def.runW);
   $('v-runw').innerHTML=!b?'<b>No 1× board is that wide.</b> Add a board across the depth.'
     :b.mill!=null?'Each board: a <b>1×'+b.nominalW+'</b> ('+fmt(b.actual)+' in) <b>edge-milled to '+inch(b.mill)+'</b>, '+fmt(r3(b.actual-b.mill))+' in off one edge. Whether the mill takes that much, and its time and price, are the Store’s answer.'
     :'Each board: a <b>1×'+b.nominalW+'</b> as it comes, '+inch(b.actual)+'. No milling.';
-  if($('v-spots')){const pl=P.spots.rule?spotRule(P.spots):null;const n=(P.SH.LEFT+P.SH.RIGHT)*2*def.runs;
-    set('v-spots',pl?n+' spots: '+(P.SH.LEFT+P.SH.RIGHT)+' shelves × 2 sides × '+def.runs+' board'+(def.runs===1?'':'s')+', '+pl.label+'.':'Pick a placement. Nothing is assumed.');}
+  {const sp=spotsByRun(def),n=Object.values(sp).reduce((k,a)=>k+a.length,0);
+    const nd=def.feats.filter(f=>/DIVIDER/.test(f.role)).length;
+    set('v-spots',n?n+' spots':(P.spots.dividers&&!nd?'no dividers in this version':'off'));}
   [['c-H',P.H],['c-wL',P.W.LEFT],['c-wC',P.W.CENTER],['c-wR',P.W.RIGHT],['c-d',P.depth],['c-gap',P.gap],['c-seat',P.seat],['c-upperH',P.upperH],
    ['c-bays',P.bays],['c-cub',P.cub],['c-shL',P.SH.LEFT],['c-shR',P.SH.RIGHT]].forEach(([id,v])=>{const e=$(id);if(e&&e.value!==String(v))e.value=String(v)});
   if($('c-front'))$('c-front').checked=P.front;
   $$('#c-runs button').forEach(x=>{const on=x.dataset.n==='derived'?P.runsSet==null:(P.runsSet!=null&&+x.dataset.n===P.runsSet);x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
-  const pl=P.spots.rule?spotRule(P.spots):null;
-  $$('#c-spot-place button').forEach(x=>{const on=!!pl&&x.dataset.k===pl.k;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
+  $$('#c-spot-sides button').forEach(x=>{const on=(x.dataset.k||null)===P.spots.sides;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
+  $$('#c-spot-div button').forEach(x=>{const on=(x.dataset.k==='on')===!!P.spots.dividers;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
   $$('#species [data-material]').forEach(x=>{const on=x.dataset.material===P.wood;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
   const sel=$('xs-target');
   if(sel){const ids=def.feats.map(f=>f.id).join(',');
@@ -1193,7 +1273,7 @@ function render(){
     +kv('Features',req.spotCount?req.spotCount+' spots':'none')
     +kv('Operations',ops.length)+'<p class="small dim" style="margin:0 0 6px">'+ops.join(' · ')+'</p>'
     +kv('Material','1× '+woodName(P.wood).toLowerCase()+(b?', 1×'+b.nominalW:''))
-    +kv('Hardware',has('SCREWS')?screwsText()+' (sent as a requirement)':'none')
+    +kv('Hardware',has('SCREWS')?screwsText()+' (the Store picks the item)':'none')
     +'<p class="dim small" style="margin:8px 0 0">Board lengths, stock, time and price come back from the Store. The bench doesn’t guess them.</p>';
 
   /* depth: your number versus the boards */
@@ -1203,13 +1283,13 @@ function render(){
   const pick=[];alts.forEach(x=>{if(pick.length<2&&!pick.some(p=>p.depth===x.depth))pick.push(x)});
   $('p-depth').innerHTML=kv('You asked for',inch(P.depth)+' deep')+kv('Made from',def.runs+' × '+inch(def.runW)+' boards')
     +(b?(b.mill==null?'<p style="margin:6px 0 0"><b>Exact board width.</b> Every board is a 1×'+b.nominalW+' as it comes. No milling.</p>'
-      :'<p style="margin:6px 0 0"><b>Edge-milled to '+inch(b.mill)+'.</b> Each 1×'+b.nominalW+' ('+fmt(b.actual)+' in) runs through the edge mill against the fence before its parts are cut. Any depth works this way; the Store says whether its mill takes it, and prices the time.</p>')
+      :'<p style="margin:6px 0 0"><b>Edge-milled to '+inch(b.mill)+'.</b> Each 1×'+b.nominalW+' ('+fmt(b.actual)+' in) runs through the edge mill against the fence before its parts are cut. That’s how a depth between board widths is made. The Store says whether its mill can take that much off, and prices the time.</p>')
       :'<p style="margin:6px 0 0;color:var(--no)"><b>No 1× board is that wide.</b></p>')
     +'<p class="dim" style="margin:6px 0 0">Your number stays yours. These land on board widths exactly, if you want them:</p>'
     +pick.map((x,i)=>'<div class="ln" style="margin-top:6px"><span><b>'+inch(x.depth)+'</b> <span class="dim">: '+x.runs+' × 1×'+x.d.n+'</span></span><button type="button" class="xbtn" data-alt="'+i+'">USE '+fmt(x.depth)+' IN</button></div>').join('');
   $$('#p-depth [data-alt]').forEach(btn=>btn.onclick=()=>{const x=pick[+btn.dataset.alt];P.depth=x.depth;P.runsSet=x.runs===derivedRuns(x.depth)?null:x.runs;changed()});
 
-  $('p-cond').innerHTML=cond.map(c=>'<div class="ln"><span><b>'+c.t+'</b> <span class="dim">'+c.d+'</span></span><span class="chip '+(c.block?'no':'warn')+'">'+(c.block?(c.at==='intent'?'FIX ON INTENT':'BLOCKS'):'TRAVELS')+'</span></div>').join('');
+  $('p-cond').innerHTML=cond.map(c=>'<div class="ln"><span><b>'+c.t+'</b> <span class="dim">'+c.d+'</span></span><span class="chip '+(c.block?'no':'')+'">'+(c.block?(c.at==='intent'?'FIX ON INTENT':'NEEDED FIRST'):'YOURS · NOTED')+'</span></div>').join('');
 
   /* intent → parts, features, operations */
   const sideCount=def.feats.filter(f=>f.role==='UPRIGHT').length,shelfCount=def.feats.filter(f=>f.role==='SHELF').length;
@@ -1222,7 +1302,7 @@ function render(){
     ['Seat height · cubbies',inch(P.seat)+' · '+P.cub,'seat position; '+(P.cub-1)+' cubby divider'+(P.cub-1===1?'':'s')+' at '+inch(Math.max(P.seat-2*T,0)),'PARTS']
   ];
   if(has('FRONT'))rows.push(['Front board',P.front?'yes':'no',P.front?'one 1×4 as it comes, '+inch(P.W.CENTER)+' long':'no part','PARTS']);
-  if(has('SPOTS'))rows.push(['Shelf-pin spot facing',P.spots.rule?spotRule(P.spots).label:'placement missing',P.spots.rule?((P.SH.LEFT+P.SH.RIGHT)*2*def.runs)+' spots at the shelf positions, on the tower sides':'nothing until placed','FEATURES · OPERATION']);
+  rows.push(['Drill spotting',spotsText(),req.spotCount?req.spotCount+' spots, 3/16 in wide × 3/16 in deep':'no spots','FEATURES · OPERATION']);
   if(has('XSPOT'))rows.push(['One more spot',P.xspot.target||'not placed',P.xspot.target?'one spot on each board of '+P.xspot.target:'nothing until placed','FEATURE · OPERATION']);
   rows.push(['Wood',woodName(P.wood),'the material of every cut package','MATERIAL']);
   if(has('SCREWS'))rows.push(['Wood screws',screwsText(),'a hardware requirement sent to the Store; Store picks the item or refuses','HARDWARE · REQUIREMENT']);
@@ -1230,13 +1310,14 @@ function render(){
   $('xform').innerHTML='<thead><tr><th>From intent</th><th>Now</th><th>Makes</th><th>Kind</th></tr></thead><tbody>'
     +rows.map(r=>'<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td>'+r[2]+'</td><td><span class="chip">'+r[3]+'</span></td></tr>').join('')+'</tbody>';
 
-  /* request register: nothing drops off the list */
+  /* request register: nothing drops off the list. "Included" until this exact version has gone to the Store. */
+  const IN=answerCurrent()?'SENT':'INCLUDED';
   const reg=[];
-  if(b&&b.mill!=null)reg.push(['Edge-mill 1×'+b.nominalW+' boards to '+fmt(b.mill)+' in wide','the whole board, against the fence, before its parts are cut','SENT','ok']);
-  reg.push(['Cut every part to length',def.boards.length+' boards, in '+req.definition.cutPackages.length+' package'+(req.definition.cutPackages.length===1?'':'s'),'SENT','ok']);
-  if(has('SPOTS'))reg.push(['Shelf-pin spot facing',P.spots.rule?((P.SH.LEFT+P.SH.RIGHT)*2*def.runs)+' spots, '+spotRule(P.spots).label:'needs a placement',P.spots.rule?'SENT':'NEEDS AN ANSWER',P.spots.rule?'ok':'no']);
-  if(has('XSPOT')){const ok=!cond.some(c=>c.block&&/extra spot/.test(c.t));reg.push(['One more spot',ok?P.xspot.target+' · '+P.xspot.offset+' in from its end':'needs a part, a distance and a placement',ok?'SENT':'NEEDS AN ANSWER',ok?'ok':'no'])}
-  if(has('SCREWS')){const sl=(req.definition.itemLines||[]).find(l=>l.lineId==='SCREWS');reg.push(['Wood screws',sl?screwsText()+', sent as a requirement: gauge, length, finish and count. Store picks its own item or refuses':'needs a gauge, a length, a finish and a count',sl?'SENT':'NEEDS AN ANSWER',sl?'ok':'no'])}
+  if(b&&b.mill!=null)reg.push(['Edge-mill 1×'+b.nominalW+' boards to '+fmt(b.mill)+' in wide','the whole board, against the fence, before its parts are cut',IN,'ok']);
+  reg.push(['Cut every part to length',def.boards.length+' boards, in '+req.definition.cutPackages.length+' package'+(req.definition.cutPackages.length===1?'':'s'),IN,'ok']);
+  if(req.spotCount)reg.push(['Drill spotting',req.spotCount+' spots: '+spotsText(),IN,'ok']);
+  if(has('XSPOT')){const ok=!cond.some(c=>c.block&&/extra spot/.test(c.t));reg.push(['One more spot',ok?P.xspot.target+' · '+P.xspot.offset+' in from its end':'needs a part, a distance and a placement',ok?IN:'NEEDS AN ANSWER',ok?'ok':'no'])}
+  if(has('SCREWS')){const sl=(req.definition.itemLines||[]).find(l=>l.lineId==='SCREWS');reg.push(['Wood screws',sl?screwsText()+', sent as a requirement: gauge, length, finish and count. Store picks its own item or refuses':'needs a gauge, a length, a finish and a count',sl?IN:'NEEDS AN ANSWER',sl?'ok':'no'])}
   keptList().forEach(k=>reg.push([esc(k.t),'kept on your list; the Store has no line for it, so it isn’t sent and isn’t claimed done','KEPT · NOT SENT','warn']));
   OPEN_QUESTIONS.forEach(q=>reg.push([q.t,'travels with the job; '+q.owner.toLowerCase()+' owns it',q.status,q.status==='UNRESOLVED'?'warn':'']));
   $('ws-reg').innerHTML=reg.map(r=>'<div class="ln"><span>'+r[0]+' <span class="dim">: '+r[1]+'</span></span><span class="chip '+r[3]+'">'+r[2]+'</span></div>').join('');
@@ -1275,18 +1356,43 @@ function render(){
 
 /* ═════ PAGE 4 · THE STORE ANSWERS ═════ */
 
+/* The bench's price, as Alcove's: one number, the Store's, under the wood. It follows every knob and every wood.
+   While the Store answers a change, the last number stays on screen faded and marked as updating; it is never shown
+   as the answer for a version it wasn't given. Nothing here is computed: no Store answer, no number. */
+function mainRefusal(v){
+  const bad=v.lines.filter(l=>l.status!=='SUPPORTABLE');if(!bad.length)return null;
+  const l=bad[0],codes=(l.reasonCodes||[]).length?l.reasonCodes:((l.considered||[]).map(c=>c.reason).filter(Boolean));
+  const why=codes.length?(REASONS[codes[0]]||codes[0]):'not supportable';
+  return {line:lineLabel(l.packageId||l.lineId),why,more:bad.length-1};
+}
 function renderBenchMoney(){
   const el=$('bench-money'); if(!el) return;
-  if(S.asking){ el.innerHTML='<p class="status ask">Asking the live Store…</p>'; }
-  else if(S.error){ el.innerHTML='<p class="status bad">The Store didn’t answer ('+esc(S.error)+'). Nothing is shown in its place.</p>'; }
-  else if(!S.answer){ el.innerHTML='<p class="dim">Board lengths, stock, time and price come back from the Store. The bench doesn’t guess them.</p>'; }
-  else {
-    const a=S.answer, v=storeView(), t=v&&v.t, stale=a.stale;
-    el.innerHTML='<p class="lb">'+(stale?'OLD ANSWER · DEFINITION HAS CHANGED':'STORE BUDGETARY ANSWER · REVISION '+a.rev)+'</p>'
-      +(v&&v.estimate!=null
-        ? '<div class="big" style="'+(stale?'opacity:.5':'')+'">'+money(v.estimate)+'</div><p class="small" style="margin:0">Wood '+money(t.material)+' + machine work '+money(t.machine_service)+(t.items?' + hardware '+money(t.items):'')+' · '+Math.round(v.minutes)+' min. Not a commercial quote.</p>'
-        : '<div class="big none" style="'+(stale?'opacity:.5':'')+'">No complete budgetary estimate</div><p class="small" style="margin:0">The Store answered this version. A complete number exists only when every line is supportable.</p>');
+  const a=S.answer,v=storeView(),t=v&&v.t;
+  const blocking=conditions(buildDefinition()).filter(c=>c.block);
+  const more='<p class="more"><a href="#s-store" data-to="store">See the Store’s full answer, line by line →</a></p>';
+  const priceOf=(cls)=>v&&v.estimate!=null?'<p class="big'+(cls?' '+cls:'')+'">'+money(v.estimate)+'</p>':'<p class="big none'+(cls?' '+cls:'')+'">No complete budgetary estimate</p>';
+  const basis=()=>'Wood '+money(t.material)+' + machine work '+money(t.machine_service)+(t.items?' + hardware '+money(t.items):'')+' · about '+Math.round(v.minutes)+' min modeled machine time. Budgetary, not a quote.';
+  let lb,body,big,extra='';
+  if(blocking.length){
+    lb='NOT PRICED YET';big='<p class="big none">—</p>';
+    body='Fill this in first, then the Store prices it: <b>'+esc(blocking[0].t)+'</b>'+(blocking.length>1?' (and '+(blocking.length-1)+' more, listed below)':'')+'.';
+  } else if(S.asking){
+    lb=a?'UPDATING FOR REVISION '+rev.n+'…':'ASKING THE STORE…';big=a?priceOf('old'):'<p class="big none">…</p>';
+    body=a?'The Store is pricing your change. The faded number was for revision '+a.rev+'.':'The Store prices revision '+rev.n+' as soon as it answers.';
+  } else if(S.error){
+    lb='THE STORE DIDN’T ANSWER';big='<p class="big none">—</p>';
+    body='Couldn’t reach the Store ('+esc(S.error)+'). Nothing is shown in its place.';
+  } else if(!a){
+    lb='NOT ASKED YET';big='<p class="big none">—</p>';body='Board lengths, stock, time and price come back from the Store. The bench doesn’t guess them.';
+  } else if(a.stale){
+    lb='OLD ANSWER · REVISION '+a.rev;big=priceOf('old');body='Your definition changed since this answer.';
+  } else {
+    lb='STORE ZERO';big=priceOf('');
+    if(v.estimate!=null)body=basis();
+    else{const r=mainRefusal(v);body='The Store can’t do every line of this version.';
+      if(r)extra='<p class="why"><b>'+esc(r.line)+':</b> '+esc(r.why)+(r.more?' <span class="dim">(+'+r.more+' more line'+(r.more===1?'':'s')+')</span>':'')+'</p>';}
   }
+  el.innerHTML='<div class="pb"><div><p class="lb">'+lb+'</p><p class="basis">'+body+'</p></div>'+big+'</div>'+extra+(a&&!a.stale&&!S.asking?more:'');
 }
 
 function renderStore(req,cond){
@@ -1515,7 +1621,7 @@ $('mfields').addEventListener('change',()=>{readFacts();changed()});
 $('add-knobs').addEventListener('change',e=>{const c=e.target.closest('[data-add]');if(!c)return;
   const k=c.dataset.add;I.added[k]=c.checked;
   /* A knob added by hand starts with its required facts empty. No hidden defaults. */
-  if(c.checked){if(k==='front')P.front=true;if(k==='spots')P.spots={rule:null,inset:null};if(k==='xspot')P.xspot={target:'',offset:'',place:''};if(k==='screws')P.screws={gauge:'',lengthIn:'',finish:'',qty:''}}
+  if(c.checked){if(k==='front')P.front=true;if(k==='xspot')P.xspot={target:'',offset:'',place:''};if(k==='screws')P.screws={gauge:'',lengthIn:'',finish:'',qty:''}}
   controls();changed()});
 $('kept-asks').addEventListener('change',e=>{const c=e.target.closest('[data-kept]');if(!c)return;I.kept[c.dataset.kept]=c.checked;changed()});
 $('other-text').addEventListener('input',function(){I.otherText=this.value;changed()});

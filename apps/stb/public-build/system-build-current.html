@@ -79,6 +79,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       .dev-build-guide .guide-meta{margin-top:auto;padding-top:10px;border-top:1px solid var(--border);display:grid;gap:3px;font:8.5px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text3)}
       /* Trail rules: the top nav appears only inside a live project, never on Landing, the doors or the Shared Home. */
       .recovery-nav:not([data-active-project]){display:none!important}
+      /* Window Seat page 1 (Idea) carries its own two-route bar; the step bar starts at Intent. */
+      .recovery-nav[data-seat-hero] button[data-journey-stage],.recovery-nav[data-seat-hero] .job-idea{display:none!important}
       .recovery-nav .job-nav-context{display:inline-flex;align-items:center;padding:5px 9px;border:1px solid var(--border-accent);border-radius:999px;background:var(--tint);color:var(--accent);font-size:9.5px;font-weight:800;letter-spacing:.06em;white-space:nowrap}
       .s001-v2-intent-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(300px,1.1fr);gap:16px;align-items:start;margin:14px 0}
       .s001-v2-story{font-size:13px;line-height:1.55;margin:10px 0 0}
@@ -1234,7 +1236,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="window-seat-frame"
                   class="window-seat-shell-frame"
                   title="Space utilization · Window seat"
-                  src="stb-window-seat-0.9.html?v=35338178"
+                  src="stb-window-seat-0.9.html?v=b0a9a268"
                 ></iframe>
               </div>
             `;
@@ -3230,17 +3232,39 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
     // The Window Seat page reports which steps can be used now, the same way Outdoor does.
     var seatNavState = {scan:true, configure:true, store:true, request:false, yard:false, record:false};
+    var seatPlace = {section:'hero', step:null};
     function seatFrame() {
       return doc.getElementById('window-seat-frame');
     }
     function applySeatNavState() {
       const nav = doc.querySelector('.recovery-nav');
-      if (!nav || activeJourneyProject !== 'window-seat') return;
+      if (!nav) return;
+      let idea = nav.querySelector('.job-idea');
+      if (activeJourneyProject !== 'window-seat') { delete nav.dataset.seatHero; if (idea) idea.hidden = true; return; }
+      // Idea: after the Project Library, before the steps. Not a step; it takes you back to the want.
+      if (!idea) {
+        idea = doc.createElement('button');
+        idea.type = 'button';
+        idea.className = 'job-idea';
+        idea.textContent = 'Idea';
+        idea.addEventListener('click', function(event) {
+          event.preventDefault(); event.stopPropagation();
+          seatFrame()?.contentWindow?.postMessage({type:'STB_SEAT_GO', stage:'hero'}, win.location.origin);
+        });
+      }
+      const lib = nav.querySelector('button[data-job-exit="project-library"]');
+      if (lib && idea.previousElementSibling !== lib) lib.after(idea);
+      idea.hidden = false;
+      // On Idea the page shows its own route bar; from Intent on, this bar is the only one, and it marks where you are.
+      if (seatPlace.section === 'hero') nav.dataset.seatHero = 'true';
+      else delete nav.dataset.seatHero;
       nav.querySelectorAll('button[data-job-project="window-seat"]').forEach(button => {
         const on = !!seatNavState[button.dataset.journeyStage];
         button.disabled = !on;
         if (on) button.removeAttribute('aria-disabled');
         else button.setAttribute('aria-disabled','true');
+        if (seatPlace.step && button.dataset.journeyStage === seatPlace.step && !button.hidden) button.setAttribute('aria-current','step');
+        else button.removeAttribute('aria-current');
       });
     }
     win.addEventListener('message', function(event) {
@@ -3252,6 +3276,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         scan:usable.scan === true, configure:usable.configure === true, store:usable.store === true,
         request:usable.request === true, yard:usable.yard === true, record:usable.record === true
       };
+      seatPlace = {section:String(event.data.section || 'hero'), step:event.data.step || null};
       applySeatNavState();
     });
 
@@ -3342,6 +3367,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 
       const nav = doc.querySelector('.recovery-nav');
       if (nav) {
+        delete nav.dataset.seatHero;
         restoreJourneyNav(nav);
         if (activeJourneyProject === 'start-own') {
           wireStartOwnJourneyNav(nav);
