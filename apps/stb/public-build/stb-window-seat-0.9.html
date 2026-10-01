@@ -455,6 +455,9 @@
         <h1>The Store answers</h1>
         <p class="dim">The live Store gets exactly this version and answers each line on its own: which board, how many, the cut plan, the machine minutes, the price, or a refusal with its reason. Nothing is cached, and nothing on this page does the Store’s math.</p>
         <div class="store" id="store-panel"></div>
+        <div class="grp" id="store-wood" style="margin:10px 0 12px"><p class="gh">WOOD</p>
+          <div id="species" data-knob="WOOD" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px"></div>
+          <p class="dim" style="font-size:10.5px;margin:9px 0 0">Solid board, ¾ in. Pick another wood and the Store is asked again for that version; its price replaces this one. The Store answers whether it stocks it; it never swaps it.</p></div>
         <div id="store-lines"></div>
         <div id="store-kept"></div>
         <div class="doctrine" id="store-doctrine"></div>
@@ -626,7 +629,7 @@ const OPEN_QUESTIONS=Object.freeze([
    made: SKETCH (read off the sketch) · HAND (entered by hand where the sketch is silent) · DERIVED (a stated rule)
          · ADDED (added by hand on the intent page because this job needs it). */
 const WOODS=[{k:'pine',n:'Select pine',c:'#D8BE7C'},{k:'poplar',n:'Select poplar',c:'#9FA678'},
-             {k:'oak',n:'Select red oak',c:'#C4A06A'},{k:'cherry',n:'Select cherry',c:'#A6522C'}];
+             {k:'cherry',n:'Select cherry',c:'#A6522C'},{k:'oak',n:'Select red oak',c:'#C4A06A'}];
 const woodName=k=>(WOODS.find(f=>f.k===k)||{n:k}).n;
 const SPOT_RULES=[
   {k:'CENTER',label:'centered',rule:'CENTERED_ON_WIDE_FACE',inset:null},
@@ -971,9 +974,6 @@ function controls(){
       +'<select class="sel" id="xs-place" aria-label="Where across the board"><option value="">across the board…</option>'+SPOT_RULES.map(s=>'<option value="'+s.k+'"'+(P.xspot.place===s.k?' selected':'')+'>'+s.label+'</option>').join('')+'</select></div></div>';
     h+='</div>';
   }
-  h+='<div class="grp"><p class="gh">WOOD</p>'
-    +'<div id="species" data-knob="WOOD" style="display:grid;grid-template-columns:1fr 1fr;gap:4px"></div>'
-    +'<p class="dim" style="font-size:10.5px;margin:9px 0 0">Solid board, ¾ in. The Store answers whether it stocks it; it never swaps it.</p></div>';
   if(K('SCREWS'))h+='<div class="grp" data-knob="SCREWS"><p class="gh">WOOD SCREWS</p>'
     +'<div class="opdet"><select class="sel" id="sc-gauge" aria-label="Gauge"><option value="">gauge…</option>'+SCREW_GAUGES.map(g=>'<option'+(P.screws.gauge===g?' selected':'')+'>'+g+'</option>').join('')+'</select>'
     +'<input class="sel" id="sc-len" placeholder="length, in" value="'+esc(P.screws.lengthIn)+'" style="width:90px" aria-label="Length in inches">'
@@ -995,9 +995,6 @@ function controls(){
   $('depth-panel').addEventListener('click',e=>{const b=e.target.closest('[data-depth]');if(!b)return;
     P.depth=Math.min(24,Math.max(6,Math.round((P.depth+Number(b.dataset.depth))*4)/4));changed()});
   $('c-runs').onclick=e=>{const b=e.target.closest('button');if(!b)return;P.runsSet=b.dataset.n==='derived'?null:+b.dataset.n;changed()};
-  const sw=$('species');
-  WOODS.forEach(f=>{const b=document.createElement('button');b.type='button';b.className='sp';b.dataset.k=f.k;
-    b.innerHTML='<div style="background:'+f.c+'"></div><p>'+f.n+'</p>';b.onclick=()=>{P.wood=f.k;changed()};sw.appendChild(b)});
   $('btn-reset').onclick=()=>{P=clone(START);controls();changed()};
   lastTargets='';
 }
@@ -1081,6 +1078,14 @@ function changed(){
   render();
 }
 const answerCurrent=()=>!!(S.answer&&!S.answer.stale);
+/* Wood, under the price: a new species is a new version, and the page asks the Store again by itself.
+   The price is the Store's; nothing is computed here. A wood the Store can't supply comes back as its refusal. */
+function chooseWood(k){
+  if(P.wood===k)return;
+  P.wood=k;changed();
+  if(S.asking){S.reask=true;return}
+  askStore();
+}
 
 /* ═════ THE STORE: asked live, through the shared client. One request per version. ═════ */
 async function askStore(){
@@ -1102,6 +1107,7 @@ async function askStore(){
     if(buildRequest(buildDefinition()).sig!==req.sig){S.answer.stale=true;rev.n++}
   }catch(e){S.error=String(e&&e.message||e)}
   S.asking=false;render();
+  if(S.reask){S.reask=false;if(!answerCurrent())askStore()}
 }
 /* Store reason codes in plain words. The code is the Store's; the words are only a reading of it. */
 const REASONS={
@@ -1534,6 +1540,8 @@ window.addEventListener('message',event=>{
 if(embedded)$('bar').hidden=true;
 
 $('idea-text').value=I.idea;
+WOODS.forEach(f=>{const b=document.createElement('button');b.type='button';b.className='sp';b.dataset.k=f.k;
+  b.innerHTML='<div style="background:'+f.c+'"></div><p>'+f.n+'</p>';b.onclick=()=>chooseWood(f.k);$('species').appendChild(b)});
 renderFactFields();readFacts();controls();renderStoreDoctrine($('store-doctrine'));render();setView('trail','hero');
 window.STBWindowSeat=Object.freeze({version:'0.9',
   definition:()=>buildDefinition(),
