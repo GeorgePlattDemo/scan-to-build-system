@@ -55,6 +55,8 @@ Every project tile on the Shared Home follows one protocol. The machine-readable
 8. Adding a tile means declaring it in the trail contract. Nothing else.
 9. The guest is the user. No demo-account names on project pages.
 
+Shared behavior does not branch on tile identity. A registry may name a tile. An exception is contract data with an owner, not a branch.
+
 The scoreboard is a ratchet: known violations are listed and may not grow; a fixed tile must be removed from the known list so it stays fixed.
 
 Rules 1–3, 8 and 9 are checked by the trail scoreboard. Rules 4–6 are checked for every tile against the real pinned Store by `apps/stb/test/integration/trail-terms.test.mjs`. Rule 6's one post-Store terms flow is `apps/stb/public-build/stb-terms-flow.js`: every tile uses it; none keeps its own commerce state machine.
