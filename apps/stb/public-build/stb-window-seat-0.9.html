@@ -1304,8 +1304,7 @@ function renderStore(req,cond){
     +(location.protocol==='file:'||/STORE_ZERO_UNAVAILABLE|Failed to fetch|NetworkError|Load failed/i.test(S.error)?'<p class="small dim">The live Store answers the published app. A copy of this page opened anywhere else can’t reach it, and a failed ask stays a failed ask.</p>':'')
     +'<button type="button" class="go" data-ask>TRY AGAIN</button>'}
   else if(!a){h='<p class="lb">NOT ASKED YET</p><p class="status">Revision '+rev.n+' hasn’t been sent. '+(blocked?'Settle the conditions on the bench first.':'Ask, and the live Store answers this exact version.')+'</p>'
-    '}'
-  else{
+  } else{
     const t=v.t,stale=a.stale,id=identities();
     h='<p class="lb">'+(stale?(a.reused?'ANSWER USED · ASK AGAIN FOR REVISION '+rev.n:'OLD ANSWER · REVISION '+a.rev+' · YOUR DEFINITION HAS CHANGED'):'STORE BUDGETARY ANSWER · STORE ZERO · REVISION '+a.rev)+'</p>'
       +(v.estimate!=null?'<div class="big" style="'+(stale?'opacity:.5':'')+'">'+money(v.estimate)+'</div><p class="small" style="margin:0 0 6px">Complete budgetary estimate: wood '+money(t.material)+' + machine work '+money(t.machine_service)+(t.items?' + hardware '+money(t.items):'')+' · '+Math.round(v.minutes)+' min on the machine'+(v.spots?' · '+v.spots+' spots':'')+'</p>'
