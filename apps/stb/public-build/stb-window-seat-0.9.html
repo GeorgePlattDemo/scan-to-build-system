@@ -181,10 +181,10 @@
   .cbx input{margin-top:3px;accent-color:var(--accent);flex:none}
   .sel{font:inherit;font-size:12px;padding:5px 7px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text)}
   .opdet{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px}
-  .sp{cursor:pointer;border-radius:6px;padding:2px;border:1.5px solid transparent;background:none;font:inherit;color:inherit}
-  .sp.on{border-color:var(--accent);background:var(--tint)}
-  .sp div{height:20px;border-radius:4px;border:1px solid rgba(0,0,0,.2)}
-  .sp p{margin:2px 0 0;font-size:9.5px;text-align:center}
+  .swatches{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}
+  .swatch{display:flex;align-items:center;gap:7px;padding:6px 7px;font:inherit;font-size:11px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);cursor:pointer;text-align:left}
+  .swatch.on{border-color:var(--accent);background:var(--tint)}
+  .swatch .dot{width:15px;height:15px;border-radius:50%;border:1px solid rgba(0,0,0,.2);flex:none}
   .ws-draw{background:var(--draw);border-radius:9px;border:1px solid var(--border);padding:6px}
   .ws-draw svg{width:100%;display:block}
   .fs{font-size:11.5px}
@@ -389,10 +389,6 @@
           <div class="ctl"><div id="ctlcol"></div><p class="backlink">A knob you need isn’t here? <a href="#s-intent" data-to="intent">Add it on your intent page</a>. The bench never adds one.</p></div>
           <div>
             <div class="ws-draw"><svg id="elev" viewBox="0 0 520 400" role="img" aria-label="Window seat elevation: left tower, center window-seat module with upper storage, right tower"></svg></div>
-            <div class="box" style="margin:12px 0 0" id="bench-money-box">
-              <h4>THE STORE’S ANSWER FOR THIS VERSION</h4>
-              <div class="bd" id="bench-money"></div>
-            </div>
             <div class="box" style="margin:12px 0 0">
               <h4>FINISHED SHELVES AND OPENINGS</h4>
               <div class="bd fs" id="p-feat"></div>
@@ -455,9 +451,6 @@
         <h1>The Store answers</h1>
         <p class="dim">The live Store gets exactly this version and answers each line on its own: which board, how many, the cut plan, the machine minutes, the price, or a refusal with its reason. Nothing is cached, and nothing on this page does the Store’s math.</p>
         <div class="store" id="store-panel"></div>
-        <div class="grp" id="store-wood" style="margin:10px 0 12px"><p class="gh">WOOD</p>
-          <div id="species" data-knob="WOOD" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px"></div>
-          <p class="dim" style="font-size:10.5px;margin:9px 0 0">Solid board, ¾ in. Pick another wood and the Store is asked again for that version; its price replaces this one. The Store answers whether it stocks it; it never swaps it.</p></div>
         <div id="store-lines"></div>
         <div id="store-kept"></div>
         <div class="doctrine" id="store-doctrine"></div>
@@ -974,6 +967,12 @@ function controls(){
       +'<select class="sel" id="xs-place" aria-label="Where across the board"><option value="">across the board…</option>'+SPOT_RULES.map(s=>'<option value="'+s.k+'"'+(P.xspot.place===s.k?' selected':'')+'>'+s.label+'</option>').join('')+'</select></div></div>';
     h+='</div>';
   }
+  h+='<div class="box" style="margin:0 0 10px" id="bench-money-box"><h4>THE STORE’S ANSWER FOR THIS VERSION</h4><div class="bd" id="bench-money"></div></div>'
+    +'<div class="grp" data-knob="WOOD"><p style="margin:0 0 6px;font-weight:600">Material</p><div id="species" class="swatches">'
+    +'<button class="swatch" data-material="pine"><span class="dot" style="background:#C9A227"></span>Pine</button>'
+    +'<button class="swatch" data-material="poplar"><span class="dot" style="background:#9FA678"></span>Poplar</button>'
+    +'<button class="swatch" data-material="cherry"><span class="dot" style="background:#A6522C"></span>Cherry</button>'
+    +'<button class="swatch" data-material="oak"><span class="dot" style="background:#C4A06A"></span>Oak</button></div></div>';
   if(K('SCREWS'))h+='<div class="grp" data-knob="SCREWS"><p class="gh">WOOD SCREWS</p>'
     +'<div class="opdet"><select class="sel" id="sc-gauge" aria-label="Gauge"><option value="">gauge…</option>'+SCREW_GAUGES.map(g=>'<option'+(P.screws.gauge===g?' selected':'')+'>'+g+'</option>').join('')+'</select>'
     +'<input class="sel" id="sc-len" placeholder="length, in" value="'+esc(P.screws.lengthIn)+'" style="width:90px" aria-label="Length in inches">'
@@ -995,6 +994,7 @@ function controls(){
   $('depth-panel').addEventListener('click',e=>{const b=e.target.closest('[data-depth]');if(!b)return;
     P.depth=Math.min(24,Math.max(6,Math.round((P.depth+Number(b.dataset.depth))*4)/4));changed()});
   $('c-runs').onclick=e=>{const b=e.target.closest('button');if(!b)return;P.runsSet=b.dataset.n==='derived'?null:+b.dataset.n;changed()};
+  $$('#species [data-material]').forEach(b=>b.onclick=()=>{P.wood=b.dataset.material;changed()});
   $('btn-reset').onclick=()=>{P=clone(START);controls();changed()};
   lastTargets='';
 }
@@ -1018,7 +1018,7 @@ function syncControls(def){
   $$('#c-runs button').forEach(x=>{const on=x.dataset.n==='derived'?P.runsSet==null:(P.runsSet!=null&&+x.dataset.n===P.runsSet);x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
   const pl=P.spots.rule?spotRule(P.spots):null;
   $$('#c-spot-place button').forEach(x=>{const on=!!pl&&x.dataset.k===pl.k;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
-  $$('#species .sp').forEach(x=>{const on=x.dataset.k===P.wood;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
+  $$('#species [data-material]').forEach(x=>{const on=x.dataset.material===P.wood;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
   const sel=$('xs-target');
   if(sel){const ids=def.feats.map(f=>f.id).join(',');
     if(ids!==lastTargets){lastTargets=ids;
@@ -1076,13 +1076,15 @@ function changed(){
   if(S.answer&&S.answer.sig!==req.sig&&!S.answer.stale){S.answer.stale=true;rev.n++}
   S.error=null;
   render();
+  benchAsk();
 }
 const answerCurrent=()=>!!(S.answer&&!S.answer.stale);
-/* Wood, under the price: a new species is a new version, and the page asks the Store again by itself.
-   The price is the Store's; nothing is computed here. A wood the Store can't supply comes back as its refusal. */
-function chooseWood(k){
-  if(P.wood===k)return;
-  P.wood=k;changed();
+/* The bench asks the Store by itself, as Alcove does: on arrival, and again whenever the definition changes while the
+   bench is showing (a new wood included). No ask button. A change made while an ask is out is asked as soon as it
+   returns. The price is the Store's; nothing is computed here, and a wood it can't supply comes back as its refusal. */
+function benchAsk(){
+  if(S.section!=='bench'||answerCurrent())return;
+  if(conditions(buildDefinition()).some(c=>c.block))return;
   if(S.asking){S.reask=true;return}
   askStore();
 }
@@ -1107,7 +1109,7 @@ async function askStore(){
     if(buildRequest(buildDefinition()).sig!==req.sig){S.answer.stale=true;rev.n++}
   }catch(e){S.error=String(e&&e.message||e)}
   S.asking=false;render();
-  if(S.reask){S.reask=false;if(!answerCurrent())askStore()}
+  if(S.reask){S.reask=false;benchAsk()}
 }
 /* Store reason codes in plain words. The code is the Store's; the words are only a reading of it. */
 const REASONS={
@@ -1275,19 +1277,16 @@ function render(){
 
 function renderBenchMoney(){
   const el=$('bench-money'); if(!el) return;
-  const blocked=conditions(buildDefinition()).some(c=>c.block);
   if(S.asking){ el.innerHTML='<p class="status ask">Asking the live Store…</p>'; }
-  else if(S.error){ el.innerHTML='<p class="status bad">The Store didn’t answer ('+esc(S.error)+'). Nothing is shown in its place.</p><button type="button" class="go" data-ask>TRY AGAIN</button>'; }
-  else if(!S.answer){ el.innerHTML='<p class="dim">Board lengths, stock, time and price come back from the Store. The bench doesn’t guess them.</p><button type="button" class="go" data-ask'+(blocked?' disabled':'')+'>ASK THE STORE NOW</button>'; }
+  else if(S.error){ el.innerHTML='<p class="status bad">The Store didn’t answer ('+esc(S.error)+'). Nothing is shown in its place.</p>'; }
+  else if(!S.answer){ el.innerHTML='<p class="dim">Board lengths, stock, time and price come back from the Store. The bench doesn’t guess them.</p>'; }
   else {
     const a=S.answer, v=storeView(), t=v&&v.t, stale=a.stale;
     el.innerHTML='<p class="lb">'+(stale?'OLD ANSWER · DEFINITION HAS CHANGED':'STORE BUDGETARY ANSWER · REVISION '+a.rev)+'</p>'
       +(v&&v.estimate!=null
         ? '<div class="big" style="'+(stale?'opacity:.5':'')+'">'+money(v.estimate)+'</div><p class="small" style="margin:0">Wood '+money(t.material)+' + machine work '+money(t.machine_service)+(t.items?' + hardware '+money(t.items):'')+' · '+Math.round(v.minutes)+' min. Not a commercial quote.</p>'
-        : '<div class="big none" style="'+(stale?'opacity:.5':'')+'">No complete budgetary estimate</div><p class="small" style="margin:0">The Store answered this version. A complete number exists only when every line is supportable.</p>')
-      +(stale?'<p class="small dim">Ask again for this revision. The old number stays history.</p><button type="button" class="go" data-ask'+(blocked?' disabled':'')+'>ASK AGAIN FOR REVISION '+rev.n+'</button>':'');
+        : '<div class="big none" style="'+(stale?'opacity:.5':'')+'">No complete budgetary estimate</div><p class="small" style="margin:0">The Store answered this version. A complete number exists only when every line is supportable.</p>');
   }
-  $$('#bench-money [data-ask]').forEach(bt=>bt.onclick=askStore);
 }
 
 function renderStore(req,cond){
@@ -1480,12 +1479,12 @@ function setView(view,section){
   document.body.dataset.view=view;document.body.dataset.section=S.section;
   $$('.step').forEach(s=>s.classList.toggle('on',s.dataset.section===S.section));
   $$('[data-view-btn]').forEach(bt=>{const on=bt.dataset.viewBtn===view;bt.classList.toggle('on',on);bt.setAttribute('aria-pressed',on)});
-  syncNav();
+  syncNav();benchAsk();
 }
 function go(section){
   if(!SECTIONS.includes(section)&&section!=='audit')return;
   if(!usable()[section])return;
-  if(S.view==='whole'){S.section=section;syncNav();$('s-'+section).scrollIntoView({behavior:'smooth',block:'start'});return}
+  if(S.view==='whole'){S.section=section;syncNav();benchAsk();$('s-'+section).scrollIntoView({behavior:'smooth',block:'start'});return}
   setView('trail',section);window.scrollTo(0,0);
   if(section==='store'&&(!S.answer||S.answer.stale)&&!S.asking&&!S.error&&!conditions(buildDefinition()).some(c=>c.block))askStore();
 }
@@ -1505,7 +1504,7 @@ document.addEventListener('click',e=>{
     else{const at=S.view==='whole'?visibleSection():S.section;setView('trail',usable()[at]?at:'hero');window.scrollTo(0,0)}
     return}
 });
-window.addEventListener('scroll',()=>{if(S.view!=='whole')return;const s=visibleSection();if(s!==S.section){S.section=s;document.body.dataset.section=s;syncNav()}},{passive:true});
+window.addEventListener('scroll',()=>{if(S.view!=='whole')return;const s=visibleSection();if(s!==S.section){S.section=s;document.body.dataset.section=s;syncNav();benchAsk()}},{passive:true});
 
 /* Intent-page inputs: every change is a change of definition. */
 $('idea-text').addEventListener('input',function(){I.idea=this.value;changed()});
@@ -1540,8 +1539,6 @@ window.addEventListener('message',event=>{
 if(embedded)$('bar').hidden=true;
 
 $('idea-text').value=I.idea;
-WOODS.forEach(f=>{const b=document.createElement('button');b.type='button';b.className='sp';b.dataset.k=f.k;
-  b.innerHTML='<div style="background:'+f.c+'"></div><p>'+f.n+'</p>';b.onclick=()=>chooseWood(f.k);$('species').appendChild(b)});
 renderFactFields();readFacts();controls();renderStoreDoctrine($('store-doctrine'));render();setView('trail','hero');
 window.STBWindowSeat=Object.freeze({version:'0.9',
   definition:()=>buildDefinition(),

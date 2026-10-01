@@ -107,11 +107,16 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     assert.equal(await page.locator('#knob-table tbody tr').count(), 14);
     assert.ok(await page.locator('#s-intent [data-add]').count() >= 4, 'add a knob by hand lives on the intent page');
     assert.equal(await page.locator('#s-bench [data-add], #s-bench [data-kept]').count(), 0, 'the bench adds no knob');
-    // Wood is the one knob turned under the price, on the Store-answer page; every other knob is on the bench.
-    assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), knobs.filter(k => k !== 'WOOD').sort());
-    assert.equal(await page.evaluate(() => document.getElementById('store-panel').nextElementSibling.querySelector('[data-knob="WOOD"]') !== null), true, 'wood sits directly under the price');
-    assert.deepEqual(await page.locator('#species .sp').evaluateAll(els => els.map(e => e.dataset.k)), ['pine', 'poplar', 'cherry', 'oak']);
-    assert.equal(await page.locator('#species .sp.on').getAttribute('data-k'), 'pine', 'wood starts resolved as pine');
+    assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), [...knobs].sort());
+    // Wood is Alcove's material block, on the bench, pine already selected, directly beneath the bench's one price.
+    // The Store-answer page shows the answer and holds no wood control.
+    assert.equal(await page.locator('#species').count(), 1, 'one wood control');
+    assert.equal(await page.locator('#s-configure [data-knob="WOOD"]').count(), 1, 'on the bench');
+    assert.equal(await page.locator('#s-store [data-knob="WOOD"], #store-wood').count(), 0, 'not on the Store-answer page');
+    assert.deepEqual(await page.locator('#species .swatch').evaluateAll(els => els.map(e => [e.dataset.material, e.innerText.trim()])), [['pine', 'Pine'], ['poplar', 'Poplar'], ['cherry', 'Cherry'], ['oak', 'Oak']]);
+    assert.equal(await page.locator('#species .swatch.on').getAttribute('data-material'), 'pine', 'wood starts resolved as pine');
+    assert.equal(await page.evaluate(() => document.getElementById('bench-money-box').nextElementSibling.querySelector('#species') !== null), true, 'the wood sits directly beneath the price');
+    assert.equal(await page.locator('#bench-money-box').count(), 1, 'one money block on the bench');
 
     // The sketch's 14 in depth over two boards is 7 in each: 1×8 select pine, edge-milled to 7 in.
     let req = await request(page);
@@ -182,14 +187,17 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     assert.match(await page.locator('#store-doctrine').innerText(), /What happens next/);
     assert.equal(await page.locator('#store-doctrine .s').count(), 12);
 
-    // Ask from the regular path: exactly one request for this version.
+    // The bench asks the Store by itself for the version on it: no ask button on the bench.
     const trailRequest = await request(page);
+    const s1 = await asked(page);
+    assert.deepEqual(sent[sent.length - 1].payload.definition, trailRequest, 'the bench asked for exactly this version');
+    assert.match(s1.error, /STORE_ZERO_UNAVAILABLE/, 'no answer stays no answer');
+    assert.match(await page.locator('#bench-money').innerText(), /Nothing is shown in its place/);
+    assert.equal(await page.locator('#s-configure button[data-ask], #bench-money button').count(), 0, 'no ask button on the bench');
+    // Going on to the Store's page sends no duplicate for the same version.
     let n = sent.length;
     await page.locator('#btn-ask').click();
-    const s1 = await asked(page);
-    assert.equal(sent.length - n, 1, 'one Store request');
-    assert.deepEqual(sent[n].payload.definition, trailRequest);
-    assert.match(s1.error, /STORE_ZERO_UNAVAILABLE/, 'no answer stays no answer');
+    assert.equal(sent.length - n, 0, 'no second request for the same version');
     assert.match(await page.locator('#store-panel').innerText(), /Nothing is shown in its place/);
     assert.equal(await page.locator('[data-nav="request"]').isDisabled(), true);
     assert.deepEqual(errors, []);
@@ -205,14 +213,15 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     await whole.locator('#p-depth button', { hasText: 'USE 14 1/2 IN' }).click();
     await whole.locator('#add-knobs [data-add="spots"]').check();
     await whole.locator('#c-spot-place button', { hasText: '2 in' }).click();
+    const trailLast = sent[sent.length - 1];
     n = sent.length;
     await whole.locator('#btn-ask').click();
     await asked(whole);
-    assert.equal(sent.length - n, 1, 'one Store request');
+    assert.ok(sent.length > n, 'the long scroll asks the Store too');
     // The fork: one state, one definition, one Store request, whichever route.
-    assert.deepEqual(sent[n].payload.definition, sent[n - 1].payload.definition, 'the request is identical from both routes');
-    assert.equal(sent[n].payloadDigest, sent[n - 1].payloadDigest);
-    assert.equal(sent[n].demandSignature, sent[n - 1].demandSignature);
+    assert.deepEqual(sent[sent.length - 1].payload.definition, trailLast.payload.definition, 'the request is identical from both routes');
+    assert.equal(sent[sent.length - 1].payloadDigest, trailLast.payloadDigest);
+    assert.equal(sent[sent.length - 1].demandSignature, trailLast.demandSignature);
 
     // The audit copy: the full definition, what was sent, and the Store answer, as plain copyable text.
     const audit = await whole.locator('#audit-text').innerText();
