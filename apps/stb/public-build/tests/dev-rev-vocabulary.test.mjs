@@ -34,7 +34,7 @@ test('the Store authority line is one line wherever it appears',()=>{
 
 test('bench, knob and configurator are defined once, as approved',()=>{
   assert.ok(definitions.includes('The bench turns the knobs made at intent. It never adds one.'));
-  assert.ok(definitions.includes('**Knob** — One setting a job needs so it can be defined and accepted. Made at intent, for that job, auto or by hand, from the need. Turned on the bench. Never added there.'));
+  assert.ok(definitions.includes('**Knob** — One setting needed to state or vary this job. Not a setting needed for the job to be accepted. Made at intent, for that job, auto or by hand, from the need. Turned on the bench. Never added there.'));
   assert.ok(definitions.includes('**Configurator** — The knobs made for one job at intent. A tool, not the program. There is no universal configurator.'));
   for(const t of ['**Knob** —','**Configurator** —']) assert.equal(definitions.split(t).length-1,1,`${t} defined more than once`);
 });

@@ -69,7 +69,7 @@ A drawing, PDF, scan, photo, measurement, takeoff, or ordinary-language statemen
 
 A first-time person should not have to pretend they already possess a professional job package.
 
-A returning holder should not have to discard existing project/record context simply to re-enter the system.
+A returning holder should not have to discard existing project/record context, or re-enter values already on the record, simply to come back into the system.
 
 A professional may bring structured material, but professional form does not exempt that material from source, definition, Store, or authority checks.
 
@@ -99,6 +99,16 @@ outcome / owner record
 ```
 
 Implementation names and pages may change. The semantic order must not be silently inverted to make an unsupported job appear complete.
+
+## Where entry meets the trail
+
+An opening starts from Idea, or from an Intent a bounded tile has already established. It does not have to show an Idea page. Idea holds the contemplated outcome and its source material; it is revisitable, and its contents do not automatically become controlling facts.
+
+**Intent** is step 1 for every opening. It establishes this job's scope, requirements, permissible controls, dependencies and responsibilities, and carries forward values already supplied with their source and status. A person is never required to re-enter a value the system already holds; they re-enter it only if they choose to revise it. A bounded tile may establish Intent from its template and open at the bench, and that Intent remains inspectable.
+
+**The bench** applies and revises values inside Intent's scope and produces an identified job-definition revision. A new scope or control returns to Intent; turning on a control Intent already declared stays on the bench. Store then evaluates a Store inquiry linked to that revision. A saved Store answer is history, not current authority.
+
+Steps are stages of meaning; pages are navigation. An opening may use several pages within one step, but it rejoins the same step order and does not acquire a different authority sequence. Terms are defined in [`docs/definitions/README.md`](../definitions/README.md#the-trail).
 
 ## Privacy and dignity
 

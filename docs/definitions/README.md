@@ -31,17 +31,27 @@ Words the working app uses on screen or in its records. Where a term has an exac
 
 ### The trail
 
-**Trail** — The one six-step path every project follows: **Your idea → The bench → The Store answers → Your call → We cut it → Pick up & build.** Declared in `apps/stb/public-build/stb-trail-contract.js`; enforced by the trail scoreboard test.
+**Trail** — The one six-step path every project follows: **Intent → The bench → The Store answers → Your call → We cut it → Pick up & build.** Idea comes before it, unnumbered. Declared in `apps/stb/public-build/stb-trail-contract.js` (`STB-TRAIL-CONTRACT-0.2`); the rules are AGENTS.md "Trail rules"; enforced by the trail scoreboard test.
 
-**Your idea** (step 1) — Capture: what you want, and what you measured, photographed or already have. May span as many pages as capture needs.
+**Step ≠ page.** A step names what the job means at that point. A page is where you are. One step may span several pages, and moving between pages does not change the step. Navigation never reorders, skips or adds a step.
 
-**The bench** (step 2) — Where a library project's few real choices are made against a board or sheet you can see. Only choices that change what gets cut are offered. Not a general-purpose configurator. The bench turns the knobs made at intent. It never adds one.
+**Idea** (unnumbered, not a step) — A revisitable workspace for a contemplated outcome and its source material: what you want, and what you measured, photographed, drew or already have. Its contents do not automatically become controlling facts. You can come back to it at any point.
 
-**Knob** — One setting a job needs so it can be defined and accepted. Made at intent, for that job, auto or by hand, from the need. Turned on the bench. Never added there.
+**Intent** (step 1) — Establishes this job's scope, requirements, permissible controls, dependencies and responsibilities. It carries forward values already supplied, each with its source and status, and never requires them to be entered again. A bounded tile may establish Intent from its template and open at the bench. Intent remains inspectable.
+
+**The bench** (step 2) — Applies and revises values inside the scope Intent established and produces an identified job-definition revision. Not a general-purpose configurator. Turning on a control Intent already declared is a bench action. A new scope or a new control returns to Intent. The bench turns the knobs made at intent. It never adds one.
+
+**Job-definition revision** — The identified record of this job's current requirements, values, derivations and unresolved responsibilities. It is not "the object sent to Store"; what goes to Store is the Store inquiry.
+
+**Store inquiry** (System side) — The bounded demands System submits to Store for evaluation, linked to one job-definition revision. How Store evaluates and answers it is Store's vocabulary (section 8).
+
+**Admissible** — Sufficiently defined and representable for the stated Store inquiry. Admissible is not supportable: whether the job is supportable is the Store's answer.
+
+**Knob** — One setting needed to state or vary this job. Not a setting needed for the job to be accepted. Made at intent, for that job, auto or by hand, from the need. Turned on the bench. Never added there.
 
 **Configurator** — The knobs made for one job at intent. A tool, not the program. There is no universal configurator.
 
-**The Store answers** (step 3) — A fresh answer from the live, independently hosted Store for the exact current definition. Never a cached answer and never a browser-side copy of Store logic.
+**The Store answers** (step 3) — A fresh answer from the live, independently hosted Store to the Store inquiry for the current job-definition revision. Never a cached answer and never a browser-side copy of Store logic. A saved Store answer is history, not current authority: it records what Store said about an earlier revision.
 
 **Your call** (step 4) — You accept the Store's answer for this version, or go back and change it. In the demonstration, offer, acceptance and payment are simulated and labelled so.
 
@@ -173,11 +183,11 @@ Terms a person may reasonably use before the need has been translated into manuf
 
 **Need** — Something a person wants changed, supplied, repaired, made, learned, or resolved. It does not require a known product.
 
-**Idea** — Early expression of something desired. It may be incomplete.
+**Idea** — Defined once, in [The trail](#the-trail): the unnumbered workspace before the steps.
 
 **Interest** — Something a person cares about before a specific project is necessarily formed.
 
-**Intent** — What the person is trying to make true in a particular situation.
+**Intent** — Defined once, in [The trail](#the-trail): step 1, where this job's scope and permissible controls are established.
 
 **Requirement** — Condition that must be satisfied for the applicable result.
 
@@ -681,7 +691,15 @@ A compact check for the most consequential translation errors. Store keeps the c
 
 **Current / applicable ≠ live / fresh**
 
-**A saved answer ≠ a current answer**
+**A saved answer ≠ a current answer** — a saved Store answer is history, not current authority.
+
+**Idea contents ≠ controlling facts**
+
+**Job-definition revision ≠ Store inquiry**
+
+**Admissible ≠ supportable**
+
+**Step ≠ page**
 
 **Accept ≠ pay ≠ allocate ≠ release ≠ ready ≠ Cycle Start**
 

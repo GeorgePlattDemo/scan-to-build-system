@@ -34,7 +34,9 @@ These are different project classes, not five copies of one configurator. Their 
 
 Every project uses the same six labels, in the same order:
 
-**Your idea → The bench → The Store answers → Your call → We cut it → Pick up & build**
+**Intent → The bench → The Store answers → Your call → We cut it → Pick up & build**
+
+Before the steps sits **Idea**, an unnumbered workspace for what you want and the material you bring; it is not a step, and nothing on it becomes a controlling fact by itself. Intent (step 1) sets this job's scope and carries forward what you already supplied, so nothing known is asked again. The words are defined in [`docs/definitions/README.md`](docs/definitions/README.md#the-trail).
 
 The machine-readable contract is [`apps/stb/public-build/stb-trail-contract.js`](apps/stb/public-build/stb-trail-contract.js). It currently names all five project tiles and no exceptions.
 
