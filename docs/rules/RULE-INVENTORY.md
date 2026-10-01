@@ -20,7 +20,7 @@ Enforcement labels are descriptive of what was found in the current tree:
 ## PROP-TRAIL-ONE-PATH
 
 - **Proposed ID:** `PROP-TRAIL-ONE-PATH`
-- **Rule in current-source words:** “One trail, same steps, same order: **Your idea → The bench → The Store answers → Your call → We cut it → Pick up & build.**”
+- **Rule in current-source words:** “One trail, same steps, same order: **Intent → The bench → The Store answers → Your call → We cut it → Pick up & build.** Idea comes before it, unnumbered.”
 - **Owner:** System
 - **Source file:** [`AGENTS.md`](../../AGENTS.md), Trail rule 1; same trail meaning is also stated in [`docs/definitions/README.md`](../definitions/README.md).
 - **Implementation file:** [`apps/stb/public-build/stb-trail-contract.js`](../../apps/stb/public-build/stb-trail-contract.js)

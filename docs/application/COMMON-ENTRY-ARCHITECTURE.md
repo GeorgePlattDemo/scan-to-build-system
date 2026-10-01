@@ -102,7 +102,7 @@ Implementation names and pages may change. The semantic order must not be silent
 
 ## Where entry meets the trail
 
-Every opening lands on **Idea**, the unnumbered workspace before the six steps. Idea holds the contemplated outcome and its source material; it is revisitable, and its contents do not automatically become controlling facts.
+An opening starts from Idea, or from an Intent a bounded tile has already established. It does not have to show an Idea page. Idea holds the contemplated outcome and its source material; it is revisitable, and its contents do not automatically become controlling facts.
 
 **Intent** is step 1 for every opening. It establishes this job's scope, requirements, permissible controls, dependencies and responsibilities, and carries forward values already supplied with their source and status. A person is never required to re-enter a value the system already holds; they re-enter it only if they choose to revise it. A bounded tile may establish Intent from its template and open at the bench, and that Intent remains inspectable.
 
