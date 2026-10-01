@@ -108,7 +108,7 @@ const TILES = {
     label:'Space utilization', projectId:'window-seat', inner:true,
     async answer({ page }) {
       const win=await until(()=>frameOf(page,'stb-window-seat-0.9.html'),'window seat frame');
-      await win.locator('#s-hero [data-to="intent"]').click();
+      await frameOf(page, 'system-build-base-8d8a9dd.html').locator('.recovery-nav [data-seat-fork="intent"]').click();
       await win.locator('#s-intent [data-to="bench"]').click();
       await win.locator('#btn-ask').click();
       await until(async()=> (await terms(win,'window-seat'))?.stage==='ANSWERED','window seat answer');

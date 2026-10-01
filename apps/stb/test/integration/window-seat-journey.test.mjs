@@ -67,13 +67,12 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     // ── The regular path ──
     const a = await open(browser, origin);
     let page = a.page;
-    // Page 1 is the want, behind the trail: the fork is the pills, and no nav step is current here.
+    // Idea is the intake: its one nav line is the fork, Intent | One full scroll, and no step is current here.
     assert.deepEqual(await page.evaluate(() => [...document.querySelectorAll('.step')].filter(s => s.offsetParent).map(s => s.id)), ['s-hero']);
-    assert.equal(await page.locator('[data-view-btn="trail"]').count(), 1);
-    assert.equal(await page.locator('[data-view-btn="whole"]').count(), 1);
-    assert.equal(await page.locator('[data-nav="scan"]').getAttribute('class'), 'pill', 'page 1 is not a trail step');
+    assert.deepEqual(await page.locator('#bar button:visible').evaluateAll(els => els.map(e => e.innerText.trim())), ['Intent', 'One full scroll']);
+    assert.equal(await page.locator('[data-nav="scan"]').getAttribute('class'), 'pill', 'Idea is not a trail step');
     assert.equal(await page.locator('[data-nav="request"]').isDisabled(), true, 'your call is inert before an answer');
-    await page.locator('#s-hero [data-to="intent"]').click();
+    await page.locator('#bar [data-view-btn="trail"]').click();
     assert.equal((await seat(page)).section, 'intent');
     assert.equal(await page.locator('[data-nav="scan"]').getAttribute('class'), 'pill on', 'step 1, Intent, starts on the intent page');
 
@@ -81,19 +80,23 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     const knobs = await page.evaluate(() => window.STBWindowSeat.knobs());
     assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), [...knobs].sort());
     assert.equal(await page.locator('#s-configure [data-add]').count(), 0, 'no knob is added on the bench');
-    await page.locator('#add-knobs [data-add="spots"]').check();
-    const withSpots = await page.evaluate(() => window.STBWindowSeat.knobs());
-    assert.deepEqual(withSpots.filter(k => !knobs.includes(k)), ['SPOTS']);
-    assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), [...withSpots].sort());
+    await page.locator('#add-knobs [data-add="xspot"]').check();
+    const withSpot = await page.evaluate(() => window.STBWindowSeat.knobs());
+    assert.deepEqual(withSpot.filter(k => !knobs.includes(k)), ['XSPOT']);
+    assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), [...withSpot].sort());
     // A knob added by hand brings its required facts empty: no hidden default, so the Store is not asked yet.
-    assert.ok((await page.evaluate(() => window.STBWindowSeat.conditions())).some(c => c.block && /placement/.test(c.t)));
-    await page.locator('#add-knobs [data-add="spots"]').uncheck();
+    assert.ok((await page.evaluate(() => window.STBWindowSeat.conditions())).some(c => c.block && /extra spot/.test(c.t)));
+    await page.locator('#add-knobs [data-add="xspot"]').uncheck();
     assert.deepEqual(await page.evaluate(() => window.STBWindowSeat.knobs()), knobs);
 
     // Arriving at the bench asks the Store for pine by itself. No ask button on the bench.
     const n0 = log.length;
     await page.locator('#s-intent [data-to="bench"]').click();
     const first = await answered(page, log);
+    // As Alcove: the knobs, the wood and the Store's price are on screen together on arrival, so every turn shows its price.
+    const inView = sel => page.locator(sel).first().evaluate(e => { const r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; });
+    for (const sel of ['#c-H', '#c-wC', '#species', '#bench-money .big']) assert.equal(await inView(sel), true, sel + ' in view on arrival');
+    assert.match(await page.locator('#bench-money .big').innerText(), /^\$[\d,]+\.\d\d$/, 'the Store’s price, live');
     assert.equal(log.length - n0, 1, 'arriving at the bench asks the Store once');
     assert.ok(first.request.payload.definition.cutPackages.every(p => p.material.species === 'pine'), 'pine, already selected');
     assert.equal(await page.locator('#bench-money button, #s-configure [data-ask]').count(), 0, 'no ask button on the bench');
@@ -115,8 +118,9 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     await until(async () => (await seat(page)).terms.stage === 'HANDED_OFF', 'custody');
     assert.equal(await page.evaluate(s => window.STBTermsFlow.verify(s), (await seat(page)).terms), true, 'hash-linked terms chain');
     const trailAudit = await page.evaluate(() => window.STBWindowSeat.auditText());
-    // Switching route keeps the one state.
-    await page.locator('[data-view-btn="whole"]').click();
+    // Switching route keeps the one state. The fork lives on the Idea line: back to Idea, then switch.
+    await page.locator('#nav-idea').click();
+    await page.locator('#bar [data-view-btn="whole"]').click();
     assert.equal((await seat(page)).terms.stage, 'HANDED_OFF');
     assert.equal(await page.locator('#s-audit').isVisible(), true, 'the audit copy is in the long scroll');
     assert.equal(await page.locator('#audit-text').innerText(), await page.evaluate(() => window.STBWindowSeat.auditText()));
@@ -126,7 +130,7 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     const fromB = log.length; // the long scroll is a fresh page: its requests are counted from here
     const b = await open(browser, origin);
     page = b.page;
-    await page.locator('[data-view-btn="whole"]').click();
+    await page.locator('#bar [data-view-btn="whole"]').click();
     assert.equal(await page.evaluate(() => [...document.querySelectorAll('.step')].filter(s => s.offsetParent).length), 8, 'seven pages and the audit copy, one scroll');
     await page.locator('#btn-ask').click();
     const w1 = await answered(page, log, fromB);
@@ -219,7 +223,7 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     assert.equal(await page.locator('#species').count(), 1, 'one wood control');
     assert.equal(await page.locator('#s-configure #species').count(), 1, 'on the bench');
     assert.equal(await page.locator('#s-store #species, #store-wood').count(), 0, 'not on the Store-answer page');
-    assert.equal(await page.evaluate(() => document.getElementById('bench-money-box').nextElementSibling.querySelector('#species') !== null), true, 'the wood sits directly beneath the price');
+    assert.deepEqual(await page.evaluate(() => [...document.getElementById('species').closest('.matprice').children].map(e => e.dataset.knob || e.id)), ['WOOD', 'SPOTS', 'bench-money-box'], 'one frame: wood, then spotting, then the Store price');
     assert.equal(await page.locator('#species .swatch.on').getAttribute('data-material'), 'pine');
     const pinePrice = await page.locator('#bench-money .big').innerText();
     const askWood = async k => {
