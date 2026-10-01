@@ -71,12 +71,13 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
 
     // Intent makes the knobs; the bench shows exactly those, and has no way to add one.
     const knobs = await page.evaluate(() => window.STBWindowSeat.knobs());
-    assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), [...knobs].sort());
+    // Every knob is turned on the bench except wood, which is turned under the price on the Store-answer page.
+    assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), knobs.filter(k => k !== 'WOOD').sort());
     assert.equal(await page.locator('#s-configure [data-add]').count(), 0, 'no knob is added on the bench');
     await page.locator('#add-knobs [data-add="spots"]').check();
     const withSpots = await page.evaluate(() => window.STBWindowSeat.knobs());
     assert.deepEqual(withSpots.filter(k => !knobs.includes(k)), ['SPOTS']);
-    assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), [...withSpots].sort());
+    assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), withSpots.filter(k => k !== 'WOOD').sort());
     // A knob added by hand brings its required facts empty: no hidden default, so the Store is not asked yet.
     assert.ok((await page.evaluate(() => window.STBWindowSeat.conditions())).some(c => c.block && /placement/.test(c.t)));
     await page.locator('#add-knobs [data-add="spots"]').uncheck();
@@ -196,6 +197,49 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     assert.equal(refused.status, 'REFUSED');
     assert.deepEqual(refused.reasonCodes, ['NO_MATCHING_HARDWARE_OFFERING']);
     assert.equal(refused.storeSku ?? null, null);
+
+    // Wood sits directly under the price and starts resolved as pine. Changing it is a new version: the page asks
+    // the Store again by itself (no second button) and the Store's new price replaces the old one. The page
+    // computes no price; a wood the pinned Store can't supply comes back as the Store's refusal.
+    await page.locator('#sc-gauge').selectOption('#10');
+    // Back to the standard job: 14 in deep, boards across by the rule (1×8s edge-milled to 7 in).
+    await page.locator('#c-d').evaluate(e => { e.value = '14'; e.dispatchEvent(new Event('input', { bubbles: true })); });
+    await page.locator('#c-runs [data-n="derived"]').click();
+    let n5 = log.length;
+    await page.locator('#btn-ask').click();
+    await settled(page);
+    assert.equal(log[n5].answer.rawEvaluation.status, 'SUPPORTABLE');
+    assert.ok(log[n5].request.payload.definition.cutPackages.every(p => p.material.species === 'pine'), 'pine to start');
+    const pineQ = log[n5].answer.rawEvaluation.totals.sumOfSupportableLines;
+    assert.equal(await page.evaluate(() => document.getElementById('store-panel').nextElementSibling.id), 'store-wood');
+    assert.equal(await page.locator('#s-configure [data-knob="WOOD"]').count(), 0, 'wood is not on the bench');
+    assert.equal(await page.locator('#species .sp.on').getAttribute('data-k'), 'pine');
+    const askWood = async k => {
+      const n = log.length;
+      await page.locator('#species [data-k="' + k + '"]').click();
+      await until(async () => log.length > n, 'Store asked for ' + k);
+      await settled(page);
+      assert.equal(log.length - n, 1, 'one Store request for ' + k);
+      assert.equal((await seat(page)).current, true, 'the answer on screen is for ' + k);
+      assert.equal(await page.locator('#store-panel [data-ask]').count(), 0, 'no second button');
+      assert.equal(await page.locator('#species .sp.on').getAttribute('data-k'), k);
+      return log[n];
+    };
+    const poplar = await askWood('poplar');
+    assert.ok(poplar.request.payload.definition.cutPackages.every(p => p.material.species === 'poplar'), 'the species fact is on the definition');
+    assert.notEqual(poplar.request.payload.definition.configurationVersion, log[n5].request.payload.definition.configurationVersion, 'a new version');
+    assert.equal(poplar.answer.rawEvaluation.status, 'SUPPORTABLE');
+    assert.notEqual(poplar.answer.rawEvaluation.totals.sumOfSupportableLines, pineQ, 'the Store repriced');
+    assert.match(await page.locator('#store-panel').innerText(), /Complete budgetary estimate/);
+    const cherry = await askWood('cherry');
+    assert.ok(cherry.request.payload.definition.cutPackages.every(p => p.material.species === 'cherry'));
+    assert.equal((await page.evaluate(() => window.STBWindowSeat.conditions())).some(c => c.block), false, 'the page does not pre-judge the wood');
+    assert.notEqual(cherry.answer.rawEvaluation.status, 'SUPPORTABLE', 'the pinned Store stocks no cherry this wide');
+    assert.ok(cherry.answer.rawEvaluation.packages.some(p => p.status !== 'SUPPORTABLE' && p.reasonCodes.length), 'the refusal carries the Store\'s reasons');
+    assert.match(await page.locator('#store-panel').innerText(), /No complete budgetary estimate/);
+    const backToPine = await askWood('pine');
+    assert.equal(backToPine.answer.rawEvaluation.totals.sumOfSupportableLines, pineQ, 'pine prices as pine again');
+    assert.deepEqual(b.errors, []);
     assert.deepEqual(b.errors, []);
   } finally {
     await browser.close();

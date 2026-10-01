@@ -107,7 +107,11 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     assert.equal(await page.locator('#knob-table tbody tr').count(), 14);
     assert.ok(await page.locator('#s-intent [data-add]').count() >= 4, 'add a knob by hand lives on the intent page');
     assert.equal(await page.locator('#s-bench [data-add], #s-bench [data-kept]').count(), 0, 'the bench adds no knob');
-    assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), [...knobs].sort());
+    // Wood is the one knob turned under the price, on the Store-answer page; every other knob is on the bench.
+    assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), knobs.filter(k => k !== 'WOOD').sort());
+    assert.equal(await page.evaluate(() => document.getElementById('store-panel').nextElementSibling.querySelector('[data-knob="WOOD"]') !== null), true, 'wood sits directly under the price');
+    assert.deepEqual(await page.locator('#species .sp').evaluateAll(els => els.map(e => e.dataset.k)), ['pine', 'poplar', 'cherry', 'oak']);
+    assert.equal(await page.locator('#species .sp.on').getAttribute('data-k'), 'pine', 'wood starts resolved as pine');
 
     // The sketch's 14 in depth over two boards is 7 in each: 1×8 select pine, edge-milled to 7 in.
     let req = await request(page);

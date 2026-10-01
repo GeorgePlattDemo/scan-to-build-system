@@ -658,6 +658,13 @@
       "blobSha": "24484f87d05e8d418c7d5601a1982ccbd03e0e1f",
       "bytes": 229947,
       "reason": "Cache-buster for Window Seat 0.9: its register shows wood screws as SENT, a requirement the Store resolves to its own item or refuses."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-species-at-price",
+      "blobSha": "6c003296f005f35551ce658ae404757a0f77753d",
+      "bytes": 229947,
+      "reason": "Cache-buster for Window Seat 0.9: wood sits under the Store price and starts as pine; changing it asks the Store again for the new version."
     }
   ],
   "retiredFiles": [
