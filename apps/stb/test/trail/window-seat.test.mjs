@@ -108,14 +108,14 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     assert.ok(await page.locator('#s-intent [data-add]').count() >= 4, 'add a knob by hand lives on the intent page');
     assert.equal(await page.locator('#s-bench [data-add], #s-bench [data-kept]').count(), 0, 'the bench adds no knob');
     assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.benchKnobs())).sort(), [...knobs].sort());
-    // Wood is one control, on the bench, pine already selected; the bench's one price sits directly under it.
+    // Wood is Alcove's material block, on the bench, pine already selected, directly beneath the bench's one price.
     // The Store-answer page shows the answer and holds no wood control.
     assert.equal(await page.locator('#species').count(), 1, 'one wood control');
     assert.equal(await page.locator('#s-configure [data-knob="WOOD"]').count(), 1, 'on the bench');
     assert.equal(await page.locator('#s-store [data-knob="WOOD"], #store-wood').count(), 0, 'not on the Store-answer page');
-    assert.deepEqual(await page.locator('#species .sp').evaluateAll(els => els.map(e => e.dataset.k)), ['pine', 'poplar', 'cherry', 'oak']);
-    assert.equal(await page.locator('#species .sp.on').getAttribute('data-k'), 'pine', 'wood starts resolved as pine');
-    assert.equal(await page.evaluate(() => document.getElementById('species').closest('.grp').nextElementSibling.id), 'bench-money-box', 'the price sits directly under the wood');
+    assert.deepEqual(await page.locator('#species .swatch').evaluateAll(els => els.map(e => [e.dataset.material, e.innerText.trim()])), [['pine', 'Pine'], ['poplar', 'Poplar'], ['cherry', 'Cherry'], ['oak', 'Oak']]);
+    assert.equal(await page.locator('#species .swatch.on').getAttribute('data-material'), 'pine', 'wood starts resolved as pine');
+    assert.equal(await page.evaluate(() => document.getElementById('bench-money-box').nextElementSibling.querySelector('#species') !== null), true, 'the wood sits directly beneath the price');
     assert.equal(await page.locator('#bench-money-box').count(), 1, 'one money block on the bench');
 
     // The sketch's 14 in depth over two boards is 7 in each: 1×8 select pine, edge-milled to 7 in.

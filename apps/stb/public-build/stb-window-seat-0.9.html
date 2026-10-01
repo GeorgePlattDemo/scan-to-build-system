@@ -181,10 +181,10 @@
   .cbx input{margin-top:3px;accent-color:var(--accent);flex:none}
   .sel{font:inherit;font-size:12px;padding:5px 7px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text)}
   .opdet{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px}
-  .sp{cursor:pointer;border-radius:6px;padding:2px;border:1.5px solid transparent;background:none;font:inherit;color:inherit}
-  .sp.on{border-color:var(--accent);background:var(--tint)}
-  .sp div{height:20px;border-radius:4px;border:1px solid rgba(0,0,0,.2)}
-  .sp p{margin:2px 0 0;font-size:9.5px;text-align:center}
+  .swatches{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}
+  .swatch{display:flex;align-items:center;gap:7px;padding:6px 7px;font:inherit;font-size:11px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);cursor:pointer;text-align:left}
+  .swatch.on{border-color:var(--accent);background:var(--tint)}
+  .swatch .dot{width:15px;height:15px;border-radius:50%;border:1px solid rgba(0,0,0,.2);flex:none}
   .ws-draw{background:var(--draw);border-radius:9px;border:1px solid var(--border);padding:6px}
   .ws-draw svg{width:100%;display:block}
   .fs{font-size:11.5px}
@@ -434,7 +434,7 @@
         <div class="actions" style="margin-top:0">
           <button type="button" class="trail-only" data-to="intent">← Your intent</button>
           <span class="fine" id="bench-gate">—</span>
-          <button class="go push" type="button" id="btn-ask">THE STORE ANSWERS →</button>
+          <button class="go push" type="button" id="btn-ask">ASK THE STORE →</button>
         </div>
       </div>
     </div>
@@ -967,10 +967,12 @@ function controls(){
       +'<select class="sel" id="xs-place" aria-label="Where across the board"><option value="">across the board…</option>'+SPOT_RULES.map(s=>'<option value="'+s.k+'"'+(P.xspot.place===s.k?' selected':'')+'>'+s.label+'</option>').join('')+'</select></div></div>';
     h+='</div>';
   }
-  h+='<div class="grp"><p class="gh">WOOD</p>'
-    +'<div id="species" data-knob="WOOD" style="display:grid;grid-template-columns:1fr 1fr;gap:4px"></div>'
-    +'<p class="dim" style="font-size:10.5px;margin:9px 0 0">Solid board, ¾ in. Pick another and the Store is asked again by itself; its price below replaces the last one. It never swaps the wood.</p></div>'
-    +'<div class="box" style="margin:0 0 10px" id="bench-money-box"><h4>THE STORE’S ANSWER FOR THIS VERSION</h4><div class="bd" id="bench-money"></div></div>';
+  h+='<div class="box" style="margin:0 0 10px" id="bench-money-box"><h4>THE STORE’S ANSWER FOR THIS VERSION</h4><div class="bd" id="bench-money"></div></div>'
+    +'<div class="grp" data-knob="WOOD"><p style="margin:0 0 6px;font-weight:600">Material</p><div id="species" class="swatches">'
+    +'<button class="swatch" data-material="pine"><span class="dot" style="background:#C9A227"></span>Pine</button>'
+    +'<button class="swatch" data-material="poplar"><span class="dot" style="background:#9FA678"></span>Poplar</button>'
+    +'<button class="swatch" data-material="cherry"><span class="dot" style="background:#A6522C"></span>Cherry</button>'
+    +'<button class="swatch" data-material="oak"><span class="dot" style="background:#C4A06A"></span>Oak</button></div></div>';
   if(K('SCREWS'))h+='<div class="grp" data-knob="SCREWS"><p class="gh">WOOD SCREWS</p>'
     +'<div class="opdet"><select class="sel" id="sc-gauge" aria-label="Gauge"><option value="">gauge…</option>'+SCREW_GAUGES.map(g=>'<option'+(P.screws.gauge===g?' selected':'')+'>'+g+'</option>').join('')+'</select>'
     +'<input class="sel" id="sc-len" placeholder="length, in" value="'+esc(P.screws.lengthIn)+'" style="width:90px" aria-label="Length in inches">'
@@ -992,8 +994,7 @@ function controls(){
   $('depth-panel').addEventListener('click',e=>{const b=e.target.closest('[data-depth]');if(!b)return;
     P.depth=Math.min(24,Math.max(6,Math.round((P.depth+Number(b.dataset.depth))*4)/4));changed()});
   $('c-runs').onclick=e=>{const b=e.target.closest('button');if(!b)return;P.runsSet=b.dataset.n==='derived'?null:+b.dataset.n;changed()};
-  WOODS.forEach(f=>{const b=document.createElement('button');b.type='button';b.className='sp';b.dataset.k=f.k;
-    b.innerHTML='<div style="background:'+f.c+'"></div><p>'+f.n+'</p>';b.onclick=()=>{if(P.wood!==f.k){P.wood=f.k;changed()}};$('species').appendChild(b)});
+  $$('#species [data-material]').forEach(b=>b.onclick=()=>{P.wood=b.dataset.material;changed()});
   $('btn-reset').onclick=()=>{P=clone(START);controls();changed()};
   lastTargets='';
 }
@@ -1017,7 +1018,7 @@ function syncControls(def){
   $$('#c-runs button').forEach(x=>{const on=x.dataset.n==='derived'?P.runsSet==null:(P.runsSet!=null&&+x.dataset.n===P.runsSet);x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
   const pl=P.spots.rule?spotRule(P.spots):null;
   $$('#c-spot-place button').forEach(x=>{const on=!!pl&&x.dataset.k===pl.k;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
-  $$('#species .sp').forEach(x=>{const on=x.dataset.k===P.wood;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
+  $$('#species [data-material]').forEach(x=>{const on=x.dataset.material===P.wood;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
   const sel=$('xs-target');
   if(sel){const ids=def.feats.map(f=>f.id).join(',');
     if(ids!==lastTargets){lastTargets=ids;
@@ -1265,7 +1266,7 @@ function render(){
 
   /* bench gate */
   $('btn-ask').disabled=blocking.length>0||S.asking;
-  $('btn-ask').textContent='THE STORE ANSWERS →';
+  $('btn-ask').textContent=S.asking?'ASKING THE STORE…':answerCurrent()?'SEE THE STORE’S ANSWER →':'ASK THE STORE →';
   $('bench-gate').textContent=blocking.length?blocking.length+' condition'+(blocking.length===1?'':'s')+' to settle before the Store can answer.':'Revision '+rev.n+' is ready to ask. The Store gets exactly this.';
 
   feedTerms();renderBenchMoney();renderStore(req,cond);renderCall();renderYard();renderRecord(def);renderAudit();
@@ -1275,22 +1276,16 @@ function render(){
 /* ═════ PAGE 4 · THE STORE ANSWERS ═════ */
 
 function renderBenchMoney(){
-  /* The bench's one price: the Store's number for the version on the bench, directly under the wood. No ask button:
-     the bench asks by itself (benchAsk). Nothing here is computed; a refusal shows the Store's own reasons. */
   const el=$('bench-money'); if(!el) return;
-  const blocked=conditions(buildDefinition()).some(c=>c.block);
-  const wood=woodName(P.wood);
-  if(S.asking){ el.innerHTML='<p class="lb">ASKING · '+esc(wood.toUpperCase())+'</p><p class="status ask">Asking the live Store for this version…</p>'; }
-  else if(S.error){ el.innerHTML='<p class="status bad">The Store didn’t answer ('+esc(S.error)+'). Nothing is shown in its place.</p><p class="small dim" style="margin:0">Change anything, or come back to the bench, and it is asked again.</p>'; }
-  else if(!S.answer||(S.answer.stale&&blocked)){ el.innerHTML='<p class="dim" style="margin:0">'+(blocked?'Settle the conditions on the bench first. The Store is asked as soon as they are settled.':'Board lengths, stock, time and price come back from the Store. The bench doesn’t guess them.')+'</p>'; }
+  if(S.asking){ el.innerHTML='<p class="status ask">Asking the live Store…</p>'; }
+  else if(S.error){ el.innerHTML='<p class="status bad">The Store didn’t answer ('+esc(S.error)+'). Nothing is shown in its place.</p>'; }
+  else if(!S.answer){ el.innerHTML='<p class="dim">Board lengths, stock, time and price come back from the Store. The bench doesn’t guess them.</p>'; }
   else {
     const a=S.answer, v=storeView(), t=v&&v.t, stale=a.stale;
-    const sent=woodName(((a.definition.cutPackages||[])[0]||{}).material?.species||P.wood);
-    const why=v&&!v.allOk?[...new Set(v.lines.filter(l=>l.status!=='SUPPORTABLE').flatMap(l=>l.reasonCodes||[]))]:[];
-    el.innerHTML='<p class="lb">'+(stale?'OLD ANSWER · ASKING AGAIN':'STORE BUDGETARY ANSWER · '+esc(sent.toUpperCase())+' · REVISION '+a.rev)+'</p>'
+    el.innerHTML='<p class="lb">'+(stale?'OLD ANSWER · DEFINITION HAS CHANGED':'STORE BUDGETARY ANSWER · REVISION '+a.rev)+'</p>'
       +(v&&v.estimate!=null
         ? '<div class="big" style="'+(stale?'opacity:.5':'')+'">'+money(v.estimate)+'</div><p class="small" style="margin:0">Wood '+money(t.material)+' + machine work '+money(t.machine_service)+(t.items?' + hardware '+money(t.items):'')+' · '+Math.round(v.minutes)+' min. Not a commercial quote.</p>'
-        : '<div class="big none" style="'+(stale?'opacity:.5':'')+'">No complete budgetary estimate</div><p class="small" style="margin:0">The Store refused part of this version'+(why.length?': '+why.map(c=>esc(plain(c))).join('; '):'')+'. The refusal is the result.</p>');
+        : '<div class="big none" style="'+(stale?'opacity:.5':'')+'">No complete budgetary estimate</div><p class="small" style="margin:0">The Store answered this version. A complete number exists only when every line is supportable.</p>');
   }
 }
 

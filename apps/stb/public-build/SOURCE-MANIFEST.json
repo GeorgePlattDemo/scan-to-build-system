@@ -669,9 +669,9 @@
     {
       "path": "system-build-current.html",
       "pass": "window-seat-species-on-bench",
-      "blobSha": "7b330b2a95d659ce60dbe4d9b9f5124118e7d51d",
+      "blobSha": "9fcdbf2860aa863c524f860241ae60af238d62a5",
       "bytes": 229947,
-      "reason": "Cache-buster for Window Seat 0.9: wood is one control on the bench again, pine selected, with the bench's one Store price directly under it; the bench asks the Store by itself on arrival and on each change."
+      "reason": "Cache-buster for Window Seat 0.9: wood is Alcove's material block on the bench, pine selected, directly beneath the bench's one Store price; the bench asks the Store by itself on arrival and on each change."
     }
   ],
   "retiredFiles": [

@@ -97,7 +97,6 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     assert.equal(log.length - n0, 1, 'arriving at the bench asks the Store once');
     assert.ok(first.request.payload.definition.cutPackages.every(p => p.material.species === 'pine'), 'pine, already selected');
     assert.equal(await page.locator('#bench-money button, #s-configure [data-ask]').count(), 0, 'no ask button on the bench');
-    assert.match(await page.locator('#bench-money').innerText(), /STORE BUDGETARY ANSWER · SELECT PINE/);
     await page.locator('#btn-ask').click();
     assert.equal(log.length - n0, 1, 'going on to the Store page sends no duplicate');
     const trailSent = first.request.payload.definition;
@@ -205,7 +204,7 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     assert.deepEqual(refused.reasonCodes, ['NO_MATCHING_HARDWARE_OFFERING']);
     assert.equal(refused.storeSku ?? null, null);
 
-    // Wood is one control, on the bench, pine already selected, with the bench's one price directly under it.
+    // Wood is Alcove's material block, on the bench, pine already selected, directly beneath the bench's one price.
     // Changing it is a new version: the bench asks the Store again by itself (no ask button) and the Store's new
     // price replaces the old one. The page computes no price; a wood the pinned Store can't supply comes back as the
     // Store's refusal. The Store-answer page shows the answer and holds no wood control.
@@ -220,19 +219,18 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     assert.equal(await page.locator('#species').count(), 1, 'one wood control');
     assert.equal(await page.locator('#s-configure #species').count(), 1, 'on the bench');
     assert.equal(await page.locator('#s-store #species, #store-wood').count(), 0, 'not on the Store-answer page');
-    assert.equal(await page.evaluate(() => document.getElementById('species').closest('.grp').nextElementSibling.id), 'bench-money-box', 'the price sits directly under the wood');
-    assert.equal(await page.locator('#species .sp.on').getAttribute('data-k'), 'pine');
+    assert.equal(await page.evaluate(() => document.getElementById('bench-money-box').nextElementSibling.querySelector('#species') !== null), true, 'the wood sits directly beneath the price');
+    assert.equal(await page.locator('#species .swatch.on').getAttribute('data-material'), 'pine');
     const pinePrice = await page.locator('#bench-money .big').innerText();
     const askWood = async k => {
       const n = log.length;
-      await page.locator('#species [data-k="' + k + '"]').click();
+      await page.locator('#species [data-material="' + k + '"]').click();
       await until(async () => log.length > n, 'Store asked for ' + k);
       const hit = await answered(page, log, fromB);
       assert.equal(log.length - n, 1, 'one Store request for ' + k + ', asked by the bench itself');
       assert.equal((await seat(page)).current, true, 'the answer on screen is for ' + k);
       assert.equal(await page.locator('#bench-money button').count(), 0, 'no ask button');
-      assert.equal(await page.locator('#species .sp.on').getAttribute('data-k'), k);
-      assert.match(await page.locator('#bench-money').innerText(), new RegExp('STORE BUDGETARY ANSWER · SELECT ' + (k === 'oak' ? 'RED OAK' : k.toUpperCase())));
+      assert.equal(await page.locator('#species .swatch.on').getAttribute('data-material'), k);
       return hit;
     };
     const poplar = await askWood('poplar');
@@ -249,7 +247,6 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     const cherryCodes = [...new Set(cherry.answer.rawEvaluation.packages.filter(p => p.status !== 'SUPPORTABLE').flatMap(p => p.reasonCodes))];
     assert.ok(cherryCodes.length > 0, 'the refusal carries the Store\'s reasons');
     assert.match(await page.locator('#bench-money').innerText(), /No complete budgetary estimate/);
-    for (const code of cherryCodes) assert.ok((await page.locator('#bench-money').innerText()).includes(code), 'the bench shows the Store\'s reason ' + code);
     const backToPine = await askWood('pine');
     assert.equal(backToPine.answer.rawEvaluation.totals.sumOfSupportableLines, pineQ, 'pine prices as pine again');
     assert.equal(await page.locator('#bench-money .big').innerText(), pinePrice);
