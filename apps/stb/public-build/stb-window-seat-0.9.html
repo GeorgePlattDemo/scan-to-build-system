@@ -406,6 +406,10 @@
           <div class="ctl"><div id="ctlcol"></div><p class="backlink">A knob you need isn’t here? <a href="#s-intent" data-to="intent">Add it on your intent page</a>. The bench never adds one.</p></div>
           <div>
             <div class="ws-draw"><svg id="elev" viewBox="0 0 520 400" role="img" aria-label="Window seat elevation: left tower, center window-seat module with upper storage, right tower"></svg></div>
+            <div class="box" style="margin:12px 0 0" id="bench-money-box">
+              <h4>THE STORE’S ANSWER FOR THIS VERSION</h4>
+              <div class="bd" id="bench-money"></div>
+            </div>
             <div class="box" style="margin:12px 0 0">
               <h4>FINISHED SHELVES AND OPENINGS</h4>
               <div class="bd fs" id="p-feat"></div>
@@ -1274,11 +1278,29 @@ function render(){
   $('btn-ask').textContent=S.asking?'ASKING THE STORE…':answerCurrent()?'SEE THE STORE’S ANSWER →':'ASK THE STORE →';
   $('bench-gate').textContent=blocking.length?blocking.length+' condition'+(blocking.length===1?'':'s')+' to settle before the Store can answer.':'Revision '+rev.n+' is ready to ask. The Store gets exactly this.';
 
-  feedTerms();renderStore(req,cond);renderCall();renderYard();renderRecord(def);renderAudit();
+  feedTerms();renderBenchMoney();renderStore(req,cond);renderCall();renderYard();renderRecord(def);renderAudit();
   syncNav();
 }
 
 /* ═════ PAGE 4 · THE STORE ANSWERS ═════ */
+
+function renderBenchMoney(){
+  const el=$('bench-money'); if(!el) return;
+  const blocked=conditions(buildDefinition()).some(c=>c.block);
+  if(S.asking){ el.innerHTML='<p class="status ask">Asking the live Store…</p>'; }
+  else if(S.error){ el.innerHTML='<p class="status bad">The Store didn’t answer ('+esc(S.error)+'). Nothing is shown in its place.</p><button type="button" class="go" data-ask>TRY AGAIN</button>'; }
+  else if(!S.answer){ el.innerHTML='<p class="dim">Board lengths, stock, time and price come back from the Store. The bench doesn’t guess them.</p><button type="button" class="go" data-ask'+(blocked?' disabled':'')+'>ASK THE STORE NOW</button>'; }
+  else {
+    const a=S.answer, v=storeView(), t=v&&v.t, stale=a.stale;
+    el.innerHTML='<p class="lb">'+(stale?'OLD ANSWER · DEFINITION HAS CHANGED':'STORE BUDGETARY ANSWER · REVISION '+a.rev)+'</p>'
+      +(v&&v.estimate!=null
+        ? '<div class="big" style="'+(stale?'opacity:.5':'')+'">'+money(v.estimate)+'</div><p class="small" style="margin:0">Wood '+money(t.material)+' + machine work '+money(t.machine_service)+(t.items?' + hardware '+money(t.items):'')+' · '+Math.round(v.minutes)+' min. Not a commercial quote.</p>'
+        : '<div class="big none" style="'+(stale?'opacity:.5':'')+'">No complete budgetary estimate</div><p class="small" style="margin:0">The Store answered this version. A complete number exists only when every line is supportable.</p>')
+      +(stale?'<p class="small dim">Ask again for this revision. The old number stays history.</p><button type="button" class="go" data-ask'+(blocked?' disabled':'')+'>ASK AGAIN FOR REVISION '+rev.n+'</button>':'');
+  }
+  $$('#bench-money [data-ask]').forEach(bt=>bt.onclick=askStore);
+}
+
 function renderStore(req,cond){
   const a=S.answer,v=storeView(),panel=$('store-panel');
   const blocked=cond.some(c=>c.block);
