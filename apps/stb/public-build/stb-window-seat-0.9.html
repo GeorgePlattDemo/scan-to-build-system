@@ -389,6 +389,19 @@
           <div class="ctl"><div id="ctlcol"></div><p class="backlink">A knob you need isn’t here? <a href="#s-intent" data-to="intent">Add it on your intent page</a>. The bench never adds one.</p></div>
           <div>
             <div class="ws-draw"><svg id="elev" viewBox="0 0 520 400" role="img" aria-label="Window seat elevation: left tower, center window-seat module with upper storage, right tower"></svg></div>
+            <div class="box" style="margin:12px 0 0" id="bench-money-box">
+              <h4>THE STORE’S ANSWER FOR THIS VERSION</h4>
+              <div class="bd" id="bench-money"></div>
+            </div>
+            <div class="grp" data-knob="WOOD" style="margin:12px 0 0">
+              <p style="margin:0 0 6px;font-weight:600">Material</p>
+              <div id="species" class="swatches">
+                <button class="swatch" type="button" data-material="pine"><span class="dot" style="background:#C9A227"></span>Pine</button>
+                <button class="swatch" type="button" data-material="poplar"><span class="dot" style="background:#9FA678"></span>Poplar</button>
+                <button class="swatch" type="button" data-material="cherry"><span class="dot" style="background:#A6522C"></span>Cherry</button>
+                <button class="swatch" type="button" data-material="oak"><span class="dot" style="background:#C4A06A"></span>Oak</button>
+              </div>
+            </div>
             <div class="box" style="margin:12px 0 0">
               <h4>FINISHED SHELVES AND OPENINGS</h4>
               <div class="bd fs" id="p-feat"></div>
@@ -434,7 +447,7 @@
         <div class="actions" style="margin-top:0">
           <button type="button" class="trail-only" data-to="intent">← Your intent</button>
           <span class="fine" id="bench-gate">—</span>
-          <button class="go push" type="button" id="btn-ask">ASK THE STORE →</button>
+          
         </div>
       </div>
     </div>
@@ -967,13 +980,7 @@ function controls(){
       +'<select class="sel" id="xs-place" aria-label="Where across the board"><option value="">across the board…</option>'+SPOT_RULES.map(s=>'<option value="'+s.k+'"'+(P.xspot.place===s.k?' selected':'')+'>'+s.label+'</option>').join('')+'</select></div></div>';
     h+='</div>';
   }
-  h+='<div class="box" style="margin:0 0 10px" id="bench-money-box"><h4>THE STORE’S ANSWER FOR THIS VERSION</h4><div class="bd" id="bench-money"></div></div>'
-    +'<div class="grp" data-knob="WOOD"><p style="margin:0 0 6px;font-weight:600">Material</p><div id="species" class="swatches">'
-    +'<button class="swatch" data-material="pine"><span class="dot" style="background:#C9A227"></span>Pine</button>'
-    +'<button class="swatch" data-material="poplar"><span class="dot" style="background:#9FA678"></span>Poplar</button>'
-    +'<button class="swatch" data-material="cherry"><span class="dot" style="background:#A6522C"></span>Cherry</button>'
-    +'<button class="swatch" data-material="oak"><span class="dot" style="background:#C4A06A"></span>Oak</button></div></div>';
-  if(K('SCREWS'))h+='<div class="grp" data-knob="SCREWS"><p class="gh">WOOD SCREWS</p>'
+    if(K('SCREWS'))h+='<div class="grp" data-knob="SCREWS"><p class="gh">WOOD SCREWS</p>'
     +'<div class="opdet"><select class="sel" id="sc-gauge" aria-label="Gauge"><option value="">gauge…</option>'+SCREW_GAUGES.map(g=>'<option'+(P.screws.gauge===g?' selected':'')+'>'+g+'</option>').join('')+'</select>'
     +'<input class="sel" id="sc-len" placeholder="length, in" value="'+esc(P.screws.lengthIn)+'" style="width:90px" aria-label="Length in inches">'
     +'<select class="sel" id="sc-finish" aria-label="Finish"><option value="">finish…</option>'+SCREW_FINISHES.map(f=>'<option value="'+f[0]+'"'+(P.screws.finish===f[0]?' selected':'')+'>'+f[1]+'</option>').join('')+'</select>'
@@ -1265,8 +1272,7 @@ function render(){
   if(hs)$('history-note').innerHTML='<b>'+hs+' earlier answer'+(hs===1?'':'s')+' kept in history.</b> This version, revision '+rev.n+', needs its own fresh Store answer. Nothing from an earlier version carries over.';
 
   /* bench gate */
-  $('btn-ask').disabled=blocking.length>0||S.asking;
-  $('btn-ask').textContent=S.asking?'ASKING THE STORE…':answerCurrent()?'SEE THE STORE’S ANSWER →':'ASK THE STORE →';
+  if($('btn-ask')){$('btn-ask').disabled=blocking.length>0||S.asking;$('btn-ask').textContent=S.asking?'ASKING THE STORE…':answerCurrent()?'SEE THE STORE’S ANSWER →':'ASK THE STORE →';}
   $('bench-gate').textContent=blocking.length?blocking.length+' condition'+(blocking.length===1?'':'s')+' to settle before the Store can answer.':'Revision '+rev.n+' is ready to ask. The Store gets exactly this.';
 
   feedTerms();renderBenchMoney();renderStore(req,cond);renderCall();renderYard();renderRecord(def);renderAudit();
@@ -1298,7 +1304,7 @@ function renderStore(req,cond){
     +(location.protocol==='file:'||/STORE_ZERO_UNAVAILABLE|Failed to fetch|NetworkError|Load failed/i.test(S.error)?'<p class="small dim">The live Store answers the published app. A copy of this page opened anywhere else can’t reach it, and a failed ask stays a failed ask.</p>':'')
     +'<button type="button" class="go" data-ask>TRY AGAIN</button>'}
   else if(!a){h='<p class="lb">NOT ASKED YET</p><p class="status">Revision '+rev.n+' hasn’t been sent. '+(blocked?'Settle the conditions on the bench first.':'Ask, and the live Store answers this exact version.')+'</p>'
-    +'<button type="button" class="go" data-ask'+(blocked?' disabled':'')+'>ASK THE STORE NOW</button>'}
+    '}'
   else{
     const t=v.t,stale=a.stale,id=identities();
     h='<p class="lb">'+(stale?(a.reused?'ANSWER USED · ASK AGAIN FOR REVISION '+rev.n:'OLD ANSWER · REVISION '+a.rev+' · YOUR DEFINITION HAS CHANGED'):'STORE BUDGETARY ANSWER · STORE ZERO · REVISION '+a.rev)+'</p>'
@@ -1520,7 +1526,7 @@ $('add-knobs').addEventListener('change',e=>{const c=e.target.closest('[data-add
 $('kept-asks').addEventListener('change',e=>{const c=e.target.closest('[data-kept]');if(!c)return;I.kept[c.dataset.kept]=c.checked;changed()});
 $('other-text').addEventListener('input',function(){I.otherText=this.value;changed()});
 
-$('btn-ask').onclick=()=>{if(answerCurrent()){go('store');return}if(S.view==='trail')go('store');else{$('s-store').scrollIntoView({behavior:'smooth',block:'start'});askStore()}};
+if($('btn-ask'))$('btn-ask').onclick=()=>{if(answerCurrent()){go('store');return}if(S.view==='trail')go('store');else{$('s-store').scrollIntoView({behavior:'smooth',block:'start'});askStore()}};
 $('btn-call').onclick=()=>go('request');
 $('copy-audit').onclick=()=>{const txt=$('audit-text').textContent;(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>{$('copy-note').textContent='Copied.'},()=>{$('copy-note').textContent='Select the text below and copy it.'})};
 for(const id of ['call-terms','yard-terms','record-terms'])TERMS.bind($(id),afterTerms);
