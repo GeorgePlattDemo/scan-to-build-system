@@ -1486,12 +1486,15 @@ function setView(view,section){
   $$('[data-view-btn]').forEach(bt=>{const on=bt.dataset.viewBtn===view;bt.classList.toggle('on',on);bt.setAttribute('aria-pressed',on)});
   syncNav();benchAsk();
 }
+function askStoreIfDue(section){
+  if(section==='store'&&(!S.answer||S.answer.stale)&&!S.asking&&!S.error&&!conditions(buildDefinition()).some(c=>c.block))askStore();
+}
 function go(section){
   if(!SECTIONS.includes(section)&&section!=='audit')return;
   if(!usable()[section])return;
-  if(S.view==='whole'){S.section=section;syncNav();benchAsk();$('s-'+section).scrollIntoView({behavior:'smooth',block:'start'});return}
+  if(S.view==='whole'){S.section=section;syncNav();benchAsk();askStoreIfDue(section);$('s-'+section).scrollIntoView({behavior:'smooth',block:'start'});return}
   setView('trail',section);window.scrollTo(0,0);
-  if(section==='store'&&(!S.answer||S.answer.stale)&&!S.asking&&!S.error&&!conditions(buildDefinition()).some(c=>c.block))askStore();
+  askStoreIfDue(section);
 }
 /* Which page is on screen in the long scroll: the last one whose top has passed the route bar. */
 function visibleSection(){let cur='hero';for(const s of SECTIONS){const r=$('s-'+s).getBoundingClientRect();if(r.top<120)cur=s}return cur}
