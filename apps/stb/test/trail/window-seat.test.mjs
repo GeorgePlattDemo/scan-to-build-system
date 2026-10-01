@@ -215,7 +215,7 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     await whole.locator('#c-spot-place button', { hasText: '2 in' }).click();
     const trailLast = sent[sent.length - 1];
     n = sent.length;
-    await whole.locator('#btn-ask').click();
+    await whole.locator('[data-nav="store"]').click();
     await asked(whole);
     assert.ok(sent.length > n, 'the long scroll asks the Store too');
     // The fork: one state, one definition, one Store request, whichever route.
