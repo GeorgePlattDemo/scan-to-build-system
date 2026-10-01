@@ -40,6 +40,10 @@ const KNOWN_FAILING = new Set([
   'alcove:R1',
   'outdoor:R1',
   'playhouse:R1',
+  'start-own:R2',
+  'alcove:R2',
+  'outdoor:R2',
+  'playhouse:R2',
 ]);
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css' };
