@@ -19,7 +19,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-user-defined-board-runtime-bridge.js?v=f77a49e9"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=bcf7a02c"></script>
+<script src="stb-build-guide-spec.js?v=9523c7af"></script>
 <script>
 (() => {
   const shell = document.getElementById('stb-current');
@@ -1234,7 +1234,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
                   id="window-seat-frame"
                   class="window-seat-shell-frame"
                   title="Space utilization · Window seat"
-                  src="stb-window-seat-0.9.html?v=6fdb7e7d"
+                  src="stb-window-seat-0.9.html?v=99bac6a4"
                 ></iframe>
               </div>
             `;
@@ -1246,7 +1246,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
             event.stopImmediatePropagation();
             selectJourneyProject('window-seat');
             originalShow.call(win, 'window-seat-live');
-            // Every visit opens at page 1, her idea, where both routes are offered.
+            // Every visit opens at page 1, the want, kept behind the trail: no step is current there.
             seatFrame()?.contentWindow?.postMessage({type:'STB_SEAT_GO', stage:'hero'}, win.location.origin);
           }, true);
         }
@@ -3158,6 +3158,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       record:'6 · Pick up & build'
     });
 
+    // Window Seat: step 1 reads Intent. Page 1 (the want) sits behind the trail, so no step is current there.
+    // Buttons 2 to 6 keep the shared labels. Other tiles are untouched.
+    const TRAIL_NAV_LABEL_OVERRIDES = Object.freeze({
+      'window-seat': Object.freeze({ scan:'1 · Intent' })
+    });
+
     function restoreJourneyNav(nav) {
       if (!nav) return;
       nav.removeAttribute('data-active-project');
@@ -3320,7 +3326,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         button.setAttribute('data-go',directTarget);
         button.dataset.jobProject = projectId;
         button.dataset.jobTarget = directTarget;
-        button.textContent = START_OWN_NAV_LABELS[stage] || button.dataset.defaultLabel;
+        button.textContent = TRAIL_NAV_LABEL_OVERRIDES[projectId]?.[stage] || START_OWN_NAV_LABELS[stage] || button.dataset.defaultLabel;
 
         // Duplicate technical stages project onto the same Job 1 customer surface. Keep one button only.
         if (stage === 'review' || stage === 'terms' || stage === 'recap') button.hidden = true;

@@ -7,7 +7,7 @@
 //   (once a tile is fixed, it stays fixed).
 //
 // Checks per tile (no tile is excepted):
-//   R1  the top nav shows the six trail steps, with the contract labels, in order
+//   R1  the top nav shows the six trail steps, with the contract labels (a tile's own `steps`, if declared), in order
 //   R2  every visible nav button lands on this tile's own pages (or Landing / Home); no other buttons
 //   R3  a step you cannot use yet is shown inert (disabled); steps 2-6 never silently do nothing
 //   R8  every tile on the Shared Home is declared in the contract, and every declared tile is on the Shared Home
@@ -139,6 +139,7 @@ test('trail scoreboard: every tile against the trail rules', { timeout: 600000 }
     for (const tile of contract.tiles) {
       if (tile.exception) continue;
       const allowed = new Set([...tile.pages, ...contract.sharedPages]);
+      const tileSteps = tile.steps || contract.steps;
 
       let { page, frame } = await enterTile(browser, origin, tile);
       const entry = await activePage(frame);
@@ -146,13 +147,13 @@ test('trail scoreboard: every tile against the trail rules', { timeout: 600000 }
       if (ACCOUNT_NAMES.test(await pageText(page))) add(tile.id, 'R9', `account name on entry page "${entry}"`);
 
       const nav = await visibleNav(frame);
-      const steps = nav.filter(b => contract.steps.includes(stripNumber(b.label)));
+      const steps = nav.filter(b => tileSteps.includes(stripNumber(b.label)));
       const stepLabels = steps.map(b => stripNumber(b.label));
-      if (JSON.stringify(stepLabels) !== JSON.stringify([...contract.steps])) {
+      if (JSON.stringify(stepLabels) !== JSON.stringify([...tileSteps])) {
         add(tile.id, 'R1', `nav steps are [${nav.map(b => b.label).join(' | ')}]`);
       }
       for (const b of nav) {
-        const isStep = contract.steps.includes(stripNumber(b.label));
+        const isStep = tileSteps.includes(stripNumber(b.label));
         if (!isStep && !contract.sharedPages.includes(b.go)) add(tile.id, 'R2', `extra nav button "${b.label}" → ${b.go}`);
       }
       await page.close();
@@ -167,7 +168,7 @@ test('trail scoreboard: every tile against the trail rules', { timeout: 600000 }
         const landed = await activePage(frame);
         const after = await fingerprint(page, frame);
         if (!allowed.has(landed)) add(tile.id, 'R2', `"${b.label}" crosses to "${landed}"`);
-        const stepIndex = contract.steps.indexOf(stripNumber(b.label));
+        const stepIndex = tileSteps.indexOf(stripNumber(b.label));
         if (stepIndex >= 1 && before === after) add(tile.id, 'R3', `"${b.label}" does nothing and is not shown inert`);
         if (allowed.has(landed) && ACCOUNT_NAMES.test(await pageText(page))) add(tile.id, 'R9', `account name on "${landed}"`);
         await page.close();

@@ -832,7 +832,7 @@
   // Job 3 (Window Seat) rails: one per page of stb-window-seat-0.9.html, rendered inside that page.
   const JOB3={
     "ws-hero": {
-      "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 1 · HER IDEA",
+      "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 1 · WHAT SHE WANTS",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
@@ -852,7 +852,7 @@
             "One long scroll: every page in order, on one screen, for audit.",
             "One state. One definition. One Store request. Whichever route.",
             "Switching route keeps the version and the terms stage.",
-            "Pages 1 and 2 both sit on trail step 1."
+            "Page 1 sits behind the trail. Step 1, Intent, is page 2."
           ]
         },
         {
@@ -860,7 +860,7 @@
           "items": [
             "Both routes send the same definition and get the same result hash. Test: window-seat-journey.test.mjs.",
             "Switching route keeps the state. Tests: window-seat.test.mjs, window-seat-journey.test.mjs.",
-            "The nav stays on step 1 across pages 1 and 2. Tests: window-seat.test.mjs, window-seat-journey.test.mjs."
+            "No nav step is current on page 1. Step 1, Intent, starts on page 2. Tests: window-seat.test.mjs, window-seat-journey.test.mjs."
           ]
         },
         {

@@ -637,6 +637,20 @@
       "blobSha": "d5874157845c754f1b70ca8cfcb2f9bd4c647dfa",
       "bytes": 90531,
       "reason": "Window Seat screws travel as a Store requirement when that knob is on. Incomplete screw facts block the ask. #8 stays selectable; Store owns stock refusal."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-page1-want",
+      "blobSha": "50aeff856c160dd33315923b9ed6059d33c3b2ca",
+      "bytes": 229947,
+      "reason": "Window Seat step 1 reads \"1 · Intent\"; other tiles keep \"1 · Your idea\"; page 1 sits behind the trail. Cache-busters for the page and the guide."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "window-seat-page1-want",
+      "blobSha": "889a48b27ef49383d6b29b305b2327853f1496ce",
+      "bytes": 90576,
+      "reason": "Window Seat step 1 reads \"1 · Intent\"; other tiles keep \"1 · Your idea\"; page 1 sits behind the trail. Cache-busters for the page and the guide."
     }
   ],
   "retiredFiles": [

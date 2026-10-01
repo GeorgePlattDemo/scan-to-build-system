@@ -1,5 +1,6 @@
 // Window Seat 0.9 on the trail: the fully worked example follows the same rules as every tile.
-// - Page 1 is her idea, with the two routes stated on it: the regular path and one long scroll.
+// - Page 1 is the want, kept behind the trail: no nav step is current there. The two routes are the top pills, and
+//   page 1 has one forward control, Intent. Step 1, Intent, is the next page.
 // - Intent makes the knobs, including any added by hand. The bench only turns them; it has no way to add one.
 // - Both routes are one state, one definition and one Store request: the request is identical from either.
 // - The request is a plain cut-package request the System wire accepts (rule 4: the live Store answers).
@@ -81,20 +82,23 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     page.on('pageerror', e => errors.push(e.message));
     await page.goto(`${origin}/${FILE}`, { waitUntil: 'load' });
 
-    // Page 1 is her idea, alone, with both routes on it.
+    // Page 1 is the want, alone, outside the trail steps. The routes are the pills; one forward control, Intent.
     assert.equal(await page.evaluate(() => document.body.dataset.view), 'trail');
     assert.deepEqual(await page.locator('.step:visible').evaluateAll(els => els.map(e => e.id)), ['s-hero']);
-    assert.equal(await page.locator('#fork [data-route="trail"]').count(), 1);
-    assert.equal(await page.locator('#fork [data-route="whole"]').count(), 1);
+    assert.equal(await page.locator('[data-view-btn="trail"]').count(), 1);
+    assert.equal(await page.locator('[data-view-btn="whole"]').count(), 1);
+    assert.deepEqual(await page.locator('#s-hero button').evaluateAll(els => els.map(e => [e.dataset.to, e.innerText.trim()])), [['intent', 'Intent →']]);
+    assert.equal(await page.locator('[data-nav].on').count(), 0, 'page 1 is not a trail step');
+    assert.equal(await page.locator('[data-nav="scan"]').innerText(), '1 · Intent');
     assert.equal(await page.locator('[data-nav="request"]').isDisabled(), true, 'your call is inert before a Store answer');
     // Each page's Dev/Rev rail is a slot filled from the app's one guide file.
     assert.equal(await page.locator('aside.rail[data-guide-id]').count(), 8);
     assert.match(await page.locator('#s-hero aside.rail').innerText(), /DEV GUIDE|DEV\/REV GUIDE/);
     assert.match(await page.locator('#s-hero aside.rail').innerText(), /window-seat-hero/);
 
-    await page.locator('#fork [data-route="trail"]').click();
+    await page.locator('#s-hero [data-to="intent"]').click();
     assert.deepEqual(await page.locator('.step:visible').evaluateAll(els => els.map(e => e.id)), ['s-intent']);
-    assert.equal(await page.locator('[data-nav="scan"]').getAttribute('class'), 'pill on', 'both idea pages sit on step 1');
+    assert.equal(await page.locator('[data-nav="scan"]').getAttribute('class'), 'pill on', 'step 1, Intent, starts on the intent page');
 
     // The knob rule: every knob, including those added by hand, is made on the intent page. The bench shows exactly
     // those knobs and has no control that adds one.
@@ -191,7 +195,7 @@ test('Window Seat 0.9: one job, two routes, same rules, live-Store request', { t
     const errors2 = [];
     whole.on('pageerror', e => errors2.push(e.message));
     await whole.goto(`${origin}/${FILE}`, { waitUntil: 'load' });
-    await whole.locator('#fork [data-route="whole"]').click();
+    await whole.locator('[data-view-btn="whole"]').click();
     assert.equal(await whole.evaluate(() => document.body.dataset.view), 'whole');
     assert.equal(await whole.locator('.step:visible').count(), 8, 'seven pages and the audit copy');
     await whole.locator('#p-depth button', { hasText: 'USE 14 1/2 IN' }).click();
