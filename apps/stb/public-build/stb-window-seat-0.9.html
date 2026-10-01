@@ -1217,7 +1217,7 @@ function render(){
   if(has('SPOTS'))rows.push(['Shelf-pin spot facing',P.spots.rule?spotRule(P.spots).label:'placement missing',P.spots.rule?((P.SH.LEFT+P.SH.RIGHT)*2*def.runs)+' spots at the shelf positions, on the tower sides':'nothing until placed','FEATURES · OPERATION']);
   if(has('XSPOT'))rows.push(['One more spot',P.xspot.target||'not placed',P.xspot.target?'one spot on each board of '+P.xspot.target:'nothing until placed','FEATURE · OPERATION']);
   rows.push(['Wood',woodName(P.wood),'the material of every cut package','MATERIAL']);
-  if(has('SCREWS'))rows.push(['Wood screws',screwsText(),'a hardware requirement sent to the Store; Store picks the item or refuses','HARDWARE · KEPT']);
+  if(has('SCREWS'))rows.push(['Wood screws',screwsText(),'a hardware requirement sent to the Store; Store picks the item or refuses','HARDWARE · REQUIREMENT']);
   rows.push(['Every board','—','cut to length; the Store picks the board length and plans the cuts','OPERATION']);
   $('xform').innerHTML='<thead><tr><th>From intent</th><th>Now</th><th>Makes</th><th>Kind</th></tr></thead><tbody>'
     +rows.map(r=>'<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td>'+r[2]+'</td><td><span class="chip">'+r[3]+'</span></td></tr>').join('')+'</tbody>';
@@ -1228,7 +1228,7 @@ function render(){
   reg.push(['Cut every part to length',def.boards.length+' boards, in '+req.definition.cutPackages.length+' package'+(req.definition.cutPackages.length===1?'':'s'),'SENT','ok']);
   if(has('SPOTS'))reg.push(['Shelf-pin spot facing',P.spots.rule?((P.SH.LEFT+P.SH.RIGHT)*2*def.runs)+' spots, '+spotRule(P.spots).label:'needs a placement',P.spots.rule?'SENT':'NEEDS AN ANSWER',P.spots.rule?'ok':'no']);
   if(has('XSPOT')){const ok=!cond.some(c=>c.block&&/extra spot/.test(c.t));reg.push(['One more spot',ok?P.xspot.target+' · '+P.xspot.offset+' in from its end':'needs a part, a distance and a placement',ok?'SENT':'NEEDS AN ANSWER',ok?'ok':'no'])}
-  if(has('SCREWS'))reg.push(['Wood screws',screwsText()+'. The link to the Store carries hardware only by Store item number, and this page holds none','KEPT · NOT SENT','warn']);
+  if(has('SCREWS')){const sl=(req.definition.itemLines||[]).find(l=>l.lineId==='SCREWS');reg.push(['Wood screws',sl?screwsText()+', sent as a requirement: gauge, length, finish and count. Store picks its own item or refuses':'needs a gauge, a length, a finish and a count',sl?'SENT':'NEEDS AN ANSWER',sl?'ok':'no'])}
   keptList().forEach(k=>reg.push([esc(k.t),'kept on your list; the Store has no line for it, so it isn’t sent and isn’t claimed done','KEPT · NOT SENT','warn']));
   OPEN_QUESTIONS.forEach(q=>reg.push([q.t,'travels with the job; '+q.owner.toLowerCase()+' owns it',q.status,q.status==='UNRESOLVED'?'warn':'']));
   $('ws-reg').innerHTML=reg.map(r=>'<div class="ln"><span>'+r[0]+' <span class="dim">: '+r[1]+'</span></span><span class="chip '+r[3]+'">'+r[2]+'</span></div>').join('');

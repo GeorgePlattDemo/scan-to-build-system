@@ -159,21 +159,43 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     await settled(page);
     assert.equal((await seat(page)).terms.stage, 'ANSWERED');
 
-    // Hardware is a requirement, stated at intent. System's wire carries hardware only by Store item number and the
-    // page holds none, so the requirement is kept on the job, marked not sent, and never blocks the Store answer.
+    // Hardware is a requirement, stated at intent: gauge, length, finish and count. The page sends the requirement,
+    // never a Store item number; the Store picks its own item or refuses. A missing field blocks the ask.
     await page.locator('#add-knobs [data-add="screws"]').check();
+    assert.ok((await page.evaluate(() => window.STBWindowSeat.conditions())).some(c => c.block && /screws/.test(c.t)), 'incomplete screws block the ask');
+    assert.equal((await page.evaluate(() => window.STBWindowSeat.request())).itemLines, undefined, 'an incomplete requirement is not sent');
     await page.locator('#sc-gauge').selectOption('#10');
     await page.locator('#sc-len').fill('2.5');
     await page.locator('#sc-finish').selectOption('coated');
     await page.locator('#sc-qty').fill('60');
     assert.equal((await page.evaluate(() => window.STBWindowSeat.conditions())).some(c => c.block), false);
-    assert.equal((await page.evaluate(() => window.STBWindowSeat.request())).itemLines, undefined, 'nothing is sent by item number');
-    assert.match(await page.locator('#ws-reg').innerText(), /Wood screws[\s\S]*KEPT · NOT SENT/);
+    const screws = { lineId: 'SCREWS', qty: 60, requirement: { kind: 'wood-screw', gauge: '#10', lengthIn: 2.5, finish: 'coated', unit: 'piece' } };
+    assert.deepEqual((await page.evaluate(() => window.STBWindowSeat.request())).itemLines, [screws], 'the requirement, not an item number');
+    assert.match(await page.locator('#ws-reg').innerText(), /Wood screws[^\n]*sent as a requirement[\s\S]*?SENT/);
+    assert.doesNotMatch(await page.locator('#ws-reg').innerText(), /Wood screws[^\n]*\n?KEPT · NOT SENT/);
     const n3 = log.length;
     await page.locator('#btn-ask').click();
     await settled(page);
+    assert.deepEqual(log[n3].request.payload.definition.itemLines, [screws], 'the requirement is on the wire');
     assert.equal(log[n3].answer.rawEvaluation.status, 'SUPPORTABLE');
-    assert.match(await page.locator('#audit-text').innerText(), /Hardware requirement: 60 × #10 wood screw, 2 1\/2 in, coated \(kept, not sent/);
+    const screwAnswer = log[n3].answer.rawEvaluation.items.find(i => i.lineId === 'SCREWS');
+    assert.equal(screwAnswer.status, 'SUPPORTABLE');
+    assert.ok(typeof screwAnswer.storeSku === 'string' && screwAnswer.storeSku.length > 0, 'the Store names its own item');
+    assert.equal(SOURCE.includes(screwAnswer.storeSku), false, 'the page never names that item');
+    assert.match(await page.locator('#audit-text').innerText(), /Hardware requirement: 60 × #10 wood screw, 2 1\/2 in, coated \(sent as a requirement/);
+    assert.doesNotMatch(await page.locator('#audit-text').innerText(), /Wood screws[^\n]*KEPT · NOT SENT|wood screw[^\n]*kept, not sent/);
+
+    // #8 stays selectable. The pinned Store stocks no #8 wood screw, so the refusal is the Store's, with its reason.
+    await page.locator('#sc-gauge').selectOption('#8');
+    assert.equal((await page.evaluate(() => window.STBWindowSeat.conditions())).some(c => c.block), false, 'the page does not pre-judge the gauge');
+    const n4 = log.length;
+    await page.locator('#btn-ask').click();
+    await settled(page);
+    assert.equal(log[n4].request.payload.definition.itemLines[0].requirement.gauge, '#8');
+    const refused = log[n4].answer.rawEvaluation.items.find(i => i.lineId === 'SCREWS');
+    assert.equal(refused.status, 'REFUSED');
+    assert.deepEqual(refused.reasonCodes, ['NO_MATCHING_HARDWARE_OFFERING']);
+    assert.equal(refused.storeSku ?? null, null);
     assert.deepEqual(b.errors, []);
   } finally {
     await browser.close();

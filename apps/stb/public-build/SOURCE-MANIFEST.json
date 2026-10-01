@@ -651,6 +651,13 @@
       "blobSha": "889a48b27ef49383d6b29b305b2327853f1496ce",
       "bytes": 90576,
       "reason": "Window Seat step 1 reads \"1 · Intent\"; other tiles keep \"1 · Your idea\"; page 1 sits behind the trail. Cache-busters for the page and the guide."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-hardware-requirement",
+      "blobSha": "24484f87d05e8d418c7d5601a1982ccbd03e0e1f",
+      "bytes": 229947,
+      "reason": "Cache-buster for Window Seat 0.9: its register shows wood screws as SENT, a requirement the Store resolves to its own item or refuses."
     }
   ],
   "retiredFiles": [
