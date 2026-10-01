@@ -26,10 +26,12 @@ const SHELL_FILES = [
   'system-build-front-door-0.5.html',
 ];
 
-// Recorded on System main 2ad8cff (#129, docs/idea-intent-vocabulary, head c7ab5b8).
-// system-build-current.html: 21 activeJourneyProject comparisons + 8 per-tile nav functions.
+// Recorded on System main 2ad8cff (#129, docs/idea-intent-vocabulary, head c7ab5b8): 29.
+// Lowered to 24 on system/playhouse-on-shared-host: Playhouse moved onto the shared tile host
+// (applyPlayhouseNavState and four activeJourneyProject === 'playhouse' comparisons removed).
+// system-build-current.html: 17 activeJourneyProject comparisons + 7 per-tile nav functions.
 // system-build-front-door-0.5.html: 0 + 0.
-const CEILING = 29;
+const CEILING = 24;
 
 const sandbox = {};
 vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'stb-trail-contract.js'), 'utf8'), sandbox, { filename: 'stb-trail-contract.js' });

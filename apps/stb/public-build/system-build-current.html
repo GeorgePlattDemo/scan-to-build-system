@@ -20,6 +20,13 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-terms-flow.js?v=850b1843"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
 <script src="stb-build-guide-spec.js?v=9523c7af"></script>
+<script src="stb-trail-contract.js?v=aea2f84d"></script>
+<script>
+// The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
+import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => {
+  window.STBTileHostAdmission = Object.freeze({ ...contract });
+});
+</script>
 <script>
 (() => {
   const shell = document.getElementById('stb-current');
@@ -31,6 +38,10 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     const win = inner.contentWindow;
     const doc = win?.document;
     if (!doc || typeof win.show !== 'function' || !doc.getElementById('playhouse-record')) return false;
+    // The shared tile host draws nav only from contract-validated messages; without both contracts it waits.
+    const trailContract = window.STBTrailContract || null;
+    const tileHostContract = window.STBTileHostAdmission || null;
+    if (!trailContract || !tileHostContract) return false;
     if (doc.documentElement.dataset.s001OutcomeSplit === 'true') return true;
     doc.documentElement.dataset.s001OutcomeSplit = 'true';
 
@@ -2891,27 +2902,127 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       s001AskIfChanged(g);
     };
 
+    // ── Shared tile host · STB-TILE-HOST-0.1 ─────────────────────────────────────────────────────────
+    // A tile on the shared host registers once, keyed by its id. It hands the host plain STB-TILE-HOST-0.1
+    // messages; the host validates each one against the trail contract and draws the one nav line from it
+    // (hostNavLine). The host never reads a tile's definition or Store state, and a usable step never asks
+    // the Store. Which tile owns a page comes from the trail contract. An invalid message is rejected and the
+    // tile's steps go inert until a valid one arrives.
+    const tileHosts = new Map();
+    const tileHostLines = new Map();
+    // Journey stage keys on the nav buttons, as indexes into the trail contract's six steps.
+    const JOURNEY_STAGE_STEP = Object.freeze({ scan:0, configure:1, store:2, review:2, request:3, yard:4, terms:4, recap:5, record:5 });
+    function registerTileHost(tileId, hooks) {
+      if (!trailContract.tiles.some(tile => tile.id === tileId)) throw new TypeError('TILE_NOT_DECLARED: ' + tileId);
+      tileHosts.set(tileId, Object.freeze({ report:hooks.report, shown:hooks.shown || null }));
+    }
+    function tileHostActive(tileId) {
+      return activeJourneyProject === tileId;
+    }
+    function tileHostShownPage() {
+      return [...doc.querySelectorAll('.page.on')].pop()?.id || null;
+    }
+    // The trail step a tile's own page stands for, from the shell's stage map for that tile; null off its pages.
+    function tileHostStepOfPage(tileId, pageId) {
+      const stages = PROJECT_STAGE_TARGETS[tileId] || {};
+      const stage = Object.keys(stages).find(key => stages[key] === pageId);
+      return stage ? JOURNEY_STAGE_STEP[stage] : null;
+    }
+    function receiveTileHostMessage(message) {
+      const check = tileHostContract.validateTileHostMessage(trailContract, message);
+      if (!check.ok) {
+        if (message && typeof message.tileId === 'string') tileHostLines.delete(message.tileId);
+        doc.documentElement.dataset.tileHostRejected = check.errors.join(' ');
+      } else {
+        delete doc.documentElement.dataset.tileHostRejected;
+        tileHostLines.set(message.tileId, tileHostContract.hostNavLine(trailContract, message));
+      }
+      applyTileHostNav();
+      return check;
+    }
+    function refreshTileHost(tileId) {
+      const host = tileHosts.get(tileId);
+      if (host) receiveTileHostMessage(host.report());
+    }
+    // One nav line from the last validated message: contract labels, inert steps disabled (never hidden), one current.
+    function applyTileHostNav() {
+      const nav = doc.querySelector('.recovery-nav');
+      const tileId = activeJourneyProject || '';
+      if (!nav || !tileHosts.has(tileId)) return;
+      const line = tileHostLines.get(tileId) || null;
+      nav.querySelectorAll('button[data-journey-stage]').forEach(button => {
+        if (button.dataset.jobProject !== tileId) return;
+        const index = JOURNEY_STAGE_STEP[button.dataset.journeyStage];
+        if (index === undefined) return;
+        button.textContent = `${index + 1} · ${trailContract.steps[index]}`;
+        const step = line ? line.steps[index] : null;
+        const on = !!step?.enabled;
+        button.disabled = !on;
+        if (on) button.removeAttribute('aria-disabled');
+        else button.setAttribute('aria-disabled','true');
+        if (step?.current && !button.hidden) button.setAttribute('aria-current','step');
+        else button.removeAttribute('aria-current');
+      });
+    }
+    // null: the tile is not on the shared host. Otherwise whether its last validated message made this step usable.
+    function tileHostStageOpen(tileId, stage) {
+      if (!tileHosts.has(tileId)) return null;
+      const index = JOURNEY_STAGE_STEP[stage];
+      return index !== undefined && !!tileHostLines.get(tileId)?.steps[index]?.enabled;
+    }
+    function tilePageShown(pageId) {
+      const owner = trailContract.tiles.find(tile => tile.pages.includes(pageId));
+      tileHosts.get(owner?.id)?.shown?.(pageId);
+    }
+
     // ── Playhouse · the live Store answers every version of the sheet ─────────────────────────────
     // The page carries the project's own definition to the pinned Store through the shared client and
     // shows what comes back. It never answers for the Store, never reuses an earlier answer for a changed
-    // version, and never changes the geometry to get a yes. Steps 4–6 open only on a SUPPORTABLE answer
-    // for the version on screen.
+    // version, and never changes the geometry to get a yes. Every inquiry is one job-definition revision
+    // through admit() (tile-host-admission-contract.mjs): a missing profile fact blocks before the Store and
+    // names its owner; a complete revision reaches the Store whatever its values. The nav is drawn by the
+    // shared tile host from this tile's STB-TILE-HOST-0.1 message. Steps 4–6 open only on a SUPPORTABLE
+    // answer for the version on screen.
     const S001_PROJECT_ID = 'playhouse';
     const S001_REQUEST_TYPE = 'SHEET_PACKAGE_V1';
-    const s001Live = { token:0, asking:false, answer:null, error:null, version:null, timer:null };
-    function s001Definition(g) {
+    const S001_INQUIRY_SCOPE = 'SHEET_PACKAGE_V1';
+    const S001_SHEET = Object.freeze({ thicknessIn:0.5, lengthIn:96, widthIn:48 });
+    const s001Live = { token:0, asking:false, answer:null, error:null, version:null, timer:null, admission:null, blocking:[] };
+    const s001Positive = value => Number.isFinite(value) && value > 0;
+    // One job-definition revision from what is on screen. The opening is User 1's; the sheet is the project's.
+    // A fact that is not there is left out, so admission blocks on it rather than the page filling it in.
+    function s001Revision(g) {
+      const facts = {
+        'playhouse.sheet': { value:{ ...S001_SHEET }, status:'CONFIRMED' }
+      };
+      if (s001Positive(g.width) && s001Positive(g.straight) && s001Positive(g.rise)) {
+        facts['playhouse.opening'] = { value:{ widthIn:g.width, straightHeightIn:g.straight, riseIn:g.rise }, status:'CONFIRMED' };
+      }
+      return {
+        definitionRevisionId:`playhouse-w${g.width}-s${g.straight}-r${g.rise}-t4-c18x18`,
+        tileId:S001_PROJECT_ID,
+        facts
+      };
+    }
+    // The sheet definition the Store is asked about, built only from the admitted request's facts.
+    function s001DefinitionFrom(request) {
+      const sheet = request.facts['playhouse.sheet'];
+      const opening = request.facts['playhouse.opening'];
       return {
         configurationId:'PLAYHOUSE-ARCHED-WINDOW',
-        configurationVersion:`playhouse-w${g.width}-s${g.straight}-r${g.rise}-t4-c18x18`,
-        sheet:{ thicknessIn:0.5, lengthIn:96, widthIn:48 },
+        configurationVersion:request.definitionRevisionId,
+        sheet:{ thicknessIn:sheet.thicknessIn, lengthIn:sheet.lengthIn, widthIn:sheet.widthIn },
         features:[
-          { featureId:'OPENING', kind:'ARCHED_APERTURE', placement:'CENTERED', widthIn:g.width, straightHeightIn:g.straight, riseIn:g.rise, retain:'TABS', requestedTabCount:4 },
+          { featureId:'OPENING', kind:'ARCHED_APERTURE', placement:'CENTERED', widthIn:opening.widthIn, straightHeightIn:opening.straightHeightIn, riseIn:opening.riseIn, retain:'TABS', requestedTabCount:4 },
           { featureId:'CENTER-SPLIT', kind:'STRAIGHT_SPLIT', within:'OPENING', line:'VERTICAL_CENTERLINE' },
           { featureId:'CUT-LEFT', kind:'CROSSCUT', fromEnd:'LEFT', distanceIn:18 },
           { featureId:'CUT-RIGHT', kind:'CROSSCUT', fromEnd:'RIGHT', distanceIn:18 }
         ],
         returnAllPieces:true
       };
+    }
+    function s001Admitted() {
+      return s001Live.admission?.admission?.result === tileHostContract.ADMISSION_RESULT.ADMITTED;
     }
     var s001Terms = window.STBTermsFlow ? window.STBTermsFlow.create({ projectId:'playhouse', title:'Playhouse arched window' }) : null;
     window.STBTermsFlow?.installStyle(doc);
@@ -2936,7 +3047,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         if (open) button.removeAttribute('aria-disabled'); else button.setAttribute('aria-disabled','true');
       });
       doc.documentElement.dataset.playhouseTerms = t.stage;
-      applyPlayhouseNavState();
+      s001Publish();
     }
     if (s001Terms) {
       s001Terms.onChange(s001RenderTerms);
@@ -2949,6 +3060,32 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     function s001Supportable() {
       const a = s001Live.answer;
       return !s001Live.asking && !s001Live.error && !!a && a.evaluation?.status === 'SUPPORTABLE' && a.version === s001Live.version;
+    }
+    // The fresh answer availableSteps() reads: current authority, for this exact revision, inside the envelope or not.
+    function s001FreshAnswer() {
+      const a = s001Live.answer;
+      if (s001Live.asking || s001Live.error || !a || a.version !== s001Live.version) return null;
+      return { authority:a.authority, definitionRevisionId:a.definitionRevisionId, withinEnvelope:a.evaluation?.status === 'SUPPORTABLE' };
+    }
+    // This tile's STB-TILE-HOST-0.1 message. Intent, the bench and The Store answers come from the contract's
+    // availableSteps(); We cut it and Pick up & build stay with the terms flow's gates, behind Your call.
+    function s001HostMessage() {
+      const steps = trailContract.steps;
+      const usable = [...tileHostContract.availableSteps({ trail:trailContract, admission:s001Live.admission, freshAnswer:s001FreshAnswer() })];
+      const t = s001Terms?.state() || null;
+      if (usable.includes(steps[3]) && t?.yardOpen) usable.push(steps[4]);
+      if (usable.includes(steps[3]) && t?.recordOpen) usable.push(steps[5]);
+      const index = tileHostStepOfPage(S001_PROJECT_ID, tileHostShownPage());
+      return {
+        interface:tileHostContract.TILE_HOST_VERSION,
+        tileId:S001_PROJECT_ID,
+        stage:steps[index ?? 0],
+        usableSteps:usable,
+        navigationRequest:null
+      };
+    }
+    function s001Publish() {
+      if (tileHostActive(S001_PROJECT_ID)) receiveTileHostMessage(s001HostMessage());
     }
     const s001Money = value => Number.isFinite(Number(value)) ? '$' + Number(value).toFixed(2) : '—';
     const S001_OP_TEXT = {
@@ -2963,19 +3100,25 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     function s001Render() {
       const a = s001Live.answer;
       const ev = a?.evaluation || null;
-      const status = s001Live.asking ? 'ASKING'
+      const blocked = !s001Live.asking && !!s001Live.admission && !s001Admitted();
+      const blockedText = s001Live.blocking.map(b => b.title + ' · owner ' + b.owner).join('; ');
+      const status = blocked ? 'BLOCKED'
+        : s001Live.asking ? 'ASKING'
         : s001Live.error ? 'UNAVAILABLE'
         : ev?.status || 'ASKING';
       const box = doc.getElementById('s001-live-answer');
-      if (box) box.dataset.storeStatus = s001Live.error ? 'ERROR' : status;
-      const statusText = s001Live.asking ? 'ASKING THE STORE…'
+      if (box) box.dataset.storeStatus = blocked ? 'BLOCKED' : s001Live.error ? 'ERROR' : status;
+      const statusText = blocked ? 'NOT SENT TO THE STORE · MISSING: ' + blockedText
+        : s001Live.asking ? 'ASKING THE STORE…'
         : s001Live.error ? 'THE STORE COULD NOT ANSWER (' + s001Live.error + '). NO EARLIER ANSWER IS REUSED.'
         : ev?.status === 'SUPPORTABLE' ? 'SUPPORTABLE · STAGE-2 REFERENCE'
         : ev?.status || '—';
       text('s001-live-status', statusText);
-      text('s001-live-status-2', s001Live.error ? 'NO ANSWER' : (ev?.status || '—'));
+      text('s001-live-status-2', blocked ? 'NOT SENT' : s001Live.error ? 'NO ANSWER' : (ev?.status || '—'));
       const reasons = doc.getElementById('s001-live-reasons');
-      if (reasons) reasons.innerHTML = (!s001Live.asking && ev && ev.status !== 'SUPPORTABLE')
+      if (reasons) reasons.innerHTML = blocked
+        ? s001Live.blocking.map(b => '<li><b>' + b.owner + '</b> · ' + b.title + ' (' + b.condition + ')</li>').join('')
+        : (!s001Live.asking && ev && ev.status !== 'SUPPORTABLE')
         ? (ev.reasonRecords || []).map(r => '<li><b>' + r.code + '</b> · ' + r.explanation + '</li>').join('')
         : '';
       const ok = !s001Live.asking && ev?.status === 'SUPPORTABLE';
@@ -2995,7 +3138,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       text('s001-live-tabs', tabs);
       text('s001-live-receipt', receipt);
       const binds = {
-        status: s001Live.error ? 'NO ANSWER' : (ev?.status || '—'),
+        status: blocked ? 'NOT SENT' : s001Live.error ? 'NO ANSWER' : (ev?.status || '—'),
         q: ok ? s001Money(ev.totals.Q) + ' budgetary' : '—',
         material,
         materialPrice: ok ? s001Money(ev.totals.material) : '—',
@@ -3015,30 +3158,48 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       s001FeedTerms();
       s001RenderTerms();
     }
-    function s001Ask(g) {
+    // The one inquiry path. admit() decides whether this revision may be asked about at all; only an admitted
+    // revision is sent, through inquire(), and admission never checks the envelope: the Store does.
+    function s001Inquire(revision) {
       const client = window.STBStoreClient;
-      const definition = s001Definition(g);
+      const admission = tileHostContract.admit({ revision, inquiryScope:S001_INQUIRY_SCOPE });
       const token = ++s001Live.token;
-      s001Live.version = definition.configurationVersion;
-      s001Live.asking = true; s001Live.error = null; s001Live.answer = null;
-      s001Render();
       clearTimeout(s001Live.timer);
+      s001Live.admission = admission;
+      s001Live.version = admission.definitionRevisionId;
+      s001Live.error = null; s001Live.answer = null;
+      if (!s001Admitted()) {
+        s001Live.asking = false;
+        s001Live.blocking = admission.admission.blocking.map(b => ({ ...b }));
+        s001Render();
+        return admission;
+      }
+      s001Live.blocking = [];
+      s001Live.asking = true;
+      s001Render();
       s001Live.timer = setTimeout(() => {
         if (!client) { s001Live.asking = false; s001Live.error = 'STORE_CLIENT_UNAVAILABLE'; s001Render(); return; }
         const sentAt = new Date().toISOString();
-        client.sendJob({
-          projectId:S001_PROJECT_ID,
-          requestType:S001_REQUEST_TYPE,
-          candidateRevisionId:definition.configurationVersion,
-          payload:{ definition, definitionKind:'sheet_package.v1', ruleVersion:'0.1' }
-        }).then(body => {
+        let definition = null;
+        let body = null;
+        tileHostContract.inquire(admission, request => {
+          if (request.requestType !== S001_REQUEST_TYPE) throw new Error('ADMITTED_REQUEST_TYPE_MISMATCH');
+          definition = s001DefinitionFrom(request);
+          return client.sendJob({
+            projectId:S001_PROJECT_ID,
+            requestType:S001_REQUEST_TYPE,
+            candidateRevisionId:request.definitionRevisionId,
+            payload:{ definition, definitionKind:'sheet_package.v1', ruleVersion:'0.1' }
+          }).then(answer => (body = answer));
+        }).then(result => {
           if (token !== s001Live.token) return;
           const ev = body.rawEvaluation;
           // The answer must be this project's answer for this exact version.
           if (body.projectId !== S001_PROJECT_ID || body.requestType !== S001_REQUEST_TYPE || ev?.configurationVersion !== definition.configurationVersion) {
             throw new Error('STORE_ANSWER_NOT_FOR_THIS_VERSION');
           }
-          s001Live.answer = { evaluation:ev, receipt:body.evaluationReceipt, requestId:body.requestId, storePin:body.storePin, version:definition.configurationVersion, body, sentAt };
+          s001Live.answer = { evaluation:ev, receipt:body.evaluationReceipt, requestId:body.requestId, storePin:body.storePin, version:definition.configurationVersion, body, sentAt,
+            authority:result.answer.authority, definitionRevisionId:result.answer.definitionRevisionId };
           s001Live.asking = false;
           s001Render();
         }).catch(error => {
@@ -3047,19 +3208,38 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
           s001Render();
         });
       }, 250);
+      return admission;
     }
     function s001AskIfChanged(g) {
       // Only the active Playhouse project asks the Store; loading the app or another project asks nothing.
-      if (activeJourneyProject !== 'playhouse') return;
-      const version = s001Definition(g).configurationVersion;
-      if (version === s001Live.version && (s001Live.asking || s001Live.answer)) { s001Render(); return; }
-      s001Ask(g);
+      if (!tileHostActive(S001_PROJECT_ID)) return;
+      const revision = s001Revision(g);
+      if (revision.definitionRevisionId === s001Live.version && (s001Live.asking || s001Live.answer || s001Live.blocking.length)) { s001Render(); return; }
+      s001Inquire(revision);
     }
+    const s001Current = () => s001Revision(read());
     win.STBPlayhouseLive = Object.freeze({
-      definition:() => s001Definition(read()),
-      state:() => JSON.parse(JSON.stringify({ asking:s001Live.asking, error:s001Live.error, version:s001Live.version, answer:s001Live.answer })),
+      // The definition the current revision sends, or null when admission blocks it.
+      definition:() => {
+        const admission = tileHostContract.admit({ revision:s001Current(), inquiryScope:S001_INQUIRY_SCOPE });
+        return admission.request ? s001DefinitionFrom(admission.request) : null;
+      },
+      revision:() => JSON.parse(JSON.stringify(s001Current())),
+      // Asks about a revision through the same admission as the page; a blocked one never reaches the Store.
+      inquire:revision => JSON.parse(JSON.stringify(s001Inquire(revision))),
+      state:() => JSON.parse(JSON.stringify({ asking:s001Live.asking, error:s001Live.error, version:s001Live.version, answer:s001Live.answer,
+        admission:s001Live.admission?.admission ?? null })),
+      hostMessage:() => s001HostMessage(),
       terms:() => s001Terms?.state() ?? null,
       supportable:() => s001Supportable()
+    });
+    registerTileHost(S001_PROJECT_ID, {
+      report:s001HostMessage,
+      shown:() => setTimeout(sync, 0)
+    });
+    // Confirming this version on the review page is recorded on the document, as before.
+    doc.querySelector('#playhouse-review [data-canonical-go="playhouse-request"]')?.addEventListener('click', () => {
+      doc.documentElement.dataset.playhouseRevisionConfirmed = 'true';
     });
 
     ['s001-opening-width','s001-straight-height','s001-arch-rise'].forEach(id => doc.getElementById(id)?.addEventListener('input', sync));
@@ -3311,26 +3491,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       applySeatNavState();
     });
 
-    // Playhouse: steps 4–6 open only when the live Store has answered SUPPORTABLE for the version on screen.
-    function playhouseStageOpen(stage) {
-      if (!['request','yard','terms','recap','record'].includes(stage)) return true;
-      if (!win.STBPlayhouseLive?.supportable()) return false;
-      const t = win.STBPlayhouseLive.terms();
-      if (stage === 'request') return true;
-      if (stage === 'yard' || stage === 'terms') return !!t?.yardOpen;
-      return !!t?.recordOpen;
-    }
-    function applyPlayhouseNavState() {
-      const nav = doc.querySelector('.recovery-nav');
-      if (!nav || activeJourneyProject !== 'playhouse') return;
-      nav.querySelectorAll('button[data-job-project="playhouse"]').forEach(button => {
-        const on = playhouseStageOpen(button.dataset.journeyStage);
-        button.disabled = !on;
-        if (on) button.removeAttribute('aria-disabled');
-        else button.setAttribute('aria-disabled','true');
-      });
-    }
-
     function applyAlcoveNavState() {
       const nav = doc.querySelector('.recovery-nav');
       if (!nav || activeJourneyProject !== 'alcove') return;
@@ -3400,12 +3560,13 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       if (nav) {
         delete nav.dataset.seatHero;
         restoreJourneyNav(nav);
-        if (activeJourneyProject === 'start-own') {
+        if (tileHosts.has(activeJourneyProject || '')) {
+          // A tile on the shared tile host: the trail nav, drawn from its validated STB-TILE-HOST-0.1 message.
+          wireTrailJourneyNav(nav, activeJourneyProject);
+          refreshTileHost(activeJourneyProject);
+        } else if (activeJourneyProject === 'start-own') {
           wireStartOwnJourneyNav(nav);
           applyStartOwnNavState();
-        } else if (activeJourneyProject === 'playhouse') {
-          wireTrailJourneyNav(nav, 'playhouse');
-          applyPlayhouseNavState();
         } else if (activeJourneyProject === 'alcove') {
           wireTrailJourneyNav(nav, 'alcove');
           applyAlcoveNavState();
@@ -3466,15 +3627,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       }
       const target = PROJECT_STAGE_TARGETS[projectId]?.[stage] || null;
       if (!target || !doc.getElementById(target)) return false;
-      // A refused, unresolved or unanswered Playhouse version keeps the commercial and cut steps closed.
-      if (projectId === 'playhouse' && !playhouseStageOpen(stage)) { applyPlayhouseNavState(); return true; }
+      // A tile on the shared host opens only the steps its last validated message made usable.
+      if (tileHostStageOpen(projectId, stage) === false) { applyTileHostNav(); return true; }
       originalShow.call(win, target);
       if (projectId === 'start-own' || projectId === 'outdoor') syncJourneyNav(stage);
       if (projectId === 'outdoor') {
         outdoorFrame()?.contentWindow?.postMessage({type:'STB_OUTDOOR_GO', stage}, win.location.origin);
         applyOutdoorNavState();
       }
-      if (projectId === 'playhouse') setTimeout(sync, 0);
+      tilePageShown(target);
       if (projectId === 'window-seat') {
         seatFrame()?.contentWindow?.postMessage({type:'STB_SEAT_GO', stage}, win.location.origin);
         applySeatNavState();
@@ -3525,12 +3686,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       showMappedProjectStage(activeJourneyProject, stage);
     }, true);
 
-    win.addEventListener('click', function(event) {
-      if (activeJourneyProject === 'playhouse' && event.target.closest?.('#playhouse-review [data-canonical-go="playhouse-request"]')) {
-        doc.documentElement.dataset.playhouseRevisionConfirmed = 'true';
-      }
-    }, true);
-
     // Project identity is selected at the window-capture boundary so it runs
     // before the older front-door preview handler can stop propagation.
     // A route or stage change never selects a project implicitly.
@@ -3570,7 +3725,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
         selectJourneyProject(null);
       }
       const result = originalShow.apply(this, arguments);
-      if (target.startsWith('playhouse')) setTimeout(sync, 0);
+      tilePageShown(target);
       if (target.startsWith('alcove') || (activeJourneyProject === 'alcove' && ['store','request','yard','record','terms','recap'].includes(target))) setTimeout(syncAlcoveCommercialSurface, 0);
       return result;
     };

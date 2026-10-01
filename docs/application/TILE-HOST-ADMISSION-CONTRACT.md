@@ -1,6 +1,6 @@
 # Tile/host and definition/Store admission contract
 
-**Owner:** System. **Status:** spec and tests only. Nothing in the app uses it yet; no page, iframe, Store call or Store answer changes.
+**Owner:** System. **Status:** in use for Playhouse. The shared tile host in `apps/stb/public-build/system-build-current.html` loads the deployed copy (`apps/stb/public-build/shared/`, byte for byte) and draws Playhouse's nav from its validated `STB-TILE-HOST-0.1` message; Playhouse's Store inquiries go through `admit()`. Every other tile keeps its current path until its own migration.
 **Executable half:** [`apps/stb/shared/tile-host-admission-contract.mjs`](../../apps/stb/shared/tile-host-admission-contract.mjs).
 **Check:** [`apps/stb/test/trail/tile-host-admission-contract.test.mjs`](../../apps/stb/test/trail/tile-host-admission-contract.test.mjs), beside the trail tests.
 Terms used here (job-definition revision, Store inquiry, admissible, The Store answers) are defined once in [definitions](../definitions/README.md).
@@ -59,4 +59,4 @@ The current admission path is `admitPublicStoreRequest` in `apps/stb/public-buil
 ## Open before adoption
 
 - **Profiles are first declarations,** enough for the contract tests. They are not yet a port of every row in the current path (for example Start your own spot demand, Window Seat screws, generator consistency).
-- **Tile messages today** are per-tile types (`STB_SEAT_STATE`, `STB_OUTDOOR_STATE`, `STB_START_OWN_*`). Interface 1 is what they converge on; no page or iframe changes in this step.
+- **Tile messages today:** Playhouse sends `STB-TILE-HOST-0.1`. The others are still per-tile types (`STB_SEAT_STATE`, `STB_OUTDOOR_STATE`, `STB_START_OWN_*`); interface 1 is what they converge on.

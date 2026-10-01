@@ -231,3 +231,84 @@ test('a Store that cannot answer leaves Playhouse with no answer and closed step
     assert.equal((await navInert(frame)).yard, true);
   }, tamper);
 });
+
+// ---------- On the shared tile host (STB-TILE-HOST-0.1 and admit()) ----------
+const TRAIL_STEPS = ['Intent', 'The bench', 'The Store answers', 'Your call', 'We cut it', 'Pick up & build'];
+
+async function playhouseNav(frame) {
+  return frame.$$eval('.recovery-nav button[data-job-project="playhouse"]', els => els.filter(e => !e.hidden).map(e => ({
+    stage: e.dataset.journeyStage,
+    label: e.textContent.trim(),
+    inert: e.disabled || e.getAttribute('aria-disabled') === 'true',
+    current: e.getAttribute('aria-current') === 'step',
+  })));
+}
+
+test('the shared host draws the Playhouse nav from its validated STB-TILE-HOST-0.1 message', { timeout: 180000 }, async () => {
+  await withBrowser(async ({ browser, origin }) => {
+    const { frame, errors } = await openPlayhouse(browser, origin);
+    await settled(frame);
+    await frame.page().waitForTimeout(300);
+    const message = await frame.evaluate(() => window.STBPlayhouseLive.hostMessage());
+    assert.deepEqual(Object.keys(message).sort(), ['interface', 'navigationRequest', 'stage', 'tileId', 'usableSteps']);
+    assert.equal(message.interface, 'STB-TILE-HOST-0.1');
+    assert.equal(message.tileId, 'playhouse');
+    assert.equal(message.stage, 'Intent');
+    assert.deepEqual(message.usableSteps, TRAIL_STEPS.slice(0, 4));
+    assert.equal(await frame.evaluate(() => document.documentElement.dataset.tileHostRejected ?? null), null);
+    const nav = await playhouseNav(frame);
+    // One line, contract labels in trail order, inert steps shown disabled, exactly one current.
+    assert.deepEqual(nav.map(b => b.label), TRAIL_STEPS.map((step, i) => `${i + 1} · ${step}`));
+    assert.deepEqual(nav.map(b => b.inert), [false, false, false, false, true, true]);
+    assert.deepEqual(nav.filter(b => b.current).map(b => b.label), ['1 · Intent']);
+    // Moving to the bench moves the current step with it.
+    await frame.locator('.recovery-nav button[data-job-project="playhouse"][data-journey-stage="configure"]').click();
+    await frame.page().waitForTimeout(400);
+    assert.deepEqual((await playhouseNav(frame)).filter(b => b.current).map(b => b.label), ['2 · The bench']);
+    assert.deepEqual(errors, []);
+  });
+});
+
+test('a missing profile fact blocks before the Store and names its owner; a complete revision still reaches the Store', { timeout: 180000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { frame } = await openPlayhouse(browser, origin);
+    await settled(frame);
+    const sheetCalls = () => log.filter(e => e.request.requestType === 'SHEET_PACKAGE_V1').length;
+    const before = sheetCalls();
+
+    for (const [factId, owner, title] of [
+      ['playhouse.opening', 'USER', 'Complete arched-opening geometry'],
+      ['playhouse.sheet', 'PROJECT', 'Real sheet dimensions'],
+    ]) {
+      const admission = await frame.evaluate(id => {
+        const revision = window.STBPlayhouseLive.revision();
+        delete revision.facts[id];
+        revision.definitionRevisionId += '-without-' + id;
+        return window.STBPlayhouseLive.inquire(revision);
+      }, factId);
+      assert.equal(admission.admission.result, 'BLOCKED');
+      assert.equal(admission.admission.reason, 'REQUIRED_FACT_UNSETTLED');
+      assert.deepEqual(admission.admission.blocking, [{ factId, owner, title, condition: 'MISSING' }]);
+      assert.equal(admission.request, null);
+      await frame.page().waitForTimeout(600);
+      assert.equal(sheetCalls(), before, factId + ': a blocked revision never reaches the Store');
+      const state = await frame.evaluate(() => window.STBPlayhouseLive.state());
+      assert.equal(state.answer, null);
+      assert.equal(state.asking, false);
+      assert.match(await frame.locator('#s001-live-status').textContent(), new RegExp(title + ' · owner ' + owner));
+      // Not admitted: The Store answers and every later step are inert.
+      const inert = Object.fromEntries((await playhouseNav(frame)).map(b => [b.stage, b.inert]));
+      assert.deepEqual(inert, { scan: false, configure: false, store: true, request: true, yard: true, record: true });
+    }
+
+    // A complete revision, outside the envelope or not, is admitted and reaches the Store.
+    await frame.evaluate(() => window.STBPlayhouseLive.inquire(window.STBPlayhouseLive.revision()));
+    const state = await settled(frame);
+    assert.equal(state.admission.result, 'ADMITTED');
+    assert.equal(state.answer.evaluation.status, 'SUPPORTABLE');
+    assert.equal(sheetCalls(), before + 1);
+    const inert = Object.fromEntries((await playhouseNav(frame)).map(b => [b.stage, b.inert]));
+    assert.equal(inert.store, false);
+    assert.equal(inert.request, false);
+  });
+});
