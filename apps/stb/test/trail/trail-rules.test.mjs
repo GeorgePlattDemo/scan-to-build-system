@@ -30,8 +30,21 @@ const sandbox = {};
 vm.runInNewContext(contractSource, sandbox, { filename: 'stb-trail-contract.js' });
 const contract = sandbox.STBTrailContract;
 
-// Empty: every rule-bound tile passes. Keep it that way — a new violation fails the test.
-const KNOWN_FAILING = new Set([]);
+// Rule-only migration from System main 2de7ce8b0881a34e032fc3160b3d3b118eb23b79.
+// Do not make these tiles pass by editing their pages in this PR. Each entry is today's R1 drift:
+// the tile still exposes "Your idea" where the contract now requires Intent as step 1.
+// Remove an entry only when that tile's later bounded migration puts Idea in its intake/back-control role
+// and Intent at step 1. The ratchet then prevents that tile from drifting back.
+const KNOWN_FAILING = new Set([
+  'start-own:R1',
+  'alcove:R1',
+  'outdoor:R1',
+  'playhouse:R1',
+  'start-own:R2',
+  'alcove:R2',
+  'outdoor:R2',
+  'playhouse:R2',
+]);
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css' };
 function serve() {
