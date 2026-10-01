@@ -59,7 +59,7 @@ Shared behavior does not branch on tile identity. A registry may name a tile. An
 
 The scoreboard is a ratchet: known violations are listed and may not grow; a fixed tile must be removed from the known list so it stays fixed.
 
-Rules 1–3 and 9 are checked by the trail scoreboard. The admission-profile half of rule 8 is checked by apps/stb/test/trail/tile-host-admission-contract.test.mjs. Rules 4–6 are checked for every tile against the real pinned Store by `apps/stb/test/integration/trail-terms.test.mjs`. Rule 6's one post-Store terms flow is `apps/stb/public-build/stb-terms-flow.js`: every tile uses it; none keeps its own commerce state machine.
+Rules 1–3 and 9, and the trail-contract half of rule 8, are checked by the trail scoreboard. The admission-profile half of rule 8 is checked by apps/stb/test/trail/tile-host-admission-contract.test.mjs. The no-branch half is checked by apps/stb/test/trail/shell-tile-branches.test.mjs. Rules 4–6 are checked for every tile against the real pinned Store by `apps/stb/test/integration/trail-terms.test.mjs`. Rule 6's one post-Store terms flow is `apps/stb/public-build/stb-terms-flow.js`: every tile uses it; none keeps its own commerce state machine.
 
 ## Preferred write targets
 
