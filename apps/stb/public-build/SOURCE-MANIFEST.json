@@ -686,6 +686,13 @@
       "blobSha": "cef9c211b3ea7666f7907e69939b166194444725",
       "bytes": 132524,
       "reason": "Window Seat Idea is the intake, not a step: its one nav line carries the fork Intent | One full scroll; the route bars, the page line and the repeated Intent button are gone. Intent is step 1 and makes drill spotting as a knob, off to start. The bench is titled The bench; under the drawing, wood (pine selected), drill spotting, then the Store's price, asked by itself on arrival and on every change. No ask button, no local price. No STEP n OF 6 line on any page. Section ids hero, scan and configure are unchanged."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "playhouse-on-shared-host",
+      "blobSha": "5122d77f96d507e89b1fd5f564c42765b65583d1",
+      "bytes": 242738,
+      "reason": "Playhouse on the shared tile host: the host loads the trail contract and the deployed tile-host admission contract, validates Playhouse's STB-TILE-HOST-0.1 message and draws its one nav line from it; every Playhouse Store inquiry goes through admit(), so a missing profile fact blocks before the Store and names its owner while a complete revision still reaches the Store. The old Playhouse shell path (applyPlayhouseNavState, playhouseStageOpen and the Playhouse-only branches) is gone."
     }
   ],
   "retiredFiles": [

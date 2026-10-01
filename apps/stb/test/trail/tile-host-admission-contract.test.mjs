@@ -1,4 +1,4 @@
-// Tile/host and definition/Store admission contract (spec only; nothing in the app imports it yet).
+// Tile/host and definition/Store admission contract (the shared tile host uses it; Playhouse is on it).
 // Contract: apps/stb/shared/tile-host-admission-contract.mjs. Spec: docs/application/TILE-HOST-ADMISSION-CONTRACT.md.
 //
 // Proves three cases for every tile declared in public-build/stb-trail-contract.js:
@@ -313,4 +313,10 @@ test('tile-host interface carries navigation only; the Window Seat Idea fork is 
   const { [FIXTURES['window-seat'].userFact]: _d, ...short } = FIXTURES['window-seat'].facts;
   const allUsable = tileMessage('window-seat', { usableSteps: [...trail.steps], stage: YOUR_CALL });
   assert.equal(admit({ revision: revision('window-seat', 'window-seat-r5', short), inquiryScope: 'WINDOW_SEAT_COMMITTED', tileHostMessage: allUsable }).admission.result, ADMISSION_RESULT.BLOCKED);
+});
+
+test('the shared tile host loads the exact contract bytes', () => {
+  const canonical = fs.readFileSync(new URL('../../shared/tile-host-admission-contract.mjs', import.meta.url));
+  const deployed = fs.readFileSync(new URL('../../public-build/shared/tile-host-admission-contract.mjs', import.meta.url));
+  assert.deepEqual(deployed, canonical);
 });
