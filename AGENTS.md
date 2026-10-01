@@ -52,7 +52,7 @@ Every project tile on the Shared Home follows one protocol. The machine-readable
 5. Within the envelope: priced → your call → paid (simulated) → cut → pick up and record. Past the envelope: the Store refuses, steps 4–6 stay inert, and the refusal is the result. Both are passes.
 6. One post-Store terms flow for every tile: Store answer → simulated offer → accept or decline → simulated pay → allocate → release → cut → stage → ready → custody. `apps/stb/public-build/stb-terms-flow.js` owns the event meanings, order and gates. Projects may vary presentation; they may not redefine that sequence. A Store budgetary answer is not itself a quote or commercial offer.
 7. Layout may vary; operational rules may not. Window Seat (Space utilization) has the one stated presentation exception: on its **Idea** line it may offer the fork **Intent | One full scroll**. That fork lives on the Idea line only. Both ways are the same job and definition and must obey the same Intent, bench, Store-answer, revision, and shared terms rules.
-8. Adding a tile means declaring it in the trail contract. Nothing else.
+8. Adding a tile means declaring it in the trail contract and giving it one admission profile. Shared code does not branch on that tile. Nothing else.
 9. The guest is the user. No demo-account names on project pages.
 
 Shared behavior does not branch on tile identity. A registry may name a tile. An exception is contract data with an owner, not a branch.

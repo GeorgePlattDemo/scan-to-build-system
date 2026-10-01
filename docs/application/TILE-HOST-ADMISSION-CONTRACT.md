@@ -37,7 +37,7 @@ From one job-definition revision and one inquiry scope:
 
 Rules:
 
-- **Admission checks what the profile declares.** Each tile has an admission profile: per inquiry scope, the required facts and their owners. Admission reads those requirements against the revision. Rows or facts a tile happened to emit neither add to nor stand in for them. A tile with no profile, or an undeclared scope, fails closed.
+- **Admission checks what the profile declares.** Each tile has an admission profile: per inquiry scope, the required facts and their owners. Admission reads those requirements against the revision. Rows or facts a tile happened to emit neither add to nor stand in for them. A tile with no profile, or an undeclared scope, fails closed. The 0.1 profiles are the contract shape, not a claim that every row of `admitPublicStoreRequest` has been ported.
 - **A missing required fact blocks before Store** and names the owner. Missing, unresolved, candidate and invalid all block. A required fact owned by `STORE` (for example Alcove hardware selection) does not block: it travels as an open demand for Store to resolve.
 - **Admission never checks Store capability.** A complete request outside the envelope still reaches Store. The Store's refusal is the result, and Your call stays inert (trail rule 5).
 - **The request is bounded.** The job record may hold source material (photos, sketches), earlier retained requests, saved answers and facts outside the scope. The request carries none of them.
