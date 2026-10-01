@@ -116,19 +116,13 @@
   .two{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px}
   .lead{font-size:14px;color:var(--text-2);max-width:760px}
 
-  /* page 1 · her idea */
+  /* page 1 · the want */
   .hero{position:relative;margin:0}
   .hero img{display:block;width:100%;aspect-ratio:2/1;max-height:440px;object-fit:cover;object-position:50% 38%;border-bottom:1px solid var(--border)}
   .hero figcaption{position:absolute;left:14px;bottom:12px;font-size:10.5px;color:#fff;background:rgba(28,25,23,.62);padding:3px 8px;border-radius:6px}
   .idea{margin:0 0 14px;padding:12px 14px;border-left:3px solid var(--accent);background:var(--tint);border-radius:0 8px 8px 0}
   .idea label{display:block;font-size:10.5px;font-weight:650;letter-spacing:.06em;color:var(--accent);margin:0 0 4px}
   .idea textarea{width:100%;min-height:58px;font:inherit;font-size:15px;line-height:1.5;border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:var(--surface);color:var(--text);resize:vertical}
-  .fork{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 4px}
-  .fork .way{border:1px solid var(--border-accent);border-radius:12px;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:8px}
-  .fork .way b{font-size:15px}
-  .fork .way p{margin:0;font-size:13px;color:var(--text-2)}
-  .fork .way button{align-self:flex-start;margin-top:auto}
-  .same{font-size:12.5px;color:var(--text-2);margin:10px 0 0}
 
   /* page 2 · intent */
   .sketch{display:grid;grid-template-columns:minmax(0,360px) 1fr;gap:16px;align-items:start}
@@ -243,7 +237,7 @@
     .wrap{padding:12px 16px 48px}
     .page{grid-template-columns:1fr}
     .main{border-right:0;border-bottom:1px solid var(--border)}
-    .cfg,.fork,.two,.sketch{grid-template-columns:1fr}
+    .cfg,.two,.sketch{grid-template-columns:1fr}
     .cfg>div:last-child{grid-column:auto}
     #mfields{grid-template-columns:1fr}
     .pad{padding:16px}
@@ -256,7 +250,7 @@
 
 <nav class="bar" id="bar" aria-label="Window Seat trail">
   <span class="pill brand">WINDOW SEAT · SPACE UTILIZATION</span>
-  <button class="pill" type="button" data-nav="scan">1 · Your idea</button>
+  <button class="pill" type="button" data-nav="scan">1 · Intent</button>
   <button class="pill" type="button" data-nav="configure">2 · The bench</button>
   <button class="pill" type="button" data-nav="store">3 · The Store answers</button>
   <button class="pill" type="button" data-nav="request" disabled>4 · Your call</button>
@@ -272,9 +266,9 @@
   </div>
 </div>
 
-<!-- ═════ PAGE 1 · STEP 1 · YOUR IDEA: HER IDEA ═════ -->
+<!-- ═════ PAGE 1 · THE WANT, KEPT BEHIND THE TRAIL. Not a trail step: no nav button is current here. ═════ -->
 <section class="step" id="s-hero" data-section="hero">
-  <p class="stepband">STEP 1 OF 6 · YOUR IDEA <span>page 1 of 7 · her idea</span></p>
+  <p class="stepband"><span>page 1 of 7 · what she wants</span></p>
   <div class="page">
     <div class="main">
       <figure class="hero">
@@ -282,26 +276,15 @@
         <figcaption>room-capture.usdz · the picture of what she wants · context, not a dimension</figcaption>
       </figure>
       <div class="pad">
-        <h1>Her idea</h1>
+        <h1>What she wants</h1>
         <div class="idea">
           <label for="idea-text">WHAT SHE WANTS, IN HER OWN WORDS</label>
           <textarea id="idea-text" rows="2"></textarea>
         </div>
-        <p class="dim">The picture says what she wants. It isn’t the definition: nobody cuts to a picture. Her words carry weight, though. <b>“A seat you can sit on”</b> means a person sits on it, and that raises a question we carry with the job instead of answering it for her. The next page turns the idea into a definition: the sketch, the numbers, and the knobs this one job needs.</p>
-
-        <div class="fork" id="fork">
-          <div class="way">
-            <b>The regular path →</b>
-            <p>One page at a time, like every project: your intent, the bench, the Store’s answer, your call, the cut, pickup.</p>
-            <button class="go" type="button" data-route="trail">TAKE THE REGULAR PATH →</button>
-          </div>
-          <div class="way">
-            <b>One long scroll ↓</b>
-            <p>The whole job on one screen, every page in order, ending in a plain-text audit copy. Copy it and check it against the Store yourself.</p>
-            <button type="button" data-route="whole">READ IT AS ONE LONG SCROLL ↓</button>
-          </div>
+        <p class="dim">Her words carry weight, but they are not the measurements; the next page is intent.</p>
+        <div class="actions">
+          <button class="go push" type="button" data-to="intent">Intent →</button>
         </div>
-        <p class="same">Same job either way. Pick one now; the switch at the top stays with you to the end.</p>
       </div>
     </div>
     <aside class="rail dev-build-guide" data-guide-id="window-seat-hero" aria-label="Build guide · developer notes"></aside>
@@ -569,7 +552,7 @@
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
 <script src="stb-store-client.js?v=7eb5ab65"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
-<script src="stb-build-guide-spec.js?v=bcf7a02c"></script>
+<script src="stb-build-guide-spec.js?v=9523c7af"></script>
 <script>
 (function(){
 'use strict';
@@ -1483,8 +1466,8 @@ function renderStoreDoctrine(host){
 
 /* ═════ ROUTES: the regular path, or one long scroll. One state underneath. ═════ */
 const SECTIONS=['hero','intent','bench','store','request','yard','record'];
-const NAV_OF={hero:'scan',intent:'scan',bench:'configure',store:'store',request:'request',yard:'yard',record:'record',audit:'record'};
-const FIRST_OF={scan:'hero',configure:'bench',store:'store',request:'request',yard:'yard',record:'record'};
+const NAV_OF={intent:'scan',bench:'configure',store:'store',request:'request',yard:'yard',record:'record',audit:'record'};
+const FIRST_OF={scan:'intent',configure:'bench',store:'store',request:'request',yard:'yard',record:'record'};
 function usable(){const t=TERMS.state();return {hero:true,intent:true,bench:true,store:true,request:t.callOpen,yard:t.yardOpen,record:t.recordOpen,audit:true}}
 function setView(view,section){
   S.view=view;if(section)S.section=section;
@@ -1509,7 +1492,6 @@ function syncNav(){
 }
 document.addEventListener('click',e=>{
   const t=e.target.closest('[data-to]');if(t){e.preventDefault();go(t.dataset.to);return}
-  const r=e.target.closest('[data-route]');if(r){if(r.dataset.route==='whole'){setView('whole');$('s-intent').scrollIntoView({behavior:'smooth',block:'start'})}else{setView('trail','intent');window.scrollTo(0,0)}return}
   const n=e.target.closest('[data-nav]');if(n){const target=FIRST_OF[n.dataset.nav];if(S.view==='whole'){go(target)}else{go(target)}return}
   const vl=e.target.closest('[data-view-link]');if(vl){e.preventDefault();setView('whole');$('s-audit').scrollIntoView({behavior:'smooth',block:'start'});return}
   const vb=e.target.closest('[data-view-btn]');if(vb){
@@ -1546,7 +1528,7 @@ window.addEventListener('message',event=>{
   if(event.data?.type!=='STB_SEAT_GO')return;
   const st=String(event.data.stage||'');
   if(st==='whole'){setView('whole');window.scrollTo(0,0);return}
-  const map={hero:'hero',scan:'hero',intent:'intent',configure:'bench',bench:'bench',store:'store',review:'store',request:'request',yard:'yard',terms:'yard',recap:'record',record:'record'};
+  const map={hero:'hero',scan:'intent',intent:'intent',configure:'bench',bench:'bench',store:'store',review:'store',request:'request',yard:'yard',terms:'yard',recap:'record',record:'record'};
   if(map[st]){if(S.view==='whole')setView('trail',S.section);go(map[st])}
 });
 if(embedded)$('bar').hidden=true;

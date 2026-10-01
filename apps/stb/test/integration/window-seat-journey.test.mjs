@@ -1,5 +1,6 @@
 // Window Seat 0.9, one journey, two routes, against the real pinned Store (no scripted answers).
-// - Page 1 is her idea and states both forks; page 2 (intent) makes the knobs; the bench only turns them.
+// - Page 1 is the want, kept behind the trail (no nav step current); the pills are the fork; page 2, Intent, is
+//   step 1 and makes the knobs; the bench only turns them.
 // - The regular path and the one long scroll are one state: the same definition, one Store request each,
 //   the same Store identity, and the same audit copy.
 // - The page holds no Store logic: no SKU, price, time, capability or envelope. A refusal is the result, and a
@@ -58,15 +59,15 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     // ── The regular path ──
     const a = await open(browser, origin);
     let page = a.page;
-    // Page 1 is her idea, with both forks stated on it.
+    // Page 1 is the want, behind the trail: the fork is the pills, and no nav step is current here.
     assert.deepEqual(await page.evaluate(() => [...document.querySelectorAll('.step')].filter(s => s.offsetParent).map(s => s.id)), ['s-hero']);
-    assert.equal(await page.locator('#s-hero [data-route="trail"]').count(), 1);
-    assert.equal(await page.locator('#s-hero [data-route="whole"]').count(), 1);
-    assert.equal(await page.locator('[data-nav="scan"]').getAttribute('class'), 'pill on');
+    assert.equal(await page.locator('[data-view-btn="trail"]').count(), 1);
+    assert.equal(await page.locator('[data-view-btn="whole"]').count(), 1);
+    assert.equal(await page.locator('[data-nav="scan"]').getAttribute('class'), 'pill', 'page 1 is not a trail step');
     assert.equal(await page.locator('[data-nav="request"]').isDisabled(), true, 'your call is inert before an answer');
-    await page.locator('[data-route="trail"]').click();
+    await page.locator('#s-hero [data-to="intent"]').click();
     assert.equal((await seat(page)).section, 'intent');
-    assert.equal(await page.locator('[data-nav="scan"]').getAttribute('class'), 'pill on', 'the nav stays on step 1 across both idea pages');
+    assert.equal(await page.locator('[data-nav="scan"]').getAttribute('class'), 'pill on', 'step 1, Intent, starts on the intent page');
 
     // Intent makes the knobs; the bench shows exactly those, and has no way to add one.
     const knobs = await page.evaluate(() => window.STBWindowSeat.knobs());
@@ -112,7 +113,7 @@ test('Window Seat 0.9: two routes, one state, one live-Store answer', { timeout:
     // ── One long scroll ──
     const b = await open(browser, origin);
     page = b.page;
-    await page.locator('[data-route="whole"]').click();
+    await page.locator('[data-view-btn="whole"]').click();
     assert.equal(await page.evaluate(() => [...document.querySelectorAll('.step')].filter(s => s.offsetParent).length), 8, 'seven pages and the audit copy, one scroll');
     const n1 = log.length;
     await page.locator('#btn-ask').click();

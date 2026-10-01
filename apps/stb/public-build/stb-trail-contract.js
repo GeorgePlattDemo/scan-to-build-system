@@ -37,6 +37,8 @@
     Object.freeze({
       id: 'window-seat',
       tileLabel: 'Space utilization',
+      // Window Seat's step 1 reads Intent: its first page, the want, sits behind the trail. Steps 2 to 6 are shared.
+      steps: Object.freeze(['Intent', 'The bench', 'The Store answers', 'Your call', 'We cut it', 'Pick up & build']),
       pages: Object.freeze(['window-seat-live'])
     }),
     Object.freeze({
