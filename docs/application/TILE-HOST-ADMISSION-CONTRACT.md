@@ -58,6 +58,5 @@ The current admission path is `admitPublicStoreRequest` in `apps/stb/public-buil
 
 ## Open before adoption
 
-- **Trail rule 8.** "Adding a tile means declaring it in the trail contract. Nothing else." An admission profile is a second declaration per tile. Either the profile moves into the tile's trail-contract entry, or rule 8 is amended. Until then a tile without a profile fails closed.
 - **Profiles are first declarations,** enough for the contract tests. They are not yet a port of every row in the current path (for example Start your own spot demand, Window Seat screws, generator consistency).
 - **Tile messages today** are per-tile types (`STB_SEAT_STATE`, `STB_OUTDOOR_STATE`, `STB_START_OWN_*`). Interface 1 is what they converge on; no page or iframe changes in this step.
