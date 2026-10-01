@@ -1,0 +1,316 @@
+// Tile/host and definition/Store admission contract (spec only; nothing in the app imports it yet).
+// Contract: apps/stb/shared/tile-host-admission-contract.mjs. Spec: docs/application/TILE-HOST-ADMISSION-CONTRACT.md.
+//
+// Proves three cases for every tile declared in public-build/stb-trail-contract.js:
+//   1. A missing required fact blocks before Store and names its owner, even when the tile reports
+//      "The Store answers" as usable. Admission reads the profile's declared requirements, not the rows
+//      a tile emitted.
+//   2. A complete request outside Store capability still reaches Store. Admission makes no capability
+//      check; the request is bounded to the scope's declared facts and leaves out source material and
+//      retained requests the job record holds.
+//   3. Reopening a record restores history and recalculates available steps. A saved Store answer comes
+//      back as history, never as current authority, even for the current revision.
+// No live Store is used: `ask` stands in for the Store transport and records what reached it.
+
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+import {
+  TILE_HOST_VERSION,
+  DEFINITION_STORE_VERSION,
+  ADMISSION_PROFILES,
+  ADMISSION_RESULT,
+  BLOCK_REASON,
+  ANSWER_AUTHORITY,
+  LIBRARY_TARGET,
+  validateTileHostMessage,
+  hostNavLine,
+  admit,
+  inquire,
+  availableSteps,
+  reopenJobRecord,
+} from '../../shared/tile-host-admission-contract.mjs';
+import { STATUS, OWNER } from '../../shared/definition-contract.mjs';
+
+const ROOT = fileURLToPath(new URL('../../public-build/', import.meta.url));
+const sandbox = {};
+vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'stb-trail-contract.js'), 'utf8'), sandbox, { filename: 'stb-trail-contract.js' });
+const trail = sandbox.STBTrailContract;
+const [INTENT, BENCH, STORE_ANSWERS, YOUR_CALL, WE_CUT, PICK_UP] = trail.steps;
+const TILE_IDS = [...trail.tiles.map(tile => tile.id)];
+
+const ok = value => ({ value, status: STATUS.CONFIRMED });
+
+// One complete job-definition revision per tile, the USER-owned fact case 1 leaves out, and the values that
+// put case 2 past any envelope the Store would support (System does not know or check that envelope).
+const FIXTURES = {
+  'start-own': {
+    scope: 'USER_DEFINED_BOARD_V1',
+    facts: {
+      'start-own.material': ok({ species: 'white-oak', form: 'S4S', nominalT: 1, nominalW: 6 }),
+      'start-own.workpiece-length': ok(48),
+      'start-own.parts': ok([{ partId: 'P1', lengthIn: 22 }, { partId: 'P2', lengthIn: 22 }]),
+      'start-own.operations': ok(['CROSSCUT']),
+      'start-own.datum': ok({ cutPlane: 'XZ', lengthDatum: 'C' }),
+    },
+    userFact: 'start-own.workpiece-length',
+    pastEnvelope: { 'start-own.workpiece-length': ok(4800), 'start-own.parts': ok([{ partId: 'P1', lengthIn: 4790 }]) },
+  },
+  alcove: {
+    scope: 'ALCOVE_INSERT_V1',
+    facts: {
+      'alcove.opening': ok({ widthIn: 30, heightIn: 72, depthIn: 12 }),
+      'alcove.material': ok({ species: 'poplar', form: 'S4S', nominalT: 1, nominalW: 12 }),
+      'alcove.board-requirements': ok([{ requirementId: 'ALCOVE-UPRIGHT-PARENTS' }, { requirementId: 'ALCOVE-SHELF-PARENTS' }]),
+      'alcove.component-programs': ok([{ componentId: 'U1', requirementId: 'ALCOVE-UPRIGHT-PARENTS' }]),
+      // alcove.hardware is STORE-owned and deliberately left unresolved: the Store selects it.
+    },
+    userFact: 'alcove.opening',
+    pastEnvelope: { 'alcove.opening': ok({ widthIn: 1000, heightIn: 1000, depthIn: 400 }) },
+  },
+  'window-seat': {
+    scope: 'WINDOW_SEAT_COMMITTED',
+    facts: {
+      'window-seat.width': ok(60),
+      'window-seat.height': ok(18),
+      'window-seat.depth': ok(16),
+      'window-seat.boards': { value: [{ id: 'B1', len: 60, w: 16 }], status: STATUS.DERIVED },
+    },
+    userFact: 'window-seat.depth',
+    pastEnvelope: { 'window-seat.width': ok(900), 'window-seat.boards': { value: [{ id: 'B1', len: 900, w: 60 }], status: STATUS.DERIVED } },
+  },
+  outdoor: {
+    scope: 'OUTDOOR_COMMITTED',
+    facts: {
+      'outdoor.plan': ok('OUTDOOR-PICNIC-6FT'),
+      'outdoor.cut-packages': ok([{ packageId: 'TOP', parts: [{ partId: 'T1', lengthIn: 72 }] }]),
+    },
+    userFact: 'outdoor.plan',
+    pastEnvelope: { 'outdoor.cut-packages': ok([{ packageId: 'TOP', parts: [{ partId: 'T1', lengthIn: 2000 }] }]) },
+  },
+  playhouse: {
+    scope: 'SHEET_PACKAGE_V1',
+    facts: {
+      'playhouse.sheet': ok({ thicknessIn: 0.75, lengthIn: 96, widthIn: 48 }),
+      'playhouse.opening': ok({ widthIn: 18, straightHeightIn: 12, riseIn: 9, requestedTabCount: 4 }),
+    },
+    userFact: 'playhouse.opening',
+    pastEnvelope: { 'playhouse.sheet': ok({ thicknessIn: 4, lengthIn: 400, widthIn: 400 }) },
+  },
+};
+
+const SOURCE_MATERIAL = [{ kind: 'photo', name: 'SOURCE-PHOTO-front-wall.jpg' }, { kind: 'sketch', name: 'SOURCE-SKETCH-napkin.png' }];
+const RETAINED_REQUEST_ID = 'RETAINED-REQUEST-r1';
+
+function revision(tileId, id, facts) {
+  // A fact the tile emitted that its profile does not declare. It must never travel.
+  return { definitionRevisionId: id, tileId, facts: { ...facts, [`${tileId}.scratch-note`]: ok('UNDECLARED-FACT') } };
+}
+function record(tileId, current) {
+  const fx = FIXTURES[tileId];
+  return {
+    tileId,
+    currentRevisionId: current.definitionRevisionId,
+    inquiryScope: fx.scope,
+    lastStage: YOUR_CALL,
+    sourceMaterial: SOURCE_MATERIAL,
+    revisions: [revision(tileId, `${tileId}-r1`, fx.facts), current],
+    retainedRequests: [{ requestId: RETAINED_REQUEST_ID, definitionRevisionId: `${tileId}-r1`, inquiryScope: fx.scope }],
+    storeAnswers: [
+      { requestId: RETAINED_REQUEST_ID, definitionRevisionId: `${tileId}-r1`, status: 'BUDGETARY_ESTIMATE', withinEnvelope: true, authority: ANSWER_AUTHORITY.CURRENT },
+      { requestId: 'RETAINED-REQUEST-r2', definitionRevisionId: current.definitionRevisionId, status: 'BUDGETARY_ESTIMATE', withinEnvelope: true, authority: ANSWER_AUTHORITY.CURRENT },
+    ],
+    savedUsableSteps: [...trail.steps],
+  };
+}
+function storeStub(answer) {
+  const calls = [];
+  const ask = async request => { calls.push(request); return answer; };
+  return { calls, ask };
+}
+function tileMessage(tileId, extra = {}) {
+  return {
+    interface: TILE_HOST_VERSION,
+    tileId,
+    stage: BENCH,
+    usableSteps: [INTENT, BENCH, STORE_ANSWERS],
+    navigationRequest: { target: STORE_ANSWERS },
+    ...extra,
+  };
+}
+
+test('contract covers exactly the five declared tiles', () => {
+  assert.deepEqual(TILE_IDS, ['start-own', 'alcove', 'window-seat', 'outdoor', 'playhouse']);
+  assert.deepEqual(Object.keys(ADMISSION_PROFILES).sort(), [...TILE_IDS].sort());
+  assert.deepEqual(Object.keys(FIXTURES).sort(), [...TILE_IDS].sort());
+  for (const id of TILE_IDS) assert.ok(Object.keys(ADMISSION_PROFILES[id].scopes).length > 0, id);
+});
+
+test('case 1: a missing required fact blocks before Store and names the owner', async () => {
+  for (const tileId of TILE_IDS) {
+    const fx = FIXTURES[tileId];
+
+    // The tile says "The Store answers" is usable and asks to go there. That message is valid tile-host data,
+    // and it authorizes nothing: admission never reads it.
+    const message = tileMessage(tileId);
+    assert.equal(validateTileHostMessage(trail, message).ok, true, tileId);
+
+    // The tile simply did not emit the fact. The profile still requires it.
+    const { [fx.userFact]: _omitted, ...emitted } = fx.facts;
+    const rev = revision(tileId, `${tileId}-r2`, emitted);
+    const result = admit({ revision: rev, inquiryScope: fx.scope });
+    assert.equal(result.interface, DEFINITION_STORE_VERSION);
+    assert.equal(result.admission.result, ADMISSION_RESULT.BLOCKED, tileId);
+    assert.equal(result.admission.reason, BLOCK_REASON.REQUIRED_FACT_UNSETTLED, tileId);
+    assert.deepEqual(result.admission.blocking.map(b => [b.factId, b.owner, b.condition]), [[fx.userFact, OWNER.USER, 'MISSING']], tileId);
+    assert.equal(result.request, null, tileId);
+
+    const store = storeStub({ status: 'SHOULD_NOT_BE_ASKED' });
+    const sent = await inquire(result, store.ask);
+    assert.equal(sent.reachedStore, false, tileId);
+    assert.equal(store.calls.length, 0, `${tileId}: nothing reached Store`);
+    assert.equal(sent.blocking[0].owner, OWNER.USER, tileId);
+    assert.ok(!availableSteps({ trail, admission: result }).includes(STORE_ANSWERS), `${tileId}: The Store answers is inert`);
+
+    // Present but unresolved is the same block; the owner is still named.
+    const unresolved = revision(tileId, `${tileId}-r3`, { ...fx.facts, [fx.userFact]: { value: null, status: STATUS.UNRESOLVED } });
+    const second = admit({ revision: unresolved, inquiryScope: fx.scope });
+    assert.deepEqual(second.admission.blocking.map(b => [b.factId, b.owner, b.condition]), [[fx.userFact, OWNER.USER, 'STATUS_UNRESOLVED']], tileId);
+  }
+
+  // Only profile-declared requirements count. A tile emitting extra rows cannot stand in for a missing one.
+  const fx = FIXTURES.playhouse;
+  const padded = revision('playhouse', 'playhouse-r4', {
+    'playhouse.sheet': fx.facts['playhouse.sheet'],
+    'playhouse.opening-ok': ok(true),
+    'playhouse.unresolved': ok([]),
+  });
+  assert.equal(admit({ revision: padded, inquiryScope: fx.scope }).admission.result, ADMISSION_RESULT.BLOCKED);
+
+  // A tile with no declared profile, or an undeclared scope, fails closed rather than passing on what it emitted.
+  assert.equal(admit({ revision: revision('unknown-tile', 'u-r1', {}), inquiryScope: 'X' }).admission.reason, BLOCK_REASON.PROFILE_MISSING);
+  assert.equal(admit({ revision: revision('outdoor', 'o-r1', FIXTURES.outdoor.facts), inquiryScope: 'OUTDOOR_WHATEVER' }).admission.reason, BLOCK_REASON.SCOPE_UNDECLARED);
+});
+
+test('case 2: a complete request outside Store capability still reaches Store', async () => {
+  for (const tileId of TILE_IDS) {
+    const fx = FIXTURES[tileId];
+    const rec = record(tileId, revision(tileId, `${tileId}-r2`, { ...fx.facts, ...fx.pastEnvelope }));
+    const current = rec.revisions.at(-1);
+
+    const result = admit({ revision: current, inquiryScope: fx.scope });
+    assert.equal(result.admission.result, ADMISSION_RESULT.ADMITTED, tileId);
+    assert.deepEqual(result.admission.blocking, [], tileId);
+
+    const refusal = { status: 'REFUSED', reason: 'OUTSIDE_STORE_ENVELOPE', withinEnvelope: false };
+    const store = storeStub(refusal);
+    const sent = await inquire(result, store.ask);
+    assert.equal(sent.reachedStore, true, tileId);
+    assert.equal(store.calls.length, 1, `${tileId}: exactly one request reached Store`);
+    assert.equal(sent.answer.status, 'REFUSED', `${tileId}: the refusal is the result`);
+    assert.equal(sent.answer.authority, ANSWER_AUTHORITY.CURRENT);
+
+    // The request is bounded: the scope's declared facts, this revision, this scope. Nothing else from the record.
+    const request = store.calls[0];
+    const profile = ADMISSION_PROFILES[tileId].scopes[fx.scope];
+    const declared = profile.requires.map(r => r.id);
+    assert.equal(request.definitionRevisionId, current.definitionRevisionId);
+    assert.equal(request.inquiryScope, fx.scope);
+    assert.equal(request.requestType, profile.requestType);
+    assert.ok(Object.keys(request.facts).every(id => declared.includes(id)), `${tileId}: only declared facts travel`);
+    for (const [id, fact] of Object.entries(fx.pastEnvelope)) assert.deepEqual(request.facts[id], fact.value, `${tileId}: ${id} travels as defined`);
+    const wire = JSON.stringify(request);
+    for (const absent of ['SOURCE-PHOTO', 'SOURCE-SKETCH', RETAINED_REQUEST_ID, 'UNDECLARED-FACT', `${tileId}-r1`]) {
+      assert.ok(!wire.includes(absent), `${tileId}: request leaves out ${absent}`);
+    }
+    // The record still holds them.
+    assert.equal(rec.sourceMaterial.length, 2);
+    assert.equal(rec.retainedRequests[0].requestId, RETAINED_REQUEST_ID);
+
+    // Past the envelope, Your call stays inert (rule 5).
+    const usable = availableSteps({ trail, admission: result, freshAnswer: sent.answer });
+    assert.deepEqual(usable, [INTENT, BENCH, STORE_ANSWERS], tileId);
+  }
+
+  // A STORE-owned requirement travels as an open demand for Store to resolve; it does not block.
+  const alcove = admit({ revision: revision('alcove', 'alcove-r9', FIXTURES.alcove.facts), inquiryScope: 'ALCOVE_INSERT_V1' });
+  assert.deepEqual(alcove.request.openDemands, ['alcove.hardware']);
+});
+
+test('case 3: reopening restores history and recalculates; a saved answer is never current authority', () => {
+  for (const tileId of TILE_IDS) {
+    const fx = FIXTURES[tileId];
+    const rec = record(tileId, revision(tileId, `${tileId}-r2`, fx.facts));
+    const reopened = reopenJobRecord({ trail, record: rec });
+
+    // History is restored whole.
+    assert.deepEqual(reopened.history.revisions.map(r => r.definitionRevisionId), [`${tileId}-r1`, `${tileId}-r2`]);
+    assert.deepEqual(reopened.history.sourceMaterial, SOURCE_MATERIAL);
+    assert.equal(reopened.history.retainedRequests[0].requestId, RETAINED_REQUEST_ID);
+    assert.equal(reopened.history.storeAnswers.length, 2);
+    assert.ok(reopened.history.storeAnswers.every(a => a.authority === ANSWER_AUTHORITY.HISTORY), `${tileId}: saved answers are history`);
+
+    // Even the saved answer for the current revision is not restored as current authority.
+    assert.equal(reopened.history.storeAnswers[1].definitionRevisionId, reopened.current.definitionRevisionId);
+    assert.equal(reopened.current.storeAnswer, null, tileId);
+
+    // Available steps are recalculated, not restored from savedUsableSteps.
+    assert.equal(reopened.current.admission.admission.result, ADMISSION_RESULT.ADMITTED, tileId);
+    assert.deepEqual(reopened.current.usableSteps, [INTENT, BENCH, STORE_ANSWERS], tileId);
+    for (const inert of [YOUR_CALL, WE_CUT, PICK_UP]) assert.ok(!reopened.current.usableSteps.includes(inert), `${tileId}: ${inert} inert after reopen`);
+    assert.equal(reopened.current.stage, STORE_ANSWERS, `${tileId}: saved stage "${YOUR_CALL}" is not restored`);
+
+    // The host would draw that state: the saved stage cannot be navigated to.
+    const message = tileMessage(tileId, { stage: reopened.current.stage, usableSteps: [...reopened.current.usableSteps], navigationRequest: { target: YOUR_CALL } });
+    assert.deepEqual([...validateTileHostMessage(trail, message).errors], ['NAVIGATION_TO_INERT_STEP'], tileId);
+
+    // A reopened record whose current revision lost a required fact recalculates to blocked and names the owner.
+    const { [fx.userFact]: _gone, ...rest } = fx.facts;
+    const stale = reopenJobRecord({ trail, record: record(tileId, revision(tileId, `${tileId}-r2`, rest)) });
+    assert.deepEqual(stale.current.usableSteps, [INTENT, BENCH], tileId);
+    assert.equal(stale.current.admission.admission.blocking[0].owner, OWNER.USER, tileId);
+    assert.equal(stale.history.storeAnswers.length, 2, `${tileId}: history kept even when blocked`);
+
+    // Restored history cannot be edited into authority.
+    assert.throws(() => { reopened.history.storeAnswers[1].authority = ANSWER_AUTHORITY.CURRENT; }, TypeError);
+  }
+});
+
+test('tile-host interface carries navigation only; the Window Seat Idea fork is presentation only', () => {
+  // No definition, request or admission travels tile -> host.
+  const smuggled = tileMessage('alcove', { storeRequest: { requestType: 'ALCOVE_INSERT_V1' }, admission: { result: 'ADMITTED' } });
+  assert.deepEqual([...validateTileHostMessage(trail, smuggled).errors], ['UNKNOWN_FIELD:storeRequest', 'UNKNOWN_FIELD:admission']);
+  assert.ok(validateTileHostMessage(trail, tileMessage('outdoor', { interface: 'STB-TILE-HOST-0.0' })).errors.includes('INTERFACE_VERSION_MISMATCH'));
+  assert.ok(validateTileHostMessage(trail, tileMessage('nope')).errors.includes('TILE_NOT_DECLARED'));
+  assert.equal(validateTileHostMessage(trail, tileMessage('start-own', { navigationRequest: { target: LIBRARY_TARGET } })).ok, true);
+
+  // Inert steps are drawn disabled, never dropped.
+  const line = hostNavLine(trail, tileMessage('playhouse'));
+  assert.deepEqual(line.steps.map(s => [s.number, s.label, s.enabled]), trail.steps.map((label, i) => [i + 1, label, i < 3]));
+  assert.equal(line.steps.filter(s => s.current).length, 1);
+  assert.equal(hostNavLine(trail, tileMessage('playhouse', { stage: trail.idea.label, navigationRequest: null })).stepBarShown, false);
+
+  // The fork lives on Window Seat's Idea line only.
+  const fork = trail.presentationForks.find(f => f.tileId === 'window-seat');
+  assert.deepEqual([...fork.options], ['Intent', 'One full scroll']);
+  for (const option of fork.options) {
+    assert.equal(validateTileHostMessage(trail, tileMessage('window-seat', { stage: fork.line, presentationFork: option, navigationRequest: null })).ok, true, option);
+  }
+  assert.ok(validateTileHostMessage(trail, tileMessage('window-seat', { presentationFork: 'One full scroll' })).errors.includes('PRESENTATION_FORK_OFF_ITS_LINE'));
+  assert.ok(validateTileHostMessage(trail, tileMessage('outdoor', { stage: trail.idea.label, presentationFork: 'Intent', navigationRequest: null })).errors.includes('PRESENTATION_FORK_NOT_DECLARED'));
+
+  // Either way through, the same revision gives the same admission and the same request. Admission has no
+  // tile-host input: a message handed to it alongside the revision is ignored, fork and usable steps included.
+  const rev = revision('window-seat', 'window-seat-r2', FIXTURES['window-seat'].facts);
+  const plainAdmit = admit({ revision: rev, inquiryScope: 'WINDOW_SEAT_COMMITTED' });
+  for (const option of fork.options) {
+    const message = tileMessage('window-seat', { stage: fork.line, presentationFork: option, navigationRequest: null, usableSteps: [...trail.steps] });
+    assert.deepEqual(admit({ revision: rev, inquiryScope: 'WINDOW_SEAT_COMMITTED', tileHostMessage: message }), plainAdmit, option);
+  }
+  const { [FIXTURES['window-seat'].userFact]: _d, ...short } = FIXTURES['window-seat'].facts;
+  const allUsable = tileMessage('window-seat', { usableSteps: [...trail.steps], stage: YOUR_CALL });
+  assert.equal(admit({ revision: revision('window-seat', 'window-seat-r5', short), inquiryScope: 'WINDOW_SEAT_COMMITTED', tileHostMessage: allUsable }).admission.result, ADMISSION_RESULT.BLOCKED);
+});
