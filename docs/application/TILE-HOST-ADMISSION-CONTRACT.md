@@ -58,7 +58,7 @@ Intent and The bench are always usable. The Store answers is usable when the cur
 
 ## What this replaces, later
 
-The current admission path is `admitPublicStoreRequest` in `apps/stb/public-build/stb-public-admission.mjs`, called from `sendJob` in `apps/stb/public-build/stb-store-client.js`. Each tile branch builds its own responsibility rows and then takes `requiredIds = rows.map(item => item.id)`, so the `SYSTEM_ADMISSION_COVERAGE_GAP` check compares the rows with themselves and cannot fire. Window Seat and Outdoor blockers come from the tile page's own `conditions()`. That path stays in place until a separate change moves `sendJob` onto this contract. Playhouse and Window Seat are off it already: each transport inside `inquire()` calls `sendAdmittedJob`, which sends only the request `admit()` admitted and does not call `admitPublicStoreRequest`.
+The current admission path is `admitPublicStoreRequest` in `apps/stb/public-build/stb-public-admission.mjs`, called from `sendJob` in `apps/stb/public-build/stb-store-client.js`. Each tile branch builds its own responsibility rows and then takes `requiredIds = rows.map(item => item.id)`, so the `SYSTEM_ADMISSION_COVERAGE_GAP` check compares the rows with themselves and cannot fire. Window Seat and Outdoor blockers come from the tile page's own `conditions()`. That path stays in place until a separate change moves `sendJob` onto this contract. Playhouse, Window Seat and Alcove are off it already: each transport inside `inquire()` calls `sendAdmittedJob`, which sends only the request `admit()` admitted and does not call `admitPublicStoreRequest`.
 
 ## Open before adoption
 

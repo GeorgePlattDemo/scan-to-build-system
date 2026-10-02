@@ -861,6 +861,34 @@
       "blobSha": "4f21b30f0d34f95243b58f7bcc009a69b2903a36",
       "bytes": 251468,
       "reason": "Cache-buster for the changed stb-window-seat-0.9.html."
+    },
+    {
+      "path": "stb-alcove-store-bridge.js",
+      "pass": "alcove-one-admission-door",
+      "blobSha": "6f2001b872cdc60844049ac1eb1cd2da99ac62dd",
+      "bytes": 1708,
+      "reason": "The Alcove bridge, the transport inside inquire(), sends the request admit() admitted through STBStoreClient.sendAdmittedJob, so an Alcove inquiry has one admission decision and never calls admitPublicStoreRequest. Hardware still travels as a Store-owned open demand."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "alcove-one-admission-door",
+      "blobSha": "d016c1a951ddbcd710fe65d911502c26ddaba9bc",
+      "bytes": 127709,
+      "reason": "Cache-busters for the changed stb-alcove-store-bridge.js and for stb-store-client.js at the bytes that carry sendAdmittedJob. Visible pages are unchanged."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "alcove-one-admission-door",
+      "blobSha": "46fff26b9f76362b8886f0c97c70b93e23dbe29d",
+      "bytes": 39662,
+      "reason": "Cache-buster for the base page."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "alcove-one-admission-door",
+      "blobSha": "b27e3285b122d3a6076fd6d7d4a4fc718fecb8e6",
+      "bytes": 251468,
+      "reason": "Cache-buster for the front door."
     }
   ],
   "retiredFiles": [
