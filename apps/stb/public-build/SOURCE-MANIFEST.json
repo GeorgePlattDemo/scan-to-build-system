@@ -1120,6 +1120,41 @@
       "blobSha": "d3022a28dccad4785dfb58e809439dd0136f2fd1",
       "bytes": 252927,
       "reason": "The tile-host admission contract loads at ?v=2615dd6f, the contract's current blob prefix (was ?v=dd8615db): Alcove profile 0.3 checks its material fields, both parents with operations, real component program sizes and, with spotting on, the spot demand's mode, tool and features. Cache-busters for the changed stb-outdoor-picnic-0.4.html, stb-window-seat-0.9.html and front door."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "window-seat-boards-sent-screws-admission",
+      "blobSha": "53142f5b8884b7acdb2484e11b6bd64f82a69a98",
+      "bytes": 81496,
+      "reason": "The tile-host admission contract loads at ?v=798e2a54, the contract's current blob prefix (was ?v=2615dd6f): Window Seat profile 0.3 checks every board's id, length and width. Nothing else on the Outdoor page changes."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "window-seat-boards-sent-screws-admission",
+      "blobSha": "5a117c178b8e358324a772aededce2c7d74ea0dd",
+      "bytes": 140536,
+      "reason": "The tile-host admission contract loads at ?v=798e2a54, the contract's current blob prefix (was ?v=2615dd6f): Window Seat profile 0.3 checks every board's id, length and width. The Window Seat transport stops before the Store when the boards it would send are not exactly the admitted boards (ADMITTED_BOARD_NOT_SENT, SENT_BOARD_NOT_ADMITTED), or when added screws would not travel with the admitted gauge, length, finish and count (ADMITTED_SCREWS_NOT_SENT)."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "window-seat-boards-sent-screws-admission",
+      "blobSha": "5ef4edee87eeeb9fe832e1e49646f42c0480b703",
+      "bytes": 127709,
+      "reason": "The tile-host admission contract loads at ?v=798e2a54, the contract's current blob prefix (was ?v=2615dd6f): Window Seat profile 0.3 checks every board's id, length and width. Visible pages are unchanged."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "window-seat-boards-sent-screws-admission",
+      "blobSha": "7c5effe98b3d22cdf0d012b266841bce6e1094d4",
+      "bytes": 39662,
+      "reason": "Cache-buster for the changed system-build-base-8d8a9dd.html."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-boards-sent-screws-admission",
+      "blobSha": "e83b48a09209d11d6b6fbab61ab55b5c664c685e",
+      "bytes": 252927,
+      "reason": "The tile-host admission contract loads at ?v=798e2a54, the contract's current blob prefix (was ?v=2615dd6f): Window Seat profile 0.3 checks every board's id, length and width. Cache-busters for the changed stb-outdoor-picnic-0.4.html, stb-window-seat-0.9.html and front door."
     }
   ],
   "retiredFiles": [

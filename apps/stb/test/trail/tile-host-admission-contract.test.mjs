@@ -421,7 +421,7 @@ test('case 4: a malformed nested fact blocks before Store with the fact id and o
   assert.deepEqual([...new Set(formed)].sort(),
     ['alcove.board-requirements', 'alcove.component-programs', 'alcove.material', 'alcove.spot-demand',
       'playhouse.opening', 'start-own.datum', 'start-own.material', 'start-own.parts', 'start-own.spot-demand',
-      'window-seat.added-knobs', 'window-seat.kept-asks']);
+      'window-seat.added-knobs', 'window-seat.boards', 'window-seat.kept-asks']);
   const stated = { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 };
   const material = admit({ revision: facts('start-own', { 'start-own.material': ok(stated) }), inquiryScope: 'USER_DEFINED_BOARD_V1' });
   assert.equal(material.admission.result, ADMISSION_RESULT.ADMITTED);
@@ -439,6 +439,53 @@ test('case 4: a malformed nested fact blocks before Store with the fact id and o
     const store = storeStub({ status: 'SHOULD_NOT_BE_ASKED' });
     assert.equal((await inquire(blocked, store.ask)).reachedStore, false);
     assert.equal(store.calls.length, 0, 'a material missing a stated field never reaches the Store');
+  }
+});
+
+// Window Seat's boards, board by board, as its page emits them ({id, len, w}). A board without an id, or without a
+// length and width above 0, blocks before Store with owner PROJECT and the field paths. Every board real, it still
+// reaches Store, past any envelope.
+test('case 4, Window Seat: every board has an id and a length and width above 0', async () => {
+  const SCOPE = 'WINDOW_SEAT_COMMITTED';
+  const base = FIXTURES['window-seat'].facts;
+  const B1 = { id: 'C-SEAT-1', len: 55, w: 7.25 };
+  const B2 = { id: 'L-TOP-1', len: 24, w: 7.25 };
+  const without = (item, key) => (({ [key]: _, ...rest }) => rest)(item);
+  const boards = value => revision('window-seat', 'window-seat-boards', { ...base, 'window-seat.boards': { value, status: STATUS.DERIVED } });
+  const BLOCKS = [
+    [[B1, { ...B2, id: '' }], ['[1].id']],
+    [[B1, { ...B2, id: '  ' }], ['[1].id']],
+    [[without(B1, 'id'), B2], ['[0].id']],
+    [[B1, { ...B2, id: 7 }], ['[1].id']],
+    [[{ ...B1, len: 0 }, B2], ['[0].len']],
+    [[B1, { ...B2, w: 0 }], ['[1].w']],
+    [[{ ...B1, len: -1, w: -7.25 }, B2], ['[0].len', '[0].w']],
+    [[B1, without(B2, 'len')], ['[1].len']],
+    [[B1, { ...B2, w: '7.25' }], ['[1].w']],
+    [[B1, { ...B2, len: NaN }], ['[1].len']],
+    [[{ id: '', len: 0, w: 0 }], ['[0].id', '[0].len', '[0].w']],
+    [[B1, null], ['[1]']],
+  ];
+  for (const [value, missing] of BLOCKS) {
+    const label = JSON.stringify(value);
+    const result = admit({ revision: boards(value), inquiryScope: SCOPE });
+    assert.equal(result.admission.result, ADMISSION_RESULT.BLOCKED, label);
+    assert.equal(result.admission.reason, BLOCK_REASON.REQUIRED_FACT_UNSETTLED, label);
+    assert.deepEqual(result.admission.blocking, [{ factId: 'window-seat.boards', owner: OWNER.PROJECT,
+      title: 'Every defined board with real length and width', condition: 'INVALID_VALUE', fields: missing }], label);
+    assert.equal(result.request, null, label);
+    const store = storeStub({ status: 'SHOULD_NOT_BE_ASKED' });
+    assert.equal((await inquire(result, store.ask)).reachedStore, false, label);
+    assert.equal(store.calls.length, 0, `${label}: nothing reached Store`);
+  }
+
+  for (const value of [[B1], [B1, B2], [{ id: 'C-SEAT-1', len: 900, w: 60 }]]) {
+    const label = JSON.stringify(value);
+    const result = admit({ revision: boards(value), inquiryScope: SCOPE });
+    assert.equal(result.admission.result, ADMISSION_RESULT.ADMITTED, label);
+    const store = storeStub({ status: 'REFUSED', withinEnvelope: false });
+    assert.equal((await inquire(result, store.ask)).reachedStore, true, label);
+    assert.deepEqual(store.calls[0].facts['window-seat.boards'], value, `${label}: travels exactly as defined`);
   }
 });
 
