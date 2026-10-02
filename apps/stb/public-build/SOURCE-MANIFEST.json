@@ -840,6 +840,13 @@
       "blobSha": "827989a05cf2a76454ff5753da7192a5b126f870",
       "bytes": 127709,
       "reason": "Cache-buster for the deployed tile-host admission contract, whose inquire() now stamps the inquiry scope; Alcove's live state names its answer's inquiry scope."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "playhouse-one-admission-door",
+      "blobSha": "62cb92afc31ca9f4cfac247f999e02a1d494ed73",
+      "bytes": 251468,
+      "reason": "Playhouse's transport inside inquire() sends the request admit() admitted through STBStoreClient.sendAdmittedJob, so a Playhouse inquiry has one admission decision and never calls admitPublicStoreRequest. Cache-buster for the changed stb-store-client.js."
     }
   ],
   "retiredFiles": [

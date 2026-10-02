@@ -78,7 +78,10 @@ for(const id of ['playhouse-request','playhouse-yard','playhouse-terms']) assert
 assert.match(shell,/CONFIRM THIS VERSION →/);
 assert.match(shell,/REQUEST ≠ ORDER/);
 // Playhouse's Store step is the live Store's answer for the current version, never a stored reference answer.
-assert.match(shell,/requestType:S001_REQUEST_TYPE/);
+assert.match(shell,/if \(request\.requestType !== S001_REQUEST_TYPE\) throw new Error\('ADMITTED_REQUEST_TYPE_MISMATCH'\);/);
+// Its one admission decision is admit(): the transport inside inquire() sends the admitted request without the old door.
+assert.match(shell,/return client\.sendAdmittedJob\(\{\s*admitted:request,/);
+assert.doesNotMatch(shell.slice(shell.indexOf('function s001Inquire('),shell.indexOf('function s001AskIfChanged(')),/sendJob\(/);
 assert.match(shell,/const S001_REQUEST_TYPE = 'SHEET_PACKAGE_V1'/);
 assert.match(shell,/window\.STBStoreClient/);
 assert.match(shell,/data-s001-needs-supportable/);
