@@ -64,7 +64,7 @@
   }
   function clone(value){ return value == null ? value : JSON.parse(JSON.stringify(value)); }
 
-  // Send one formal public-build job request. Every five-tile request passes the same admission seam here.
+  // Send one formal public-build job request through the old admission seam (admitPublicStoreRequest).
   // `payload` remains the existing request-type payload; admission evidence is local and is not added to the wire.
   // A caller-provided readiness flag has no authority because this function derives admission itself.
   async function sendJob({projectId, requestType, payload, signatureBody = null, candidateRevisionId, requestId, freshReceipt = true, timeoutMs = 25000}){
@@ -81,6 +81,23 @@
       candidateRevisionId:revision,
       storePin:config.storePin
     });
+    return post({config, projectId, requestType, body, revision, signatureBody, requestId, freshReceipt, timeoutMs});
+  }
+
+  // The transport inside inquire() for a tile whose one admission decision is admit() in
+  // tile-host-admission-contract.mjs. `admitted` is the request admit() produced; this function does not admit
+  // anything and does not call admitPublicStoreRequest. It sends only that request's tile, request type and revision.
+  async function sendAdmittedJob({admitted, payload, signatureBody = null, requestId, freshReceipt = true, timeoutMs = 25000}){
+    if(admitted?.interface !== 'STB-DEFINITION-STORE-0.1' || !admitted.tileId || !admitted.requestType ||
+       !admitted.definitionRevisionId || !payload){
+      throw new Error('STORE_CLIENT_REQUEST_INCOMPLETE');
+    }
+    const config = await loadConfig();
+    return post({config, projectId:admitted.tileId, requestType:admitted.requestType, body:clone(payload),
+      revision:String(admitted.definitionRevisionId), signatureBody, requestId, freshReceipt, timeoutMs});
+  }
+
+  async function post({config, projectId, requestType, body, revision, signatureBody, requestId, freshReceipt, timeoutMs}){
     const wire = {
       protocolVersion:PROTOCOL_VERSION,
       requestId:String(requestId || crypto.randomUUID()),
@@ -141,6 +158,7 @@
     loadConfig,
     canonicalJson,
     sha256,
-    sendJob
+    sendJob,
+    sendAdmittedJob
   });
 })(window);

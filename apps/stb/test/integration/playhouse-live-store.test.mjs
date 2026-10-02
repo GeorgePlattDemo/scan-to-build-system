@@ -20,7 +20,8 @@ const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/ja
 
 // Serves the public build, answers stb-store-runtime.json with a loopback endpoint, and passes every Store
 // POST to the real adapter. `tamper` lets one test hand the page an answer meant for someone else.
-function serve(adapter, log, tamper = null) {
+// `rewrite` lets one test serve a public-build file with changed text.
+function serve(adapter, log, tamper = null, rewrite = null) {
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://x');
     if (url.pathname === '/stb-store-runtime.json') {
@@ -44,6 +45,7 @@ function serve(adapter, log, tamper = null) {
     const file = path.join(ROOT, rel);
     if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
     res.writeHead(200, { 'content-type': TYPES[path.extname(file)] || 'application/octet-stream' });
+    if (rewrite?.[rel]) { res.end(rewrite[rel](fs.readFileSync(file, 'utf8'))); return; }
     fs.createReadStream(file).pipe(res);
   });
   return new Promise(resolve => server.listen(0, '127.0.0.1', () => resolve(server)));
@@ -93,13 +95,13 @@ async function navInert(frame) {
     Object.fromEntries(els.filter(e => !e.hidden).map(e => [e.dataset.journeyStage, e.disabled || e.getAttribute('aria-disabled') === 'true'])));
 }
 
-async function withBrowser(fn, tamper = null) {
+async function withBrowser(fn, tamper = null, rewrite = null) {
   await requireCleanPinnedStore();
   const adapter = await createStoreAdapter();
   assert.equal(adapter.ready, true, JSON.stringify(adapter.inspection));
   assert.ok(adapter.modules.sheetPackage, 'the pinned Store must carry the S-001 sheet evaluator for this suite');
   const log = [];
-  const server = await serve(adapter, log, tamper);
+  const server = await serve(adapter, log, tamper, rewrite);
   const browser = await chromium.launch(process.env.STB_CHROMIUM_PATH ? { executablePath: process.env.STB_CHROMIUM_PATH } : {});
   try {
     await fn({ browser, origin: `http://127.0.0.1:${server.address().port}`, log });
@@ -311,4 +313,68 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.equal(inert.store, false);
     assert.equal(inert.request, false);
   });
+});
+
+// The old door, served with a recorder: every call to admitPublicStoreRequest in that page is counted on the
+// window that imported it, with the project it was called for. Nothing else about the module changes.
+const OLD_DOOR = 'stb-public-admission.mjs';
+const recordOldDoor = source => {
+  const head = 'export function admitPublicStoreRequest(';
+  assert.equal(source.split(head).length, 2, 'the old door is exported once');
+  return source.replace(head, 'function oldDoorUnrecorded(') + `
+export function admitPublicStoreRequest(input) {
+  (globalThis.__stbOldDoorCalls ||= []).push(input?.projectId ?? null);
+  return oldDoorUnrecorded(input);
+}
+`;
+};
+// Other tiles (the Outdoor page asks its options on load) still use the old door; only Playhouse calls are read.
+const playhouseOldDoorCalls = page => Promise.all(page.frames().map(f => f.evaluate(() => window.__stbOldDoorCalls ?? [])))
+  .then(lists => lists.flat().filter(projectId => projectId === 'playhouse'));
+
+test('a Playhouse inquiry has one admission decision, admit(); it never calls admitPublicStoreRequest', { timeout: 180000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { page, frame, errors } = await openPlayhouse(browser, origin);
+    const sheetCalls = () => log.filter(e => e.request.requestType === 'SHEET_PACKAGE_V1').length;
+
+    // A complete revision still reaches the Store.
+    const first = await settled(frame);
+    assert.equal(first.admission.result, 'ADMITTED');
+    assert.equal(first.answer.evaluation.status, 'SUPPORTABLE');
+    assert.equal(sheetCalls(), 1);
+    // A changed complete revision is asked again, on the same one door.
+    await setGeometry(frame, { width: 30 });
+    const changed = await settled(frame);
+    assert.notEqual(changed.version, first.version);
+    assert.equal(changed.admission.result, 'ADMITTED');
+    assert.equal(sheetCalls(), 2);
+
+    // A malformed opening (settled, but its rise is not above 0) still blocks before the Store, in admit().
+    const before = sheetCalls();
+    const blocked = await frame.evaluate(() => {
+      const revision = window.STBPlayhouseLive.revision();
+      revision.facts['playhouse.opening'].value.riseIn = 0;
+      revision.definitionRevisionId += '-malformed-opening';
+      return window.STBPlayhouseLive.inquire(revision);
+    });
+    assert.equal(blocked.admission.result, 'BLOCKED');
+    assert.equal(blocked.admission.reason, 'REQUIRED_FACT_UNSETTLED');
+    assert.deepEqual(blocked.admission.blocking, [{ factId: 'playhouse.opening', owner: 'USER',
+      title: 'Complete arched-opening geometry', condition: 'INVALID_VALUE', fields: ['riseIn'] }]);
+    assert.equal(blocked.request, null);
+    await page.waitForTimeout(600);
+    assert.equal(sheetCalls(), before, 'a malformed opening never reaches the Store');
+
+    // No Playhouse inquiry, admitted or blocked, called the old door.
+    assert.deepEqual(await playhouseOldDoorCalls(page), []);
+
+    // Control: the recorder is live. The old door still runs for a direct sendJob call, and is counted.
+    const direct = await page.evaluate(() => window.STBStoreClient.sendJob({
+      projectId: 'playhouse', requestType: 'SHEET_PACKAGE_V1', candidateRevisionId: 'control', payload: {},
+    }).then(() => 'sent', error => String(error?.message || error)));
+    assert.match(direct, /SYSTEM_ADMISSION_/);
+    assert.deepEqual(await playhouseOldDoorCalls(page), ['playhouse']);
+    assert.equal(sheetCalls(), before);
+    assert.deepEqual(errors, []);
+  }, null, { [OLD_DOOR]: recordOldDoor });
 });
