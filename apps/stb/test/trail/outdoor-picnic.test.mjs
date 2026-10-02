@@ -1,6 +1,7 @@
 // Outdoor picnic page 0.4 wiring, in a real browser, through the real System shell.
 // A scripted Store answers every request so the test checks the page's wiring, not Store prices:
-//  - the top nav is the six trail steps on the Outdoor page only; steps it cannot use yet are inert
+//  - the top nav is the six trail steps on the Outdoor page only, drawn by the shared tile host from Outdoor's
+//    STB-TILE-HOST-0.1 message with the trail contract's labels; steps it cannot use yet are inert
 //  - screen 1: two plan cards, each with a "From" price the Store answered
 //  - screen 2: the plan as published. Grow or shrink to the inch inside the plan rule, pick wood and hardware,
 //    the Store's live total, "Confirm & send". Only the plan is sent: its boards, lengths and angles, no holes
@@ -118,9 +119,11 @@ test('Outdoor 0.4: the plan as published, a bigger bench, and back', { timeout: 
     const optionsOf = () => requests.filter(r => r.payload.definition.configurationId === 'OUTDOOR-PICNIC-OPTIONS');
     const steps = async () => (await navState(base)).filter(b => /^\d · /.test(b.label));
 
-    // Six steps, all on the Outdoor page; only "Your idea" usable before a plan is picked.
+    // Six steps, all on the Outdoor page; only Intent usable before a plan is picked. The host draws them once the
+    // page has spoken.
+    for (let i = 0; i < 60 && (await steps()).every(b => b.inert); i++) await page.waitForTimeout(150);
     const nav = await navState(base);
-    assert.deepEqual((await steps()).map(b => b.label.replace(/^\d · /, '')), ['Your idea', 'The bench', 'The Store answers', 'Your call', 'We cut it', 'Pick up & build']);
+    assert.deepEqual((await steps()).map(b => b.label.replace(/^\d · /, '')), ['Intent', 'The bench', 'The Store answers', 'Your call', 'We cut it', 'Pick up & build']);
     assert.ok((await steps()).every(b => b.go === 'outdoor-build-live'));
     assert.deepEqual((await steps()).map(b => b.inert), [false, true, true, true, true, true]);
     assert.ok(nav.every(b => /^\d · /.test(b.label) || b.go === 'projects'), 'no buttons into other jobs: ' + JSON.stringify(nav));
@@ -265,8 +268,8 @@ test('Outdoor 0.4: the plan as published, a bigger bench, and back', { timeout: 
     await base.locator('.recovery-nav button:visible', { hasText: '6 · Pick up & build' }).first().click();
     await outdoor.waitForSelector('#s-record:not([hidden])', { timeout: 5000 });
 
-    // "Your idea" returns to the cards, still on the Outdoor page.
-    await base.locator('.recovery-nav button:visible', { hasText: '1 · Your idea' }).first().click();
+    // Intent returns to the cards, still on the Outdoor page.
+    await base.locator('.recovery-nav button:visible', { hasText: '1 · Intent' }).first().click();
     await outdoor.waitForSelector('#s-plans:not([hidden])', { timeout: 5000 });
     assert.equal(await base.evaluate(() => [...document.querySelectorAll('.page.on')].pop()?.id), 'outdoor-build-live');
     assert.deepEqual(errors, []);

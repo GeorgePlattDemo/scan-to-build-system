@@ -2,7 +2,7 @@
 //
 // Executable half of docs/application/TILE-HOST-ADMISSION-CONTRACT.md. The shared tile host in
 // public-build/system-build-current.html loads the deployed copy (public-build/shared/, byte for byte).
-// Playhouse, Window Seat and Alcove are on it; the other tiles keep their current paths until each is migrated.
+// Playhouse, Window Seat, Alcove and Outdoor are on it; the other tiles keep their current paths until each is migrated.
 //
 // Two interfaces, kept separate on purpose:
 //
@@ -198,8 +198,12 @@ export const ADMISSION_PROFILES = deepFreeze({
       },
     },
   },
+  // Outdoor 0.2: what its page already requires before it asks. Two scopes, kept apart: OUTDOOR_OPTIONS prices the
+  // "From" and the option buttons and never reaches the terms flow; OUTDOOR_COMMITTED is this exact table. Added to
+  // the committed scope: every spot hole and decorative cut tried on the bench is set (each blocking condition on
+  // the bench is one of these), owned by the user.
   outdoor: {
-    version: '0.1',
+    version: '0.2',
     scopes: {
       OUTDOOR_OPTIONS: {
         requestType: 'CUT_PACKAGE_V1',
@@ -212,6 +216,7 @@ export const ADMISSION_PROFILES = deepFreeze({
         requires: [
           req('outdoor.plan', OWNER.USER, 'text', 'Chosen plan'),
           req('outdoor.cut-packages', OWNER.PROJECT, 'nonempty-list', 'Requested work with real part values'),
+          req('outdoor.bench-work', OWNER.USER, 'object', 'Every spot hole and decorative cut tried on the bench, set'),
         ],
       },
     },

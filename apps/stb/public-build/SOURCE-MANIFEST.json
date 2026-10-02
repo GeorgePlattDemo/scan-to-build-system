@@ -735,6 +735,34 @@
       "blobSha": "25fbc3b35ca491932ae21bdd8649f0dcc9de3f88",
       "bytes": 1620,
       "reason": "The Alcove bridge sends only a request admit() admitted, as the transport inside inquire(); its candidate revision is the admitted revision."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-on-shared-host",
+      "blobSha": "98546709b1a2624a855cd7842ebb8422ae0bbd72",
+      "bytes": 244080,
+      "reason": "Outdoor on the shared tile host: Outdoor registers with the host as a framed tile, and the host validates the STB-TILE-HOST-0.1 messages its frame posts and draws its one nav line from them and the trail contract (contract labels, inert steps disabled, one current). The host asks the frame for a step by its contract label (STB_TILE_HOST_GO). After a page is shown the host redraws from the last validated message, so the base page cannot mark every Outdoor step current. The old Outdoor shell path (applyOutdoorNavState, outdoorNavState, outdoorFrame, the STB_OUTDOOR_STATE listener, STB_OUTDOOR_GO and the Outdoor branches in selectJourneyProject, showMappedProjectStage, the proof return and the proof step gate) is gone; the Outdoor tile is registry data in PROJECT_TILE_TO_JOURNEY. Cache-busters for the contract and the Outdoor page."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "outdoor-on-shared-host",
+      "blobSha": "b049e106a1e783738a3aabc285c6f2e754b1d1ae",
+      "bytes": 127659,
+      "reason": "Cache-buster for the tile-host admission contract after the outdoor admission profile 0.2."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "outdoor-on-shared-host",
+      "blobSha": "9e13e72406586cc2a618b281b462fea2a2d8c9b3",
+      "bytes": 39662,
+      "reason": "Cache-buster for the base page."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "outdoor-on-shared-host",
+      "blobSha": "ff9e818c342e9fa33e83e3d92ba4c613d6776f14",
+      "bytes": 80858,
+      "reason": "Outdoor speaks STB-TILE-HOST-0.1 to the shared host and loads the deployed tile-host admission contract and the trail contract. Every Store inquiry is one job-definition revision through admit() then inquire(), in the outdoor profile's two scopes: OUTDOOR_OPTIONS for the From and option prices, OUTDOOR_COMMITTED for this exact table (the only answer the terms flow takes). Work tried on the bench that a blocking condition holds open travels unresolved, so a blocked revision is not sent and the page names the fact and its owner; a complete revision reaches the Store whatever its values. Steps come from availableSteps() and the terms flow's gates. Visible pages are unchanged."
     }
   ],
   "retiredFiles": [
