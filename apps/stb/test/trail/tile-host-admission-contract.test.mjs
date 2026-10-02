@@ -429,7 +429,7 @@ test('case 4: a malformed nested fact blocks before Store with the fact id and o
     const blocked = admit({ revision: facts('start-own', { 'start-own.material': ok(value) }), inquiryScope: 'USER_DEFINED_BOARD_V1' });
     assert.equal(blocked.admission.result, ADMISSION_RESULT.BLOCKED, JSON.stringify(value));
     assert.deepEqual(blocked.admission.blocking,
-      [{ factId: 'start-own.material', owner: OWNER.PROJECT, title: 'Material demand', condition: 'INVALID_VALUE', fields: missing }]);
+      [{ factId: 'start-own.material', owner: OWNER.USER, title: 'Material demand', condition: 'INVALID_VALUE', fields: missing }]);
     const store = storeStub({ status: 'SHOULD_NOT_BE_ASKED' });
     assert.equal((await inquire(blocked, store.ask)).reachedStore, false);
     assert.equal(store.calls.length, 0, 'a material missing a stated field never reaches the Store');
