@@ -52,7 +52,8 @@ function browser() {
 }
 
 // A complete Start your own revision, in the shape the page's startOwnRevision() builds it.
-const MATERIAL = { origin: 'STORE_ZERO', stockClass: '2x4' };
+// The material is what the bench's "2×4 stud" control states: form and nominal size. No species control exists.
+const MATERIAL = { form: 'board', nominalT: 2, nominalW: 4 };
 function revision(id = 'SYO-USER1-XBRACE-0.1-v1') {
   const parts = [{ partId: 'XB-1', lengthIn: 16 }, { partId: 'XB-2', lengthIn: 16 }];
   return {
@@ -102,17 +103,15 @@ test('a complete Start your own revision reaches the Store through sendAdmittedJ
   // The material on the wire is the admitted start-own.material fact, the same object, nothing added.
   assert.deepEqual(sent.payload.line.materialDemand, admission.request.facts['start-own.material']);
   assert.deepEqual(sent.payload.line.materialDemand, MATERIAL);
-  for (const invented of ['species', 'form', 'nominalT', 'nominalW']) {
-    assert.equal(Object.hasOwn(sent.payload.line.materialDemand, invented), false, invented + ' was added on the wire');
-  }
+  assert.equal(Object.hasOwn(sent.payload.line.materialDemand, 'species'), false, 'species was added on the wire');
   assert.deepEqual(sent.payload.line.parts, admission.request.facts['start-own.parts']);
   assert.deepEqual(sent.payload.line.requiredOps, admission.request.facts['start-own.operations']);
 
   // A changed admitted material is what travels: the bridge has no material of its own.
   const other = revision('SYO-USER1-XBRACE-0.1-v2');
-  other.facts['start-own.material'].value = { origin: 'STORE_ZERO', stockClass: '2x6' };
+  other.facts['start-own.material'].value = { species: 'cedar', form: 'board', nominalT: 2, nominalW: 6 };
   await inquire(admit({ revision: other, inquiryScope: SCOPE }), ask(window));
-  assert.deepEqual(wire[1].payload.line.materialDemand, { origin: 'STORE_ZERO', stockClass: '2x6' });
+  assert.deepEqual(wire[1].payload.line.materialDemand, { species: 'cedar', form: 'board', nominalT: 2, nominalW: 6 });
   assert.deepEqual(oldDoor, []);
 });
 
@@ -133,6 +132,20 @@ test('a part without an id or a length blocks in admit() before the Store', asyn
   }
   assert.equal(wire.length, 0, 'a blocked revision never reaches the Store');
   assert.deepEqual(oldDoor, []);
+});
+
+test('a material missing a stated field blocks in admit() before the Store', async () => {
+  const { window, wire } = browser();
+  for (const [material, missing] of [[{ form: 'board', nominalT: 2 }, ['nominalW']], [{ nominalT: 2, nominalW: 4 }, ['form']]]) {
+    const blockedRevision = revision('SYO-USER1-XBRACE-0.1-material');
+    blockedRevision.facts['start-own.material'].value = material;
+    const admission = admit({ revision: blockedRevision, inquiryScope: SCOPE });
+    assert.equal(admission.admission.result, 'BLOCKED');
+    assert.deepEqual(admission.admission.blocking, [{ factId: 'start-own.material', owner: 'PROJECT', title: 'Material demand',
+      condition: 'INVALID_VALUE', fields: missing }]);
+    assert.equal((await inquire(admission, ask(window))).reachedStore, false);
+  }
+  assert.equal(wire.length, 0);
 });
 
 test('the bridge refuses a request admit() did not admit, and a missing admitted material', async () => {

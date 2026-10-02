@@ -188,15 +188,18 @@ function formGaps(form, value, at = '') {
 // admission code does not branch on tile identity. Profiles here are first declarations for the
 // contract tests; they are not yet a port of every row in public-build/stb-public-admission.mjs.
 export const ADMISSION_PROFILES = deepFreeze({
-  // Start your own 0.2: what its bench already sends the Store with every confirmed definition. Added: the center
-  // spot demand, on or off, which the bench always states and the Store must evaluate or refuse (USER).
+  // Start your own 0.3: what its bench already sends the Store with every confirmed definition. 0.2 added the center
+  // spot demand, on or off, which the bench always states and the Store must evaluate or refuse (USER). 0.3: the
+  // material is what the bench's material control states, form and nominal thickness and width. Species is not
+  // required: the bench has no species control, and a material without one is the Store side's to refuse.
   'start-own': {
-    version: '0.2',
+    version: '0.3',
     scopes: {
       USER_DEFINED_BOARD_V1: {
         requestType: 'USER_DEFINED_BOARD_V1',
         requires: [
-          req('start-own.material', OWNER.PROJECT, 'object', 'Material demand'),
+          req('start-own.material', OWNER.PROJECT, 'object', 'Material demand',
+            fields({ form: 'text', nominalT: 'positive-number', nominalW: 'positive-number' })),
           req('start-own.workpiece-length', OWNER.USER, 'positive-number', 'Defined workpiece length (in)'),
           req('start-own.parts', OWNER.USER, 'nonempty-list', 'Identified parts with real lengths',
             each(fields({ partId: 'text', lengthIn: 'positive-number' }))),

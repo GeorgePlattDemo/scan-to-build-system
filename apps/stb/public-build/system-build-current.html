@@ -11,7 +11,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=46fff26b"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=3cec5d43"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
 <script src="stb-store-handoff-contract.js?v=afccfa82"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
@@ -23,7 +23,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-trail-contract.js?v=aea2f84d"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
-import('./shared/tile-host-admission-contract.mjs?v=9375063a').then(contract => {
+import('./shared/tile-host-admission-contract.mjs?v=d28b8800').then(contract => {
   window.STBTileHostAdmission = Object.freeze({ ...contract });
 });
 </script>
@@ -187,7 +187,7 @@ import('./shared/tile-host-admission-contract.mjs?v=9375063a').then(contract => 
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=d173ace3"
+                  src="three-frames.html?v=1934bb2b"
                 ></iframe>
               </div>
             `;
@@ -196,7 +196,7 @@ import('./shared/tile-host-admission-contract.mjs?v=9375063a').then(contract => 
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=d173ace3';
+            liveFrame.src = 'three-frames.html?v=1934bb2b';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -350,6 +350,18 @@ import('./shared/tile-host-admission-contract.mjs?v=9375063a').then(contract => 
               const confirmButton = childDoc.getElementById('stb-confirm-store');
               const glossaryStatus = childDoc.getElementById('stb-store-glossary-status');
               const glossaryChoices = Array.from(childDoc.querySelectorAll('[data-store-size-key]'));
+              // The material the bench's "2×4 stud" control states, and only that: a field the control does not state
+              // is left out, so admission blocks on it or the Store side refuses it. Species has no control yet.
+              const statedMaterial = () => {
+                const control = childDoc.getElementById('stb-store-board-2x4');
+                const stated = {};
+                if (!control) return stated;
+                if (control.dataset.materialSpecies) stated.species = control.dataset.materialSpecies;
+                if (control.dataset.materialForm) stated.form = control.dataset.materialForm;
+                if (control.dataset.materialNominalT) stated.nominalT = Number(control.dataset.materialNominalT);
+                if (control.dataset.materialNominalW) stated.nominalW = Number(control.dataset.materialNominalW);
+                return stated;
+              };
               const startOwnAuthority = storeHandoffContract?.storeAuthorities?.startOwn || null;
               const catalogSource = storeHandoffContract?.startOwnStoreCatalog || null;
               let definitionRevision = 1;
@@ -615,6 +627,7 @@ import('./shared/tile-host-admission-contract.mjs?v=9375063a').then(contract => 
                   material:{
                     origin:'STORE_ZERO',
                     stockClass:'2x4',
+                    stated:statedMaterial(),
                     stockClassAuthority:{
                       repository:storeAnswer.source?.repository || catalogSource?.repository || null,
                       file:'store-zero-catalog.json',
@@ -1223,7 +1236,7 @@ import('./shared/tile-host-admission-contract.mjs?v=9375063a').then(contract => 
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.4.html?v=ff0ec673"
+                  src="stb-outdoor-picnic-0.4.html?v=8e3e4b39"
                 ></iframe>
               </div>
             `;
@@ -1256,7 +1269,7 @@ import('./shared/tile-host-admission-contract.mjs?v=9375063a').then(contract => 
                   id="window-seat-frame"
                   class="window-seat-shell-frame"
                   title="Space utilization · Window seat"
-                  src="stb-window-seat-0.9.html?v=6623f1c6"
+                  src="stb-window-seat-0.9.html?v=194db3e1"
                 ></iframe>
               </div>
             `;
@@ -2520,7 +2533,7 @@ import('./shared/tile-host-admission-contract.mjs?v=9375063a').then(contract => 
       const demand = definition.storeDemand;
       const facts = {};
       const fact = (id, value, status) => { if (value !== undefined && value !== null) facts[id] = { value, status }; };
-      fact('start-own.material', definition.material ? { origin:definition.material.origin, stockClass:definition.material.stockClass } : null, 'CONFIRMED');
+      fact('start-own.material', definition.material?.stated ? { ...definition.material.stated } : null, 'CONFIRMED');
       fact('start-own.workpiece-length', demand.definedWorkpieceLengthIn, 'CONFIRMED');
       fact('start-own.parts', demand.parts, 'CONFIRMED');
       fact('start-own.operations', demand.requiredOps, 'DERIVED');

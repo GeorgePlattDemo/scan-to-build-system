@@ -917,6 +917,48 @@
       "blobSha": "07d07c79935f6993b191d65b0ea0350d53a02eb3",
       "bytes": 251468,
       "reason": "Cache-buster for the changed stb-user-defined-board-runtime-bridge.js."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "start-own-stated-material",
+      "blobSha": "1934bb2b81b9b5466683636f18132f6161b69d19",
+      "bytes": 88969,
+      "reason": "The \"2×4 stud\" material control states what its label says as data: data-material-form=\"board\", data-material-nominal-t=\"2\", data-material-nominal-w=\"4\". No species is stated; the bench has no species control."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "start-own-stated-material",
+      "blobSha": "8e3e4b39a894117c18a3c7e0c75f0d06cfd9a314",
+      "bytes": 81333,
+      "reason": "Cache-buster for the tile-host admission contract after the start-own admission profile 0.3. Nothing else on the Outdoor page changes."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "start-own-stated-material",
+      "blobSha": "194db3e1a85700bf49b068505f7fe0d25e1e4031",
+      "bytes": 139760,
+      "reason": "Cache-buster for the tile-host admission contract after the start-own admission profile 0.3. Nothing else on the Window Seat page changes."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "start-own-stated-material",
+      "blobSha": "6a3329afc9ca2957ec528d25d8ebb04506b5e35c",
+      "bytes": 127709,
+      "reason": "Cache-buster for the tile-host admission contract after the start-own admission profile 0.3. Visible pages are unchanged."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "start-own-stated-material",
+      "blobSha": "3cec5d430aca03bd69fd9eeda0a7823717e1b33f",
+      "bytes": 39662,
+      "reason": "Cache-buster for the base page."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "start-own-stated-material",
+      "blobSha": "59db6e09adc7579a3be46d276f549dd2e77c3678",
+      "bytes": 252386,
+      "reason": "Start your own's start-own.material is what the bench's \"2×4 stud\" control states (form, nominalT, nominalW, read from its data-material-* attributes); a field the control does not state is left out. Cache-busters for the contract, three-frames.html, the Outdoor and Window Seat pages and the front door."
     }
   ],
   "retiredFiles": [
