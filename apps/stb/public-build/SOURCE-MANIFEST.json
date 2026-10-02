@@ -847,6 +847,20 @@
       "blobSha": "62cb92afc31ca9f4cfac247f999e02a1d494ed73",
       "bytes": 251468,
       "reason": "Playhouse's transport inside inquire() sends the request admit() admitted through STBStoreClient.sendAdmittedJob, so a Playhouse inquiry has one admission decision and never calls admitPublicStoreRequest. Cache-buster for the changed stb-store-client.js."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "window-seat-one-admission-door",
+      "blobSha": "6623f1c6ab7a72697008b61034fe7e179ee78aa0",
+      "bytes": 139760,
+      "reason": "Window Seat's transport inside inquire() sends the request admit() admitted through STBStoreClient.sendAdmittedJob, so a Window Seat inquiry has one admission decision and never calls admitPublicStoreRequest. Visible pages are unchanged."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-one-admission-door",
+      "blobSha": "4f21b30f0d34f95243b58f7bcc009a69b2903a36",
+      "bytes": 251468,
+      "reason": "Cache-buster for the changed stb-window-seat-0.9.html."
     }
   ],
   "retiredFiles": [

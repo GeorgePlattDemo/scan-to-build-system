@@ -1212,8 +1212,8 @@ async function askStore(rv){
       if(request.requestType!=='CUT_PACKAGE_V1'||request.definitionRevisionId!==req.definition.configurationVersion)throw new Error('ADMITTED_REVISION_NOT_ON_SCREEN');
       const sent=new Set(req.definition.cutPackages.flatMap(p=>p.parts.map(x=>x.partId)));
       if(!request.facts['window-seat.boards'].every(b=>sent.has(b.id)))throw new Error('ADMITTED_BOARD_NOT_SENT');
-      return client.sendJob({projectId:TILE_ID,requestType:'CUT_PACKAGE_V1',
-        candidateRevisionId:request.definitionRevisionId,
+      /* admit() above is this inquiry's one admission decision; the transport does not admit it again. */
+      return client.sendAdmittedJob({admitted:request,
         payload:{definition:req.definition,definitionKind:'cut_package.v1',ruleVersion:'0.1'}}).then(a=>(body=a));
     });
     S.answer={rev:rev.n,sig:req.sig,stale:false,definition:req.definition,record:req.record,
