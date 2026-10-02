@@ -10,7 +10,7 @@
   // Job 1 rails: owner's text, verbatim (DEV/REV GUIDE ceiling).
   const JOB1={
     "job1-idea": {
-      "header": "DEV/REV GUIDE — JOB 1 · PAGE 1 · YOUR IDEA",
+      "header": "DEV/REV GUIDE — JOB 1 · PAGE 1 · INTENT",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [
         "This page is the want. It does not become the bench.",
@@ -180,7 +180,7 @@
   // Job 2 (Alcove) rails: owner's text, verbatim, with the approved edits and current-gap notes.
   const JOB2={
     "alcove-idea": {
-      "header": "DEV/REV GUIDE — JOB 2 · ALCOVE · PAGE 1 · YOUR IDEA",
+      "header": "DEV/REV GUIDE — JOB 2 · ALCOVE · PAGE 1 · INTENT",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
@@ -1628,7 +1628,7 @@
   // Job 5 (Playhouse) rails: one per Playhouse page in the shell.
   const JOB5={
     "ph-idea": {
-      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 1 · YOUR IDEA",
+      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 1 · INTENT",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [],
       "sections": [
