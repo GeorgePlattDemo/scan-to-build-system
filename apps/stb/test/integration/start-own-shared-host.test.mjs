@@ -4,6 +4,8 @@
 //   (and, on the Start your own page, its Intent or bench screen).
 // - Every Store inquiry is admit() then inquire(): a missing profile fact blocks before the Store and names its owner;
 //   a complete revision still reaches the Store, and the Store demand is built only from the admitted request.
+// - A Start your own inquiry has one admission decision, admit(): its transport is sendAdmittedJob, it never calls
+//   admitPublicStoreRequest, and the material on the wire is the admitted start-own.material fact.
 // - The old Start your own shell path is gone: no applyStartOwnNavState, wireStartOwnJourneyNav, its own step gate
 //   or labels, no activeJourneyProject 'start-own' branch, and no second Store handoff.
 // The rest of Start your own's preserved journey (answer → your call → yard → pickup, decline) is in
@@ -64,10 +66,12 @@ test('the old Start your own shell path is gone; one Store handoff, inside inqui
   assert.equal((shell.match(/user1RuntimeBridge\.request\(/g) || []).length, 1);
   assert.match(shell, /const admission = tileHostContract\.admit\(\{ revision, inquiryScope:START_OWN_INQUIRY_SCOPE \}\);[\s\S]*?tileHostContract\.inquire\(admission, request => \{[\s\S]*?user1RuntimeBridge\.request\(request, startOwnStoreDemandFrom\(request\), \{ requestId \}\)/);
   const bridge = read('stb-user-defined-board-runtime-bridge.js');
-  assert.equal((bridge.match(/client\.sendJob\(/g) || []).length, 1);
+  // The bridge sends the admitted request without the old door.
+  assert.equal((bridge.match(/client\.sendAdmittedJob\(/g) || []).length, 1);
+  assert.match(bridge, /client\.sendAdmittedJob\(\{\s*admitted,/);
+  assert.equal(bridge.includes('sendJob('), false, 'no Start your own inquiry goes through sendJob');
   assert.match(bridge, /START_OWN_ADMITTED_REQUEST_REQUIRED/);
-  assert.match(bridge, /candidateRevisionId:admitted\.definitionRevisionId/);
-
+  
   // The contract is loaded from the one deployed copy, never pasted in.
   const blob = execFileSync('git', ['hash-object', fileURLToPath(new URL('../../public-build/shared/tile-host-admission-contract.mjs', import.meta.url))], { encoding: 'utf8' }).trim().slice(0, 8);
   assert.ok(shell.includes(`import('./shared/tile-host-admission-contract.mjs?v=${blob}')`), 'shell loads the deployed contract at its current bytes');
@@ -133,6 +137,22 @@ test('the shared host draws the Start your own nav from its validated STB-TILE-H
   });
 });
 
+// The old door, served with a recorder: every call to admitPublicStoreRequest in that page is counted on the
+// window that imported it, with the project it was called for. Nothing else about the module changes.
+const OLD_DOOR = 'stb-public-admission.mjs';
+const recordOldDoor = source => {
+  const head = 'export function admitPublicStoreRequest(';
+  assert.equal(source.split(head).length, 2, 'the old door is exported once');
+  return source.replace(head, 'function oldDoorUnrecorded(') + `
+export function admitPublicStoreRequest(input) {
+  (globalThis.__stbOldDoorCalls ||= []).push(input?.projectId ?? null);
+  return oldDoorUnrecorded(input);
+}
+`;
+};
+const startOwnOldDoorCalls = page => Promise.all(page.frames().map(f => f.evaluate(() => window.__stbOldDoorCalls ?? [])))
+  .then(lists => lists.flat().filter(projectId => projectId === 'start-own'));
+
 test('a missing profile fact blocks before the Store and names its owner; a complete revision still reaches the Store', { timeout: 240000 }, async () => {
   await withBrowser(async ({ browser, origin, log }) => {
     const { page, frame } = await openStartOwn(browser, origin);
@@ -171,15 +191,21 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     }
 
     // The complete revision is admitted and reaches the Store, and the demand sent is built from the admitted facts.
+    // The material on the wire is the admitted start-own.material fact, {origin, stockClass}, as the page states it.
+    // Recorded result at STORE_PIN: the hosted Store refuses that material (422 INVALID_BOUNDED_SCOPE, "must match
+    // the frozen User 1 SPF 2x4 demand"). The refusal is the result; no material is added to get past it.
     const revision = await live(frame, () => window.STBStartOwnLive.revision());
-    const result = await live(frame, r => window.STBStartOwnLive.inquire(r), revision);
-    assert.equal(result.reachedStore, true);
-    assert.equal(result.answer.authority, 'CURRENT');
-    assert.equal(result.answer.definitionRevisionId, revision.definitionRevisionId);
+    const failure = await live(frame, r => window.STBStartOwnLive.inquire(r).then(() => null, error => error.message), revision);
     const sent = startOwnCalls(log);
-    assert.equal(sent.length, 1);
+    assert.equal(sent.length, 1, 'a complete revision reaches the Store');
     assert.equal(sent[0].request.candidateRevisionId, revision.definitionRevisionId);
     const lineSent = sent[0].request.payload.line;
+    assert.deepEqual(lineSent.materialDemand, revision.facts['start-own.material'].value);
+    assert.deepEqual(lineSent.materialDemand, { origin: 'STORE_ZERO', stockClass: '2x4' });
+    assert.equal(failure, 'INVALID_BOUNDED_SCOPE');
+    assert.equal(sent[0].status, 422);
+    assert.equal(sent[0].answer.code, 'INVALID_BOUNDED_SCOPE');
+    assert.equal(sent[0].answer.details, 'user-defined Board materialDemand must match the frozen User 1 SPF 2x4 demand');
     assert.deepEqual(lineSent.parts, revision.facts['start-own.parts'].value);
     assert.deepEqual(lineSent.requiredOps, revision.facts['start-own.operations'].value);
     assert.equal(Number(lineSent.definedWorkpieceLength.value), revision.facts['start-own.workpiece-length'].value);
@@ -193,5 +219,15 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     });
     assert.equal(refused, 'START_OWN_ADMITTED_REQUEST_REQUIRED');
     assert.equal(startOwnCalls(log).length, 1);
-  });
+
+    // No Start your own inquiry, admitted or blocked, called the old door.
+    assert.deepEqual(await startOwnOldDoorCalls(page), []);
+
+    // Control: the recorder is live. The old door still runs for a direct sendJob call, and is counted.
+    const direct = await live(frame, () => window.STBStoreClient.sendJob({
+      projectId: 'start-own', requestType: 'USER_DEFINED_BOARD_V1', candidateRevisionId: 'control', payload: {},
+    }).then(() => 'sent', error => String(error?.message || error)));
+    assert.match(direct, /SYSTEM_ADMISSION_/);
+    assert.deepEqual(await startOwnOldDoorCalls(page), ['start-own']);
+  }, null, { [OLD_DOOR]: recordOldDoor });
 });

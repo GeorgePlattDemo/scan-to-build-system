@@ -903,6 +903,20 @@
       "blobSha": "7b4fcf8ac2fc14353de938b17e6403dd7e1ed4f2",
       "bytes": 251468,
       "reason": "Cache-buster for the changed stb-outdoor-picnic-0.4.html."
+    },
+    {
+      "path": "stb-user-defined-board-runtime-bridge.js",
+      "pass": "start-own-one-admission-door",
+      "blobSha": "db611717de5149f882b91ec92eec383280b383d1",
+      "bytes": 5849,
+      "reason": "The User 1 bridge, the transport inside inquire(), sends the request admit() admitted through STBStoreClient.sendAdmittedJob, so a Start your own inquiry has one admission decision and never calls admitPublicStoreRequest. The material on the wire is the admitted start-own.material fact, {origin, stockClass}; the bridge constant {spf, board, 2, 4} is deleted. At STORE_PIN the hosted Store refuses that material (422 INVALID_BOUNDED_SCOPE); the refusal is recorded, not worked around."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "start-own-one-admission-door",
+      "blobSha": "07d07c79935f6993b191d65b0ea0350d53a02eb3",
+      "bytes": 251468,
+      "reason": "Cache-buster for the changed stb-user-defined-board-runtime-bridge.js."
     }
   ],
   "retiredFiles": [
