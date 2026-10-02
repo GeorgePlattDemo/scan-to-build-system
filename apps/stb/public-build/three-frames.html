@@ -321,6 +321,15 @@
           <!-- The pills write the chosen length here; Job 1 has no typed length. -->
           <input id="stb-config-length" type="hidden" min="16" max="18" step="0.125" value="16">
         </div>
+        <!-- Species of the 2×4 board: the three the Store catalog has for nominal 2×4 board. None is chosen for you. -->
+        <div class="higher-row" id="stb-bench-species">
+          <h2>Which wood?</h2>
+          <div class="choice-row">
+            <button type="button" data-species="spf">SPF</button>
+            <button type="button" data-species="syp-treated">SYP TREATED</button>
+            <button type="button" data-species="cedar">CEDAR</button>
+          </div>
+        </div>
         <p class="bench-price-line" id="stb-bench-price-line">Change it and the Store answers again.</p>
         <div class="board-swap" id="stb-bench-board-swap" hidden role="status"></div>
         <p class="fine" id="stb-config-geometry-note">Same two parts, same 8.000 in horizontal span. 16.000 in → 30.000° end cuts. 18.000 in → 26.388° end cuts.</p>

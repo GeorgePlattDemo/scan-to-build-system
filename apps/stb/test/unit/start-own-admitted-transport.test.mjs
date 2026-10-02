@@ -52,8 +52,8 @@ function browser() {
 }
 
 // A complete Start your own revision, in the shape the page's startOwnRevision() builds it.
-// The material is what the bench's "2×4 stud" control states: form and nominal size. No species control exists.
-const MATERIAL = { form: 'board', nominalT: 2, nominalW: 4 };
+// The material is what the bench states: a species the user chose, and form and nominal size from its "2×4 stud" control.
+const MATERIAL = { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 };
 function revision(id = 'SYO-USER1-XBRACE-0.1-v1') {
   const parts = [{ partId: 'XB-1', lengthIn: 16 }, { partId: 'XB-2', lengthIn: 16 }];
   return {
@@ -103,7 +103,6 @@ test('a complete Start your own revision reaches the Store through sendAdmittedJ
   // The material on the wire is the admitted start-own.material fact, the same object, nothing added.
   assert.deepEqual(sent.payload.line.materialDemand, admission.request.facts['start-own.material']);
   assert.deepEqual(sent.payload.line.materialDemand, MATERIAL);
-  assert.equal(Object.hasOwn(sent.payload.line.materialDemand, 'species'), false, 'species was added on the wire');
   assert.deepEqual(sent.payload.line.parts, admission.request.facts['start-own.parts']);
   assert.deepEqual(sent.payload.line.requiredOps, admission.request.facts['start-own.operations']);
 
@@ -136,7 +135,7 @@ test('a part without an id or a length blocks in admit() before the Store', asyn
 
 test('a material missing a stated field blocks in admit() before the Store', async () => {
   const { window, wire } = browser();
-  for (const [material, missing] of [[{ form: 'board', nominalT: 2 }, ['nominalW']], [{ nominalT: 2, nominalW: 4 }, ['form']]]) {
+  for (const [material, missing] of [[{ form: 'board', nominalT: 2, nominalW: 4 }, ['species']], [{ species: 'spf', form: 'board', nominalT: 2 }, ['nominalW']], [{ species: 'spf', nominalT: 2, nominalW: 4 }, ['form']]]) {
     const blockedRevision = revision('SYO-USER1-XBRACE-0.1-material');
     blockedRevision.facts['start-own.material'].value = material;
     const admission = admit({ revision: blockedRevision, inquiryScope: SCOPE });

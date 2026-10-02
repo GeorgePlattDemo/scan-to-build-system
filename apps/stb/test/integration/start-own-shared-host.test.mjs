@@ -48,8 +48,17 @@ const bench = page => page.frames().find(f => f.url().includes('three-frames.htm
 async function openStartOwn(browser, origin) {
   const { page, frame, errors } = await openTile(browser, origin, 'Start your own');
   await until(async () => bench(page) && await bench(page).$('#stb-confirm-store'), 'Start your own page');
-  await until(() => live(frame, () => window.STBStartOwnLive?.admission()?.admission?.result === 'ADMITTED'), 'bench revision admitted');
+  // The bench has no default species: until the user chooses one, the revision blocks before the Store on the
+  // material and names its owner.
+  await until(() => live(frame, () => window.STBStartOwnLive?.admission()?.admission?.result === 'BLOCKED'), 'bench revision blocked on species');
+  assert.deepEqual(await live(frame, () => window.STBStartOwnLive.admission().admission.blocking),
+    [{ factId: 'start-own.material', owner: 'PROJECT', title: 'Material demand', condition: 'INVALID_VALUE', fields: ['species'] }]);
   return { page, frame, errors };
+}
+// The user states a species on the bench; the bench revision is then admitted.
+async function chooseSpecies(page, frame, species) {
+  await bench(page).locator(`#stb-bench-species [data-species="${species}"]`).click();
+  await until(() => live(frame, () => window.STBStartOwnLive?.admission()?.admission?.result === 'ADMITTED'), 'bench revision admitted');
 }
 
 test('the old Start your own shell path is gone; one Store handoff, inside inquire()', () => {
@@ -109,6 +118,7 @@ test('the shared host draws the Start your own nav from its validated STB-TILE-H
     await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current again');
 
     // Confirming the bench asks the Store once and opens The Store answers with Your call usable.
+    await chooseSpecies(page, frame, 'spf');
     await bench(page).locator('#stb-confirm-store').click();
     await until(async () => (await currentLabels(frame)).join() === '3 · The Store answers', 'store current');
     assert.equal(await shownPage(frame), 'proof-store');
@@ -156,6 +166,8 @@ const startOwnOldDoorCalls = page => Promise.all(page.frames().map(f => f.evalua
 test('a missing profile fact blocks before the Store and names its owner; a complete revision still reaches the Store', { timeout: 240000 }, async () => {
   await withBrowser(async ({ browser, origin, log }) => {
     const { page, frame } = await openStartOwn(browser, origin);
+    await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
+    await chooseSpecies(page, frame, 'spf');
 
     // The bench's revision is complete: admitted, with exactly the profile's facts.
     const admission = await live(frame, () => window.STBStartOwnLive.admission());
@@ -163,9 +175,9 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.deepEqual(Object.keys(admission.request.facts).sort(),
       ['start-own.datum', 'start-own.material', 'start-own.operations', 'start-own.parts', 'start-own.spot-demand', 'start-own.workpiece-length']);
     assert.deepEqual(admission.request.openDemands, []);
-    assert.equal(admission.request.profileVersion, '0.3');
-    // The material is what the bench's "2×4 stud" control states: form and nominal size. The bench has no species control.
-    assert.deepEqual(admission.request.facts['start-own.material'], { form: 'board', nominalT: 2, nominalW: 4 });
+    assert.equal(admission.request.profileVersion, '0.4');
+    // The material is what the bench states: the species the user chose, form and nominal size from its "2×4 stud" control.
+    assert.deepEqual(admission.request.facts['start-own.material'], { species: 'spf', form: 'board', nominalT: 2, nominalW: 4 });
     assert.equal(admission.request.requestType, 'USER_DEFINED_BOARD_V1');
 
     // Each declared fact left out blocks before the Store and names its owner, on the bench and in the nav.
@@ -193,29 +205,38 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     }
 
     // The complete revision is admitted and reaches the Store, and the demand sent is built from the admitted facts.
-    // The material on the wire is the admitted start-own.material fact, {form, nominalT, nominalW}, as the bench's
-    // control states it. Recorded result: the hosted Store refuses a material without a species (422
-    // INVALID_BOUNDED_SCOPE, "materialDemand.species must be a nonempty string"); the catalog has more than one
-    // species at nominal 2x4, so none is chosen for the bench. The refusal is the result; no species is added.
+    // The material on the wire is the admitted start-own.material fact, exactly the four fields the bench states.
     const revision = await live(frame, () => window.STBStartOwnLive.revision());
-    const failure = await live(frame, r => window.STBStartOwnLive.inquire(r).then(() => null, error => error.message), revision);
+    const result = await live(frame, r => window.STBStartOwnLive.inquire(r), revision);
+    assert.equal(result.reachedStore, true);
+    assert.equal(result.answer.authority, 'CURRENT');
+    assert.equal(result.answer.definitionRevisionId, revision.definitionRevisionId);
     const sent = startOwnCalls(log);
     assert.equal(sent.length, 1, 'a complete revision reaches the Store');
     assert.equal(sent[0].request.candidateRevisionId, revision.definitionRevisionId);
     const lineSent = sent[0].request.payload.line;
     assert.deepEqual(lineSent.materialDemand, revision.facts['start-own.material'].value);
-    assert.deepEqual(lineSent.materialDemand, { form: 'board', nominalT: 2, nominalW: 4 });
-    assert.equal(failure, 'INVALID_BOUNDED_SCOPE');
-    assert.equal(sent[0].status, 422);
-    assert.equal(sent[0].answer.code, 'INVALID_BOUNDED_SCOPE');
-    assert.equal(sent[0].answer.details, 'materialDemand.species must be a nonempty string');
+    assert.deepEqual(lineSent.materialDemand, { species: 'spf', form: 'board', nominalT: 2, nominalW: 4 });
+    assert.equal(sent[0].status, 200);
+    assert.equal(sent[0].answer.materialResolution.status, 'MAPPED');
+    assert.equal(sent[0].answer.materialResolution.materialDemand.species, 'spf');
     assert.deepEqual(lineSent.parts, revision.facts['start-own.parts'].value);
     assert.deepEqual(lineSent.requiredOps, revision.facts['start-own.operations'].value);
     assert.equal(Number(lineSent.definedWorkpieceLength.value), revision.facts['start-own.workpiece-length'].value);
     assert.equal(lineSent.sawAngleDeg, revision.facts['start-own.datum'].value.sawAngleDeg);
     assert.equal(lineSent.spotDemand?.totalCount ?? 0, revision.facts['start-own.spot-demand'].value.totalCount ?? 0);
 
-    // A material missing a stated field blocks before the Store and names its owner and the field.
+    // A material without a species blocks before the Store and names its owner and the field.
+    const noSpecies = await live(frame, () => {
+      const r = window.STBStartOwnLive.revision();
+      delete r.facts['start-own.material'].value.species;
+      r.definitionRevisionId += '-without-species';
+      return window.STBStartOwnLive.inquire(r);
+    });
+    assert.equal(noSpecies.reachedStore, false);
+    assert.deepEqual(noSpecies.blocking, [{ factId: 'start-own.material', owner: 'PROJECT', title: 'Material demand', condition: 'INVALID_VALUE', fields: ['species'] }]);
+
+    // A material missing another stated field blocks the same way.
     const noWidth = await live(frame, () => {
       const r = window.STBStartOwnLive.revision();
       delete r.facts['start-own.material'].value.nominalW;

@@ -41,7 +41,7 @@
     alcove:'#alcove-config',
     'window-seat':'#s-configure'
   });
-  const START_OWN_CONTROLS = 'button[data-length],#stb-config-length';
+  const START_OWN_CONTROLS = 'button[data-length],#stb-config-length,button[data-species]';
   const DOWNSTREAM_STAGES = new Set(['request','review','yard','terms','recap','record']);
   const INSTANCES = new Map();
   const WATCHED_DOCS = new WeakSet();

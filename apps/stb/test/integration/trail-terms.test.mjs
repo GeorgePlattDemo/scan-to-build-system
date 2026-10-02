@@ -109,6 +109,8 @@ const TILES = {
     async answer({ page, frame }) {
       await frame.locator('.recovery-nav button[data-journey-stage="configure"]').click();
       await wait(page, 1500);
+      // The bench has no default species; the user states one before confirming.
+      await frameOf(page, 'three-frames.html').locator('#stb-bench-species [data-species="spf"]').click();
       await frameOf(page, 'three-frames.html').locator('#stb-confirm-store').click();
       await until(async () => (await terms(page, 'start-own'))?.stage === 'ANSWERED', 'job 1 answer');
       return { win: page };

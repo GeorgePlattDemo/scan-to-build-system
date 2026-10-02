@@ -410,20 +410,21 @@ test('case 4: a malformed nested fact blocks before Store with the fact id and o
   const alcove = admit({ revision: facts('alcove', {}), inquiryScope: 'ALCOVE_INSERT_V1' });
   assert.deepEqual(alcove.request.openDemands, ['alcove.hardware']);
 
-  // Only the facts whose fields the live page emits carry a form. Start your own's material carries the three fields
-  // its "2×4 stud" control states: form, nominal thickness and nominal width. Species is not required.
+  // Only the facts whose fields the live page emits carry a form. Start your own's material carries the four fields
+  // its bench states: species from its species choice (no default), form and nominal size from its "2×4 stud" control.
   const formed = Object.entries(ADMISSION_PROFILES).flatMap(([, p]) => Object.values(p.scopes))
     .flatMap(s => s.requires).filter(r => r.form).map(r => r.id);
   assert.deepEqual([...new Set(formed)].sort(),
     ['playhouse.opening', 'start-own.material', 'start-own.parts', 'window-seat.added-knobs', 'window-seat.kept-asks']);
-  const stated = { form: 'board', nominalT: 2, nominalW: 4 };
+  const stated = { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 };
   const material = admit({ revision: facts('start-own', { 'start-own.material': ok(stated) }), inquiryScope: 'USER_DEFINED_BOARD_V1' });
   assert.equal(material.admission.result, ADMISSION_RESULT.ADMITTED);
-  assert.deepEqual(material.request.facts['start-own.material'], stated, 'no species is added');
+  assert.deepEqual(material.request.facts['start-own.material'], stated, 'travels exactly as stated');
   for (const [value, missing] of [
-    [{ origin: 'STORE_ZERO', stockClass: 'board' }, ['form', 'nominalT', 'nominalW']],
-    [{ form: 'board', nominalT: 2 }, ['nominalW']],
-    [{ form: ' ', nominalT: 0, nominalW: 4 }, ['form', 'nominalT']],
+    [{ origin: 'STORE_ZERO', stockClass: 'board' }, ['species', 'form', 'nominalT', 'nominalW']],
+    [{ form: 'board', nominalT: 2, nominalW: 4 }, ['species']],
+    [{ species: 'spf', form: 'board', nominalT: 2 }, ['nominalW']],
+    [{ species: ' ', form: ' ', nominalT: 0, nominalW: 4 }, ['species', 'form', 'nominalT']],
   ]) {
     const blocked = admit({ revision: facts('start-own', { 'start-own.material': ok(value) }), inquiryScope: 'USER_DEFINED_BOARD_V1' });
     assert.equal(blocked.admission.result, ADMISSION_RESULT.BLOCKED, JSON.stringify(value));

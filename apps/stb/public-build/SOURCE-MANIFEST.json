@@ -959,6 +959,48 @@
       "blobSha": "59db6e09adc7579a3be46d276f549dd2e77c3678",
       "bytes": 252386,
       "reason": "Start your own's start-own.material is what the bench's \"2×4 stud\" control states (form, nominalT, nominalW, read from its data-material-* attributes); a field the control does not state is left out. Cache-busters for the contract, three-frames.html, the Outdoor and Window Seat pages and the front door."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "start-own-stated-species",
+      "blobSha": "5d58605a5743038a8ffa0f9fa11067e8f72b6f23",
+      "bytes": 89465,
+      "reason": "The bench states the species of its 2×4 board: a \"Which wood?\" choice of the three species the Store catalog at STORE_PIN has for nominal 2×4 board (spf, syp-treated, cedar), with none chosen by default."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "start-own-stated-species",
+      "blobSha": "ccc2cbc12d4ef7ceddc8b238c4e9a496dd6e2457",
+      "bytes": 81333,
+      "reason": "Cache-busters for the tile-host admission contract (start-own profile 0.4) and stb-terms-flow.js. Nothing else on the Outdoor page changes."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "start-own-stated-species",
+      "blobSha": "6087e1caa9cf33d39ba66629d9306db6657855db",
+      "bytes": 139760,
+      "reason": "Cache-busters for the tile-host admission contract (start-own profile 0.4) and stb-terms-flow.js. Nothing else on the Window Seat page changes."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "start-own-stated-species",
+      "blobSha": "5982c104acee5e3eb9ad3dd114aeb2a39ae22002",
+      "bytes": 127709,
+      "reason": "Cache-buster for the tile-host admission contract after the start-own admission profile 0.4. Visible pages are unchanged."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "start-own-stated-species",
+      "blobSha": "8a77b23cc1bfe41031cb25c8299d92e25e7105bb",
+      "bytes": 39662,
+      "reason": "Cache-buster for the base page."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "start-own-stated-species",
+      "blobSha": "5a85bd7d68852aea9e79fa25bf235e2c90679cb5",
+      "bytes": 252927,
+      "reason": "start-own.material takes its species from the bench's species choice (no default) and its form and nominal size from the \"2×4 stud\" control; a species choice is a new revision. Cache-busters for the contract, stb-terms-flow.js, three-frames.html, the Outdoor and Window Seat pages and the front door."
     }
   ],
   "retiredFiles": [
