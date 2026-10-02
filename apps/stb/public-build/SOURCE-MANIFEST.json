@@ -1015,6 +1015,41 @@
       "blobSha": "977085d7e32058a1cf6a420eb628a4ad5c2524de",
       "bytes": 252927,
       "reason": "Cache-buster for the changed stb-outdoor-picnic-0.4.html."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "contract-cache-buster-matches-blob",
+      "blobSha": "652e6fe58b1b3f23dca67eb6510b23cfee35e0da",
+      "bytes": 81496,
+      "reason": "The tile-host admission contract loads at ?v=dca3ac17, the contract's current blob prefix (was ?v=e4cdfcd3, an older blob, so a browser could run the old contract). Nothing else on the Outdoor page changes."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "contract-cache-buster-matches-blob",
+      "blobSha": "85fbb274d7f7e75d6f3c49ede35229c4b83251ec",
+      "bytes": 139760,
+      "reason": "The tile-host admission contract loads at ?v=dca3ac17, the contract's current blob prefix (was ?v=e4cdfcd3, an older blob, so a browser could run the old contract). Nothing else on the Window Seat page changes."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "contract-cache-buster-matches-blob",
+      "blobSha": "3f40be1406e1dcec597feaba54c2b59259ec1f59",
+      "bytes": 127709,
+      "reason": "The tile-host admission contract loads at ?v=dca3ac17, the contract's current blob prefix (was ?v=e4cdfcd3, an older blob, so a browser could run the old contract). Visible pages are unchanged."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "contract-cache-buster-matches-blob",
+      "blobSha": "af18a4a07dbe0629b38401a3fe55f6a69cc6ac47",
+      "bytes": 39662,
+      "reason": "Cache-buster for the changed system-build-base-8d8a9dd.html."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "contract-cache-buster-matches-blob",
+      "blobSha": "d6badb58b662b905e487def294eeb61313d25e28",
+      "bytes": 252927,
+      "reason": "The tile-host admission contract loads at ?v=dca3ac17, the contract's current blob prefix (was ?v=e4cdfcd3). Cache-busters for the changed stb-outdoor-picnic-0.4.html, stb-window-seat-0.9.html and front door."
     }
   ],
   "retiredFiles": [
