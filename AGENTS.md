@@ -4,6 +4,17 @@ You are working in `GeorgePlattDemo/scan-to-build-system`.
 
 Read [`START-HERE.md`](START-HERE.md) first. Then the capability-bridge bench. Then the trial protocol.
 
+## How a task is done
+
+Do the task as stated, for the reason stated. Do not reorder it, shrink it, or swap it for a faster path that finishes the session.
+
+- A step left in place is not done. Delete the old path in the same change.
+- Do not add a second path, a copy, or a fallback to make the new path pass.
+- Do not skip a stated check because another check is easier.
+- Do not change STORE_PIN, Review, or a protected file to make a test pass.
+- If a test fails on untouched main, say so. Do not fix it inside this task.
+- If the stated task cannot be done as written, stop and say why. Do not invent a nearer task.
+
 ## Ownership
 
 - System: application source, operational job meaning, application behavior, application tests, release composition.
