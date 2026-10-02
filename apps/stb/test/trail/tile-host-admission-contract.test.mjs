@@ -463,6 +463,10 @@ test('case 4, Start your own: datum fields, a finite saw angle and the spot dema
       'start-own.spot-demand', OWNER.USER, ['required', 'mode', 'totalCount']],
     [{ 'start-own.operations': ok(SPOT_OPS), 'start-own.spot-demand': ok({ ...SPOT, totalCount: 0 }) }, 'start-own.spot-demand', OWNER.USER, ['totalCount']],
     [{ 'start-own.operations': ok(SPOT_OPS), 'start-own.spot-demand': ok({ ...SPOT, mode: '' }) }, 'start-own.spot-demand', OWNER.USER, ['mode']],
+    // The mode is exactly SPOT_ON_LOCATION; any other text blocks.
+    ...['DRILL', 'spot_on_location', 'SPOT_ON_LOCATION ', 'CENTERED_ON_PART'].map(mode =>
+      [{ 'start-own.operations': ok(SPOT_OPS), 'start-own.spot-demand': ok({ ...SPOT, mode }) }, 'start-own.spot-demand', OWNER.USER, ['mode']]),
+    [{ 'start-own.operations': ok(SPOT_OPS), 'start-own.spot-demand': ok((({ mode, ...rest }) => rest)(SPOT)) }, 'start-own.spot-demand', OWNER.USER, ['mode']],
     [{ 'start-own.operations': ok(SPOT_OPS), 'start-own.spot-demand': ok({ ...SPOT, required: 'yes' }) }, 'start-own.spot-demand', OWNER.USER, ['required']],
   ];
   for (const [overrides, factId, owner, missing] of BLOCKS) {

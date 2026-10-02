@@ -146,11 +146,13 @@ const req = (id, owner, kind, title, form) => Object.freeze(form ? { id, owner, 
 // checks them one by one: `fields(...)` names fields that must be present, `each(...)` applies to every item of a
 // list, and `nullable(...)` is a field the page states as null when it is off. `whenListed(factId, member, ...)`
 // applies only while another fact of the same revision, a list, includes `member`; otherwise it asks for nothing.
+// `exactly(value)` is a field that must be that one value.
 // A form names only fields the live page already emits; it never adds a machine envelope or any other Store
 // capability check.
 const fields = spec => Object.freeze({ fields: Object.freeze(spec) });
 const each = spec => Object.freeze({ each: spec });
 const nullable = spec => Object.freeze({ nullable: spec });
+const exactly = value => Object.freeze({ exactly: value });
 const whenListed = (fact, member, spec) => Object.freeze({ whenListed: Object.freeze({ fact, member }), form: spec });
 // An amount the person typed: a number, or text written as `3`, `3.5`, `3/4` or `3 1/2`.
 function amount(value) {
@@ -178,6 +180,7 @@ const FIELD = Object.freeze({
 // revision's facts, read only by `whenListed`.
 function formGaps(form, value, at = '', facts = {}) {
   if (typeof form === 'string') return FIELD[form](value) ? [] : [at];
+  if (Object.prototype.hasOwnProperty.call(form, 'exactly')) return value === form.exactly ? [] : [at];
   if (form.whenListed) {
     const list = facts[form.whenListed.fact]?.value;
     return Array.isArray(list) && list.includes(form.whenListed.member) ? formGaps(form.form, value, at, facts) : [];
@@ -203,7 +206,7 @@ export const ADMISSION_PROFILES = deepFreeze({
   // material is what the bench states, form and nominal thickness and width from its "2×4 stud" control. 0.4: and
   // species, from the bench's species choice, which has no default. The user states it, so the owner is USER. 0.5: the
   // datum's five meaning fields are text and its saw angle is finite, and while the operations include
-  // SPOT_ON_LOCATION the spot demand says it is required, its mode and a count above 0. With spotting off, the spot
+  // SPOT_ON_LOCATION the spot demand says it is required, mode SPOT_ON_LOCATION and a count above 0. With spotting off, the spot
   // demand is not asked for one.
   'start-own': {
     version: '0.5',
@@ -220,7 +223,7 @@ export const ADMISSION_PROFILES = deepFreeze({
           req('start-own.datum', OWNER.RULE, 'object', 'Cut and datum meaning', fields({ cutPlane: 'text', endIdentity: 'text',
             endRelation: 'text', lengthDatum: 'text', datumCMethod: 'text', sawAngleDeg: 'finite-number' })),
           req('start-own.spot-demand', OWNER.USER, 'object', 'Center spot demand, on or off',
-            whenListed('start-own.operations', 'SPOT_ON_LOCATION', fields({ required: 'true', mode: 'text', totalCount: 'positive-count' }))),
+            whenListed('start-own.operations', 'SPOT_ON_LOCATION', fields({ required: 'true', mode: exactly('SPOT_ON_LOCATION'), totalCount: 'positive-count' }))),
         ],
       },
     },

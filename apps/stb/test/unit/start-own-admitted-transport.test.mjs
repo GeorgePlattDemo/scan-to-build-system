@@ -164,6 +164,9 @@ test('a blank datum field, a non-finite saw angle or a spot operation without it
     [edit('spot-off', f => withSpotOp(f, { required: false })), 'start-own.spot-demand', 'USER', ['required', 'mode', 'totalCount']],
     [edit('spot-zero', f => withSpotOp(f, { ...SPOT, totalCount: 0 })), 'start-own.spot-demand', 'USER', ['totalCount']],
     [edit('spot-no-mode', f => withSpotOp(f, { ...SPOT, mode: ' ' })), 'start-own.spot-demand', 'USER', ['mode']],
+    // The mode is exactly SPOT_ON_LOCATION; any other text blocks.
+    [edit('spot-mode-drill', f => withSpotOp(f, { ...SPOT, mode: 'DRILL' })), 'start-own.spot-demand', 'USER', ['mode']],
+    [edit('spot-mode-lowercase', f => withSpotOp(f, { ...SPOT, mode: 'spot_on_location' })), 'start-own.spot-demand', 'USER', ['mode']],
   ];
   for (const [blockedRevision, factId, owner, fields] of CASES) {
     const admission = admit({ revision: blockedRevision, inquiryScope: SCOPE });

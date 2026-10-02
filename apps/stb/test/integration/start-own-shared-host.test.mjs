@@ -313,6 +313,11 @@ test('a blank datum field, a non-finite saw angle or a spot operation without it
       ['start-own.spot-demand', { set: ['totalCount', 0] }, ['totalCount'], 'spot-zero'],
       ['start-own.spot-demand', { del: 'totalCount' }, ['totalCount'], 'spot-no-count'],
       ['start-own.spot-demand', { set: ['mode', ''] }, ['mode'], 'spot-no-mode'],
+      // The mode is exactly SPOT_ON_LOCATION: any other text, or none, blocks.
+      ['start-own.spot-demand', { set: ['mode', 'DRILL'] }, ['mode'], 'spot-mode-drill'],
+      ['start-own.spot-demand', { set: ['mode', 'spot_on_location'] }, ['mode'], 'spot-mode-lowercase'],
+      ['start-own.spot-demand', { set: ['mode', ' SPOT_ON_LOCATION '] }, ['mode'], 'spot-mode-padded'],
+      ['start-own.spot-demand', { del: 'mode' }, ['mode'], 'spot-mode-missing'],
       ['start-own.spot-demand', { set: ['required', false] }, ['required'], 'spot-not-required'],
     ];
     const OWNERS = { 'start-own.datum': ['RULE', 'Cut and datum meaning'], 'start-own.spot-demand': ['USER', 'Center spot demand, on or off'] };
