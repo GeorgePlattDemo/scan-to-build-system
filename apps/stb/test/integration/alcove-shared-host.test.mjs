@@ -5,6 +5,8 @@
 //   a complete revision still reaches the Store, and the Store definition is built only from the admitted request.
 // - The old Alcove shell path is gone: no applyAlcoveNavState, alcoveStageOpen, Alcove branches or data-go remapping,
 //   and no Store definition built outside admission.
+// - An Alcove inquiry has one admission decision, admit(): its transport is sendAdmittedJob, and it never calls
+//   admitPublicStoreRequest.
 // The rest of Alcove's preserved journey (answer → your call → yard → pickup, decline, refusal past the envelope,
 // a stale acceptance) is in trail-terms.test.mjs and trail-stale-version.test.mjs.
 
@@ -63,7 +65,10 @@ test('the old Alcove shell path is gone; one Store handoff, inside inquire()', (
   assert.equal((base.match(/bridge\.request\(/g) || []).length, 1);
   assert.match(base, /const admission=C\.admit\(\{revision,inquiryScope:ALCOVE_INQUIRY_SCOPE\}\);[\s\S]*?C\.inquire\(admission,request=>bridge\.request\(request,alcoveDefinitionFrom\(request\)\)\)/);
   const bridge = read('stb-alcove-store-bridge.js');
-  assert.equal((bridge.match(/client\.sendJob\(/g) || []).length, 1);
+  // The bridge sends the admitted request without the old door.
+  assert.equal((bridge.match(/client\.sendAdmittedJob\(/g) || []).length, 1);
+  assert.match(bridge, /client\.sendAdmittedJob\(\{\s*admitted,/);
+  assert.equal(bridge.includes('sendJob('), false, 'no Alcove inquiry goes through sendJob');
   assert.match(bridge, /ALCOVE_ADMITTED_REQUEST_REQUIRED/);
 
   // The contract is loaded from the one deployed copy, never pasted in; page and host load the same bytes.
@@ -176,4 +181,68 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.equal(state.answer.definitionRevisionId, await live(frame, () => window.STBAlcoveLive.revision().definitionRevisionId));
     await until(async () => !steps(await navLine(frame)).find(b => b.stage === 'store').inert, 'The Store answers usable');
   });
+});
+
+// The old door, served with a recorder: every call to admitPublicStoreRequest in that page is counted on the
+// window that imported it, with the project it was called for. Nothing else about the module changes.
+const OLD_DOOR = 'stb-public-admission.mjs';
+const recordOldDoor = source => {
+  const head = 'export function admitPublicStoreRequest(';
+  assert.equal(source.split(head).length, 2, 'the old door is exported once');
+  return source.replace(head, 'function oldDoorUnrecorded(') + `
+export function admitPublicStoreRequest(input) {
+  (globalThis.__stbOldDoorCalls ||= []).push(input?.projectId ?? null);
+  return oldDoorUnrecorded(input);
+}
+`;
+};
+// Other tiles still use the old door; only Alcove calls are read, from every frame of the page.
+const alcoveOldDoorCalls = page => Promise.all(page.frames().map(f => f.evaluate(() => window.__stbOldDoorCalls ?? [])))
+  .then(lists => lists.flat().filter(projectId => projectId === 'alcove'));
+
+test('an Alcove inquiry has one admission decision, admit(); it never calls admitPublicStoreRequest', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    // Arrival asks the Store once, admitted, through inquire().
+    const { page, frame, errors } = await openAlcove(browser, origin);
+    const arrived = alcoveCalls(log).length;
+    assert.ok(arrived >= 1, 'the arrival answer reached the Store');
+
+    // A complete revision still reaches the Store, with the definition built from the admitted request on the wire.
+    let result = await live(frame, () => window.STBAlcoveLive.inquire(window.STBAlcoveLive.revision()));
+    assert.equal(result.admission.result, 'ADMITTED');
+    assert.deepEqual(result.request.openDemands, ['alcove.hardware'], 'hardware stays a Store-owned open demand');
+    await until(async () => { const s = await live(frame, () => window.STBAlcoveLive.state()); return !s.asking && s.answer?.authority === 'CURRENT'; }, 'complete answer');
+    assert.equal(alcoveCalls(log).length, arrived + 1, 'a complete revision reaches the Store');
+    const sent = alcoveCalls(log).at(-1).request;
+    assert.equal(sent.candidateRevisionId, result.request.definitionRevisionId);
+    assert.deepEqual(sent.payload.definition, await live(frame, () => window.STBAlcoveLive.definition()));
+    assert.equal(sent.payload.definitionKind, 'alcove_insert.v1');
+    assert.equal(sent.payload.ruleVersion, '0.1');
+
+    // A missing opening still blocks before the Store, in admit(), and names its owner.
+    const reached = alcoveCalls(log).length;
+    result = await live(frame, () => {
+      const revision = window.STBAlcoveLive.revision();
+      delete revision.facts['alcove.opening'];
+      revision.definitionRevisionId += '-without-opening';
+      return window.STBAlcoveLive.inquire(revision);
+    });
+    assert.equal(result.admission.result, 'BLOCKED');
+    assert.equal(result.admission.reason, 'REQUIRED_FACT_UNSETTLED');
+    assert.deepEqual(result.admission.blocking, [{ factId: 'alcove.opening', owner: 'USER', title: 'Unit width, height and depth fitted to the opening', condition: 'MISSING' }]);
+    assert.equal(result.request, null);
+    await page.waitForTimeout(600);
+    assert.equal(alcoveCalls(log).length, reached, 'a missing opening never reaches the Store');
+
+    // No Alcove inquiry, admitted or blocked, called the old door.
+    assert.deepEqual(await alcoveOldDoorCalls(page), []);
+
+    // Control: the recorder is live. The old door still runs for a direct sendJob call, and is counted.
+    const direct = await live(frame, () => window.STBStoreClient.sendJob({
+      projectId: 'alcove', requestType: 'ALCOVE_INSERT_V1', candidateRevisionId: 'control', payload: {},
+    }).then(() => 'sent', error => String(error?.message || error)));
+    assert.match(direct, /SYSTEM_ADMISSION_/);
+    assert.deepEqual(await alcoveOldDoorCalls(page), ['alcove']);
+    assert.deepEqual(errors, []);
+  }, null, { [OLD_DOOR]: recordOldDoor });
 });
