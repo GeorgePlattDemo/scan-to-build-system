@@ -140,7 +140,7 @@ test('a material missing a stated field blocks in admit() before the Store', asy
     blockedRevision.facts['start-own.material'].value = material;
     const admission = admit({ revision: blockedRevision, inquiryScope: SCOPE });
     assert.equal(admission.admission.result, 'BLOCKED');
-    assert.deepEqual(admission.admission.blocking, [{ factId: 'start-own.material', owner: 'PROJECT', title: 'Material demand',
+    assert.deepEqual(admission.admission.blocking, [{ factId: 'start-own.material', owner: 'USER', title: 'Material demand',
       condition: 'INVALID_VALUE', fields: missing }]);
     assert.equal((await inquire(admission, ask(window))).reachedStore, false);
   }
