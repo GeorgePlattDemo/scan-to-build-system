@@ -798,6 +798,20 @@
       "blobSha": "5a5e8a4d109e3ef3a2dac6795b30562b6307fafc",
       "bytes": 80858,
       "reason": "Cache-buster for the tile-host admission contract after the start-own admission profile 0.2. Nothing else on the Outdoor page changes."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "idea-label-not-step-1",
+      "blobSha": "3f35f253f64d11ec74fec68abda721e1f30cb0a2",
+      "bytes": 80852,
+      "reason": "Idea is not a step: step-1 labels that read \"Your idea\" / \"YOUR IDEA\" now read \"Intent\" / \"INTENT\". Labels only; no page, nav path or Store call moves."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "idea-label-not-step-1",
+      "blobSha": "c54c5bb8bbe3b4da3da8973223100d002ecec731",
+      "bytes": 90567,
+      "reason": "Idea is not a step: step-1 labels that read \"Your idea\" / \"YOUR IDEA\" now read \"Intent\" / \"INTENT\". Labels only; no page, nav path or Store call moves."
     }
   ],
   "retiredFiles": [
