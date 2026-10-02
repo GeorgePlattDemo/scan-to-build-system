@@ -103,7 +103,9 @@ assert.match(seat9,/insetFromEdgeIn=place\.inset/);
 assert.match(seat9,/if\(spots\[r\.id\]&&spots\[r\.id\]\.length\)part\.spots=spots\[r\.id\]/);
 assert.match(seat9,/fill="#2f6f9e"/);
 assert.match(seat9,/stb-store-client\.js/);
-assert.match(seat9,/requestType:'CUT_PACKAGE_V1'/);
+// The request type is the admitted request's; the transport inside inquire() checks it and sends it without the old door.
+assert.match(seat9,/if\(request\.requestType!=='CUT_PACKAGE_V1'\|\|/);
+assert.match(seat9,/return client\.sendAdmittedJob\(\{admitted:request,/);
 assert.equal(/sellingPrice\s*\*|list_reference|RECOVERY|FIXTURE|onHand/.test(seat9),false,'Window Seat 0.9 contains Store-owned price, stock or recovery logic');
 
 console.log('PASS · Alcove and Window Seat send optional shelf-elevation SPOT_ON_LOCATION demand to the Store without inventing Store pricing');

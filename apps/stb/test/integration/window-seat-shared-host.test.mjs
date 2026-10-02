@@ -6,6 +6,8 @@
 // - Every Store inquiry is admit() then inquire(): a missing profile fact blocks before the Store and names its owner;
 //   a complete revision still reaches the Store.
 // - The old Window Seat shell path is gone: no seatGo, seatNavButton, applySeatNavState or STB_SEAT_* messages.
+// - A Window Seat inquiry has one admission decision, admit(): its transport is sendAdmittedJob, and it never calls
+//   admitPublicStoreRequest.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -55,9 +57,10 @@ test('the old Window Seat shell path is gone', () => {
   assert.doesNotMatch(shell, /activeJourneyProject\s*[!=]==?\s*['"]window-seat['"]/, 'no Window Seat branch in the shell');
   const page = fs.readFileSync(PAGE, 'utf8');
   assert.equal(page.includes('STB_SEAT_'), false, 'the page speaks only STB-TILE-HOST-0.1 to the host');
-  // One Store handoff on the page: inside inquire(), after admit().
-  assert.equal((page.match(/client\.sendJob\(/g) || []).length, 1);
-  assert.match(page, /C\.inquire\(admission,request=>\{[\s\S]*?client\.sendJob\(/);
+  // One Store handoff on the page: inside inquire(), after admit(), sending the admitted request without the old door.
+  assert.equal((page.match(/client\.sendAdmittedJob\(/g) || []).length, 1);
+  assert.match(page, /C\.inquire\(admission,request=>\{[\s\S]*?client\.sendAdmittedJob\(\{admitted:request,/);
+  assert.equal(page.includes('sendJob('), false, 'no Window Seat inquiry goes through sendJob');
   // The contract is loaded from the one deployed copy, never pasted in.
   assert.match(page, /import\('\.\/shared\/tile-host-admission-contract\.mjs\?v=[0-9a-f]{8}'\)/);
   assert.equal(page.includes('export function admit'), false);
@@ -261,4 +264,85 @@ test('a malformed nested fact blocks before the Store with its fact id and owner
     assert.deepEqual(sent.payload.definition, await seat.evaluate(() => window.STBWindowSeat.request()), 'the bridge sends what it sent before: the page request');
     assert.ok(JSON.stringify(sent.payload.definition).includes('-X1'), 'the extra spot is on the wire');
   });
+});
+
+// The old door, served with a recorder: every call to admitPublicStoreRequest in that page is counted on the
+// window that imported it, with the project it was called for. Nothing else about the module changes.
+const OLD_DOOR = 'stb-public-admission.mjs';
+const recordOldDoor = source => {
+  const head = 'export function admitPublicStoreRequest(';
+  assert.equal(source.split(head).length, 2, 'the old door is exported once');
+  return source.replace(head, 'function oldDoorUnrecorded(') + `
+export function admitPublicStoreRequest(input) {
+  (globalThis.__stbOldDoorCalls ||= []).push(input?.projectId ?? null);
+  return oldDoorUnrecorded(input);
+}
+`;
+};
+// Other tiles still use the old door; only Window Seat calls are read, from every frame of the page.
+const seatOldDoorCalls = page => Promise.all(page.frames().map(f => f.evaluate(() => window.__stbOldDoorCalls ?? [])))
+  .then(lists => lists.flat().filter(projectId => projectId === 'window-seat'));
+
+test('a Window Seat inquiry has one admission decision, admit(); it never calls admitPublicStoreRequest', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { page, frame, seat, errors } = await openSeat(browser, origin);
+    await frame.locator('.recovery-nav [data-presentation-fork="Intent"]').click();
+    await until(async () => (await seat.evaluate(() => window.STBWindowSeat.state())).section === 'intent', 'intent');
+    const set = (id, value, type = 'input') => seat.evaluate(([id, value, type]) => {
+      const e = document.getElementById(id); e.value = value; e.dispatchEvent(new Event(type, { bubbles: true }));
+    }, [id, value, type]);
+    const tick = selector => seat.evaluate(s => { const e = document.querySelector(s); e.checked = true; e.dispatchEvent(new Event('change', { bubbles: true })); }, selector);
+
+    // A complete revision still reaches the Store, with the page's own request on the wire.
+    const before = cutCalls(log);
+    let result = await seat.evaluate(() => window.STBWindowSeat.inquire(window.STBWindowSeat.revision()));
+    assert.equal(result.admission.result, 'ADMITTED');
+    await until(() => cutCalls(log) === before + 1, 'complete revision reaches the Store');
+    let state = await until(async () => { const s = await seat.evaluate(() => window.STBWindowSeat.state()); return !s.asking && s.answered ? s : null; }, 'answer');
+    assert.equal(state.error, null);
+    let sent = log.filter(e => e.request.projectId === 'window-seat').pop().request;
+    assert.equal(sent.candidateRevisionId, await seat.evaluate(() => window.STBWindowSeat.revision().definitionRevisionId));
+    assert.deepEqual(sent.payload.definition, await seat.evaluate(() => window.STBWindowSeat.request()));
+
+    // A malformed added knob (the extra spot as an object of nulls, marked settled) still blocks before the Store, in admit().
+    await tick('#add-knobs [data-add="xspot"]');
+    const calls = cutCalls(log);
+    result = await seat.evaluate(() => {
+      const rv = window.STBWindowSeat.revision();
+      rv.facts['window-seat.added-knobs'] = { value: { ...rv.facts['window-seat.added-knobs'].value, xspot: { target: null, offset: null, place: null } }, status: 'CONFIRMED' };
+      return window.STBWindowSeat.inquire(rv);
+    });
+    assert.equal(result.admission.result, 'BLOCKED');
+    assert.equal(result.admission.reason, 'REQUIRED_FACT_UNSETTLED');
+    assert.deepEqual(result.admission.blocking, [{ factId: 'window-seat.added-knobs', owner: 'USER', title: 'Every knob added by hand, with what it needs',
+      condition: 'INVALID_VALUE', fields: ['xspot.target', 'xspot.offset', 'xspot.place'] }]);
+    assert.equal(result.request, null);
+    await page.waitForTimeout(600);
+    assert.equal(cutCalls(log), calls, 'a malformed added knob never reaches the Store');
+
+    // Completed, the changed revision is admitted and reaches the Store on the same one door.
+    const target = await seat.evaluate(() => window.STBWindowSeat.definition().feats[0].id);
+    await set('xs-target', target, 'change');
+    await set('xs-off', '3');
+    await set('xs-place', 'CENTER', 'change');
+    await until(async () => (await seat.evaluate(() => window.STBWindowSeat.state())).asking === false, 'idle');
+    const reached = cutCalls(log);
+    result = await seat.evaluate(() => window.STBWindowSeat.inquire(window.STBWindowSeat.revision()));
+    assert.equal(result.admission.result, 'ADMITTED');
+    await until(() => cutCalls(log) > reached, 'completed revision reaches the Store');
+    sent = log.filter(e => e.request.projectId === 'window-seat').pop().request;
+    assert.ok(JSON.stringify(sent.payload.definition).includes('-X1'), 'the extra spot is on the wire');
+
+    // No Window Seat inquiry, admitted or blocked, called the old door.
+    assert.ok(cutCalls(log) >= before + 2);
+    assert.deepEqual(await seatOldDoorCalls(page), []);
+
+    // Control: the recorder is live. The old door still runs for a direct sendJob call, and is counted.
+    const direct = await seat.evaluate(() => window.STBStoreClient.sendJob({
+      projectId: 'window-seat', requestType: 'CUT_PACKAGE_V1', candidateRevisionId: 'control', payload: {},
+    }).then(() => 'sent', error => String(error?.message || error)));
+    assert.match(direct, /SYSTEM_ADMISSION_/);
+    assert.deepEqual(await seatOldDoorCalls(page), ['window-seat']);
+    assert.deepEqual(errors, []);
+  }, null, { [OLD_DOOR]: recordOldDoor });
 });

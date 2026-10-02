@@ -16,7 +16,8 @@ const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/ja
 
 // Serves the public build, answers stb-store-runtime.json with a loopback endpoint, and passes every Store
 // POST to the real adapter. `tamper` lets one test hand the page an answer meant for someone else.
-export function serve(adapter, log, tamper = null) {
+// `rewrite` lets one test serve a public-build file with changed text.
+export function serve(adapter, log, tamper = null, rewrite = null) {
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://x');
     if (url.pathname === '/stb-store-runtime.json') {
@@ -40,6 +41,7 @@ export function serve(adapter, log, tamper = null) {
     const file = path.join(ROOT, rel);
     if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
     res.writeHead(200, { 'content-type': TYPES[path.extname(file)] || 'application/octet-stream' });
+    if (rewrite?.[rel]) { res.end(rewrite[rel](fs.readFileSync(file, 'utf8'))); return; }
     fs.createReadStream(file).pipe(res);
   });
   return new Promise(resolve => server.listen(0, '127.0.0.1', () => resolve(server)));
@@ -83,12 +85,12 @@ export async function openTile(browser, origin, tileLabel) {
   return { page, frame, errors };
 }
 
-export async function withBrowser(fn, tamper = null) {
+export async function withBrowser(fn, tamper = null, rewrite = null) {
   await requireCleanPinnedStore();
   const adapter = await createStoreAdapter();
   assert.equal(adapter.ready, true, JSON.stringify(adapter.inspection));
   const log = [];
-  const server = await serve(adapter, log, tamper);
+  const server = await serve(adapter, log, tamper, rewrite);
   const browser = await chromium.launch(process.env.STB_CHROMIUM_PATH ? { executablePath: process.env.STB_CHROMIUM_PATH } : {});
   try {
     await fn({ browser, origin: `http://127.0.0.1:${server.address().port}`, log, adapter });
