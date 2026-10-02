@@ -144,11 +144,16 @@ const req = (id, owner, kind, title, form) => Object.freeze(form ? { id, owner, 
 
 // A nonempty object or list is not a complete fact. Where a profile names the fields its page emits, `form`
 // checks them one by one: `fields(...)` names fields that must be present, `each(...)` applies to every item of a
-// list, and `nullable(...)` is a field the page states as null when it is off. A form names only fields the
-// live page already emits; it never adds a machine envelope or any other Store capability check.
+// list, and `nullable(...)` is a field the page states as null when it is off. `whenListed(factId, member, ...)`
+// applies only while another fact of the same revision, a list, includes `member`; otherwise it asks for nothing.
+// `exactly(value)` is a field that must be that one value.
+// A form names only fields the live page already emits; it never adds a machine envelope or any other Store
+// capability check.
 const fields = spec => Object.freeze({ fields: Object.freeze(spec) });
 const each = spec => Object.freeze({ each: spec });
 const nullable = spec => Object.freeze({ nullable: spec });
+const exactly = value => Object.freeze({ exactly: value });
+const whenListed = (fact, member, spec) => Object.freeze({ whenListed: Object.freeze({ fact, member }), form: spec });
 // An amount the person typed: a number, or text written as `3`, `3.5`, `3/4` or `3 1/2`.
 function amount(value) {
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
@@ -164,23 +169,31 @@ function amount(value) {
 const FIELD = Object.freeze({
   text: value => text(value),
   boolean: value => typeof value === 'boolean',
+  true: value => value === true,
+  'finite-number': value => Number.isFinite(value),
   'positive-number': value => Number.isFinite(value) && value > 0,
   count: value => Number.isInteger(value) && value >= 0,
   'positive-amount': value => amount(value) > 0,
   'positive-count': value => Number.isInteger(amount(value)) && amount(value) > 0,
 });
-// The field paths a value is missing against its form, in order. Empty when the value is complete.
-function formGaps(form, value, at = '') {
+// The field paths a value is missing against its form, in order. Empty when the value is complete. `facts` is the
+// revision's facts, read only by `whenListed`.
+function formGaps(form, value, at = '', facts = {}) {
   if (typeof form === 'string') return FIELD[form](value) ? [] : [at];
-  if (form.nullable) return value === null ? [] : formGaps(form.nullable, value, at);
+  if (Object.prototype.hasOwnProperty.call(form, 'exactly')) return value === form.exactly ? [] : [at];
+  if (form.whenListed) {
+    const list = facts[form.whenListed.fact]?.value;
+    return Array.isArray(list) && list.includes(form.whenListed.member) ? formGaps(form.form, value, at, facts) : [];
+  }
+  if (form.nullable) return value === null ? [] : formGaps(form.nullable, value, at, facts);
   if (form.each) {
     if (!Array.isArray(value)) return [at];
-    return value.flatMap((item, i) => formGaps(form.each, item, `${at}[${i}]`));
+    return value.flatMap((item, i) => formGaps(form.each, item, `${at}[${i}]`, facts));
   }
   if (!isObject(value)) return [at];
   return Object.entries(form.fields).flatMap(([key, spec]) => {
     const path = at ? `${at}.${key}` : key;
-    return Object.prototype.hasOwnProperty.call(value, key) ? formGaps(spec, value[key], path) : [path];
+    return Object.prototype.hasOwnProperty.call(value, key) ? formGaps(spec, value[key], path, facts) : [path];
   });
 }
 
@@ -188,12 +201,15 @@ function formGaps(form, value, at = '') {
 // admission code does not branch on tile identity. Profiles here are first declarations for the
 // contract tests; they are not yet a port of every row in public-build/stb-public-admission.mjs.
 export const ADMISSION_PROFILES = deepFreeze({
-  // Start your own 0.4: what its bench already sends the Store with every confirmed definition. 0.2 added the center
+  // Start your own 0.5: what its bench already sends the Store with every confirmed definition. 0.2 added the center
   // spot demand, on or off, which the bench always states and the Store must evaluate or refuse (USER). 0.3: the
   // material is what the bench states, form and nominal thickness and width from its "2×4 stud" control. 0.4: and
-  // species, from the bench's species choice, which has no default. The user states it, so the owner is USER.
+  // species, from the bench's species choice, which has no default. The user states it, so the owner is USER. 0.5: the
+  // datum's five meaning fields are text and its saw angle is finite, and while the operations include
+  // SPOT_ON_LOCATION the spot demand says it is required, mode SPOT_ON_LOCATION and a count above 0. With spotting off, the spot
+  // demand is not asked for one.
   'start-own': {
-    version: '0.4',
+    version: '0.5',
     scopes: {
       USER_DEFINED_BOARD_V1: {
         requestType: 'USER_DEFINED_BOARD_V1',
@@ -204,8 +220,10 @@ export const ADMISSION_PROFILES = deepFreeze({
           req('start-own.parts', OWNER.USER, 'nonempty-list', 'Identified parts with real lengths',
             each(fields({ partId: 'text', lengthIn: 'positive-number' }))),
           req('start-own.operations', OWNER.PROJECT, 'nonempty-list', 'Declared operations'),
-          req('start-own.datum', OWNER.RULE, 'object', 'Cut and datum meaning'),
-          req('start-own.spot-demand', OWNER.USER, 'object', 'Center spot demand, on or off'),
+          req('start-own.datum', OWNER.RULE, 'object', 'Cut and datum meaning', fields({ cutPlane: 'text', endIdentity: 'text',
+            endRelation: 'text', lengthDatum: 'text', datumCMethod: 'text', sawAngleDeg: 'finite-number' })),
+          req('start-own.spot-demand', OWNER.USER, 'object', 'Center spot demand, on or off',
+            whenListed('start-own.operations', 'SPOT_ON_LOCATION', fields({ required: 'true', mode: exactly('SPOT_ON_LOCATION'), totalCount: 'positive-count' }))),
         ],
       },
     },
@@ -331,7 +349,7 @@ export function admit({ profiles = ADMISSION_PROFILES, revision, inquiryScope })
   for (const requirement of scope.requires) {
     const fact = Object.prototype.hasOwnProperty.call(facts, requirement.id) ? facts[requirement.id] : undefined;
     const gaps = isObject(fact) && SETTLED.has(fact.status) && KIND[requirement.kind](fact.value) && requirement.form
-      ? formGaps(requirement.form, fact.value) : [];
+      ? formGaps(requirement.form, fact.value, '', facts) : [];
     const condition = !isObject(fact) ? 'MISSING'
       : !SETTLED.has(fact.status) ? `STATUS_${fact.status ?? 'NONE'}`
       : !KIND[requirement.kind](fact.value) || gaps.length ? 'INVALID_VALUE'

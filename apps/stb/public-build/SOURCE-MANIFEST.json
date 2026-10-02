@@ -1050,6 +1050,41 @@
       "blobSha": "d6badb58b662b905e487def294eeb61313d25e28",
       "bytes": 252927,
       "reason": "The tile-host admission contract loads at ?v=dca3ac17, the contract's current blob prefix (was ?v=e4cdfcd3). Cache-busters for the changed stb-outdoor-picnic-0.4.html, stb-window-seat-0.9.html and front door."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "start-own-datum-angle-spot-admission",
+      "blobSha": "c58af4e409e16faf9d1ed453170e8fff44c045fe",
+      "bytes": 81496,
+      "reason": "The tile-host admission contract loads at ?v=dd8615db, the contract's current blob prefix (was ?v=dca3ac17): Start your own profile 0.5 checks its datum fields, a finite saw angle and the spot demand a spot operation needs, mode exactly SPOT_ON_LOCATION. Nothing else on the Outdoor page changes."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "start-own-datum-angle-spot-admission",
+      "blobSha": "d8ea5c54036703a99946cfee254de66e38aedf91",
+      "bytes": 139760,
+      "reason": "The tile-host admission contract loads at ?v=dd8615db, the contract's current blob prefix (was ?v=dca3ac17): Start your own profile 0.5 checks its datum fields, a finite saw angle and the spot demand a spot operation needs, mode exactly SPOT_ON_LOCATION. Nothing else on the Window Seat page changes."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "start-own-datum-angle-spot-admission",
+      "blobSha": "e202deea86a191211509a86293e15b99b84985b6",
+      "bytes": 127709,
+      "reason": "The tile-host admission contract loads at ?v=dd8615db, the contract's current blob prefix (was ?v=dca3ac17): Start your own profile 0.5 checks its datum fields, a finite saw angle and the spot demand a spot operation needs, mode exactly SPOT_ON_LOCATION. Visible pages are unchanged."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "start-own-datum-angle-spot-admission",
+      "blobSha": "1d5246a65b28048e03f59f6764de3f71097d3ba2",
+      "bytes": 39662,
+      "reason": "Cache-buster for the changed system-build-base-8d8a9dd.html."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "start-own-datum-angle-spot-admission",
+      "blobSha": "22396472ca0d9132a9f4aa1182ebf5ba8e6d83b8",
+      "bytes": 252927,
+      "reason": "The tile-host admission contract loads at ?v=dd8615db, the contract's current blob prefix (was ?v=dca3ac17): Start your own profile 0.5 checks its datum fields, a finite saw angle and the spot demand a spot operation needs, mode exactly SPOT_ON_LOCATION. Cache-busters for the changed stb-outdoor-picnic-0.4.html, stb-window-seat-0.9.html and front door."
     }
   ],
   "retiredFiles": [

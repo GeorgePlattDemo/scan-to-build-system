@@ -175,7 +175,7 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.deepEqual(Object.keys(admission.request.facts).sort(),
       ['start-own.datum', 'start-own.material', 'start-own.operations', 'start-own.parts', 'start-own.spot-demand', 'start-own.workpiece-length']);
     assert.deepEqual(admission.request.openDemands, []);
-    assert.equal(admission.request.profileVersion, '0.4');
+    assert.equal(admission.request.profileVersion, '0.5');
     // The material is what the bench states: the species the user chose, form and nominal size from its "2×4 stud" control.
     assert.deepEqual(admission.request.facts['start-own.material'], { species: 'spf', form: 'board', nominalT: 2, nominalW: 4 });
     assert.equal(admission.request.requestType, 'USER_DEFINED_BOARD_V1');
@@ -266,4 +266,97 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.match(direct, /SYSTEM_ADMISSION_/);
     assert.deepEqual(await startOwnOldDoorCalls(page), ['start-own']);
   }, null, { [OLD_DOOR]: recordOldDoor });
+});
+
+// The datum, saw angle and spot demand are checked field by field, on the live route: each malformed case blocks in
+// admit() before the Store and names the fact's owner and the missing field; the complete bench revision still
+// reaches the Store. Only the fields the page already emits are checked. With spotting off, no spot is asked for
+// and none is sent.
+test('a blank datum field, a non-finite saw angle or a spot operation without its spot demand blocks before the Store', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { page, frame } = await openTile(browser, origin, 'Start your own');
+    await until(async () => bench(page) && await bench(page).$('#stb-confirm-store'), 'Start your own page');
+    await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
+    await chooseSpecies(page, frame, 'spf');
+
+    // The bench's revision as the page emits it: six datum keys and, with spotting on, the spot demand.
+    const bench0 = await live(frame, () => window.STBStartOwnLive.revision());
+    assert.deepEqual(Object.keys(bench0.facts['start-own.datum'].value).sort(),
+      ['cutPlane', 'datumCMethod', 'endIdentity', 'endRelation', 'lengthDatum', 'sawAngleDeg']);
+    assert.ok(bench0.facts['start-own.operations'].value.includes('SPOT_ON_LOCATION'));
+    assert.equal(bench0.facts['start-own.spot-demand'].value.required, true);
+
+    // Each case is one edit to the bench's own revision, made in the page and sent through the page's one inquiry
+    // path: set a field to a value, or delete it, or replace the whole fact value.
+    const ask = (factId, edit, tag) => live(frame, ({ factId, edit, tag }) => {
+      const r = window.STBStartOwnLive.revision();
+      if (edit.replace) r.facts[factId].value = edit.replace;
+      else if (edit.del) delete r.facts[factId].value[edit.del];
+      else r.facts[factId].value[edit.set[0]] = edit.set[1];
+      r.definitionRevisionId += '-' + tag;
+      return window.STBStartOwnLive.inquire(r);
+    }, { factId, edit, tag });
+    const CASES = [
+      // Datum: the five meaning fields are nonempty text. Owner RULE.
+      ...['cutPlane', 'endIdentity', 'endRelation', 'lengthDatum', 'datumCMethod'].flatMap(field => [
+        ['start-own.datum', { set: [field, ''] }, [field], `blank-${field}`],
+        ['start-own.datum', { set: [field, '  '] }, [field], `space-${field}`],
+        ['start-own.datum', { set: [field, null] }, [field], `null-${field}`],
+      ]),
+      // Saw angle: finite. Missing or non-finite blocks. Owner RULE.
+      ['start-own.datum', { del: 'sawAngleDeg' }, ['sawAngleDeg'], 'no-angle'],
+      ['start-own.datum', { set: ['sawAngleDeg', NaN] }, ['sawAngleDeg'], 'nan-angle'],
+      ['start-own.datum', { set: ['sawAngleDeg', Infinity] }, ['sawAngleDeg'], 'infinite-angle'],
+      ['start-own.datum', { set: ['sawAngleDeg', null] }, ['sawAngleDeg'], 'null-angle'],
+      // Spot demand: the operations include SPOT_ON_LOCATION, so it says required, its mode and a count above 0. Owner USER.
+      ['start-own.spot-demand', { replace: { required: false } }, ['required', 'mode', 'totalCount'], 'spot-off'],
+      ['start-own.spot-demand', { set: ['totalCount', 0] }, ['totalCount'], 'spot-zero'],
+      ['start-own.spot-demand', { del: 'totalCount' }, ['totalCount'], 'spot-no-count'],
+      ['start-own.spot-demand', { set: ['mode', ''] }, ['mode'], 'spot-no-mode'],
+      // The mode is exactly SPOT_ON_LOCATION: any other text, or none, blocks.
+      ['start-own.spot-demand', { set: ['mode', 'DRILL'] }, ['mode'], 'spot-mode-drill'],
+      ['start-own.spot-demand', { set: ['mode', 'spot_on_location'] }, ['mode'], 'spot-mode-lowercase'],
+      ['start-own.spot-demand', { set: ['mode', ' SPOT_ON_LOCATION '] }, ['mode'], 'spot-mode-padded'],
+      ['start-own.spot-demand', { del: 'mode' }, ['mode'], 'spot-mode-missing'],
+      ['start-own.spot-demand', { set: ['required', false] }, ['required'], 'spot-not-required'],
+    ];
+    const OWNERS = { 'start-own.datum': ['RULE', 'Cut and datum meaning'], 'start-own.spot-demand': ['USER', 'Center spot demand, on or off'] };
+    for (const [factId, edit, fields, tag] of CASES) {
+      const [owner, title] = OWNERS[factId];
+      const result = await ask(factId, edit, tag);
+      assert.equal(result.reachedStore, false, tag);
+      assert.deepEqual(result.blocking, [{ factId, owner, title, condition: 'INVALID_VALUE', fields }], tag);
+      assert.match(await bench(page).locator('#stb-before-send').textContent(), new RegExp('^NOT SENT TO THE STORE · MISSING: ' + title + ' · owner ' + owner), tag);
+      assert.deepEqual(await inertByStage(frame), { scan: false, configure: false, store: true, request: true, yard: true, record: true }, tag);
+    }
+    await page.waitForTimeout(300);
+    assert.equal(startOwnCalls(log).length, 0, 'no malformed revision reached the Store');
+
+    // The complete bench revision still reaches the Store, with its datum, angle and spot demand on the wire.
+    const complete = await live(frame, () => window.STBStartOwnLive.revision());
+    const sent = await live(frame, r => window.STBStartOwnLive.inquire(r), complete);
+    assert.equal(sent.reachedStore, true);
+    assert.equal(startOwnCalls(log).length, 1);
+    const line = startOwnCalls(log)[0].request.payload.line;
+    const datum = complete.facts['start-own.datum'].value;
+    for (const field of ['cutPlane', 'endIdentity', 'endRelation', 'lengthDatum', 'datumCMethod', 'sawAngleDeg']) {
+      assert.equal(line[field], datum[field], field);
+    }
+    assert.equal(line.spotDemand.required, true);
+    assert.equal(line.spotDemand.mode, 'SPOT_ON_LOCATION');
+    assert.equal(line.spotDemand.totalCount, complete.facts['start-own.spot-demand'].value.totalCount);
+
+    // Spotting off: no SPOT_ON_LOCATION and {required:false}, as the page states it off. Admitted, and no spot is sent.
+    const off = await live(frame, () => {
+      const r = window.STBStartOwnLive.revision();
+      r.facts['start-own.operations'].value = r.facts['start-own.operations'].value.filter(op => op !== 'SPOT_ON_LOCATION');
+      r.facts['start-own.spot-demand'].value = { required: false };
+      r.definitionRevisionId += '-spot-off';
+      return window.STBStartOwnLive.inquire(r);
+    });
+    assert.equal(off.reachedStore, true);
+    assert.equal(startOwnCalls(log).length, 2);
+    assert.equal(startOwnCalls(log)[1].request.payload.line.spotDemand, null, 'spotting off sends no spot');
+    assert.equal(startOwnCalls(log)[1].request.payload.line.requiredOps.includes('SPOT_ON_LOCATION'), false);
+  });
 });

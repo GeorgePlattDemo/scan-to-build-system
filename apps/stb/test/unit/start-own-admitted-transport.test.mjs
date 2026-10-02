@@ -147,6 +147,49 @@ test('a material missing a stated field blocks in admit() before the Store', asy
   assert.equal(wire.length, 0);
 });
 
+// The datum's five meaning fields, a finite saw angle, and the spot demand a spot operation needs: each malformed case
+// blocks in admit() and never reaches the bridge or the wire. A complete revision, spotting on or off, still does.
+test('a blank datum field, a non-finite saw angle or a spot operation without its spot demand blocks before the Store', async () => {
+  const { window, wire, oldDoor } = browser();
+  const SPOT = { required: true, mode: 'SPOT_ON_LOCATION', countPerPart: 1, locationRule: 'CENTERED_ON_PART',
+    acrossWidthRule: 'CENTERED_ON_WIDE_FACE', totalCount: 2 };
+  const edit = (id, change) => { const r = revision(id); change(r.facts); return r; };
+  const withSpotOp = (f, spot) => { f['start-own.operations'].value = ['CROSSCUT', 'SPOT_ON_LOCATION']; f['start-own.spot-demand'].value = spot; };
+  const CASES = [
+    ...['cutPlane', 'endIdentity', 'endRelation', 'lengthDatum', 'datumCMethod'].map(field =>
+      [edit('datum-' + field, f => { f['start-own.datum'].value[field] = ''; }), 'start-own.datum', 'RULE', [field]]),
+    [edit('angle-missing', f => { delete f['start-own.datum'].value.sawAngleDeg; }), 'start-own.datum', 'RULE', ['sawAngleDeg']],
+    [edit('angle-nan', f => { f['start-own.datum'].value.sawAngleDeg = NaN; }), 'start-own.datum', 'RULE', ['sawAngleDeg']],
+    [edit('angle-infinite', f => { f['start-own.datum'].value.sawAngleDeg = -Infinity; }), 'start-own.datum', 'RULE', ['sawAngleDeg']],
+    [edit('spot-off', f => withSpotOp(f, { required: false })), 'start-own.spot-demand', 'USER', ['required', 'mode', 'totalCount']],
+    [edit('spot-zero', f => withSpotOp(f, { ...SPOT, totalCount: 0 })), 'start-own.spot-demand', 'USER', ['totalCount']],
+    [edit('spot-no-mode', f => withSpotOp(f, { ...SPOT, mode: ' ' })), 'start-own.spot-demand', 'USER', ['mode']],
+    // The mode is exactly SPOT_ON_LOCATION; any other text blocks.
+    [edit('spot-mode-drill', f => withSpotOp(f, { ...SPOT, mode: 'DRILL' })), 'start-own.spot-demand', 'USER', ['mode']],
+    [edit('spot-mode-lowercase', f => withSpotOp(f, { ...SPOT, mode: 'spot_on_location' })), 'start-own.spot-demand', 'USER', ['mode']],
+  ];
+  for (const [blockedRevision, factId, owner, fields] of CASES) {
+    const admission = admit({ revision: blockedRevision, inquiryScope: SCOPE });
+    assert.equal(admission.admission.result, 'BLOCKED', blockedRevision.definitionRevisionId);
+    assert.deepEqual(admission.admission.blocking.map(({ factId, owner, condition, fields }) => ({ factId, owner, condition, fields })),
+      [{ factId, owner, condition: 'INVALID_VALUE', fields }], blockedRevision.definitionRevisionId);
+    assert.equal((await inquire(admission, ask(window))).reachedStore, false);
+  }
+  assert.equal(wire.length, 0, 'no malformed revision reached the Store');
+
+  // Complete, spotting on: admitted, and the spot demand travels.
+  const spotOn = edit('spot-on', f => withSpotOp(f, SPOT));
+  const on = await inquire(admit({ revision: spotOn, inquiryScope: SCOPE }), request =>
+    window.STBUserDefinedBoardRuntimeBridge.request(request, { ...demandFrom(request), declaredSpotCount: SPOT.totalCount }, {}));
+  assert.equal(on.reachedStore, true);
+  assert.equal(wire[0].payload.line.spotDemand.totalCount, 2);
+  // Complete, spotting off: admitted, and no spot is invented.
+  const off = await inquire(admit({ revision: revision('spot-off-complete'), inquiryScope: SCOPE }), ask(window));
+  assert.equal(off.reachedStore, true);
+  assert.equal(wire[1].payload.line.spotDemand, null);
+  assert.deepEqual(oldDoor, []);
+});
+
 test('the bridge refuses a request admit() did not admit, and a missing admitted material', async () => {
   const { window, wire } = browser();
   const bridge = window.STBUserDefinedBoardRuntimeBridge;
