@@ -2,7 +2,7 @@
 //
 // Executable half of docs/application/TILE-HOST-ADMISSION-CONTRACT.md. The shared tile host in
 // public-build/system-build-current.html loads the deployed copy (public-build/shared/, byte for byte).
-// Playhouse and Window Seat are on it; the other tiles keep their current paths until each is migrated.
+// Playhouse, Window Seat and Alcove are on it; the other tiles keep their current paths until each is migrated.
 //
 // Two interfaces, kept separate on purpose:
 //
@@ -161,16 +161,20 @@ export const ADMISSION_PROFILES = deepFreeze({
       },
     },
   },
+  // Alcove 0.2: what its page already sends the Store with every definition. The opening is the unit's width,
+  // height and depth as the page fits them to the measured room. Added: the pilot spot demand, on or off, which
+  // the page always states and the Store must evaluate or refuse (USER).
   alcove: {
-    version: '0.1',
+    version: '0.2',
     scopes: {
       ALCOVE_INSERT_V1: {
         requestType: 'ALCOVE_INSERT_V1',
         requires: [
-          req('alcove.opening', OWNER.USER, 'object', 'Measured alcove opening'),
+          req('alcove.opening', OWNER.USER, 'object', 'Unit width, height and depth fitted to the opening'),
           req('alcove.material', OWNER.PROJECT, 'object', 'Material demand'),
           req('alcove.board-requirements', OWNER.PROJECT, 'nonempty-list', 'Upright and shelf parent responsibilities'),
           req('alcove.component-programs', OWNER.PROJECT, 'nonempty-list', 'Component programs for every parent'),
+          req('alcove.spot-demand', OWNER.USER, 'object', 'Pilot spot demand, on or off'),
           req('alcove.hardware', OWNER.STORE, 'object', 'Pins-and-screws selection'),
         ],
       },

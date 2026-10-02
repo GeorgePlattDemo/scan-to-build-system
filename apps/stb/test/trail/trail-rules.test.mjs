@@ -39,13 +39,14 @@ const contract = sandbox.STBTrailContract;
 // and Intent at step 1. The ratchet then prevents that tile from drifting back.
 // playhouse:R2 left on system/playhouse-on-shared-host: the shared tile host draws Playhouse's nav labels
 // from the trail contract. playhouse:R1 stays: Playhouse still opens on Intent with no Idea intake.
+// alcove:R2 left on system/alcove-on-shared-host, for the same reason. alcove:R1 stays: Alcove still opens on
+// Intent with no Idea intake.
 const KNOWN_FAILING = new Set([
   'start-own:R1',
   'alcove:R1',
   'outdoor:R1',
   'playhouse:R1',
   'start-own:R2',
-  'alcove:R2',
   'outdoor:R2',
 ]);
 
