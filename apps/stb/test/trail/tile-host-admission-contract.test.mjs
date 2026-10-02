@@ -420,7 +420,7 @@ test('case 4: a malformed nested fact blocks before Store with the fact id and o
     .flatMap(s => s.requires).filter(r => r.form).map(r => r.id);
   assert.deepEqual([...new Set(formed)].sort(),
     ['alcove.board-requirements', 'alcove.component-programs', 'alcove.material', 'alcove.spot-demand',
-      'playhouse.opening', 'start-own.datum', 'start-own.material', 'start-own.parts', 'start-own.spot-demand',
+      'outdoor.cut-packages', 'playhouse.opening', 'start-own.datum', 'start-own.material', 'start-own.parts', 'start-own.spot-demand',
       'window-seat.added-knobs', 'window-seat.boards', 'window-seat.kept-asks']);
   const stated = { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 };
   const material = admit({ revision: facts('start-own', { 'start-own.material': ok(stated) }), inquiryScope: 'USER_DEFINED_BOARD_V1' });
