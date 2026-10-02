@@ -826,6 +826,20 @@
       "blobSha": "0c760d782e3af94a2c3aa9296b164b212a5a8532",
       "bytes": 127659,
       "reason": "Cache-buster for the deployed tile-host admission contract, whose admit() now rejects a malformed nested fact."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "answer-is-not-authority",
+      "blobSha": "40b93a45d93a924ae3845e825b360c718af13ebe",
+      "bytes": 251466,
+      "reason": "A Store answer authorizes nothing unless it is the fresh answer for this exact revision and inquiry scope: Alcove, Start your own and Playhouse gate Your call and the terms flow through isCurrentAnswer() against the revision on the page now. Cache-buster for the deployed contract."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "answer-is-not-authority",
+      "blobSha": "827989a05cf2a76454ff5753da7192a5b126f870",
+      "bytes": 127709,
+      "reason": "Cache-buster for the deployed tile-host admission contract, whose inquire() now stamps the inquiry scope; Alcove's live state names its answer's inquiry scope."
     }
   ],
   "retiredFiles": [

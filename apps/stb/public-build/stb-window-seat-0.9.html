@@ -1179,7 +1179,9 @@ function changed(){
   render();
   benchAsk();
 }
-const answerCurrent=()=>!!(S.answer&&!S.answer.stale);
+/* Current only when isCurrentAnswer() says so for the revision on screen now: fresh, this exact revision, this inquiry
+   scope. A saved, stale or superseded answer, or one for another revision or scope, authorizes nothing. */
+const answerCurrent=()=>!!(S.answer&&!S.answer.stale&&C&&C.isCurrentAnswer({admission:currentAdmission(),answer:S.answer}));
 /* The bench asks the Store by itself, as Alcove does: on arrival, and again whenever the definition changes while the
    bench is showing (a new wood included). No ask button. A change made while an ask is out is asked as soon as it
    returns. The price is the Store's; nothing is computed here, and a wood it can't supply comes back as its refusal. */
@@ -1217,7 +1219,7 @@ async function askStore(rv){
     S.answer={rev:rev.n,sig:req.sig,stale:false,definition:req.definition,record:req.record,
       evaluation:body.rawEvaluation,receipt:body.evaluationReceipt||body.rawEvaluation?.evaluationReceipt||null,
       requestId:body.requestId,storePin:body.storePin,demand:body.mappedCallInputs?.demand||null,body,sentAt,
-      authority:result.answer.authority,definitionRevisionId:result.answer.definitionRevisionId};
+      authority:result.answer.authority,definitionRevisionId:result.answer.definitionRevisionId,inquiryScope:result.answer.inquiryScope};
     /* The bench moved while the Store was answering: the answer belongs to the version that was sent. */
     if(buildRequest(buildDefinition()).sig!==req.sig){S.answer.stale=true;rev.n++}
   }catch(e){S.error=String(e&&e.message||e)}
@@ -1616,10 +1618,11 @@ function renderStoreDoctrine(host){
 const SECTIONS=['hero','intent','bench','store','request','yard','record'];
 const NAV_OF={intent:'scan',bench:'configure',store:'store',request:'request',yard:'yard',record:'record',audit:'record'};
 const FIRST_OF={scan:'intent',configure:'bench',store:'store',request:'request',yard:'yard',record:'record'};
-/* The fresh answer availableSteps() reads: current authority, for this exact revision, inside the envelope or not. */
+/* The fresh answer availableSteps() reads: current authority, for this exact revision and inquiry scope, inside the
+   envelope or not. */
 function freshAnswer(){
   const a=S.answer;if(!a||a.stale||S.asking||S.error)return null;
-  return {authority:a.authority,definitionRevisionId:a.definitionRevisionId,withinEnvelope:!!storeView()?.allOk};
+  return {authority:a.authority,definitionRevisionId:a.definitionRevisionId,inquiryScope:a.inquiryScope,withinEnvelope:!!storeView()?.allOk};
 }
 /* Intent, the bench, The Store answers and Your call from the contract's availableSteps(); We cut it and Pick up &
    build stay with the terms flow's gates, behind Your call. Before the contract loads: Intent and the bench only. */
@@ -1724,9 +1727,10 @@ window.STBWindowSeat=Object.freeze({version:'0.9',
   inquire:rv=>askStore(rv).then(a=>clone(a)),
   hostMessage:()=>C?hostMessage():null,
   state:()=>({view:S.view,section:S.section,rev:rev.n,asking:S.asking,error:S.error,answered:!!S.answer,current:answerCurrent(),terms:TERMS.state(),
+    answer:S.answer&&{authority:S.answer.authority,definitionRevisionId:S.answer.definitionRevisionId,inquiryScope:S.answer.inquiryScope,stale:!!S.answer.stale},
     admission:clone(S.blocked?.admission??currentAdmission()?.admission??null)})});
 /* The deployed contract copy, loaded once. Nothing is asked before it is here. */
-import('./shared/tile-host-admission-contract.mjs?v=4f7973a0').then(m=>{C=m;render();benchAsk()},
+import('./shared/tile-host-admission-contract.mjs?v=9375063a').then(m=>{C=m;render();benchAsk()},
   ()=>{document.documentElement.dataset.tileHostContract='MISSING'});
 })();
 </script>

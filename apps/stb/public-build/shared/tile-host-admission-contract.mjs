@@ -366,6 +366,7 @@ export function admit({ profiles = ADMISSION_PROFILES, revision, inquiryScope })
 
 // inquire(admission, ask) -> { reachedStore, answer }. `ask` is the transport to the live Store.
 // A blocked admission never calls it. An admitted one always does, whatever the values are.
+// The answer is stamped with the revision and the inquiry scope it answers, and nothing else may stand in for them.
 export async function inquire(admission, ask) {
   if (admission?.admission?.result !== ADMISSION_RESULT.ADMITTED) {
     return deepFreeze({ reachedStore: false, answer: null, blocking: plain(admission?.admission?.blocking ?? []) });
@@ -373,27 +374,37 @@ export async function inquire(admission, ask) {
   const answer = await ask(admission.request);
   return deepFreeze({
     reachedStore: true,
-    answer: { ...plain(answer), definitionRevisionId: admission.definitionRevisionId, authority: ANSWER_AUTHORITY.CURRENT },
+    answer: { ...plain(answer), definitionRevisionId: admission.definitionRevisionId, inquiryScope: admission.inquiryScope,
+      authority: ANSWER_AUTHORITY.CURRENT },
     blocking: [],
   });
+}
+
+// isCurrentAnswer({ admission, answer }): a Store answer authorizes nothing unless it is the fresh answer for this
+// exact revision and this inquiry scope. `admission` is the admission of the revision on screen now. True only when
+// that revision is admitted and the answer is CURRENT (inquire() made it; a saved answer is HISTORY) and names the
+// same definitionRevisionId and the same inquiryScope. An answer missing either stamp is not current.
+export function isCurrentAnswer({ admission, answer }) {
+  return admission?.admission?.result === ADMISSION_RESULT.ADMITTED
+    && isObject(answer)
+    && answer.authority === ANSWER_AUTHORITY.CURRENT
+    && text(answer.definitionRevisionId) && answer.definitionRevisionId === admission.definitionRevisionId
+    && text(answer.inquiryScope) && answer.inquiryScope === admission.inquiryScope;
 }
 
 // ---------------------------------------------------------------------------------------------
 // Available steps and reopening a job record
 
 // Recalculated, never restored. Intent and the bench are always usable. "The Store answers" is usable
-// when the current revision is admitted. "Your call" needs a fresh, current-authority answer for this
-// exact revision that is within the envelope; a refusal leaves it inert (rule 5). The later steps are
-// gated by stb-terms-flow.js and stay inert in this contract.
+// when the current revision is admitted. "Your call" needs an answer isCurrentAnswer() accepts for this
+// admission (fresh, this exact revision, this inquiry scope) that is within the envelope; a refusal leaves
+// it inert (rule 5). The later steps are gated by stb-terms-flow.js and stay inert in this contract.
 export function availableSteps({ trail, admission, freshAnswer = null }) {
   const [intent, bench, storeAnswers, yourCall] = trail.steps;
   const usable = [intent, bench];
   const admitted = admission?.admission?.result === ADMISSION_RESULT.ADMITTED;
   if (admitted) usable.push(storeAnswers);
-  if (admitted
-      && freshAnswer?.authority === ANSWER_AUTHORITY.CURRENT
-      && freshAnswer.definitionRevisionId === admission.definitionRevisionId
-      && freshAnswer.withinEnvelope === true) {
+  if (isCurrentAnswer({ admission, answer: freshAnswer }) && freshAnswer.withinEnvelope === true) {
     usable.push(yourCall);
   }
   return Object.freeze(usable);

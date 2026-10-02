@@ -55,7 +55,7 @@ Words the working app uses on screen or in its records. Where a term has an exac
 
 **Configurator** — The knobs made for one job at intent. A tool, not the program. There is no universal configurator.
 
-**The Store answers** (step 3) — A fresh answer from the live, independently hosted Store to the Store inquiry for the current job-definition revision. Never a cached answer and never a browser-side copy of Store logic. A saved Store answer is history, not current authority: it records what Store said about an earlier revision.
+**The Store answers** (step 3) — A fresh answer from the live, independently hosted Store to the Store inquiry for the current job-definition revision. Never a cached answer and never a browser-side copy of Store logic. A saved Store answer is history, not current authority: it records what Store said about an earlier revision. A Store answer authorizes nothing unless it is the fresh answer for this exact job-definition revision and this inquiry scope; an answer for another revision or another scope, or one carried over from before the definition changed, is not current authority.
 
 **Your call** (step 4) — You accept the Store's answer for this version, or go back and change it. In the demonstration, offer, acceptance and payment are simulated and labelled so.
 
