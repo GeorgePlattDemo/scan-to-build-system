@@ -325,3 +325,100 @@ test('the shared tile host loads the exact contract bytes', () => {
   const deployed = fs.readFileSync(new URL('../../public-build/shared/tile-host-admission-contract.mjs', import.meta.url));
   assert.deepEqual(deployed, canonical);
 });
+
+// Case 4: a nonempty object or list is not a complete fact. Where a profile names the fields its page emits, a
+// settled fact missing one blocks before Store with the fact id, its owner and the missing field paths. A complete
+// one still reaches Store, past any envelope. Only the four tightened facts are exercised; the rest stay presence only.
+test('case 4: a malformed nested fact blocks before Store with the fact id and owner; a complete one still reaches Store', async () => {
+  const facts = (tileId, overrides) => revision(tileId, `${tileId}-n`, { ...FIXTURES[tileId].facts, ...overrides });
+  const title = id => Object.values(ADMISSION_PROFILES).flatMap(p => Object.values(p.scopes)).flatMap(s => s.requires).find(r => r.id === id).title;
+  const BLOCKS = [
+    // Window Seat added knobs: an added knob stated as an object of nulls does not admit.
+    ['window-seat', 'window-seat.added-knobs', { front: null, xspot: { target: null, offset: null, place: null }, screws: null },
+      ['xspot.target', 'xspot.offset', 'xspot.place']],
+    // The extra spot needs a part, a distance and a placement.
+    ['window-seat', 'window-seat.added-knobs', { front: null, xspot: { target: 'C-SEAT', offset: '3 1/2', place: '' }, screws: null },
+      ['xspot.place']],
+    ['window-seat', 'window-seat.added-knobs', { front: null, xspot: { target: 'C-SEAT', offset: '0', place: 'center' }, screws: null },
+      ['xspot.offset']],
+    // Screws need a gauge, a length, a finish and a count.
+    ['window-seat', 'window-seat.added-knobs', { front: null, xspot: null, screws: { gauge: '#8', lengthIn: '1 1/4', finish: '', qty: '' } },
+      ['screws.finish', 'screws.qty']],
+    ['window-seat', 'window-seat.added-knobs', { front: null, xspot: null, screws: { gauge: '', lengthIn: 'long', finish: 'zinc', qty: '2.5' } },
+      ['screws.gauge', 'screws.lengthIn', 'screws.qty']],
+    // A knob the page always states, left out of the object, is missing.
+    ['window-seat', 'window-seat.added-knobs', { front: { board: true } }, ['xspot', 'screws']],
+    ['window-seat', 'window-seat.added-knobs', { front: { board: 'yes' }, xspot: null, screws: null }, ['front.board']],
+    // Kept asks: the page emits a count. Something that is not a count does not admit.
+    ['window-seat', 'window-seat.kept-asks', { kept: null }, ['kept']],
+    ['window-seat', 'window-seat.kept-asks', { other: 'Something else' }, ['kept']],
+    // Start your own: a part without an id, or without a length above 0.
+    ['start-own', 'start-own.parts', [{ partId: 'P1', lengthIn: 22 }, { lengthIn: 22 }], ['[1].partId']],
+    ['start-own', 'start-own.parts', [{ partId: 'P1', lengthIn: 0 }, { partId: ' ', lengthIn: -1 }], ['[0].lengthIn', '[1].partId', '[1].lengthIn']],
+    ['start-own', 'start-own.parts', [null], ['[0]']],
+    // Playhouse opening: width, straight height and rise present and above 0.
+    ['playhouse', 'playhouse.opening', { widthIn: 18, straightHeightIn: 0, riseIn: 9 }, ['straightHeightIn']],
+    ['playhouse', 'playhouse.opening', { widthIn: 18, straightHeightIn: 12 }, ['riseIn']],
+    ['playhouse', 'playhouse.opening', { widthIn: null, straightHeightIn: null, riseIn: null }, ['widthIn', 'straightHeightIn', 'riseIn']],
+  ];
+  for (const [tileId, factId, value, missing] of BLOCKS) {
+    const label = `${factId} ${JSON.stringify(value)}`;
+    const result = admit({ revision: facts(tileId, { [factId]: ok(value) }), inquiryScope: FIXTURES[tileId].scope });
+    assert.equal(result.admission.result, ADMISSION_RESULT.BLOCKED, label);
+    assert.equal(result.admission.reason, BLOCK_REASON.REQUIRED_FACT_UNSETTLED, label);
+    assert.deepEqual(result.admission.blocking,
+      [{ factId, owner: OWNER.USER, title: title(factId), condition: 'INVALID_VALUE', fields: missing }], label);
+    assert.equal(result.request, null, label);
+    const store = storeStub({ status: 'SHOULD_NOT_BE_ASKED' });
+    const sent = await inquire(result, store.ask);
+    assert.equal(sent.reachedStore, false, label);
+    assert.equal(store.calls.length, 0, `${label}: nothing reached Store`);
+    assert.deepEqual(sent.blocking.map(b => [b.factId, b.owner]), [[factId, OWNER.USER]], label);
+  }
+
+  const ADMITS = [
+    // Every knob off, as the page states it: nothing added, nothing missing.
+    ['window-seat', 'window-seat.added-knobs', { front: null, xspot: null, screws: null }],
+    // Every knob on and complete, in the forms the page emits (typed text for amounts).
+    ['window-seat', 'window-seat.added-knobs', {
+      front: { board: false },
+      xspot: { target: 'C-SEAT', offset: '3 1/2', place: 'center' },
+      screws: { gauge: '#8', lengthIn: '1 1/4', finish: 'zinc', qty: '24' },
+    }],
+    ['window-seat', 'window-seat.kept-asks', { kept: 0 }],
+    ['window-seat', 'window-seat.kept-asks', { kept: 5 }],
+    ['start-own', 'start-own.parts', [{ partId: 'PART-1', lengthIn: 4790, features: [] }]],
+    // No machine envelope: an opening no sheet could hold is complete, and the Store answers it.
+    ['playhouse', 'playhouse.opening', { widthIn: 400, straightHeightIn: 400, riseIn: 200 }],
+  ];
+  for (const [tileId, factId, value] of ADMITS) {
+    const label = `${factId} ${JSON.stringify(value)}`;
+    const result = admit({ revision: facts(tileId, { [factId]: ok(value) }), inquiryScope: FIXTURES[tileId].scope });
+    assert.equal(result.admission.result, ADMISSION_RESULT.ADMITTED, label);
+    const store = storeStub({ status: 'REFUSED', withinEnvelope: false });
+    const sent = await inquire(result, store.ask);
+    assert.equal(sent.reachedStore, true, label);
+    assert.equal(store.calls.length, 1, label);
+    assert.deepEqual(store.calls[0].facts[factId], value, `${label}: travels exactly as defined`);
+  }
+
+  // A STORE-owned fact still travels open, whatever its value.
+  const alcove = admit({ revision: facts('alcove', {}), inquiryScope: 'ALCOVE_INSERT_V1' });
+  assert.deepEqual(alcove.request.openDemands, ['alcove.hardware']);
+
+  // Only the facts whose fields the live page emits carry a form. Start your own's material stays presence only:
+  // its admitted value is {origin, stockClass}, not the bridge's wire constant, and that split stays recorded.
+  const formed = Object.entries(ADMISSION_PROFILES).flatMap(([, p]) => Object.values(p.scopes))
+    .flatMap(s => s.requires).filter(r => r.form).map(r => r.id);
+  assert.deepEqual([...new Set(formed)].sort(),
+    ['playhouse.opening', 'start-own.parts', 'window-seat.added-knobs', 'window-seat.kept-asks']);
+  const material = admit({ revision: facts('start-own', { 'start-own.material': ok({ origin: 'STORE_ZERO', stockClass: 'board' }) }), inquiryScope: 'USER_DEFINED_BOARD_V1' });
+  assert.equal(material.admission.result, ADMISSION_RESULT.ADMITTED);
+});
+
+test('the old path is still there and still runs after admit()', () => {
+  const oldPath = fs.readFileSync(new URL('../../public-build/stb-public-admission.mjs', import.meta.url), 'utf8');
+  const client = fs.readFileSync(new URL('../../public-build/stb-store-client.js', import.meta.url), 'utf8');
+  assert.match(oldPath, /export function admitPublicStoreRequest\(/);
+  assert.match(client, /admission\.admitPublicStoreRequest\(/);
+});

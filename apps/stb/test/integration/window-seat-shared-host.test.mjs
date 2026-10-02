@@ -187,3 +187,78 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     await until(async () => !steps(await navLine(frame)).find(b => b.stage === 'store').inert, 'The Store answers usable');
   });
 });
+
+// A nonempty object is not a complete fact. On the live page, through the deployed contract and the real pinned Store:
+// - Kept asks: the profile fact is a count, not a disposition. "Something else" with a blank description blocks before
+//   the Store and names its owner; once described it is admitted, stays on the job record and is not sent.
+// - Added knobs: an added extra spot stated as an object of nulls blocks in admit() itself, with the fact id, its
+//   owner and the missing fields, even when it is marked settled; a complete one is admitted and reaches the Store.
+test('a malformed nested fact blocks before the Store with its fact id and owner; a complete one still reaches the Store', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { frame, seat } = await openSeat(browser, origin);
+    await frame.locator('.recovery-nav [data-presentation-fork="Intent"]').click();
+    await until(async () => (await seat.evaluate(() => window.STBWindowSeat.state())).section === 'intent', 'intent');
+    const keptBefore = (await seat.evaluate(() => window.STBWindowSeat.revision())).facts['window-seat.kept-asks'].value.kept;
+    const set = (id, value, type = 'input') => seat.evaluate(([id, value, type]) => {
+      const e = document.getElementById(id); e.value = value; e.dispatchEvent(new Event(type, { bubbles: true }));
+    }, [id, value, type]);
+    const tick = (selector) => seat.evaluate(s => { const e = document.querySelector(s); e.checked = true; e.dispatchEvent(new Event('change', { bubbles: true })); }, selector);
+
+    // "Something else", kept with a blank description: blocking. Nothing reaches the Store.
+    const before = cutCalls(log);
+    await tick('#kept-asks [data-kept="other"]');
+    let result = await seat.evaluate(() => window.STBWindowSeat.inquire(window.STBWindowSeat.revision()));
+    assert.equal(result.admission.result, 'BLOCKED');
+    assert.deepEqual(result.admission.blocking.map(b => [b.factId, b.owner, b.condition]), [['window-seat.kept-asks', 'USER', 'STATUS_UNRESOLVED']]);
+    await frame.page().waitForTimeout(500);
+    assert.equal(cutCalls(log), before, 'a blank "Something else" never reaches the Store');
+
+    // Described: admitted, carried as a count, kept on the job record and excluded from what is sent.
+    await set('other-text', 'Leave the offcuts in the bundle');
+    const rev = await seat.evaluate(() => window.STBWindowSeat.revision());
+    assert.deepEqual(rev.facts['window-seat.kept-asks'], { value: { kept: keptBefore + 1 }, status: 'CONFIRMED' });
+    assert.ok((await seat.evaluate(() => window.STBWindowSeat.record())).keptNotSent.includes('Something else: Leave the offcuts in the bundle'));
+    assert.match(await seat.locator('#kept-asks [data-kept="other"]').locator('xpath=..').innerText(), /KEPT · NOT SENT/);
+    result = await seat.evaluate(() => window.STBWindowSeat.inquire(window.STBWindowSeat.revision()));
+    assert.equal(result.admission.result, 'ADMITTED');
+    await until(() => cutCalls(log) === before + 1, 'described ask: the revision reaches the Store');
+    const keptSent = JSON.stringify(log.filter(e => e.request.projectId === 'window-seat').pop().request);
+    assert.equal(keptSent.includes('Leave the offcuts'), false, 'the described ask is not sent');
+    assert.equal(keptSent.includes('Something else'), false, 'the described ask is not sent');
+
+    // Add the extra spot by hand. The page states it with its fields empty, and holds it open.
+    await tick('#add-knobs [data-add="xspot"]');
+    const opened = await seat.evaluate(() => window.STBWindowSeat.admission());
+    assert.deepEqual(opened.admission.blocking.map(b => [b.factId, b.owner, b.condition]), [['window-seat.added-knobs', 'USER', 'STATUS_UNRESOLVED']]);
+
+    // The same knob as an object of nulls, marked settled: admit() itself refuses it and names the missing fields.
+    const calls = cutCalls(log);
+    result = await seat.evaluate(() => {
+      const rv = window.STBWindowSeat.revision();
+      rv.facts['window-seat.added-knobs'] = { value: { ...rv.facts['window-seat.added-knobs'].value, xspot: { target: null, offset: null, place: null } }, status: 'CONFIRMED' };
+      return window.STBWindowSeat.inquire(rv);
+    });
+    assert.equal(result.admission.result, 'BLOCKED');
+    assert.equal(result.admission.reason, 'REQUIRED_FACT_UNSETTLED');
+    assert.deepEqual(result.admission.blocking, [{ factId: 'window-seat.added-knobs', owner: 'USER', title: 'Every knob added by hand, with what it needs',
+      condition: 'INVALID_VALUE', fields: ['xspot.target', 'xspot.offset', 'xspot.place'] }]);
+    assert.equal(result.request, null);
+    await frame.page().waitForTimeout(500);
+    assert.equal(cutCalls(log), calls, 'a malformed nested fact never reaches the Store');
+
+    // Give it a part, a distance and a placement: complete, admitted, and it reaches the Store with the spot on it.
+    const target = await seat.evaluate(() => window.STBWindowSeat.definition().feats[0].id);
+    await set('xs-target', target, 'change');
+    await set('xs-off', '3');
+    await set('xs-place', 'CENTER', 'change');
+    const complete = await seat.evaluate(() => window.STBWindowSeat.revision());
+    assert.deepEqual(complete.facts['window-seat.added-knobs'].value.xspot, { target, offset: '3', place: 'CENTER' });
+    result = await seat.evaluate(() => window.STBWindowSeat.inquire(window.STBWindowSeat.revision()));
+    assert.equal(result.admission.result, 'ADMITTED');
+    assert.deepEqual(result.request.facts['window-seat.added-knobs'].xspot, { target, offset: '3', place: 'CENTER' });
+    await until(() => cutCalls(log) === calls + 1, 'complete nested fact reaches the Store');
+    const sent = log.filter(e => e.request.projectId === 'window-seat').pop().request;
+    assert.deepEqual(sent.payload.definition, await seat.evaluate(() => window.STBWindowSeat.request()), 'the bridge sends what it sent before: the page request');
+    assert.ok(JSON.stringify(sent.payload.definition).includes('-X1'), 'the extra spot is on the wire');
+  });
+});
