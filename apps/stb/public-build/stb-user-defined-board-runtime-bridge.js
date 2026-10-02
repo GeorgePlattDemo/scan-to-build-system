@@ -3,10 +3,13 @@
 
   // User 1's request shape only. Transport, the Store address (stb-store-runtime.json), the Store version
   // and every freshness check live in the shared stb-store-client.js.
+  // It sends only a request admit() admitted (tile-host-admission-contract.mjs), and is called only as the
+  // transport inside inquire(): a blocked revision never reaches it.
   const REQUEST_TYPE = 'USER_DEFINED_BOARD_V1';
   const SCOPE = 'USER_DEFINED_BOARD_V1';
   const DEFINITION_KIND = 'user_defined_board.v1';
   const RULE_VERSION = '0.1';
+  const ADMITTED_INTERFACE = 'STB-DEFINITION-STORE-0.1';
 
   function canonicalInchString(value){
     if(typeof value !== 'number' || !Number.isFinite(value)) {
@@ -97,7 +100,18 @@
     });
   }
 
-  async function request(demand, options){
+  // The demand must carry exactly the admitted request's work: its parts, operations and workpiece length.
+  function sameWork(admitted, demand){
+    const facts = admitted.facts || {};
+    return !!demand && typeof demand === 'object'
+      && JSON.stringify(demand.parts) === JSON.stringify(facts['start-own.parts'])
+      && JSON.stringify(demand.requiredOps) === JSON.stringify(facts['start-own.operations'])
+      && Number(demand.definedWorkpieceLengthIn) === Number(facts['start-own.workpiece-length']);
+  }
+
+  async function request(admitted, demand, options){
+    if(!admitted || admitted.interface !== ADMITTED_INTERFACE || admitted.tileId !== 'start-own' || admitted.requestType !== REQUEST_TYPE) throw new Error('START_OWN_ADMITTED_REQUEST_REQUIRED');
+    if(!sameWork(admitted, demand)) throw new Error('START_OWN_DEMAND_NOT_THE_ADMITTED_REQUEST');
     options = options || {};
     const client = root.STBStoreClient;
     if(!client) throw new Error('STORE_CLIENT_UNAVAILABLE');
@@ -106,7 +120,7 @@
       projectId:'start-own',
       requestType:REQUEST_TYPE,
       requestId:options.requestId,
-      candidateRevisionId:String(options.candidateRevisionId || demand.configurationVersion || crypto.randomUUID()),
+      candidateRevisionId:admitted.definitionRevisionId,
       payload,
       signatureBody:signatureBody(payload),
       timeoutMs:20000
@@ -114,7 +128,7 @@
   }
 
   root.STBUserDefinedBoardRuntimeBridge = Object.freeze({
-    version:'0.2',
+    version:'0.3',
     requestType:REQUEST_TYPE,
     payloadFromDemand,
     request

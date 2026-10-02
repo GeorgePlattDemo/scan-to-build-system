@@ -763,6 +763,41 @@
       "blobSha": "ff9e818c342e9fa33e83e3d92ba4c613d6776f14",
       "bytes": 80858,
       "reason": "Outdoor speaks STB-TILE-HOST-0.1 to the shared host and loads the deployed tile-host admission contract and the trail contract. Every Store inquiry is one job-definition revision through admit() then inquire(), in the outdoor profile's two scopes: OUTDOOR_OPTIONS for the From and option prices, OUTDOOR_COMMITTED for this exact table (the only answer the terms flow takes). Work tried on the bench that a blocking condition holds open travels unresolved, so a blocked revision is not sent and the page names the fact and its owner; a complete revision reaches the Store whatever its values. Steps come from availableSteps() and the terms flow's gates. Visible pages are unchanged."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "start-own-on-shared-host",
+      "blobSha": "64e3a74f63881b04d9bb9b1928e7cd819cf6b99a",
+      "bytes": 250265,
+      "reason": "Start your own on the shared tile host: Start your own registers with the host, and the host draws its one nav line from the STB-TILE-HOST-0.1 message its tile code builds (startOwnHostMessage) and the trail contract (contract labels, inert steps disabled, one current, following the shown page and, on the Start your own page, its Intent or bench screen). Asked for Intent or the bench, the host's go hook switches the page's screen. The bench's definition is one job-definition revision, admitted on every change; confirming asks the Store through admit() then inquire(), with the User 1 bridge as the transport inside inquire() and the Store demand built only from the admitted request. A missing profile fact blocks before the Store and the bench names the fact and its owner. The old Start your own shell path (applyStartOwnNavState, wireStartOwnJourneyNav, canOpenStartOwnSimulationStage, syncJourneyNav, START_OWN_NAV_LABELS, the STB_START_OWN_CONFIRMED, STB_PROOF_OPEN_JOB1 and STB_PROJECT_DEFINITION_CHANGED listeners, and the Start your own branches in selectJourneyProject, showMappedProjectStage, the proof return and proof step handlers, syncProofSimulationUI and the Shared Home tile handler) is gone. In-page proof steps open through the same gate as the nav. Cache-busters for the contract, the User 1 bridge, the Outdoor page and the front door."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "start-own-on-shared-host",
+      "blobSha": "0b8d9cd6d587f62258a00e4df2daa9de1b1c7a81",
+      "bytes": 127659,
+      "reason": "Cache-buster for the tile-host admission contract after the start-own admission profile 0.2."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "start-own-on-shared-host",
+      "blobSha": "34dcd4eda4d1be01fa42ac74fcc74e22312d4313",
+      "bytes": 39662,
+      "reason": "Cache-buster for the base page."
+    },
+    {
+      "path": "stb-user-defined-board-runtime-bridge.js",
+      "pass": "start-own-on-shared-host",
+      "blobSha": "4900acbf05c646c07ff4885ed81047f3c9b57f36",
+      "bytes": 5450,
+      "reason": "The User 1 bridge sends only a request admit() admitted, as the transport inside inquire(): its demand must carry exactly the admitted parts, operations and workpiece length, and its candidate revision is the admitted revision."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "start-own-on-shared-host",
+      "blobSha": "5a5e8a4d109e3ef3a2dac6795b30562b6307fafc",
+      "bytes": 80858,
+      "reason": "Cache-buster for the tile-host admission contract after the start-own admission profile 0.2. Nothing else on the Outdoor page changes."
     }
   ],
   "retiredFiles": [

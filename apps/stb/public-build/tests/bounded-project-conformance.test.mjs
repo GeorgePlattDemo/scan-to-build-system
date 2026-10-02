@@ -58,7 +58,7 @@ assert.match(shell,/review:'store'/);
 assert.match(shell,/request:'request'/);
 assert.match(shell,/terms:'yard'/);
 assert.match(shell,/recap:'record'/);
-assert.match(shell,/request:'4 · Your call'/);
+assert.match(shell,/button\.textContent = index === undefined \? button\.dataset\.defaultLabel : `\$\{index \+ 1\} · \$\{trailContract\.steps\[index\]\}`/);
 assert.match(shell,/Confirmed version sent to Store Zero\./);
 
 // Every live Store answer page carries the one shared Store Zero text (never a local copy).

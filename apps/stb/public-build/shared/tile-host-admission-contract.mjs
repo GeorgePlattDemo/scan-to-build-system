@@ -2,7 +2,7 @@
 //
 // Executable half of docs/application/TILE-HOST-ADMISSION-CONTRACT.md. The shared tile host in
 // public-build/system-build-current.html loads the deployed copy (public-build/shared/, byte for byte).
-// Playhouse, Window Seat, Alcove and Outdoor are on it; the other tiles keep their current paths until each is migrated.
+// Start your own, Playhouse, Window Seat, Alcove and Outdoor are on it.
 //
 // Two interfaces, kept separate on purpose:
 //
@@ -146,8 +146,10 @@ const req = (id, owner, kind, title) => Object.freeze({ id, owner, kind, title }
 // admission code does not branch on tile identity. Profiles here are first declarations for the
 // contract tests; they are not yet a port of every row in public-build/stb-public-admission.mjs.
 export const ADMISSION_PROFILES = deepFreeze({
+  // Start your own 0.2: what its bench already sends the Store with every confirmed definition. Added: the center
+  // spot demand, on or off, which the bench always states and the Store must evaluate or refuse (USER).
   'start-own': {
-    version: '0.1',
+    version: '0.2',
     scopes: {
       USER_DEFINED_BOARD_V1: {
         requestType: 'USER_DEFINED_BOARD_V1',
@@ -157,6 +159,7 @@ export const ADMISSION_PROFILES = deepFreeze({
           req('start-own.parts', OWNER.USER, 'nonempty-list', 'Identified parts with real lengths'),
           req('start-own.operations', OWNER.PROJECT, 'nonempty-list', 'Declared operations'),
           req('start-own.datum', OWNER.RULE, 'object', 'Cut and datum meaning'),
+          req('start-own.spot-demand', OWNER.USER, 'object', 'Center spot demand, on or off'),
         ],
       },
     },
