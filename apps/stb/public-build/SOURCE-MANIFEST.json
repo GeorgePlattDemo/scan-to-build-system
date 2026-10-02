@@ -812,6 +812,20 @@
       "blobSha": "c54c5bb8bbe3b4da3da8973223100d002ecec731",
       "bytes": 90567,
       "reason": "Idea is not a step: step-1 labels that read \"Your idea\" / \"YOUR IDEA\" now read \"Intent\" / \"INTENT\". Labels only; no page, nav path or Store call moves."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "admission-nested-facts",
+      "blobSha": "e03e0de00e41665f544a4c5974a27a48431cdafd",
+      "bytes": 250265,
+      "reason": "Cache-buster for the deployed tile-host admission contract, whose admit() now rejects a malformed nested fact."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "admission-nested-facts",
+      "blobSha": "0c760d782e3af94a2c3aa9296b164b212a5a8532",
+      "bytes": 127659,
+      "reason": "Cache-buster for the deployed tile-host admission contract, whose admit() now rejects a malformed nested fact."
     }
   ],
   "retiredFiles": [

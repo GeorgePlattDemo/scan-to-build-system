@@ -140,7 +140,49 @@ const KIND = Object.freeze({
   'nonempty-list': value => Array.isArray(value) && value.length > 0,
   object: value => isObject(value) && Object.keys(value).length > 0,
 });
-const req = (id, owner, kind, title) => Object.freeze({ id, owner, kind, title });
+const req = (id, owner, kind, title, form) => Object.freeze(form ? { id, owner, kind, title, form } : { id, owner, kind, title });
+
+// A nonempty object or list is not a complete fact. Where a profile names the fields its page emits, `form`
+// checks them one by one: `fields(...)` names fields that must be present, `each(...)` applies to every item of a
+// list, and `nullable(...)` is a field the page states as null when it is off. A form names only fields the
+// live page already emits; it never adds a machine envelope or any other Store capability check.
+const fields = spec => Object.freeze({ fields: Object.freeze(spec) });
+const each = spec => Object.freeze({ each: spec });
+const nullable = spec => Object.freeze({ nullable: spec });
+// An amount the person typed: a number, or text written as `3`, `3.5`, `3/4` or `3 1/2`.
+function amount(value) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value !== 'string' || !value.trim()) return null;
+  const s = value.trim();
+  let m = s.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+  if (m) return Number(m[1]) + Number(m[2]) / Number(m[3]);
+  m = s.match(/^(\d+)\/(\d+)$/);
+  if (m) return Number(m[1]) / Number(m[2]);
+  const v = Number(s);
+  return Number.isFinite(v) ? v : null;
+}
+const FIELD = Object.freeze({
+  text: value => text(value),
+  boolean: value => typeof value === 'boolean',
+  'positive-number': value => Number.isFinite(value) && value > 0,
+  count: value => Number.isInteger(value) && value >= 0,
+  'positive-amount': value => amount(value) > 0,
+  'positive-count': value => Number.isInteger(amount(value)) && amount(value) > 0,
+});
+// The field paths a value is missing against its form, in order. Empty when the value is complete.
+function formGaps(form, value, at = '') {
+  if (typeof form === 'string') return FIELD[form](value) ? [] : [at];
+  if (form.nullable) return value === null ? [] : formGaps(form.nullable, value, at);
+  if (form.each) {
+    if (!Array.isArray(value)) return [at];
+    return value.flatMap((item, i) => formGaps(form.each, item, `${at}[${i}]`));
+  }
+  if (!isObject(value)) return [at];
+  return Object.entries(form.fields).flatMap(([key, spec]) => {
+    const path = at ? `${at}.${key}` : key;
+    return Object.prototype.hasOwnProperty.call(value, key) ? formGaps(spec, value[key], path) : [path];
+  });
+}
 
 // Admission profiles, one per tile declared in the trail contract. A registry keyed by tile id: shared
 // admission code does not branch on tile identity. Profiles here are first declarations for the
@@ -156,7 +198,8 @@ export const ADMISSION_PROFILES = deepFreeze({
         requires: [
           req('start-own.material', OWNER.PROJECT, 'object', 'Material demand'),
           req('start-own.workpiece-length', OWNER.USER, 'positive-number', 'Defined workpiece length (in)'),
-          req('start-own.parts', OWNER.USER, 'nonempty-list', 'Identified parts with real lengths'),
+          req('start-own.parts', OWNER.USER, 'nonempty-list', 'Identified parts with real lengths',
+            each(fields({ partId: 'text', lengthIn: 'positive-number' }))),
           req('start-own.operations', OWNER.PROJECT, 'nonempty-list', 'Declared operations'),
           req('start-own.datum', OWNER.RULE, 'object', 'Cut and datum meaning'),
           req('start-own.spot-demand', OWNER.USER, 'object', 'Center spot demand, on or off'),
@@ -195,8 +238,13 @@ export const ADMISSION_PROFILES = deepFreeze({
           req('window-seat.height', OWNER.USER, 'positive-number', 'Overall height H (in)'),
           req('window-seat.depth', OWNER.USER, 'positive-number', 'Depth (in)'),
           req('window-seat.boards', OWNER.PROJECT, 'nonempty-list', 'Every defined board with real length and width'),
-          req('window-seat.added-knobs', OWNER.USER, 'object', 'Every knob added by hand, with what it needs'),
-          req('window-seat.kept-asks', OWNER.USER, 'object', 'Every ask kept on the job, described'),
+          req('window-seat.added-knobs', OWNER.USER, 'object', 'Every knob added by hand, with what it needs', fields({
+            front: nullable(fields({ board: 'boolean' })),
+            xspot: nullable(fields({ target: 'text', offset: 'positive-amount', place: 'text' })),
+            screws: nullable(fields({ gauge: 'text', lengthIn: 'positive-amount', finish: 'text', qty: 'positive-count' })),
+          })),
+          // The page emits only the count of kept asks. A count is not a disposition; dispositions stay on the page.
+          req('window-seat.kept-asks', OWNER.USER, 'object', 'Every ask kept on the job, described', fields({ kept: 'count' })),
         ],
       },
     },
@@ -231,7 +279,8 @@ export const ADMISSION_PROFILES = deepFreeze({
         requestType: 'SHEET_PACKAGE_V1',
         requires: [
           req('playhouse.sheet', OWNER.PROJECT, 'object', 'Real sheet dimensions'),
-          req('playhouse.opening', OWNER.USER, 'object', 'Complete arched-opening geometry'),
+          req('playhouse.opening', OWNER.USER, 'object', 'Complete arched-opening geometry',
+            fields({ widthIn: 'positive-number', straightHeightIn: 'positive-number', riseIn: 'positive-number' })),
         ],
       },
     },
@@ -278,16 +327,20 @@ export function admit({ profiles = ADMISSION_PROFILES, revision, inquiryScope })
   const openDemands = [];
   for (const requirement of scope.requires) {
     const fact = Object.prototype.hasOwnProperty.call(facts, requirement.id) ? facts[requirement.id] : undefined;
+    const gaps = isObject(fact) && SETTLED.has(fact.status) && KIND[requirement.kind](fact.value) && requirement.form
+      ? formGaps(requirement.form, fact.value) : [];
     const condition = !isObject(fact) ? 'MISSING'
       : !SETTLED.has(fact.status) ? `STATUS_${fact.status ?? 'NONE'}`
-      : !KIND[requirement.kind](fact.value) ? 'INVALID_VALUE'
+      : !KIND[requirement.kind](fact.value) || gaps.length ? 'INVALID_VALUE'
       : null;
     if (condition === null) {
       sent[requirement.id] = plain(fact.value);
     } else if (requirement.owner === OWNER.STORE) {
       openDemands.push(requirement.id);
     } else {
-      blocking.push({ factId: requirement.id, owner: requirement.owner, title: requirement.title, condition });
+      // A malformed nested fact names the fields it is missing, as well as the fact and its owner.
+      blocking.push({ factId: requirement.id, owner: requirement.owner, title: requirement.title, condition,
+        ...(gaps.length ? { fields: gaps } : {}) });
     }
   }
   if (blocking.length) return blocked(revision, inquiryScope, BLOCK_REASON.REQUIRED_FACT_UNSETTLED, blocking);
