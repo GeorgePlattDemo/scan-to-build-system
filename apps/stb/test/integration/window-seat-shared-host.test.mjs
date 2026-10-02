@@ -8,6 +8,10 @@
 // - The old Window Seat shell path is gone: no seatGo, seatNavButton, applySeatNavState or STB_SEAT_* messages.
 // - A Window Seat inquiry has one admission decision, admit(): its transport is sendAdmittedJob, and it never calls
 //   admitPublicStoreRequest.
+// - Boards: every board has an id and a length and width above 0; a missing id or a zero blocks before the Store in
+//   admit() and names the owner. Sent work matches admitted work: an admitted board that is not sent, or a sent board
+//   that was not admitted, stops in the transport before the Store. Added screws travel with the gauge, length,
+//   finish and count admitted.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -137,7 +141,7 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.equal(admission.admission.result, 'ADMITTED');
     assert.deepEqual(Object.keys(admission.request.facts).sort(),
       ['window-seat.added-knobs', 'window-seat.boards', 'window-seat.depth', 'window-seat.height', 'window-seat.kept-asks', 'window-seat.width']);
-    assert.equal(admission.request.profileVersion, '0.2');
+    assert.equal(admission.request.profileVersion, '0.3');
     assert.equal(admission.request.requestType, 'CUT_PACKAGE_V1');
 
     // Each declared fact left out blocks before the Store and names its owner.
@@ -263,6 +267,139 @@ test('a malformed nested fact blocks before the Store with its fact id and owner
     const sent = log.filter(e => e.request.projectId === 'window-seat').pop().request;
     assert.deepEqual(sent.payload.definition, await seat.evaluate(() => window.STBWindowSeat.request()), 'the bridge sends what it sent before: the page request');
     assert.ok(JSON.stringify(sent.payload.definition).includes('-X1'), 'the extra spot is on the wire');
+  });
+});
+
+// On the live page, through the deployed contract and the real pinned Store:
+// - A board without an id, or with a zero length or width, blocks in admit() before the Store: the fact, its owner
+//   (PROJECT) and the board's field paths are named, and the page shows it as not sent.
+// - Sent work matches admitted work. A revision admitted with a board the page's request does not carry, or without a
+//   board the request carries, stops in the transport before the Store (ADMITTED_BOARD_NOT_SENT, SENT_BOARD_NOT_ADMITTED).
+// - Added screws travel with the gauge, length, finish and count admitted; any other admitted screws stop in the
+//   transport (ADMITTED_SCREWS_NOT_SENT). Kept asks still travel only as a count and are not sent.
+// - A complete revision still reaches the Store, before and after.
+test('a bad board blocks before the Store; sent work must match admitted work on the live route; a complete revision still reaches the Store', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { frame, seat, errors } = await openSeat(browser, origin);
+    await frame.locator('.recovery-nav [data-presentation-fork="Intent"]').click();
+    await until(async () => (await seat.evaluate(() => window.STBWindowSeat.state())).section === 'intent', 'intent');
+    const idle = () => until(async () => { const s = await seat.evaluate(() => window.STBWindowSeat.state()); return !s.asking ? s : null; }, 'idle');
+    const lastSent = () => log.filter(e => e.request.projectId === 'window-seat').pop().request;
+    const set = (id, value, type = 'input') => seat.evaluate(([id, value, type]) => {
+      const e = document.getElementById(id); e.value = value; e.dispatchEvent(new Event(type, { bubbles: true }));
+    }, [id, value, type]);
+    const tick = selector => seat.evaluate(s => { const e = document.querySelector(s); e.checked = true; e.dispatchEvent(new Event('change', { bubbles: true })); }, selector);
+    // Inquire about the page's own revision, changed by `edit` (a function body over `rv`).
+    const inquireWith = edit => seat.evaluate(body => {
+      const rv = window.STBWindowSeat.revision();
+      new Function('rv', body)(rv);
+      return window.STBWindowSeat.inquire(rv);
+    }, edit);
+
+    await idle();
+    // A bad board blocks in admit() before the Store and names its owner and the board's fields.
+    let calls = cutCalls(log);
+    let result;
+    for (const [edit, fields] of [
+      ["rv.facts['window-seat.boards'].value[0].id = ''", ['[0].id']],
+      ["delete rv.facts['window-seat.boards'].value[1].id", ['[1].id']],
+      ["rv.facts['window-seat.boards'].value[1].len = 0", ['[1].len']],
+      ["rv.facts['window-seat.boards'].value[0].w = 0", ['[0].w']],
+    ]) {
+      result = await inquireWith(edit);
+      assert.equal(result.admission.result, 'BLOCKED', edit);
+      assert.equal(result.admission.reason, 'REQUIRED_FACT_UNSETTLED', edit);
+      assert.deepEqual(result.admission.blocking, [{ factId: 'window-seat.boards', owner: 'PROJECT',
+        title: 'Every defined board with real length and width', condition: 'INVALID_VALUE', fields }], edit);
+      assert.equal(result.request, null, edit);
+      assert.deepEqual((await seat.evaluate(() => window.STBWindowSeat.state())).admission, result.admission, edit);
+      assert.match(await seat.locator('#store-panel').innerText(), /NOT SENT TO THE STORE[\s\S]*Every defined board with real length and width · owner PROJECT/, edit);
+    }
+    await frame.page().waitForTimeout(500);
+    assert.equal(cutCalls(log), calls, 'a bad board never reaches the Store');
+
+    // The page emits every board as {id, len, w}, each real. A complete revision is admitted and reaches the Store.
+    const boards = (await seat.evaluate(() => window.STBWindowSeat.revision())).facts['window-seat.boards'].value;
+    assert.ok(boards.length > 1);
+    for (const board of boards) {
+      assert.deepEqual(Object.keys(board).sort(), ['id', 'len', 'w']);
+      assert.ok(typeof board.id === 'string' && board.id.trim() && board.len > 0 && board.w > 0, JSON.stringify(board));
+    }
+    calls = cutCalls(log);
+    result = await inquireWith('');
+    assert.equal(result.admission.result, 'ADMITTED');
+    await until(() => cutCalls(log) === calls + 1, 'complete revision reaches the Store');
+    let state = await idle();
+    assert.equal(state.error, null);
+    assert.deepEqual(lastSent().payload.definition, await seat.evaluate(() => window.STBWindowSeat.request()));
+
+    // Sent work matches admitted work. Each revision here is admitted; the transport stops it before the Store.
+    calls = cutCalls(log);
+    for (const [edit, code] of [
+      // An admitted board that the page's request does not carry.
+      ["rv.facts['window-seat.boards'].value.push({ id: 'GHOST-BOARD', len: 24, w: 7.25 })", 'ADMITTED_BOARD_NOT_SENT'],
+      // A board the page's request carries that was not admitted.
+      ["rv.facts['window-seat.boards'].value.pop()", 'SENT_BOARD_NOT_ADMITTED'],
+      // The same board admitted twice: one board sent, so the second is admitted and not sent.
+      ["rv.facts['window-seat.boards'].value.push({ ...rv.facts['window-seat.boards'].value[0] })", 'ADMITTED_BOARD_NOT_SENT'],
+      // An admitted board renamed: the admitted name is not sent, and the sent one was not admitted.
+      ["rv.facts['window-seat.boards'].value[0].id += '-RENAMED'", 'ADMITTED_BOARD_NOT_SENT'],
+      // Screws admitted that the page does not send.
+      ["rv.facts['window-seat.added-knobs'].value.screws = { gauge: '#8', lengthIn: '1 1/4', finish: 'coated', qty: '24' }", 'ADMITTED_SCREWS_NOT_SENT'],
+    ]) {
+      result = await inquireWith(edit);
+      assert.equal(result.admission.result, 'ADMITTED', edit);
+      state = await idle();
+      assert.equal(state.error, code, edit);
+    }
+    await frame.page().waitForTimeout(500);
+    assert.equal(cutCalls(log), calls, 'work that does not match its admission never reaches the Store');
+
+    // Add screws by hand with a gauge, a length, a finish and a count: admitted with all four, and they reach the
+    // Store with the same four. Kept asks still travel only as a count.
+    await tick('#add-knobs [data-add="screws"]');
+    await set('sc-gauge', '#8', 'change');
+    await set('sc-len', '1 1/4');
+    await set('sc-finish', 'coated', 'change');
+    await set('sc-qty', '24');
+    await idle();
+    const rev = await seat.evaluate(() => window.STBWindowSeat.revision());
+    assert.deepEqual(rev.facts['window-seat.added-knobs'].value.screws, { gauge: '#8', lengthIn: '1 1/4', finish: 'coated', qty: '24' });
+    assert.deepEqual(Object.keys(rev.facts['window-seat.kept-asks'].value), ['kept']);
+    calls = cutCalls(log);
+    result = await inquireWith('');
+    assert.equal(result.admission.result, 'ADMITTED');
+    await until(() => cutCalls(log) === calls + 1, 'screws reach the Store');
+    state = await idle();
+    assert.equal(state.error, null);
+    const line = lastSent().payload.definition.itemLines.find(l => l.lineId === 'SCREWS');
+    assert.deepEqual([line.requirement.gauge, line.requirement.lengthIn, line.requirement.finish, line.qty], ['#8', 1.25, 'coated', 24]);
+
+    // Admitted screws that differ from the ones sent, in any of the four, or admitted as not added, stop before the Store.
+    calls = cutCalls(log);
+    for (const edit of [
+      "rv.facts['window-seat.added-knobs'].value.screws.gauge = '#10'",
+      "rv.facts['window-seat.added-knobs'].value.screws.lengthIn = '1 1/2'",
+      "rv.facts['window-seat.added-knobs'].value.screws.finish = 'stainless'",
+      "rv.facts['window-seat.added-knobs'].value.screws.qty = '30'",
+      "rv.facts['window-seat.added-knobs'].value.screws = null",
+    ]) {
+      result = await inquireWith(edit);
+      assert.equal(result.admission.result, 'ADMITTED', edit);
+      state = await idle();
+      assert.equal(state.error, 'ADMITTED_SCREWS_NOT_SENT', edit);
+    }
+    await frame.page().waitForTimeout(500);
+    assert.equal(cutCalls(log), calls, 'screws that do not match their admission never reach the Store');
+
+    // The complete revision still reaches the Store.
+    result = await inquireWith('');
+    assert.equal(result.admission.result, 'ADMITTED');
+    await until(() => cutCalls(log) === calls + 1, 'complete revision reaches the Store again');
+    state = await idle();
+    assert.equal(state.error, null);
+    assert.deepEqual(lastSent().payload.definition, await seat.evaluate(() => window.STBWindowSeat.request()));
+    assert.deepEqual(errors, []);
   });
 });
 

@@ -277,10 +277,11 @@ export const ADMISSION_PROFILES = deepFreeze({
       },
     },
   },
-  // Window Seat 0.2: what its page already requires before it asks the Store (each blocking condition on the
+  // Window Seat 0.3: what its page already requires before it asks the Store (each blocking condition on the
   // page names one of these facts). Width and height are the unit's overall W and H, as the page defines them.
+  // 0.3: every board the page emits has an id and a length and width above 0.
   'window-seat': {
-    version: '0.2',
+    version: '0.3',
     scopes: {
       WINDOW_SEAT_COMMITTED: {
         requestType: 'CUT_PACKAGE_V1',
@@ -288,7 +289,8 @@ export const ADMISSION_PROFILES = deepFreeze({
           req('window-seat.width', OWNER.USER, 'positive-number', 'Overall width W (in)'),
           req('window-seat.height', OWNER.USER, 'positive-number', 'Overall height H (in)'),
           req('window-seat.depth', OWNER.USER, 'positive-number', 'Depth (in)'),
-          req('window-seat.boards', OWNER.PROJECT, 'nonempty-list', 'Every defined board with real length and width'),
+          req('window-seat.boards', OWNER.PROJECT, 'nonempty-list', 'Every defined board with real length and width',
+            each(fields({ id: 'text', len: 'positive-number', w: 'positive-number' }))),
           req('window-seat.added-knobs', OWNER.USER, 'object', 'Every knob added by hand, with what it needs', fields({
             front: nullable(fields({ board: 'boolean' })),
             xspot: nullable(fields({ target: 'text', offset: 'positive-amount', place: 'text' })),
