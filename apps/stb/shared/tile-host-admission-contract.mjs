@@ -2,7 +2,7 @@
 //
 // Executable half of docs/application/TILE-HOST-ADMISSION-CONTRACT.md. The shared tile host in
 // public-build/system-build-current.html loads the deployed copy (public-build/shared/, byte for byte).
-// Playhouse is the one tile on it; the other tiles keep their current paths until each is migrated.
+// Playhouse and Window Seat are on it; the other tiles keep their current paths until each is migrated.
 //
 // Two interfaces, kept separate on purpose:
 //
@@ -176,16 +176,20 @@ export const ADMISSION_PROFILES = deepFreeze({
       },
     },
   },
+  // Window Seat 0.2: what its page already requires before it asks the Store (each blocking condition on the
+  // page names one of these facts). Width and height are the unit's overall W and H, as the page defines them.
   'window-seat': {
-    version: '0.1',
+    version: '0.2',
     scopes: {
       WINDOW_SEAT_COMMITTED: {
         requestType: 'CUT_PACKAGE_V1',
         requires: [
-          req('window-seat.width', OWNER.USER, 'positive-number', 'Window width W (in)'),
-          req('window-seat.height', OWNER.USER, 'positive-number', 'Seat height H (in)'),
-          req('window-seat.depth', OWNER.USER, 'positive-number', 'Seat depth (in)'),
+          req('window-seat.width', OWNER.USER, 'positive-number', 'Overall width W (in)'),
+          req('window-seat.height', OWNER.USER, 'positive-number', 'Overall height H (in)'),
+          req('window-seat.depth', OWNER.USER, 'positive-number', 'Depth (in)'),
           req('window-seat.boards', OWNER.PROJECT, 'nonempty-list', 'Every defined board with real length and width'),
+          req('window-seat.added-knobs', OWNER.USER, 'object', 'Every knob added by hand, with what it needs'),
+          req('window-seat.kept-asks', OWNER.USER, 'object', 'Every ask kept on the job, described'),
         ],
       },
     },

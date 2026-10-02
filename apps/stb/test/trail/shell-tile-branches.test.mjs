@@ -29,9 +29,11 @@ const SHELL_FILES = [
 // Recorded on System main 2ad8cff (#129, docs/idea-intent-vocabulary, head c7ab5b8): 29.
 // Lowered to 24 on system/playhouse-on-shared-host: Playhouse moved onto the shared tile host
 // (applyPlayhouseNavState and four activeJourneyProject === 'playhouse' comparisons removed).
-// system-build-current.html: 17 activeJourneyProject comparisons + 7 per-tile nav functions.
+// Lowered to 19 on system/window-seat-on-shared-host: Window Seat moved onto the shared tile host
+// (seatGo, seatNavButton, applySeatNavState and two activeJourneyProject 'window-seat' comparisons removed).
+// system-build-current.html: 15 activeJourneyProject comparisons + 4 per-tile nav functions.
 // system-build-front-door-0.5.html: 0 + 0.
-const CEILING = 24;
+const CEILING = 19;
 
 const sandbox = {};
 vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'stb-trail-contract.js'), 'utf8'), sandbox, { filename: 'stb-trail-contract.js' });

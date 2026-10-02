@@ -693,6 +693,20 @@
       "blobSha": "5122d77f96d507e89b1fd5f564c42765b65583d1",
       "bytes": 242738,
       "reason": "Playhouse on the shared tile host: the host loads the trail contract and the deployed tile-host admission contract, validates Playhouse's STB-TILE-HOST-0.1 message and draws its one nav line from it; every Playhouse Store inquiry goes through admit(), so a missing profile fact blocks before the Store and names its owner while a complete revision still reaches the Store. The old Playhouse shell path (applyPlayhouseNavState, playhouseStageOpen and the Playhouse-only branches) is gone."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "window-seat-on-shared-host",
+      "blobSha": "51cfd3c3ca38a76c86149ef6e1b96bb1e587adb5",
+      "bytes": 243503,
+      "reason": "Window Seat on the shared tile host: its frame registers with the host, which validates Window Seat's STB-TILE-HOST-0.1 messages and draws its one nav line from them and the trail contract, including the Idea line and the declared fork Intent | One full scroll (presentation only), and asks the frame for a trail target by its contract label. The old Window Seat shell path (seatGo, seatNavButton, applySeatNavState, STB_SEAT_STATE/STB_SEAT_GO and the Window Seat label override and branches) is gone. Cache-busters for Window Seat 0.9 and the contract."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "window-seat-on-shared-host",
+      "blobSha": "34238e37f6e434e4b187d9c31d4cd017489ac2c4",
+      "bytes": 139184,
+      "reason": "Window Seat speaks STB-TILE-HOST-0.1 to the shared host and loads the deployed tile-host admission contract. Every Store inquiry is one job-definition revision through admit() then inquire(): each blocking condition names the profile fact it holds open, a blocked revision is not sent and the page names the fact and its owner, and a complete revision reaches the Store whatever its values. Steps come from availableSteps() and the terms flow's gates. Visible pages and the one full scroll are unchanged."
     }
   ],
   "retiredFiles": [
