@@ -146,7 +146,9 @@ const req = (id, owner, kind, title, form) => Object.freeze(form ? { id, owner, 
 // checks them one by one: `fields(...)` names fields that must be present, `each(...)` applies to every item of a
 // list, and `nullable(...)` is a field the page states as null when it is off. `whenListed(factId, member, ...)`
 // applies only while another fact of the same revision, a list, includes `member`; otherwise it asks for nothing.
-// `exactly(value)` is a field that must be that one value.
+// `exactly(value)` is a field that must be that one value. `whenField(key, value, ...)` applies only while the same
+// object's `key` is exactly `value`; otherwise it asks for nothing. `all(...)` is every form it lists, in order.
+// `including(key, members, ...)` is a list that has an item whose `key` is each member, and whose items meet the form.
 // A form names only fields the live page already emits; it never adds a machine envelope or any other Store
 // capability check.
 const fields = spec => Object.freeze({ fields: Object.freeze(spec) });
@@ -154,6 +156,9 @@ const each = spec => Object.freeze({ each: spec });
 const nullable = spec => Object.freeze({ nullable: spec });
 const exactly = value => Object.freeze({ exactly: value });
 const whenListed = (fact, member, spec) => Object.freeze({ whenListed: Object.freeze({ fact, member }), form: spec });
+const whenField = (key, value, spec) => Object.freeze({ whenField: Object.freeze({ key, value }), form: spec });
+const all = (...forms) => Object.freeze({ all: Object.freeze(forms) });
+const including = (key, members, spec) => Object.freeze({ including: Object.freeze({ key, members: Object.freeze(members) }), form: spec });
 // An amount the person typed: a number, or text written as `3`, `3.5`, `3/4` or `3 1/2`.
 function amount(value) {
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
@@ -171,6 +176,8 @@ const FIELD = Object.freeze({
   boolean: value => typeof value === 'boolean',
   true: value => value === true,
   'finite-number': value => Number.isFinite(value),
+  list: value => Array.isArray(value),
+  'nonempty-list': value => Array.isArray(value) && value.length > 0,
   'positive-number': value => Number.isFinite(value) && value > 0,
   count: value => Number.isInteger(value) && value >= 0,
   'positive-amount': value => amount(value) > 0,
@@ -185,6 +192,17 @@ function formGaps(form, value, at = '', facts = {}) {
     const list = facts[form.whenListed.fact]?.value;
     return Array.isArray(list) && list.includes(form.whenListed.member) ? formGaps(form.form, value, at, facts) : [];
   }
+  if (form.whenField) {
+    return isObject(value) && value[form.whenField.key] === form.whenField.value ? formGaps(form.form, value, at, facts) : [];
+  }
+  if (form.all) return form.all.flatMap(spec => formGaps(spec, value, at, facts));
+  if (form.including) {
+    if (!Array.isArray(value)) return [at];
+    const { key, members } = form.including;
+    const absent = members.filter(member => !value.some(item => isObject(item) && item[key] === member))
+      .map(member => `${at}[${key}=${member}]`);
+    return [...absent, ...formGaps(form.form, value, at, facts)];
+  }
   if (form.nullable) return value === null ? [] : formGaps(form.nullable, value, at, facts);
   if (form.each) {
     if (!Array.isArray(value)) return [at];
@@ -196,6 +214,9 @@ function formGaps(form, value, at = '', facts = {}) {
     return Object.prototype.hasOwnProperty.call(value, key) ? formGaps(spec, value[key], path, facts) : [path];
   });
 }
+
+// Alcove's two parent responsibilities, as its page names them.
+const ALCOVE_PARENTS = ['ALCOVE-UPRIGHT-PARENTS', 'ALCOVE-SHELF-PARENTS'];
 
 // Admission profiles, one per tile declared in the trail contract. A registry keyed by tile id: shared
 // admission code does not branch on tile identity. Profiles here are first declarations for the
@@ -228,20 +249,29 @@ export const ADMISSION_PROFILES = deepFreeze({
       },
     },
   },
-  // Alcove 0.2: what its page already sends the Store with every definition. The opening is the unit's width,
-  // height and depth as the page fits them to the measured room. Added: the pilot spot demand, on or off, which
-  // the page always states and the Store must evaluate or refuse (USER).
+  // Alcove 0.3: what its page already sends the Store with every definition. The opening is the unit's width,
+  // height and depth as the page fits them to the measured room. 0.2 added the pilot spot demand, on or off, which
+  // the page always states and the Store must evaluate or refuse (USER). 0.3: the material's species and form are
+  // text and its nominal thickness and width above 0; the upright and shelf parents are both there, each with
+  // operations; every component program has its ids and a length and width above 0, and both parents have one; and
+  // with spotting on, the spot demand is mode SPOT_ON_LOCATION, a tool above 0 and a list of features. With spotting
+  // off, nothing more is asked of it.
   alcove: {
-    version: '0.2',
+    version: '0.3',
     scopes: {
       ALCOVE_INSERT_V1: {
         requestType: 'ALCOVE_INSERT_V1',
         requires: [
           req('alcove.opening', OWNER.USER, 'object', 'Unit width, height and depth fitted to the opening'),
-          req('alcove.material', OWNER.PROJECT, 'object', 'Material demand'),
-          req('alcove.board-requirements', OWNER.PROJECT, 'nonempty-list', 'Upright and shelf parent responsibilities'),
-          req('alcove.component-programs', OWNER.PROJECT, 'nonempty-list', 'Component programs for every parent'),
-          req('alcove.spot-demand', OWNER.USER, 'object', 'Pilot spot demand, on or off'),
+          req('alcove.material', OWNER.PROJECT, 'object', 'Material demand',
+            fields({ species: 'text', form: 'text', nominalT: 'positive-number', nominalW: 'positive-number' })),
+          req('alcove.board-requirements', OWNER.PROJECT, 'nonempty-list', 'Upright and shelf parent responsibilities',
+            including('requirementId', ALCOVE_PARENTS, each(fields({ requiredOps: 'nonempty-list' })))),
+          req('alcove.component-programs', OWNER.PROJECT, 'nonempty-list', 'Component programs for every parent',
+            including('requirementId', ALCOVE_PARENTS, each(fields({ componentId: 'text', requirementId: 'text',
+              finishedLengthIn: 'positive-number', finishedWidthIn: 'positive-number' })))),
+          req('alcove.spot-demand', OWNER.USER, 'object', 'Pilot spot demand, on or off', all(fields({ enabled: 'boolean' }),
+            whenField('enabled', true, fields({ mode: exactly('SPOT_ON_LOCATION'), toolDiameterIn: 'positive-number', features: 'list' })))),
           req('alcove.hardware', OWNER.STORE, 'object', 'Pins-and-screws selection'),
         ],
       },

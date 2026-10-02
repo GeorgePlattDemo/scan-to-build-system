@@ -1085,6 +1085,41 @@
       "blobSha": "22396472ca0d9132a9f4aa1182ebf5ba8e6d83b8",
       "bytes": 252927,
       "reason": "The tile-host admission contract loads at ?v=dd8615db, the contract's current blob prefix (was ?v=dca3ac17): Start your own profile 0.5 checks its datum fields, a finite saw angle and the spot demand a spot operation needs, mode exactly SPOT_ON_LOCATION. Cache-busters for the changed stb-outdoor-picnic-0.4.html, stb-window-seat-0.9.html and front door."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "alcove-material-parents-programs-spot-admission",
+      "blobSha": "76cb98348090211112156a9407058c886d62e178",
+      "bytes": 81496,
+      "reason": "The tile-host admission contract loads at ?v=2615dd6f, the contract's current blob prefix (was ?v=dd8615db): Alcove profile 0.3 checks its material fields, both parents with operations, real component program sizes and, with spotting on, the spot demand's mode, tool and features. Nothing else on the Outdoor page changes."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "alcove-material-parents-programs-spot-admission",
+      "blobSha": "0ae8709ad17b4596277a03faed3fd531591fcdca",
+      "bytes": 139760,
+      "reason": "The tile-host admission contract loads at ?v=2615dd6f, the contract's current blob prefix (was ?v=dd8615db): Alcove profile 0.3 checks its material fields, both parents with operations, real component program sizes and, with spotting on, the spot demand's mode, tool and features. Nothing else on the Window Seat page changes."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "alcove-material-parents-programs-spot-admission",
+      "blobSha": "940f1d76ee31e62d1ca8a5e6957f7b288c46c1bd",
+      "bytes": 127709,
+      "reason": "The tile-host admission contract loads at ?v=2615dd6f, the contract's current blob prefix (was ?v=dd8615db): Alcove profile 0.3 checks its material fields, both parents with operations, real component program sizes and, with spotting on, the spot demand's mode, tool and features. Visible pages are unchanged."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "alcove-material-parents-programs-spot-admission",
+      "blobSha": "60c9df5f98b310ac86ec22ea06213a18d01da594",
+      "bytes": 39662,
+      "reason": "Cache-buster for the changed system-build-base-8d8a9dd.html."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "alcove-material-parents-programs-spot-admission",
+      "blobSha": "d3022a28dccad4785dfb58e809439dd0136f2fd1",
+      "bytes": 252927,
+      "reason": "The tile-host admission contract loads at ?v=2615dd6f, the contract's current blob prefix (was ?v=dd8615db): Alcove profile 0.3 checks its material fields, both parents with operations, real component program sizes and, with spotting on, the spot demand's mode, tool and features. Cache-busters for the changed stb-outdoor-picnic-0.4.html, stb-window-seat-0.9.html and front door."
     }
   ],
   "retiredFiles": [

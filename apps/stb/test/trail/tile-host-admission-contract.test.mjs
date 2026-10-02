@@ -70,9 +70,12 @@ const FIXTURES = {
     facts: {
       'alcove.opening': ok({ widthIn: 30, heightIn: 72, depthIn: 12 }),
       'alcove.material': ok({ species: 'poplar', form: 'S4S', nominalT: 1, nominalW: 12 }),
-      'alcove.board-requirements': ok([{ requirementId: 'ALCOVE-UPRIGHT-PARENTS' }, { requirementId: 'ALCOVE-SHELF-PARENTS' }]),
-      'alcove.component-programs': ok([{ componentId: 'U1', requirementId: 'ALCOVE-UPRIGHT-PARENTS' }]),
-      'alcove.spot-demand': ok({ enabled: false, mode: 'SPOT_ON_LOCATION', features: [] }),
+      'alcove.board-requirements': ok([{ requirementId: 'ALCOVE-UPRIGHT-PARENTS', requiredOps: ['CROSSCUT'] },
+        { requirementId: 'ALCOVE-SHELF-PARENTS', requiredOps: ['CROSSCUT'] }]),
+      'alcove.component-programs': ok([
+        { componentId: 'U1', requirementId: 'ALCOVE-UPRIGHT-PARENTS', finishedLengthIn: 72, finishedWidthIn: 5.5 },
+        { componentId: 'S1', requirementId: 'ALCOVE-SHELF-PARENTS', finishedLengthIn: 28.5, finishedWidthIn: 5.5 }]),
+      'alcove.spot-demand': ok({ enabled: false, mode: 'SPOT_ON_LOCATION', toolDiameterIn: 0.1875, features: [] }),
       // alcove.hardware is STORE-owned and deliberately left unresolved: the Store selects it.
     },
     userFact: 'alcove.opening',
@@ -416,7 +419,8 @@ test('case 4: a malformed nested fact blocks before Store with the fact id and o
   const formed = Object.entries(ADMISSION_PROFILES).flatMap(([, p]) => Object.values(p.scopes))
     .flatMap(s => s.requires).filter(r => r.form).map(r => r.id);
   assert.deepEqual([...new Set(formed)].sort(),
-    ['playhouse.opening', 'start-own.datum', 'start-own.material', 'start-own.parts', 'start-own.spot-demand',
+    ['alcove.board-requirements', 'alcove.component-programs', 'alcove.material', 'alcove.spot-demand',
+      'playhouse.opening', 'start-own.datum', 'start-own.material', 'start-own.parts', 'start-own.spot-demand',
       'window-seat.added-knobs', 'window-seat.kept-asks']);
   const stated = { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 };
   const material = admit({ revision: facts('start-own', { 'start-own.material': ok(stated) }), inquiryScope: 'USER_DEFINED_BOARD_V1' });
@@ -497,6 +501,106 @@ test('case 4, Start your own: datum fields, a finite saw angle and the spot dema
     const store = storeStub({ status: 'REFUSED', withinEnvelope: false });
     assert.equal((await inquire(result, store.ask)).reachedStore, true, label);
     assert.deepEqual(store.calls[0].facts['start-own.spot-demand'], (overrides['start-own.spot-demand'] ?? base['start-own.spot-demand']).value, label);
+  }
+});
+
+// Alcove's material, parents, component programs and spot demand, field by field, as its page emits them. A blank or
+// zero material field, a missing parent, a parent without operations, or a program without its ids or a length and
+// width above 0 blocks with owner PROJECT; spotting on without mode SPOT_ON_LOCATION, a tool above 0 and a list of
+// features blocks with owner USER. With spotting off, nothing more is asked of the spot demand.
+test('case 4, Alcove: material fields, both parents and real program sizes, and the spot demand spotting on needs', async () => {
+  const SCOPE = 'ALCOVE_INSERT_V1';
+  const base = FIXTURES.alcove.facts;
+  const material = base['alcove.material'].value;
+  const parents = base['alcove.board-requirements'].value;
+  const programs = base['alcove.component-programs'].value;
+  const SPOT_ON = { enabled: true, mode: 'SPOT_ON_LOCATION', toolDiameterIn: 0.1875, source: 'SHELF_ELEVATIONS',
+    features: [{ featureId: 'ALCOVE-UPRIGHT-01-SPOT-01', kind: 'SPOT_ON_LOCATION', targetComponentId: 'U1', xIn: 12 }] };
+  const TITLE = {
+    'alcove.material': 'Material demand',
+    'alcove.board-requirements': 'Upright and shelf parent responsibilities',
+    'alcove.component-programs': 'Component programs for every parent',
+    'alcove.spot-demand': 'Pilot spot demand, on or off',
+  };
+  const without = (item, key) => (({ [key]: _, ...rest }) => rest)(item);
+  const revisionWith = overrides => revision('alcove', 'alcove-fields', { ...base, ...overrides });
+  const P = OWNER.PROJECT;
+  const BLOCKS = [
+    // Material: species and form are nonempty text; nominalT and nominalW are above 0.
+    ...['species', 'form'].flatMap(field => [
+      [{ 'alcove.material': ok({ ...material, [field]: '' }) }, 'alcove.material', P, [field]],
+      [{ 'alcove.material': ok({ ...material, [field]: '  ' }) }, 'alcove.material', P, [field]],
+      [{ 'alcove.material': ok(without(material, field)) }, 'alcove.material', P, [field]],
+    ]),
+    ...['nominalT', 'nominalW'].flatMap(field => [
+      [{ 'alcove.material': ok({ ...material, [field]: 0 }) }, 'alcove.material', P, [field]],
+      [{ 'alcove.material': ok({ ...material, [field]: -1 }) }, 'alcove.material', P, [field]],
+      [{ 'alcove.material': ok({ ...material, [field]: '1' }) }, 'alcove.material', P, [field]],
+      [{ 'alcove.material': ok(without(material, field)) }, 'alcove.material', P, [field]],
+    ]),
+    [{ 'alcove.material': ok({ grade: 'select' }) }, 'alcove.material', P, ['species', 'form', 'nominalT', 'nominalW']],
+    // Parents: both are there, each with a nonempty requiredOps.
+    [{ 'alcove.board-requirements': ok([parents[0]]) }, 'alcove.board-requirements', P, ['[requirementId=ALCOVE-SHELF-PARENTS]']],
+    [{ 'alcove.board-requirements': ok([parents[1]]) }, 'alcove.board-requirements', P, ['[requirementId=ALCOVE-UPRIGHT-PARENTS]']],
+    [{ 'alcove.board-requirements': ok([{ requirementId: 'OTHER', requiredOps: ['CROSSCUT'] }]) }, 'alcove.board-requirements', P,
+      ['[requirementId=ALCOVE-UPRIGHT-PARENTS]', '[requirementId=ALCOVE-SHELF-PARENTS]']],
+    [{ 'alcove.board-requirements': ok([parents[0], { ...parents[1], requiredOps: [] }]) }, 'alcove.board-requirements', P, ['[1].requiredOps']],
+    [{ 'alcove.board-requirements': ok([without(parents[0], 'requiredOps'), parents[1]]) }, 'alcove.board-requirements', P, ['[0].requiredOps']],
+    // Programs: both parents have one; each has its ids and a length and width above 0.
+    [{ 'alcove.component-programs': ok([programs[0]]) }, 'alcove.component-programs', P, ['[requirementId=ALCOVE-SHELF-PARENTS]']],
+    [{ 'alcove.component-programs': ok([programs[1]]) }, 'alcove.component-programs', P, ['[requirementId=ALCOVE-UPRIGHT-PARENTS]']],
+    ...['finishedLengthIn', 'finishedWidthIn'].flatMap(field => [
+      [{ 'alcove.component-programs': ok([programs[0], { ...programs[1], [field]: 0 }]) }, 'alcove.component-programs', P, [`[1].${field}`]],
+      [{ 'alcove.component-programs': ok([{ ...programs[0], [field]: -5.5 }, programs[1]]) }, 'alcove.component-programs', P, [`[0].${field}`]],
+      [{ 'alcove.component-programs': ok([programs[0], without(programs[1], field)]) }, 'alcove.component-programs', P, [`[1].${field}`]],
+    ]),
+    [{ 'alcove.component-programs': ok([{ ...programs[0], componentId: '' }, programs[1]]) }, 'alcove.component-programs', P, ['[0].componentId']],
+    [{ 'alcove.component-programs': ok([...programs, { ...programs[1], componentId: 'S2', requirementId: ' ' }]) },
+      'alcove.component-programs', P, ['[2].requirementId']],
+    // Spot demand: on or off is a boolean; on asks for mode exactly SPOT_ON_LOCATION, a tool above 0 and a list.
+    [{ 'alcove.spot-demand': ok({ ...SPOT_ON, enabled: 'yes' }) }, 'alcove.spot-demand', OWNER.USER, ['enabled']],
+    [{ 'alcove.spot-demand': ok(without(SPOT_ON, 'enabled')) }, 'alcove.spot-demand', OWNER.USER, ['enabled']],
+    ...['DRILL', 'spot_on_location', ' SPOT_ON_LOCATION', ''].map(mode =>
+      [{ 'alcove.spot-demand': ok({ ...SPOT_ON, mode }) }, 'alcove.spot-demand', OWNER.USER, ['mode']]),
+    [{ 'alcove.spot-demand': ok(without(SPOT_ON, 'mode')) }, 'alcove.spot-demand', OWNER.USER, ['mode']],
+    [{ 'alcove.spot-demand': ok({ ...SPOT_ON, toolDiameterIn: 0 }) }, 'alcove.spot-demand', OWNER.USER, ['toolDiameterIn']],
+    [{ 'alcove.spot-demand': ok(without(SPOT_ON, 'toolDiameterIn')) }, 'alcove.spot-demand', OWNER.USER, ['toolDiameterIn']],
+    [{ 'alcove.spot-demand': ok({ ...SPOT_ON, features: null }) }, 'alcove.spot-demand', OWNER.USER, ['features']],
+    [{ 'alcove.spot-demand': ok(without(SPOT_ON, 'features')) }, 'alcove.spot-demand', OWNER.USER, ['features']],
+    [{ 'alcove.spot-demand': ok({ enabled: true }) }, 'alcove.spot-demand', OWNER.USER, ['mode', 'toolDiameterIn', 'features']],
+  ];
+  for (const [overrides, factId, owner, missing] of BLOCKS) {
+    const label = JSON.stringify(overrides);
+    const result = admit({ revision: revisionWith(overrides), inquiryScope: SCOPE });
+    assert.equal(result.admission.result, ADMISSION_RESULT.BLOCKED, label);
+    assert.deepEqual(result.admission.blocking,
+      [{ factId, owner, title: TITLE[factId], condition: 'INVALID_VALUE', fields: missing }], label);
+    const store = storeStub({ status: 'SHOULD_NOT_BE_ASKED' });
+    assert.equal((await inquire(result, store.ask)).reachedStore, false, label);
+    assert.equal(store.calls.length, 0, `${label}: nothing reached Store`);
+  }
+
+  const ADMITS = [
+    // The page's complete revision, spotting off: the spot demand is sent as stated and no spot is invented.
+    {},
+    // Spotting off asks nothing more of it, whatever else it carries.
+    { 'alcove.spot-demand': ok({ enabled: false }) },
+    { 'alcove.spot-demand': ok({ enabled: false, mode: 'NONE', toolDiameterIn: 0, features: null }) },
+    // Spotting on and complete; an empty feature list is a list.
+    { 'alcove.spot-demand': ok(SPOT_ON) },
+    { 'alcove.spot-demand': ok({ ...SPOT_ON, features: [] }) },
+    // More programs per parent, in any order, and extra material fields the page states.
+    { 'alcove.component-programs': ok([programs[1], ...programs, { ...programs[1], componentId: 'S2' }]) },
+    { 'alcove.material': ok({ ...material, grade: 'select', nominalT: 0.75 }) },
+  ];
+  for (const overrides of ADMITS) {
+    const label = JSON.stringify(overrides);
+    const result = admit({ revision: revisionWith(overrides), inquiryScope: SCOPE });
+    assert.equal(result.admission.result, ADMISSION_RESULT.ADMITTED, label);
+    assert.deepEqual(result.request.openDemands, ['alcove.hardware'], label);
+    const store = storeStub({ status: 'REFUSED', withinEnvelope: false });
+    assert.equal((await inquire(result, store.ask)).reachedStore, true, label);
+    assert.deepEqual(store.calls[0].facts['alcove.spot-demand'], (overrides['alcove.spot-demand'] ?? base['alcove.spot-demand']).value, label);
   }
 });
 
