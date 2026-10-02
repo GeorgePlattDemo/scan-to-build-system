@@ -246,7 +246,7 @@ let alcoveStoreRequestGeneration=0;
 let alcoveStoreSignature=null;
 // Every Alcove Store inquiry is one job-definition revision through admit() then inquire(), from the one deployed
 // tile-host admission contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
-const alcoveContract=import('./shared/tile-host-admission-contract.mjs?v=4f7973a0');
+const alcoveContract=import('./shared/tile-host-admission-contract.mjs?v=9375063a');
 let alcoveAdmission=null,alcoveAsking=false;
 const alcove={material:'pine',fraction:true,pilotShelves:false,spotInsetIn:1.5,H:[12,24,36,45,65,68,70]};
 const ALCOVE_SPOT_INSETS_IN=[1.5,2];
@@ -393,7 +393,7 @@ window.STBAlcoveLive=Object.freeze({
  // Asks about a revision through the same admission as the page; a blocked one never reaches the Store.
  inquire:revision=>alcoveInquire(revision,{force:true}).then(()=>alcoveCopy(alcoveAdmission)),
  state:()=>alcoveCopy({asking:alcoveAsking,admission:alcoveAdmission?alcoveAdmission.admission:null,
-  answer:alcoveStoreAnswer?{status:alcoveStoreAnswer.status||null,authority:alcoveStoreAnswer.authority||null,definitionRevisionId:alcoveStoreAnswer.definitionRevisionId||null}:null})
+  answer:alcoveStoreAnswer?{status:alcoveStoreAnswer.status||null,authority:alcoveStoreAnswer.authority||null,definitionRevisionId:alcoveStoreAnswer.definitionRevisionId||null,inquiryScope:alcoveStoreAnswer.inquiryScope||null}:null})
 });
 function currentAlcoveSnapshot(){
  const n=+document.getElementById('c-n').value,d=+document.getElementById('c-d').value,w=+document.getElementById('c-w').value,selected=alcove.H.slice(0,n).slice().sort((a,b)=>a-b),maxShelf=selected[selected.length-1];let h=+document.getElementById('c-h').value;if(h<maxShelf){h=maxShelf;document.getElementById('c-h').value=h}const pilotFeatures=alcove.pilotShelves?selected.flatMap((sh,idx)=>[1,2,3,4].map(u=>{const componentId='ALCOVE-UPRIGHT-'+String(u).padStart(2,'0');return {featureId:componentId+'-SPOT-'+String(idx+1).padStart(2,'0'),kind:'SPOT_ON_LOCATION',targetComponentId:componentId,targetRole:u<=2?'LEFT_UPRIGHT':'RIGHT_UPRIGHT',partRelativeXIn:sh,xIn:sh,reference:'FROM_BASE',acrossWidthRule:'INSET_FROM_EDGE',insetFromEdgeIn:alcove.spotInsetIn,toolDiameterIn:0.1875,fullDiameterDepthIn:0.1875,basis:'DERIVED_FROM_SHELF_ELEVATION'}})):[];return {n,d,w,h,selected,pilotFeatures,span:Math.max(0,w-1.5),gap:Math.max(0,45.5-w),material:alcove.material}}

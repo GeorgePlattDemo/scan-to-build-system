@@ -65,7 +65,7 @@ jobs:
           test/store/alcove.test.mjs
           test/integration/playhouse-live-store.test.mjs
 
-      - name: Trail rules R4-R6 and stale-version ratchet against the pinned Store
+      - name: Trail rules R4-R6, stale-version ratchet and answer authority against the pinned Store
         working-directory: apps/stb
         env:
           STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-live
@@ -73,3 +73,4 @@ jobs:
           node --test --test-concurrency=1
           test/integration/trail-terms.test.mjs
           test/integration/trail-stale-version.test.mjs
+          test/integration/answer-authority.test.mjs

@@ -659,7 +659,7 @@ async function askExact(rv){
     S.answer={rev:S.rev,sig:req.sig,stale:false,definition:req.definition,record:req.record,
       evaluation:body.rawEvaluation,receipt:body.evaluationReceipt||body.rawEvaluation?.evaluationReceipt||null,
       requestId:body.requestId,storePin:body.storePin,body,sentAt,
-      authority:result.answer.authority,definitionRevisionId:result.answer.definitionRevisionId};
+      authority:result.answer.authority,definitionRevisionId:result.answer.definitionRevisionId,inquiryScope:result.answer.inquiryScope};
     if(buildRequest().sig!==req.sig){S.answer.stale=true;S.rev++;scheduleAsk()}
   }catch(e){if(token!==S.token)return admission;S.error=String(e&&e.message||e)}
   S.asking=false;render();
@@ -678,7 +678,9 @@ function scheduleOptions(){
     S.optionsAsking=false;render();
   },350);
 }
-const answerCurrent=()=>!!(S.answer&&!S.answer.stale);
+/* Current only when isCurrentAnswer() says so for the revision on screen now: fresh, this exact revision, this inquiry
+   scope. A saved, stale or superseded answer, or one for another revision or scope, authorizes nothing. */
+const answerCurrent=()=>!!(S.answer&&!S.answer.stale&&C&&C.isCurrentAnswer({admission:currentAdmission(),answer:S.answer}));
 
 /* ═════ READING THE STORE'S ANSWER ═════ */
 const REASONS={
@@ -955,10 +957,11 @@ const NAV_OF={plans:'scan',build:'configure',edge:'configure',call:'request',yar
 const NAV_STEPS=['scan','configure','store','request','yard','record'];
 const SECTION_OF_STEP=['plans','build','build','call','yard','record'];
 const STEP_OF_SECTION={plans:0,build:1,edge:1,call:3,yard:4,record:5};
-/* The fresh answer availableSteps() reads: current authority, for this exact revision, inside the envelope or not. */
+/* The fresh answer availableSteps() reads: current authority, for this exact revision and inquiry scope, inside the
+   envelope or not. */
 function freshAnswer(){
   const a=S.answer;if(!a||a.stale||S.asking||S.error||S.blocked)return null;
-  return {authority:a.authority,definitionRevisionId:a.definitionRevisionId,withinEnvelope:!!view()?.allOk};
+  return {authority:a.authority,definitionRevisionId:a.definitionRevisionId,inquiryScope:a.inquiryScope,withinEnvelope:!!view()?.allOk};
 }
 /* The Store answers and Your call from the contract's availableSteps(); the bench needs a picked plan (it is that
    plan's bench); We cut it and Pick up & build stay with the terms flow's gates, behind Your call. Before the
@@ -1079,10 +1082,10 @@ window.STBOutdoorPicnic=Object.freeze({version:'0.4',rule:RULE,plans:Object.keys
   benchKnobs:()=>[...new Set($$('#s-build [data-knob], #s-edge [data-knob]').map(e=>e.dataset.knob))],
   state:()=>({section:S.section,plan:S.cfg&&S.cfg.plan,lengthIn:S.cfg&&S.cfg.lengthIn,
     rev:S.rev,asking:S.asking,error:S.error,answered:!!S.answer,current:answerCurrent(),terms:TERMS.state(),
-    answer:S.answer&&{authority:S.answer.authority,definitionRevisionId:S.answer.definitionRevisionId,stale:!!S.answer.stale},
+    answer:S.answer&&{authority:S.answer.authority,definitionRevisionId:S.answer.definitionRevisionId,inquiryScope:S.answer.inquiryScope,stale:!!S.answer.stale},
     admission:clone(S.blocked?.admission??currentAdmission()?.admission??null)})});
 /* The deployed contract copy, loaded once. Nothing is asked before it is here. */
-import('./shared/tile-host-admission-contract.mjs?v=4f7973a0').then(m=>{C=m;askFrom();if(S.cfg){scheduleAsk();scheduleOptions()}render()},
+import('./shared/tile-host-admission-contract.mjs?v=9375063a').then(m=>{C=m;askFrom();if(S.cfg){scheduleAsk();scheduleOptions()}render()},
   ()=>{document.documentElement.dataset.tileHostContract='MISSING'});
 })();
 </script>

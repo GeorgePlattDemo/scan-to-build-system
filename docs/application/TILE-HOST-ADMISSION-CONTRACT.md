@@ -2,7 +2,7 @@
 
 **Owner:** System. **Status:** in use for every tile: Start your own, Playhouse, Window Seat, Alcove and Outdoor. The shared tile host in `apps/stb/public-build/system-build-current.html` loads the deployed copy (`apps/stb/public-build/shared/`, byte for byte) and draws each one's nav from its validated `STB-TILE-HOST-0.1` message; their Store inquiries go through `admit()` then `inquire()`. Window Seat runs in its own frame: its page loads the same deployed copy, posts `{ type: 'STB_TILE_HOST', message }` from that frame, and the host asks it for a trail target (Idea, a step, or a declared fork option) with `STB_TILE_HOST_GO`. Outdoor runs in its own frame the same way (no Idea intake yet, so it opens on Intent); its page asks the Store through `admit()` then `inquire()` in its profile's two scopes, `OUTDOOR_OPTIONS` (the "From" and option prices, never the terms flow) and `OUTDOOR_COMMITTED` (this exact table). Alcove's page lives in the base build (`system-build-base-8d8a9dd.html`): it loads the same deployed copy and sends every inquiry through `admit()` then `inquire()`, with `stb-alcove-store-bridge.js` as the transport inside `inquire()`; Alcove's tile code in the shell builds its message from that admission, the fresh answer and the terms flow's gates. Start your own's page is the shell's Start your own page (its Intent and bench screens, in `three-frames.html`) and its proof pages: its tile code in the shell admits the bench's revision on every change and, on confirm, asks the Store through `admit()` then `inquire()`, with `stb-user-defined-board-runtime-bridge.js` as the transport inside `inquire()`; it builds its message the same way Alcove's does (no Idea intake yet, so it opens on Intent).
 **Executable half:** [`apps/stb/shared/tile-host-admission-contract.mjs`](../../apps/stb/shared/tile-host-admission-contract.mjs).
-**Check:** [`apps/stb/test/trail/tile-host-admission-contract.test.mjs`](../../apps/stb/test/trail/tile-host-admission-contract.test.mjs), beside the trail tests.
+**Check:** [`apps/stb/test/trail/tile-host-admission-contract.test.mjs`](../../apps/stb/test/trail/tile-host-admission-contract.test.mjs), beside the trail tests; current authority on the five tiles against the pinned Store: [`apps/stb/test/integration/answer-authority.test.mjs`](../../apps/stb/test/integration/answer-authority.test.mjs).
 Terms used here (job-definition revision, Store inquiry, admissible, The Store answers) are defined once in [definitions](../definitions/README.md).
 
 Two interfaces. They are separate: neither reads the other's data.
@@ -48,9 +48,13 @@ Reopening restores history whole: source material, revisions, retained requests 
 
 A saved Store answer comes back as history, never as current authority, even when it names the current revision. Your call needs a fresh answer.
 
+## Current authority
+
+A Store answer authorizes nothing unless it is the fresh answer for this exact revision and this inquiry scope. `inquire()` stamps every answer with the `definitionRevisionId` and the `inquiryScope` it answers, and `authority: CURRENT`. `isCurrentAnswer({ admission, answer })` is the one test: the admission of the revision on screen now is admitted, and the answer is `CURRENT` and names that same revision and that same scope. A saved answer (`HISTORY`), an answer for another revision or another scope (for example Outdoor's `OUTDOOR_OPTIONS` answer against `OUTDOOR_COMMITTED`), an answer from before the definition changed, and an answer missing either stamp all fail it. Every tile holds its answer against the revision on its page now, not only the one it last asked about, and gates Your call and its terms flow through this test.
+
 ## Available steps
 
-Intent and The bench are always usable. The Store answers is usable when the current revision is admitted. Your call is usable only with a fresh, current answer for that exact revision inside the envelope. We cut it and Pick up & build stay with the gates in `stb-terms-flow.js`.
+Intent and The bench are always usable. The Store answers is usable when the current revision is admitted. Your call is usable only with an answer `isCurrentAnswer()` accepts for that admission that is inside the envelope; a refusal is current but leaves Your call inert. We cut it and Pick up & build stay with the gates in `stb-terms-flow.js`.
 
 ## What this replaces, later
 

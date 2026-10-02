@@ -23,7 +23,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-trail-contract.js?v=aea2f84d"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
-import('./shared/tile-host-admission-contract.mjs?v=4f7973a0').then(contract => {
+import('./shared/tile-host-admission-contract.mjs?v=9375063a').then(contract => {
   window.STBTileHostAdmission = Object.freeze({ ...contract });
 });
 </script>
@@ -1569,14 +1569,16 @@ import('./shared/tile-host-admission-contract.mjs?v=4f7973a0').then(contract => 
     }
     var alcoveTerms = window.STBTermsFlow ? window.STBTermsFlow.create({ projectId:'alcove', title:'Alcove insert' }) : null;
     window.STBTermsFlow?.installStyle(doc);
-    // The answer inquire() returned for the revision the page last admitted, while nothing newer is being asked;
-    // otherwise null. A blocked, failed or superseded answer is never current authority.
+    // The answer inquire() returned for the revision the page last admitted, while nothing newer is being asked and
+    // that revision is the one on the page now; otherwise null. Only isCurrentAnswer() decides: a blocked, failed,
+    // saved or superseded answer, or one for another revision or another inquiry scope, is never current authority.
     function alcoveCurrentAnswer() {
       const live = win.STBAlcoveLive || null;
       const admission = live?.admission() || null;
       const answer = win.STBAlcoveStoreAnswer || null;
       if (!admission || !answer || live.state().asking) return null;
-      if (answer.authority !== tileHostContract.ANSWER_AUTHORITY.CURRENT || answer.definitionRevisionId !== admission.definitionRevisionId) return null;
+      if (admission.definitionRevisionId !== live.revision()?.definitionRevisionId) return null;
+      if (!tileHostContract.isCurrentAnswer({ admission, answer })) return null;
       return answer;
     }
     function alcoveSupportable(answer) {
@@ -1617,7 +1619,7 @@ import('./shared/tile-host-admission-contract.mjs?v=4f7973a0').then(contract => 
       const steps = trailContract.steps;
       const admission = win.STBAlcoveLive?.admission() || null;
       const answer = alcoveCurrentAnswer();
-      const freshAnswer = answer ? { authority:answer.authority, definitionRevisionId:answer.definitionRevisionId, withinEnvelope:alcoveSupportable(answer) } : null;
+      const freshAnswer = answer ? { authority:answer.authority, definitionRevisionId:answer.definitionRevisionId, inquiryScope:answer.inquiryScope, withinEnvelope:alcoveSupportable(answer) } : null;
       const t = alcoveTerms?.state() || null;
       const usable = tileHostContract.availableSteps({ trail:trailContract, admission, freshAnswer })
         .filter(step => step !== steps[3] || !t || t.callOpen);
@@ -2593,12 +2595,14 @@ import('./shared/tile-host-admission-contract.mjs?v=4f7973a0').then(contract => 
       return answer.rawEvaluation?.status === 'SUPPORTABLE' && answer.priceCompleteness?.status === 'COMPLETE_FOR_TRAVEL_STANDARD';
     }
     // The answer inquire() returned for the revision on the bench, while nothing newer is being asked and the
-    // pages after the bench carry it; otherwise null. A blocked, failed or superseded answer is never current.
+    // pages after the bench carry it; otherwise null. Only isCurrentAnswer() decides: a blocked, failed, saved or
+    // superseded answer, or one for another revision or another inquiry scope, is never current.
     function startOwnCurrentAnswer() {
       const admission = startOwnLive.admission;
       const answer = startOwnLive.answer;
       if (!admission || !answer || startOwnLive.asking || !startOwnAdmitted()) return null;
-      if (answer.authority !== tileHostContract.ANSWER_AUTHORITY.CURRENT || answer.definitionRevisionId !== admission.definitionRevisionId) return null;
+      if (admission.definitionRevisionId !== startOwnLive.revision?.definitionRevisionId) return null;
+      if (!tileHostContract.isCurrentAnswer({ admission, answer })) return null;
       if (proofHandoff?.source !== START_OWN_PROJECT_ID || proofHandoff.payload?.versionId !== answer.definitionRevisionId) return null;
       return answer;
     }
@@ -2610,7 +2614,7 @@ import('./shared/tile-host-admission-contract.mjs?v=4f7973a0').then(contract => 
     function startOwnHostMessage() {
       const steps = trailContract.steps;
       const answer = startOwnCurrentAnswer();
-      const freshAnswer = answer ? { authority:answer.authority, definitionRevisionId:answer.definitionRevisionId, withinEnvelope:startOwnWithinEnvelope(answer) } : null;
+      const freshAnswer = answer ? { authority:answer.authority, definitionRevisionId:answer.definitionRevisionId, inquiryScope:answer.inquiryScope, withinEnvelope:startOwnWithinEnvelope(answer) } : null;
       const t = startOwnTerms?.state() || null;
       const usable = tileHostContract.availableSteps({ trail:trailContract, admission:startOwnLive.admission, freshAnswer })
         .filter(step => step !== steps[2] || !!answer)
@@ -2673,9 +2677,9 @@ import('./shared/tile-host-admission-contract.mjs?v=4f7973a0').then(contract => 
       admission:() => startOwnLive.admission ? JSON.parse(JSON.stringify(startOwnLive.admission)) : null,
       // Asks about a revision through the same admission as the bench; a blocked one never reaches the Store.
       inquire:revision => startOwnInquire(revision).then(result => JSON.parse(JSON.stringify({ reachedStore:result.reachedStore, blocking:result.blocking,
-        answer:result.answer ? { definitionRevisionId:result.answer.definitionRevisionId, authority:result.answer.authority, status:result.answer.rawEvaluation?.status ?? null } : null }))),
+        answer:result.answer ? { definitionRevisionId:result.answer.definitionRevisionId, inquiryScope:result.answer.inquiryScope, authority:result.answer.authority, status:result.answer.rawEvaluation?.status ?? null } : null }))),
       state:() => JSON.parse(JSON.stringify({ asking:startOwnLive.asking, blocking:startOwnLive.blocking, admission:startOwnLive.admission?.admission ?? null,
-        answer:startOwnLive.answer ? { definitionRevisionId:startOwnLive.answer.definitionRevisionId, authority:startOwnLive.answer.authority } : null })),
+        answer:startOwnLive.answer ? { definitionRevisionId:startOwnLive.answer.definitionRevisionId, inquiryScope:startOwnLive.answer.inquiryScope, authority:startOwnLive.answer.authority } : null })),
       hostMessage:() => startOwnHostMessage()
     });
 
@@ -3220,12 +3224,21 @@ import('./shared/tile-host-admission-contract.mjs?v=4f7973a0').then(contract => 
     function s001Admitted() {
       return s001Live.admission?.admission?.result === tileHostContract.ADMISSION_RESULT.ADMITTED;
     }
+    // The answer inquire() returned for the revision last asked about, while nothing newer is being asked and that
+    // revision is the one on the page now; otherwise null. Only isCurrentAnswer() decides: a failed, saved or
+    // superseded answer, or one for another revision or another inquiry scope, is never current authority.
+    function s001CurrentAnswer() {
+      const a = s001Live.answer;
+      if (s001Live.asking || s001Live.error || !a || a.version !== s001Live.version) return null;
+      if (s001Live.admission?.definitionRevisionId !== s001Revision(read()).definitionRevisionId) return null;
+      return tileHostContract.isCurrentAnswer({ admission:s001Live.admission, answer:a }) ? a : null;
+    }
     var s001Terms = window.STBTermsFlow ? window.STBTermsFlow.create({ projectId:'playhouse', title:'Playhouse arched window' }) : null;
     window.STBTermsFlow?.installStyle(doc);
     function s001FeedTerms() {
       if (!s001Terms) return;
-      const a = s001Live.answer;
-      if (!a || s001Live.asking || s001Live.error || a.version !== s001Live.version) { s001Terms.setAnswer(null); return; }
+      const a = s001CurrentAnswer();
+      if (!a) { s001Terms.setAnswer(null); return; }
       const ev = a.evaluation;
       s001Terms.setAnswer({ version:a.version, status:ev.status, total:ev.totals?.Q ?? null,
         reasons:(ev.reasonRecords || []).map(r => ({ code:r.code, text:r.explanation })), body:a.body, sentAt:a.sentAt });
@@ -3254,14 +3267,14 @@ import('./shared/tile-host-admission-contract.mjs?v=4f7973a0').then(contract => 
       }));
     }
     function s001Supportable() {
-      const a = s001Live.answer;
-      return !s001Live.asking && !s001Live.error && !!a && a.evaluation?.status === 'SUPPORTABLE' && a.version === s001Live.version;
+      return s001CurrentAnswer()?.evaluation?.status === 'SUPPORTABLE';
     }
-    // The fresh answer availableSteps() reads: current authority, for this exact revision, inside the envelope or not.
+    // The fresh answer availableSteps() reads: current authority, for this exact revision and inquiry scope, inside
+    // the envelope or not.
     function s001FreshAnswer() {
-      const a = s001Live.answer;
-      if (s001Live.asking || s001Live.error || !a || a.version !== s001Live.version) return null;
-      return { authority:a.authority, definitionRevisionId:a.definitionRevisionId, withinEnvelope:a.evaluation?.status === 'SUPPORTABLE' };
+      const a = s001CurrentAnswer();
+      if (!a) return null;
+      return { authority:a.authority, definitionRevisionId:a.definitionRevisionId, inquiryScope:a.inquiryScope, withinEnvelope:a.evaluation?.status === 'SUPPORTABLE' };
     }
     // This tile's STB-TILE-HOST-0.1 message. Intent, the bench and The Store answers come from the contract's
     // availableSteps(); We cut it and Pick up & build stay with the terms flow's gates, behind Your call.
@@ -3395,7 +3408,7 @@ import('./shared/tile-host-admission-contract.mjs?v=4f7973a0').then(contract => 
             throw new Error('STORE_ANSWER_NOT_FOR_THIS_VERSION');
           }
           s001Live.answer = { evaluation:ev, receipt:body.evaluationReceipt, requestId:body.requestId, storePin:body.storePin, version:definition.configurationVersion, body, sentAt,
-            authority:result.answer.authority, definitionRevisionId:result.answer.definitionRevisionId };
+            authority:result.answer.authority, definitionRevisionId:result.answer.definitionRevisionId, inquiryScope:result.answer.inquiryScope };
           s001Live.asking = false;
           s001Render();
         }).catch(error => {
@@ -3421,6 +3434,8 @@ import('./shared/tile-host-admission-contract.mjs?v=4f7973a0').then(contract => 
         return admission.request ? s001DefinitionFrom(admission.request) : null;
       },
       revision:() => JSON.parse(JSON.stringify(s001Current())),
+      // The admission of the revision last asked about.
+      admission:() => s001Live.admission ? JSON.parse(JSON.stringify(s001Live.admission)) : null,
       // Asks about a revision through the same admission as the page; a blocked one never reaches the Store.
       inquire:revision => JSON.parse(JSON.stringify(s001Inquire(revision))),
       state:() => JSON.parse(JSON.stringify({ asking:s001Live.asking, error:s001Live.error, version:s001Live.version, answer:s001Live.answer,
