@@ -889,6 +889,20 @@
       "blobSha": "b27e3285b122d3a6076fd6d7d4a4fc718fecb8e6",
       "bytes": 251468,
       "reason": "Cache-buster for the front door."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "outdoor-one-admission-door",
+      "blobSha": "ff0ec6737f8825996576ba2633e363ea51db32e3",
+      "bytes": 81333,
+      "reason": "Outdoor's transport, the one inside inquire() in both its scopes (OUTDOOR_OPTIONS and OUTDOOR_COMMITTED), sends the request admit() admitted through STBStoreClient.sendAdmittedJob, so no Outdoor inquiry calls admitPublicStoreRequest. Cache-buster for stb-store-client.js at the bytes that carry sendAdmittedJob."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-one-admission-door",
+      "blobSha": "7b4fcf8ac2fc14353de938b17e6403dd7e1ed4f2",
+      "bytes": 251468,
+      "reason": "Cache-buster for the changed stb-outdoor-picnic-0.4.html."
     }
   ],
   "retiredFiles": [

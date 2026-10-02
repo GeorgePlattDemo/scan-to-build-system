@@ -5,6 +5,8 @@
 // - Every Store inquiry is admit() then inquire(), in the outdoor profile's two scopes: OUTDOOR_OPTIONS (the "From"
 //   and option prices) and OUTDOOR_COMMITTED (this exact table). A missing profile fact blocks before the Store and
 //   names its owner; a complete revision still reaches the Store.
+// - Both scopes have one admission decision, admit(): the transport is sendAdmittedJob, and no Outdoor inquiry, options
+//   or committed, calls admitPublicStoreRequest.
 // - The old Outdoor shell path is gone: no applyOutdoorNavState, outdoorNavState, outdoorFrame, STB_OUTDOOR_*
 //   messages or Outdoor branches in the shell, and one Store handoff on the page, inside inquire().
 // The rest of Outdoor's preserved journey (plans → bench → answer → your call → yard → pickup, the bigger bench,
@@ -16,6 +18,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { isDeepStrictEqual } from 'node:util';
 
 import { withBrowser, openTile } from './helpers.mjs';
 
@@ -65,9 +68,11 @@ test('the old Outdoor shell path is gone; one Store handoff, inside inquire()', 
   const page = read('stb-outdoor-picnic-0.4.html');
   assert.equal(page.includes('STB_OUTDOOR_'), false, 'the page speaks only STB-TILE-HOST-0.1 to the host');
   assert.equal(/\bsend\(/.test(page), false, 'no Store send outside inquire()');
-  // One Store handoff on the page: the transport inside inquire(), after admit(), in each scope.
-  assert.equal((page.match(/client\.sendJob\(/g) || []).length, 1);
-  assert.match(page, /function storeTransport\(definition,got\)\{\s*return request=>\{[\s\S]*?client\.sendJob\(/);
+  // One Store handoff on the page: the transport inside inquire(), after admit(), in each scope. It sends the request
+  // admit() admitted through sendAdmittedJob; the old door (sendJob) is not on the page.
+  assert.equal((page.match(/client\.sendAdmittedJob\(/g) || []).length, 1);
+  assert.equal(page.includes('sendJob('), false, 'no Outdoor inquiry goes through sendJob');
+  assert.match(page, /function storeTransport\(definition,got\)\{\s*return request=>\{[\s\S]*?client\.sendAdmittedJob\(\{admitted:request,/);
   assert.match(page, /C\.admit\(\{revision:optionsRevision\(def\),inquiryScope:OPTIONS_SCOPE\}\);[\s\S]*?C\.inquire\(admission,storeTransport\(def,got\)\)/);
   assert.match(page, /C\.admit\(\{revision:rv\|\|revision\(req\),inquiryScope:COMMITTED_SCOPE\}\);[\s\S]*?C\.inquire\(admission,storeTransport\(req\.definition,got\)\)/);
 
@@ -210,4 +215,89 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.equal(committedCalls(log).length, quiet + 1);
     assert.ok(committedCalls(log).at(-1).request.payload.definition.cutPackages.some(p => p.parts.some(x => x.spots)));
   });
+});
+
+// The old door, served with a recorder: every call to admitPublicStoreRequest in that page is counted on the
+// window that imported it, with the project and the configuration it was called for. Nothing else about the module
+// changes.
+const OLD_DOOR = 'stb-public-admission.mjs';
+const recordOldDoor = source => {
+  const head = 'export function admitPublicStoreRequest(';
+  assert.equal(source.split(head).length, 2, 'the old door is exported once');
+  return source.replace(head, 'function oldDoorUnrecorded(') + `
+export function admitPublicStoreRequest(input) {
+  (globalThis.__stbOldDoorCalls ||= []).push({ projectId: input?.projectId ?? null, configurationId: input?.payload?.definition?.configurationId ?? null });
+  return oldDoorUnrecorded(input);
+}
+`;
+};
+// Other tiles still use the old door; only Outdoor calls are read, from every frame of the page.
+const outdoorOldDoorCalls = page => Promise.all(page.frames().map(f => f.evaluate(() => window.__stbOldDoorCalls ?? [])))
+  .then(lists => lists.flat().filter(call => call.projectId === 'outdoor'));
+const optionsCalls = log => outdoorCalls(log).filter(e => e.request.payload.definition.configurationId === 'OUTDOOR-PICNIC-OPTIONS');
+
+test('both Outdoor scopes have one admission decision, admit(); no Outdoor inquiry calls admitPublicStoreRequest', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { page, od, errors } = await openOutdoor(browser, origin);
+
+    // OUTDOOR_OPTIONS before a plan: the "From" prices reach the Store, one per plan, nothing committed.
+    const plans = await od.evaluate(() => window.STBOutdoorPicnic.plans);
+    await until(() => optionsCalls(log).length >= plans.length, 'from prices reached the Store');
+    assert.equal(committedCalls(log).length, 0, 'nothing committed before a plan');
+    for (const { request } of optionsCalls(log)) {
+      assert.match(request.candidateRevisionId, /^od-options-[0-9a-f]{8}$/);
+      assert.equal(request.candidateRevisionId, request.payload.definition.configurationVersion);
+    }
+
+    // OUTDOOR_OPTIONS for the plan just picked: its option prices reach the Store, through the same admitted door.
+    await od.locator('[data-plan="a-frame"]').click();
+    await settle(od);
+    const picked = await od.evaluate(() => window.STBOutdoorPicnic.optionsRequest());
+    assert.ok(picked.itemLines.length > 0, 'the picked plan prices its hardware packs too');
+    await until(() => optionsCalls(log).some(e => isDeepStrictEqual(e.request.payload.definition, picked)), 'picked plan options reached the Store');
+    assert.equal(optionsCalls(log).find(e => isDeepStrictEqual(e.request.payload.definition, picked)).request.candidateRevisionId, picked.configurationVersion);
+
+    // OUTDOOR_COMMITTED: a complete revision still reaches the Store, with the definition for the admitted revision.
+    const reached = committedCalls(log).length;
+    let result = await od.evaluate(() => window.STBOutdoorPicnic.inquire(window.STBOutdoorPicnic.revision()));
+    assert.equal(result.admission.result, 'ADMITTED');
+    assert.equal(result.inquiryScope, 'OUTDOOR_COMMITTED');
+    const state = await settle(od);
+    assert.equal(state.answer.authority, 'CURRENT');
+    assert.equal(committedCalls(log).length, reached + 1, 'a complete committed revision reaches the Store');
+    const sent = committedCalls(log).at(-1).request;
+    assert.equal(sent.candidateRevisionId, result.definitionRevisionId);
+    assert.deepEqual(sent.payload.definition, await od.evaluate(() => window.STBOutdoorPicnic.request()));
+    assert.equal(sent.payload.definitionKind, 'cut_package.v1');
+    assert.equal(sent.payload.ruleVersion, '0.1');
+
+    // OUTDOOR_COMMITTED: a missing plan still blocks before the Store, in admit(), and names its owner.
+    const before = outdoorCalls(log).length;
+    result = await od.evaluate(() => {
+      const revision = window.STBOutdoorPicnic.revision();
+      delete revision.facts['outdoor.plan'];
+      revision.definitionRevisionId += '-without-plan';
+      return window.STBOutdoorPicnic.inquire(revision);
+    });
+    assert.equal(result.admission.result, 'BLOCKED');
+    assert.equal(result.admission.reason, 'REQUIRED_FACT_UNSETTLED');
+    assert.deepEqual(result.admission.blocking, [{ factId: 'outdoor.plan', owner: 'USER', title: 'Chosen plan', condition: 'MISSING' }]);
+    assert.equal(result.request, null);
+    await page.waitForTimeout(600);
+    assert.equal(outdoorCalls(log).length, before, 'a missing plan never reaches the Store');
+
+    // No Outdoor inquiry, options or committed, admitted or blocked, called the old door.
+    assert.deepEqual(await outdoorOldDoorCalls(page), []);
+
+    // Control: the recorder is live. The old door still runs for a direct sendJob call in either scope, and is counted.
+    const direct = await od.evaluate(() => Promise.all(['OUTDOOR-PICNIC-OPTIONS', 'OUTDOOR-PICNIC-A-FRAME'].map(configurationId =>
+      window.STBStoreClient.sendJob({ projectId: 'outdoor', requestType: 'CUT_PACKAGE_V1', candidateRevisionId: 'control',
+        payload: { definition: { configurationId } } }).then(() => 'sent', error => String(error?.message || error)))));
+    for (const outcome of direct) assert.match(outcome, /SYSTEM_ADMISSION_/);
+    assert.deepEqual(await outdoorOldDoorCalls(page), [
+      { projectId: 'outdoor', configurationId: 'OUTDOOR-PICNIC-OPTIONS' },
+      { projectId: 'outdoor', configurationId: 'OUTDOOR-PICNIC-A-FRAME' },
+    ]);
+    assert.deepEqual(errors, []);
+  }, null, { [OLD_DOOR]: recordOldDoor });
 });

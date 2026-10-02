@@ -360,7 +360,7 @@ tr:last-child td{border-bottom:0}
 </div>
 
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-store-client.js?v=7eb5ab65"></script>
+<script src="stb-store-client.js?v=72cdc9fa"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
 <script src="stb-build-guide-spec.js?v=bcf7a02c"></script>
 <script src="stb-trail-contract.js?v=aea2f84d"></script>
@@ -608,8 +608,9 @@ const ownerLine=a=>a.admission.blocking.map(b=>b.title+' · owner '+b.owner).joi
 /* ═════ THE STORE: asked live, through the shared client. One inquiry path. ═════
    admit() decides whether a revision may be asked about at all: a blocked one is shown, naming what is missing and its
    owner, and never reaches the Store. An admitted one goes through inquire(), whatever its values: admission never
-   checks the envelope; the Store does. This is the transport inside inquire(): it sends the definition the admitted
-   revision was made from, with exactly the admitted packages in it, and nothing else. */
+   checks the envelope; the Store does. This is the transport inside inquire(), in both scopes: it sends the definition
+   the admitted revision was made from, with exactly the admitted packages in it, and nothing else, through
+   sendAdmittedJob. admit() is the one admission decision; no Outdoor inquiry calls admitPublicStoreRequest. */
 function storeTransport(definition,got){
   return request=>{
     if(request.requestType!=='CUT_PACKAGE_V1'||request.definitionRevisionId!==definition.configurationVersion)throw new Error('ADMITTED_REVISION_NOT_ON_SCREEN');
@@ -617,7 +618,7 @@ function storeTransport(definition,got){
     if(JSON.stringify(packages)!==JSON.stringify(definition.cutPackages))throw new Error('ADMITTED_PACKAGES_NOT_SENT');
     const client=window.STBStoreClient;
     if(!client)throw new Error('STORE_CLIENT_UNAVAILABLE');
-    return client.sendJob({projectId:TILE_ID,requestType:request.requestType,candidateRevisionId:request.definitionRevisionId,
+    return client.sendAdmittedJob({admitted:request,
       payload:{definition:{...definition,cutPackages:packages},definitionKind:'cut_package.v1',ruleVersion:'0.1'}}).then(a=>(got.body=a));
   };
 }
