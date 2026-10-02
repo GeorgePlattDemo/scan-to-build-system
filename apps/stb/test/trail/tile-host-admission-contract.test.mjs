@@ -1,4 +1,4 @@
-// Tile/host and definition/Store admission contract (the shared tile host uses it; Playhouse, Window Seat, Alcove and Outdoor are on it).
+// Tile/host and definition/Store admission contract (the shared tile host uses it; every tile is on it).
 // Contract: apps/stb/shared/tile-host-admission-contract.mjs. Spec: docs/application/TILE-HOST-ADMISSION-CONTRACT.md.
 //
 // Proves three cases for every tile declared in public-build/stb-trail-contract.js:
@@ -55,6 +55,7 @@ const FIXTURES = {
       'start-own.parts': ok([{ partId: 'P1', lengthIn: 22 }, { partId: 'P2', lengthIn: 22 }]),
       'start-own.operations': ok(['CROSSCUT']),
       'start-own.datum': ok({ cutPlane: 'XZ', lengthDatum: 'C' }),
+      'start-own.spot-demand': ok({ required: false }),
     },
     userFact: 'start-own.workpiece-length',
     pastEnvelope: { 'start-own.workpiece-length': ok(4800), 'start-own.parts': ok([{ partId: 'P1', lengthIn: 4790 }]) },

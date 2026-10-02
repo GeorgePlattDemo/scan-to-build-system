@@ -78,7 +78,7 @@ assert.equal(frame.includes('data-spot='),false);
 assert.match(frame,/18\.000 in → 26\.388° end cuts/);
 assert.match(frame,/Center spot = 16 ÷ 2 = 8 in/);
 assert.match(shell,/definitionId:'SYO-USER1-XBRACE-0\.1'/);
-assert.match(shell,/configurationId = 'SYO-USER1-XBRACE'/);
+assert.match(shell,/START_OWN_CONFIGURATION_ID = 'SYO-USER1-XBRACE'/);
 assert.match(shell,/endpoint16[\s\S]*?endpoint18[\s\S]*?'0\.1'[\s\S]*?'0\.2'/);
 assert.match(shell,/DEMO_HORIZONTAL_SPAN_IN = 8/);
 assert.match(shell,/Math\.asin\(spanRatio\)/);
@@ -97,9 +97,9 @@ assert.match(shell,/source:'start-own'/);
 assert.match(shell,/storeReference:freshStoreReference/);
 assert.match(shell,/stb-proof-handoff-job1/);
 assert.match(shell,/originalShow\.call\(win,'proof-store'\)/);
-assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=f77a49e9/);
+assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=4900acbf/);
 assert.match(shell,/const requestId = nextStoreRequestId\(definition\)/);
-assert.match(shell,/user1RuntimeBridge\.request\(definition\.storeDemand/);
+assert.match(shell,/user1RuntimeBridge\.request\(request, startOwnStoreDemandFrom\(request\), \{ requestId \}\)/);
 assert.match(shell,/freshEvaluation\?\.freshEvaluation === true/);
 assert.match(shell,/freshReceipt\?\.requestId === requestId/);
 assert.equal(shell.includes('currentStoreAuthorityUrl'),false,'Job 1 still floats on Store main');
@@ -113,15 +113,17 @@ assert.match(shell,/'start-own': Object\.freeze\(\{[\s\S]*?store:'proof-store'[\
 assert.match(shell,/data-proof-go="proof-accept">CONTINUE → ACCEPT \/ PAY/);
 assert.match(shell,/<div class="start-own-terms-host" data-terms-step="call"><\/div>/);
 assert.match(shell,/id="proof-yard-handoff"[^>]*data-proof-go="proof-record">PICK UP &amp; RECORD →/);
-assert.match(shell,/1 · Your idea/);
-assert.match(shell,/3 · The Store answers/);
+assert.equal(shell.includes('Your idea'),false,'Start your own nav still carries its own step labels');
+assert.match(shell,/`\$\{index \+ 1\} · \$\{trailContract\.steps\[index\]\}`/);
 assert.match(shell,/05 · FROM CONFIRMATION TO MOTION/);
 assert.match(shell,/PICKED UP\. GO FIX THAT BENCH\./);
 assert.match(shell,/YOU BUILD\./);
 assert.equal(shell.includes('id="proof-yard-next"'),false,'Job 1 Yard still has a separate receipts-next button');
-assert.match(shell,/canOpenStartOwnSimulationStage/);
-assert.match(shell,/stage==='yard'[\s\S]*SIMULATED_PAYMENT/);
-assert.match(shell,/stage==='record'[\s\S]*SIMULATED_CUSTODY_TRANSFER/);
+// Steps 5 and 6 open from the shared terms flow's gates, in the tile's STB-TILE-HOST-0.1 message.
+assert.equal(shell.includes('canOpenStartOwnSimulationStage'),false,'Start your own still has its own step gate');
+assert.match(shell,/function startOwnHostMessage\(\)[\s\S]*?t\?\.yardOpen\) usable\.push\(steps\[4\]\)[\s\S]*?t\?\.recordOpen\) usable\.push\(steps\[5\]\)/);
+assert.match(shell,/proofSimulationHas\('SIMULATED_PAYMENT'\)/);
+assert.match(shell,/SIMULATED_CUSTODY_TRANSFER/);
 
 // Each downstream gate exposes the same custody spine.
 for(const gate of ['store','accept','yard','terms','record']){

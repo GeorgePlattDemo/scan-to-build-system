@@ -11,19 +11,19 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=c797251c"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=34dcd4ed"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
 <script src="stb-store-handoff-contract.js?v=afccfa82"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
 <script src="stb-store-client.js?v=7eb5ab65"></script>
-<script src="stb-user-defined-board-runtime-bridge.js?v=f77a49e9"></script>
+<script src="stb-user-defined-board-runtime-bridge.js?v=4900acbf"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
 <script src="stb-build-guide-spec.js?v=9523c7af"></script>
 <script src="stb-trail-contract.js?v=aea2f84d"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
-import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => {
+import('./shared/tile-host-admission-contract.mjs?v=254cd59b').then(contract => {
   window.STBTileHostAdmission = Object.freeze({ ...contract });
 });
 </script>
@@ -135,6 +135,12 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
     // Opens a Start-your-own screen ('intent' or 'bench') from anywhere in the shell.
     // The real switcher is scoped inside the Shared Home block below and assigns itself here.
     let openStartOwnStage = () => {};
+    // Start your own is on the shared tile host. The bench's definition is one job-definition revision; the
+    // revision on the bench is admitted on every change, and confirming asks the Store through admit() then inquire().
+    const START_OWN_PROJECT_ID = 'start-own';
+    const START_OWN_INQUIRY_SCOPE = 'USER_DEFINED_BOARD_V1';
+    const START_OWN_CONFIGURATION_ID = 'SYO-USER1-XBRACE';
+    const startOwnLive = { token:0, revision:null, admission:null, asking:false, answer:null, blocking:[] };
 
     const home = doc.getElementById('projects');
     if (home) {
@@ -447,6 +453,7 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
                 } else {
                   proofFrame.contentWindow?.scrollTo?.(0,0);
                 }
+                startOwnPublish();
               };
               showStartOwnStage = (stage, focus = null) => {
                 pendingStartOwnStage = stage === 'bench' ? 'bench' : 'intent';
@@ -518,15 +525,10 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
                  * The static public Review build may present only exact Store-issued
                  * references proven against promoted authority. Other values require a live Store answer.
                  */
-                const configurationId = 'SYO-USER1-XBRACE';
+                const configurationId = START_OWN_CONFIGURATION_ID;
                 const endpoint16 = Math.abs(finishedLengthIn - 16) < 1e-9;
-                const endpoint18 = Math.abs(finishedLengthIn - 18) < 1e-9;
-                const configurationVersion = endpoint16
-                  ? '0.1'
-                  : endpoint18
-                    ? '0.2'
-                    : 'review-intermediate-'+finishedLengthIn.toFixed(3);
-                const declaredSawCuts = angleDeg !== 0 ? partQty + 1 : partQty;
+                const configurationVersion = startOwnConfigurationVersion(finishedLengthIn);
+                const declaredSawCuts = startOwnDeclaredSawCuts(partQty, angleDeg);
                 const declaredSpotCount = spotDemand ? partQty : 0;
                 const storeDemand = {
                   configurationId:configurationId,
@@ -902,6 +904,7 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
               const syncAndRender = reason => {
                 const definition = syncDefinition(reason);
                 renderBench(definition);
+                startOwnAdmitBench(definition);
                 return definition;
               };
               const markRevision = () => { definitionRevision += 1; };
@@ -913,11 +916,9 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
               benchButton?.addEventListener('click', () => {
                 syncAndRender('BENCH_HANDOFF');
                 showStage('bench');
-                syncJourneyNav('configure');
               });
               benchBack?.addEventListener('click', () => {
                 showStage('intent');
-                syncJourneyNav('scan');
               });
               benchLibrary?.addEventListener('click', () => {
                 selectJourneyProject(null);
@@ -957,12 +958,15 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
                   confirmButton.disabled = true;
                   setText('stb-before-send','ASKING STORE ZERO · this exact definition is being freshly evaluated. The displayed prior reference is not being reused.');
 
+                  // The one Store handoff: this exact definition as one revision, through admit() then inquire().
                   let freshStoreBody = null;
                   try {
-                    freshStoreBody = await user1RuntimeBridge.request(definition.storeDemand, {
-                      requestId:requestId,
-                      candidateRevisionId:definition.versionId
-                    });
+                    const inquiry = await startOwnInquire(startOwnRevision(definition), requestId);
+                    if (!inquiry.reachedStore) {
+                      confirmButton.disabled = false;
+                      return;
+                    }
+                    freshStoreBody = inquiry.answer;
                   } catch (error) {
                     setText('stb-before-send',String(error?.message || 'STORE_ZERO_UNAVAILABLE')+' · Store Zero could not evaluate this definition. Nothing was sent downstream and no prior Store answer was reused.');
                     confirmButton.disabled = false;
@@ -1173,7 +1177,7 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
                   confirmButton.disabled = false;
                   syncProofHandoff();
                   originalShow.call(win,'proof-store');
-                  syncJourneyNav('store');
+                  tilePageShown('proof-store');
                 });
               }
 
@@ -1195,10 +1199,10 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
           startOwnTile.addEventListener('click', event => {
             event.preventDefault();
             event.stopImmediatePropagation();
-            selectJourneyProject('start-own');
+            selectJourneyProject(START_OWN_PROJECT_ID);
             originalShow.call(win, 'start-own-live');
+            tilePageShown('start-own-live');
             setTimeout(() => showStartOwnStage('intent'),0);
-            syncJourneyNav('scan');
           }, true);
         }
 
@@ -1219,7 +1223,7 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.4.html?v=ff9e818c"
+                  src="stb-outdoor-picnic-0.4.html?v=5a5e8a4d"
                 ></iframe>
               </div>
             `;
@@ -1349,38 +1353,9 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
           if (type === 'STB_PROOF_RETURN_LIBRARY' || type === 'STB_CHILD_RETURN_LIBRARY') {
             selectJourneyProject(null);
             originalShow.call(win, 'projects');
-          } else if (type === 'STB_PROJECT_DEFINITION_CHANGED' && event.data?.projectId === 'start-own') {
-            // Current hosted Start Own is evaluated by the ab8a4c5d handoff contract.
-            // Legacy child messages may trigger proof refresh, but may not supply a competing Store answer.
-            captureStartOwnProof();
-          } else if (type === 'STB_PROOF_OPEN_JOB1') {
-            selectJourneyProject('start-own');
-            originalShow.call(win, 'start-own-live');
-          } else if (type === 'STB_START_OWN_CONFIRMED' && event.data?.payload) {
-            if (activeJourneyProject !== 'start-own') return;
-            captureStartOwnProof();
-            const carriedDefinition = event.data.payload.definition || null;
-            const boardEval = carriedDefinition?.capability || (
-              event.data.payload.storeReference
-                ? {
-                    status:event.data.payload.storeReference.capabilityStatus || 'UNRESOLVED',
-                    storeReference:event.data.payload.storeReference
-                  }
-                : null
-            );
-            const storeHandoff = createComparisonStoreHandoff('start-own',event.data.payload);
-            proofHandoff = {
-              job:'JOB 1 · START YOUR OWN',
-              source:'start-own',
-              payload:event.data.payload,
-              storeHandoff:storeHandoff,
-              boardEvaluation:boardEval
-            };
-            retainComparisonStoreHandoff('start-own',storeHandoff);
-            try { win.localStorage.setItem('stb-proof-handoff-job1', JSON.stringify(proofHandoff)); } catch (_) {}
-            syncProofHandoff();
-            originalShow.call(win, 'proof-store');
           }
+          // Start your own reaches the Store only through its bench's admit() then inquire(); no child message hands
+          // the shell a Store answer or opens its pages around the shared tile host.
           // Outdoor no longer hands off into Job 1's proof pages; its steps stay on its own page.
         });
       }
@@ -2434,7 +2409,6 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
 
     function syncProofSimulationUI(){
       renderStartOwnTerms();
-      applyStartOwnNavState();
       if(proofHandoff?.source!=='start-own') return;
       const sim=ensureProofSimulation();
       if(!sim) return;
@@ -2518,20 +2492,149 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
       renderProofReceiptLedger('proof-receipt-ledger');
       renderProofReceiptLedger('proof-yard-receipt-ledger');
       renderProofReceiptLedger('proof-record-ledger');
-
-      doc.querySelectorAll('.recovery-nav button[data-journey-stage]').forEach(button=>{
-        if(activeJourneyProject!=='start-own') return;
-        const stage=button.dataset.journeyStage;
-        const on=canOpenStartOwnSimulationStage(stage);
-        button.disabled=!on;
-      });
     }
 
     var startOwnTerms = window.STBTermsFlow ? window.STBTermsFlow.create({ projectId:'start-own', title:'Job 1 · X brace' }) : null;
     window.STBTermsFlow?.installStyle(doc);
+
+    // ── Start your own · on the shared tile host ──────────────────────────────────────────────────
+    // The bench's definition is one job-definition revision. Every Store inquiry goes through admit() then
+    // inquire() (tile-host-admission-contract.mjs): a missing profile fact blocks before the Store and names its
+    // owner; a complete revision reaches the Store whatever its values. The User 1 bridge is the transport inside
+    // inquire() and accepts only the admitted request. The nav is drawn by the shared tile host from this tile's
+    // STB-TILE-HOST-0.1 message.
+    function startOwnConfigurationVersion(finishedLengthIn) {
+      const endpoint16 = Math.abs(finishedLengthIn - 16) < 1e-9;
+      const endpoint18 = Math.abs(finishedLengthIn - 18) < 1e-9;
+      return endpoint16 ? '0.1' : endpoint18 ? '0.2' : 'review-intermediate-'+finishedLengthIn.toFixed(3);
+    }
+    function startOwnDeclaredSawCuts(partCount, angleDeg) {
+      return angleDeg !== 0 ? partCount + 1 : partCount;
+    }
+    // One revision from the bench's definition. A fact the definition does not carry is left out, so admission
+    // blocks on it rather than the page filling it in.
+    function startOwnRevision(definition) {
+      if (!definition || !definition.storeDemand) return null;
+      const demand = definition.storeDemand;
+      const facts = {};
+      const fact = (id, value, status) => { if (value !== undefined && value !== null) facts[id] = { value, status }; };
+      fact('start-own.material', definition.material ? { origin:definition.material.origin, stockClass:definition.material.stockClass } : null, 'CONFIRMED');
+      fact('start-own.workpiece-length', demand.definedWorkpieceLengthIn, 'CONFIRMED');
+      fact('start-own.parts', demand.parts, 'CONFIRMED');
+      fact('start-own.operations', demand.requiredOps, 'DERIVED');
+      fact('start-own.datum', { sawAngleDeg:demand.sawAngleDeg, cutPlane:demand.cutPlane, endIdentity:demand.endIdentity,
+        endRelation:demand.endRelation, lengthDatum:demand.lengthDatum, datumCMethod:demand.datumCMethod }, 'DERIVED');
+      const spot = definition.physicalDemand?.spotDemand || null;
+      fact('start-own.spot-demand', spot ? { ...spot } : { required:false }, 'CONFIRMED');
+      return { definitionRevisionId:definition.versionId, tileId:START_OWN_PROJECT_ID, facts };
+    }
+    // The Store demand, built only from the admitted request's facts.
+    function startOwnStoreDemandFrom(request) {
+      const f = request.facts;
+      const parts = f['start-own.parts'];
+      const datum = f['start-own.datum'];
+      const spot = f['start-own.spot-demand'];
+      return {
+        configurationId:START_OWN_CONFIGURATION_ID,
+        configurationVersion:startOwnConfigurationVersion(Number(parts[0]?.lengthIn)),
+        definedWorkpieceLengthIn:f['start-own.workpiece-length'],
+        sawAngleDeg:datum.sawAngleDeg,
+        cutPlane:datum.cutPlane,
+        endIdentity:datum.endIdentity,
+        endRelation:datum.endRelation,
+        lengthDatum:datum.lengthDatum,
+        datumCMethod:datum.datumCMethod,
+        requiredOps:f['start-own.operations'],
+        declaredSawCuts:startOwnDeclaredSawCuts(parts.length, datum.sawAngleDeg),
+        declaredSpotCount:spot.required === true ? Number(spot.totalCount) || 0 : 0,
+        parts
+      };
+    }
+    function startOwnAdmitted() {
+      return startOwnLive.admission?.admission?.result === tileHostContract.ADMISSION_RESULT.ADMITTED;
+    }
+    // Every change on the bench is a revision; it is admitted (never asked) so the nav reflects it.
+    function startOwnAdmitBench(definition) {
+      const revision = startOwnRevision(definition);
+      if (revision && startOwnLive.admission?.definitionRevisionId === revision.definitionRevisionId
+          && JSON.stringify(revision) === JSON.stringify(startOwnLive.revision)) { startOwnPublish(); return; }
+      startOwnLive.revision = revision;
+      startOwnLive.admission = tileHostContract.admit({ revision, inquiryScope:START_OWN_INQUIRY_SCOPE });
+      startOwnLive.blocking = startOwnLive.admission.admission.blocking.map(b => ({ ...b }));
+      renderStartOwnTerms();
+    }
+    // The one inquiry path. admit() decides whether this revision may be asked about at all; only an admitted
+    // revision is sent, through inquire(), and admission never checks the envelope: the Store does.
+    async function startOwnInquire(revision, requestId = null) {
+      const admission = tileHostContract.admit({ revision, inquiryScope:START_OWN_INQUIRY_SCOPE });
+      const token = ++startOwnLive.token;
+      startOwnLive.admission = admission;
+      startOwnLive.answer = null;
+      startOwnLive.blocking = admission.admission.blocking.map(b => ({ ...b }));
+      startOwnLive.asking = startOwnAdmitted();
+      renderStartOwnTerms();
+      if (!startOwnLive.asking) {
+        // Not sent: the bench names each missing fact and its owner.
+        const line = doc.getElementById('start-own-proof-frame')?.contentDocument?.getElementById('stb-before-send');
+        if (line) line.textContent = 'NOT SENT TO THE STORE · MISSING: '+startOwnLive.blocking.map(b => b.title+' · owner '+b.owner).join('; ')+'. Nothing was sent and no prior Store answer was reused.';
+      }
+      try {
+        const result = await tileHostContract.inquire(admission, request => {
+          if (!user1RuntimeBridge || typeof user1RuntimeBridge.request !== 'function') throw new Error('STORE_RUNTIME_UNAVAILABLE');
+          return user1RuntimeBridge.request(request, startOwnStoreDemandFrom(request), { requestId });
+        });
+        if (token === startOwnLive.token) startOwnLive.answer = result.answer;
+        return result;
+      } finally {
+        if (token === startOwnLive.token) { startOwnLive.asking = false; renderStartOwnTerms(); }
+      }
+    }
+    function startOwnWithinEnvelope(answer) {
+      return answer.rawEvaluation?.status === 'SUPPORTABLE' && answer.priceCompleteness?.status === 'COMPLETE_FOR_TRAVEL_STANDARD';
+    }
+    // The answer inquire() returned for the revision on the bench, while nothing newer is being asked and the
+    // pages after the bench carry it; otherwise null. A blocked, failed or superseded answer is never current.
+    function startOwnCurrentAnswer() {
+      const admission = startOwnLive.admission;
+      const answer = startOwnLive.answer;
+      if (!admission || !answer || startOwnLive.asking || !startOwnAdmitted()) return null;
+      if (answer.authority !== tileHostContract.ANSWER_AUTHORITY.CURRENT || answer.definitionRevisionId !== admission.definitionRevisionId) return null;
+      if (proofHandoff?.source !== START_OWN_PROJECT_ID || proofHandoff.payload?.versionId !== answer.definitionRevisionId) return null;
+      return answer;
+    }
+    // This tile's STB-TILE-HOST-0.1 message. Intent, the bench, The Store answers and Your call come from the
+    // contract's availableSteps() for the bench's admission and fresh answer. The Store answers shows that answer,
+    // so it waits for one; Your call also waits for the terms flow (callOpen); We cut it and Pick up & build stay
+    // with the terms flow's gates, behind Your call. The stage is the step the shown page (and, on the Start your
+    // own page, its Intent or bench screen) stands for.
+    function startOwnHostMessage() {
+      const steps = trailContract.steps;
+      const answer = startOwnCurrentAnswer();
+      const freshAnswer = answer ? { authority:answer.authority, definitionRevisionId:answer.definitionRevisionId, withinEnvelope:startOwnWithinEnvelope(answer) } : null;
+      const t = startOwnTerms?.state() || null;
+      const usable = tileHostContract.availableSteps({ trail:trailContract, admission:startOwnLive.admission, freshAnswer })
+        .filter(step => step !== steps[2] || !!answer)
+        .filter(step => step !== steps[3] || !t || t.callOpen);
+      if (usable.includes(steps[3]) && t?.yardOpen) usable.push(steps[4]);
+      if (usable.includes(steps[3]) && t?.recordOpen) usable.push(steps[5]);
+      const shown = tileHostShownPage();
+      let index = tileHostStepOfPage(START_OWN_PROJECT_ID, shown);
+      if (index === 0 && doc.getElementById(shown)?.dataset.revStage === 'bench') index = 1;
+      return {
+        interface:tileHostContract.TILE_HOST_VERSION,
+        tileId:START_OWN_PROJECT_ID,
+        stage:steps[index ?? 0],
+        usableSteps:usable,
+        navigationRequest:null
+      };
+    }
+    function startOwnPublish() {
+      if (tileHostActive(START_OWN_PROJECT_ID)) receiveTileHostMessage(startOwnHostMessage());
+    }
+
     function feedStartOwnTerms(){
       if(!startOwnTerms) return;
-      const ref=proofHandoff?.source==='start-own' ? proofHandoff?.payload?.storeReference : null;
+      const ref=startOwnCurrentAnswer() ? proofHandoff.payload.storeReference : null;
       if(!ref){ startOwnTerms.setAnswer(null); return; }
       const economics=proofSimulationEconomics();
       const receipt=ref.evaluationReceipt||null;
@@ -2547,21 +2650,34 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
       });
     }
     function renderStartOwnTerms(){
-      if(!startOwnTerms) return;
-      feedStartOwnTerms();
-      doc.querySelectorAll('.start-own-terms-host').forEach(host=>{
-        host.innerHTML=startOwnTerms.renderControls(host.dataset.termsStep)+startOwnTerms.renderChain();
-      });
-      doc.documentElement.dataset.startOwnTerms=startOwnTerms.state().stage;
+      if(startOwnTerms){
+        feedStartOwnTerms();
+        doc.querySelectorAll('.start-own-terms-host').forEach(host=>{
+          host.innerHTML=startOwnTerms.renderControls(host.dataset.termsStep)+startOwnTerms.renderChain();
+        });
+        doc.documentElement.dataset.startOwnTerms=startOwnTerms.state().stage;
+      }
+      startOwnPublish();
     }
     if(startOwnTerms){
       doc.querySelectorAll('.start-own-terms-host').forEach(host=>startOwnTerms.bind(host,(action,t)=>{
         if(action==='accept'&&t.stage==='QUEUED') handleProofSimulationAction('accept-pay-yard');
         else if(action==='yard'&&t.stage==='READY'){ handleProofSimulationAction('run-yard'); syncProofSimulationUI(); }
         else if(action==='pickup'&&t.stage==='HANDED_OFF'){ handleProofSimulationAction('handoff-record'); }
-        renderStartOwnTerms(); applyStartOwnNavState();
+        renderStartOwnTerms();
       }));
     }
+    win.STBStartOwnLive = Object.freeze({
+      // The revision on the bench, and the admission of the revision last admitted or asked about.
+      revision:() => JSON.parse(JSON.stringify(startOwnLive.revision)),
+      admission:() => startOwnLive.admission ? JSON.parse(JSON.stringify(startOwnLive.admission)) : null,
+      // Asks about a revision through the same admission as the bench; a blocked one never reaches the Store.
+      inquire:revision => startOwnInquire(revision).then(result => JSON.parse(JSON.stringify({ reachedStore:result.reachedStore, blocking:result.blocking,
+        answer:result.answer ? { definitionRevisionId:result.answer.definitionRevisionId, authority:result.answer.authority, status:result.answer.rawEvaluation?.status ?? null } : null }))),
+      state:() => JSON.parse(JSON.stringify({ asking:startOwnLive.asking, blocking:startOwnLive.blocking, admission:startOwnLive.admission?.admission ?? null,
+        answer:startOwnLive.answer ? { definitionRevisionId:startOwnLive.answer.definitionRevisionId, authority:startOwnLive.answer.authority } : null })),
+      hostMessage:() => startOwnHostMessage()
+    });
 
     function handleProofSimulationAction(action){
       if(proofHandoff?.source!=='start-own') return false;
@@ -2576,7 +2692,7 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
         proofSimulationReceipt('SIMULATED_QUEUE','Sent to the Store · in the yard queue for the same identified paid definition');
         syncProofSimulationUI();
         originalShow.call(win,'proof-yard');
-        syncJourneyNav('yard');
+        tilePageShown('proof-yard');
         return true;
       } else if(action==='run-yard'){
         if(!proofSimulationHas('SIMULATED_PAYMENT')) return true;
@@ -2611,7 +2727,7 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
         proofSimulationReceipt('SIMULATED_CUSTODY_TRANSFER','Simulated customer pickup and Yard custody transfer recorded · demonstration job closed');
         syncProofSimulationUI();
         originalShow.call(win,'proof-record');
-        syncJourneyNav('record');
+        tilePageShown('proof-record');
         return true;
       } else if(action==='pickup'){
         if(!proofSimulationHas('SIMULATED_READY_NOTICE')) return true;
@@ -2623,37 +2739,8 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
       return true;
     }
 
-    function canOpenStartOwnSimulationStage(stage){
-      if(proofHandoff?.source!=='start-own') return stage==='scan'||stage==='configure';
-      // The shared terms flow decides: 4 needs a SUPPORTABLE answer, 5 an accepted order, 6 a READY order.
-      const t=startOwnTerms?.state();
-      if(t){
-        if(stage==='request'||stage==='review') return t.callOpen;
-        if(stage==='yard'||stage==='terms') return t.yardOpen;
-        if(stage==='recap'||stage==='record') return t.recordOpen;
-        return true;
-      }
-      if(stage==='yard') return proofSimulationHas('SIMULATED_PAYMENT');
-      if(stage==='terms') return proofSimulationHas('SIMULATED_READY_NOTICE');
-      if(stage==='record') return proofSimulationHas('SIMULATED_CUSTODY_TRANSFER');
-      return true;
-    }
-
-    // Trail rule 3: a Start-your-own step that cannot be used yet is shown inert, never a silent no-op.
-    function applyStartOwnNavState(){
-      if(activeJourneyProject!=='start-own') return;
-      const nav=doc.querySelector('.recovery-nav');
-      if(!nav) return;
-      nav.querySelectorAll('button[data-job-project="start-own"]').forEach(button=>{
-        const on=canOpenStartOwnSimulationStage(button.dataset.journeyStage);
-        button.disabled=!on;
-        if(on) button.removeAttribute('aria-disabled');
-        else button.setAttribute('aria-disabled','true');
-      });
-    }
-
     function syncProofHandoff(){
-      applyStartOwnNavState();
+      startOwnPublish();
       if(!proofHandoff)return;
       const payload=proofHandoff.payload||{};
       const version=proofHandoff.storeHandoff?.versionId||payload.id||payload.versionId||payload.normalizedPart?.versionId||'IDENTIFIED VERSION';
@@ -2792,12 +2879,8 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
       const source=event.target.closest?.('[data-proof-return-source]');
       if(source){
         event.preventDefault();
-        if(proofHandoff?.source==='start-own'){
-          selectJourneyProject('start-own');
-          originalShow.call(win,'start-own-live');
-          setTimeout(() => openStartOwnStage('bench'),0);
-          syncJourneyNav('configure');
-        }
+        // Back to the bench, through the same gate as the nav.
+        if(proofHandoff && activeJourneyProject) showMappedProjectStage(activeJourneyProject,'configure');
         return;
       }
       const simAction=event.target.closest?.('[data-proof-sim-action]');
@@ -2809,22 +2892,14 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
       const go=event.target.closest?.('[data-proof-go]');
       if(go){
         event.preventDefault();
-        const expectedSource = activeJourneyProject === 'start-own' ? 'start-own' : null;
-        if(!expectedSource || proofHandoff?.source !== expectedSource) return;
+        if(!proofHandoff || !activeJourneyProject) return;
         syncProofHandoff();
-        let target=go.dataset.proofGo;
+        // An in-page step opens through the same gate as the nav: only a step the last validated message made usable.
+        const target=go.dataset.proofGo;
+        const index=tileHostStepOfPage(activeJourneyProject,target);
+        if(index==null || !tileHostLines.get(activeJourneyProject)?.steps[index]?.enabled){ applyTileHostNav(); return; }
         originalShow.call(win,target);
-        if(proofHandoff?.source==='start-own'){
-          const stageByTarget={proofStore:'store'};
-          const proofStage = {
-            'proof-store':'store',
-            'proof-accept':'request',
-            'proof-yard':'yard',
-            'proof-terms':'terms',
-            'proof-record':'record'
-          }[target] || null;
-          if(proofStage) syncJourneyNav(proofStage);
-        }
+        tilePageShown(target);
       }
     }, true);
 
@@ -3459,18 +3534,6 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
         && canonicalJourney.gates.length === 8;
     }
 
-    const START_OWN_NAV_LABELS = Object.freeze({
-      scan:'1 · Your idea',
-      configure:'2 · The bench',
-      store:'3 · The Store answers',
-      review:'3 · The Store answers',
-      request:'4 · Your call',
-      yard:'5 · We cut it',
-      terms:'5 · We cut it',
-      recap:'6 · Pick up & build',
-      record:'6 · Pick up & build'
-    });
-
     function restoreJourneyNav(nav) {
       if (!nav) return;
       nav.removeAttribute('data-active-project');
@@ -3519,9 +3582,19 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
     });
     win.STBAlcoveTileHost = Object.freeze({ hostMessage:() => alcoveHostMessage() });
 
-    function wireStartOwnJourneyNav(nav) {
-      wireTrailJourneyNav(nav, 'start-own');
-    }
+    // Start your own is on the shared tile host. The host draws its one nav line from the message its tile code
+    // builds (startOwnHostMessage); its Store inquiries go through admit() then inquire() from its bench. It has no
+    // Idea intake yet, so it opens on Intent. Intent and the bench are two screens of its page: asked for either,
+    // it switches screens (the bench opens at the top, so the X-brace picture and the board are seen first).
+    registerTileHost(START_OWN_PROJECT_ID, {
+      report:startOwnHostMessage,
+      shown:() => startOwnPublish(),
+      go:target => {
+        const at = trailContract.steps.indexOf(target);
+        if (at === 0 || at === 1) setTimeout(() => openStartOwnStage(at === 1 ? 'bench' : 'intent', null), 0);
+        startOwnPublish();
+      }
+    });
 
     function wireTrailJourneyNav(nav, projectId) {
       if (!nav) return;
@@ -3559,9 +3632,10 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
         button.setAttribute('data-go',directTarget);
         button.dataset.jobProject = projectId;
         button.dataset.jobTarget = directTarget;
-        button.textContent = START_OWN_NAV_LABELS[stage] || button.dataset.defaultLabel;
+        const index = JOURNEY_STAGE_STEP[stage];
+        button.textContent = index === undefined ? button.dataset.defaultLabel : `${index + 1} · ${trailContract.steps[index]}`;
 
-        // Duplicate technical stages project onto the same Job 1 customer surface. Keep one button only.
+        // Duplicate technical stages project onto the same customer page. Keep one button only.
         if (stage === 'review' || stage === 'terms' || stage === 'recap') button.hidden = true;
       });
     }
@@ -3581,9 +3655,6 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
           // A tile on the shared tile host: the trail nav, drawn from its validated STB-TILE-HOST-0.1 message.
           wireTrailJourneyNav(nav, activeJourneyProject);
           refreshTileHost(activeJourneyProject);
-        } else if (activeJourneyProject === 'start-own') {
-          wireStartOwnJourneyNav(nav);
-          applyStartOwnNavState();
         }
       }
     }
@@ -3596,30 +3667,12 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
       });
     }
 
-    function syncJourneyNav(stage) {
-      doc.querySelectorAll('.recovery-nav button').forEach(function(button) {
-        if (stage && button.dataset.journeyStage === stage && !button.hidden) button.setAttribute('aria-current', 'step');
-        else button.removeAttribute('aria-current');
-      });
-    }
-
     function showMappedProjectStage(projectId, stage) {
-      if (projectId === 'start-own' && !canOpenStartOwnSimulationStage(stage)) { syncProofSimulationUI(); return true; }
-      if (projectId === 'start-own' && (stage === 'scan' || stage === 'configure')) {
-        originalShow.call(win,'start-own-live');
-        setTimeout(() => openStartOwnStage(
-          stage === 'configure' ? 'bench' : 'intent',
-          null  // open the bench at the top, so the X-brace picture and the board are what you see first
-        ),0);
-        syncJourneyNav(stage);
-        return true;
-      }
       const target = PROJECT_STAGE_TARGETS[projectId]?.[TILE_STAGE_LANDING[projectId]?.[stage] || stage] || null;
       if (!target || !doc.getElementById(target)) return false;
       // A tile on the shared host opens only the steps its last validated message made usable.
       if (tileHostStageOpen(projectId, stage) === false) { applyTileHostNav(); return true; }
       originalShow.call(win, target);
-      if (projectId === 'start-own') syncJourneyNav(stage);
       tilePageShown(target);
       if (JOURNEY_STAGE_STEP[stage] !== undefined) tileHostGo(projectId, trailContract.steps[JOURNEY_STAGE_STEP[stage]]);
       return true;
@@ -3657,10 +3710,6 @@ import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => 
       const tile = event.target.closest?.('#projects .tile[data-go]');
       if (!tile) return;
       const target = tile.getAttribute('data-go');
-      if (target === 'start-own') {
-        selectJourneyProject('start-own');
-        return;
-      }
       selectJourneyProject(PROJECT_TILE_TO_JOURNEY[target] || null);
     }, true);
 

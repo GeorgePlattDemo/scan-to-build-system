@@ -222,10 +222,10 @@ for (const forbidden of [
   assert.equal(syncBlock.includes(forbidden),false,'visible configurator reclaimed Store authority: '+forbidden);
 }
 
-assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=f77a49e9/);
+assert.match(shell,/stb-user-defined-board-runtime-bridge\.js\?v=4900acbf/);
 assert.match(shell,/const user1RuntimeBridge = window\.STBUserDefinedBoardRuntimeBridge \|\| null/);
 assert.match(shell,/nextStoreRequestId/);
-assert.match(shell,/user1RuntimeBridge\.request\(definition\.storeDemand/);
+assert.match(shell,/user1RuntimeBridge\.request\(request, startOwnStoreDemandFrom\(request\), \{ requestId \}\)/);
 assert.match(shell,/freshReceipt\?\.requestId === requestId/);
 assert.match(shell,/LIVE STORE EVALUATION REQUIRED/);
 assert.equal(shell.includes('currentStoreAuthorityUrl'),false,'active Start Own still floats on Store main');

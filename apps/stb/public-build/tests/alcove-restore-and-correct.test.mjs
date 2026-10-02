@@ -32,7 +32,7 @@ assert.match(shell,/review:'store'/);
 assert.match(shell,/request:'request'/);
 assert.match(shell,/terms:'yard'/);
 assert.match(shell,/recap:'record'/);
-assert.match(shell,/request:'4 · Your call'/);
+assert.match(shell,/button\.textContent = index === undefined \? button\.dataset\.defaultLabel : `\$\{index \+ 1\} · \$\{trailContract\.steps\[index\]\}`/);
 assert.match(shell,/sharedBand\.innerHTML\.replace\('Reference journey shown before confirmation\.'\,'Confirmed version sent to Store Zero\.'\)/);
 
 console.log('PASS · Alcove restore-and-correct checks');
