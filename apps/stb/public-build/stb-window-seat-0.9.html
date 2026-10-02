@@ -585,6 +585,7 @@
 <script src="stb-store-client.js?v=7eb5ab65"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
 <script src="stb-build-guide-spec.js?v=9523c7af"></script>
+<script src="stb-trail-contract.js?v=aea2f84d"></script>
 <script>
 (function(){
 'use strict';
@@ -604,6 +605,17 @@ const r3=v=>Math.round(v*1000)/1000;
 const clone=v=>JSON.parse(JSON.stringify(v));
 const T=0.75;
 const embedded=window.self!==window.top;
+
+/* ═════ THE SHARED TILE HOST AND ADMISSION: System's one contract ═════
+   The trail contract names the steps; the tile-host admission contract (shared/, the deployed copy, loaded, not copied)
+   decides whether a revision may be asked about at all. Every Store inquiry is admit() then inquire(). Until the
+   contract has loaded nothing is asked and The Store answers stays inert. */
+const TILE_ID='window-seat';
+const INQUIRY_SCOPE='WINDOW_SEAT_COMMITTED';
+const TRAIL=window.STBTrailContract;
+const FORK=TRAIL.presentationForks.find(f=>f.tileId===TILE_ID);
+const STEP_SECTIONS=['intent','bench','store','request','yard','record'];
+let C=null;
 
 /* ════════════════════════════════════════════════════════════════════
    PAGE 1 AND 2 · INTENT. Her idea, the sketch, the measured facts, and the knobs made for this job.
@@ -706,7 +718,7 @@ const START={wood:'pine',H:94,W:{LEFT:24,CENTER:55,RIGHT:24},SH:{LEFT:4,RIGHT:4}
   screws:{gauge:'',lengthIn:'',finish:'',qty:''}};
 let P=clone(START);
 let rev={n:1};
-const S={view:'trail',section:'hero',asking:false,answer:null,error:null};
+const S={view:'trail',section:'hero',asking:false,answer:null,error:null,blocked:null};
 
 /* One terms flow for every tile (stb-terms-flow.js): sent → arrived → answered → offered → your call → paid → queued → yard → custody. */
 const TERMS=window.STBTermsFlow.create({projectId:'window-seat',title:'Window seat'});
@@ -902,27 +914,58 @@ const keptList=()=>KEPT_ASKS.filter(k=>I.kept[k.k]).map(k=>({...k,t:k.k==='other
 /* ═════ CONDITIONS: ours to settle, not the Store's ═════ */
 function conditions(def){
   const c=[];
-  if(!(P.depth>0))c.push({t:'Depth needs an answer',d:'depth must be positive',block:true,at:'bench'});
-  if(def.center.windowH<=2)c.push({t:'No window opening left',d:inch(P.H)+' tall, less the '+inch(P.seat)+' seat and '+inch(P.upperH)+' upper storage, leaves '+inch(Math.max(def.center.windowH,0))+'. Raise the height, lower the seat, or shrink the upper storage.',block:true,at:'bench'});
-  if(def.center.cubClearH<=1)c.push({t:'No cubby opening left under the seat',d:'a '+inch(P.seat)+' seat leaves '+inch(Math.max(def.center.cubClearH,0))+' below it',block:true,at:'bench'});
-  def.feats.filter(f=>!f.defined).forEach(f=>c.push({t:'Part needs an answer: '+f.asm+' '+f.name,d:'works out at '+fmt(f.len)+' in long × '+fmt(def.runW)+' in per board',block:true,at:'bench'}));
-  if(!boardFor(def.runW))c.push({t:'No 1× board is that wide',d:inch(def.runW)+' per board is wider than an 11¼ in 1×12 (lumber standard). Add a board across the depth.',block:true,at:'bench'});
-  if(M.narrow!=null&&def.W+P.gap*2>M.narrow)c.push({t:'Wider than your controlling width',d:'three modules plus clearance measure '+inch(def.W+P.gap*2)+'; the narrowest width you marked controlling is '+inch(M.narrow),block:true,at:'bench'});
-  if(M.low!=null&&P.H>M.low)c.push({t:'Taller than your controlling height',d:inch(P.H)+' is taller than the lowest height you marked controlling, '+inch(M.low),block:true,at:'bench'});
-  if(M.depth!=null&&P.depth>M.depth)c.push({t:'Deeper than your controlling depth',d:inch(P.depth)+' is deeper than the '+inch(M.depth)+' you marked controlling',block:true,at:'bench'});
+  if(!(P.depth>0))c.push({t:'Depth needs an answer',d:'depth must be positive',block:true,at:'bench',fact:'window-seat.depth'});
+  if(def.center.windowH<=2)c.push({fact:'window-seat.height',t:'No window opening left',d:inch(P.H)+' tall, less the '+inch(P.seat)+' seat and '+inch(P.upperH)+' upper storage, leaves '+inch(Math.max(def.center.windowH,0))+'. Raise the height, lower the seat, or shrink the upper storage.',block:true,at:'bench'});
+  if(def.center.cubClearH<=1)c.push({t:'No cubby opening left under the seat',d:'a '+inch(P.seat)+' seat leaves '+inch(Math.max(def.center.cubClearH,0))+' below it',block:true,at:'bench',fact:'window-seat.height'});
+  def.feats.filter(f=>!f.defined).forEach(f=>c.push({t:'Part needs an answer: '+f.asm+' '+f.name,d:'works out at '+fmt(f.len)+' in long × '+fmt(def.runW)+' in per board',block:true,at:'bench',fact:'window-seat.boards'}));
+  if(!boardFor(def.runW))c.push({t:'No 1× board is that wide',d:inch(def.runW)+' per board is wider than an 11¼ in 1×12 (lumber standard). Add a board across the depth.',block:true,at:'bench',fact:'window-seat.boards'});
+  if(M.narrow!=null&&def.W+P.gap*2>M.narrow)c.push({t:'Wider than your controlling width',d:'three modules plus clearance measure '+inch(def.W+P.gap*2)+'; the narrowest width you marked controlling is '+inch(M.narrow),block:true,at:'bench',fact:'window-seat.width'});
+  if(M.low!=null&&P.H>M.low)c.push({t:'Taller than your controlling height',d:inch(P.H)+' is taller than the lowest height you marked controlling, '+inch(M.low),block:true,at:'bench',fact:'window-seat.height'});
+  if(M.depth!=null&&P.depth>M.depth)c.push({t:'Deeper than your controlling depth',d:inch(P.depth)+' is deeper than the '+inch(M.depth)+' you marked controlling',block:true,at:'bench',fact:'window-seat.depth'});
   if(has('XSPOT')){
     const f=def.feats.find(x=>x.id===P.xspot.target),off=parse(P.xspot.offset);
-    if(!P.xspot.target||off==null||!P.xspot.place)c.push({t:'The extra spot needs a part, a distance and a placement',d:'size is fixed at 3/16 in wide and 3/16 in deep.',block:true,at:'bench'});
-    else if(!f)c.push({t:'The extra spot’s part isn’t in this version',d:P.xspot.target+' no longer exists. The request is kept and marked; it is not moved to another part.',block:true,at:'bench'});
-    else if(!(off>0&&off<f.len))c.push({t:'The extra spot is off the part',d:fmt(off)+' in is not inside a '+fmt(f.len)+' in part',block:true,at:'bench'});
+    if(!P.xspot.target||off==null||!P.xspot.place)c.push({t:'The extra spot needs a part, a distance and a placement',d:'size is fixed at 3/16 in wide and 3/16 in deep.',block:true,at:'bench',fact:'window-seat.added-knobs'});
+    else if(!f)c.push({t:'The extra spot’s part isn’t in this version',d:P.xspot.target+' no longer exists. The request is kept and marked; it is not moved to another part.',block:true,at:'bench',fact:'window-seat.added-knobs'});
+    else if(!(off>0&&off<f.len))c.push({t:'The extra spot is off the part',d:fmt(off)+' in is not inside a '+fmt(f.len)+' in part',block:true,at:'bench',fact:'window-seat.added-knobs'});
   }
-  if(has('SCREWS')&&!screwsLine())c.push({t:'The screws need a gauge, a length, a finish and a count',d:'state all four before the Store is asked. Incomplete screws block the ask.',block:true,at:'bench'});
-  if(I.kept.other&&!I.otherText.trim())c.push({t:'“Something else” needs a description',d:'say what you’re asking for, on your intent page',block:true,at:'intent'});
+  if(has('SCREWS')&&!screwsLine())c.push({t:'The screws need a gauge, a length, a finish and a count',d:'state all four before the Store is asked. Incomplete screws block the ask.',block:true,at:'bench',fact:'window-seat.added-knobs'});
+  if(I.kept.other&&!I.otherText.trim())c.push({t:'“Something else” needs a description',d:'say what you’re asking for, on your intent page',block:true,at:'intent',fact:'window-seat.kept-asks'});
   if(M.narrow==null)c.push({t:'Fit against the opening not checked',d:'no width is marked controlling, so the job isn’t compared to the opening. The parts are still defined.',block:false});
   if(M.checking)c.push({t:M.checking+' measured number'+(M.checking===1?'':'s')+' still need checking',d:'not compared against the job until you mark them. They travel, marked.',block:false});
   c.push({t:'Assembly on site',d:'yours: how the towers fasten to the center and the unit to the wall.',block:false});
   return c;
 }
+
+/* ═════ ONE JOB-DEFINITION REVISION, AND ITS ADMISSION ═════
+   The revision carries the facts the window-seat admission profile declares, read off this one state. A fact a
+   blocking condition above holds open travels UNRESOLVED, so admit() blocks on it and names its owner. Kept asks
+   travel only as a count: they are on the job, never sent. */
+function revision(){
+  const def=buildDefinition(),req=buildRequest(def);
+  const open=new Set(conditions(def).filter(c=>c.block).map(c=>c.fact));
+  const fact=(id,value,status)=>({value,status:open.has(id)?'UNRESOLVED':status});
+  return {definitionRevisionId:req.definition.configurationVersion,tileId:TILE_ID,facts:{
+    'window-seat.width':fact('window-seat.width',def.W,'CONFIRMED'),
+    'window-seat.height':fact('window-seat.height',def.H,'CONFIRMED'),
+    'window-seat.depth':fact('window-seat.depth',P.depth,'CONFIRMED'),
+    'window-seat.boards':fact('window-seat.boards',def.boards.map(b=>({id:b.id,len:b.len,w:b.w})),'DERIVED'),
+    'window-seat.added-knobs':fact('window-seat.added-knobs',{
+      front:I.added.front?{board:!!P.front}:null,
+      xspot:I.added.xspot?clone(P.xspot):null,
+      screws:I.added.screws?clone(P.screws):null},'CONFIRMED'),
+    'window-seat.kept-asks':fact('window-seat.kept-asks',{kept:keptList().length},'CONFIRMED')
+  }};
+}
+/* Recalculated from the revision on screen, never restored. Null until the contract has loaded. */
+function currentAdmission(){return C?C.admit({revision:revision(),inquiryScope:INQUIRY_SCOPE}):null}
+const admitted=a=>!!C&&a?.admission?.result===C.ADMISSION_RESULT.ADMITTED;
+/* What the page shows as not sent: the last inquiry that admission blocked, else the revision on screen if blocked. */
+function blockedAdmission(){
+  if(S.blocked)return S.blocked;
+  const a=currentAdmission();
+  return a&&!admitted(a)?a:null;
+}
+const ownerLine=a=>a.admission.blocking.map(b=>b.title+' · owner '+b.owner).join('; ');
 
 /* ═════ RENDER · PAGE 1 AND 2 ═════ */
 function chipList(a,h){$(h).innerHTML=a.map((c,i)=>'<button type="button" class="ws-chip'+(c.on?' on':'')+'" aria-pressed="'+c.on+'" data-i="'+i+'">'+esc(c.t)+'</button>').join('')}
@@ -1132,7 +1175,7 @@ function changed(){
   measure();
   const req=buildRequest(buildDefinition());
   if(S.answer&&S.answer.sig!==req.sig&&!S.answer.stale){S.answer.stale=true;rev.n++}
-  S.error=null;
+  S.error=null;S.blocked=null;
   render();
   benchAsk();
 }
@@ -1141,33 +1184,46 @@ const answerCurrent=()=>!!(S.answer&&!S.answer.stale);
    bench is showing (a new wood included). No ask button. A change made while an ask is out is asked as soon as it
    returns. The price is the Store's; nothing is computed here, and a wood it can't supply comes back as its refusal. */
 function benchAsk(){
-  if(S.section!=='bench'||answerCurrent())return;
-  if(conditions(buildDefinition()).some(c=>c.block))return;
+  if(S.section!=='bench'||answerCurrent()||!C)return;
   if(S.asking){S.reask=true;return}
   askStore();
 }
 
-/* ═════ THE STORE: asked live, through the shared client. One request per version. ═════ */
-async function askStore(){
-  if(S.asking)return;
-  if(conditions(buildDefinition()).some(c=>c.block))return;
-  S.asking=true;S.error=null;render();
+/* ═════ THE STORE: asked live, through the shared client. One request per version. ═════
+   The one inquiry path. admit() decides whether this revision may be asked about at all: a blocked one is shown,
+   naming what is missing and its owner, and never reaches the Store. An admitted one goes through inquire(),
+   whatever its values: admission never checks the envelope; the Store does. */
+async function askStore(rv){
+  if(S.asking||!C)return null;
+  const req=buildRequest(buildDefinition());
+  const admission=C.admit({revision:rv||revision(),inquiryScope:INQUIRY_SCOPE});
+  if(!admitted(admission)){S.blocked=admission;render();return admission}
+  S.blocked=null;S.asking=true;S.error=null;render();
   try{
     const client=window.STBStoreClient;
     if(!client)throw new Error('STORE_CLIENT_UNAVAILABLE');
-    const req=buildRequest(buildDefinition());
     const sentAt=new Date().toISOString();
-    const body=await client.sendJob({projectId:'window-seat',requestType:'CUT_PACKAGE_V1',
-      candidateRevisionId:req.definition.configurationVersion,
-      payload:{definition:req.definition,definitionKind:'cut_package.v1',ruleVersion:'0.1'}});
+    let body=null;
+    const result=await C.inquire(admission,request=>{
+      /* The Store is asked about exactly the admitted revision: the request this page generated for it, with every
+         admitted board in it. */
+      if(request.requestType!=='CUT_PACKAGE_V1'||request.definitionRevisionId!==req.definition.configurationVersion)throw new Error('ADMITTED_REVISION_NOT_ON_SCREEN');
+      const sent=new Set(req.definition.cutPackages.flatMap(p=>p.parts.map(x=>x.partId)));
+      if(!request.facts['window-seat.boards'].every(b=>sent.has(b.id)))throw new Error('ADMITTED_BOARD_NOT_SENT');
+      return client.sendJob({projectId:TILE_ID,requestType:'CUT_PACKAGE_V1',
+        candidateRevisionId:request.definitionRevisionId,
+        payload:{definition:req.definition,definitionKind:'cut_package.v1',ruleVersion:'0.1'}}).then(a=>(body=a));
+    });
     S.answer={rev:rev.n,sig:req.sig,stale:false,definition:req.definition,record:req.record,
       evaluation:body.rawEvaluation,receipt:body.evaluationReceipt||body.rawEvaluation?.evaluationReceipt||null,
-      requestId:body.requestId,storePin:body.storePin,demand:body.mappedCallInputs?.demand||null,body,sentAt};
+      requestId:body.requestId,storePin:body.storePin,demand:body.mappedCallInputs?.demand||null,body,sentAt,
+      authority:result.answer.authority,definitionRevisionId:result.answer.definitionRevisionId};
     /* The bench moved while the Store was answering: the answer belongs to the version that was sent. */
     if(buildRequest(buildDefinition()).sig!==req.sig){S.answer.stale=true;rev.n++}
   }catch(e){S.error=String(e&&e.message||e)}
   S.asking=false;render();
   if(S.reask){S.reask=false;benchAsk()}
+  return admission;
 }
 /* Store reason codes in plain words. The code is the Store's; the words are only a reading of it. */
 const REASONS={
@@ -1324,7 +1380,7 @@ function render(){
   if(hs)$('history-note').innerHTML='<b>'+hs+' earlier answer'+(hs===1?'':'s')+' kept in history.</b> This version, revision '+rev.n+', needs its own fresh Store answer. Nothing from an earlier version carries over.';
 
   /* bench gate */
-  $('btn-ask').disabled=blocking.length>0||S.asking;
+  $('btn-ask').disabled=!admitted(currentAdmission())||S.asking;
   /* No ask button on the bench: the bench asks the Store by itself. This one only opens the Store's answer. */
   $('btn-ask').textContent='SEE THE STORE’S ANSWER →';
   $('bench-gate').textContent=blocking.length?blocking.length+' condition'+(blocking.length===1?'':'s')+' to settle before the Store can answer.':'Revision '+rev.n+' is ready to ask. The Store gets exactly this.';
@@ -1347,14 +1403,15 @@ function mainRefusal(v){
 function renderBenchMoney(){
   const el=$('bench-money'); if(!el) return;
   const a=S.answer,v=storeView(),t=v&&v.t;
-  const blocking=conditions(buildDefinition()).filter(c=>c.block);
+  const blocking=conditions(buildDefinition()).filter(c=>c.block),adm=blockedAdmission();
   const more='<p class="more"><a href="#s-store" data-to="store">See the Store’s full answer, line by line →</a></p>';
   const priceOf=(cls)=>v&&v.estimate!=null?'<p class="big'+(cls?' '+cls:'')+'">'+money(v.estimate)+'</p>':'<p class="big none'+(cls?' '+cls:'')+'">No complete budgetary estimate</p>';
   const basis=()=>'Wood '+money(t.material)+' + machine work '+money(t.machine_service)+(t.items?' + hardware '+money(t.items):'')+' · about '+Math.round(v.minutes)+' min modeled machine time. Budgetary, not a quote.';
   let lb,body,big,extra='';
-  if(blocking.length){
+  if(blocking.length||adm){
     lb='NOT PRICED YET';big='<p class="big none">—</p>';
-    body='Fill this in first, then the Store prices it: <b>'+esc(blocking[0].t)+'</b>'+(blocking.length>1?' (and '+(blocking.length-1)+' more, listed below)':'')+'.';
+    body=(blocking.length?'Fill this in first, then the Store prices it: <b>'+esc(blocking[0].t)+'</b>'+(blocking.length>1?' (and '+(blocking.length-1)+' more, listed below)':'')+'. ':'')
+      +(adm?'<span data-admission="BLOCKED">Not sent to the Store. Missing: '+esc(ownerLine(adm))+'.</span>':'');
   } else if(S.asking){
     lb=a?'UPDATING FOR REVISION '+rev.n+'…':'ASKING THE STORE…';big=a?priceOf('old'):'<p class="big none">…</p>';
     body=a?'The Store is pricing your change. The faded number was for revision '+a.rev+'.':'The Store prices revision '+rev.n+' as soon as it answers.';
@@ -1376,13 +1433,14 @@ function renderBenchMoney(){
 
 function renderStore(req,cond){
   const a=S.answer,v=storeView(),panel=$('store-panel');
-  const blocked=cond.some(c=>c.block);
+  const adm=blockedAdmission(),blocked=!admitted(currentAdmission());
   let h='';
   if(S.asking){h='<p class="lb">ASKING</p><p class="status ask">Sending revision '+rev.n+' to the live Store…</p>'}
   else if(S.error){h='<p class="lb">NO ANSWER</p><p class="status bad">The Store didn’t answer ('+esc(S.error)+'). Nothing is shown in its place.</p>'
     +(location.protocol==='file:'||/STORE_ZERO_UNAVAILABLE|Failed to fetch|NetworkError|Load failed/i.test(S.error)?'<p class="small dim">The live Store answers the published app. A copy of this page opened anywhere else can’t reach it, and a failed ask stays a failed ask.</p>':'')
     +'<button type="button" class="go" data-ask>TRY AGAIN</button>'}
-  else if(!a){h='<p class="lb">NOT ASKED YET</p><p class="status">Revision '+rev.n+' hasn’t been sent. '+(blocked?'Settle the conditions on the bench first.':'Ask, and the live Store answers this exact version.')+'</p>'
+  else if(!a){h='<p class="lb">'+(adm?'NOT SENT TO THE STORE':'NOT ASKED YET')+'</p><p class="status">Revision '+rev.n+' hasn’t been sent. '+(blocked?'Settle the conditions on the bench first.':'Ask, and the live Store answers this exact version.')+'</p>'
+    +(adm?'<p class="small" data-admission="BLOCKED">Missing: '+esc(ownerLine(adm))+'</p>':'')
     +'<button type="button" class="go" data-ask'+(blocked?' disabled':'')+'>ASK THE STORE NOW</button>'}
   else{
     const t=v.t,stale=a.stale,id=identities();
@@ -1558,7 +1616,33 @@ function renderStoreDoctrine(host){
 const SECTIONS=['hero','intent','bench','store','request','yard','record'];
 const NAV_OF={intent:'scan',bench:'configure',store:'store',request:'request',yard:'yard',record:'record',audit:'record'};
 const FIRST_OF={scan:'intent',configure:'bench',store:'store',request:'request',yard:'yard',record:'record'};
-function usable(){const t=TERMS.state();return {hero:true,intent:true,bench:true,store:true,request:t.callOpen,yard:t.yardOpen,record:t.recordOpen,audit:true}}
+/* The fresh answer availableSteps() reads: current authority, for this exact revision, inside the envelope or not. */
+function freshAnswer(){
+  const a=S.answer;if(!a||a.stale||S.asking||S.error)return null;
+  return {authority:a.authority,definitionRevisionId:a.definitionRevisionId,withinEnvelope:!!storeView()?.allOk};
+}
+/* Intent, the bench, The Store answers and Your call from the contract's availableSteps(); We cut it and Pick up &
+   build stay with the terms flow's gates, behind Your call. Before the contract loads: Intent and the bench only. */
+function usableSteps(){
+  const steps=TRAIL.steps,t=TERMS.state();
+  const u=C?[...C.availableSteps({trail:TRAIL,admission:currentAdmission(),freshAnswer:freshAnswer()})]:steps.slice(0,2);
+  if(u.includes(steps[3])&&!t.callOpen)u.splice(u.indexOf(steps[3]),1);
+  if(u.includes(steps[3])&&t.yardOpen)u.push(steps[4]);
+  if(u.includes(steps[3])&&t.recordOpen)u.push(steps[5]);
+  return u;
+}
+function usable(){const u=usableSteps(),on=i=>u.includes(TRAIL.steps[i]);
+  return {hero:true,intent:true,bench:true,store:on(2),request:on(3),yard:on(4),record:on(5),audit:true}}
+/* This tile's STB-TILE-HOST-0.1 message for the shared host. On Idea it carries the fork's pressed option; from
+   Intent on, the current step (in the long scroll, the last usable step at or above the page in view). */
+function hostMessage(){
+  const steps=TRAIL.steps,u=usableSteps(),onIdea=S.section==='hero';
+  let stage=TRAIL.idea.label;
+  if(!onIdea){let i=Math.max(STEP_SECTIONS.indexOf(S.section==='audit'?'record':S.section),0);while(i>0&&!u.includes(steps[i]))i--;stage=steps[i]}
+  const m={interface:C.TILE_HOST_VERSION,tileId:TILE_ID,stage,usableSteps:u,navigationRequest:null};
+  if(onIdea&&FORK)m.presentationFork=FORK.options[S.view==='whole'?1:0];
+  return m;
+}
 function setView(view,section){
   S.view=view;if(section)S.section=section;
   document.body.dataset.view=view;document.body.dataset.section=S.section;
@@ -1571,14 +1655,14 @@ function go(section){
   if(!usable()[section])return;
   if(S.view==='whole'){S.section=section;syncNav();benchAsk();$('s-'+section).scrollIntoView({behavior:'smooth',block:'start'});return}
   setView('trail',section);window.scrollTo(0,0);
-  if(section==='store'&&(!S.answer||S.answer.stale)&&!S.asking&&!S.error&&!conditions(buildDefinition()).some(c=>c.block))askStore();
+  if(section==='store'&&(!S.answer||S.answer.stale)&&!S.asking&&!S.error)askStore();
 }
 /* Which page is on screen in the long scroll: the last one whose top has passed the route bar. */
 function visibleSection(){let cur='hero';for(const s of SECTIONS){const r=$('s-'+s).getBoundingClientRect();if(r.top<120)cur=s}return cur}
 function syncNav(){
-  const u=usable(),navU={scan:true,configure:true,store:true,request:u.request,yard:u.yard,record:u.record};
+  const u=usable(),navU={scan:true,configure:true,store:u.store,request:u.request,yard:u.yard,record:u.record};
   $$('[data-nav]').forEach(bt=>{const st=bt.dataset.nav;bt.disabled=!navU[st];bt.classList.toggle('on',S.view==='trail'&&NAV_OF[S.section]===st)});
-  if(embedded&&window.parent!==window)window.parent.postMessage({type:'STB_SEAT_STATE',projectId:'window-seat',view:S.view,step:NAV_OF[S.section],section:S.section,usable:navU},location.origin);
+  if(embedded&&window.parent!==window&&C)window.parent.postMessage({type:'STB_TILE_HOST',message:hostMessage()},location.origin);
 }
 document.addEventListener('click',e=>{
   const t=e.target.closest('[data-to]');if(t){e.preventDefault();go(t.dataset.to);return}
@@ -1613,13 +1697,14 @@ TERMS.onChange(()=>{renderTerms();syncNav()});
 $('start-over').onclick=()=>{TERMS.setAnswer(null);S.answer=null;S.error=null;I=clone(INTENT_START);P=clone(START);rev.n++;
   $('idea-text').value=I.idea;renderFactFields();readFacts();controls();render();setView('trail','hero');window.scrollTo(0,0)};
 window.addEventListener('message',event=>{
-  /* The System shell (the parent frame, or the top window that drives it) may choose the page. */
+  /* The shared tile host (the parent frame, or the top window that drives it) asks for a trail target by its
+     contract label: Idea, one of the six steps, or an option of this tile's declared fork. */
   if(event.origin!==location.origin||(event.source!==window.parent&&event.source!==window.top))return;
-  if(event.data?.type!=='STB_SEAT_GO')return;
-  const st=String(event.data.stage||'');
-  if(st==='whole'){setView('whole');window.scrollTo(0,0);return}
-  const map={hero:'hero',scan:'intent',intent:'intent',configure:'bench',bench:'bench',store:'store',review:'store',request:'request',yard:'yard',terms:'yard',recap:'record',record:'record'};
-  if(map[st]){if(S.view==='whole')setView('trail',S.section);go(map[st])}
+  if(event.data?.type!=='STB_TILE_HOST_GO')return;
+  const target=String(event.data.target||'');
+  if(FORK&&target===FORK.options[1]){setView('whole');window.scrollTo(0,0);return}
+  const section=target===TRAIL.idea.label?'hero':STEP_SECTIONS[TRAIL.steps.indexOf(target)];
+  if(section){if(S.view==='whole')setView('trail',S.section);go(section)}
 });
 if(embedded)$('bar').hidden=true;
 
@@ -1633,7 +1718,16 @@ window.STBWindowSeat=Object.freeze({version:'0.9',
   knobs:()=>manifest().map(k=>k.id),
   benchKnobs:()=>[...new Set($$('#s-configure [data-knob]').map(e=>e.dataset.knob))],
   auditText:()=>auditText(),
-  state:()=>({view:S.view,section:S.section,rev:rev.n,asking:S.asking,error:S.error,answered:!!S.answer,current:answerCurrent(),terms:TERMS.state()})});
+  revision:()=>clone(revision()),
+  admission:()=>clone(currentAdmission()),
+  /* Asks about a revision through the same admission as the page; a blocked one never reaches the Store. */
+  inquire:rv=>askStore(rv).then(a=>clone(a)),
+  hostMessage:()=>C?hostMessage():null,
+  state:()=>({view:S.view,section:S.section,rev:rev.n,asking:S.asking,error:S.error,answered:!!S.answer,current:answerCurrent(),terms:TERMS.state(),
+    admission:clone(S.blocked?.admission??currentAdmission()?.admission??null)})});
+/* The deployed contract copy, loaded once. Nothing is asked before it is here. */
+import('./shared/tile-host-admission-contract.mjs?v=6523126f').then(m=>{C=m;render();benchAsk()},
+  ()=>{document.documentElement.dataset.tileHostContract='MISSING'});
 })();
 </script>
 </body>

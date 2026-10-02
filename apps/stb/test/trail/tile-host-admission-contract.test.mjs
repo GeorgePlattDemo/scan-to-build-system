@@ -1,4 +1,4 @@
-// Tile/host and definition/Store admission contract (the shared tile host uses it; Playhouse is on it).
+// Tile/host and definition/Store admission contract (the shared tile host uses it; Playhouse and Window Seat are on it).
 // Contract: apps/stb/shared/tile-host-admission-contract.mjs. Spec: docs/application/TILE-HOST-ADMISSION-CONTRACT.md.
 //
 // Proves three cases for every tile declared in public-build/stb-trail-contract.js:
@@ -78,6 +78,8 @@ const FIXTURES = {
       'window-seat.height': ok(18),
       'window-seat.depth': ok(16),
       'window-seat.boards': { value: [{ id: 'B1', len: 60, w: 16 }], status: STATUS.DERIVED },
+      'window-seat.added-knobs': ok({ front: { board: true }, xspot: null, screws: null }),
+      'window-seat.kept-asks': ok({ kept: 1 }),
     },
     userFact: 'window-seat.depth',
     pastEnvelope: { 'window-seat.width': ok(900), 'window-seat.boards': { value: [{ id: 'B1', len: 900, w: 60 }], status: STATUS.DERIVED } },

@@ -1,6 +1,6 @@
 # Tile/host and definition/Store admission contract
 
-**Owner:** System. **Status:** in use for Playhouse. The shared tile host in `apps/stb/public-build/system-build-current.html` loads the deployed copy (`apps/stb/public-build/shared/`, byte for byte) and draws Playhouse's nav from its validated `STB-TILE-HOST-0.1` message; Playhouse's Store inquiries go through `admit()`. Every other tile keeps its current path until its own migration.
+**Owner:** System. **Status:** in use for Playhouse and Window Seat. The shared tile host in `apps/stb/public-build/system-build-current.html` loads the deployed copy (`apps/stb/public-build/shared/`, byte for byte) and draws each one's nav from its validated `STB-TILE-HOST-0.1` message; their Store inquiries go through `admit()` then `inquire()`. Window Seat runs in its own frame: its page loads the same deployed copy, posts `{ type: 'STB_TILE_HOST', message }` from that frame, and the host asks it for a trail target (Idea, a step, or a declared fork option) with `STB_TILE_HOST_GO`. Every other tile keeps its current path until its own migration.
 **Executable half:** [`apps/stb/shared/tile-host-admission-contract.mjs`](../../apps/stb/shared/tile-host-admission-contract.mjs).
 **Check:** [`apps/stb/test/trail/tile-host-admission-contract.test.mjs`](../../apps/stb/test/trail/tile-host-admission-contract.test.mjs), beside the trail tests.
 Terms used here (job-definition revision, Store inquiry, admissible, The Store answers) are defined once in [definitions](../definitions/README.md).
@@ -58,5 +58,5 @@ The current admission path is `admitPublicStoreRequest` in `apps/stb/public-buil
 
 ## Open before adoption
 
-- **Profiles are first declarations,** enough for the contract tests. They are not yet a port of every row in the current path (for example Start your own spot demand, Window Seat screws, generator consistency).
-- **Tile messages today:** Playhouse sends `STB-TILE-HOST-0.1`. The others are still per-tile types (`STB_SEAT_STATE`, `STB_OUTDOOR_STATE`, `STB_START_OWN_*`); interface 1 is what they converge on.
+- **Profiles are first declarations,** enough for the contract tests. They are not yet a port of every row in the current path (for example Start your own spot demand, generator consistency). Window Seat's profile (0.2) declares what its page already requires before it asks: overall width, overall height and depth (USER), every defined board (PROJECT), every knob added by hand with what it needs, screws included, and every kept ask described (USER; kept asks travel only as a count, never sent).
+- **Tile messages today:** Playhouse and Window Seat send `STB-TILE-HOST-0.1`. The others are still per-tile types (`STB_OUTDOOR_STATE`, `STB_START_OWN_*`); interface 1 is what they converge on.

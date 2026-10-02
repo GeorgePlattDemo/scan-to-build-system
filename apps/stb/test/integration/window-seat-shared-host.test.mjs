@@ -1,0 +1,189 @@
+// Window Seat on the shared tile host, against the real pinned Store.
+// - The host draws Window Seat's one nav line from a validated STB-TILE-HOST-0.1 message and the trail contract:
+//   on Idea, the declared fork Intent | One full scroll and no steps; from Intent on, Idea as a back control and the
+//   six contract steps, inert steps disabled, one current. The fork is presentation only: it changes no admission.
+// - A frame that speaks for another tile, or sends an invalid message, is rejected and the steps go inert.
+// - Every Store inquiry is admit() then inquire(): a missing profile fact blocks before the Store and names its owner;
+//   a complete revision still reaches the Store.
+// - The old Window Seat shell path is gone: no seatGo, seatNavButton, applySeatNavState or STB_SEAT_* messages.
+
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+import { withBrowser, openTile } from './helpers.mjs';
+
+const TRAIL_STEPS = ['Intent', 'The bench', 'The Store answers', 'Your call', 'We cut it', 'Pick up & build'];
+const SHELL = fileURLToPath(new URL('../../public-build/system-build-current.html', import.meta.url));
+const PAGE = fileURLToPath(new URL('../../public-build/stb-window-seat-0.9.html', import.meta.url));
+
+const frameOf = (page, part) => page.frames().find(f => f.url().includes(part));
+async function until(fn, label, tries = 80) {
+  for (let i = 0; i < tries; i++) { const v = await fn(); if (v) return v; await new Promise(r => setTimeout(r, 150)); }
+  throw new Error('timed out: ' + label);
+}
+// The visible nav line, in order: what a person sees.
+async function navLine(frame) {
+  return frame.$$eval('.recovery-nav button', els => els
+    .filter(e => !e.hidden && getComputedStyle(e).display !== 'none' && e.closest('.recovery-nav') && getComputedStyle(e.closest('.trail-fork') || e).display !== 'none')
+    .map(e => ({
+      label: e.textContent.trim(),
+      stage: e.dataset.journeyStage || null,
+      fork: e.dataset.presentationFork || null,
+      inert: e.disabled || e.getAttribute('aria-disabled') === 'true',
+      current: e.getAttribute('aria-current') === 'step',
+      pressed: e.getAttribute('aria-pressed') === 'true',
+    })));
+}
+const steps = line => line.filter(b => b.stage);
+const cutCalls = log => log.filter(e => e.request.projectId === 'window-seat' && e.request.requestType === 'CUT_PACKAGE_V1').length;
+
+async function openSeat(browser, origin) {
+  const { page, frame, errors } = await openTile(browser, origin, 'Space utilization');
+  const seat = await until(() => frameOf(page, 'stb-window-seat-0.9.html'), 'seat frame');
+  await until(() => seat.evaluate(() => !!window.STBWindowSeat?.hostMessage()), 'seat contract loaded');
+  await until(async () => (await steps(await navLine(frame))).length === 0 && (await navLine(frame)).some(b => b.fork), 'idea line');
+  return { page, frame, seat, errors };
+}
+
+test('the old Window Seat shell path is gone', () => {
+  const shell = fs.readFileSync(SHELL, 'utf8');
+  for (const name of ['seatGo', 'seatNavButton', 'applySeatNavState', 'seatNavState', 'seatPlace', 'STB_SEAT_STATE', 'STB_SEAT_GO', 'TRAIL_NAV_LABEL_OVERRIDES']) {
+    assert.equal(shell.includes(name), false, name + ' is still in the shell');
+  }
+  assert.doesNotMatch(shell, /activeJourneyProject\s*[!=]==?\s*['"]window-seat['"]/, 'no Window Seat branch in the shell');
+  const page = fs.readFileSync(PAGE, 'utf8');
+  assert.equal(page.includes('STB_SEAT_'), false, 'the page speaks only STB-TILE-HOST-0.1 to the host');
+  // One Store handoff on the page: inside inquire(), after admit().
+  assert.equal((page.match(/client\.sendJob\(/g) || []).length, 1);
+  assert.match(page, /C\.inquire\(admission,request=>\{[\s\S]*?client\.sendJob\(/);
+  // The contract is loaded from the one deployed copy, never pasted in.
+  assert.match(page, /import\('\.\/shared\/tile-host-admission-contract\.mjs\?v=[0-9a-f]{8}'\)/);
+  assert.equal(page.includes('export function admit'), false);
+});
+
+test('the shared host draws the Window Seat nav from its validated STB-TILE-HOST-0.1 message', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin }) => {
+    const { page, frame, seat, errors } = await openSeat(browser, origin);
+
+    // Idea: the intake. The tile's message carries the declared fork; the host shows it, and no step.
+    let message = await seat.evaluate(() => window.STBWindowSeat.hostMessage());
+    assert.deepEqual(Object.keys(message).sort(), ['interface', 'navigationRequest', 'presentationFork', 'stage', 'tileId', 'usableSteps']);
+    assert.equal(message.interface, 'STB-TILE-HOST-0.1');
+    assert.equal(message.tileId, 'window-seat');
+    assert.equal(message.stage, 'Idea');
+    assert.equal(message.presentationFork, 'Intent');
+    assert.equal(await frame.evaluate(() => document.documentElement.dataset.tileHostRejected ?? null), null);
+    let line = await navLine(frame);
+    assert.deepEqual(line.map(b => b.label), ['← Project Library', 'Intent', 'One full scroll']);
+    assert.deepEqual(line.filter(b => b.fork).map(b => [b.fork, b.pressed]), [['Intent', true], ['One full scroll', false]]);
+    assert.match(await frame.locator('.recovery-nav .trail-fork').innerText(), /^Two ways through this job:/);
+    assert.equal(line.some(b => b.current), false, 'Idea is not a step');
+
+    // From Intent on: Idea as the back control, the six contract steps in order, inert ones disabled, one current.
+    await frame.locator('.recovery-nav [data-presentation-fork="Intent"]').click();
+    await until(async () => steps(await navLine(frame)).some(b => b.current), 'intent current');
+    line = await navLine(frame);
+    assert.deepEqual(line.map(b => b.label), ['← Project Library', 'Idea', ...TRAIL_STEPS.map((step, i) => `${i + 1} · ${step}`)]);
+    assert.deepEqual(steps(line).map(b => b.inert), [false, false, false, true, true, true]);
+    assert.deepEqual(line.filter(b => b.current).map(b => b.label), ['1 · Intent']);
+    assert.equal((await seat.evaluate(() => window.STBWindowSeat.state())).section, 'intent');
+    message = await seat.evaluate(() => window.STBWindowSeat.hostMessage());
+    assert.equal(message.presentationFork, undefined, 'the fork lives on the Idea line only');
+    assert.deepEqual(message.usableSteps, TRAIL_STEPS.slice(0, 3));
+
+    // A step on the line opens it on the tile's own page; the current step moves with it.
+    await frame.locator('.recovery-nav button[data-job-project="window-seat"][data-journey-stage="configure"]').click();
+    await until(async () => (await seat.evaluate(() => window.STBWindowSeat.state())).section === 'bench', 'bench');
+    await until(async () => (await navLine(frame)).filter(b => b.current).map(b => b.label).join() === '2 · The bench', 'bench current');
+
+    // Idea goes back to the intake; the fork is drawn again with the same choice.
+    await frame.locator('.recovery-nav .job-idea').click();
+    await until(async () => steps(await navLine(frame)).length === 0, 'back on Idea');
+    assert.equal((await seat.evaluate(() => window.STBWindowSeat.state())).section, 'hero');
+
+    // The other fork option is the same job, shown as one long scroll. It is presentation only.
+    const before = await seat.evaluate(() => ({ revision: window.STBWindowSeat.revision(), admission: window.STBWindowSeat.admission() }));
+    await frame.locator('.recovery-nav [data-presentation-fork="One full scroll"]').click();
+    await until(async () => (await seat.evaluate(() => window.STBWindowSeat.state())).view === 'whole', 'whole view');
+    await until(async () => (await navLine(frame)).some(b => b.fork === 'One full scroll' && b.pressed), 'fork pressed');
+    const after = await seat.evaluate(() => ({ revision: window.STBWindowSeat.revision(), admission: window.STBWindowSeat.admission() }));
+    assert.deepEqual(after, before, 'the fork changes neither the revision nor its admission');
+
+    // A frame that speaks for another tile is rejected, and the steps go inert.
+    await seat.evaluate(() => window.parent.postMessage({ type: 'STB_TILE_HOST', message: { ...window.STBWindowSeat.hostMessage(), tileId: 'playhouse' } }, location.origin));
+    await until(() => frame.evaluate(() => document.documentElement.dataset.tileHostRejected === 'TILE_FRAME_MISMATCH'), 'mismatch rejected');
+    // An invalid message for itself (a fork off its line) is rejected too.
+    await seat.evaluate(() => window.parent.postMessage({ type: 'STB_TILE_HOST', message: { ...window.STBWindowSeat.hostMessage(), stage: 'The bench', presentationFork: 'Intent' } }, location.origin));
+    await until(() => frame.evaluate(() => /PRESENTATION_FORK_OFF_ITS_LINE/.test(document.documentElement.dataset.tileHostRejected || '')), 'invalid rejected');
+    assert.ok(steps(await navLine(frame)).every(b => b.inert) || (await navLine(frame)).every(b => !b.stage), 'no usable step from a rejected message');
+    assert.deepEqual(errors, []);
+    await page.close();
+  });
+});
+
+test('a missing profile fact blocks before the Store and names its owner; a complete revision still reaches the Store', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { frame, seat } = await openSeat(browser, origin);
+    await frame.locator('.recovery-nav [data-presentation-fork="Intent"]').click();
+    await until(async () => (await seat.evaluate(() => window.STBWindowSeat.state())).section === 'intent', 'intent');
+
+    // The page's state is complete: admitted, with exactly the profile's facts.
+    const admission = await seat.evaluate(() => window.STBWindowSeat.admission());
+    assert.equal(admission.admission.result, 'ADMITTED');
+    assert.deepEqual(Object.keys(admission.request.facts).sort(),
+      ['window-seat.added-knobs', 'window-seat.boards', 'window-seat.depth', 'window-seat.height', 'window-seat.kept-asks', 'window-seat.width']);
+    assert.equal(admission.request.profileVersion, '0.2');
+    assert.equal(admission.request.requestType, 'CUT_PACKAGE_V1');
+
+    // Each declared fact left out blocks before the Store and names its owner.
+    const before = cutCalls(log);
+    for (const [factId, owner, title] of [
+      ['window-seat.width', 'USER', 'Overall width W (in)'],
+      ['window-seat.boards', 'PROJECT', 'Every defined board with real length and width'],
+      ['window-seat.kept-asks', 'USER', 'Every ask kept on the job, described'],
+    ]) {
+      const result = await seat.evaluate(id => {
+        const revision = window.STBWindowSeat.revision();
+        delete revision.facts[id];
+        return window.STBWindowSeat.inquire(revision);
+      }, factId);
+      assert.equal(result.admission.result, 'BLOCKED', factId);
+      assert.equal(result.admission.reason, 'REQUIRED_FACT_UNSETTLED');
+      assert.deepEqual(result.admission.blocking, [{ factId, owner, title, condition: 'MISSING' }]);
+      assert.equal(result.request, null);
+      await frame.page().waitForTimeout(500);
+      assert.equal(cutCalls(log), before, factId + ': a blocked revision never reaches the Store');
+      assert.match(await seat.locator('#store-panel').innerText(), new RegExp('NOT SENT TO THE STORE[\\s\\S]*' + title.replace(/[()]/g, '\\$&') + ' · owner ' + owner));
+    }
+
+    // On the bench, a center wider than the controlling width holds the USER's width open: The Store answers is
+    // inert, nothing is sent, and the page names the fact and its owner.
+    await frame.locator('.recovery-nav button[data-job-project="window-seat"][data-journey-stage="configure"]').click();
+    await until(async () => (await seat.evaluate(() => window.STBWindowSeat.state())).section === 'bench', 'bench');
+    await until(async () => (await seat.evaluate(() => window.STBWindowSeat.state())).answered, 'first answer');
+    const answered = cutCalls(log);
+    await seat.evaluate(() => { const e = document.getElementById('c-wC'); e.value = '84'; e.dispatchEvent(new Event('input')); });
+    await frame.page().waitForTimeout(600);
+    const blocked = await seat.evaluate(() => window.STBWindowSeat.admission());
+    assert.equal(blocked.admission.result, 'BLOCKED');
+    assert.deepEqual(blocked.admission.blocking.map(b => [b.factId, b.owner, b.condition]), [['window-seat.width', 'USER', 'STATUS_UNRESOLVED']]);
+    assert.equal(cutCalls(log), answered, 'nothing sent for a blocked revision');
+    assert.match(await seat.locator('#bench-money').innerText(), /Not sent to the Store\. Missing: Overall width W \(in\) · owner USER/);
+    const inert = Object.fromEntries(steps(await navLine(frame)).map(b => [b.stage, b.inert]));
+    assert.deepEqual(inert, { scan: false, configure: false, store: true, request: true, yard: true, record: true });
+    assert.equal(await seat.locator('#btn-ask').isDisabled(), true);
+
+    // Settled again, the complete revision is admitted and reaches the Store by itself, and its answer is current.
+    await seat.evaluate(() => { const e = document.getElementById('c-wC'); e.value = '55'; e.dispatchEvent(new Event('input')); });
+    await until(() => cutCalls(log) > answered, 'complete revision reaches the Store');
+    const state = await until(async () => { const s = await seat.evaluate(() => window.STBWindowSeat.state()); return !s.asking && s.answered && s.current ? s : null; }, 'answer');
+    assert.equal(state.error, null);
+    assert.equal(state.admission.result, 'ADMITTED');
+    const sent = log.filter(e => e.request.projectId === 'window-seat').pop().request;
+    assert.equal(sent.candidateRevisionId, await seat.evaluate(() => window.STBWindowSeat.revision().definitionRevisionId));
+    assert.deepEqual(sent.payload.definition, await seat.evaluate(() => window.STBWindowSeat.request()));
+    await until(async () => !steps(await navLine(frame)).find(b => b.stage === 'store').inert, 'The Store answers usable');
+  });
+});

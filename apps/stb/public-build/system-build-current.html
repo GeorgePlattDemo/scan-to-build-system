@@ -23,7 +23,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-trail-contract.js?v=aea2f84d"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
-import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => {
+import('./shared/tile-host-admission-contract.mjs?v=6523126f').then(contract => {
   window.STBTileHostAdmission = Object.freeze({ ...contract });
 });
 </script>
@@ -90,12 +90,12 @@ import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => 
       .dev-build-guide .guide-meta{margin-top:auto;padding-top:10px;border-top:1px solid var(--border);display:grid;gap:3px;font:8.5px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text3)}
       /* Trail rules: the top nav appears only inside a live project, never on Landing, the doors or the Shared Home. */
       .recovery-nav:not([data-active-project]){display:none!important}
-      /* Window Seat page 1 (Idea) carries its own two-route bar; the step bar starts at Intent. */
-      .recovery-nav[data-seat-hero] button[data-journey-stage],.recovery-nav[data-seat-hero] .job-idea{display:none!important}
-      .recovery-nav:not([data-seat-hero]) .seat-fork{display:none!important}
-      .recovery-nav .seat-fork{display:inline-flex;align-items:center;gap:5px}
-      .recovery-nav .seat-fork-label{font-size:10px;color:var(--text2);margin:0 2px 0 4px}
-      .recovery-nav .seat-fork-way.on{border-color:var(--accent);background:var(--tint);color:var(--accent);font-weight:700}
+      /* The shared tile host's Idea line: no step bar there, and a declared fork only there. The step bar starts at Intent. */
+      .recovery-nav[data-idea-line] button[data-journey-stage],.recovery-nav[data-idea-line] .job-idea{display:none!important}
+      .recovery-nav:not([data-idea-line]) .trail-fork{display:none!important}
+      .recovery-nav .trail-fork{display:inline-flex;align-items:center;gap:5px}
+      .recovery-nav .trail-fork-label{font-size:10px;color:var(--text2);margin:0 2px 0 4px}
+      .recovery-nav .trail-fork-way.on{border-color:var(--accent);background:var(--tint);color:var(--accent);font-weight:700}
       .recovery-nav .job-nav-context{display:inline-flex;align-items:center;padding:5px 9px;border:1px solid var(--border-accent);border-radius:999px;background:var(--tint);color:var(--accent);font-size:9.5px;font-weight:800;letter-spacing:.06em;white-space:nowrap}
       .s001-v2-intent-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(300px,1.1fr);gap:16px;align-items:start;margin:14px 0}
       .s001-v2-story{font-size:13px;line-height:1.55;margin:10px 0 0}
@@ -1251,7 +1251,7 @@ import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => 
                   id="window-seat-frame"
                   class="window-seat-shell-frame"
                   title="Space utilization · Window seat"
-                  src="stb-window-seat-0.9.html?v=8ba2597b"
+                  src="stb-window-seat-0.9.html?v=34238e37"
                 ></iframe>
               </div>
             `;
@@ -1263,8 +1263,8 @@ import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => 
             event.stopImmediatePropagation();
             selectJourneyProject('window-seat');
             originalShow.call(win, 'window-seat-live');
-            // Every visit opens at page 1, the want, kept behind the trail: no step is current there.
-            seatFrame()?.contentWindow?.postMessage({type:'STB_SEAT_GO', stage:'hero'}, win.location.origin);
+            // Every visit opens on Idea, the intake, kept behind the trail: no step is current there.
+            tileHostGo('window-seat', trailContract.idea.label);
           }, true);
         }
       }
@@ -2910,12 +2910,49 @@ import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => 
     // tile's steps go inert until a valid one arrives.
     const tileHosts = new Map();
     const tileHostLines = new Map();
+    // The last validated message per tile (the fork's pressed option is read from it), and the last message a
+    // framed tile posted, which the host validates whenever that tile becomes active.
+    const tileHostMessages = new Map();
+    const tileHostPosted = new Map();
     // Journey stage keys on the nav buttons, as indexes into the trail contract's six steps.
     const JOURNEY_STAGE_STEP = Object.freeze({ scan:0, configure:1, store:2, review:2, request:3, yard:4, terms:4, recap:5, record:5 });
+    // hooks: report() returns the tile's current message; shown(pageId) runs when one of its pages is shown.
+    // A tile in its own frame gives frame() instead: it posts {type:'STB_TILE_HOST', message} from that frame and
+    // the host asks it for a trail target (Idea, a step, or a declared fork option) with STB_TILE_HOST_GO.
+    // idea: the tile has an Idea page, so from Intent on the host draws Idea as its back control.
     function registerTileHost(tileId, hooks) {
       if (!trailContract.tiles.some(tile => tile.id === tileId)) throw new TypeError('TILE_NOT_DECLARED: ' + tileId);
-      tileHosts.set(tileId, Object.freeze({ report:hooks.report, shown:hooks.shown || null }));
+      const frame = hooks.frame || null;
+      tileHosts.set(tileId, Object.freeze({
+        report:hooks.report || (() => tileHostPosted.get(tileId) ?? null),
+        shown:hooks.shown || null,
+        frame,
+        go:hooks.go || (frame ? target => frame()?.contentWindow?.postMessage({ type:'STB_TILE_HOST_GO', target }, win.location.origin) : null),
+        idea:hooks.idea === true
+      }));
     }
+    function tileHostGo(tileId, target) {
+      tileHosts.get(tileId)?.go?.(target);
+    }
+    // A framed tile speaks only from its own frame and only for itself.
+    win.addEventListener('message', function(event) {
+      if (event.origin !== win.location.origin || event.data?.type !== 'STB_TILE_HOST') return;
+      for (const [tileId, host] of tileHosts) {
+        if (!host.frame || event.source !== host.frame()?.contentWindow) continue;
+        const message = event.data.message ?? null;
+        if (message?.tileId !== tileId) {
+          tileHostPosted.delete(tileId);
+          tileHostLines.delete(tileId);
+          tileHostMessages.delete(tileId);
+          doc.documentElement.dataset.tileHostRejected = 'TILE_FRAME_MISMATCH';
+          applyTileHostNav();
+          return;
+        }
+        tileHostPosted.set(tileId, message);
+        if (tileHostActive(tileId)) receiveTileHostMessage(message);
+        return;
+      }
+    });
     function tileHostActive(tileId) {
       return activeJourneyProject === tileId;
     }
@@ -2931,18 +2968,71 @@ import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => 
     function receiveTileHostMessage(message) {
       const check = tileHostContract.validateTileHostMessage(trailContract, message);
       if (!check.ok) {
-        if (message && typeof message.tileId === 'string') tileHostLines.delete(message.tileId);
+        if (message && typeof message.tileId === 'string') { tileHostLines.delete(message.tileId); tileHostMessages.delete(message.tileId); }
         doc.documentElement.dataset.tileHostRejected = check.errors.join(' ');
       } else {
         delete doc.documentElement.dataset.tileHostRejected;
         tileHostLines.set(message.tileId, tileHostContract.hostNavLine(trailContract, message));
+        tileHostMessages.set(message.tileId, message);
       }
       applyTileHostNav();
       return check;
     }
     function refreshTileHost(tileId) {
       const host = tileHosts.get(tileId);
-      if (host) receiveTileHostMessage(host.report());
+      if (!host) return;
+      const message = host.report();
+      // A tile that has not spoken yet has nothing to validate: its steps stay inert until it does.
+      if (message == null) { tileHostLines.delete(tileId); tileHostMessages.delete(tileId); applyTileHostNav(); return; }
+      receiveTileHostMessage(message);
+    }
+    // The Idea line, from the trail contract: Idea as the back control after the Project Library, and on the line a
+    // tile's declared fork lives on, that fork's options with the message's choice pressed. Presentation only: each
+    // control asks the tile for its target, and nothing here admits or asks anything.
+    function drawTileHostIdeaLine(nav, tileId) {
+      const host = tileHosts.get(tileId);
+      const line = tileHostLines.get(tileId) || null;
+      const message = tileHostMessages.get(tileId) || null;
+      if (line && !line.stepBarShown) nav.dataset.ideaLine = 'true';
+      else delete nav.dataset.ideaLine;
+      if (!host?.go || !host.idea) return;
+      const control = (className, label) => {
+        const button = doc.createElement('button');
+        button.type = 'button';
+        button.className = className + ' tile-host-only';
+        button.textContent = label;
+        button.addEventListener('click', function(event) {
+          event.preventDefault(); event.stopPropagation();
+          tileHostGo(tileId, label);
+        });
+        return button;
+      };
+      const lib = nav.querySelector('button[data-job-exit="project-library"]');
+      const declared = trailContract.presentationForks.find(item => item.tileId === tileId && item.line === trailContract.idea.label) || null;
+      let fork = nav.querySelector('.trail-fork');
+      if (declared && !fork) {
+        fork = doc.createElement('span');
+        fork.className = 'trail-fork tile-host-only';
+        const label = doc.createElement('span');
+        label.className = 'trail-fork-label';
+        label.textContent = 'Two ways through this job:';
+        fork.append(label, ...declared.options.map(option => {
+          const way = control('trail-fork-way', option);
+          way.dataset.presentationFork = option;
+          return way;
+        }));
+      }
+      let idea = nav.querySelector('.job-idea');
+      if (!idea) idea = control('job-idea', trailContract.idea.label);
+      const before = fork || lib;
+      if (fork && lib && lib.nextElementSibling !== fork) lib.after(fork);
+      if (before && before.nextElementSibling !== idea) before.after(idea);
+      idea.removeAttribute('aria-current');
+      fork?.querySelectorAll('[data-presentation-fork]').forEach(button => {
+        const on = button.dataset.presentationFork === message?.presentationFork;
+        button.classList.toggle('on', on);
+        button.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
     }
     // One nav line from the last validated message: contract labels, inert steps disabled (never hidden), one current.
     function applyTileHostNav() {
@@ -2950,6 +3040,7 @@ import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => 
       const tileId = activeJourneyProject || '';
       if (!nav || !tileHosts.has(tileId)) return;
       const line = tileHostLines.get(tileId) || null;
+      drawTileHostIdeaLine(nav, tileId);
       nav.querySelectorAll('button[data-journey-stage]').forEach(button => {
         if (button.dataset.jobProject !== tileId) return;
         const index = JOURNEY_STAGE_STEP[button.dataset.journeyStage];
@@ -3344,17 +3435,11 @@ import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => 
       record:'6 · Pick up & build'
     });
 
-    // Window Seat: step 1 reads Intent. Page 1 (the want) sits behind the trail, so no step is current there.
-    // Buttons 2 to 6 keep the shared labels. Other tiles are untouched.
-    const TRAIL_NAV_LABEL_OVERRIDES = Object.freeze({
-      'window-seat': Object.freeze({ scan:'1 · Intent' })
-    });
-
     function restoreJourneyNav(nav) {
       if (!nav) return;
       nav.removeAttribute('data-active-project');
       nav.querySelector('.job-nav-context')?.remove();
-      nav.querySelectorAll('.seat-only').forEach(e => e.remove());
+      nav.querySelectorAll('.tile-host-only').forEach(e => e.remove());
       [...nav.querySelectorAll('button')].forEach(button => {
         if (!button.dataset.defaultLabel) button.dataset.defaultLabel = button.textContent;
         if (!Object.prototype.hasOwnProperty.call(button.dataset,'defaultGo')) {
@@ -3415,81 +3500,11 @@ import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => 
       applyOutdoorNavState();
     });
 
-    // The Window Seat page reports which steps can be used now, the same way Outdoor does.
-    var seatNavState = {scan:true, configure:true, store:true, request:false, yard:false, record:false};
-    var seatPlace = {section:'hero', step:null, view:'trail'};
-    function seatFrame() {
-      return doc.getElementById('window-seat-frame');
-    }
-    function seatGo(stage) {
-      seatFrame()?.contentWindow?.postMessage({type:'STB_SEAT_GO', stage:stage}, win.location.origin);
-    }
-    function seatNavButton(className, label, stage) {
-      const button = doc.createElement('button');
-      button.type = 'button';
-      button.className = className + ' seat-only';
-      button.textContent = label;
-      button.addEventListener('click', function(event) {
-        event.preventDefault(); event.stopPropagation();
-        seatGo(stage);
-      });
-      return button;
-    }
-    function applySeatNavState() {
-      const nav = doc.querySelector('.recovery-nav');
-      if (!nav) return;
-      if (activeJourneyProject !== 'window-seat') { delete nav.dataset.seatHero; nav.querySelectorAll('.seat-only').forEach(e => e.remove()); return; }
-      const lib = nav.querySelector('button[data-job-exit="project-library"]');
-      // Idea is the intake, not a step. On Idea this one nav line carries the fork and no steps:
-      // Two ways through this job: Intent | One full scroll. Intent is the default.
-      let fork = nav.querySelector('.seat-fork');
-      if (!fork) {
-        fork = doc.createElement('span');
-        fork.className = 'seat-fork seat-only';
-        const label = doc.createElement('span');
-        label.className = 'seat-fork-label';
-        label.textContent = 'Two ways through this job:';
-        const intent = seatNavButton('seat-fork-way', 'Intent', 'scan');
-        intent.dataset.seatFork = 'intent';
-        const whole = seatNavButton('seat-fork-way', 'One full scroll', 'whole');
-        whole.dataset.seatFork = 'whole';
-        fork.append(label, intent, whole);
-      }
-      // From Intent on, Idea is a back control after the Project Library, never the current step.
-      let idea = nav.querySelector('.job-idea');
-      if (!idea) idea = seatNavButton('job-idea', 'Idea', 'hero');
-      if (lib && lib.nextElementSibling !== fork) lib.after(fork);
-      if (fork.nextElementSibling !== idea) fork.after(idea);
-      idea.removeAttribute('aria-current');
-      const whole = seatPlace.view === 'whole';
-      fork.querySelectorAll('[data-seat-fork]').forEach(button => {
-        const on = (button.dataset.seatFork === 'whole') === whole;
-        button.classList.toggle('on', on);
-        button.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
-      if (seatPlace.section === 'hero') nav.dataset.seatHero = 'true';
-      else delete nav.dataset.seatHero;
-      nav.querySelectorAll('button[data-job-project="window-seat"]').forEach(button => {
-        const on = !!seatNavState[button.dataset.journeyStage];
-        button.disabled = !on;
-        if (on) button.removeAttribute('aria-disabled');
-        else button.setAttribute('aria-disabled','true');
-        if (seatPlace.step && button.dataset.journeyStage === seatPlace.step && !button.hidden) button.setAttribute('aria-current','step');
-        else button.removeAttribute('aria-current');
-      });
-    }
-    win.addEventListener('message', function(event) {
-      if (event.origin !== win.location.origin) return;
-      if (event.source !== seatFrame()?.contentWindow) return;
-      if (event.data?.type !== 'STB_SEAT_STATE') return;
-      const usable = event.data.usable || {};
-      seatNavState = {
-        scan:usable.scan === true, configure:usable.configure === true, store:usable.store === true,
-        request:usable.request === true, yard:usable.yard === true, record:usable.record === true
-      };
-      seatPlace = {section:String(event.data.section || 'hero'), step:event.data.step || null, view:event.data.view === 'whole' ? 'whole' : 'trail'};
-      applySeatNavState();
-    });
+    // Window Seat is on the shared tile host. Its page runs in its own frame and speaks for itself in plain
+    // STB-TILE-HOST-0.1 messages; the host validates them and draws the one nav line, the Idea line and its
+    // declared fork. Its Store inquiries go through admit() then inquire() on its page. Nothing here reads its
+    // definition or Store state.
+    registerTileHost('window-seat', { frame:() => doc.getElementById('window-seat-frame'), idea:true });
 
     function applyAlcoveNavState() {
       const nav = doc.querySelector('.recovery-nav');
@@ -3542,7 +3557,7 @@ import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => 
         button.setAttribute('data-go',directTarget);
         button.dataset.jobProject = projectId;
         button.dataset.jobTarget = directTarget;
-        button.textContent = TRAIL_NAV_LABEL_OVERRIDES[projectId]?.[stage] || START_OWN_NAV_LABELS[stage] || button.dataset.defaultLabel;
+        button.textContent = START_OWN_NAV_LABELS[stage] || button.dataset.defaultLabel;
 
         // Duplicate technical stages project onto the same Job 1 customer surface. Keep one button only.
         if (stage === 'review' || stage === 'terms' || stage === 'recap') button.hidden = true;
@@ -3558,7 +3573,7 @@ import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => 
 
       const nav = doc.querySelector('.recovery-nav');
       if (nav) {
-        delete nav.dataset.seatHero;
+        delete nav.dataset.ideaLine;
         restoreJourneyNav(nav);
         if (tileHosts.has(activeJourneyProject || '')) {
           // A tile on the shared tile host: the trail nav, drawn from its validated STB-TILE-HOST-0.1 message.
@@ -3573,9 +3588,6 @@ import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => 
         } else if (activeJourneyProject === 'outdoor') {
           wireTrailJourneyNav(nav, 'outdoor');
           applyOutdoorNavState();
-        } else if (activeJourneyProject === 'window-seat') {
-          wireTrailJourneyNav(nav, 'window-seat');
-          applySeatNavState();
         }
       }
     }
@@ -3636,10 +3648,7 @@ import('./shared/tile-host-admission-contract.mjs?v=a094a60b').then(contract => 
         applyOutdoorNavState();
       }
       tilePageShown(target);
-      if (projectId === 'window-seat') {
-        seatFrame()?.contentWindow?.postMessage({type:'STB_SEAT_GO', stage}, win.location.origin);
-        applySeatNavState();
-      }
+      if (JOURNEY_STAGE_STEP[stage] !== undefined) tileHostGo(projectId, trailContract.steps[JOURNEY_STAGE_STEP[stage]]);
       return true;
     }
 
