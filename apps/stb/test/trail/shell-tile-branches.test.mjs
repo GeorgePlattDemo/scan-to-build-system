@@ -33,9 +33,11 @@ const SHELL_FILES = [
 // (seatGo, seatNavButton, applySeatNavState and two activeJourneyProject 'window-seat' comparisons removed).
 // Lowered to 11 on system/alcove-on-shared-host: Alcove moved onto the shared tile host
 // (applyAlcoveNavState and seven activeJourneyProject 'alcove' comparisons removed).
-// system-build-current.html: 8 activeJourneyProject comparisons + 3 per-tile nav functions.
+// Lowered to 7 on system/outdoor-on-shared-host: Outdoor moved onto the shared tile host
+// (applyOutdoorNavState and three activeJourneyProject 'outdoor' comparisons removed).
+// system-build-current.html: 5 activeJourneyProject comparisons + 2 per-tile nav functions.
 // system-build-front-door-0.5.html: 0 + 0.
-const CEILING = 11;
+const CEILING = 7;
 
 const sandbox = {};
 vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'stb-trail-contract.js'), 'utf8'), sandbox, { filename: 'stb-trail-contract.js' });

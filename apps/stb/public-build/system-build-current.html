@@ -23,7 +23,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-trail-contract.js?v=aea2f84d"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
-import('./shared/tile-host-admission-contract.mjs?v=43bf096e').then(contract => {
+import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(contract => {
   window.STBTileHostAdmission = Object.freeze({ ...contract });
 });
 </script>
@@ -1219,7 +1219,7 @@ import('./shared/tile-host-admission-contract.mjs?v=43bf096e').then(contract => 
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.4.html?v=973d0657"
+                  src="stb-outdoor-picnic-0.4.html?v=ff9e818c"
                 ></iframe>
               </div>
             `;
@@ -1231,6 +1231,7 @@ import('./shared/tile-host-admission-contract.mjs?v=43bf096e').then(contract => 
             event.stopImmediatePropagation();
             selectJourneyProject('outdoor');
             originalShow.call(win, 'outdoor-build-live');
+            tilePageShown('outdoor-build-live');
           }, true);
         }
 
@@ -2796,9 +2797,6 @@ import('./shared/tile-host-admission-contract.mjs?v=43bf096e').then(contract => 
           originalShow.call(win,'start-own-live');
           setTimeout(() => openStartOwnStage('bench'),0);
           syncJourneyNav('configure');
-        } else if(proofHandoff?.source==='outdoor'){
-          selectJourneyProject('outdoor');
-          originalShow.call(win,'outdoor-build-live');
         }
         return;
       }
@@ -2811,7 +2809,7 @@ import('./shared/tile-host-admission-contract.mjs?v=43bf096e').then(contract => 
       const go=event.target.closest?.('[data-proof-go]');
       if(go){
         event.preventDefault();
-        const expectedSource = activeJourneyProject === 'start-own' ? 'start-own' : (activeJourneyProject === 'outdoor' ? 'outdoor' : null);
+        const expectedSource = activeJourneyProject === 'start-own' ? 'start-own' : null;
         if(!expectedSource || proofHandoff?.source !== expectedSource) return;
         syncProofHandoff();
         let target=go.dataset.proofGo;
@@ -3090,7 +3088,10 @@ import('./shared/tile-host-admission-contract.mjs?v=43bf096e').then(contract => 
       const index = JOURNEY_STAGE_STEP[stage];
       return index !== undefined && !!tileHostLines.get(tileId)?.steps[index]?.enabled;
     }
+    // The base page's show() marks every nav button that targets the shown page; a tile on the host is redrawn from
+    // its last validated message, so exactly one step stays current.
     function tilePageShown(pageId) {
+      applyTileHostNav();
       const owner = trailContract.tiles.find(tile => tile.pages.includes(pageId));
       tileHosts.get(owner?.id)?.shown?.(pageId);
     }
@@ -3498,48 +3499,17 @@ import('./shared/tile-host-admission-contract.mjs?v=43bf096e').then(contract => 
       playhouse:'PLAYHOUSE · ARCHED WINDOW'
     });
 
-    // The Outdoor page reports which steps can be used now; steps it cannot use yet are shown inert.
-    var outdoorNavState = {planChosen:false, callReady:false, paid:false, cut:false};
-    function outdoorFrame() {
-      return doc.getElementById('outdoor-bench-leg-frame');
-    }
-    function applyOutdoorNavState() {
-      const nav = doc.querySelector('.recovery-nav');
-      if (!nav || activeJourneyProject !== 'outdoor') return;
-      const usable = {
-        scan:true,
-        configure:outdoorNavState.planChosen,
-        store:outdoorNavState.planChosen,
-        request:outdoorNavState.callReady,
-        yard:outdoorNavState.paid,
-        record:outdoorNavState.cut
-      };
-      nav.querySelectorAll('button[data-job-project="outdoor"]').forEach(button => {
-        const stage = button.dataset.journeyStage;
-        const on = !!usable[stage];
-        button.disabled = !on;
-        if (on) button.removeAttribute('aria-disabled');
-        else button.setAttribute('aria-disabled','true');
-      });
-    }
-    win.addEventListener('message', function(event) {
-      if (event.origin !== win.location.origin) return;
-      if (event.source !== outdoorFrame()?.contentWindow) return;
-      if (event.data?.type !== 'STB_OUTDOOR_STATE') return;
-      outdoorNavState = {
-        planChosen:event.data.planChosen === true,
-        callReady:event.data.callReady === true,
-        paid:event.data.paid === true,
-        cut:event.data.cut === true
-      };
-      applyOutdoorNavState();
-    });
-
     // Window Seat is on the shared tile host. Its page runs in its own frame and speaks for itself in plain
     // STB-TILE-HOST-0.1 messages; the host validates them and draws the one nav line, the Idea line and its
     // declared fork. Its Store inquiries go through admit() then inquire() on its page. Nothing here reads its
     // definition or Store state.
     registerTileHost('window-seat', { frame:() => doc.getElementById('window-seat-frame'), idea:true });
+
+    // Outdoor is on the shared tile host. Its page runs in its own frame and speaks for itself in plain
+    // STB-TILE-HOST-0.1 messages; the host validates them and draws the one nav line. It has no Idea intake yet,
+    // so it opens on Intent. Its Store inquiries go through admit() then inquire() on its page, in its two scopes
+    // (OUTDOOR_OPTIONS, OUTDOOR_COMMITTED). Nothing here reads its definition or Store state.
+    registerTileHost('outdoor', { frame:() => doc.getElementById('outdoor-bench-leg-frame') });
 
     // Alcove is on the shared tile host. The host draws its one nav line from the message Alcove's tile code builds
     // (alcoveHostMessage); its Store inquiries go through admit() then inquire() on its page.
@@ -3614,9 +3584,6 @@ import('./shared/tile-host-admission-contract.mjs?v=43bf096e').then(contract => 
         } else if (activeJourneyProject === 'start-own') {
           wireStartOwnJourneyNav(nav);
           applyStartOwnNavState();
-        } else if (activeJourneyProject === 'outdoor') {
-          wireTrailJourneyNav(nav, 'outdoor');
-          applyOutdoorNavState();
         }
       }
     }
@@ -3652,17 +3619,14 @@ import('./shared/tile-host-admission-contract.mjs?v=43bf096e').then(contract => 
       // A tile on the shared host opens only the steps its last validated message made usable.
       if (tileHostStageOpen(projectId, stage) === false) { applyTileHostNav(); return true; }
       originalShow.call(win, target);
-      if (projectId === 'start-own' || projectId === 'outdoor') syncJourneyNav(stage);
-      if (projectId === 'outdoor') {
-        outdoorFrame()?.contentWindow?.postMessage({type:'STB_OUTDOOR_GO', stage}, win.location.origin);
-        applyOutdoorNavState();
-      }
+      if (projectId === 'start-own') syncJourneyNav(stage);
       tilePageShown(target);
       if (JOURNEY_STAGE_STEP[stage] !== undefined) tileHostGo(projectId, trailContract.steps[JOURNEY_STAGE_STEP[stage]]);
       return true;
     }
 
     const PROJECT_TILE_TO_JOURNEY = Object.freeze({
+      'picnic-chooser': 'outdoor',
       'alcove-capture': 'alcove',
       'window-parts': 'playhouse'
     });
@@ -3697,16 +3661,13 @@ import('./shared/tile-host-admission-contract.mjs?v=43bf096e').then(contract => 
         selectJourneyProject('start-own');
         return;
       }
-      if (target === 'picnic-chooser') {
-        selectJourneyProject('outdoor');
-        return;
-      }
       selectJourneyProject(PROJECT_TILE_TO_JOURNEY[target] || null);
     }, true);
 
     function openCurrentOutdoorBuildFromLegacyRoute() {
       selectJourneyProject('outdoor');
       originalShow.call(win, 'outdoor-build-live');
+      tilePageShown('outdoor-build-live');
     }
 
     win.show = function(id) {

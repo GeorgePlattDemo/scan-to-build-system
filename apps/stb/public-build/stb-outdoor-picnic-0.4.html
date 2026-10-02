@@ -363,6 +363,7 @@ tr:last-child td{border-bottom:0}
 <script src="stb-store-client.js?v=7eb5ab65"></script>
 <script src="stb-terms-flow.js?v=850b1843"></script>
 <script src="stb-build-guide-spec.js?v=bcf7a02c"></script>
+<script src="stb-trail-contract.js?v=aea2f84d"></script>
 <script>
 (function(){
 'use strict';
@@ -484,9 +485,21 @@ function manifest(cfg){
 
 /* ═════ STATE: one definition ═════ */
 const START_LEN=72;
-const S={section:'plans',cfg:null,rev:1,answer:null,asking:false,error:null,token:0,
+const S={section:'plans',step:null,cfg:null,rev:1,answer:null,asking:false,error:null,token:0,blocked:null,
   options:null,optionsKey:'',optionsAsking:false,optionsError:null,from:{}};
 const TERMS=window.STBTermsFlow.create({projectId:'outdoor',title:'Outdoor · picnic table'});
+const clone=v=>JSON.parse(JSON.stringify(v));
+
+/* ═════ THE SHARED TILE HOST AND ADMISSION: System's one contract ═════
+   The trail contract names the steps; the tile-host admission contract (shared/, the deployed copy, loaded, not copied)
+   decides whether a revision may be asked about at all. Every Store inquiry is admit() then inquire(), in one of the
+   outdoor profile's two scopes: OUTDOOR_OPTIONS (the "From" and option prices) or OUTDOOR_COMMITTED (this exact
+   table, the only answer the terms flow takes). Until the contract has loaded nothing is asked and The Store answers
+   stays inert. */
+const TILE_ID='outdoor';
+const OPTIONS_SCOPE='OUTDOOR_OPTIONS',COMMITTED_SCOPE='OUTDOOR_COMMITTED';
+const TRAIL=window.STBTrailContract;
+let C=null;
 window.STBTermsFlow.installStyle(document);
 const partOf=(cfg,kind)=>cfg.parts[kind]||(cfg.parts[kind]={spots:{on:false,fromEndIn:'',place:'',middle:false},deco:{on:false,angle:''}});
 const planCfg=(plan,lengthIn)=>({plan,lengthIn:lengthIn||START_LEN,wood:PLANS[plan].wood,tier:'COATED',parts:{}});
@@ -565,50 +578,102 @@ function conditions(){
 }
 const blocked=()=>conditions().some(c=>c.block);
 
-/* ═════ THE STORE: asked live, through the shared client ═════ */
-async function send(definition){
-  const client=window.STBStoreClient;
-  if(!client)throw new Error('STORE_CLIENT_UNAVAILABLE');
-  return client.sendJob({projectId:'outdoor',requestType:'CUT_PACKAGE_V1',candidateRevisionId:definition.configurationVersion,
-    payload:{definition,definitionKind:'cut_package.v1',ruleVersion:'0.1'}});
+/* ═════ ONE JOB-DEFINITION REVISION PER INQUIRY, AND ITS ADMISSION ═════
+   A committed revision carries the facts the outdoor admission profile declares for OUTDOOR_COMMITTED, read off this
+   one state. Work tried on the bench that a condition above still holds open travels UNRESOLVED, so admit() blocks on
+   it and names its owner. An options revision carries only the requested work. */
+function revision(req){
+  req=req||buildRequest();
+  if(!req)return {definitionRevisionId:null,tileId:TILE_ID,facts:{}};
+  const open=conditions().some(c=>c.block&&c.kind);
+  return {definitionRevisionId:req.definition.configurationVersion,tileId:TILE_ID,facts:{
+    'outdoor.plan':{value:S.cfg.plan,status:'CONFIRMED'},
+    'outdoor.cut-packages':{value:clone(req.definition.cutPackages),status:'DERIVED'},
+    'outdoor.bench-work':{value:{work:work(S.cfg)},status:open?'UNRESOLVED':'CONFIRMED'}
+  }};
+}
+const optionsRevision=def=>({definitionRevisionId:def.configurationVersion,tileId:TILE_ID,facts:{
+  'outdoor.cut-packages':{value:clone(def.cutPackages),status:'DERIVED'}}});
+/* Recalculated from the revision on screen, never restored. Null until the contract has loaded and a plan is picked. */
+function currentAdmission(){return C&&S.cfg?C.admit({revision:revision(),inquiryScope:COMMITTED_SCOPE}):null}
+const admitted=a=>!!C&&a?.admission?.result===C.ADMISSION_RESULT.ADMITTED;
+/* What the page shows as not sent: the last inquiry that admission blocked, else the revision on screen if blocked. */
+function blockedAdmission(){
+  if(S.blocked)return S.blocked;
+  const a=currentAdmission();
+  return a&&!admitted(a)?a:null;
+}
+const ownerLine=a=>a.admission.blocking.map(b=>b.title+' · owner '+b.owner).join('; ');
+
+/* ═════ THE STORE: asked live, through the shared client. One inquiry path. ═════
+   admit() decides whether a revision may be asked about at all: a blocked one is shown, naming what is missing and its
+   owner, and never reaches the Store. An admitted one goes through inquire(), whatever its values: admission never
+   checks the envelope; the Store does. This is the transport inside inquire(): it sends the definition the admitted
+   revision was made from, with exactly the admitted packages in it, and nothing else. */
+function storeTransport(definition,got){
+  return request=>{
+    if(request.requestType!=='CUT_PACKAGE_V1'||request.definitionRevisionId!==definition.configurationVersion)throw new Error('ADMITTED_REVISION_NOT_ON_SCREEN');
+    const packages=request.facts['outdoor.cut-packages'];
+    if(JSON.stringify(packages)!==JSON.stringify(definition.cutPackages))throw new Error('ADMITTED_PACKAGES_NOT_SENT');
+    const client=window.STBStoreClient;
+    if(!client)throw new Error('STORE_CLIENT_UNAVAILABLE');
+    return client.sendJob({projectId:TILE_ID,requestType:request.requestType,candidateRevisionId:request.definitionRevisionId,
+      payload:{definition:{...definition,cutPackages:packages},definitionKind:'cut_package.v1',ruleVersion:'0.1'}}).then(a=>(got.body=a));
+  };
+}
+/* Option and "From" prices: an OUTDOOR_OPTIONS inquiry. Its answer never reaches the terms flow. */
+async function askOptions(def){
+  if(!C)throw new Error('TILE_HOST_CONTRACT_UNAVAILABLE');
+  const admission=C.admit({revision:optionsRevision(def),inquiryScope:OPTIONS_SCOPE});
+  if(!admitted(admission))throw new Error('Not sent to the Store. Missing: '+ownerLine(admission));
+  const got={};
+  await C.inquire(admission,storeTransport(def,got));
+  return got.body;
 }
 let askTimer=null,optTimer=null;
 function changed(){
   const req=buildRequest();
   if(S.answer&&req&&S.answer.sig!==req.sig&&!S.answer.stale){S.answer.stale=true;S.rev++}
-  S.error=null;
+  S.error=null;S.blocked=null;
   scheduleAsk();scheduleOptions();render();
 }
 function scheduleAsk(){
   clearTimeout(askTimer);
-  if(!S.cfg||blocked())return;
+  if(!S.cfg||!C)return;
   const req=buildRequest();if(S.answer&&!S.answer.stale&&S.answer.sig===req.sig)return;
   askTimer=setTimeout(askExact,250);
 }
-async function askExact(){
-  if(!S.cfg||blocked())return;
+/* This exact table: an OUTDOOR_COMMITTED inquiry about the revision on screen (or one handed in). A blocked revision
+   is not sent; the page names the fact and its owner. */
+async function askExact(rv){
+  if(!S.cfg||!C)return null;
   const req=buildRequest(),token=++S.token;
-  S.asking=true;S.error=null;render();
+  const admission=C.admit({revision:rv||revision(req),inquiryScope:COMMITTED_SCOPE});
+  if(!admitted(admission)){S.blocked=admission;S.asking=false;render();return admission}
+  S.blocked=null;S.asking=true;S.error=null;render();
   try{
-    const sentAt=new Date().toISOString();
-    const body=await send(req.definition);
-    if(token!==S.token)return;
+    const sentAt=new Date().toISOString(),got={};
+    const result=await C.inquire(admission,storeTransport(req.definition,got));
+    const body=got.body;
+    if(token!==S.token)return admission;
     S.answer={rev:S.rev,sig:req.sig,stale:false,definition:req.definition,record:req.record,
       evaluation:body.rawEvaluation,receipt:body.evaluationReceipt||body.rawEvaluation?.evaluationReceipt||null,
-      requestId:body.requestId,storePin:body.storePin,body,sentAt};
+      requestId:body.requestId,storePin:body.storePin,body,sentAt,
+      authority:result.answer.authority,definitionRevisionId:result.answer.definitionRevisionId};
     if(buildRequest().sig!==req.sig){S.answer.stale=true;S.rev++;scheduleAsk()}
-  }catch(e){if(token!==S.token)return;S.error=String(e&&e.message||e)}
+  }catch(e){if(token!==S.token)return admission;S.error=String(e&&e.message||e)}
   S.asking=false;render();
+  return admission;
 }
 function scheduleOptions(){
-  if(!S.cfg)return;
+  if(!S.cfg||!C)return;
   const def=optionsRequest(S.cfg),key=def.configurationVersion;
   if(key===S.optionsKey)return;
   S.optionsKey=key;S.options=null;S.optionsError=null;S.optionsAsking=true;
   clearTimeout(optTimer);
   optTimer=setTimeout(async()=>{
     const mine=S.optionsKey;
-    try{const body=await send(def);if(mine!==S.optionsKey)return;S.options=body.rawEvaluation}
+    try{const body=await askOptions(def);if(mine!==S.optionsKey)return;S.options=body.rawEvaluation}
     catch(e){if(mine!==S.optionsKey)return;S.optionsError=String(e&&e.message||e)}
     S.optionsAsking=false;render();
   },350);
@@ -655,7 +720,7 @@ function optionPrice(kind,key){
 /* Every current Store answer goes to the shared terms flow; a refusal ends there, with the Store's reasons. */
 function feedTerms(){
   const v=view();
-  if(!v||!answerCurrent()||S.asking||S.error){TERMS.setAnswer(null);return}
+  if(!v||!answerCurrent()||S.asking||S.error||S.blocked){TERMS.setAnswer(null);return}
   const st=TERMS.setAnswer({version:S.answer.definition.configurationVersion,status:v.allOk?'SUPPORTABLE':(v.ev.status==='SUPPORTABLE'?'UNRESOLVED':(v.ev.status||'REFUSED')),
     total:v.estimate,reasons:v.bad.map(l=>{const codes=lineCodes(l).length?lineCodes(l):[l.status];return {code:codes.join(','),text:groupLabel(l.packageId||l.lineId,S.cfg.plan)+': '+codes.map(reasonText).join('; ')}}),
     body:S.answer.body,sentAt:S.answer.sentAt});
@@ -698,7 +763,7 @@ function askFrom(){
   for(const key of Object.keys(PLANS)){
     const def=optionsRequest(planCfg(key));delete def.itemLines;
     S.from[key]={asking:true};
-    send(def).then(body=>{const ev=body.rawEvaluation;
+    askOptions(def).then(body=>{const ev=body.rawEvaluation;
       const best=WOODS.map(w=>{const ls=(ev.packages||[]).filter(p=>String(p.packageId).startsWith(w.key+'|'));return {ok:ls.length>0&&ls.every(l=>l.status==='SUPPORTABLE'),Q:ls.reduce((s,l)=>s+Number(l.Q||0),0)}}).filter(x=>x.ok).sort((a,b)=>a.Q-b.Q)[0];
       S.from[key]={best:best?best.Q:null};renderPlans();
     }).catch(e=>{S.from[key]={error:String(e&&e.message||e)};renderPlans()});
@@ -738,7 +803,9 @@ function optionButtons(){
 function answerHtml(){
   const v=view(),a=S.answer;
   if(!S.cfg)return '';
-  if(blocked())return '<h3>Store Zero answers</h3><p class="status ask">Finish the settings marked on the bench first. The Store is asked for a complete table only.</p>';
+  const adm=blockedAdmission();
+  if(blocked()||adm)return '<h3>Store Zero answers</h3><p class="status ask">'+(blocked()?'Finish the settings marked on the bench first. ':'')+'The Store is asked for a complete table only.</p>'
+    +(adm?'<p class="status bad" data-not-sent>NOT SENT TO THE STORE. Missing: '+esc(ownerLine(adm))+'</p>':'');
   if(S.asking&&!answerCurrent())return '<h3>Store Zero answers</h3><p class="status ask">Asking Store Zero for this exact table…</p>';
   if(S.error)return '<h3>Store Zero answers</h3><p class="status bad">Store Zero could not answer ('+esc(S.error)+'). No earlier answer is reused.</p><button type="button" class="cta ghost" data-ask>TRY AGAIN</button>';
   if(!v)return '<h3>Store Zero answers</h3><p class="status ask">Asking…</p>';
@@ -884,18 +951,47 @@ function renderRecord(){
 /* ═════ SCREENS ═════ */
 const SECTIONS=['plans','build','edge','call','yard','record'];
 const NAV_OF={plans:'scan',build:'configure',edge:'configure',call:'request',yard:'yard',record:'record'};
-function usable(){const t=TERMS.state();return {plans:true,build:!!S.cfg,edge:!!S.cfg,call:t.callOpen,yard:t.yardOpen,record:t.recordOpen}}
+/* The six trail steps, by index, and where each opens on this page. The Store answers is the answer on the bench. */
+const NAV_STEPS=['scan','configure','store','request','yard','record'];
+const SECTION_OF_STEP=['plans','build','build','call','yard','record'];
+const STEP_OF_SECTION={plans:0,build:1,edge:1,call:3,yard:4,record:5};
+/* The fresh answer availableSteps() reads: current authority, for this exact revision, inside the envelope or not. */
+function freshAnswer(){
+  const a=S.answer;if(!a||a.stale||S.asking||S.error||S.blocked)return null;
+  return {authority:a.authority,definitionRevisionId:a.definitionRevisionId,withinEnvelope:!!view()?.allOk};
+}
+/* The Store answers and Your call from the contract's availableSteps(); the bench needs a picked plan (it is that
+   plan's bench); We cut it and Pick up & build stay with the terms flow's gates, behind Your call. Before the
+   contract loads: Intent, and the bench once a plan is picked. */
+function usableSteps(){
+  const steps=TRAIL.steps,t=TERMS.state();
+  const u=C?[...C.availableSteps({trail:TRAIL,admission:S.blocked||currentAdmission(),freshAnswer:freshAnswer()})]:steps.slice(0,2);
+  if(!S.cfg)u.splice(1);
+  if(u.includes(steps[3])&&!t.callOpen)u.splice(u.indexOf(steps[3]),1);
+  if(u.includes(steps[3])&&t.yardOpen)u.push(steps[4]);
+  if(u.includes(steps[3])&&t.recordOpen)u.push(steps[5]);
+  return u;
+}
+function usable(){const u=usableSteps(),on=i=>u.includes(TRAIL.steps[i]);
+  return {plans:true,build:on(1),edge:on(1),call:on(3),yard:on(4),record:on(5)}}
+/* This tile's STB-TILE-HOST-0.1 message for the shared host: the step the page on screen stands for (the last usable
+   one at or before it) and the usable steps. Outdoor has no Idea intake yet, so it is never on Idea. */
+function hostMessage(){
+  const steps=TRAIL.steps,u=usableSteps();
+  let i=S.step!=null?S.step:STEP_OF_SECTION[S.section];
+  while(i>0&&!u.includes(steps[i]))i--;
+  return {interface:C.TILE_HOST_VERSION,tileId:TILE_ID,stage:steps[i],usableSteps:u,navigationRequest:null};
+}
 function go(section){
   if(!SECTIONS.includes(section)||!usable()[section])return;
-  S.section=section;document.body.dataset.section=section;
+  S.section=section;S.step=null;document.body.dataset.section=section;
   SECTIONS.forEach(s=>{$('s-'+s).hidden=s!==section});
   window.scrollTo(0,0);syncNav();
 }
 function syncNav(){
-  const u=usable(),nu={scan:true,configure:u.build,store:u.build,request:u.call,yard:u.yard,record:u.record};
-  $$('[data-nav]').forEach(b=>{b.disabled=!nu[b.dataset.nav];b.classList.toggle('on',NAV_OF[S.section]===b.dataset.nav)});
-  if(embedded&&window.parent!==window){const t=TERMS.state();
-    window.parent.postMessage({type:'STB_OUTDOOR_STATE',projectId:'outdoor',view:S.section,planChosen:!!S.cfg,callReady:t.callOpen,paid:t.yardOpen,cut:t.recordOpen,terms:t.stage},location.origin);}
+  const u=usableSteps();
+  $$('[data-nav]').forEach(b=>{b.disabled=!u.includes(TRAIL.steps[NAV_STEPS.indexOf(b.dataset.nav)]);b.classList.toggle('on',NAV_OF[S.section]===b.dataset.nav)});
+  if(embedded&&window.parent!==window&&C)window.parent.postMessage({type:'STB_TILE_HOST',message:hostMessage()},location.origin);
 }
 const clampLen=n=>Math.min(RULE.lengthIn.max,Math.max(RULE.lengthIn.min,Math.round(Number(n))));
 function setLength(n){if(!S.cfg)return;n=clampLen(n);if(!isFinite(n)||n===S.cfg.lengthIn)return;S.cfg.lengthIn=n;changed()}
@@ -920,7 +1016,7 @@ document.addEventListener('click',e=>{
     changed();return}
   const dw=e.target.closest('[data-drop-work]');if(dw){e.preventDefault();backToPlan();return}
   const ak=e.target.closest('[data-ask]');if(ak){askExact();return}
-  const nv=e.target.closest('[data-nav]');if(nv){goStage(nv.dataset.nav);return}
+  const nv=e.target.closest('[data-nav]');if(nv){goStep(NAV_STEPS.indexOf(nv.dataset.nav));return}
 });
 $('len').addEventListener('input',e=>setLength(e.target.value));
 $('parts-bench').addEventListener('input',e=>{const f=e.target.closest('[data-in]');if(!f)return;const kind=f.closest('[data-part]').dataset.part,p=partOf(S.cfg,kind);
@@ -936,19 +1032,21 @@ $('back-build').onclick=()=>go(work(S.cfg).length?'edge':'build');
 function afterTerms(action){render();if(action==='accept')go('yard');if(action==='yard')go('record')}
 for(const id of ['call-terms','yard-terms','record-terms'])TERMS.bind($(id),afterTerms);
 TERMS.onChange(()=>{renderTerms();syncNav()});
-$('start-over').onclick=()=>{TERMS.setAnswer(null);S.cfg=null;S.answer=null;S.error=null;S.options=null;S.optionsKey='';S.rev++;partsSig='';render();go('plans')};
+$('start-over').onclick=()=>{TERMS.setAnswer(null);S.cfg=null;S.answer=null;S.error=null;S.blocked=null;S.options=null;S.optionsKey='';S.rev++;partsSig='';render();go('plans')};
 
-/* The host's top nav drives this page; the page tells the host which steps can be used right now. */
-function goStage(stage){
-  const map={scan:'plans',plan:'plans',configure:'build',bench:'build',store:'build',review:'build',request:'call',yard:'yard',terms:'yard',recap:'record',record:'record'};
-  const s=map[stage];if(!s)return;
+/* One trail step, by its index in the trail contract: the page that step opens here. */
+function goStep(i){
+  const s=SECTION_OF_STEP[i];if(!s)return;
   if(s==='build'&&S.cfg&&!answerCurrent()&&!S.asking&&!blocked())askExact();
   go(s);
-  if(stage==='store'&&S.section==='build')$('answer').scrollIntoView({block:'center'});
+  if(i===2&&S.section==='build'){S.step=2;syncNav();$('answer').scrollIntoView({block:'center'})}
 }
 window.addEventListener('message',event=>{
+  /* The shared tile host (the parent frame, or the top window that drives it) asks for a trail step by its contract
+     label. The page tells the host which steps can be used right now, in its STB-TILE-HOST-0.1 message. */
   if(event.origin!==location.origin||(event.source!==window.parent&&event.source!==window.top))return;
-  if(event.data?.type==='STB_OUTDOOR_GO')goStage(String(event.data.stage||''));
+  if(event.data?.type!=='STB_TILE_HOST_GO')return;
+  goStep(TRAIL.steps.indexOf(String(event.data.target||'')));
 });
 if(embedded)$('bar').hidden=true;
 
@@ -966,16 +1064,26 @@ function renderStoreDoctrine(host){
     :'<div class="band warn"><b>Store Zero reference text unavailable.</b> '+((d&&d.unavailableMessage)||'The shared Store Zero text did not load, so none is shown in its place.')+'</div>';
 }
 renderStoreDoctrine($('store-doctrine'));
-render();go('plans');askFrom();
+render();go('plans');
 window.STBOutdoorPicnic=Object.freeze({version:'0.4',rule:RULE,plans:Object.keys(PLANS),
   openPlan,setLength,backToPlan,
   request:()=>{const r=buildRequest();return r&&r.definition},
+  revision:()=>clone(revision()),
+  admission:()=>clone(currentAdmission()),
+  /* Asks about a revision through the same admission as the page; a blocked one never reaches the Store. */
+  inquire:rv=>askExact(rv).then(a=>clone(a)),
+  hostMessage:()=>C?hostMessage():null,
   optionsRequest:()=>S.cfg?optionsRequest(S.cfg):null,
   record:()=>{const r=buildRequest();return r&&r.record},
   conditions,work:()=>S.cfg?work(S.cfg):[],knobs:()=>manifest(S.cfg),
   benchKnobs:()=>[...new Set($$('#s-build [data-knob], #s-edge [data-knob]').map(e=>e.dataset.knob))],
   state:()=>({section:S.section,plan:S.cfg&&S.cfg.plan,lengthIn:S.cfg&&S.cfg.lengthIn,
-    rev:S.rev,asking:S.asking,error:S.error,answered:!!S.answer,current:answerCurrent(),terms:TERMS.state()})});
+    rev:S.rev,asking:S.asking,error:S.error,answered:!!S.answer,current:answerCurrent(),terms:TERMS.state(),
+    answer:S.answer&&{authority:S.answer.authority,definitionRevisionId:S.answer.definitionRevisionId,stale:!!S.answer.stale},
+    admission:clone(S.blocked?.admission??currentAdmission()?.admission??null)})});
+/* The deployed contract copy, loaded once. Nothing is asked before it is here. */
+import('./shared/tile-host-admission-contract.mjs?v=c603cb4f').then(m=>{C=m;askFrom();if(S.cfg){scheduleAsk();scheduleOptions()}render()},
+  ()=>{document.documentElement.dataset.tileHostContract='MISSING'});
 })();
 </script>
 </body>

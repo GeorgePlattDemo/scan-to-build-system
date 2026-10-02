@@ -41,13 +41,14 @@ const contract = sandbox.STBTrailContract;
 // from the trail contract. playhouse:R1 stays: Playhouse still opens on Intent with no Idea intake.
 // alcove:R2 left on system/alcove-on-shared-host, for the same reason. alcove:R1 stays: Alcove still opens on
 // Intent with no Idea intake.
+// outdoor:R2 left on system/outdoor-on-shared-host, for the same reason. outdoor:R1 stays: Outdoor still opens on
+// Intent with no Idea intake.
 const KNOWN_FAILING = new Set([
   'start-own:R1',
   'alcove:R1',
   'outdoor:R1',
   'playhouse:R1',
   'start-own:R2',
-  'outdoor:R2',
 ]);
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css' };
