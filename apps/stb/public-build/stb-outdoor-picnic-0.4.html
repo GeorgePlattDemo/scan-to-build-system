@@ -555,10 +555,12 @@ function definitionFor(cfg,prefix){
   return {definition:{configurationId:'OUTDOOR-PICNIC-'+cfg.plan.toUpperCase(),configurationVersion:prefix+sig,...body},record:rec,sig};
 }
 const buildRequest=()=>S.cfg?definitionFor(S.cfg,'od-r'+S.rev+'-'):null;
-/* One request for the option prices: every wood and every hardware pack, for this table and this work.
-   These are the Store's own line prices; your call only ever uses the exact answer. */
-function optionsRequest(cfg){
-  const body={cutPackages:packagesFor(cfg,WOODS.map(w=>w.key)),itemLines:itemsFor(cfg,TIERS.map(t=>t.key))};
+/* One request for the option prices: every wood and, unless hardware is off, every hardware pack, for this table and
+   this work. These are the Store's own line prices; your call only ever uses the exact answer. The revision id is the
+   hash of exactly the body sent, so a different definition never shares an id. */
+function optionsRequest(cfg,{hardware=true}={}){
+  const body={cutPackages:packagesFor(cfg,WOODS.map(w=>w.key))};
+  if(hardware)body.itemLines=itemsFor(cfg,TIERS.map(t=>t.key));
   return {configurationId:'OUTDOOR-PICNIC-OPTIONS',configurationVersion:'od-options-'+hash(JSON.stringify(body)),...body};
 }
 
@@ -764,7 +766,7 @@ function render(){
 /* Screen 1: each "From" is the Store's cheapest complete wood for that plan as published, at 6 ft, bring-your-own hardware. */
 function askFrom(){
   for(const key of Object.keys(PLANS)){
-    const def=optionsRequest(planCfg(key));delete def.itemLines;
+    const def=optionsRequest(planCfg(key),{hardware:false});
     S.from[key]={asking:true};
     askOptions(def).then(body=>{const ev=body.rawEvaluation;
       const best=WOODS.map(w=>{const ls=(ev.packages||[]).filter(p=>String(p.packageId).startsWith(w.key+'|'));return {ok:ls.length>0&&ls.every(l=>l.status==='SUPPORTABLE'),Q:ls.reduce((s,l)=>s+Number(l.Q||0),0)}}).filter(x=>x.ok).sort((a,b)=>a.Q-b.Q)[0];
