@@ -217,6 +217,8 @@ function formGaps(form, value, at = '', facts = {}) {
 
 // Alcove's two parent responsibilities, as its page names them.
 const ALCOVE_PARENTS = ['ALCOVE-UPRIGHT-PARENTS', 'ALCOVE-SHELF-PARENTS'];
+// Outdoor's cut packages, as its page emits them in both scopes: each package's id, and each part's id and length.
+const OUTDOOR_PACKAGES = each(fields({ packageId: 'text', parts: each(fields({ partId: 'text', lengthIn: 'positive-number' })) }));
 
 // Admission profiles, one per tile declared in the trail contract. A registry keyed by tile id: shared
 // admission code does not branch on tile identity. Profiles here are first declarations for the
@@ -302,24 +304,25 @@ export const ADMISSION_PROFILES = deepFreeze({
       },
     },
   },
-  // Outdoor 0.2: what its page already requires before it asks. Two scopes, kept apart: OUTDOOR_OPTIONS prices the
+  // Outdoor 0.3: what its page already requires before it asks. Two scopes, kept apart: OUTDOOR_OPTIONS prices the
   // "From" and the option buttons and never reaches the terms flow; OUTDOOR_COMMITTED is this exact table. Added to
   // the committed scope: every spot hole and decorative cut tried on the bench is set (each blocking condition on
-  // the bench is one of these), owned by the user.
+  // the bench is one of these), owned by the user. 0.3: in both scopes, every package the page emits has an id, and
+  // every part in it an id and a length above 0.
   outdoor: {
-    version: '0.2',
+    version: '0.3',
     scopes: {
       OUTDOOR_OPTIONS: {
         requestType: 'CUT_PACKAGE_V1',
         requires: [
-          req('outdoor.cut-packages', OWNER.PROJECT, 'nonempty-list', 'Requested work with real part values'),
+          req('outdoor.cut-packages', OWNER.PROJECT, 'nonempty-list', 'Requested work with real part values', OUTDOOR_PACKAGES),
         ],
       },
       OUTDOOR_COMMITTED: {
         requestType: 'CUT_PACKAGE_V1',
         requires: [
           req('outdoor.plan', OWNER.USER, 'text', 'Chosen plan'),
-          req('outdoor.cut-packages', OWNER.PROJECT, 'nonempty-list', 'Requested work with real part values'),
+          req('outdoor.cut-packages', OWNER.PROJECT, 'nonempty-list', 'Requested work with real part values', OUTDOOR_PACKAGES),
           req('outdoor.bench-work', OWNER.USER, 'object', 'Every spot hole and decorative cut tried on the bench, set'),
         ],
       },

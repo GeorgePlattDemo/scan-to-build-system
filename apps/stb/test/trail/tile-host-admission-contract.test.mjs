@@ -651,6 +651,73 @@ test('case 4, Alcove: material fields, both parents and real program sizes, and 
   }
 });
 
+// Outdoor's cut packages, package by package and part by part, as its page emits them ({packageId, parts: [{partId,
+// lengthIn}]}), in both of its scopes. A package without an id, or a part without an id or a length above 0, blocks
+// before Store with owner PROJECT and the field paths. Every package real, it still reaches Store, past any envelope.
+// The scopes stay apart: OUTDOOR_OPTIONS asks for the packages only; OUTDOOR_COMMITTED still asks for the plan and the
+// bench work as well.
+test('case 4, Outdoor: every package has an id and every part an id and a length above 0, in both scopes', async () => {
+  const base = FIXTURES.outdoor.facts;
+  const P1 = { packageId: 'CEDAR|TOP', material: { species: 'cedar' }, endCut: { angleDeg: 0 }, parts: [{ partId: 'TOP-01', lengthIn: 72 }, { partId: 'TOP-02', lengthIn: 72 }] };
+  const P2 = { packageId: 'CEDAR|LEG|A30', parts: [{ partId: 'LEG-01', lengthIn: 30, spots: [{ xIn: 4 }] }] };
+  const without = (item, key) => (({ [key]: _, ...rest }) => rest)(item);
+  const withPart = (pkg, i, part) => ({ ...pkg, parts: pkg.parts.map((x, j) => (j === i ? part : x)) });
+  const BLOCKS = [
+    [[P1, { ...P2, packageId: '' }], ['[1].packageId']],
+    [[P1, { ...P2, packageId: '  ' }], ['[1].packageId']],
+    [[without(P1, 'packageId'), P2], ['[0].packageId']],
+    [[P1, { ...P2, packageId: 7 }], ['[1].packageId']],
+    [[withPart(P1, 1, { partId: 'TOP-02', lengthIn: 0 }), P2], ['[0].parts[1].lengthIn']],
+    [[P1, withPart(P2, 0, { partId: 'LEG-01', lengthIn: -30 })], ['[1].parts[0].lengthIn']],
+    [[P1, withPart(P2, 0, { partId: 'LEG-01' })], ['[1].parts[0].lengthIn']],
+    [[P1, withPart(P2, 0, { partId: 'LEG-01', lengthIn: '30' })], ['[1].parts[0].lengthIn']],
+    [[P1, withPart(P2, 0, { partId: 'LEG-01', lengthIn: NaN })], ['[1].parts[0].lengthIn']],
+    [[withPart(P1, 0, { partId: '', lengthIn: 72 }), P2], ['[0].parts[0].partId']],
+    [[withPart(P1, 0, { lengthIn: 72 }), P2], ['[0].parts[0].partId']],
+    [[withPart(P1, 0, { partId: '', lengthIn: 0 }), P2], ['[0].parts[0].partId', '[0].parts[0].lengthIn']],
+    [[P1, without(P2, 'parts')], ['[1].parts']],
+    [[P1, { ...P2, parts: null }], ['[1].parts']],
+    [[P1, withPart(P2, 0, null)], ['[1].parts[0]']],
+    [[P1, null], ['[1]']],
+  ];
+  for (const scope of ['OUTDOOR_OPTIONS', 'OUTDOOR_COMMITTED']) {
+    // Each scope's revision carries only what the page sends for it: the options revision has only the packages.
+    const packages = value => revision('outdoor', `outdoor-packages-${scope}`, scope === 'OUTDOOR_OPTIONS'
+      ? { 'outdoor.cut-packages': { value, status: STATUS.DERIVED } }
+      : { ...base, 'outdoor.cut-packages': { value, status: STATUS.DERIVED } });
+    for (const [value, missing] of BLOCKS) {
+      const label = `${scope} ${JSON.stringify(value)}`;
+      const result = admit({ revision: packages(value), inquiryScope: scope });
+      assert.equal(result.admission.result, ADMISSION_RESULT.BLOCKED, label);
+      assert.equal(result.admission.reason, BLOCK_REASON.REQUIRED_FACT_UNSETTLED, label);
+      assert.deepEqual(result.admission.blocking, [{ factId: 'outdoor.cut-packages', owner: OWNER.PROJECT,
+        title: 'Requested work with real part values', condition: 'INVALID_VALUE', fields: missing }], label);
+      assert.equal(result.request, null, label);
+      const store = storeStub({ status: 'SHOULD_NOT_BE_ASKED' });
+      assert.equal((await inquire(result, store.ask)).reachedStore, false, label);
+      assert.equal(store.calls.length, 0, `${label}: nothing reached Store`);
+    }
+    for (const value of [[P1], [P1, P2], [{ packageId: 'CEDAR|TOP', parts: [{ partId: 'TOP-01', lengthIn: 2000 }] }]]) {
+      const label = `${scope} ${JSON.stringify(value)}`;
+      const result = admit({ revision: packages(value), inquiryScope: scope });
+      assert.equal(result.admission.result, ADMISSION_RESULT.ADMITTED, label);
+      assert.equal(result.request.profileVersion, '0.3', label);
+      const store = storeStub({ status: 'REFUSED', withinEnvelope: false });
+      assert.equal((await inquire(result, store.ask)).reachedStore, true, label);
+      assert.deepEqual(store.calls[0].facts['outdoor.cut-packages'], value, `${label}: travels exactly as defined`);
+      assert.deepEqual(Object.keys(store.calls[0].facts).sort(), scope === 'OUTDOOR_OPTIONS'
+        ? ['outdoor.cut-packages'] : ['outdoor.bench-work', 'outdoor.cut-packages', 'outdoor.plan'], `${label}: only its scope's facts`);
+    }
+  }
+
+  // Not collapsed: real packages alone admit an options inquiry, never a committed one.
+  const optionsOnly = revision('outdoor', 'outdoor-options-only', { 'outdoor.cut-packages': { value: [P1], status: STATUS.DERIVED } });
+  assert.equal(admit({ revision: optionsOnly, inquiryScope: 'OUTDOOR_OPTIONS' }).admission.result, ADMISSION_RESULT.ADMITTED);
+  const committed = admit({ revision: optionsOnly, inquiryScope: 'OUTDOOR_COMMITTED' });
+  assert.equal(committed.admission.result, ADMISSION_RESULT.BLOCKED);
+  assert.deepEqual(committed.admission.blocking.map(b => b.factId), ['outdoor.plan', 'outdoor.bench-work']);
+});
+
 test('the old path is still there and still runs after admit()', () => {
   const oldPath = fs.readFileSync(new URL('../../public-build/stb-public-admission.mjs', import.meta.url), 'utf8');
   const client = fs.readFileSync(new URL('../../public-build/stb-store-client.js', import.meta.url), 'utf8');

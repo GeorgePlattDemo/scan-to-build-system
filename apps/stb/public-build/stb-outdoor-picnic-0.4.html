@@ -497,7 +497,7 @@ const clone=v=>JSON.parse(JSON.stringify(v));
    table, the only answer the terms flow takes). Until the contract has loaded nothing is asked and The Store answers
    stays inert. */
 const TILE_ID='outdoor';
-const OPTIONS_SCOPE='OUTDOOR_OPTIONS',COMMITTED_SCOPE='OUTDOOR_COMMITTED';
+const OPTIONS_SCOPE='OUTDOOR_OPTIONS',COMMITTED_SCOPE='OUTDOOR_COMMITTED',OPTIONS_CONFIGURATION='OUTDOOR-PICNIC-OPTIONS';
 const TRAIL=window.STBTrailContract;
 let C=null;
 window.STBTermsFlow.installStyle(document);
@@ -561,7 +561,7 @@ const buildRequest=()=>S.cfg?definitionFor(S.cfg,'od-r'+S.rev+'-'):null;
 function optionsRequest(cfg,{hardware=true}={}){
   const body={cutPackages:packagesFor(cfg,WOODS.map(w=>w.key))};
   if(hardware)body.itemLines=itemsFor(cfg,TIERS.map(t=>t.key));
-  return {configurationId:'OUTDOOR-PICNIC-OPTIONS',configurationVersion:'od-options-'+hash(JSON.stringify(body)),...body};
+  return {configurationId:OPTIONS_CONFIGURATION,configurationVersion:'od-options-'+hash(JSON.stringify(body)),...body};
 }
 
 /* ═════ CONDITIONS: ours to settle, not the Store's ═════ */
@@ -612,11 +612,20 @@ const ownerLine=a=>a.admission.blocking.map(b=>b.title+' · owner '+b.owner).joi
    owner, and never reaches the Store. An admitted one goes through inquire(), whatever its values: admission never
    checks the envelope; the Store does. This is the transport inside inquire(), in both scopes: it sends the definition
    the admitted revision was made from, with exactly the admitted packages in it, and nothing else, through
-   sendAdmittedJob. admit() is the one admission decision; no Outdoor inquiry calls admitPublicStoreRequest. */
+   sendAdmittedJob. Each scope sends only its own body: the options body under OUTDOOR_OPTIONS, a plan's under
+   OUTDOOR_COMMITTED. Under OUTDOOR_COMMITTED the packages sent are the admitted ones, counted by id. admit() is the one
+   admission decision; no Outdoor inquiry calls admitPublicStoreRequest. */
 function storeTransport(definition,got){
   return request=>{
     if(request.requestType!=='CUT_PACKAGE_V1'||request.definitionRevisionId!==definition.configurationVersion)throw new Error('ADMITTED_REVISION_NOT_ON_SCREEN');
+    if((request.inquiryScope===OPTIONS_SCOPE)!==(definition.configurationId===OPTIONS_CONFIGURATION))throw new Error('BODY_NOT_FOR_INQUIRY_SCOPE');
     const packages=request.facts['outdoor.cut-packages'];
+    if(request.inquiryScope===COMMITTED_SCOPE){
+      const tally=ids=>ids.reduce((m,id)=>m.set(id,(m.get(id)||0)+1),new Map());
+      const sent=tally(definition.cutPackages.map(p=>p.packageId)),admittedPackages=tally(packages.map(p=>p.packageId));
+      if([...admittedPackages].some(([id,n])=>(sent.get(id)||0)<n))throw new Error('ADMITTED_PACKAGE_NOT_SENT');
+      if([...sent].some(([id,n])=>(admittedPackages.get(id)||0)<n))throw new Error('SENT_PACKAGE_NOT_ADMITTED');
+    }
     if(JSON.stringify(packages)!==JSON.stringify(definition.cutPackages))throw new Error('ADMITTED_PACKAGES_NOT_SENT');
     const client=window.STBStoreClient;
     if(!client)throw new Error('STORE_CLIENT_UNAVAILABLE');
@@ -1088,7 +1097,7 @@ window.STBOutdoorPicnic=Object.freeze({version:'0.4',rule:RULE,plans:Object.keys
     answer:S.answer&&{authority:S.answer.authority,definitionRevisionId:S.answer.definitionRevisionId,inquiryScope:S.answer.inquiryScope,stale:!!S.answer.stale},
     admission:clone(S.blocked?.admission??currentAdmission()?.admission??null)})});
 /* The deployed contract copy, loaded once. Nothing is asked before it is here. */
-import('./shared/tile-host-admission-contract.mjs?v=798e2a54').then(m=>{C=m;askFrom();if(S.cfg){scheduleAsk();scheduleOptions()}render()},
+import('./shared/tile-host-admission-contract.mjs?v=0bba0c4b').then(m=>{C=m;askFrom();if(S.cfg){scheduleAsk();scheduleOptions()}render()},
   ()=>{document.documentElement.dataset.tileHostContract='MISSING'});
 })();
 </script>
