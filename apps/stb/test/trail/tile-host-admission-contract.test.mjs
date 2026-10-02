@@ -58,7 +58,8 @@ const FIXTURES = {
       'start-own.workpiece-length': ok(48),
       'start-own.parts': ok([{ partId: 'P1', lengthIn: 22 }, { partId: 'P2', lengthIn: 22 }]),
       'start-own.operations': ok(['CROSSCUT']),
-      'start-own.datum': ok({ cutPlane: 'XZ', lengthDatum: 'C' }),
+      'start-own.datum': ok({ sawAngleDeg: 0, cutPlane: 'miter-face', endIdentity: 'both', endRelation: 'parallel',
+        lengthDatum: 'long-long-outer-edge', datumCMethod: 'REFERENCE_CUT' }),
       'start-own.spot-demand': ok({ required: false }),
     },
     userFact: 'start-own.workpiece-length',
@@ -415,7 +416,8 @@ test('case 4: a malformed nested fact blocks before Store with the fact id and o
   const formed = Object.entries(ADMISSION_PROFILES).flatMap(([, p]) => Object.values(p.scopes))
     .flatMap(s => s.requires).filter(r => r.form).map(r => r.id);
   assert.deepEqual([...new Set(formed)].sort(),
-    ['playhouse.opening', 'start-own.material', 'start-own.parts', 'window-seat.added-knobs', 'window-seat.kept-asks']);
+    ['playhouse.opening', 'start-own.datum', 'start-own.material', 'start-own.parts', 'start-own.spot-demand',
+      'window-seat.added-knobs', 'window-seat.kept-asks']);
   const stated = { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 };
   const material = admit({ revision: facts('start-own', { 'start-own.material': ok(stated) }), inquiryScope: 'USER_DEFINED_BOARD_V1' });
   assert.equal(material.admission.result, ADMISSION_RESULT.ADMITTED);
@@ -433,6 +435,64 @@ test('case 4: a malformed nested fact blocks before Store with the fact id and o
     const store = storeStub({ status: 'SHOULD_NOT_BE_ASKED' });
     assert.equal((await inquire(blocked, store.ask)).reachedStore, false);
     assert.equal(store.calls.length, 0, 'a material missing a stated field never reaches the Store');
+  }
+});
+
+// Start your own's datum, saw angle and spot demand, field by field, as the page emits them. A blank datum field or a
+// missing or non-finite saw angle blocks with owner RULE; a spot operation without a spot demand that says required,
+// its mode and a count above 0 blocks with owner USER. With spotting off, no spot is asked for.
+test('case 4, Start your own: datum fields, a finite saw angle and the spot demand a spot operation needs', async () => {
+  const SCOPE = 'USER_DEFINED_BOARD_V1';
+  const base = FIXTURES['start-own'].facts;
+  const datum = base['start-own.datum'].value;
+  const SPOT_OPS = ['MITER_LIMITED', 'SPOT_ON_LOCATION'];
+  const SPOT = { required: true, mode: 'SPOT_ON_LOCATION', countPerPart: 1, locationRule: 'CENTERED_ON_PART', totalCount: 2 };
+  const revisionWith = overrides => revision('start-own', 'start-own-datum', { ...base, ...overrides });
+  const BLOCKS = [
+    ...['cutPlane', 'endIdentity', 'endRelation', 'lengthDatum', 'datumCMethod'].flatMap(field => [
+      [{ 'start-own.datum': ok({ ...datum, [field]: '' }) }, 'start-own.datum', OWNER.RULE, [field]],
+      [{ 'start-own.datum': ok({ ...datum, [field]: null }) }, 'start-own.datum', OWNER.RULE, [field]],
+    ]),
+    [{ 'start-own.datum': ok({ ...datum, cutPlane: ' ', datumCMethod: '' }) }, 'start-own.datum', OWNER.RULE, ['cutPlane', 'datumCMethod']],
+    [{ 'start-own.datum': ok((({ sawAngleDeg, ...rest }) => rest)(datum)) }, 'start-own.datum', OWNER.RULE, ['sawAngleDeg']],
+    [{ 'start-own.datum': ok({ ...datum, sawAngleDeg: NaN }) }, 'start-own.datum', OWNER.RULE, ['sawAngleDeg']],
+    [{ 'start-own.datum': ok({ ...datum, sawAngleDeg: Infinity }) }, 'start-own.datum', OWNER.RULE, ['sawAngleDeg']],
+    [{ 'start-own.datum': ok({ ...datum, sawAngleDeg: '30' }) }, 'start-own.datum', OWNER.RULE, ['sawAngleDeg']],
+    [{ 'start-own.datum': ok({ ...datum, sawAngleDeg: undefined }) }, 'start-own.datum', OWNER.RULE, ['sawAngleDeg']],
+    [{ 'start-own.operations': ok(SPOT_OPS), 'start-own.spot-demand': ok({ required: false }) },
+      'start-own.spot-demand', OWNER.USER, ['required', 'mode', 'totalCount']],
+    [{ 'start-own.operations': ok(SPOT_OPS), 'start-own.spot-demand': ok({ ...SPOT, totalCount: 0 }) }, 'start-own.spot-demand', OWNER.USER, ['totalCount']],
+    [{ 'start-own.operations': ok(SPOT_OPS), 'start-own.spot-demand': ok({ ...SPOT, mode: '' }) }, 'start-own.spot-demand', OWNER.USER, ['mode']],
+    [{ 'start-own.operations': ok(SPOT_OPS), 'start-own.spot-demand': ok({ ...SPOT, required: 'yes' }) }, 'start-own.spot-demand', OWNER.USER, ['required']],
+  ];
+  for (const [overrides, factId, owner, missing] of BLOCKS) {
+    const label = JSON.stringify(overrides);
+    const result = admit({ revision: revisionWith(overrides), inquiryScope: SCOPE });
+    assert.equal(result.admission.result, ADMISSION_RESULT.BLOCKED, label);
+    assert.deepEqual(result.admission.blocking,
+      [{ factId, owner, title: factId === 'start-own.datum' ? 'Cut and datum meaning' : 'Center spot demand, on or off',
+        condition: 'INVALID_VALUE', fields: missing }], label);
+    const store = storeStub({ status: 'SHOULD_NOT_BE_ASKED' });
+    assert.equal((await inquire(result, store.ask)).reachedStore, false, label);
+    assert.equal(store.calls.length, 0, `${label}: nothing reached Store`);
+  }
+
+  const ADMITS = [
+    // Spotting off, as the page states it: no spot is asked for.
+    {},
+    { 'start-own.datum': ok({ ...datum, sawAngleDeg: 26.387799961243 }) },
+    // Spotting on and complete.
+    { 'start-own.operations': ok(SPOT_OPS), 'start-own.spot-demand': ok(SPOT) },
+    // A spot demand stated without the spot operation is not asked to be complete; it is sent as stated.
+    { 'start-own.spot-demand': ok({ required: false, note: 'off' }) },
+  ];
+  for (const overrides of ADMITS) {
+    const label = JSON.stringify(overrides);
+    const result = admit({ revision: revisionWith(overrides), inquiryScope: SCOPE });
+    assert.equal(result.admission.result, ADMISSION_RESULT.ADMITTED, label);
+    const store = storeStub({ status: 'REFUSED', withinEnvelope: false });
+    assert.equal((await inquire(result, store.ask)).reachedStore, true, label);
+    assert.deepEqual(store.calls[0].facts['start-own.spot-demand'], (overrides['start-own.spot-demand'] ?? base['start-own.spot-demand']).value, label);
   }
 });
 
