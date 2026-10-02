@@ -707,6 +707,34 @@
       "blobSha": "34238e37f6e434e4b187d9c31d4cd017489ac2c4",
       "bytes": 139184,
       "reason": "Window Seat speaks STB-TILE-HOST-0.1 to the shared host and loads the deployed tile-host admission contract. Every Store inquiry is one job-definition revision through admit() then inquire(): each blocking condition names the profile fact it holds open, a blocked revision is not sent and the page names the fact and its owner, and a complete revision reaches the Store whatever its values. Steps come from availableSteps() and the terms flow's gates. Visible pages and the one full scroll are unchanged."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "alcove-on-shared-host",
+      "blobSha": "a5b4088e890ed197de82f4c0d557aec4e634495e",
+      "bytes": 245378,
+      "reason": "Alcove on the shared tile host: Alcove registers with the host, which validates Alcove's STB-TILE-HOST-0.1 message and draws its one nav line from it and the trail contract. Alcove's tile code builds that message from the page's admission, its fresh Store answer (availableSteps()) and the terms flow's gates; Your call also waits for the confirmed version's answer, as before. In-page Alcove actions open their steps through the same gate. Where a stage lands (review on the Store page, terms on the yard, recap on the record) is registry data. The old Alcove shell path (applyAlcoveNavState, alcoveStageOpen, the Alcove data-go remapping and the Alcove branches in selectJourneyProject, showMappedProjectStage and show) is gone. Cache-busters for the front door and the contract."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "alcove-on-shared-host",
+      "blobSha": "9dba376b575d7c93407ffb7492f48ebb03f132dd",
+      "bytes": 127659,
+      "reason": "Alcove's page sends every Store inquiry as one job-definition revision through admit() then inquire() from the deployed tile-host admission contract; the bridge is the transport inside inquire() and the Store definition is built only from the admitted request. A blocked revision is not sent and the page names each missing fact and its owner; a complete revision reaches the Store whatever its values. The page announces each change of its state to the host. No Store definition is built outside admission. Cache-buster for the bridge."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "alcove-on-shared-host",
+      "blobSha": "39f57e7ae55235a29ff7b7ef6c3186b0d169ff3e",
+      "bytes": 39662,
+      "reason": "Cache-buster for the base page (Alcove on the shared tile host)."
+    },
+    {
+      "path": "stb-alcove-store-bridge.js",
+      "pass": "alcove-on-shared-host",
+      "blobSha": "25fbc3b35ca491932ae21bdd8649f0dcc9de3f88",
+      "bytes": 1620,
+      "reason": "The Alcove bridge sends only a request admit() admitted, as the transport inside inquire(); its candidate revision is the admitted revision."
     }
   ],
   "retiredFiles": [

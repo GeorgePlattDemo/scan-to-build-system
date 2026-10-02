@@ -1,4 +1,4 @@
-// Tile/host and definition/Store admission contract (the shared tile host uses it; Playhouse and Window Seat are on it).
+// Tile/host and definition/Store admission contract (the shared tile host uses it; Playhouse, Window Seat and Alcove are on it).
 // Contract: apps/stb/shared/tile-host-admission-contract.mjs. Spec: docs/application/TILE-HOST-ADMISSION-CONTRACT.md.
 //
 // Proves three cases for every tile declared in public-build/stb-trail-contract.js:
@@ -66,6 +66,7 @@ const FIXTURES = {
       'alcove.material': ok({ species: 'poplar', form: 'S4S', nominalT: 1, nominalW: 12 }),
       'alcove.board-requirements': ok([{ requirementId: 'ALCOVE-UPRIGHT-PARENTS' }, { requirementId: 'ALCOVE-SHELF-PARENTS' }]),
       'alcove.component-programs': ok([{ componentId: 'U1', requirementId: 'ALCOVE-UPRIGHT-PARENTS' }]),
+      'alcove.spot-demand': ok({ enabled: false, mode: 'SPOT_ON_LOCATION', features: [] }),
       // alcove.hardware is STORE-owned and deliberately left unresolved: the Store selects it.
     },
     userFact: 'alcove.opening',
