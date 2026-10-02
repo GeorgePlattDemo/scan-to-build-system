@@ -302,15 +302,19 @@ function validateUserDefinedBoardPayload(payload) {
       'user-defined Board request requires materialDemand',
     );
   }
-  for (const key of ['species', 'form', 'nominalT', 'nominalW']) {
-    if (line.materialDemand[key] !== USER_DEFINED_BOARD_MATERIAL_DEMAND[key]) {
-      return fail(
-        ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
-        'user-defined Board materialDemand must match the frozen User 1 SPF 2x4 demand',
-      );
+  // The stated material passes through as stated; the Store resolves it against its catalog, and a material the
+  // catalog does not have is the Store's refusal. A missing or blank field still fails here.
+  for (const key of ['species', 'form']) {
+    const error = requireNonemptyString(`materialDemand.${key}`, line.materialDemand[key]);
+    if (error) return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, error);
+  }
+  for (const key of ['nominalT', 'nominalW']) {
+    const value = line.materialDemand[key];
+    if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, `materialDemand.${key} must be a positive number`);
     }
   }
-  if (Object.keys(line.materialDemand).some((key) => !Object.hasOwn(USER_DEFINED_BOARD_MATERIAL_DEMAND, key))) {
+  if (Object.keys(line.materialDemand).some((key) => !['species', 'form', 'nominalT', 'nominalW'].includes(key))) {
     return fail(
       ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
       'user-defined Board materialDemand contains unexpected fields',

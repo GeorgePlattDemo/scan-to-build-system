@@ -192,8 +192,9 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
 
     // The complete revision is admitted and reaches the Store, and the demand sent is built from the admitted facts.
     // The material on the wire is the admitted start-own.material fact, {origin, stockClass}, as the page states it.
-    // Recorded result at STORE_PIN: the hosted Store refuses that material (422 INVALID_BOUNDED_SCOPE, "must match
-    // the frozen User 1 SPF 2x4 demand"). The refusal is the result; no material is added to get past it.
+    // Recorded result: the hosted Store's wire check refuses that material, which states no species, form or nominal
+    // size (422 INVALID_BOUNDED_SCOPE, "materialDemand.species must be a nonempty string"). The refusal is the result;
+    // no material is added to get past it.
     const revision = await live(frame, () => window.STBStartOwnLive.revision());
     const failure = await live(frame, r => window.STBStartOwnLive.inquire(r).then(() => null, error => error.message), revision);
     const sent = startOwnCalls(log);
@@ -205,7 +206,7 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.equal(failure, 'INVALID_BOUNDED_SCOPE');
     assert.equal(sent[0].status, 422);
     assert.equal(sent[0].answer.code, 'INVALID_BOUNDED_SCOPE');
-    assert.equal(sent[0].answer.details, 'user-defined Board materialDemand must match the frozen User 1 SPF 2x4 demand');
+    assert.equal(sent[0].answer.details, 'materialDemand.species must be a nonempty string');
     assert.deepEqual(lineSent.parts, revision.facts['start-own.parts'].value);
     assert.deepEqual(lineSent.requiredOps, revision.facts['start-own.operations'].value);
     assert.equal(Number(lineSent.definedWorkpieceLength.value), revision.facts['start-own.workpiece-length'].value);

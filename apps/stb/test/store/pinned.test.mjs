@@ -388,3 +388,37 @@ test('estimate failure after SUPPORTABLE preserves raw evaluation and omits budg
   assert.notEqual(body.rawEvaluation.status, 'UNRESOLVED');
   assert.equal(body.rawEstimate?.totals?.Q, undefined);
 });
+
+// The stated user-defined Board material reaches the pinned Store, which resolves it against its catalog. A material
+// the catalog has is priced there; one it does not have is the Store's refusal, and that refusal is the result.
+test('user-defined Board stated material is resolved by the pinned Store catalog; an uncatalogued material is refused', async (t) => {
+  await withAdapter(t);
+
+  const cedarResponse = await postJob(await userDefinedBoardJobBody({
+    materialDemand: { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 },
+  }));
+  assert.equal(cedarResponse.status, 200);
+  const cedar = parseJson(cedarResponse);
+  assert.equal(cedar.rawEvaluation.status, 'SUPPORTABLE');
+  assert.equal(cedar.materialResolution.status, 'MAPPED');
+  assert.equal(cedar.materialResolution.pricingReferenceSku, 'STB-ZERO-WRC-2X4-96-001');
+  assert.equal(cedar.materialResolution.materialDemand.species, 'cedar');
+  assert.equal(cedar.priceCompleteness.status, 'COMPLETE_FOR_TRAVEL_STANDARD');
+  assert.equal(cedar.evaluationReceipt.authority.storeRevision, STORE_PIN);
+
+  const walnutResponse = await postJob(await userDefinedBoardJobBody({
+    materialDemand: { species: 'walnut', form: 'board', nominalT: 2, nominalW: 4 },
+  }));
+  assert.equal(walnutResponse.status, 200, 'an uncatalogued stated material reaches the Store, not an adapter scope error');
+  const walnut = parseJson(walnutResponse);
+  assert.equal(walnut.rawEvaluation.status, 'UNAVAILABLE');
+  assert.equal(walnut.materialResolution.status, 'UNAVAILABLE');
+  assert.equal(walnut.materialResolution.reason, 'NO_MATCHING_BOARD_OFFERING');
+  assert.deepEqual(walnut.materialResolution.consideredCandidates, []);
+  assert.equal(walnut.rawEstimate, null);
+
+  // A material without its stated fields still fails before the Store.
+  const missing = await postJob(await userDefinedBoardJobBody({ materialDemand: { origin: 'STORE_ZERO', stockClass: '2x4' } }));
+  assert.equal(missing.status, 422);
+  assert.equal(parseJson(missing).code, ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE);
+});
