@@ -153,7 +153,7 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.equal(admission.inquiryScope, 'OUTDOOR_COMMITTED');
     assert.deepEqual(Object.keys(admission.request.facts).sort(), ['outdoor.bench-work', 'outdoor.cut-packages', 'outdoor.plan']);
     assert.deepEqual(admission.request.openDemands, []);
-    assert.equal(admission.request.profileVersion, '0.2');
+    assert.equal(admission.request.profileVersion, '0.3');
     assert.equal(admission.request.requestType, 'CUT_PACKAGE_V1');
     // What reached the Store is the definition for that admitted revision, with exactly the admitted packages.
     const sent = committedCalls(log).at(-1).request;
@@ -349,4 +349,116 @@ test('the "From" and option prices for one plan send different definitions under
     assert.equal(isCurrentAnswer({ admission: fromAdmission, answer: optionAnswer }), false, 'the option answer does not open the "From"');
     assert.deepEqual(errors, []);
   });
+});
+
+// Outdoor 0.3, on the live route against the pinned Store, in both scopes. The page is served with one defect put
+// into its own options generator, since nothing outside the page can hand the "From" a body: the A-frame's options
+// carry a zero-length part and a package without an id, and the Table + benches "From" goes out under its plan's
+// committed configuration id. Each blocks before the Store: the first in admit(), the second in the transport. The
+// Table + benches option prices are untouched and still reach the Store. Under OUTDOOR_COMMITTED, a revision with a
+// bad part blocks in admit(); a revision whose admitted packages are not the packages the page sends, counted by id,
+// blocks in the transport; the complete revision still reaches the Store.
+const tamperOutdoorOptions = source => {
+  const packages = 'const body={cutPackages:packagesFor(cfg,WOODS.map(w=>w.key))};';
+  const id = 'return {configurationId:OPTIONS_CONFIGURATION,';
+  assert.equal(source.split(packages).length, 2, 'the options generator builds its packages once');
+  assert.equal(source.split(id).length, 2, 'the options generator names its configuration once');
+  return source
+    .replace(packages, packages + "if(cfg.plan==='a-frame'){body.cutPackages[0].parts[0].lengthIn=0;body.cutPackages[1].packageId=''}")
+    .replace(id, "return {configurationId:cfg.plan==='table-benches'&&!hardware?'OUTDOOR-PICNIC-TABLE-BENCHES':OPTIONS_CONFIGURATION,");
+};
+const partIds = request => request.payload.definition.cutPackages.flatMap(p => p.parts.map(x => x.partId));
+
+test('a bad part or a package mismatch blocks before the Store on the live route, in both scopes; complete inquiries still reach it', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { page, frame, od, errors } = await openOutdoor(browser, origin);
+    const fromText = key => od.locator(`[data-card="${key}"] [data-from]`).textContent();
+
+    // OUTDOOR_OPTIONS: a zero-length part and a package without an id block in admit() and name the fact and owner.
+    await until(async () => /Store unavailable/.test(await fromText('a-frame')), 'A-frame "From" blocked');
+    assert.equal(await fromText('a-frame'), 'Store unavailable (Not sent to the Store. Missing: Requested work with real part values · owner PROJECT)');
+    // OUTDOOR_OPTIONS: a "From" carrying a committed body never reaches the Store.
+    await until(async () => /Store unavailable/.test(await fromText('table-benches')), 'Table + benches "From" blocked');
+    assert.equal(await fromText('table-benches'), 'Store unavailable (BODY_NOT_FOR_INQUIRY_SCOPE)');
+    await page.waitForTimeout(600);
+    assert.deepEqual(outdoorCalls(log), [], 'neither "From" reached the Store');
+
+    // OUTDOOR_OPTIONS: the complete option prices for the plan picked still reach the Store.
+    await od.locator('[data-plan="table-benches"]').click();
+    await settle(od);
+    const picked = await od.evaluate(() => window.STBOutdoorPicnic.optionsRequest());
+    await until(() => optionsCalls(log).some(e => isDeepStrictEqual(e.request.payload.definition, picked)), 'option prices reached the Store');
+    assert.ok(optionsCalls(log).every(e => !partIds(e.request).includes('TOP-01')), 'no A-frame options reached the Store');
+
+    // OUTDOOR_COMMITTED: the complete revision on screen reached the Store, admitted under profile 0.3.
+    const admission = await od.evaluate(() => window.STBOutdoorPicnic.admission());
+    assert.equal(admission.admission.result, 'ADMITTED');
+    assert.equal(admission.request.profileVersion, '0.3');
+    assert.ok(admission.request.facts['outdoor.cut-packages'].length >= 2, 'the plan sends more than one package');
+    assert.equal(committedCalls(log).length, 1);
+    assert.deepEqual(committedCalls(log)[0].request.payload.definition, await od.evaluate(() => window.STBOutdoorPicnic.request()));
+
+    // OUTDOOR_COMMITTED: a bad part or a package without an id blocks in admit(), before the Store, with the fields.
+    const reached = outdoorCalls(log).length;
+    for (const [label, fields] of [
+      ['zero-length part', ['[0].parts[0].lengthIn']],
+      ['part without an id', ['[1].parts[2].partId']],
+      ['package without an id', ['[1].packageId']],
+    ]) {
+      const result = await od.evaluate(label => {
+        const revision = window.STBOutdoorPicnic.revision();
+        const packages = revision.facts['outdoor.cut-packages'].value;
+        if (label === 'zero-length part') packages[0].parts[0].lengthIn = 0;
+        if (label === 'part without an id') delete packages[1].parts[2].partId;
+        if (label === 'package without an id') packages[1].packageId = '';
+        revision.definitionRevisionId += '-' + label.replace(/ /g, '-');
+        return window.STBOutdoorPicnic.inquire(revision);
+      }, label);
+      assert.equal(result.admission.result, 'BLOCKED', label);
+      assert.equal(result.admission.reason, 'REQUIRED_FACT_UNSETTLED', label);
+      assert.deepEqual(result.admission.blocking, [{ factId: 'outdoor.cut-packages', owner: 'PROJECT',
+        title: 'Requested work with real part values', condition: 'INVALID_VALUE', fields }], label);
+      assert.equal(result.request, null, label);
+      await page.waitForTimeout(500);
+      assert.equal(outdoorCalls(log).length, reached, label + ': never reaches the Store');
+      assert.equal(await od.locator('#instant [data-not-sent]').textContent(),
+        'NOT SENT TO THE STORE. Missing: Requested work with real part values · owner PROJECT', label);
+      const inert = Object.fromEntries(steps(await navLine(frame)).map(b => [b.stage, b.inert]));
+      assert.deepEqual(inert, { scan: false, configure: false, store: true, request: true, yard: true, record: true }, label);
+    }
+
+    // OUTDOOR_COMMITTED: the revision on screen, admitted with packages that are not the ones the page sends, counted by
+    // id. An admitted package that is not sent blocks, and so does a sent package that was not admitted, in the
+    // transport, before the Store.
+    for (const [label, error] of [
+      ['admitted package not sent', 'ADMITTED_PACKAGE_NOT_SENT'],
+      ['admitted package sent once, admitted twice', 'ADMITTED_PACKAGE_NOT_SENT'],
+      ['sent package not admitted', 'SENT_PACKAGE_NOT_ADMITTED'],
+    ]) {
+      const result = await od.evaluate(label => {
+        const revision = window.STBOutdoorPicnic.revision();
+        const fact = revision.facts['outdoor.cut-packages'];
+        if (label === 'admitted package not sent') fact.value.push({ ...fact.value[0], packageId: fact.value[0].packageId + '|EXTRA' });
+        if (label === 'admitted package sent once, admitted twice') fact.value.push(fact.value[0]);
+        if (label === 'sent package not admitted') fact.value.pop();
+        return window.STBOutdoorPicnic.inquire(revision);
+      }, label);
+      assert.equal(result.admission.result, 'ADMITTED', label + ': every package and part is real');
+      assert.equal(result.inquiryScope, 'OUTDOOR_COMMITTED', label);
+      assert.equal(await od.evaluate(() => window.STBOutdoorPicnic.state().error), error, label);
+      await page.waitForTimeout(500);
+      assert.equal(outdoorCalls(log).length, reached, label + ': never reaches the Store');
+      await until(async () => steps(await navLine(frame)).find(b => b.stage === 'request').inert, label + ': Your call inert');
+    }
+
+    // The complete revision is admitted and reaches the Store again, and its answer is current.
+    await od.evaluate(() => window.STBOutdoorPicnic.inquire(window.STBOutdoorPicnic.revision()));
+    const state = await settle(od);
+    assert.equal(state.error, null);
+    assert.equal(state.answer.authority, 'CURRENT');
+    assert.equal(state.answer.inquiryScope, 'OUTDOOR_COMMITTED');
+    assert.equal(outdoorCalls(log).length, reached + 1);
+    assert.deepEqual(committedCalls(log).at(-1).request.payload.definition, await od.evaluate(() => window.STBOutdoorPicnic.request()));
+    assert.deepEqual(errors, []);
+  }, null, { 'stb-outdoor-picnic-0.4.html': tamperOutdoorOptions });
 });

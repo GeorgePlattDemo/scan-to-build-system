@@ -1155,6 +1155,41 @@
       "blobSha": "e83b48a09209d11d6b6fbab61ab55b5c664c685e",
       "bytes": 252927,
       "reason": "The tile-host admission contract loads at ?v=798e2a54, the contract's current blob prefix (was ?v=2615dd6f): Window Seat profile 0.3 checks every board's id, length and width. Cache-busters for the changed stb-outdoor-picnic-0.4.html, stb-window-seat-0.9.html and front door."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "outdoor-packages-parts-sent-admission",
+      "blobSha": "20c5a1b20a8b17bf039760518ab380a1db9ff4d2",
+      "bytes": 82366,
+      "reason": "The tile-host admission contract loads at ?v=0bba0c4b, the contract's current blob prefix (was ?v=798e2a54): Outdoor profile 0.3 checks, in both its scopes, every package's id and every part's id and length above 0. The Outdoor transport stops before the Store when an inquiry's body is not its scope's (an OUTDOOR_OPTIONS inquiry sends only the OUTDOOR-PICNIC-OPTIONS body, an OUTDOOR_COMMITTED one never it: BODY_NOT_FOR_INQUIRY_SCOPE), and, under OUTDOOR_COMMITTED, when the packages it would send are not the admitted packages counted by id (ADMITTED_PACKAGE_NOT_SENT, SENT_PACKAGE_NOT_ADMITTED). Visible pages are unchanged."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "outdoor-packages-parts-sent-admission",
+      "blobSha": "23e708dd5586992f7a5b5ca7e10ff94b021aba1a",
+      "bytes": 140536,
+      "reason": "The tile-host admission contract loads at ?v=0bba0c4b, the contract's current blob prefix (was ?v=798e2a54): Outdoor profile 0.3 checks, in both its scopes, every package's id and every part's id and length above 0. Nothing else on the Window Seat page changes."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "outdoor-packages-parts-sent-admission",
+      "blobSha": "132c198b1fe20bc75f6498ba735a477f9b04d0b2",
+      "bytes": 127709,
+      "reason": "The tile-host admission contract loads at ?v=0bba0c4b, the contract's current blob prefix (was ?v=798e2a54): Outdoor profile 0.3 checks, in both its scopes, every package's id and every part's id and length above 0. Visible pages are unchanged."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "outdoor-packages-parts-sent-admission",
+      "blobSha": "8ef837c81deb52ab72b55dd41d3dc2b22d8523b2",
+      "bytes": 39662,
+      "reason": "Cache-buster for the changed system-build-base-8d8a9dd.html."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-packages-parts-sent-admission",
+      "blobSha": "ae80489804eab33227a385e595017315d82c1711",
+      "bytes": 252927,
+      "reason": "The tile-host admission contract loads at ?v=0bba0c4b, the contract's current blob prefix (was ?v=798e2a54): Outdoor profile 0.3 checks, in both its scopes, every package's id and every part's id and length above 0. Cache-busters for the changed stb-outdoor-picnic-0.4.html, stb-window-seat-0.9.html and front door."
     }
   ],
   "retiredFiles": [
