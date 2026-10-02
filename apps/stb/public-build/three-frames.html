@@ -157,7 +157,7 @@
         <div class="g" style="top:43px;height:2px;opacity:.6"></div>
       </div><p>1×8 oak</p></div>
 
-      <div class="board" id="stb-store-board-2x4" data-store-size-key="2x4"><div class="swatch" style="background:linear-gradient(178deg,#E4D8BC,#D8C9A8 50%,#C9B995)">
+      <div class="board" id="stb-store-board-2x4" data-store-size-key="2x4" data-material-form="board" data-material-nominal-t="2" data-material-nominal-w="4"><div class="swatch" style="background:linear-gradient(178deg,#E4D8BC,#D8C9A8 50%,#C9B995)">
         <div class="g" style="top:16px;height:2px;opacity:.35"></div>
         <div class="g" style="top:36px;height:2px;opacity:.3"></div>
         <div class="knot" style="top:8px;left:40px;width:8px;height:5px;opacity:.7"></div>
@@ -320,6 +320,15 @@
           </div>
           <!-- The pills write the chosen length here; Job 1 has no typed length. -->
           <input id="stb-config-length" type="hidden" min="16" max="18" step="0.125" value="16">
+        </div>
+        <!-- Species of the 2×4 board: the three the Store catalog has for nominal 2×4 board. None is chosen for you. -->
+        <div class="higher-row" id="stb-bench-species">
+          <h2>Which wood?</h2>
+          <div class="choice-row">
+            <button type="button" data-species="spf">SPF</button>
+            <button type="button" data-species="syp-treated">SYP TREATED</button>
+            <button type="button" data-species="cedar">CEDAR</button>
+          </div>
         </div>
         <p class="bench-price-line" id="stb-bench-price-line">Change it and the Store answers again.</p>
         <div class="board-swap" id="stb-bench-board-swap" hidden role="status"></div>

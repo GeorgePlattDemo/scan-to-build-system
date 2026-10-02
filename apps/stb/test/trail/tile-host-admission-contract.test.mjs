@@ -410,14 +410,30 @@ test('case 4: a malformed nested fact blocks before Store with the fact id and o
   const alcove = admit({ revision: facts('alcove', {}), inquiryScope: 'ALCOVE_INSERT_V1' });
   assert.deepEqual(alcove.request.openDemands, ['alcove.hardware']);
 
-  // Only the facts whose fields the live page emits carry a form. Start your own's material stays presence only:
-  // its admitted value is {origin, stockClass}, not the bridge's wire constant, and that split stays recorded.
+  // Only the facts whose fields the live page emits carry a form. Start your own's material carries the four fields
+  // its bench states: species from its species choice (no default), form and nominal size from its "2×4 stud" control.
   const formed = Object.entries(ADMISSION_PROFILES).flatMap(([, p]) => Object.values(p.scopes))
     .flatMap(s => s.requires).filter(r => r.form).map(r => r.id);
   assert.deepEqual([...new Set(formed)].sort(),
-    ['playhouse.opening', 'start-own.parts', 'window-seat.added-knobs', 'window-seat.kept-asks']);
-  const material = admit({ revision: facts('start-own', { 'start-own.material': ok({ origin: 'STORE_ZERO', stockClass: 'board' }) }), inquiryScope: 'USER_DEFINED_BOARD_V1' });
+    ['playhouse.opening', 'start-own.material', 'start-own.parts', 'window-seat.added-knobs', 'window-seat.kept-asks']);
+  const stated = { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 };
+  const material = admit({ revision: facts('start-own', { 'start-own.material': ok(stated) }), inquiryScope: 'USER_DEFINED_BOARD_V1' });
   assert.equal(material.admission.result, ADMISSION_RESULT.ADMITTED);
+  assert.deepEqual(material.request.facts['start-own.material'], stated, 'travels exactly as stated');
+  for (const [value, missing] of [
+    [{ origin: 'STORE_ZERO', stockClass: 'board' }, ['species', 'form', 'nominalT', 'nominalW']],
+    [{ form: 'board', nominalT: 2, nominalW: 4 }, ['species']],
+    [{ species: 'spf', form: 'board', nominalT: 2 }, ['nominalW']],
+    [{ species: ' ', form: ' ', nominalT: 0, nominalW: 4 }, ['species', 'form', 'nominalT']],
+  ]) {
+    const blocked = admit({ revision: facts('start-own', { 'start-own.material': ok(value) }), inquiryScope: 'USER_DEFINED_BOARD_V1' });
+    assert.equal(blocked.admission.result, ADMISSION_RESULT.BLOCKED, JSON.stringify(value));
+    assert.deepEqual(blocked.admission.blocking,
+      [{ factId: 'start-own.material', owner: OWNER.USER, title: 'Material demand', condition: 'INVALID_VALUE', fields: missing }]);
+    const store = storeStub({ status: 'SHOULD_NOT_BE_ASKED' });
+    assert.equal((await inquire(blocked, store.ask)).reachedStore, false);
+    assert.equal(store.calls.length, 0, 'a material missing a stated field never reaches the Store');
+  }
 });
 
 test('the old path is still there and still runs after admit()', () => {

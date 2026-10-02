@@ -3,8 +3,9 @@
 
   // User 1's request shape only. Transport, the Store address (stb-store-runtime.json), the Store version
   // and every freshness check live in the shared stb-store-client.js.
-  // It sends only a request admit() admitted (tile-host-admission-contract.mjs), and is called only as the
-  // transport inside inquire(): a blocked revision never reaches it.
+  // It sends only a request admit() admitted (tile-host-admission-contract.mjs), through sendAdmittedJob, and is
+  // called only as the transport inside inquire(): a blocked revision never reaches it, and no Start your own
+  // inquiry calls admitPublicStoreRequest.
   const REQUEST_TYPE = 'USER_DEFINED_BOARD_V1';
   const SCOPE = 'USER_DEFINED_BOARD_V1';
   const DEFINITION_KIND = 'user_defined_board.v1';
@@ -29,8 +30,10 @@
     return value == null ? value : JSON.parse(JSON.stringify(value));
   }
 
-  function payloadFromDemand(demand){
+  // `materialDemand` is the admitted start-own.material fact, sent as admitted: the bridge adds no material of its own.
+  function payloadFromDemand(demand, materialDemand){
     if(!demand || typeof demand !== 'object') throw new Error('USER_DEFINED_BOARD_DEMAND_REQUIRED');
+    if(!materialDemand || typeof materialDemand !== 'object' || Array.isArray(materialDemand)) throw new Error('START_OWN_ADMITTED_MATERIAL_REQUIRED');
     const spotCount = Number(demand.declaredSpotCount || 0);
     const spotDemand = spotCount > 0 ? {
       required:true,
@@ -45,7 +48,7 @@
         lineId:'SYO-USER1-XBRACE-LINE-1',
         configurationId:String(demand.configurationId || ''),
         configurationVersion:String(demand.configurationVersion || ''),
-        materialDemand:{species:'spf',form:'board',nominalT:2,nominalW:4},
+        materialDemand:clone(materialDemand),
         quantity:1,
         unit:'ea',
         requiredOps:clone(demand.requiredOps || []),
@@ -115,12 +118,11 @@
     options = options || {};
     const client = root.STBStoreClient;
     if(!client) throw new Error('STORE_CLIENT_UNAVAILABLE');
-    const payload = payloadFromDemand(demand);
-    return client.sendJob({
-      projectId:'start-own',
-      requestType:REQUEST_TYPE,
+    const payload = payloadFromDemand(demand, (admitted.facts || {})['start-own.material']);
+    // admit() is this inquiry's one admission decision; the transport does not admit it again.
+    return client.sendAdmittedJob({
+      admitted,
       requestId:options.requestId,
-      candidateRevisionId:admitted.definitionRevisionId,
       payload,
       signatureBody:signatureBody(payload),
       timeoutMs:20000
@@ -128,7 +130,7 @@
   }
 
   root.STBUserDefinedBoardRuntimeBridge = Object.freeze({
-    version:'0.3',
+    version:'0.4',
     requestType:REQUEST_TYPE,
     payloadFromDemand,
     request

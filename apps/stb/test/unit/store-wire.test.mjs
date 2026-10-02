@@ -548,3 +548,57 @@ test('User-defined Board response is valid only with a fresh matching Store rece
     'missing-evaluation-receipt-hash',
   );
 });
+
+// A user-defined Board materialDemand is the stated material, passed through as stated. It no longer has to equal
+// USER_DEFINED_BOARD_MATERIAL_DEMAND; whether the catalog has it is the Store's answer. A missing field still fails.
+test('user-defined Board wire passes the stated material through; a missing or extra field fails', async () => {
+  const validatedWith = async (materialDemand) => {
+    const payload = userDefinedBoardJobPayload({
+      lineId: 'line-m',
+      configurationId: 'SYO-USER1-XBRACE',
+      configurationVersion: '0.1',
+      materialDemand,
+      definedWorkpieceLengthCanonical: canonicalInchString(60),
+      sawCuts: 2,
+      sawAngleDeg: 0,
+      requiredOps: ['CROSSCUT'],
+      cutPlane: 'miter-face',
+      endIdentity: 'both',
+      endRelation: 'parallel',
+      lengthDatum: 'long-long-outer-edge',
+      datumCMethod: 'REFERENCE_CUT',
+      parts: [{ partId: 'PART-1', lengthIn: 16, features: [] }, { partId: 'PART-2', lengthIn: 16, features: [] }],
+      spotDemand: null,
+      unresolvedConditions: [],
+    });
+    return validateWireRequest(await buildUserDefinedBoardRequest({
+      requestId: 'req-m', projectId: 'proj-m', candidateRevisionId: 'cand-m', attemptId: 'att-m', attemptNumber: 1,
+      sentAt: '2026-10-02T00:00:00.000Z', demandSignature: await userDefinedBoardDemandSignature(payload), payload,
+    }));
+  };
+
+  for (const stated of [
+    USER_DEFINED_BOARD_MATERIAL_DEMAND,
+    { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 },
+    { species: 'walnut', form: 'board', nominalT: 1, nominalW: 6 },
+  ]) {
+    const validated = await validatedWith({ ...stated });
+    assert.equal(validated.ok, true, JSON.stringify(validated));
+    assert.deepEqual(validated.payload.line.materialDemand, stated);
+  }
+
+  for (const [materialDemand, details] of [
+    [{ form: 'board', nominalT: 2, nominalW: 4 }, 'materialDemand.species must be a nonempty string'],
+    [{ species: 'spf', nominalT: 2, nominalW: 4 }, 'materialDemand.form must be a nonempty string'],
+    [{ species: 'spf', form: 'board', nominalW: 4 }, 'materialDemand.nominalT must be a positive number'],
+    [{ species: 'spf', form: 'board', nominalT: 2 }, 'materialDemand.nominalW must be a positive number'],
+    [{ species: 'spf', form: 'board', nominalT: 0, nominalW: 4 }, 'materialDemand.nominalT must be a positive number'],
+    [{ origin: 'STORE_ZERO', stockClass: '2x4' }, 'materialDemand.species must be a nonempty string'],
+    [{ species: 'spf', form: 'board', nominalT: 2, nominalW: 4, grade: 'construction' }, 'user-defined Board materialDemand contains unexpected fields'],
+  ]) {
+    const validated = await validatedWith(materialDemand);
+    assert.equal(validated.ok, false, JSON.stringify(materialDemand));
+    assert.equal(validated.code, ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE);
+    assert.equal(validated.details, details);
+  }
+});
