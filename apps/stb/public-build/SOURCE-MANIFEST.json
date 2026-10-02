@@ -1001,6 +1001,20 @@
       "blobSha": "5a85bd7d68852aea9e79fa25bf235e2c90679cb5",
       "bytes": 252927,
       "reason": "start-own.material takes its species from the bench's species choice (no default) and its form and nominal size from the \"2×4 stud\" control; a species choice is a new revision. Cache-busters for the contract, stb-terms-flow.js, three-frames.html, the Outdoor and Window Seat pages and the front door."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "outdoor-revision-matches-definition",
+      "blobSha": "5a7f8c062d890f161c639abea3bfe7aa2ef6522b",
+      "bytes": 81496,
+      "reason": "Outdoor's \"From\" price no longer deletes itemLines after its od-options- id is computed: optionsRequest() takes {hardware:false} and hashes exactly the body it sends, so the \"From\" and the option prices for the same plan at the same length carry different revision ids, and an OUTDOOR_OPTIONS answer for one is not current for the other."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-revision-matches-definition",
+      "blobSha": "977085d7e32058a1cf6a420eb628a4ad5c2524de",
+      "bytes": 252927,
+      "reason": "Cache-buster for the changed stb-outdoor-picnic-0.4.html."
     }
   ],
   "retiredFiles": [

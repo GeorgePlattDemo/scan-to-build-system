@@ -301,3 +301,52 @@ test('both Outdoor scopes have one admission decision, admit(); no Outdoor inqui
     assert.deepEqual(errors, []);
   }, null, { [OLD_DOOR]: recordOldDoor });
 });
+
+// One revision id per definition sent. The "From" price and the option prices for the same plan at the same length
+// are different definitions (the "From" sends no hardware packs); each carries the id of exactly what it sends, and
+// an OUTDOOR_OPTIONS answer for one is not current for the other.
+test('the "From" and option prices for one plan send different definitions under different revision ids', { timeout: 240000 }, async () => {
+  const { admit, inquire, isCurrentAnswer, ADMISSION_RESULT } = await import('../../public-build/shared/tile-host-admission-contract.mjs');
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { od, errors } = await openOutdoor(browser, origin);
+    const plans = await od.evaluate(() => window.STBOutdoorPicnic.plans);
+    await until(() => optionsCalls(log).length >= plans.length, 'from prices reached the Store');
+
+    // Same plan, same length: the plan just opened is the one its "From" price was asked for.
+    await od.locator('[data-plan="a-frame"]').click();
+    await settle(od);
+    const picked = await od.evaluate(() => window.STBOutdoorPicnic.optionsRequest());
+    await until(() => optionsCalls(log).some(e => isDeepStrictEqual(e.request.payload.definition, picked)), 'option prices reached the Store');
+    const option = optionsCalls(log).find(e => isDeepStrictEqual(e.request.payload.definition, picked));
+    const from = optionsCalls(log).find(e => !e.request.payload.definition.itemLines
+      && isDeepStrictEqual(e.request.payload.definition.cutPackages, picked.cutPackages));
+    assert.ok(from, 'the "From" price for this plan at this length was asked');
+    assert.ok(picked.itemLines.length > 0, 'the option prices carry the hardware packs; the "From" does not');
+
+    // Different definitions sent, different revision ids; each id is the one on the definition it went out with.
+    assert.notDeepEqual(from.request.payload.definition, option.request.payload.definition);
+    assert.notEqual(from.request.candidateRevisionId, option.request.candidateRevisionId);
+    for (const { request } of [from, option]) assert.equal(request.candidateRevisionId, request.payload.definition.configurationVersion);
+    // Across every options inquiry, one id never names two payloads.
+    const byId = new Map();
+    for (const { request } of optionsCalls(log)) {
+      const seen = byId.get(request.candidateRevisionId);
+      if (seen) assert.deepEqual(request.payload.definition, seen, request.candidateRevisionId + ' names two definitions');
+      else byId.set(request.candidateRevisionId, request.payload.definition);
+    }
+
+    // An answer for one does not open the other: the Store's answer to each, under the page's own admission, is
+    // current for its own revision only.
+    const admitted = ({ request }) => admit({ inquiryScope: 'OUTDOOR_OPTIONS', revision: { definitionRevisionId: request.candidateRevisionId,
+      tileId: 'outdoor', facts: { 'outdoor.cut-packages': { value: request.payload.definition.cutPackages, status: 'DERIVED' } } } });
+    const fromAdmission = admitted(from), optionAdmission = admitted(option);
+    for (const a of [fromAdmission, optionAdmission]) assert.equal(a.admission.result, ADMISSION_RESULT.ADMITTED);
+    const { answer: fromAnswer } = await inquire(fromAdmission, () => from.answer);
+    const { answer: optionAnswer } = await inquire(optionAdmission, () => option.answer);
+    assert.equal(isCurrentAnswer({ admission: fromAdmission, answer: fromAnswer }), true);
+    assert.equal(isCurrentAnswer({ admission: optionAdmission, answer: optionAnswer }), true);
+    assert.equal(isCurrentAnswer({ admission: optionAdmission, answer: fromAnswer }), false, 'the "From" answer does not open the option prices');
+    assert.equal(isCurrentAnswer({ admission: fromAdmission, answer: optionAnswer }), false, 'the option answer does not open the "From"');
+    assert.deepEqual(errors, []);
+  });
+});
