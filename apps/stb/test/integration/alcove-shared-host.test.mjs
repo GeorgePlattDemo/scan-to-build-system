@@ -3,6 +3,8 @@
 //   contract steps, inert steps disabled, exactly one current, and the current step follows the shown Alcove page.
 // - Every Store inquiry is admit() then inquire(): a missing profile fact blocks before the Store and names its owner;
 //   a complete revision still reaches the Store, and the Store definition is built only from the admitted request.
+// - Material, parents, component programs and the spot demand are checked field by field: a blank or zero material
+//   field, a missing parent, a bad program size or, with spotting on, an incomplete spot demand blocks before the Store.
 // - The old Alcove shell path is gone: no applyAlcoveNavState, alcoveStageOpen, Alcove branches or data-go remapping,
 //   and no Store definition built outside admission.
 // - An Alcove inquiry has one admission decision, admit(): its transport is sendAdmittedJob, and it never calls
@@ -138,7 +140,7 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.deepEqual(Object.keys(admission.request.facts).sort(),
       ['alcove.board-requirements', 'alcove.component-programs', 'alcove.material', 'alcove.opening', 'alcove.spot-demand']);
     assert.deepEqual(admission.request.openDemands, ['alcove.hardware']);
-    assert.equal(admission.request.profileVersion, '0.2');
+    assert.equal(admission.request.profileVersion, '0.3');
     assert.equal(admission.request.requestType, 'ALCOVE_INSERT_V1');
     // What reached the Store is the definition built from that admitted request, for that revision.
     const sent = alcoveCalls(log).at(-1).request;
@@ -180,6 +182,145 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.equal(alcoveCalls(log).length, before + 1);
     assert.equal(state.answer.definitionRevisionId, await live(frame, () => window.STBAlcoveLive.revision().definitionRevisionId));
     await until(async () => !steps(await navLine(frame)).find(b => b.stage === 'store').inert, 'The Store answers usable');
+  });
+});
+
+// Material, parents, component programs and the spot demand are checked field by field, on the live route: each
+// malformed case is one edit to the page's own revision, sent through the page's one inquiry path; it blocks in admit()
+// before the Store and names the fact's owner and the fields. The complete revision still reaches the Store, spotting
+// off or on. Only the fields the page already emits are checked; with spotting off, no spot is asked for or sent.
+test('a blank or zero material field, a missing parent, a bad program size or an incomplete spot demand blocks before the Store', { timeout: 300000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { page, frame, errors } = await openAlcove(browser, origin);
+    const idle = label => until(async () => { const s = await live(frame, () => window.STBAlcoveLive.state()); return !s.asking && s.answer?.authority === 'CURRENT' ? s : null; }, label);
+
+    // The revision as the page emits it, spotting off.
+    const off = await live(frame, () => window.STBAlcoveLive.revision());
+    assert.deepEqual(Object.keys(off.facts['alcove.material'].value).sort(), ['form', 'grade', 'nominalT', 'nominalW', 'species']);
+    assert.deepEqual(off.facts['alcove.board-requirements'].value.map(r => [r.requirementId, r.requiredOps]),
+      [['ALCOVE-UPRIGHT-PARENTS', ['CROSSCUT']], ['ALCOVE-SHELF-PARENTS', ['CROSSCUT']]]);
+    assert.deepEqual([...new Set(off.facts['alcove.component-programs'].value.map(p => p.requirementId))], ['ALCOVE-UPRIGHT-PARENTS', 'ALCOVE-SHELF-PARENTS']);
+    assert.deepEqual(off.facts['alcove.spot-demand'].value,
+      { enabled: false, mode: 'SPOT_ON_LOCATION', toolDiameterIn: 0.1875, source: 'SHELF_ELEVATIONS', features: [] });
+
+    // One edit to the page's own revision: set or delete a field of the fact, set or delete a field of one list item,
+    // keep only the list items for one parent, or replace the whole value.
+    const ask = (factId, edit, tag) => live(frame, ({ factId, edit, tag }) => {
+      const r = window.STBAlcoveLive.revision();
+      const f = r.facts[factId];
+      if (edit.replace !== undefined) f.value = edit.replace;
+      else if (edit.only) f.value = f.value.filter(item => item.requirementId === edit.only);
+      else if (edit.item) { const [i, key, value] = edit.item; if (edit.del) delete f.value[i][key]; else f.value[i][key] = value; }
+      else if (edit.del) delete f.value[edit.del];
+      else f.value[edit.set[0]] = edit.set[1];
+      r.definitionRevisionId += '-' + tag;
+      return window.STBAlcoveLive.inquire(r);
+    }, { factId, edit, tag });
+    const OWNERS = {
+      'alcove.material': ['PROJECT', 'Material demand'],
+      'alcove.board-requirements': ['PROJECT', 'Upright and shelf parent responsibilities'],
+      'alcove.component-programs': ['PROJECT', 'Component programs for every parent'],
+      'alcove.spot-demand': ['USER', 'Pilot spot demand, on or off'],
+    };
+    const blocks = async CASES => {
+      const before = alcoveCalls(log).length;
+      for (const [factId, edit, fields, tag] of CASES) {
+        const [owner, title] = OWNERS[factId];
+        const result = await ask(factId, edit, tag);
+        assert.equal(result.admission.result, 'BLOCKED', tag);
+        assert.equal(result.admission.reason, 'REQUIRED_FACT_UNSETTLED', tag);
+        assert.deepEqual(result.admission.blocking, [{ factId, owner, title, condition: 'INVALID_VALUE', fields }], tag);
+        assert.equal(result.request, null, tag);
+        assert.equal(await frame.locator('#p-price').textContent(), 'NOT SENT TO THE STORE', tag);
+        assert.equal(await frame.locator('#p-basis').textContent(), 'Not sent to the Store. Missing: ' + title + ' · owner ' + owner, tag);
+        const inert = Object.fromEntries(steps(await navLine(frame)).map(b => [b.stage, b.inert]));
+        assert.deepEqual(inert, { scan: false, configure: false, store: true, request: true, yard: true, record: true }, tag);
+      }
+      await page.waitForTimeout(500);
+      assert.equal(alcoveCalls(log).length, before, 'no malformed revision reached the Store');
+    };
+    // The complete page revision reaches the Store, and the definition on the wire carries the checked facts as stated.
+    const reaches = async label => {
+      const before = alcoveCalls(log).length;
+      const revision = await live(frame, () => window.STBAlcoveLive.revision());
+      const result = await live(frame, r => window.STBAlcoveLive.inquire(r), revision);
+      assert.equal(result.admission.result, 'ADMITTED', label);
+      await idle(label);
+      assert.equal(alcoveCalls(log).length, before + 1, label + ': reaches the Store');
+      const sent = alcoveCalls(log).at(-1).request.payload.definition;
+      assert.deepEqual(sent.materialDemand, revision.facts['alcove.material'].value, label);
+      assert.deepEqual(sent.boardRequirements, revision.facts['alcove.board-requirements'].value, label);
+      assert.deepEqual(sent.componentPrograms, revision.facts['alcove.component-programs'].value, label);
+      assert.deepEqual(sent.spotDemand, revision.facts['alcove.spot-demand'].value, label);
+      return sent;
+    };
+
+    await blocks([
+      // Material: species and form nonempty text, nominalT and nominalW above 0. Owner PROJECT.
+      ...['species', 'form'].flatMap(field => [
+        ['alcove.material', { set: [field, ''] }, [field], `blank-${field}`],
+        ['alcove.material', { set: [field, '  '] }, [field], `space-${field}`],
+        ['alcove.material', { del: field }, [field], `no-${field}`],
+      ]),
+      ...['nominalT', 'nominalW'].flatMap(field => [
+        ['alcove.material', { set: [field, 0] }, [field], `zero-${field}`],
+        ['alcove.material', { set: [field, -1] }, [field], `negative-${field}`],
+        ['alcove.material', { del: field }, [field], `no-${field}`],
+      ]),
+      // Parents: both there, each with operations. Owner PROJECT.
+      ['alcove.board-requirements', { only: 'ALCOVE-UPRIGHT-PARENTS' }, ['[requirementId=ALCOVE-SHELF-PARENTS]'], 'no-shelf-parent'],
+      ['alcove.board-requirements', { only: 'ALCOVE-SHELF-PARENTS' }, ['[requirementId=ALCOVE-UPRIGHT-PARENTS]'], 'no-upright-parent'],
+      ['alcove.board-requirements', { item: [1, 'requiredOps', []] }, ['[1].requiredOps'], 'shelf-no-ops'],
+      ['alcove.board-requirements', { item: [0, 'requiredOps'], del: true }, ['[0].requiredOps'], 'upright-ops-missing'],
+      // Programs: both parents have one; each has its ids and a length and width above 0. Owner PROJECT.
+      ['alcove.component-programs', { only: 'ALCOVE-UPRIGHT-PARENTS' }, ['[requirementId=ALCOVE-SHELF-PARENTS]'], 'no-shelf-program'],
+      ['alcove.component-programs', { only: 'ALCOVE-SHELF-PARENTS' }, ['[requirementId=ALCOVE-UPRIGHT-PARENTS]'], 'no-upright-program'],
+      ['alcove.component-programs', { item: [0, 'finishedLengthIn', 0] }, ['[0].finishedLengthIn'], 'zero-length'],
+      ['alcove.component-programs', { item: [4, 'finishedWidthIn', 0] }, ['[4].finishedWidthIn'], 'zero-width'],
+      ['alcove.component-programs', { item: [4, 'finishedLengthIn', -1] }, ['[4].finishedLengthIn'], 'negative-length'],
+      ['alcove.component-programs', { item: [1, 'finishedWidthIn'], del: true }, ['[1].finishedWidthIn'], 'no-width'],
+      ['alcove.component-programs', { item: [2, 'componentId', ''] }, ['[2].componentId'], 'blank-component-id'],
+      // Spot demand: on or off is a boolean. Owner USER.
+      ['alcove.spot-demand', { set: ['enabled', 'no'] }, ['enabled'], 'spot-enabled-text'],
+    ]);
+    // The complete revision, spotting off, reaches the Store; no spot is invented on the wire.
+    let sent = await reaches('spotting off');
+    assert.equal(sent.spotDemand.enabled, false);
+    assert.deepEqual(sent.spotDemand.features, []);
+    assert.equal(sent.componentPrograms.flatMap(p => p.features).some(f => f.kind === 'SPOT_ON_LOCATION'), false, 'spotting off sends no spot');
+
+    // Spotting on, through the page's own control: the page states mode, tool and features.
+    await frame.locator('#c-pilot-shelves').evaluate(el => el.click());
+    const on = await until(async () => { const r = await live(frame, () => window.STBAlcoveLive.revision()); return r.facts['alcove.spot-demand'].value.enabled ? r : null; }, 'spotting on');
+    await idle('spotting on, asked');
+    assert.ok(on.facts['alcove.spot-demand'].value.features.length > 0);
+    await blocks([
+      // Mode exactly SPOT_ON_LOCATION, a tool above 0, and features a list. Owner USER.
+      ...['DRILL', 'spot_on_location', ' SPOT_ON_LOCATION ', ''].map(mode =>
+        ['alcove.spot-demand', { set: ['mode', mode] }, ['mode'], `spot-mode-${mode.trim() || 'blank'}`]),
+      ['alcove.spot-demand', { del: 'mode' }, ['mode'], 'spot-no-mode'],
+      ['alcove.spot-demand', { set: ['toolDiameterIn', 0] }, ['toolDiameterIn'], 'spot-zero-tool'],
+      ['alcove.spot-demand', { del: 'toolDiameterIn' }, ['toolDiameterIn'], 'spot-no-tool'],
+      ['alcove.spot-demand', { set: ['features', null] }, ['features'], 'spot-features-null'],
+      ['alcove.spot-demand', { del: 'features' }, ['features'], 'spot-no-features'],
+      ['alcove.spot-demand', { replace: { enabled: true } }, ['mode', 'toolDiameterIn', 'features'], 'spot-on-empty'],
+    ]);
+    // The complete revision, spotting on, reaches the Store with its spots.
+    sent = await reaches('spotting on');
+    assert.equal(sent.spotDemand.enabled, true);
+    assert.equal(sent.spotDemand.mode, 'SPOT_ON_LOCATION');
+    assert.deepEqual(sent.spotDemand.features, on.facts['alcove.spot-demand'].value.features);
+
+    // Spotting off again: admitted and no spot is sent.
+    await frame.locator('#c-pilot-shelves').evaluate(el => el.click());
+    await until(async () => !(await live(frame, () => window.STBAlcoveLive.revision())).facts['alcove.spot-demand'].value.enabled, 'spotting off');
+    await idle('spotting off, asked');
+    sent = await reaches('spotting off again');
+    assert.equal(sent.spotDemand.enabled, false);
+    assert.deepEqual(sent.spotDemand.features, []);
+    assert.equal(sent.componentPrograms.flatMap(p => p.features).some(f => f.kind === 'SPOT_ON_LOCATION'), false, 'spotting off sends no spot');
+    await until(async () => !steps(await navLine(frame)).find(b => b.stage === 'store').inert, 'The Store answers usable');
+    assert.deepEqual(errors, []);
   });
 });
 
