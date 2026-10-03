@@ -219,6 +219,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       return { width, straight, rise, total, radius };
     }
 
+    // The Playhouse review is this page's, so its confirm is recorded here: exactly the revision the live Store
+    // answer found supportable. A refused, stale or missing answer records nothing.
+    function recordS001Confirm() {
+      const live = win.STBPlayhouseLive;
+      if (!live || !live.supportable()) return;
+      const version = live.state().version;
+      if (version) doc.documentElement.dataset.playhouseRevisionConfirmed = version;
+    }
+
     function syncS001Playhouse() {
       const widthInput = doc.getElementById('s001-opening-width');
       const straightInput = doc.getElementById('s001-straight-height');
@@ -628,6 +637,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       if (!target) return;
       event.preventDefault();
       event.stopImmediatePropagation();
+      if (target.closest('#playhouse-review') && target.hasAttribute('data-s001-needs-supportable')) recordS001Confirm();
       canonicalShow(target.getAttribute('data-canonical-go'));
     }, true);
 

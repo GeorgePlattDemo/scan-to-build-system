@@ -1239,6 +1239,20 @@
       "blobSha": "3f1fe6f80ed5f9ec02d59d117bbafc57c4eca5ad",
       "bytes": 251862,
       "reason": "The shell no longer writes the Playhouse review panel (reviewMain.innerHTML deleted); the page owns it. Cache-buster for the changed front door (?v=68136f4b, was ?v=1ad6f78d)."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "playhouse-confirm-records",
+      "blobSha": "617f86a4d808d3ff8176aa8886d76605703ca6a1",
+      "bytes": 40563,
+      "reason": "The Playhouse confirm records. The page owns the review, so its click listener (which stops propagation on every [data-canonical-go] click) records the confirm itself before navigating to Your call: playhouseRevisionConfirmed is set to the definition revision the live Store answer found SUPPORTABLE (STBPlayhouseLive.supportable() and state().version). A refused or stale answer records nothing."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "playhouse-confirm-records",
+      "blobSha": "84e8781f205dc63c7d629bee76ea42b694f93b03",
+      "bytes": 251575,
+      "reason": "The dead shell click handler on the Playhouse review confirm is deleted (the front door listener stopped it from ever firing); the page records the confirm. Cache-buster for the changed front door (?v=617f86a4, was ?v=68136f4b)."
     }
   ],
   "retiredFiles": [
