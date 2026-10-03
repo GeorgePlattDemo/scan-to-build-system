@@ -341,6 +341,23 @@ export async function createStoreAdapter({
       }
     }
 
+    // The pinned Store answers a count-only Board ticket with
+    // PARTIAL_BUDGETARY_ESTIMATE because the governing travel inputs are absent.
+    // System keeps that partial as returned: no travel defaults, no complete Q.
+    const completeQ =
+      rawEstimate?.status === 'BUDGETARY_ESTIMATE' &&
+      rawEstimate?.complete === true &&
+      Number.isFinite(Number(rawEstimate?.totals?.Q));
+    const priceCompleteness = {
+      status: completeQ ? 'COMPLETE_FOR_TRAVEL_STANDARD' : rawEstimate ? 'PARTIAL' : 'UNAVAILABLE',
+      unresolvedConditions: Array.isArray(rawEstimate?.unresolvedConditions)
+        ? [...new Set(rawEstimate.unresolvedConditions)]
+        : [],
+      note: completeQ
+        ? 'Complete Store answer under the governing travel standard. Budgetary only; not a commercial quote or fabrication authorization.'
+        : 'No complete dimensional Q exists unless the governing Store travel evaluator returns a complete identified result.',
+    };
+
     return {
       status: 200,
       body: await successEnvelope(envelope, {
@@ -349,6 +366,7 @@ export async function createStoreAdapter({
         rawEstimate,
         estimateAssociationId,
         estimateError,
+        priceCompleteness,
         mappedCallInputs: {
           evaluation: evaluateInput,
           evaluationDigest: evaluateDigest,
