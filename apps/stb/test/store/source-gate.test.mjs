@@ -85,7 +85,7 @@ test('exact clean pin loads required Store functions', async () => {
   assert.equal(typeof loaded.modules.estimateJob, 'function');
   assert.equal(typeof loaded.modules.envelopeCheck, 'function');
   assert.equal(loaded.modules.ENGINE.version, '0.3.0');
-  assert.equal(loaded.modules.CYCLE_MODEL.id, 'STB-D001-CYCLE-MODEL-S2-0.1');
+  assert.equal(loaded.modules.CYCLE_MODEL.id, 'STB-D001-DIMENSIONAL-TRAVEL-0.1');
   assert.equal(loaded.modules.D001_STAGE2_ENVELOPE.id, 'D001-STAGE2-ENVELOPE-0.3');
 });
 
