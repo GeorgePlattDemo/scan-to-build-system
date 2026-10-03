@@ -417,5 +417,48 @@
   </div>
 </section>
 </div>
+<script>
+// The bench draws its own parts, cuts and spots from the demand the shell posts. It reads only this page.
+(() => {
+  const drawBenchGeometry = demand => {
+    const overlay = document.getElementById('stb-bench-dynamic-geometry');
+    if (!overlay || !demand) return;
+    const x0=40, xMax=860, topY=100, bottomY=180;
+    const workpieceLength=Math.max(1,Number(demand.definedWorkpieceLengthIn)||60);
+    const scale=(xMax-x0)/workpieceLength;
+    const qty=Math.max(1,Math.min(2,Number(demand.quantity)||1));
+    const len=Math.max(0,Number(demand.finishedLength)||0);
+    const angle=Math.max(0,Math.min(89,Number(demand.angleDegrees)||0));
+    const delta=80*Math.tan(angle*Math.PI/180);
+    const boundaries=Array.from({length:qty+1},(_,i)=>x0+i*len*scale);
+    const cutBoundaries=angle>0?boundaries:boundaries.slice(1);
+    const colors=['#a85a2a','#2f6f9e'];
+    let svg='';
+    for(let i=0;i<qty;i++){
+      const left=boundaries[i], right=boundaries[i+1], fill=colors[i%colors.length];
+      svg+='<path d="M'+(left+delta)+' 101 L'+(right+delta)+' 101 L'+right+' 179 L'+left+' 179 Z" fill="'+fill+'" opacity=".06"/>';
+      const cx=left+(right-left)/2;
+      svg+='<text x="'+cx+'" y="124" text-anchor="middle" font-size="11" font-weight="700" fill="#584533">PART '+(i+1)+'</text>';
+      if(demand.spotDemand){
+        svg+='<circle cx="'+cx+'" cy="140" r="12" fill="none" stroke="#2f6f9e" stroke-width="2.4"/><circle cx="'+cx+'" cy="140" r="4" fill="#2f6f9e"/>';
+      }
+      svg+='<g stroke="#7a4f22" stroke-width="1.1" fill="none" opacity=".8"><line x1="'+left+'" y1="200" x2="'+right+'" y2="200"/><path d="M'+left+' 195v10M'+right+' 195v10"/></g>';
+      svg+='<text x="'+cx+'" y="217" text-anchor="middle" font-size="11" font-weight="700" fill="#7a4f22">'+len+' in</text>';
+    }
+    cutBoundaries.forEach((bottomX,index)=>{
+      const topX=bottomX+delta;
+      svg+='<line x1="'+topX+'" y1="'+topY+'" x2="'+bottomX+'" y2="'+bottomY+'" stroke="#a85a2a" stroke-width="5" stroke-linecap="round"/>';
+      const mx=bottomX+delta*.65;
+      svg+='<circle cx="'+mx+'" cy="74" r="13" fill="#a85a2a"/><text x="'+mx+'" y="79" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">'+(index+1)+'</text>';
+    });
+    overlay.innerHTML=svg;
+  };
+  window.addEventListener('message', event => {
+    if (event.origin !== window.location.origin) return;
+    if (event.data?.type !== 'STB_BENCH_GEOMETRY') return;
+    drawBenchGeometry(event.data.demand);
+  });
+})();
+</script>
 </body>
 </html>

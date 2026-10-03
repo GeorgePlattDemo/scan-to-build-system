@@ -92,7 +92,46 @@ test('the shell does not read the proof frame window for state three-frames.html
   for (const name of ['captureStartOwnProof', 'STBProjectBridge', 'contentWindow?.S', 'proofDecisions', 'proofActions', 'classifyStartOwnDecision']) {
     assert.equal(shell.includes(name), false, name + ' is still in the shell');
   }
-  assert.equal(read('three-frames.html').includes('<script'), false, 'three-frames.html carries no script, so there is no window state to read');
+  // three-frames.html has one script, which draws the bench geometry from the shell's message. It keeps no window
+  // state and reads no document but its own.
+  const scripts = read('three-frames.html').match(/<script[\s\S]*?<\/script>/g) || [];
+  assert.equal(scripts.length, 1, 'three-frames.html carries one script');
+  assert.doesNotMatch(scripts[0], /window\.[\w$]+\s*=[^=]/, 'the bench script sets no window state');
+  for (const reach of ['parent.document', 'top.', 'opener', 'frameElement', 'contentDocument', 'contentWindow']) {
+    assert.equal(scripts[0].includes(reach), false, 'the bench script reaches ' + reach);
+  }
+});
+
+test('the bench page draws its own parts, cuts and spots for a complete revision; the shell does not write them (R28)', { timeout: 240000 }, async () => {
+  const shell = read('system-build-current.html');
+  assert.equal(shell.includes('stb-bench-dynamic-geometry'), false, 'the shell does not reach #stb-bench-dynamic-geometry');
+  assert.equal(shell.includes('overlay.innerHTML'), false, 'the shell does not write the bench geometry');
+  assert.match(shell, /proofFrame\.contentWindow\?\.postMessage\(\{\s*type:'STB_BENCH_GEOMETRY'/);
+
+  await withBrowser(async ({ browser, origin }) => {
+    const { page, frame, errors } = await openStartOwn(browser, origin);
+    await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
+    await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current');
+    await chooseSpecies(page, frame, 'spf');
+
+    const geometry = () => bench(page).$eval('#stb-bench-dynamic-geometry', g => ({
+      texts: [...g.querySelectorAll('text')].map(t => t.textContent),
+      cuts: g.querySelectorAll('line[stroke-width="5"]').length,
+      spots: g.querySelectorAll('circle[r="12"]').length,
+    }));
+    let drawn = await until(async () => { const g = await geometry(); return g.texts.includes('PART 2') && g; }, 'bench parts drawn');
+    assert.deepEqual(drawn.texts, ['PART 1', '16 in', 'PART 2', '16 in', '1', '2', '3']);
+    assert.equal(drawn.cuts, 3);
+    assert.equal(drawn.spots, 2);
+    assert.equal(await bench(page).locator('#stb-bench-dynamic-geometry text', { hasText: 'PART 1' }).isVisible(), true);
+    assert.equal(await bench(page).locator('#stb-bench-static-parts').isVisible(), false, 'the static drawing gives way');
+
+    // A changed definition is drawn again from the next message.
+    await bench(page).locator('#stb-bench-controls [data-length="18"]').click();
+    drawn = await until(async () => { const g = await geometry(); return g.texts.includes('18 in') && g; }, 'bench redrawn at 18 in');
+    assert.deepEqual(drawn.texts, ['PART 1', '18 in', 'PART 2', '18 in', '1', '2', '3']);
+    assert.deepEqual(errors, []);
+  });
 });
 
 test('the shared host draws the Start your own nav from its validated STB-TILE-HOST-0.1 message', { timeout: 240000 }, async () => {

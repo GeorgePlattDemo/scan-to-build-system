@@ -3,7 +3,7 @@
 Owner: System. Docs only. This file lists what is in the code; it does not change it.
 
 Source: `apps/stb/public-build/system-build-current.html` at `main` `393b4bdd495c0eb7ddcc67a7bc93293af443feed`.
-Frame page: `apps/stb/public-build/three-frames.html`, which has **no `<script>`**. The page cannot read its own controls or draw its own state, so every live behavior on it comes from the shell reaching in.
+Frame page: `apps/stb/public-build/three-frames.html`. Its one `<script>` draws the bench geometry (R28) from a message the shell posts. Every other live behavior on it comes from the shell reaching in.
 
 A *reach* is shell code that creates, styles, reads, writes, listens on, or posts to `#start-own-proof-frame` or anything inside its document.
 
@@ -11,6 +11,7 @@ A *reach* is shell code that creates, styles, reads, writes, listens on, or post
 
 - **dead** — the reach does nothing today. Its target is not in `three-frames.html`, its branch cannot run, or nothing calls it. It can be deleted without a behavior change.
 - **page-should-own** — the reach draws or words the page's own bench: geometry, specs, step copy, highlights, the intent copy on the bench, scrolling. When the page has a script, the page does this itself from the definition it is given, and the shell stops touching it.
+- **page-owns** — the reach has moved: the page draws it from a message the shell posts, and the shell no longer touches it.
 - **shell-must-keep until the page has a script** — the reach carries a fact or an action the shell owns: user input that becomes the definition, the trail step shown, navigation to shell pages, the Store inquiry, and the Store and runtime answer lines. The shell keeps the decision. When the page has a script, the reach becomes a message across the frame instead of a DOM reach. The frame host (R1–R3) stays in the shell after that.
 
 Line numbers are in `system-build-current.html`.
@@ -66,7 +67,7 @@ Line numbers are in `system-build-current.html`.
 
 | # | Line | Reads / writes | Disposition |
 |---|------|----------------|-------------|
-| R28 | 604–605, 638 | Reads `#stb-bench-dynamic-geometry`; writes its `innerHTML` (parts, cuts, spots SVG) | page-should-own |
+| R28 | — | Moved. The shell posts `STB_BENCH_GEOMETRY` (the definition's workpiece length, quantity, finished length, angle, spot demand) to the frame; `three-frames.html` draws its own parts, cuts and spots SVG into `#stb-bench-dynamic-geometry`. The shell no longer reads or writes that element | page-owns |
 | R29 | 606–609 | Reads ten static geometry ids (`#stb-bench-static-parts` … `#stb-bench-part2-dim`); writes `style.display='none'` | page-should-own |
 | R30 | 641–650 | Reads `#stb-bench-spare-label`, `#stb-bench-remain-label`; writes `x` | page-should-own |
 | R31 | 674–680 | Writes text: `#stb-config-parts-value`, `#stb-config-length-value`, `#stb-config-angle-value`, `#stb-config-spot-value`. Ids are not in `three-frames.html` | dead |
@@ -90,7 +91,7 @@ Line numbers are in `system-build-current.html`.
 
 | # | Line | Reads / writes | Disposition |
 |---|------|----------------|-------------|
-| R42 | 1232–1236 | Defines `win.__stbPostStartOwnPreview`: reads the frame, `postMessage` to its `contentWindow`. Nothing in the repository calls it, and `three-frames.html` has no script to receive it | dead |
+| R42 | 1232–1236 | Defines `win.__stbPostStartOwnPreview`: reads the frame, `postMessage` to its `contentWindow`. Nothing in the repository calls it, and `three-frames.html` does not receive its message | dead |
 
 ## Looked at, not a reach
 
@@ -102,7 +103,8 @@ Line numbers are in `system-build-current.html`.
 | Disposition | Rows |
 |-------------|------|
 | dead | R3, R13, R14, R31, R42 |
-| page-should-own | R18, R19, R20, R28–R30, R32–R40 |
+| page-should-own | R18, R19, R20, R29, R30, R32–R40 |
+| page-owns (moved) | R28 |
 | shell-must-keep (until the page has a script; R1–R2 stay after) | R1, R2, R4–R12, R15–R17, R21–R27, R41 |
 
-Every row has one disposition. The bench is not moved and no live write is removed by this file.
+Every row has one disposition.
