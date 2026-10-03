@@ -3285,7 +3285,8 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
       // Only the active Playhouse project asks the Store; loading the app or another project asks nothing.
       if (!tileHostActive(S001_PROJECT_ID)) return;
       const revision = s001Revision(g);
-      if (revision.definitionRevisionId === s001Live.version && (s001Live.asking || s001Live.answer || s001Live.blocking.length)) { s001Render(); return; }
+      // A settled failure is this revision's result too: returning to the page shows it, not a new asking line.
+      if (revision.definitionRevisionId === s001Live.version && (s001Live.asking || s001Live.answer || s001Live.error || s001Live.blocking.length)) { s001Render(); return; }
       s001Inquire(revision);
     }
     const s001Current = () => s001Revision(read());
