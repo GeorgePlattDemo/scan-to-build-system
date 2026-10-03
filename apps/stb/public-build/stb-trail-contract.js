@@ -48,7 +48,7 @@
     Object.freeze({
       id: 'playhouse',
       tileLabel: 'Playhouse arched window',
-      pages: Object.freeze(['playhouse-s001', 'playhouse-machine', 'playhouse-store', 'playhouse-review', 'playhouse-request', 'playhouse-yard', 'playhouse-terms', 'playhouse-result', 'playhouse-record'])
+      pages: Object.freeze(['playhouse-idea', 'playhouse-s001', 'playhouse-machine', 'playhouse-store', 'playhouse-review', 'playhouse-request', 'playhouse-yard', 'playhouse-terms', 'playhouse-result', 'playhouse-record'])
     })
   ]);
 

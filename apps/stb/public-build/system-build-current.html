@@ -11,7 +11,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=617f86a4"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=02467ab5"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
 <script src="stb-store-handoff-contract.js?v=afccfa82"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
@@ -19,8 +19,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-user-defined-board-runtime-bridge.js?v=db611717"></script>
 <script src="stb-terms-flow.js?v=365d795c"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=9523c7af"></script>
-<script src="stb-trail-contract.js?v=aea2f84d"></script>
+<script src="stb-build-guide-spec.js?v=ca817f5e"></script>
+<script src="stb-trail-contract.js?v=ca322ebd"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
 import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => {
@@ -92,7 +92,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
       .recovery-nav:not([data-active-project]){display:none!important}
       /* The shared tile host's Idea line: no step bar there, and a declared fork only there. The step bar starts at Intent. */
       .recovery-nav[data-idea-line] button[data-journey-stage],.recovery-nav[data-idea-line] .job-idea{display:none!important}
-      .recovery-nav:not([data-idea-line]) .trail-fork{display:none!important}
+      .recovery-nav:not([data-idea-line]) .trail-fork,.recovery-nav:not([data-idea-line]) .job-idea-onward{display:none!important}
       .recovery-nav .trail-fork{display:inline-flex;align-items:center;gap:5px}
       .recovery-nav .trail-fork-label{font-size:10px;color:var(--text2);margin:0 2px 0 4px}
       .recovery-nav .trail-fork-way.on{border-color:var(--accent);background:var(--tint);color:var(--accent);font-weight:700}
@@ -1754,15 +1754,39 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
       }
     });
 
+    // What the bounded Playhouse tile already knows. Idea shows it as carried forward and Intent opens with it, so
+    // nobody re-enters a known value. The bench's knobs start from the same opening and Reset returns to it.
+    const S001_KNOWN = Object.freeze({
+      sheet:Object.freeze({ thicknessIn:0.5, lengthIn:96, widthIn:48 }),
+      opening:Object.freeze({ widthIn:36, straightHeightIn:24, riseIn:12 })
+    });
+    const s001OpeningText = o => `${o.widthIn} in wide · ${o.straightHeightIn} in straight · ${o.riseIn} in rise`;
+    // The known values as rows. `openingId` lets Intent's opening row follow the knobs once the bench turns them.
+    const s001KnownRows = openingId => `
+            <div class="row"><b>WOOD</b><span>${S001_KNOWN.sheet.widthIn} × ${S001_KNOWN.sheet.lengthIn} in · 1/2 in plywood</span></div>
+            <div class="row"><b>OPENING</b><span${openingId ? ` id="${openingId}"` : ''}>${s001OpeningText(S001_KNOWN.opening)}</span></div>
+            <div class="row"><b>KEEP CENTER</b><span>Yes · retained by tabs</span></div>
+            <div class="row"><b>RETURN REMNANTS</b><span>Yes · do not treat as disposal</span></div>
+            <div class="row"><b>OWNER FINISH</b><span>User 1 trims retained tabs later</span></div>
+            <div class="row"><b>HARDWARE</b><span>Not included in this order</span></div>`;
+
     const intent = doc.getElementById('playhouse-s001');
     const intentMain = intent?.querySelector('.main');
     const intentRail = intent?.querySelector('.rail');
-    if (intentMain) intentMain.innerHTML = `
-      <h1>SCAN / INTENT · PLAYHOUSE WINDOW</h1>
-      <p class="sub">User 1 does not need a whole sheet of plywood. She needs the useful parts the sheet can become.</p>
+
+    // Idea: the intake before the steps, not a step. User 1's picture and story land here and end at Intent.
+    // Its way to Intent is the Idea line's Intent control, drawn by the shared tile host.
+    let s001IdeaPage = doc.getElementById('playhouse-idea');
+    if (!s001IdeaPage && intent) {
+      s001IdeaPage = doc.createElement('section');
+      s001IdeaPage.className = 'page';
+      s001IdeaPage.id = 'playhouse-idea';
+      s001IdeaPage.innerHTML = `<div class="main">
+      <h1>IDEA · PLAYHOUSE WINDOW</h1>
+      <p class="sub">What User 1 brought. It lands here and ends at Intent. Idea is not a step.</p>
       <div class="s001-v2-intent-grid">
         <section class="s001-card">
-          <h3>USER 1'S PROJECT</h3>
+          <h3>WHAT USER 1 BROUGHT</h3>
           <svg class="s001-source-art" viewBox="0 0 420 300" role="img" aria-label="Small outdoor playhouse with a large arched window marked on the wall">
             <rect width="420" height="300" fill="#eee7da"/>
             <path d="M75 125 L210 42 L345 125" fill="none" stroke="#766652" stroke-width="8" stroke-linejoin="round"/>
@@ -1777,18 +1801,26 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
           <p class="s001-v2-story">She wants a large arched opening in the playhouse wall. She wants the center kept intact enough to take home and may turn it into shutters. She wants the remaining pieces returned too. Hinges and final owner finishing are outside this yard order.</p>
         </section>
         <section class="s001-card">
-          <h3>WHAT USER 1 DEFINES</h3>
-          <div class="s001-data">
-            <div class="row"><b>WOOD</b><span>48 × 96 in · 1/2 in plywood</span></div>
-            <div class="row"><b>OPENING</b><span>36 in wide · 24 in straight · 12 in rise</span></div>
-            <div class="row"><b>KEEP CENTER</b><span>Yes · retained by tabs</span></div>
-            <div class="row"><b>RETURN REMNANTS</b><span>Yes · do not treat as disposal</span></div>
-            <div class="row"><b>OWNER FINISH</b><span>User 1 trims retained tabs later</span></div>
-            <div class="row"><b>HARDWARE</b><span>Not included in this order</span></div>
+          <h3>ALREADY KNOWN · CARRIED TO INTENT</h3>
+          <div class="s001-data">${s001KnownRows(null)}
           </div>
-          <div class="s001-v2-callout"><b>The sheet is the input. The outcome is the parts.</b>The scan / intent page keeps the human reason for the job. The next page carries only the material, geometry and operations the system needs.</div>
+          <div class="s001-v2-callout"><b>Nobody types these again.</b>Intent opens with every value this project already has. Choose Intent above to go on.</div>
         </section>
       </div>
+      <div class="s001-boundary">Idea creates no machine motion. It is where the job's source material lives.</div>
+      </div><aside class="rail"></aside>`;
+      intent.insertAdjacentElement('beforebegin', s001IdeaPage);
+    }
+
+    if (intentMain) intentMain.innerHTML = `
+      <h1>INTENT · PLAYHOUSE WINDOW</h1>
+      <p class="sub">User 1 does not need a whole sheet of plywood. She needs the useful parts the sheet can become.</p>
+      <section class="s001-card">
+        <h3>WHAT USER 1 DEFINES</h3>
+        <div class="s001-data">${s001KnownRows('s001-intent-opening')}
+        </div>
+        <div class="s001-v2-callout"><b>The sheet is the input. The outcome is the parts.</b>Every value here came forward from Idea. The next page carries only the material, geometry and operations the system needs.</div>
+      </section>
       <div class="s001-boundary">Intent does not create machine motion. User 1 defines the material and features; the machine-facing definition is derived next and remains bounded by the admitted Store envelope.</div>
       <div class="btns"><button type="button" data-canonical-go="projects">BACK TO HOME</button><button type="button" data-canonical-go="playhouse-machine">SEE MACHINE DEFINITION →</button></div>
     `;
@@ -1832,10 +1864,10 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
           </section>
           <section class="s001-card">
             <h3>BOUNDED GEOMETRY</h3>
-            <div class="s001-control"><label for="s001-opening-width">Opening width</label><output id="s001-opening-width-out">36 in</output><input id="s001-opening-width" data-s001-control type="range" min="1" max="48" step="0.5" value="36"></div>
-            <div class="s001-control"><label for="s001-straight-height">Straight side height</label><output id="s001-straight-height-out">24 in</output><input id="s001-straight-height" data-s001-control type="range" min="1" max="35" step="0.5" value="24"></div>
-            <div class="s001-control"><label for="s001-arch-rise">Arch rise</label><output id="s001-arch-rise-out">12 in</output><input id="s001-arch-rise" data-s001-control type="range" min="1" max="12" step="0.5" value="12"></div>
-            <div class="btns"><button type="button" data-s001-control id="s001-reset">RESET TO USER 1'S 36 / 24 / 12</button></div>
+            <div class="s001-control"><label for="s001-opening-width">Opening width</label><output id="s001-opening-width-out">${S001_KNOWN.opening.widthIn} in</output><input id="s001-opening-width" data-s001-control type="range" min="1" max="48" step="0.5" value="${S001_KNOWN.opening.widthIn}"></div>
+            <div class="s001-control"><label for="s001-straight-height">Straight side height</label><output id="s001-straight-height-out">${S001_KNOWN.opening.straightHeightIn} in</output><input id="s001-straight-height" data-s001-control type="range" min="1" max="35" step="0.5" value="${S001_KNOWN.opening.straightHeightIn}"></div>
+            <div class="s001-control"><label for="s001-arch-rise">Arch rise</label><output id="s001-arch-rise-out">${S001_KNOWN.opening.riseIn} in</output><input id="s001-arch-rise" data-s001-control type="range" min="1" max="12" step="0.5" value="${S001_KNOWN.opening.riseIn}"></div>
+            <div class="btns"><button type="button" data-s001-control id="s001-reset">RESET TO USER 1'S ${S001_KNOWN.opening.widthIn} / ${S001_KNOWN.opening.straightHeightIn} / ${S001_KNOWN.opening.riseIn}</button></div>
             <div class="s001-status" id="s001-field-status">CURRENT 48 × 36 ROUTED FIELD · THE STORE CHECKS THE FIT</div>
             <p class="dim" id="s001-geometry-summary"></p>
             <div class="s001-v2-seq">
@@ -2861,6 +2893,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
       text('s001-request-geometry', `${fmt(g.width)} wide · ${fmt(g.straight)} straight · ${fmt(g.rise)} rise · ${fmt(g.total)} total height`);
       text('s001-yard-geometry', `${fmt(g.width)} wide · ${fmt(g.straight)} straight · ${fmt(g.rise)} rise · ${fmt(g.total)} total height`);
       text('s001-record-geometry', `${fmt(g.width)} wide · ${fmt(g.straight)} straight · ${fmt(g.rise)} rise`);
+      text('s001-intent-opening', s001OpeningText({ widthIn:fmt(g.width), straightHeightIn:fmt(g.straight), riseIn:fmt(g.rise) }));
       s001AskIfChanged(g);
     };
 
@@ -2984,9 +3017,13 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
           return way;
         }));
       }
+      // Without a declared fork, the Idea line's way to step 1 is one unnumbered control for it.
+      let onward = nav.querySelector('.job-idea-onward');
+      if (!declared && !onward) onward = control('job-idea-onward', trailContract.steps[0]);
+      if (onward && lib && lib.nextElementSibling !== onward) lib.after(onward);
       let idea = nav.querySelector('.job-idea');
       if (!idea) idea = control('job-idea', trailContract.idea.label);
-      const before = fork || lib;
+      const before = fork || onward || lib;
       if (fork && lib && lib.nextElementSibling !== fork) lib.after(fork);
       if (before && before.nextElementSibling !== idea) before.after(idea);
       idea.removeAttribute('aria-current');
@@ -3042,7 +3079,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
     const S001_PROJECT_ID = 'playhouse';
     const S001_REQUEST_TYPE = 'SHEET_PACKAGE_V1';
     const S001_INQUIRY_SCOPE = 'SHEET_PACKAGE_V1';
-    const S001_SHEET = Object.freeze({ thicknessIn:0.5, lengthIn:96, widthIn:48 });
+    const S001_SHEET = S001_KNOWN.sheet;
     const s001Live = { token:0, asking:false, answer:null, error:null, version:null, timer:null, admission:null, blocking:[] };
     const s001Positive = value => Number.isFinite(value) && value > 0;
     // One job-definition revision from what is on screen. The opening is User 1's; the sheet is the project's.
@@ -3140,11 +3177,12 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
       const t = s001Terms?.state() || null;
       if (usable.includes(steps[3]) && t?.yardOpen) usable.push(steps[4]);
       if (usable.includes(steps[3]) && t?.recordOpen) usable.push(steps[5]);
+      // A page that stands for no step is the Idea intake: the tile opens there, before Intent.
       const index = tileHostStepOfPage(S001_PROJECT_ID, tileHostShownPage());
       return {
         interface:tileHostContract.TILE_HOST_VERSION,
         tileId:S001_PROJECT_ID,
-        stage:steps[index ?? 0],
+        stage:index == null ? trailContract.idea.label : steps[index],
         usableSteps:usable,
         navigationRequest:null
       };
@@ -3307,16 +3345,26 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
       terms:() => s001Terms?.state() ?? null,
       supportable:() => s001Supportable()
     });
+    // Playhouse opens on Idea. Asked for Idea or Intent, it shows that page; the other steps open through the nav.
+    const S001_IDEA_PAGE = 'playhouse-idea';
     registerTileHost(S001_PROJECT_ID, {
       report:s001HostMessage,
-      shown:() => setTimeout(sync, 0)
+      shown:() => setTimeout(sync, 0),
+      idea:true,
+      go:target => {
+        const pageId = target === trailContract.idea.label ? S001_IDEA_PAGE
+          : target === trailContract.steps[0] ? PROJECT_STAGE_TARGETS[S001_PROJECT_ID].scan : null;
+        if (!pageId || tileHostShownPage() === pageId) return;
+        originalShow.call(win, pageId);
+        tilePageShown(pageId);
+      }
     });
 
     ['s001-opening-width','s001-straight-height','s001-arch-rise'].forEach(id => doc.getElementById(id)?.addEventListener('input', sync));
     doc.getElementById('s001-reset')?.addEventListener('click', () => {
-      doc.getElementById('s001-opening-width').value = '36';
-      doc.getElementById('s001-straight-height').value = '24';
-      doc.getElementById('s001-arch-rise').value = '12';
+      doc.getElementById('s001-opening-width').value = String(S001_KNOWN.opening.widthIn);
+      doc.getElementById('s001-straight-height').value = String(S001_KNOWN.opening.straightHeightIn);
+      doc.getElementById('s001-arch-rise').value = String(S001_KNOWN.opening.riseIn);
       sync();
     });
     sync();

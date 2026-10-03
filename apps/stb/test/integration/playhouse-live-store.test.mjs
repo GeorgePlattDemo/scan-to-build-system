@@ -318,6 +318,14 @@ test('the shared host draws the Playhouse nav from its validated STB-TILE-HOST-0
     const { frame, errors } = await openPlayhouse(browser, origin);
     await settled(frame);
     await frame.page().waitForTimeout(300);
+    // Playhouse opens on its Idea intake: no step bar, and the Idea line's one way on is Intent.
+    assert.equal(await frame.evaluate(() => [...document.querySelectorAll('.page.on')].pop()?.id), 'playhouse-idea');
+    assert.equal((await frame.evaluate(() => window.STBPlayhouseLive.hostMessage())).stage, 'Idea');
+    const ideaLine = await frame.$$eval('.recovery-nav button', els => els.filter(e => e.offsetParent !== null).map(e => e.textContent.trim()));
+    assert.deepEqual(ideaLine, ['← Project Library', 'Intent']);
+    await frame.locator('.recovery-nav button.job-idea-onward').click();
+    await frame.page().waitForTimeout(400);
+    assert.equal(await frame.evaluate(() => [...document.querySelectorAll('.page.on')].pop()?.id), 'playhouse-s001');
     const message = await frame.evaluate(() => window.STBPlayhouseLive.hostMessage());
     assert.deepEqual(Object.keys(message).sort(), ['interface', 'navigationRequest', 'stage', 'tileId', 'usableSteps']);
     assert.equal(message.interface, 'STB-TILE-HOST-0.1');

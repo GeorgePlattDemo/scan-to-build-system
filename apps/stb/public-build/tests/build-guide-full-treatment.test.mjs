@@ -26,7 +26,7 @@ test('Dev Guide covers current pages and only rewrites the reserved rail',()=>{
   const dynamicIds=[
     'start-own-live','outdoor-build-live','window-seat-live',
     'proof-store','proof-accept','proof-yard','proof-terms','proof-record',
-    'playhouse-s001','playhouse-machine','playhouse-store','playhouse-review','playhouse-request','playhouse-yard','playhouse-terms','playhouse-result','playhouse-record',
+    'playhouse-idea','playhouse-s001','playhouse-machine','playhouse-store','playhouse-review','playhouse-request','playhouse-yard','playhouse-terms','playhouse-result','playhouse-record',
     'alcove-store-order-surface','alcove-store-service-choices','alcove-store-yard-answer','alcove-store-commercial-sequence','alcove-store-returned-offer'
   ];
 

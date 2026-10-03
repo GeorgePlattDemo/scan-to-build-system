@@ -1281,6 +1281,27 @@
       "blobSha": "b36d1a104271b6cd46514be9cb829a46aec66065",
       "bytes": 242990,
       "reason": "A settled Store failure for the unchanged Playhouse revision stays that revision's result: returning to the page shows the failure and does not re-ask, so no asking line replaces it. A changed revision is still asked again."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "playhouse-idea-intake",
+      "blobSha": "02467ab5ff5d8ca5721b02b844775b9ad8fedcee",
+      "bytes": 40563,
+      "reason": "Playhouse opens on Idea: the Playhouse tile's library root is playhouse-idea (was playhouse-s001)."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "playhouse-idea-intake",
+      "blobSha": "ca817f5e79b2afe484393e7485d5a845940180a7",
+      "bytes": 90860,
+      "reason": "Dev Guide rail for the new playhouse-idea page (Idea: intake, not a step)."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "playhouse-idea-intake",
+      "blobSha": "4e807580034b823f2164665edc8d1dfafd32ff03",
+      "bytes": 246477,
+      "reason": "Playhouse Idea intake. The shell adds the playhouse-idea page (User 1's picture and story, moved off Intent, and the values the bounded tile already knows, carried forward to Intent from one S001_KNOWN source shared with the bench's knobs and Reset). Playhouse registers idea:true and a go hook for Idea and Intent; its host message stage is Idea on a page that stands for no step. The shared host draws one unnumbered step-1 control on the Idea line for a tile that declares no fork there. Cache-busters for the changed front door (?v=02467ab5, was ?v=617f86a4), Dev Guide spec (?v=ca817f5e, was ?v=9523c7af) and trail contract (?v=ca322ebd, was ?v=aea2f84d)."
     }
   ],
   "retiredFiles": [

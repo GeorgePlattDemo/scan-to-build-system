@@ -2127,6 +2127,11 @@
       ['Rebuild from receipts','Final state should be derivable.'],
       ['Still browser-held','Full build needs durable signed storage.']
     ]),
+    'playhouse-idea':guide('Intake, not a step',[
+      ['Where it lands','User 1’s picture and story land here and end at Intent.'],
+      ['No step bar','The Idea line shows Intent as its one way on.'],
+      ['Carry forward','Known values go to Intent. Nobody types them again.']
+    ]),
     'playhouse-s001':RAILS['ph-idea'],
     'playhouse-machine':RAILS['ph-bench'],
     'playhouse-store':RAILS['ph-store'],
