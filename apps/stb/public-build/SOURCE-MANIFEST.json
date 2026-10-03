@@ -1274,6 +1274,13 @@
       "blobSha": "852d86a6c2b89aa2d0e4449ee67190ab97b49417",
       "bytes": 242859,
       "reason": "The shell no longer reads #stb-bench-dynamic-geometry or writes its innerHTML; it posts the definition's demand to the bench frame as STB_BENCH_GEOMETRY (R28). Cache-buster for three-frames.html (?v=480c06a9, was ?v=5d58605a)."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "unavailable-store-settles",
+      "blobSha": "b36d1a104271b6cd46514be9cb829a46aec66065",
+      "bytes": 242990,
+      "reason": "A settled Store failure for the unchanged Playhouse revision stays that revision's result: returning to the page shows the failure and does not re-ask, so no asking line replaces it. A changed revision is still asked again."
     }
   ],
   "retiredFiles": [
