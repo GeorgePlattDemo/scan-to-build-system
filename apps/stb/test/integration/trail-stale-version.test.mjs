@@ -40,6 +40,8 @@ const TILES = {
   alcove: {
     label:'Critical fit', projectId:'alcove', inner:false,
     async answer({ page, frame }) {
+      // Alcove opens on its Idea intake; the Idea line's one way on is Intent.
+      await frame.locator('.recovery-nav button.job-idea-onward').click();
       await frame.locator('.recovery-nav button[data-journey-stage="configure"]').click();
       await wait(page,700);
       await frame.locator('#confirm-alcove-inline').click();

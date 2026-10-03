@@ -2041,6 +2041,11 @@
       ['Don’t trust uploads','Full build needs file limits, scanning, sandboxed parsing.'],
       ['Let users correct it','Extraction must never become truth by accident.']
     ]),
+    'alcove-idea':guide('Intake, not a step',[
+      ['Where it lands','User 1’s scan and story land here and end at Intent.'],
+      ['No step bar','The Idea line shows Intent as its one way on.'],
+      ['Carry forward','Known values go to Intent. Nobody types them again.']
+    ]),
     'alcove-capture':RAILS['alcove-idea'],
     'alcove-config':RAILS['alcove-bench'],
     'alcove-review':guide('Freeze the exact version',[
