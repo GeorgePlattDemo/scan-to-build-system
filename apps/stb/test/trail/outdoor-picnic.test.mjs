@@ -1,7 +1,8 @@
 // Outdoor picnic page 0.4 wiring, in a real browser, through the real System shell.
 // A scripted Store answers every request so the test checks the page's wiring, not Store prices:
-//  - the top nav is the six trail steps on the Outdoor page only, drawn by the shared tile host from Outdoor's
-//    STB-TILE-HOST-0.1 message with the trail contract's labels; steps it cannot use yet are inert
+//  - the tile opens on its Idea intake: no step bar, and the Idea line's one way on is Intent
+//  - from Intent on, the top nav is Idea, then the six trail steps on the Outdoor page only, drawn by the shared tile
+//    host from Outdoor's STB-TILE-HOST-0.1 message with the trail contract's labels; steps it cannot use yet are inert
 //  - screen 1: two plan cards, each with a "From" price the Store answered
 //  - screen 2: the plan as published. Grow or shrink to the inch inside the plan rule, pick wood and hardware,
 //    the Store's live total, "Confirm & send". Only the plan is sent: its boards, lengths and angles, no holes
@@ -119,17 +120,25 @@ test('Outdoor 0.4: the plan as published, a bigger bench, and back', { timeout: 
     const optionsOf = () => requests.filter(r => r.payload.definition.configurationId === 'OUTDOOR-PICNIC-OPTIONS');
     const steps = async () => (await navState(base)).filter(b => /^\d · /.test(b.label));
 
-    // Six steps, all on the Outdoor page; only Intent usable before a plan is picked. The host draws them once the
-    // page has spoken.
+    // Idea, where the tile opens: no step bar; the Idea line's one way on is Intent.
+    for (let i = 0; i < 60 && (await od()).section !== 'idea'; i++) await page.waitForTimeout(150);
+    for (let i = 0; i < 60 && !(await navState(base)).some(b => b.label === 'Intent'); i++) await page.waitForTimeout(150);
+    assert.deepEqual((await navState(base)).map(b => b.label), ['← Project Library', 'Intent']);
+    assert.equal(await outdoor.locator('#s-idea:not([hidden]) [data-idea-plan]').count(), 2);
+    await base.locator('.recovery-nav button.job-idea-onward').click();
+    for (let i = 0; i < 60 && (await od()).section !== 'plans'; i++) await page.waitForTimeout(150);
+
+    // From Intent on: Idea, then six steps, all on the Outdoor page; only Intent usable before a plan is picked. The
+    // host draws them once the page has spoken.
     for (let i = 0; i < 60 && (await steps()).every(b => b.inert); i++) await page.waitForTimeout(150);
     const nav = await navState(base);
     assert.deepEqual((await steps()).map(b => b.label.replace(/^\d · /, '')), ['Intent', 'The bench', 'The Store answers', 'Your call', 'We cut it', 'Pick up & build']);
     assert.ok((await steps()).every(b => b.go === 'outdoor-build-live'));
     assert.deepEqual((await steps()).map(b => b.inert), [false, true, true, true, true, true]);
-    assert.ok(nav.every(b => /^\d · /.test(b.label) || b.go === 'projects'), 'no buttons into other jobs: ' + JSON.stringify(nav));
+    assert.ok(nav.every(b => /^\d · /.test(b.label) || b.label === 'Idea' || b.go === 'projects'), 'no buttons into other jobs: ' + JSON.stringify(nav));
     assert.equal(await outdoor.locator('.step:visible').count(), 0, 'the page\'s own step buttons are hidden inside the shell');
-    // One guide, not two: six rail slots filled from the guide file; the shell's own rail hidden here.
-    assert.equal(await outdoor.locator('aside.rail[data-guide-id]').count(), 6);
+    // One guide, not two: seven rail slots (Idea and six pages) filled from the guide file; the shell's own rail hidden here.
+    assert.equal(await outdoor.locator('aside.rail[data-guide-id]').count(), 7);
     assert.equal(await base.locator('#outdoor-build-live > aside.rail').isVisible(), false);
 
     // Screen 1: two cards, photos named as photos, each with a "From" price the Store answered for the plan as published.

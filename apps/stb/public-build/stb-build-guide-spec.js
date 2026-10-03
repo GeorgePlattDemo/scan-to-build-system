@@ -2081,6 +2081,11 @@
       ['Still not durable','Full build needs signed, stored owner records.']
     ]),
     'start-own-live':RAILS['job1-bench'],
+    'outdoor-idea':guide('Intake, not a step',[
+      ['Where it lands','The two published plans land here and end at Intent.'],
+      ['No step bar','The Idea line shows Intent as its one way on.'],
+      ['Carry forward','Known values go to Intent. Nobody types them again.']
+    ]),
     'outdoor-plan':RAILS['od-plan'],
     'outdoor-bench':RAILS['od-bench'],
     'outdoor-edge':RAILS['od-edge'],
