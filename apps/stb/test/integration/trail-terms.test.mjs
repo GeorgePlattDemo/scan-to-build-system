@@ -111,6 +111,8 @@ const TILES = {
   'start-own': {
     label: 'Start your own', projectId: 'start-own', requestType: 'USER_DEFINED_BOARD_V1',
     async answer({ page, frame }) {
+      // Start your own opens on its Idea intake; the Idea line's one way on is Intent.
+      await frame.locator('.recovery-nav button.job-idea-onward').click();
       await frame.locator('.recovery-nav button[data-journey-stage="configure"]').click();
       await wait(page, 1500);
       // The bench has no default species; the user states one before confirming.

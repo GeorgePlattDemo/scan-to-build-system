@@ -1951,6 +1951,17 @@
     'job1-idea':asRail(JOB1['job1-idea']),
     'job1-bench':asRail(JOB1['job1-bench']),
     'job1-store':asRail(JOB1['job1-store']),
+    'job1-intake':asRail({
+      header:'DEV/REV GUIDE — JOB 1 · IDEA',
+      flag:'Intake, not a step.',
+      bullets:[
+        'What User 1 brings lands here and ends at Intent.',
+        'No step bar. The Idea line shows Intent as its one way on.',
+        'Known values go to Intent. Nobody types them again.',
+        'The wood is not carried. It is chosen on the bench.'
+      ],
+      sections:[]
+    }),
     'alcove-idea':asRail(JOB2['alcove-idea']),
     'alcove-bench':asRail(JOB2['alcove-bench']),
     'alcove-store':asRail(JOB2['alcove-store']),
@@ -2198,9 +2209,10 @@
 
   function render(pageId){
     const meta='<div class="guide-meta"><span>'+esc(pageId)+'</span><span>'+VERSION+'</span></div>';
-    // Job 1 is one page with two trail steps; both rails ship and the page's stage picks one.
+    // Job 1 is one page with its Idea intake and two trail steps; all three rails ship and the page's stage picks one.
     if(pageId==='start-own-live'){
-      return '<div class="rev-stage" data-rev-stage="intent">'+renderRail(RAILS['job1-idea'])+'</div>'
+      return '<div class="rev-stage" data-rev-stage="idea">'+renderRail(RAILS['job1-intake'])+'</div>'
+        +'<div class="rev-stage" data-rev-stage="intent">'+renderRail(RAILS['job1-idea'])+'</div>'
         +'<div class="rev-stage" data-rev-stage="bench">'+renderRail(RAILS['job1-bench'])+'</div>'+meta;
     }
     const p=PAGES[pageId] || guide('Keep it honest',[
