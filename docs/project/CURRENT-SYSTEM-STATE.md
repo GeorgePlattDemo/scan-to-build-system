@@ -8,7 +8,7 @@
 ## What is published
 
 - **System is the current public application owner.**
-- `.github/workflows/publish-system-build.yml` runs the public-build tests and publishes `apps/stb/public-build/` from System `main` to GitHub Pages.
+- `.github/workflows/publish-system-build.yml` publishes `apps/stb/public-build/` from System `main` to GitHub Pages only after the pinned-Store integration job (`playhouse-candidate` in `.github/workflows/playhouse-candidate-integration.yml`) has passed for that exact commit and the public-build tests pass. A failed, skipped, cancelled or missing integration job denies publication; the gate is `.github/scripts/require-integration-proof.mjs`.
 - `scan-to-build-review` is frozen history and is not touched by that publication workflow.
 - The older public-build custody and reconciliation documents remain useful provenance. Their transfer/migration instructions are historical, not open work instructions.
 
