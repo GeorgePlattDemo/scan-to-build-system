@@ -42,7 +42,6 @@ test('actual 45-in and 46-in Board HTTP invoke pinned evaluateJob and matching e
   assert.equal(body45.mappedCallInputs.estimate.pieces[0].keptLengthIn, 45);
   assert.equal(body45.mappedCallInputs.estimate.pieces[0].widthIn, 3.5);
   assert.equal(body45.mappedCallInputs.estimate.classId, 'app.board.square.v1');
-  assert.equal(body45.rawEstimate.status, 'BUDGETARY_ESTIMATE');
   const direct45 = adapter.modules.estimateJob(adapter.catalog, body45.mappedCallInputs.estimate);
   assert.deepEqual(body45.rawEstimate, direct45);
 
@@ -51,16 +50,21 @@ test('actual 45-in and 46-in Board HTTP invoke pinned evaluateJob and matching e
   assert.equal(body46.mappedCallInputs.estimate.pieces[0].keptLengthIn, 46);
   const direct46 = adapter.modules.estimateJob(adapter.catalog, body46.mappedCallInputs.estimate);
   assert.deepEqual(body46.rawEstimate, direct46);
-  assert.notEqual(body45.rawEstimate.cycle.T_job_min, body46.rawEstimate.cycle.T_job_min);
-  const cut001 = adapter.modules.estimateJob(adapter.catalog, {
-    title: 'CUT-001 — 2x4 finished 60.000 in',
-    classId: 'cut-001',
-    pieces: [{ storeSku: PUBLISHED_BOARD_SKU, qty: 1, keptLengthIn: 60, widthIn: 3.5 }],
-  });
-  assert.notEqual(body45.rawEstimate.cycle.T_job_min, cut001.cycle.T_job_min);
-  assert.notEqual(body46.rawEstimate.cycle.T_job_min, cut001.cycle.T_job_min);
-  assert.notEqual(body45.rawEstimate.totals.Q, 0);
-  assert.notEqual(body46.rawEstimate.totals.Q, 0);
+
+  // No travel inputs: the pinned Store's partial price stays partial.
+  for (const body of [body45, body46]) {
+    assert.equal(body.mappedCallInputs.estimate.travelDemand, undefined);
+    assert.equal(body.rawEstimate.status, 'PARTIAL_BUDGETARY_ESTIMATE');
+    assert.equal(body.rawEstimate.complete, false);
+    assert.equal(body.rawEstimate.completeness, 'TRAVEL_STANDARD_INPUT_REQUIRED');
+    assert.deepEqual(body.rawEstimate.unresolvedConditions, ['DIMENSIONAL_TRAVEL_STANDARD_INPUT_REQUIRED']);
+    assert.equal(body.rawEstimate.cycle, null);
+    assert.equal(body.rawEstimate.totals.machine_service, null);
+    assert.equal(body.rawEstimate.totals.Q, null);
+    assert.equal(body.rawEstimate.totals.Q_basis, 'UNRESOLVED');
+    assert.equal(body.priceCompleteness.status, 'PARTIAL');
+    assert.deepEqual(body.priceCompleteness.unresolvedConditions, ['DIMENSIONAL_TRAVEL_STANDARD_INPUT_REQUIRED']);
+  }
 });
 
 test('user-defined X-brace keeps project truth and uses the pinned Store as sole dimensional Q authority', async (t) => {

@@ -183,7 +183,10 @@ function copyEstimate(envelope) {
       : null;
   return {
     available: rawEstimate.status === 'BUDGETARY_ESTIMATE' && q !== null,
-    reason: displayOrMissing(rawEstimate.reason) ?? (q === null ? 'missing-q' : null),
+    reason:
+      displayOrMissing(rawEstimate.reason) ??
+      displayOrMissing(rawEstimate.completeness) ??
+      (q === null ? 'missing-q' : null),
     status: displayOrMissing(rawEstimate.status),
     q,
     qDisplay: formatReturnedAmount(q),
@@ -391,7 +394,10 @@ export function presentStoreAnswer(applicability, options = {}) {
   const evaluationReasons = Array.isArray(evaluation?.unresolvedConditions)
     ? evaluation.unresolvedConditions.filter((item) => typeof item === 'string')
     : [];
-  const reasons = [...new Set([...lineReasons, ...evaluationReasons])];
+  const estimateReasons = Array.isArray(envelope?.rawEstimate?.unresolvedConditions)
+    ? envelope.rawEstimate.unresolvedConditions.filter((item) => typeof item === 'string')
+    : [];
+  const reasons = [...new Set([...lineReasons, ...evaluationReasons, ...estimateReasons])];
   const current = applicability.current === true && jobStatus !== null;
   const historical = current ? false : applicability.historical === true || historicalUsable;
 

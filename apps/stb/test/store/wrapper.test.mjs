@@ -10,6 +10,7 @@ import {
   WRAPPER_BUILD_ID,
 } from '../../shared/contracts.mjs';
 import { ADAPTER_ERROR_CODES } from '../../shared/store-wire.mjs';
+import { presentStoreAnswer } from '../../shared/store-present.mjs';
 import { createStoreAdapter } from '../../server/store-adapter.mjs';
 import { startServer } from '../../server/main.mjs';
 import { postJson, rawRequest } from '../helpers/http.mjs';
@@ -109,11 +110,9 @@ test('BOARD_SQUARE_V1 45-in and 46-in invoke actual evaluate then estimate', asy
   assert.equal(body45.mappedCallInputs.estimate.pieces[0].widthIn, 3.5);
   assert.equal(body45.mappedCallInputs.estimate.classId, 'app.board.square.v1');
   assert.equal(body45.mappedCallInputs.estimate.hardwareSku, undefined);
-  assert.equal(body45.rawEstimate.status, 'BUDGETARY_ESTIMATE');
   assert.ok(body45.estimateAssociationId);
   assert.equal(body45.rawEstimate.engine.id, 'STB-STORE-ZERO-PRICE-1');
-  assert.equal(body45.rawEstimate.engine.version, '0.2.3');
-  assert.equal(body45.rawEstimate.cycle.model, 'STB-D001-CYCLE-MODEL-S2-0.1');
+  assert.equal(body45.rawEstimate.engine.version, '0.3.0');
   assert.equal(body45.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.3');
   assert.equal(body45.attributedBasis.measured, false);
   assert.equal(body45.attributedBasis.commissioned, false);
@@ -128,14 +127,33 @@ test('BOARD_SQUARE_V1 45-in and 46-in invoke actual evaluate then estimate', asy
   assert.equal(body46.mappedCallInputs.estimate.pieces[0].keptLengthIn, 46);
   const direct46 = adapter.modules.estimateJob(adapter.catalog, body46.mappedCallInputs.estimate);
   assert.deepEqual(body46.rawEstimate, direct46);
-  assert.notEqual(body45.rawEstimate.cycle.T_job_min, body46.rawEstimate.cycle.T_job_min);
-  const cut001 = adapter.modules.estimateJob(adapter.catalog, {
-    title: 'CUT-001 — 2x4 finished 60.000 in',
-    classId: 'cut-001',
-    pieces: [{ storeSku: PUBLISHED_BOARD_SKU, qty: 1, keptLengthIn: 60, widthIn: 3.5 }],
-  });
-  assert.notEqual(body45.rawEstimate.cycle.T_job_min, cut001.cycle.T_job_min);
-  assert.notEqual(body46.rawEstimate.cycle.T_job_min, cut001.cycle.T_job_min);
+
+  // No travel inputs: the pinned Store's partial price stays partial.
+  for (const body of [body45, body46]) {
+    assert.equal(body.mappedCallInputs.estimate.travelDemand, undefined);
+    assert.equal(body.rawEstimate.status, 'PARTIAL_BUDGETARY_ESTIMATE');
+    assert.equal(body.rawEstimate.complete, false);
+    assert.equal(body.rawEstimate.completeness, 'TRAVEL_STANDARD_INPUT_REQUIRED');
+    assert.deepEqual(body.rawEstimate.unresolvedConditions, ['DIMENSIONAL_TRAVEL_STANDARD_INPUT_REQUIRED']);
+    assert.equal(body.rawEstimate.cycle, null);
+    assert.equal(body.rawEstimate.totals.Q, null);
+    assert.equal(body.priceCompleteness.status, 'PARTIAL');
+    assert.deepEqual(body.priceCompleteness.unresolvedConditions, ['DIMENSIONAL_TRAVEL_STANDARD_INPUT_REQUIRED']);
+
+    const view = presentStoreAnswer({
+      status: 'response',
+      current: true,
+      historical: false,
+      response: { payload: { wrapperEnvelope: body } },
+    });
+    assert.equal(view.dispositionEnum, 'SUPPORTABLE');
+    assert.equal(view.estimate.status, 'PARTIAL_BUDGETARY_ESTIMATE');
+    assert.equal(view.estimate.available, false);
+    assert.equal(view.estimate.reason, 'TRAVEL_STANDARD_INPUT_REQUIRED');
+    assert.equal(view.q, null);
+    assert.equal(view.qDisplay, null);
+    assert.ok(view.reasons.includes('DIMENSIONAL_TRAVEL_STANDARD_INPUT_REQUIRED'));
+  }
   assert.equal(adapter.instrumentation.evaluationCalls, 2);
   assert.equal(adapter.instrumentation.estimateCalls, 2);
 });
