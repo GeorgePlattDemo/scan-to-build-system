@@ -11,7 +11,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=02467ab5"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=69c66036"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
 <script src="stb-store-handoff-contract.js?v=afccfa82"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
@@ -19,8 +19,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-user-defined-board-runtime-bridge.js?v=db611717"></script>
 <script src="stb-terms-flow.js?v=365d795c"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=ca817f5e"></script>
-<script src="stb-trail-contract.js?v=ca322ebd"></script>
+<script src="stb-build-guide-spec.js?v=55c93f09"></script>
+<script src="stb-trail-contract.js?v=71dffe24"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
 import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => {
@@ -1490,7 +1490,8 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
     // Alcove's STB-TILE-HOST-0.1 message. Intent, the bench, The Store answers and Your call come from the contract's
     // availableSteps() for the page's admission and fresh answer. Your call also waits, as before, for the confirmed
     // version's answer in the terms flow (callOpen); We cut it and Pick up & build stay with the terms flow's gates,
-    // behind Your call. The stage is the step the shown Alcove page stands for.
+    // behind Your call. The stage is the step the shown Alcove page stands for; a page that stands for no step is the
+    // Idea intake, where the tile opens, before Intent.
     function alcoveHostMessage() {
       const steps = trailContract.steps;
       const admission = win.STBAlcoveLive?.admission() || null;
@@ -1505,7 +1506,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
       return {
         interface:tileHostContract.TILE_HOST_VERSION,
         tileId:ALCOVE_PROJECT_ID,
-        stage:steps[index ?? 0],
+        stage:index == null ? trailContract.idea.label : steps[index],
         usableSteps:usable,
         navigationRequest:null
       };
@@ -3497,10 +3498,20 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
     registerTileHost('outdoor', { frame:() => doc.getElementById('outdoor-bench-leg-frame') });
 
     // Alcove is on the shared tile host. The host draws its one nav line from the message Alcove's tile code builds
-    // (alcoveHostMessage); its Store inquiries go through admit() then inquire() on its page.
+    // (alcoveHostMessage); its Store inquiries go through admit() then inquire() on its page. Alcove opens on Idea.
+    // Asked for Idea or Intent, it shows that page; the other steps open through the nav.
+    const ALCOVE_IDEA_PAGE = 'alcove-idea';
     registerTileHost(ALCOVE_PROJECT_ID, {
       report:alcoveHostMessage,
-      shown:() => setTimeout(syncAlcoveCommercialSurface, 0)
+      shown:() => setTimeout(syncAlcoveCommercialSurface, 0),
+      idea:true,
+      go:target => {
+        const pageId = target === trailContract.idea.label ? ALCOVE_IDEA_PAGE
+          : target === trailContract.steps[0] ? ALCOVE_STAGE_TARGETS.scan : null;
+        if (!pageId || tileHostShownPage() === pageId) return;
+        originalShow.call(win, pageId);
+        tilePageShown(pageId);
+      }
     });
     win.STBAlcoveTileHost = Object.freeze({ hostMessage:() => alcoveHostMessage() });
 

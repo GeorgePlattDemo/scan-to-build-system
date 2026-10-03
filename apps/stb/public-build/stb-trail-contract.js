@@ -33,7 +33,7 @@
     Object.freeze({
       id: 'alcove',
       tileLabel: 'Critical fit',
-      pages: Object.freeze(['alcove-capture', 'alcove-config', 'alcove-review', 'store', 'request', 'yard', 'terms', 'recap', 'record'])
+      pages: Object.freeze(['alcove-idea', 'alcove-capture', 'alcove-config', 'alcove-review', 'store', 'request', 'yard', 'terms', 'recap', 'record'])
     }),
     Object.freeze({
       id: 'window-seat',

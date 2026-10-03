@@ -1302,6 +1302,34 @@
       "blobSha": "4e807580034b823f2164665edc8d1dfafd32ff03",
       "bytes": 246477,
       "reason": "Playhouse Idea intake. The shell adds the playhouse-idea page (User 1's picture and story, moved off Intent, and the values the bounded tile already knows, carried forward to Intent from one S001_KNOWN source shared with the bench's knobs and Reset). Playhouse registers idea:true and a go hook for Idea and Intent; its host message stage is Idea on a page that stands for no step. The shared host draws one unnumbered step-1 control on the Idea line for a tile that declares no fork there. Cache-busters for the changed front door (?v=02467ab5, was ?v=617f86a4), Dev Guide spec (?v=ca817f5e, was ?v=9523c7af) and trail contract (?v=ca322ebd, was ?v=aea2f84d)."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "alcove-idea-intake",
+      "blobSha": "69c66036cd61d742da56391b373da07dac4220b6",
+      "bytes": 40560,
+      "reason": "Alcove opens on Idea: the Alcove tile's library root is alcove-idea (was alcove-capture). Cache-buster for the changed base page (?v=0b93cdce, was ?v=bbf2ad30)."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "alcove-idea-intake",
+      "blobSha": "55c93f0970745381a5a2492e82f7d2901dca6bd7",
+      "bytes": 91147,
+      "reason": "Dev Guide rail for the new alcove-idea page (Idea: intake, not a step)."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "alcove-idea-intake",
+      "blobSha": "0b93cdced616f3a94481455b0f01f1938bfaa57c",
+      "bytes": 129988,
+      "reason": "Alcove Idea intake. New alcove-idea page before alcove-capture: User 1's scan picture and the two scan paragraphs move there from Intent (moved, not copied), with the values the bounded tile already knows shown as carried to Intent. One ALCOVE_KNOWN source renders those values on Idea and on Intent's 'Your measurements' and 'What's off' lines, so nobody re-enters a known value. Admission and the Store inquiry are unchanged: a missing parent or a bad size still blocks before the Store."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "alcove-idea-intake",
+      "blobSha": "8b8c4bfd275a7210a1d72614f1be4d5a13dfd6ca",
+      "bytes": 247108,
+      "reason": "Alcove Idea intake. Alcove registers idea:true and a go hook for Idea and Intent; its host message stage is Idea on a page that stands for no step. The shared host is unchanged: it already draws one unnumbered step-1 control on the Idea line for a tile that declares no fork there. Cache-busters for the changed front door (?v=69c66036, was ?v=02467ab5), Dev Guide spec (?v=55c93f09, was ?v=ca817f5e) and trail contract (?v=71dffe24, was ?v=ca322ebd)."
     }
   ],
   "retiredFiles": [

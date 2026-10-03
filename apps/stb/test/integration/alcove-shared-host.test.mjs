@@ -43,10 +43,16 @@ const currentLabels = async frame => steps(await navLine(frame)).filter(b => b.c
 const alcoveCalls = log => log.filter(e => e.request.projectId === 'alcove' && e.request.requestType === 'ALCOVE_INSERT_V1');
 const live = (frame, fn, arg) => frame.evaluate(fn, arg);
 
-// Opens the tile and waits for the answer the page asks for on arrival.
+const shownPage = frame => live(frame, () => [...document.querySelectorAll('.page.on')].pop()?.id);
+
+// Opens the tile on its Idea intake, takes the Idea line's one way on to Intent, and waits for the answer the page
+// asks for on arrival.
 async function openAlcove(browser, origin) {
   const { page, frame, errors } = await openTile(browser, origin, 'Critical fit');
   await until(() => live(frame, () => { const s = window.STBAlcoveLive?.state(); return s && !s.asking && s.answer?.authority === 'CURRENT'; }), 'arrival answer');
+  await page.waitForTimeout(300);
+  await frame.locator('.recovery-nav button.job-idea-onward').click();
+  await until(async () => (await shownPage(frame)) === 'alcove-capture', 'Intent shown');
   await page.waitForTimeout(300);
   return { page, frame, errors };
 }
@@ -83,9 +89,27 @@ test('the old Alcove shell path is gone; one Store handoff, inside inquire()', (
 
 test('the shared host draws the Alcove nav from its validated STB-TILE-HOST-0.1 message', { timeout: 240000 }, async () => {
   await withBrowser(async ({ browser, origin }) => {
+    // Alcove opens on its Idea intake: no step bar, and the Idea line's one way on is Intent. The known values are
+    // already there, carried to Intent.
+    {
+      const { page: ideaPage, frame: idea } = await openTile(browser, origin, 'Critical fit');
+      await until(async () => (await shownPage(idea)) === 'alcove-idea', 'Idea shown');
+      await ideaPage.waitForTimeout(300);
+      assert.equal((await live(idea, () => window.STBAlcoveTileHost.hostMessage())).stage, 'Idea');
+      assert.deepEqual((await navLine(idea)).map(b => b.label), ['← Project Library', 'Intent']);
+      assert.match(await idea.locator('#alcove-idea-known').innerText(), /Height 94½ in floor to ceiling · Width 45½ in opening · Depth 14½ in available at the face/);
+      await idea.locator('.recovery-nav button.job-idea-onward').click();
+      await until(async () => (await shownPage(idea)) === 'alcove-capture', 'Intent from Idea');
+      assert.match(await idea.locator('#alcove-intent-measured').innerText(), /Height 94½ in floor to ceiling · Width 45½ in opening · Depth 14½ in available at the face/);
+      // From Intent, Idea is the back control and never current; it returns to the Idea page.
+      await idea.locator('.recovery-nav button.job-idea').click();
+      await until(async () => (await shownPage(idea)) === 'alcove-idea', 'Idea from Intent');
+      await ideaPage.close();
+    }
+
     const { page, frame, errors } = await openAlcove(browser, origin);
 
-    // Intent: the six contract steps after the Project Library; Your call waits for a confirmed version's answer.
+    // Intent: Idea, then the six contract steps after the Project Library; Your call waits for a confirmed version's answer.
     let message = await live(frame, () => window.STBAlcoveTileHost.hostMessage());
     assert.deepEqual(Object.keys(message).sort(), ['interface', 'navigationRequest', 'stage', 'tileId', 'usableSteps']);
     assert.equal(message.interface, 'STB-TILE-HOST-0.1');
@@ -94,7 +118,7 @@ test('the shared host draws the Alcove nav from its validated STB-TILE-HOST-0.1 
     assert.deepEqual(message.usableSteps, TRAIL_STEPS.slice(0, 3));
     assert.equal(await live(frame, () => document.documentElement.dataset.tileHostRejected ?? null), null);
     let line = await navLine(frame);
-    assert.deepEqual(line.map(b => b.label), ['← Project Library', ...TRAIL_STEPS.map((step, i) => `${i + 1} · ${step}`)]);
+    assert.deepEqual(line.map(b => b.label), ['← Project Library', 'Idea', ...TRAIL_STEPS.map((step, i) => `${i + 1} · ${step}`)]);
     assert.deepEqual(steps(line).map(b => b.inert), [false, false, false, true, true, true]);
     assert.deepEqual(await currentLabels(frame), ['1 · Intent']);
     assert.equal(await frame.locator('.recovery-nav .job-nav-context').innerText(), 'ALCOVE · CRITICAL FIT');

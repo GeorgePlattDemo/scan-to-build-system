@@ -87,6 +87,8 @@ const TILES = {
   alcove: {
     label: 'Critical fit', projectId: 'alcove', requestType: 'ALCOVE_INSERT_V1',
     async answer({ page, frame }) {
+      // Alcove opens on its Idea intake; the Idea line's one way on is Intent.
+      await frame.locator('.recovery-nav button.job-idea-onward').click();
       await frame.locator('.recovery-nav button[data-journey-stage="configure"]').click();
       await wait(page, 800);
       await frame.locator('#confirm-alcove-inline').click();
@@ -96,6 +98,8 @@ const TILES = {
     call: frame => frame.locator('.recovery-nav button[data-journey-stage="request"]').click(),
     hosts: { call: '#request .alcove-terms-host', yard: '#yard .alcove-terms-host', record: '#record .alcove-terms-host' },
     async invalid({ page, frame }) {
+      // Alcove opens on its Idea intake; the Idea line's one way on is Intent.
+      await frame.locator('.recovery-nav button.job-idea-onward').click();
       await frame.locator('.recovery-nav button[data-journey-stage="configure"]').click();
       await wait(page, 800);
       await frame.locator('[data-material="cherry"]').first().click();
