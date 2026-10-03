@@ -87,6 +87,14 @@ test('the old Start your own shell path is gone; one Store handoff, inside inqui
   assert.equal(shell.includes('export function admit'), false, 'shell does not carry a copy of the contract');
 });
 
+test('the shell does not read the proof frame window for state three-frames.html never had', () => {
+  const shell = read('system-build-current.html');
+  for (const name of ['captureStartOwnProof', 'STBProjectBridge', 'contentWindow?.S', 'proofDecisions', 'proofActions', 'classifyStartOwnDecision']) {
+    assert.equal(shell.includes(name), false, name + ' is still in the shell');
+  }
+  assert.equal(read('three-frames.html').includes('<script'), false, 'three-frames.html carries no script, so there is no window state to read');
+});
+
 test('the shared host draws the Start your own nav from its validated STB-TILE-HOST-0.1 message', { timeout: 240000 }, async () => {
   await withBrowser(async ({ browser, origin, log }) => {
     const { page, frame, errors } = await openStartOwn(browser, origin);

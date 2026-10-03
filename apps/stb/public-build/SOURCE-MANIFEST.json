@@ -1253,6 +1253,13 @@
       "blobSha": "84e8781f205dc63c7d629bee76ea42b694f93b03",
       "bytes": 251575,
       "reason": "The dead shell click handler on the Playhouse review confirm is deleted (the front door listener stopped it from ever firing); the page records the confirm. Cache-buster for the changed front door (?v=617f86a4, was ?v=68136f4b)."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "shell-does-not-read-proof-frame",
+      "blobSha": "b70b8c80c8b60d4a4f7d6caef651930b68a68f7a",
+      "bytes": 244338,
+      "reason": "captureStartOwnProof is deleted: it read the Start your own proof frame's contentWindow.STBProjectBridge and contentWindow.S, neither of which three-frames.html defines, so it always returned early. Its two calls and the click listener, decision set and action count that only fed it are deleted with it. The bench wrapper and the before-send line are unchanged."
     }
   ],
   "retiredFiles": [
