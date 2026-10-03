@@ -89,8 +89,10 @@ const TILES = {
   },
   outdoor: {
     label:'Outdoor build', projectId:'outdoor', inner:true,
-    async answer({ page }) {
+    async answer({ page, frame }) {
       const win=await until(async()=>{const f=frameOf(page,'stb-outdoor-picnic-0.4.html');return f&&await f.$('#plans .plan')?f:null},'outdoor frame');
+      // Outdoor opens on its Idea intake; the Idea line's one way on is Intent.
+      await frame.locator('.recovery-nav button.job-idea-onward').click();
       await win.locator('[data-plan="table-benches"]').click();
       await until(async()=> (await terms(win,'outdoor'))?.stage==='ANSWERED','outdoor answer');
       return { win };

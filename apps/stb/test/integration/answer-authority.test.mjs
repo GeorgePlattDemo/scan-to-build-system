@@ -150,8 +150,10 @@ const TILES = {
       return { admission, answer: s.answer && !s.answer.stale ? { authority: s.answer.authority, definitionRevisionId: s.answer.definitionRevisionId, inquiryScope: s.answer.inquiryScope } : null,
         status: null, asking: s.asking, error: s.error, onScreen: admission?.definitionRevisionId ?? null };
     }),
-    async answer({ page }) {
+    async answer({ page, frame }) {
       const od = await until(async () => { const f = frameOf(page, 'stb-outdoor-picnic-0.4.html'); return f && await f.$('#plans .plan') ? f : null; }, 'outdoor frame');
+      // Outdoor opens on its Idea intake; the Idea line's one way on is Intent.
+      await frame.locator('.recovery-nav button.job-idea-onward').click();
       await od.locator('[data-plan="table-benches"]').click();
       await until(() => od.evaluate(() => window.STBTermsFlow.instance('outdoor')?.state()?.stage === 'ANSWERED'), 'outdoor answer');
     },

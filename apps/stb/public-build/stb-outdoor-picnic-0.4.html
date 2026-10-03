@@ -195,10 +195,11 @@ tr:last-child td{border-bottom:0}
 .refusals li,.res p,#tried b{overflow-wrap:anywhere}
 </style>
 </head>
-<body data-section="plans">
+<body data-section="idea">
 <div class="wrap">
   <nav class="bar" id="bar" aria-label="Outdoor trail">
     <span class="pill brand">PICNIC TABLE · OUTDOOR</span>
+    <button class="pill" type="button" id="nav-idea">Idea</button>
     <button class="pill step" data-nav="scan" type="button">1 · Intent</button>
     <button class="pill step" data-nav="configure" type="button" disabled>2 · The bench</button>
     <button class="pill step" data-nav="store" type="button" disabled>3 · The Store answers</button>
@@ -208,8 +209,19 @@ tr:last-child td{border-bottom:0}
   </nav>
   <div class="rulebar"><a class="pill rule" href="stb-outdoor-reference-authority-0.3.html" target="_blank" rel="noopener">📘 RULE BOOK: Picnic table authorities →</a></div>
 
+  <!-- ═════ IDEA · THE INTAKE, NOT A STEP. No step is current here; it hands off to Intent. ═════ -->
+  <section class="view" id="s-idea" data-section="idea">
+    <div class="pg"><div class="main">
+      <h1>Idea · the plans you brought</h1>
+      <p class="sub">Two published picnic table plans land here and end at Intent. Idea is not a step.</p>
+      <div id="idea-plans"></div>
+      <p class="note"><b>Nobody types these again.</b> Intent opens with every value this project already has. Choose Intent above to go on.</p>
+      <p class="hint">Idea makes no machine motion. It is where the job’s source material lives.</p>
+    </div><aside class="rail dev-build-guide" data-guide-id="outdoor-idea" aria-label="Build guide · developer notes"></aside></div>
+  </section>
+
   <!-- ═════ SCREEN 1 · STEP 1 · PICK A PLAN ═════ -->
-  <section class="view" id="s-plans" data-section="plans">
+  <section class="view" id="s-plans" data-section="plans" hidden>
     <div class="pg"><div class="main">
       <p class="stepband">STEP 1 OF 6 · INTENT <span>pick a plan</span></p>
       <h1>Two proven plans. Pick one. Make it yours.</h1>
@@ -362,7 +374,7 @@ tr:last-child td{border-bottom:0}
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
 <script src="stb-store-client.js?v=72cdc9fa"></script>
 <script src="stb-terms-flow.js?v=365d795c"></script>
-<script src="stb-build-guide-spec.js?v=bcf7a02c"></script>
+<script src="stb-build-guide-spec.js?v=4f614aad"></script>
 <script src="stb-trail-contract.js?v=aea2f84d"></script>
 <script>
 (function(){
@@ -768,7 +780,7 @@ function boardSvg(len,board,angle,spots,deco){
 
 /* ═════ RENDER ═════ */
 function render(){
-  renderPlans();feedTerms();
+  renderIdea();renderPlans();feedTerms();
   if(S.cfg){renderBuild();renderEdge();}
   renderCall();renderYard();renderRecord();renderTerms();syncNav();
 }
@@ -783,6 +795,20 @@ function askFrom(){
     }).catch(e=>{S.from[key]={error:String(e&&e.message||e)};renderPlans()});
   }
 }
+/* Idea: each plan as brought, and the values the bounded tile already knows for it, carried to Intent. planCfg() is the
+   one source: Intent's plan pick opens with exactly these values, so nobody re-enters a known value. */
+function renderIdea(){
+  const host=$('idea-plans');if(host.dataset.built)return;
+  host.innerHTML=Object.entries(PLANS).map(([key,p])=>{const k=planCfg(key),row=(b,t)=>'<div class="ln"><span><b>'+b+'</b> · '+esc(t)+'</span></div>';
+    return `<div class="card" data-idea-plan="${key}">
+      <h3>${esc(p.title)}</h3>
+      <p class="src"><a href="${p.sourceUrl}" target="_blank" rel="noopener">${esc(p.source)}</a></p>
+      <p class="meta">${esc(p.facts)}</p>
+      <p class="stepband" style="margin-top:10px">ALREADY KNOWN <span>carried to Intent</span></p>
+      ${row('Length',ftin(k.lengthIn)+' · '+p.lenHint)}${row('Wood',WOODS.find(w=>w.key===k.wood).label+' · the plan’s wood')}${row('Hardware pack',TIERS.find(t=>t.key===k.tier).label)}${row('Ends',p.angleNote)}${row('Hardware',p.hardwareNote)}
+    </div>`}).join('');
+  host.dataset.built='1';
+}
 function renderPlans(){
   const host=$('plans');
   if(!host.dataset.built){
@@ -791,7 +817,6 @@ function renderPlans(){
         <img src="${p.photo}" alt="Photo of a finished ${esc(p.title)} picnic table">
         <p class="cap">A photo of a finished table, not a drawing. Nobody cuts to a photo; the parts come from the plan.</p>
         <h2>${esc(p.title)}</h2>
-        <p class="src"><a href="${p.sourceUrl}" target="_blank" rel="noopener">${esc(p.source)}</a></p>
         <p class="facts">${esc(p.facts)}</p>
         <div class="row">
           <div class="from" data-from></div>
@@ -801,7 +826,7 @@ function renderPlans(){
     host.dataset.built='1';
   }
   for(const key of Object.keys(PLANS)){const f=S.from[key]||{};
-    host.querySelector('[data-card="'+key+'"] [data-from]').innerHTML=f.error?'<small>Store unavailable ('+esc(f.error)+')</small>':f.best!=null?'<small>From</small><b>$'+Math.round(f.best)+'</b><small>6 ft, cheapest wood the Store has, your own hardware</small>':'best' in f?'<small>Store Zero can’t cut this plan as stocked</small>':'<small>Asking Store Zero…</small>';}
+    host.querySelector('[data-card="'+key+'"] [data-from]').innerHTML=f.error?'<small>Store unavailable ('+esc(f.error)+')</small>':f.best!=null?'<small>From</small><b>$'+Math.round(f.best)+'</b><small>'+ftin(planCfg(key).lengthIn)+', cheapest wood the Store has, your own hardware</small>':'best' in f?'<small>Store Zero can’t cut this plan as stocked</small>':'<small>Asking Store Zero…</small>';}
 }
 function optionButtons(){
   const pend=S.optionsAsking?'…':S.optionsError?'?':'…';
@@ -963,7 +988,7 @@ function renderRecord(){
 }
 
 /* ═════ SCREENS ═════ */
-const SECTIONS=['plans','build','edge','call','yard','record'];
+const SECTIONS=['idea','plans','build','edge','call','yard','record'];
 const NAV_OF={plans:'scan',build:'configure',edge:'configure',call:'request',yard:'yard',record:'record'};
 /* The six trail steps, by index, and where each opens on this page. The Store answers is the answer on the bench. */
 const NAV_STEPS=['scan','configure','store','request','yard','record'];
@@ -988,11 +1013,12 @@ function usableSteps(){
   return u;
 }
 function usable(){const u=usableSteps(),on=i=>u.includes(TRAIL.steps[i]);
-  return {plans:true,build:on(1),edge:on(1),call:on(3),yard:on(4),record:on(5)}}
-/* This tile's STB-TILE-HOST-0.1 message for the shared host: the step the page on screen stands for (the last usable
-   one at or before it) and the usable steps. Outdoor has no Idea intake yet, so it is never on Idea. */
+  return {idea:true,plans:true,build:on(1),edge:on(1),call:on(3),yard:on(4),record:on(5)}}
+/* This tile's STB-TILE-HOST-0.1 message for the shared host: on Idea, Idea; from Intent on, the step the page on screen
+   stands for (the last usable one at or before it). Always the usable steps. */
 function hostMessage(){
   const steps=TRAIL.steps,u=usableSteps();
+  if(S.section==='idea')return {interface:C.TILE_HOST_VERSION,tileId:TILE_ID,stage:TRAIL.idea.label,usableSteps:u,navigationRequest:null};
   let i=S.step!=null?S.step:STEP_OF_SECTION[S.section];
   while(i>0&&!u.includes(steps[i]))i--;
   return {interface:C.TILE_HOST_VERSION,tileId:TILE_ID,stage:steps[i],usableSteps:u,navigationRequest:null};
@@ -1005,6 +1031,7 @@ function go(section){
 }
 function syncNav(){
   const u=usableSteps();
+  $('nav-idea').hidden=S.section==='idea';
   $$('[data-nav]').forEach(b=>{b.disabled=!u.includes(TRAIL.steps[NAV_STEPS.indexOf(b.dataset.nav)]);b.classList.toggle('on',NAV_OF[S.section]===b.dataset.nav)});
   if(embedded&&window.parent!==window&&C)window.parent.postMessage({type:'STB_TILE_HOST',message:hostMessage()},location.origin);
 }
@@ -1032,6 +1059,7 @@ document.addEventListener('click',e=>{
   const dw=e.target.closest('[data-drop-work]');if(dw){e.preventDefault();backToPlan();return}
   const ak=e.target.closest('[data-ask]');if(ak){askExact();return}
   const nv=e.target.closest('[data-nav]');if(nv){goStep(NAV_STEPS.indexOf(nv.dataset.nav));return}
+  if(e.target.closest('#nav-idea')){go('idea');return}
 });
 $('len').addEventListener('input',e=>setLength(e.target.value));
 $('parts-bench').addEventListener('input',e=>{const f=e.target.closest('[data-in]');if(!f)return;const kind=f.closest('[data-part]').dataset.part,p=partOf(S.cfg,kind);
@@ -1057,11 +1085,13 @@ function goStep(i){
   if(i===2&&S.section==='build'){S.step=2;syncNav();$('answer').scrollIntoView({block:'center'})}
 }
 window.addEventListener('message',event=>{
-  /* The shared tile host (the parent frame, or the top window that drives it) asks for a trail step by its contract
-     label. The page tells the host which steps can be used right now, in its STB-TILE-HOST-0.1 message. */
+  /* The shared tile host (the parent frame, or the top window that drives it) asks for Idea or a trail step by its
+     contract label. The page tells the host which steps can be used right now, in its STB-TILE-HOST-0.1 message. */
   if(event.origin!==location.origin||(event.source!==window.parent&&event.source!==window.top))return;
   if(event.data?.type!=='STB_TILE_HOST_GO')return;
-  goStep(TRAIL.steps.indexOf(String(event.data.target||'')));
+  const target=String(event.data.target||'');
+  if(target===TRAIL.idea.label){go('idea');return}
+  goStep(TRAIL.steps.indexOf(target));
 });
 if(embedded)$('bar').hidden=true;
 
@@ -1079,7 +1109,7 @@ function renderStoreDoctrine(host){
     :'<div class="band warn"><b>Store Zero reference text unavailable.</b> '+((d&&d.unavailableMessage)||'The shared Store Zero text did not load, so none is shown in its place.')+'</div>';
 }
 renderStoreDoctrine($('store-doctrine'));
-render();go('plans');
+render();go('idea');
 window.STBOutdoorPicnic=Object.freeze({version:'0.4',rule:RULE,plans:Object.keys(PLANS),
   openPlan,setLength,backToPlan,
   request:()=>{const r=buildRequest();return r&&r.definition},

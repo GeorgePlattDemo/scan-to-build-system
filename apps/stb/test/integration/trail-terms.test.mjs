@@ -126,8 +126,10 @@ const TILES = {
   },
   outdoor: {
     label: 'Outdoor build', projectId: 'outdoor', requestType: 'CUT_PACKAGE_V1',
-    async answer({ page }) {
+    async answer({ page, frame }) {
       const outdoor = await until(async () => { const f = frameOf(page, 'stb-outdoor-picnic-0.4.html'); return f && await f.$('#plans .plan') ? f : null; }, 'outdoor frame');
+      // Outdoor opens on its Idea intake; the Idea line's one way on is Intent.
+      await frame.locator('.recovery-nav button.job-idea-onward').click();
       await outdoor.locator('[data-plan="table-benches"]').click();
       await outdoor.waitForSelector('#instant .total:not(.none)', { timeout: 30000 });
       await until(async () => (await terms(outdoor, 'outdoor'))?.stage === 'ANSWERED', 'outdoor answer');
@@ -137,9 +139,9 @@ const TILES = {
     call: async (frame, win) => { await win.locator('#confirm').click(); },
     inner: true,
     hosts: { call: '#call-terms', yard: '#yard-terms', record: '#record-terms' },
-    async invalid({ page }) {
+    async invalid({ page, frame }) {
       // The largest size the plan rule offers, 216 in: the Store has no board long enough, and says so.
-      const { win } = await TILES.outdoor.answer({ page });
+      const { win } = await TILES.outdoor.answer({ page, frame });
       await win.evaluate(() => window.STBOutdoorPicnic.setLength(216));
       await until(async () => (await terms(win, 'outdoor'))?.stage === 'REFUSED_BY_STORE', 'outdoor refusal');
       assert.equal(await win.locator('#confirm').isDisabled(), true, 'outdoor: no way to your call past the envelope');

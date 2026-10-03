@@ -1,6 +1,8 @@
 // Outdoor on the shared tile host, against the real pinned Store.
+// - Outdoor opens on its Idea intake: no step bar, the Idea line's one way on is Intent, and the values the bounded
+//   tile already knows are carried to Intent.
 // - The host draws Outdoor's one nav line from a validated STB-TILE-HOST-0.1 message the Outdoor frame posts, and the
-//   trail contract: the six contract steps, inert steps disabled, exactly one current, and the current step follows
+//   trail contract: Idea, then the six contract steps, inert steps disabled, exactly one current, and the current step follows
 //   the page shown in the frame. A frame speaking for another tile is rejected and the steps go inert.
 // - Every Store inquiry is admit() then inquire(), in the outdoor profile's two scopes: OUTDOOR_OPTIONS (the "From"
 //   and option prices) and OUTDOOR_COMMITTED (this exact table). A missing profile fact blocks before the Store and
@@ -46,10 +48,13 @@ const currentLabels = async frame => steps(await navLine(frame)).filter(b => b.c
 const outdoorCalls = log => log.filter(e => e.request.projectId === 'outdoor' && e.request.requestType === 'CUT_PACKAGE_V1');
 const committedCalls = log => outdoorCalls(log).filter(e => e.request.payload.definition.configurationId !== 'OUTDOOR-PICNIC-OPTIONS');
 
+// Opens the tile on its Idea intake and takes the Idea line's one way on to Intent.
 async function openOutdoor(browser, origin) {
   const { page, frame, errors } = await openTile(browser, origin, 'Outdoor build');
   const od = await until(() => frameOf(page, 'stb-outdoor-picnic-0.4.html'), 'outdoor frame');
   await until(() => od.evaluate(() => !!window.STBOutdoorPicnic?.hostMessage()), 'outdoor contract loaded');
+  await until(() => od.evaluate(() => window.STBOutdoorPicnic.hostMessage().stage === 'Idea'), 'idea shown');
+  await frame.locator('.recovery-nav button.job-idea-onward').click();
   await until(async () => (await currentLabels(frame)).join() === '1 · Intent', 'intent drawn');
   return { page, frame, od, errors };
 }
@@ -85,7 +90,7 @@ test('the old Outdoor shell path is gone; one Store handoff, inside inquire()', 
   assert.doesNotMatch(shell, /activeJourneyProject\s*[!=]==?\s*['"]outdoor['"]|['"]outdoor['"]\s*[!=]==?\s*activeJourneyProject/, 'no Outdoor branch in the shell');
   assert.doesNotMatch(shell, /projectId\s*===\s*['"]outdoor['"]/, 'no Outdoor branch in the stage router');
   assert.doesNotMatch(shell, /source\s*===\s*['"]outdoor['"]/, 'no Outdoor proof handoff');
-  assert.match(shell, /registerTileHost\('outdoor', \{ frame:\(\) => doc\.getElementById\('outdoor-bench-leg-frame'\) \}\)/);
+  assert.match(shell, /registerTileHost\('outdoor', \{ frame:\(\) => doc\.getElementById\('outdoor-bench-leg-frame'\), idea:true \}\)/);
 
   const page = read('stb-outdoor-picnic-0.4.html');
   assert.equal(page.includes('STB_OUTDOOR_'), false, 'the page speaks only STB-TILE-HOST-0.1 to the host');
@@ -108,9 +113,34 @@ test('the old Outdoor shell path is gone; one Store handoff, inside inquire()', 
 
 test('the shared host draws the Outdoor nav from its validated STB-TILE-HOST-0.1 message', { timeout: 240000 }, async () => {
   await withBrowser(async ({ browser, origin }) => {
+    // Outdoor opens on its Idea intake: no step bar, and the Idea line's one way on is Intent. The values the bounded
+    // tile already knows are there, carried to Intent, and Intent opens with them.
+    {
+      const { page: ideaPage, frame: idea } = await openTile(browser, origin, 'Outdoor build');
+      const ideaOd = await until(() => frameOf(ideaPage, 'stb-outdoor-picnic-0.4.html'), 'outdoor frame');
+      await until(() => ideaOd.evaluate(() => !!window.STBOutdoorPicnic?.hostMessage()), 'outdoor contract loaded');
+      const ideaMessage = await ideaOd.evaluate(() => window.STBOutdoorPicnic.hostMessage());
+      assert.equal(ideaMessage.stage, 'Idea');
+      assert.deepEqual(ideaMessage.usableSteps, ['Intent']);
+      assert.equal(await ideaOd.evaluate(() => window.STBOutdoorPicnic.state().section), 'idea');
+      await until(async () => (await navLine(idea)).map(b => b.label).join() === '← Project Library,Intent', 'idea line');
+      assert.match(await ideaOd.locator('[data-idea-plan="table-benches"]').innerText(), /Length · 6 ft[\s\S]*Wood · Ground-contact[\s\S]*Hardware pack · Coated/);
+      await idea.locator('.recovery-nav button.job-idea-onward').click();
+      await until(async () => (await currentLabels(idea)).join() === '1 · Intent', 'Intent from Idea');
+      // Intent opens with the carried values: picking the plan sends them, nothing re-entered.
+      await ideaOd.locator('[data-plan="table-benches"]').click();
+      const carried = await ideaOd.evaluate(() => window.STBOutdoorPicnic.state());
+      assert.equal(carried.lengthIn, 72);
+      assert.ok((await ideaOd.evaluate(() => window.STBOutdoorPicnic.request())).cutPackages.every(p => p.packageId.startsWith('ground-contact|')));
+      // From Intent on, Idea is the back control and never current; it returns to the Idea page.
+      await idea.locator('.recovery-nav button.job-idea').click();
+      await until(() => ideaOd.evaluate(() => window.STBOutdoorPicnic.state().section === 'idea'), 'Idea from Intent');
+      await ideaPage.close();
+    }
+
     const { page, frame, od, errors } = await openOutdoor(browser, origin);
 
-    // Intent, before a plan is picked: the six contract steps after the Project Library; only Intent usable.
+    // Intent, before a plan is picked: Idea, then the six contract steps after the Project Library; only Intent usable.
     let message = await od.evaluate(() => window.STBOutdoorPicnic.hostMessage());
     assert.deepEqual(Object.keys(message).sort(), ['interface', 'navigationRequest', 'stage', 'tileId', 'usableSteps']);
     assert.equal(message.interface, 'STB-TILE-HOST-0.1');
@@ -119,7 +149,7 @@ test('the shared host draws the Outdoor nav from its validated STB-TILE-HOST-0.1
     assert.deepEqual(message.usableSteps, ['Intent']);
     assert.equal(await frame.evaluate(() => document.documentElement.dataset.tileHostRejected ?? null), null);
     let line = await navLine(frame);
-    assert.deepEqual(line.map(b => b.label), ['← Project Library', ...TRAIL_STEPS.map((step, i) => `${i + 1} · ${step}`)]);
+    assert.deepEqual(line.map(b => b.label), ['← Project Library', 'Idea', ...TRAIL_STEPS.map((step, i) => `${i + 1} · ${step}`)]);
     assert.deepEqual(steps(line).map(b => b.inert), [false, true, true, true, true, true]);
     assert.equal(await frame.locator('.recovery-nav .job-nav-context').innerText(), 'OUTDOOR · PICNIC TABLE');
 

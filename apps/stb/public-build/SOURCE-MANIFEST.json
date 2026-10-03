@@ -1330,6 +1330,27 @@
       "blobSha": "8b8c4bfd275a7210a1d72614f1be4d5a13dfd6ca",
       "bytes": 247108,
       "reason": "Alcove Idea intake. Alcove registers idea:true and a go hook for Idea and Intent; its host message stage is Idea on a page that stands for no step. The shared host is unchanged: it already draws one unnumbered step-1 control on the Idea line for a tile that declares no fork there. Cache-busters for the changed front door (?v=69c66036, was ?v=02467ab5), Dev Guide spec (?v=55c93f09, was ?v=ca817f5e) and trail contract (?v=71dffe24, was ?v=ca322ebd)."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "outdoor-idea-intake",
+      "blobSha": "4f614aad63a88ad9a7788e5fb802b10372423f3b",
+      "bytes": 91433,
+      "reason": "Dev Guide rail for the new Outdoor Idea section (outdoor-idea: intake, not a step)."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "outdoor-idea-intake",
+      "blobSha": "a5c33f69ca80bf657401a37c6a8d81062f79d7d8",
+      "bytes": 84581,
+      "reason": "Outdoor Idea intake. The page opens on a new Idea section before Intent: each published plan's source (moved off the Intent plan card, not copied) and the values the bounded tile already knows for it (length, wood, hardware pack, ends, hardware), shown as carried forward to Intent. planCfg() is the one source both pages read, so nobody re-enters a known value. On Idea the page's STB-TILE-HOST-0.1 stage is Idea; the host's Idea target opens it. OUTDOOR_OPTIONS and OUTDOOR_COMMITTED are unchanged and stay apart. Cache-buster for the changed Dev Guide spec (?v=4f614aad, was ?v=bcf7a02c)."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "outdoor-idea-intake",
+      "blobSha": "a18fb2b35a8987a29a68d5293f2ec362e7088741",
+      "bytes": 247165,
+      "reason": "Outdoor Idea intake. Outdoor registers idea:true on the shared tile host, so from Intent on the host draws Idea as its back control; the shared host is otherwise unchanged (no tile branch). Cache-busters for the changed Outdoor page (?v=a5c33f69, was ?v=0f254854) and Dev Guide spec (?v=4f614aad, was ?v=55c93f09)."
     }
   ],
   "retiredFiles": [

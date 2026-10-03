@@ -19,7 +19,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-user-defined-board-runtime-bridge.js?v=db611717"></script>
 <script src="stb-terms-flow.js?v=365d795c"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=55c93f09"></script>
+<script src="stb-build-guide-spec.js?v=4f614aad"></script>
 <script src="stb-trail-contract.js?v=71dffe24"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
@@ -1099,7 +1099,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.4.html?v=0f254854"
+                  src="stb-outdoor-picnic-0.4.html?v=a5c33f69"
                 ></iframe>
               </div>
             `;
@@ -3492,10 +3492,11 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
     registerTileHost('window-seat', { frame:() => doc.getElementById('window-seat-frame'), idea:true });
 
     // Outdoor is on the shared tile host. Its page runs in its own frame and speaks for itself in plain
-    // STB-TILE-HOST-0.1 messages; the host validates them and draws the one nav line. It has no Idea intake yet,
-    // so it opens on Intent. Its Store inquiries go through admit() then inquire() on its page, in its two scopes
-    // (OUTDOOR_OPTIONS, OUTDOOR_COMMITTED). Nothing here reads its definition or Store state.
-    registerTileHost('outdoor', { frame:() => doc.getElementById('outdoor-bench-leg-frame') });
+    // STB-TILE-HOST-0.1 messages; the host validates them and draws the one nav line. It opens on its Idea intake,
+    // and from Intent on the host draws Idea as its back control. Its Store inquiries go through admit() then
+    // inquire() on its page, in its two scopes (OUTDOOR_OPTIONS, OUTDOOR_COMMITTED). Nothing here reads its
+    // definition or Store state.
+    registerTileHost('outdoor', { frame:() => doc.getElementById('outdoor-bench-leg-frame'), idea:true });
 
     // Alcove is on the shared tile host. The host draws its one nav line from the message Alcove's tile code builds
     // (alcoveHostMessage); its Store inquiries go through admit() then inquire() on its page. Alcove opens on Idea.
