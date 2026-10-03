@@ -191,7 +191,7 @@ test('an opening past the working field is REFUSED by the Store, with its reason
   });
 });
 
-test('the Playhouse page owns its job-facts review; a refused opening cannot confirm, a supportable one confirms into your call', { timeout: 180000 }, async () => {
+test('the Playhouse page owns its job-facts review; a refused opening cannot confirm, a supportable one confirms into your call and records it', { timeout: 180000 }, async () => {
   // The shell does not write the review panel; the page's own makePage('playhouse-review', …) carries it.
   const shell = fs.readFileSync(path.join(ROOT, 'system-build-current.html'), 'utf8');
   const frontDoor = fs.readFileSync(path.join(ROOT, 'system-build-front-door-0.5.html'), 'utf8');
@@ -204,8 +204,11 @@ test('the Playhouse page owns its job-facts review; a refused opening cannot con
     const review = frame.locator('#playhouse-review .main');
     const confirm = review.locator('[data-canonical-go="playhouse-request"]');
     const onPage = () => frame.evaluate(() => [...document.querySelectorAll('.page.on')].pop()?.id);
-    // The shell's confirm handler still finds the page's own confirm button, by the selector it already uses.
-    assert.match(shell, /doc\.querySelector\('#playhouse-review \[data-canonical-go="playhouse-request"\]'\)\?\.addEventListener\('click'/);
+    const confirmed = () => frame.evaluate(() => document.documentElement.dataset.playhouseRevisionConfirmed ?? null);
+    // The page owns the review, so the page records its confirm; the shell keeps no click handler on it.
+    assert.doesNotMatch(shell, /playhouseRevisionConfirmed/);
+    assert.doesNotMatch(shell, /#playhouse-review \[data-canonical-go="playhouse-request"\]/);
+    assert.match(frontDoor, /dataset\.playhouseRevisionConfirmed = version/);
     assert.equal(await frame.evaluate(() => {
       const found = document.querySelector('#playhouse-review [data-canonical-go="playhouse-request"]');
       return !!found && found.textContent === 'CONFIRM THIS VERSION →' && found.closest('.page')?.id === 'playhouse-review';
@@ -230,6 +233,7 @@ test('the Playhouse page owns its job-facts review; a refused opening cannot con
     await confirm.click({ force: true });
     await frame.page().waitForTimeout(300);
     assert.equal(await onPage(), 'playhouse-review', 'a refused opening cannot confirm');
+    assert.equal(await confirmed(), null, 'a refused opening records no confirmation');
 
     // Supportable: the same page shows the fresh answer; confirm opens your call.
     await setGeometry(frame, { straight: 24, rise: 12 });
@@ -242,9 +246,14 @@ test('the Playhouse page owns its job-facts review; a refused opening cannot con
       new RegExp('\\$' + state.answer.evaluation.totals.Q.toFixed(2).replace('.', '\\.') + ' budgetary'));
     assert.equal(await confirm.isDisabled(), false);
     assert.equal(await confirm.getAttribute('aria-disabled'), null);
+    assert.equal(await confirmed(), null, 'nothing is recorded before the click');
     await confirm.click();
     await frame.page().waitForTimeout(300);
+    // Your call opens, and the confirmation is recorded for exactly this revision; the yard is still behind Your call.
     assert.equal(await onPage(), 'playhouse-request');
+    assert.equal(await confirmed(), state.version);
+    assert.equal(state.version, 'playhouse-w36-s24-r12-t4-c18x18');
+    assert.equal((await navInert(frame)).yard, true);
     assert.deepEqual(errors, []);
   });
 });

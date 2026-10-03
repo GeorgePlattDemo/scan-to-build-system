@@ -11,7 +11,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=68136f4b"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=617f86a4"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
 <script src="stb-store-handoff-contract.js?v=afccfa82"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
@@ -3455,10 +3455,6 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
     registerTileHost(S001_PROJECT_ID, {
       report:s001HostMessage,
       shown:() => setTimeout(sync, 0)
-    });
-    // Confirming this version on the review page is recorded on the document, as before.
-    doc.querySelector('#playhouse-review [data-canonical-go="playhouse-request"]')?.addEventListener('click', () => {
-      doc.documentElement.dataset.playhouseRevisionConfirmed = 'true';
     });
 
     ['s001-opening-width','s001-straight-height','s001-arch-rise'].forEach(id => doc.getElementById(id)?.addEventListener('input', sync));
