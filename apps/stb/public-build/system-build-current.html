@@ -131,7 +131,6 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
     let proofSimulation = null;
     const storeHandoffContract = window.STBStoreHandoffContract || null;
     const user1RuntimeBridge = window.STBUserDefinedBoardRuntimeBridge || null;
-    let captureStartOwnProof = () => {};
     // Opens a Start-your-own screen ('intent' or 'bench') from anywhere in the shell.
     // The real switcher is scoped inside the Shared Home block below and assigns itself here.
     let openStartOwnStage = () => {};
@@ -211,128 +210,6 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
             pendingStartOwnFocus = focus === 'definition-boundary' ? 'definition-boundary' : null;
           };
           openStartOwnStage = (stage, focus = null) => showStartOwnStage(stage, focus);
-          const proofDecisions = new Set();
-          let proofActions = 0;
-          const classifyStartOwnDecision = target => {
-            const choice = target?.closest?.('[data-act],[data-grade],[data-size],[data-maker],[data-step],[data-set],[data-exact],[data-op-toggle],[data-op-set],[data-op-angle]');
-            if (!choice) return;
-            if (choice.dataset.act) proofDecisions.add(choice.dataset.act);
-            if (choice.dataset.grade) proofDecisions.add('material_family');
-            if (choice.dataset.size) proofDecisions.add('stock_class');
-            if (choice.dataset.maker) proofDecisions.add('part_form');
-            if (choice.dataset.opToggle === 'angled') proofDecisions.add('angled_cut');
-            if (choice.dataset.opAngle != null) proofDecisions.add('angle_degrees');
-            if (choice.dataset.opSet) {
-              const field = choice.dataset.opSet.split(':')[0];
-              const names = {angleReference:'angle_reference',cutPlane:'cut_plane',endIdentity:'end_identity',endRelation:'end_relation',lengthDatum:'length_datum'};
-              if (names[field]) proofDecisions.add(names[field]);
-            }
-            const path = choice.dataset.exact
-              || (choice.dataset.step ? choice.dataset.step.split(':')[0] : '')
-              || (choice.dataset.set ? choice.dataset.set.split(':')[0] : '');
-            if (path === 'cuts.0.len') proofDecisions.add('finished_length');
-            if (path === 'cuts.0.qty') proofDecisions.add('quantity');
-          };
-          captureStartOwnProof = () => {
-            const bridge = proofFrame?.contentWindow?.STBProjectBridge;
-            const snap = bridge && typeof bridge.getSnapshot === 'function' ? bridge.getSnapshot() : null;
-            if (snap && snap.physicalDemand) {
-              const demand = snap.physicalDemand;
-              let retainedDefinition = null;
-              try {
-                retainedDefinition = JSON.parse(win.localStorage.getItem('stb-start-own-user1-definition') || 'null');
-              } catch (_) {}
-              const ref = retainedDefinition?.storeReference || null;
-              const match = startOwnPage.querySelector('#proof-job1-match');
-              const storeLine = startOwnPage.querySelector('#proof-job1-store');
-              const dec = startOwnPage.querySelector('#proof-job1-decisions');
-              if (dec) {
-                dec.textContent = String((snap.openPoints && snap.openPoints.length)
-                  ? (8 - snap.openPoints.length)
-                  : (snap.complete ? 8 : 0));
-              }
-              if (match) {
-                match.textContent = snap.complete
-                  ? 'Contract complete.'
-                  : ('Still open: ' + ((snap.openPoints||[]).join(', ') || 'facts'));
-              }
-              if (storeLine) {
-                if (ref?.materialResolution?.status === 'MAPPED' && ref?.estimate) {
-                  storeLine.textContent =
-                    'Store: current ab8a4c5d Stage-2 answer retained · 60-in project workpiece · '
-                    +(ref.priceCompleteness === 'PARTIAL'
-                      ? 'modeled value is partial while named conditions remain.'
-                      : 'budgetary estimate available.');
-                } else {
-                  storeLine.textContent = 'Store: waiting on the current identified definition.';
-                }
-              }
-              try {
-                win.localStorage.setItem('stb-proof-ladder-job1', JSON.stringify({
-                  semanticOutput:{
-                    stockClass:demand.sizeKey || demand.stockClass,
-                    finishedLength:demand.finishedLengthIn || demand.finishedLength,
-                    quantity:demand.partQty || demand.quantity,
-                    endCondition:(demand.angleDeg || demand.angleDegrees) ? 'angled' : 'square',
-                    straightCut:(demand.angleDeg || demand.angleDegrees) ? false : true,
-                    angleDegrees:demand.angleDeg ?? demand.angleDegrees,
-                    cutPlane:demand.cutPlane,
-                    endIdentity:demand.endIdentity,
-                    endRelation:demand.endRelation,
-                    lengthDatum:demand.lengthDatum
-                  },
-                  storePreview:ref
-                }));
-              } catch (_) {}
-              return;
-            }
-
-            const state = proofFrame?.contentWindow?.S;
-            if (!state) return;
-            let semanticOutput = null;
-            if (state.maker === 'cuts' && state.cuts?.pieces?.length === 1 && state.cutOps?.angled) {
-              const part = state.cuts.pieces[0];
-              semanticOutput = {
-                stockClass: state.size === '2x4' ? '2x4' : state.size,
-                finishedLength: Number(part.len),
-                quantity: Number(part.qty),
-                endCondition: 'angled',
-                straightCut: true,
-                angleDegrees: Number(state.cutOps.angle),
-                angleReference: state.cutOps.angleReference,
-                cutPlane: state.cutOps.cutPlane,
-                endIdentity: state.cutOps.endIdentity,
-                endRelation: state.cutOps.endRelation,
-                lengthDatum: state.cutOps.lengthDatum
-              };
-            }
-            const targetMatch = !!semanticOutput
-              && semanticOutput.stockClass === '2x4'
-              && Math.abs(semanticOutput.finishedLength - 15.5) < 0.00001
-              && semanticOutput.quantity === 8
-              && semanticOutput.endCondition === 'angled'
-              && semanticOutput.angleDegrees === 10
-              && semanticOutput.angleReference === 'source-stated'
-              && semanticOutput.cutPlane === 'bevel-thickness'
-              && semanticOutput.endIdentity === 'both'
-              && semanticOutput.endRelation === 'parallel'
-              && semanticOutput.lengthDatum === 'source-length';
-            const payload = {
-              measured: true,
-              explicitProjectDecisions: [...proofDecisions],
-              explicitProjectDecisionCount: proofDecisions.size,
-              uiActions: proofActions,
-              semanticOutput,
-              targetMatch
-            };
-            try { win.localStorage.setItem('stb-proof-ladder-job1', JSON.stringify(payload)); } catch (_) {}
-            const d = startOwnPage.querySelector('#proof-job1-decisions');
-            const a = startOwnPage.querySelector('#proof-job1-actions');
-            const m = startOwnPage.querySelector('#proof-job1-match');
-            if (d) d.textContent = String(payload.explicitProjectDecisionCount);
-            if (a) a.textContent = String(payload.uiActions);
-            if (m) m.textContent = targetMatch ? 'Core target represented.' : 'Target not yet represented.';
-          };
           if (proofFrame && !proofFrame.dataset.proofObserved) {
             proofFrame.dataset.proofObserved = 'true';
             proofFrame.addEventListener('load', () => {
@@ -1202,15 +1079,6 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   tilePageShown('proof-store');
                 });
               }
-
-              childDoc.addEventListener('click', event => {
-                const target = event.target?.closest?.('button,a');
-                if (!target) return;
-                proofActions += 1;
-                classifyStartOwnDecision(target);
-                win.setTimeout(captureStartOwnProof, 0);
-              }, true);
-              captureStartOwnProof();
             });
           }
           startOwnPage.querySelector('#proof-job1-back')?.addEventListener('click', () => {
