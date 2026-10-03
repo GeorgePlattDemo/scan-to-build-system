@@ -52,7 +52,7 @@ async function openStartOwn(browser, origin) {
   // material and names its owner.
   await until(() => live(frame, () => window.STBStartOwnLive?.admission()?.admission?.result === 'BLOCKED'), 'bench revision blocked on species');
   assert.deepEqual(await live(frame, () => window.STBStartOwnLive.admission().admission.blocking),
-    [{ factId: 'start-own.material', owner: 'PROJECT', title: 'Material demand', condition: 'INVALID_VALUE', fields: ['species'] }]);
+    [{ factId: 'start-own.material', owner: 'USER', title: 'Material demand', condition: 'INVALID_VALUE', fields: ['species'] }]);
   return { page, frame, errors };
 }
 // The user states a species on the bench; the bench revision is then admitted.
@@ -234,7 +234,7 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
       return window.STBStartOwnLive.inquire(r);
     });
     assert.equal(noSpecies.reachedStore, false);
-    assert.deepEqual(noSpecies.blocking, [{ factId: 'start-own.material', owner: 'PROJECT', title: 'Material demand', condition: 'INVALID_VALUE', fields: ['species'] }]);
+    assert.deepEqual(noSpecies.blocking, [{ factId: 'start-own.material', owner: 'USER', title: 'Material demand', condition: 'INVALID_VALUE', fields: ['species'] }]);
 
     // A material missing another stated field blocks the same way.
     const noWidth = await live(frame, () => {
@@ -244,7 +244,7 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
       return window.STBStartOwnLive.inquire(r);
     });
     assert.equal(noWidth.reachedStore, false);
-    assert.deepEqual(noWidth.blocking, [{ factId: 'start-own.material', owner: 'PROJECT', title: 'Material demand', condition: 'INVALID_VALUE', fields: ['nominalW'] }]);
+    assert.deepEqual(noWidth.blocking, [{ factId: 'start-own.material', owner: 'USER', title: 'Material demand', condition: 'INVALID_VALUE', fields: ['nominalW'] }]);
     await page.waitForTimeout(300);
     assert.equal(startOwnCalls(log).length, 1, 'a material missing a stated field never reaches the Store');
 

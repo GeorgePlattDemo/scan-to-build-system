@@ -53,6 +53,28 @@ async function openOutdoor(browser, origin) {
   await until(async () => (await currentLabels(frame)).join() === '1 · Intent', 'intent drawn');
   return { page, frame, od, errors };
 }
+// Store requests the page has sent and not yet had answered. The test server logs a call only once it is answered,
+// so a count taken while a price request is in flight would gain that call later.
+function storeInFlight(page) {
+  const open = new Set();
+  const isStore = r => r.method() === 'POST' && new URL(r.url()).pathname === '/api/store-zero/job';
+  page.on('request', r => { if (isStore(r)) open.add(r); });
+  page.on('requestfinished', r => open.delete(r));
+  page.on('requestfailed', r => open.delete(r));
+  return open;
+}
+// No Store request in flight, and none started, for longer than the page's 350 ms option-price debounce.
+async function storeQuiet(page, open, quietMs = 700) {
+  let since = Date.now(), seen = 0;
+  const onRequest = () => { seen++; };
+  page.on('request', onRequest);
+  try {
+    await until(() => {
+      if (open.size || seen) { seen = 0; since = Date.now(); return false; }
+      return Date.now() - since >= quietMs;
+    }, 'Store requests settled');
+  } finally { page.off('request', onRequest); }
+}
 const settle = od => until(() => od.evaluate(() => { const s = window.STBOutdoorPicnic.state(); return !s.asking && s.current ? s : null; }), 'committed answer');
 
 test('the old Outdoor shell path is gone; one Store handoff, inside inquire()', () => {
@@ -138,6 +160,7 @@ test('the shared host draws the Outdoor nav from its validated STB-TILE-HOST-0.1
 test('a missing profile fact blocks before the Store and names its owner; a complete revision still reaches the Store', { timeout: 240000 }, async () => {
   await withBrowser(async ({ browser, origin, log }) => {
     const { frame, od } = await openOutdoor(browser, origin);
+    const inFlight = storeInFlight(od.page());
 
     // The "From" prices are OUTDOOR_OPTIONS inquiries; they reach the Store and never the terms flow.
     await until(() => od.evaluate(() => [...document.querySelectorAll('[data-from]')].every(e => /From/.test(e.textContent))), 'from prices');
@@ -162,7 +185,9 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.deepEqual(sent.payload.definition.cutPackages, admission.request.facts['outdoor.cut-packages']);
     assert.deepEqual(sent.payload.definition, await od.evaluate(() => window.STBOutdoorPicnic.request()));
 
-    // Each declared fact left out blocks before the Store and names its owner.
+    // Each declared fact left out blocks before the Store and names its owner. The plan's option prices are asked
+    // after the plan is picked; they finish before the calls are counted.
+    await storeQuiet(od.page(), inFlight);
     const before = outdoorCalls(log).length;
     for (const [factId, owner, title] of [
       ['outdoor.plan', 'USER', 'Chosen plan'],
