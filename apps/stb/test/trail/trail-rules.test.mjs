@@ -38,7 +38,8 @@ const contract = sandbox.STBTrailContract;
 // Remove an entry only when that tile's later bounded migration puts Idea in its intake/back-control role
 // and Intent at step 1. The ratchet then prevents that tile from drifting back.
 // playhouse:R2 left on system/playhouse-on-shared-host: the shared tile host draws Playhouse's nav labels
-// from the trail contract. playhouse:R1 stays: Playhouse still opens on Intent with no Idea intake.
+// from the trail contract. playhouse:R1 left on system/playhouse-idea-intake: Playhouse opens on its Idea intake,
+// and from Intent on its nav reads Idea, then the six steps.
 // alcove:R2 left on system/alcove-on-shared-host, for the same reason. alcove:R1 stays: Alcove still opens on
 // Intent with no Idea intake.
 // outdoor:R2 left on system/outdoor-on-shared-host, for the same reason. outdoor:R1 stays: Outdoor still opens on
@@ -49,7 +50,6 @@ const KNOWN_FAILING = new Set([
   'start-own:R1',
   'alcove:R1',
   'outdoor:R1',
-  'playhouse:R1',
 ]);
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css' };
