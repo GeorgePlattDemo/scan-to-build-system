@@ -420,7 +420,7 @@ test('case 4: a malformed nested fact blocks before Store with the fact id and o
     .flatMap(s => s.requires).filter(r => r.form).map(r => r.id);
   assert.deepEqual([...new Set(formed)].sort(),
     ['alcove.board-requirements', 'alcove.component-programs', 'alcove.material', 'alcove.spot-demand',
-      'outdoor.cut-packages', 'playhouse.opening', 'start-own.datum', 'start-own.material', 'start-own.parts', 'start-own.spot-demand',
+      'outdoor.cut-packages', 'playhouse.opening', 'playhouse.sheet', 'start-own.datum', 'start-own.material', 'start-own.parts', 'start-own.spot-demand',
       'window-seat.added-knobs', 'window-seat.boards', 'window-seat.kept-asks']);
   const stated = { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 };
   const material = admit({ revision: facts('start-own', { 'start-own.material': ok(stated) }), inquiryScope: 'USER_DEFINED_BOARD_V1' });
@@ -439,6 +439,55 @@ test('case 4: a malformed nested fact blocks before Store with the fact id and o
     const store = storeStub({ status: 'SHOULD_NOT_BE_ASKED' });
     assert.equal((await inquire(blocked, store.ask)).reachedStore, false);
     assert.equal(store.calls.length, 0, 'a material missing a stated field never reaches the Store');
+  }
+});
+
+// Playhouse's sheet, as its page emits it: the fixed sheet's thickness, length and width ({thicknessIn, lengthIn,
+// widthIn}). A missing one or one not above 0 blocks before Store with owner PROJECT and the field names. No upper
+// bound: a sheet no machine could cut is complete, reaches Store, and the Store refuses it.
+test('case 4, Playhouse: the sheet has a thickness, length and width above 0', async () => {
+  const SCOPE = 'SHEET_PACKAGE_V1';
+  const base = FIXTURES.playhouse.facts;
+  const SHEET = { thicknessIn: 0.5, lengthIn: 96, widthIn: 48 };
+  const without = key => (({ [key]: _, ...rest }) => rest)(SHEET);
+  const sheet = value => revision('playhouse', 'playhouse-sheet', { ...base, 'playhouse.sheet': ok(value) });
+  const BLOCKS = [
+    [without('thicknessIn'), ['thicknessIn']],
+    [without('lengthIn'), ['lengthIn']],
+    [without('widthIn'), ['widthIn']],
+    [{ ...SHEET, thicknessIn: 0 }, ['thicknessIn']],
+    [{ ...SHEET, lengthIn: 0 }, ['lengthIn']],
+    [{ ...SHEET, widthIn: 0 }, ['widthIn']],
+    [{ ...SHEET, thicknessIn: -0.5 }, ['thicknessIn']],
+    [{ ...SHEET, lengthIn: '96' }, ['lengthIn']],
+    [{ ...SHEET, widthIn: NaN }, ['widthIn']],
+    [{ ...SHEET, thicknessIn: null }, ['thicknessIn']],
+    [{ thicknessIn: 0, lengthIn: 0, widthIn: 0 }, ['thicknessIn', 'lengthIn', 'widthIn']],
+    // A nonempty object is no longer a sheet.
+    [{ material: 'plywood' }, ['thicknessIn', 'lengthIn', 'widthIn']],
+  ];
+  for (const [value, missing] of BLOCKS) {
+    const label = JSON.stringify(value);
+    const result = admit({ revision: sheet(value), inquiryScope: SCOPE });
+    assert.equal(result.admission.result, ADMISSION_RESULT.BLOCKED, label);
+    assert.equal(result.admission.reason, BLOCK_REASON.REQUIRED_FACT_UNSETTLED, label);
+    assert.deepEqual(result.admission.blocking, [{ factId: 'playhouse.sheet', owner: OWNER.PROJECT,
+      title: 'Real sheet dimensions', condition: 'INVALID_VALUE', fields: missing }], label);
+    assert.equal(result.request, null, label);
+    const store = storeStub({ status: 'SHOULD_NOT_BE_ASKED' });
+    assert.equal((await inquire(result, store.ask)).reachedStore, false, label);
+    assert.equal(store.calls.length, 0, `${label}: nothing reached Store`);
+  }
+
+  // The page's sheet, and a sheet past any machine envelope: both admitted, both reach Store exactly as defined.
+  for (const value of [SHEET, { thicknessIn: 4, lengthIn: 400, widthIn: 400 }]) {
+    const label = JSON.stringify(value);
+    const result = admit({ revision: sheet(value), inquiryScope: SCOPE });
+    assert.equal(result.admission.result, ADMISSION_RESULT.ADMITTED, label);
+    assert.equal(result.request.profileVersion, '0.2', label);
+    const store = storeStub({ status: 'REFUSED', withinEnvelope: false });
+    assert.equal((await inquire(result, store.ask)).reachedStore, true, label);
+    assert.deepEqual(store.calls[0].facts['playhouse.sheet'], value, `${label}: travels exactly as defined`);
   }
 });
 

@@ -378,3 +378,122 @@ test('a Playhouse inquiry has one admission decision, admit(); it never calls ad
     assert.deepEqual(errors, []);
   }, null, { [OLD_DOOR]: recordOldDoor });
 });
+
+// The sheet the page sends, served with a hook: when a test sets window.__s001SentSheet on the base frame, the
+// page's definition carries what it returns instead of the admitted sheet. Nothing else about the page changes.
+const PAGE = 'system-build-current.html';
+const SENT_SHEET_LINE = 'sheet:{ thicknessIn:sheet.thicknessIn, lengthIn:sheet.lengthIn, widthIn:sheet.widthIn },';
+const hookSentSheet = source => {
+  assert.equal(source.split(SENT_SHEET_LINE).length, 2, 'the page builds its sent sheet once');
+  return source.replace(SENT_SHEET_LINE,
+    'sheet:(win.__s001SentSheet || (s => s))({ thicknessIn:sheet.thicknessIn, lengthIn:sheet.lengthIn, widthIn:sheet.widthIn }),');
+};
+
+// On the live page, through the deployed contract and the real pinned Store:
+// - The page emits its fixed sheet as {thicknessIn, lengthIn, widthIn}. A sheet missing one of the three, or with one
+//   at 0, blocks in admit() before the Store: the fact, its owner (PROJECT) and the field are named, and the page
+//   shows it as not sent.
+// - The sent sheet matches the admitted sheet. A definition whose sheet differs from the admitted one in any field,
+//   or carries a field more or less, stops in the transport before the Store (ADMITTED_SHEET_NOT_SENT).
+// - No machine envelope in admission: a sheet the Store cannot cut is admitted, reaches the Store, and the Store's
+//   answer is the result. A complete revision still reaches the Store, before and after.
+test('a sheet missing a dimension blocks before the Store; the sent sheet must be the admitted sheet; a complete revision still reaches the Store', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { frame, errors } = await openPlayhouse(browser, origin);
+    const sheetCalls = () => log.filter(e => e.request.requestType === 'SHEET_PACKAGE_V1').length;
+    const lastSent = () => log.filter(e => e.request.requestType === 'SHEET_PACKAGE_V1').pop().request;
+    // Inquire about the page's own revision, changed by `edit` (a function body over `rv`).
+    const inquireWith = edit => frame.evaluate(body => {
+      const rv = window.STBPlayhouseLive.revision();
+      new Function('rv', body)(rv);
+      return window.STBPlayhouseLive.inquire(rv);
+    }, edit);
+    const idle = async () => {
+      for (let i = 0; i < 80; i++) {
+        const s = await frame.evaluate(() => window.STBPlayhouseLive.state());
+        if (!s.asking) return s;
+        await frame.page().waitForTimeout(100);
+      }
+      throw new Error('Playhouse never stopped asking');
+    };
+
+    // The page's sheet, as it emits it: three dimensions, each above 0. The complete revision reaches the Store.
+    const first = await settled(frame);
+    assert.equal(first.admission.result, 'ADMITTED');
+    assert.equal(first.answer.evaluation.status, 'SUPPORTABLE');
+    const emitted = (await frame.evaluate(() => window.STBPlayhouseLive.revision())).facts['playhouse.sheet'].value;
+    assert.deepEqual(Object.keys(emitted).sort(), ['lengthIn', 'thicknessIn', 'widthIn']);
+    assert.ok(emitted.thicknessIn > 0 && emitted.lengthIn > 0 && emitted.widthIn > 0, JSON.stringify(emitted));
+    assert.equal(sheetCalls(), 1);
+    assert.deepEqual(lastSent().payload.definition.sheet, emitted);
+
+    // A sheet missing a dimension, or with one at 0, blocks in admit() before the Store and names its owner.
+    let calls = sheetCalls();
+    for (const [edit, fields] of [
+      ["delete rv.facts['playhouse.sheet'].value.thicknessIn", ['thicknessIn']],
+      ["delete rv.facts['playhouse.sheet'].value.lengthIn", ['lengthIn']],
+      ["delete rv.facts['playhouse.sheet'].value.widthIn", ['widthIn']],
+      ["rv.facts['playhouse.sheet'].value.thicknessIn = 0", ['thicknessIn']],
+      ["rv.facts['playhouse.sheet'].value.lengthIn = 0", ['lengthIn']],
+      ["rv.facts['playhouse.sheet'].value.widthIn = 0", ['widthIn']],
+      ["rv.facts['playhouse.sheet'].value = { material: 'plywood' }", ['thicknessIn', 'lengthIn', 'widthIn']],
+    ]) {
+      const result = await inquireWith(edit + "; rv.definitionRevisionId += '-bad-sheet'");
+      assert.equal(result.admission.result, 'BLOCKED', edit);
+      assert.equal(result.admission.reason, 'REQUIRED_FACT_UNSETTLED', edit);
+      assert.deepEqual(result.admission.blocking, [{ factId: 'playhouse.sheet', owner: 'PROJECT',
+        title: 'Real sheet dimensions', condition: 'INVALID_VALUE', fields }], edit);
+      assert.equal(result.request, null, edit);
+      const state = await frame.evaluate(() => window.STBPlayhouseLive.state());
+      assert.equal(state.admission.result, 'BLOCKED', edit);
+      assert.equal(state.answer, null, edit);
+      assert.match(await frame.locator('#s001-live-status').textContent(), /NOT SENT TO THE STORE · MISSING: Real sheet dimensions · owner PROJECT/, edit);
+      const inert = Object.fromEntries((await playhouseNav(frame)).map(b => [b.stage, b.inert]));
+      assert.deepEqual(inert, { scan: false, configure: false, store: true, request: true, yard: true, record: true }, edit);
+    }
+    await frame.page().waitForTimeout(600);
+    assert.equal(sheetCalls(), calls, 'a sheet missing a dimension never reaches the Store');
+
+    // The sent sheet must be the admitted sheet. Each revision here is admitted; the transport stops it before the Store.
+    calls = sheetCalls();
+    for (const drift of [
+      's => ({ ...s, thicknessIn: 0.75 })',
+      's => ({ ...s, lengthIn: 120 })',
+      's => ({ ...s, widthIn: 60 })',
+      's => ({ thicknessIn: s.thicknessIn, lengthIn: s.lengthIn })',
+      "s => ({ ...s, grade: 'BC' })",
+    ]) {
+      await frame.evaluate(body => { window.__s001SentSheet = new Function('return ' + body)(); }, drift);
+      const result = await inquireWith("rv.definitionRevisionId += '-drift'");
+      assert.equal(result.admission.result, 'ADMITTED', drift);
+      const state = await idle();
+      assert.equal(state.error, 'ADMITTED_SHEET_NOT_SENT', drift);
+      assert.equal(state.answer, null, drift);
+    }
+    await frame.evaluate(() => { delete window.__s001SentSheet; });
+    await frame.page().waitForTimeout(600);
+    assert.equal(sheetCalls(), calls, 'a sent sheet that is not the admitted sheet never reaches the Store');
+
+    // No machine envelope in admission: a sheet the Store cannot cut is admitted and reaches the Store as defined.
+    calls = sheetCalls();
+    const big = { thicknessIn: 4, lengthIn: 400, widthIn: 400 };
+    let result = await inquireWith(`rv.facts['playhouse.sheet'].value = ${JSON.stringify(big)}; rv.definitionRevisionId += '-big-sheet'`);
+    assert.equal(result.admission.result, 'ADMITTED');
+    let state = await settled(frame);
+    assert.equal(sheetCalls(), calls + 1);
+    assert.deepEqual(lastSent().payload.definition.sheet, big);
+    assert.notEqual(state.answer.evaluation.status, 'SUPPORTABLE', 'the Store, not admission, refuses a sheet it cannot cut');
+
+    // The complete revision on the page still reaches the Store.
+    result = await frame.evaluate(() => window.STBPlayhouseLive.inquire(window.STBPlayhouseLive.revision()));
+    assert.equal(result.admission.result, 'ADMITTED');
+    assert.equal(result.request.profileVersion, '0.2');
+    state = await settled(frame);
+    assert.equal(state.error, null);
+    assert.equal(state.answer.evaluation.status, 'SUPPORTABLE');
+    assert.equal(sheetCalls(), calls + 2);
+    assert.deepEqual(lastSent().payload.definition.sheet, emitted);
+    assert.deepEqual(lastSent().payload.definition, await frame.evaluate(() => window.STBPlayhouseLive.definition()));
+    assert.deepEqual(errors, []);
+  }, null, { [PAGE]: hookSentSheet });
+});
