@@ -1735,7 +1735,7 @@ window.STBWindowSeat=Object.freeze({version:'0.9',
     answer:S.answer&&{authority:S.answer.authority,definitionRevisionId:S.answer.definitionRevisionId,inquiryScope:S.answer.inquiryScope,stale:!!S.answer.stale},
     admission:clone(S.blocked?.admission??currentAdmission()?.admission??null)})});
 /* The deployed contract copy, loaded once. Nothing is asked before it is here. */
-import('./shared/tile-host-admission-contract.mjs?v=0bba0c4b').then(m=>{C=m;render();benchAsk()},
+import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(m=>{C=m;render();benchAsk()},
   ()=>{document.documentElement.dataset.tileHostContract='MISSING'});
 })();
 </script>

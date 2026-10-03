@@ -1190,6 +1190,41 @@
       "blobSha": "ae80489804eab33227a385e595017315d82c1711",
       "bytes": 252927,
       "reason": "The tile-host admission contract loads at ?v=0bba0c4b, the contract's current blob prefix (was ?v=798e2a54): Outdoor profile 0.3 checks, in both its scopes, every package's id and every part's id and length above 0. Cache-busters for the changed stb-outdoor-picnic-0.4.html, stb-window-seat-0.9.html and front door."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "playhouse-sheet-dimensions-admission",
+      "blobSha": "0f254854f10e235e297885a076a721918f4a6a34",
+      "bytes": 82366,
+      "reason": "The tile-host admission contract loads at ?v=1b574e9b, the contract's current blob prefix (was ?v=0bba0c4b): Playhouse profile 0.2 checks the sheet's thickness, length and width, each above 0. Nothing else on the Outdoor page changes."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "playhouse-sheet-dimensions-admission",
+      "blobSha": "10866208091238138ac0f20cd47463f47665590b",
+      "bytes": 140536,
+      "reason": "The tile-host admission contract loads at ?v=1b574e9b, the contract's current blob prefix (was ?v=0bba0c4b): Playhouse profile 0.2 checks the sheet's thickness, length and width, each above 0. Nothing else on the Window Seat page changes."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "playhouse-sheet-dimensions-admission",
+      "blobSha": "bbf2ad307ded6e0700a04848c071b3fcb74bf1dd",
+      "bytes": 127709,
+      "reason": "The tile-host admission contract loads at ?v=1b574e9b, the contract's current blob prefix (was ?v=0bba0c4b): Playhouse profile 0.2 checks the sheet's thickness, length and width, each above 0. Visible pages are unchanged."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "playhouse-sheet-dimensions-admission",
+      "blobSha": "1ad6f78ddbbcf2b9b678eb22bd94ccc71e52e2db",
+      "bytes": 39662,
+      "reason": "Cache-buster for the changed system-build-base-8d8a9dd.html."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "playhouse-sheet-dimensions-admission",
+      "blobSha": "64028e84817913a95f0a4b6ddcea15a3797ed70f",
+      "bytes": 253423,
+      "reason": "The tile-host admission contract loads at ?v=1b574e9b, the contract's current blob prefix (was ?v=0bba0c4b): Playhouse profile 0.2 checks the sheet's thickness, length and width, each above 0. The Playhouse transport stops before the Store when the sheet it would send is not exactly the admitted sheet (ADMITTED_SHEET_NOT_SENT). Cache-busters for the changed stb-outdoor-picnic-0.4.html, stb-window-seat-0.9.html and front door."
     }
   ],
   "retiredFiles": [

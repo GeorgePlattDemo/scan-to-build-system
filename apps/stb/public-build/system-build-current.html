@@ -11,7 +11,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=8ef837c8"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=1ad6f78d"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
 <script src="stb-store-handoff-contract.js?v=afccfa82"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
@@ -23,7 +23,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-trail-contract.js?v=aea2f84d"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
-import('./shared/tile-host-admission-contract.mjs?v=0bba0c4b').then(contract => {
+import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => {
   window.STBTileHostAdmission = Object.freeze({ ...contract });
 });
 </script>
@@ -1245,7 +1245,7 @@ import('./shared/tile-host-admission-contract.mjs?v=0bba0c4b').then(contract => 
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.4.html?v=20c5a1b2"
+                  src="stb-outdoor-picnic-0.4.html?v=0f254854"
                 ></iframe>
               </div>
             `;
@@ -1278,7 +1278,7 @@ import('./shared/tile-host-admission-contract.mjs?v=0bba0c4b').then(contract => 
                   id="window-seat-frame"
                   class="window-seat-shell-frame"
                   title="Space utilization · Window seat"
-                  src="stb-window-seat-0.9.html?v=23e708dd"
+                  src="stb-window-seat-0.9.html?v=10866208"
                 ></iframe>
               </div>
             `;
@@ -3416,6 +3416,13 @@ import('./shared/tile-host-admission-contract.mjs?v=0bba0c4b').then(contract => 
         tileHostContract.inquire(admission, request => {
           if (request.requestType !== S001_REQUEST_TYPE) throw new Error('ADMITTED_REQUEST_TYPE_MISMATCH');
           definition = s001DefinitionFrom(request);
+          // The sheet sent is exactly the admitted sheet: its thickness, length and width, and nothing else.
+          const admittedSheet = request.facts['playhouse.sheet'];
+          const sentSheet = definition.sheet;
+          if (!sentSheet || Object.keys(sentSheet).sort().join() !== 'lengthIn,thicknessIn,widthIn'
+            || ['thicknessIn','lengthIn','widthIn'].some(key => sentSheet[key] !== admittedSheet[key])) {
+            throw new Error('ADMITTED_SHEET_NOT_SENT');
+          }
           // admit() above is this inquiry's one admission decision; the transport does not admit it again.
           return client.sendAdmittedJob({
             admitted:request,

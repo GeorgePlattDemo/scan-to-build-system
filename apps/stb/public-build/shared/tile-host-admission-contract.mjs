@@ -328,13 +328,16 @@ export const ADMISSION_PROFILES = deepFreeze({
       },
     },
   },
+  // Playhouse 0.2: the sheet is the fixed sheet its page sends, thickness, length and width, each above 0. No upper
+  // bound: a sheet the Store cannot cut is the Store's refusal, not an admission failure.
   playhouse: {
-    version: '0.1',
+    version: '0.2',
     scopes: {
       SHEET_PACKAGE_V1: {
         requestType: 'SHEET_PACKAGE_V1',
         requires: [
-          req('playhouse.sheet', OWNER.PROJECT, 'object', 'Real sheet dimensions'),
+          req('playhouse.sheet', OWNER.PROJECT, 'object', 'Real sheet dimensions',
+            fields({ thicknessIn: 'positive-number', lengthIn: 'positive-number', widthIn: 'positive-number' })),
           req('playhouse.opening', OWNER.USER, 'object', 'Complete arched-opening geometry',
             fields({ widthIn: 'positive-number', straightHeightIn: 'positive-number', riseIn: 'positive-number' })),
         ],
