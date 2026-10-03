@@ -191,6 +191,64 @@ test('an opening past the working field is REFUSED by the Store, with its reason
   });
 });
 
+test('the Playhouse page owns its job-facts review; a refused opening cannot confirm, a supportable one confirms into your call', { timeout: 180000 }, async () => {
+  // The shell does not write the review panel; the page's own makePage('playhouse-review', …) carries it.
+  const shell = fs.readFileSync(path.join(ROOT, 'system-build-current.html'), 'utf8');
+  const frontDoor = fs.readFileSync(path.join(ROOT, 'system-build-front-door-0.5.html'), 'utf8');
+  assert.doesNotMatch(shell, /getElementById\('playhouse-review'\)/);
+  assert.doesNotMatch(shell, /reviewMain/);
+  assert.match(frontDoor, /makePage\('playhouse-review',/);
+  assert.doesNotMatch(frontDoor, /CONFIRM DEFINITION|SUPPORTABLE · reference\/software path/);
+  await withBrowser(async ({ browser, origin }) => {
+    const { frame, errors } = await openPlayhouse(browser, origin);
+    const review = frame.locator('#playhouse-review .main');
+    const confirm = review.locator('[data-canonical-go="playhouse-request"]');
+    const onPage = () => frame.evaluate(() => [...document.querySelectorAll('.page.on')].pop()?.id);
+    // The shell's confirm handler still finds the page's own confirm button, by the selector it already uses.
+    assert.match(shell, /doc\.querySelector\('#playhouse-review \[data-canonical-go="playhouse-request"\]'\)\?\.addEventListener\('click'/);
+    assert.equal(await frame.evaluate(() => {
+      const found = document.querySelector('#playhouse-review [data-canonical-go="playhouse-request"]');
+      return !!found && found.textContent === 'CONFIRM THIS VERSION →' && found.closest('.page')?.id === 'playhouse-review';
+    }), true);
+
+    // Refused: the review shows the opening, the sheet, the Store's refusal and the confirm line; confirm is inert.
+    await setGeometry(frame, { straight: 30, rise: 12 });
+    assert.equal((await settled(frame)).answer.evaluation.status, 'REFUSED');
+    await frame.evaluate(() => window.show('playhouse-review'));
+    await frame.page().waitForTimeout(300);
+    const refusedText = await review.innerText();
+    assert.match(refusedText, /REVIEW · USER 1'S JOB/);
+    assert.match(refusedText, /36 wide · 30 straight · 12 rise · 42 total height/);
+    assert.match(refusedText, /48 × 96 in · 1\/2 in plywood/);
+    assert.match(refusedText, /Confirming this review retains the job definition\./);
+    assert.equal(await review.locator('[data-s001-bind="status"]').innerText(), 'REFUSED');
+    assert.equal(await review.locator('[data-s001-bind="q"]').innerText(), '—');
+    assert.doesNotMatch(refusedText, /SUPPORTABLE/);
+    assert.equal(await confirm.count(), 1);
+    assert.equal(await confirm.isDisabled(), true);
+    assert.equal(await confirm.getAttribute('aria-disabled'), 'true');
+    await confirm.click({ force: true });
+    await frame.page().waitForTimeout(300);
+    assert.equal(await onPage(), 'playhouse-review', 'a refused opening cannot confirm');
+
+    // Supportable: the same page shows the fresh answer; confirm opens your call.
+    await setGeometry(frame, { straight: 24, rise: 12 });
+    const state = await settled(frame);
+    assert.equal(state.answer.evaluation.status, 'SUPPORTABLE');
+    await frame.page().waitForTimeout(300);
+    assert.match(await review.innerText(), /36 wide · 24 straight · 12 rise · 36 total height/);
+    assert.equal(await review.locator('[data-s001-bind="status"]').innerText(), 'SUPPORTABLE');
+    assert.match(await review.locator('[data-s001-bind="q"]').innerText(),
+      new RegExp('\\$' + state.answer.evaluation.totals.Q.toFixed(2).replace('.', '\\.') + ' budgetary'));
+    assert.equal(await confirm.isDisabled(), false);
+    assert.equal(await confirm.getAttribute('aria-disabled'), null);
+    await confirm.click();
+    await frame.page().waitForTimeout(300);
+    assert.equal(await onPage(), 'playhouse-request');
+    assert.deepEqual(errors, []);
+  });
+});
+
 test('an arch too tall for its width is REFUSED; the page does not correct it', { timeout: 180000 }, async () => {
   await withBrowser(async ({ browser, origin }) => {
     const { frame } = await openPlayhouse(browser, origin);
