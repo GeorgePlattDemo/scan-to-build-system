@@ -22,7 +22,7 @@ Line numbers are in `system-build-current.html`.
 | R1 | 61 | Writes CSS for `.start-own-shell-frame` (size, border, background of the frame element) | shell-must-keep |
 | R2 | 184–190 | Writes the `<iframe id="start-own-proof-frame">` into `#start-own-live` with `src="three-frames.html?v=5d58605a"` | shell-must-keep |
 | R3 | 196–198 | Reads the frame `src`; rewrites it if it does not name `three-frames.html`. `#start-own-live` is never present before R2 creates it with that `src`, so the rewrite cannot run | dead |
-| R4 | 205, 213–215 | Reads the frame element; writes `data-proof-observed` on it; listens for `load` (R5–R25 and R27–R41 run inside this listener, which ends at 1083) | shell-must-keep |
+| R4 | 205, 213–215 | Reads the frame element; writes `data-proof-observed` on it; listens for `load` (R5–R25 and R27–R41 run inside this listener, which ends at 1082) | shell-must-keep |
 | R5 | 216–217 | Reads `contentDocument` as `childDoc` | shell-must-keep |
 
 ## Inside the frame: input and controls
