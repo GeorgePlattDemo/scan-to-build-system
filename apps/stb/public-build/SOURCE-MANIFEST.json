@@ -1260,6 +1260,20 @@
       "blobSha": "b70b8c80c8b60d4a4f7d6caef651930b68a68f7a",
       "bytes": 244338,
       "reason": "captureStartOwnProof is deleted: it read the Start your own proof frame's contentWindow.STBProjectBridge and contentWindow.S, neither of which three-frames.html defines, so it always returned early. Its two calls and the click listener, decision set and action count that only fed it are deleted with it. The bench wrapper and the before-send line are unchanged."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "page-draws-bench-geometry",
+      "blobSha": "480c06a9f98c49c6f09698b776d4b89e3d5ae119",
+      "bytes": 91967,
+      "reason": "The bench draws its own parts, cuts and spots SVG into #stb-bench-dynamic-geometry from the STB_BENCH_GEOMETRY message the shell posts (shell reach R28). Its one script reads only this page."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "page-draws-bench-geometry",
+      "blobSha": "852d86a6c2b89aa2d0e4449ee67190ab97b49417",
+      "bytes": 242859,
+      "reason": "The shell no longer reads #stb-bench-dynamic-geometry or writes its innerHTML; it posts the definition's demand to the bench frame as STB_BENCH_GEOMETRY (R28). Cache-buster for three-frames.html (?v=480c06a9, was ?v=5d58605a)."
     }
   ],
   "retiredFiles": [
