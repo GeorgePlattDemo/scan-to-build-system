@@ -331,8 +331,8 @@ test('RIP diagnostic retains exact OP_NOT_ON_OFFERING:RIP', async (t) => {
 test('Store basis distinguishes pricing engine, cycle model, and envelope identity', async (t) => {
   const adapter = await withAdapter(t);
   assert.equal(adapter.modules.ENGINE.id, 'STB-STORE-ZERO-PRICE-1');
-  assert.equal(adapter.modules.ENGINE.version, '0.2.3');
-  assert.equal(adapter.modules.CYCLE_MODEL.id, 'STB-D001-CYCLE-MODEL-S2-0.1');
+  assert.equal(adapter.modules.ENGINE.version, '0.3.0');
+  assert.equal(adapter.modules.CYCLE_MODEL.id, 'STB-D001-DIMENSIONAL-TRAVEL-0.1');
   assert.equal(adapter.modules.CYCLE_MODEL.measured, false);
   assert.equal(adapter.modules.CYCLE_MODEL.commissioned, false);
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.id, 'D001-STAGE2-ENVELOPE-0.3');
@@ -346,8 +346,8 @@ test('Store basis distinguishes pricing engine, cycle model, and envelope identi
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.stock.maxParentLengthWithoutExternalSupportIn, 96);
   assert.equal(adapter.modules.D001_STAGE2_ENVELOPE.stock.minControlledLengthIn, 24);
   const body = parseJson(await postJob(await boardJobBody({ keptLengthIn: 45 })));
-  assert.equal(body.attributedBasis.pricingEngine.version, '0.2.3');
-  assert.equal(body.attributedBasis.cycleModel.id, 'STB-D001-CYCLE-MODEL-S2-0.1');
+  assert.equal(body.attributedBasis.pricingEngine.version, '0.3.0');
+  assert.equal(body.attributedBasis.cycleModel.id, 'STB-D001-DIMENSIONAL-TRAVEL-0.1');
   assert.equal(body.attributedBasis.envelope.id, 'D001-STAGE2-ENVELOPE-0.3');
 });
 
