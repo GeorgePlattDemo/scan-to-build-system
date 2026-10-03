@@ -3,29 +3,69 @@ name: Publish OPEN SYSTEM BUILD
 # One place to check the app: publishes apps/stb/public-build/ from main to
 # https://georgeplattdemo.github.io/scan-to-build-system/ after its tests pass.
 # Review (scan-to-build-review) is frozen and is not touched by this workflow.
+#
+# Publication is gated on the pinned-Store integration proof. It starts when
+# "Playhouse candidate Store integration" completes on main, and the gate job
+# publishes only if that workflow's playhouse-candidate job (the five-tile
+# suites against STORE_PIN) concluded success for this exact SHA and the SHA
+# is still main's head. A failed, skipped, cancelled or missing integration
+# job denies publication. workflow_dispatch goes through the same gate.
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Playhouse candidate Store integration
+    types:
+      - completed
     branches:
       - main
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
+
+env:
+  PUBLISH_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
+  integration-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # The gate runs from this workflow's own commit, never from the candidate SHA.
+      - name: Checkout gate
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/stb/.node-version
+
+      - name: Gate self-test
+        run: node --test .github/scripts/require-integration-proof.test.mjs
+
+      - name: Require green pinned-Store integration for this SHA
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PUBLISH_REF: ${{ github.event.workflow_run && format('refs/heads/{0}', github.event.workflow_run.head_branch) || github.ref }}
+        run: node .github/scripts/require-integration-proof.mjs
+
   test:
+    needs: integration-proof
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.PUBLISH_SHA }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -37,7 +77,7 @@ jobs:
         run: node --test --test-concurrency=1 tests/*.test.mjs
 
   publish:
-    needs: test
+    needs: [integration-proof, test]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -46,6 +86,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.PUBLISH_SHA }}
 
       - name: Assemble site (visible build only, no tests)
         run: |
