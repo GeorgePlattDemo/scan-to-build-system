@@ -75,7 +75,8 @@ assert.equal((doctrine.processStepsHtml.match(/class="s"/g)||[]).length,12);
 
 // Playhouse now reaches every canonical stage without promoting its unresolved secondary work.
 for(const id of ['playhouse-request','playhouse-yard','playhouse-terms']) assert.ok(shell.includes("ensureProjectJourneyPage('"+id+"'"),'missing '+id);
-assert.match(shell,/CONFIRM THIS VERSION →/);
+// The Playhouse page owns its review and its confirm; the shell does not write that panel.
+assert.match(read('system-build-front-door-0.5.html'),/data-canonical-go="playhouse-request" data-s001-needs-supportable disabled aria-disabled="true">CONFIRM THIS VERSION →/);
 assert.match(shell,/REQUEST ≠ ORDER/);
 // Playhouse's Store step is the live Store's answer for the current version, never a stored reference answer.
 assert.match(shell,/if \(request\.requestType !== S001_REQUEST_TYPE\) throw new Error\('ADMITTED_REQUEST_TYPE_MISMATCH'\);/);

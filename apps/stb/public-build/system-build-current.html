@@ -11,7 +11,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 </style>
 </head>
 <body>
-<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=1ad6f78d"></iframe>
+<iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=68136f4b"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
 <script src="stb-store-handoff-contract.js?v=afccfa82"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
@@ -2039,26 +2039,6 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
           projectAnswer;
       }
     }
-
-    const review = doc.getElementById('playhouse-review');
-    const reviewMain = review?.querySelector('.main');
-    if (reviewMain) reviewMain.innerHTML = `
-      <h1>REVIEW · USER 1'S JOB</h1>
-      <p class="sub">The narrative has become a bounded definition and a Store answer. Review shows the facts without turning unresolved work into capability.</p>
-      <div class="s001-v2-order">
-        <div><b>PROJECT</b><span>Playhouse arched window</span></div>
-        <div><b>WOOD</b><span>48 × 96 in · 1/2 in plywood</span></div>
-        <div><b>OPENING</b><span id="s001-review-opening"></span></div>
-        <div><b>STORE ANSWER</b><span data-s001-bind="status">—</span></div>
-        <div><b>CENTER FEATURE</b><span>Split down the center · two pieces kept on tabs</span></div>
-        <div><b>STRAIGHT CUTS</b><span>2 requested · 18 in from sheet ends</span></div>
-        <div><b>BUDGETARY TOTAL</b><span data-s001-bind="q">—</span></div>
-        <div><b>RETURN MATERIAL</b><span>Center and remnants retained for User 1</span></div>
-        <div><b>HARDWARE</b><span>Not included</span></div>
-      </div>
-      <div class="s001-boundary">Confirming this review retains the job definition. It is not payment, reservation, production release, machine readiness, or physical execution authorization.</div>
-      <div class="btns"><button type="button" data-canonical-go="playhouse-store">BACK TO STORE</button><button type="button" data-canonical-go="playhouse-request" data-s001-needs-supportable>CONFIRM THIS VERSION →</button></div>
-    `;
 
     const result = doc.getElementById('playhouse-result');
     const resultMain = result?.querySelector('.main');

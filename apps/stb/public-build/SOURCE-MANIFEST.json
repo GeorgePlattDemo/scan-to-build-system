@@ -643,14 +643,14 @@
       "pass": "window-seat-page1-want",
       "blobSha": "50aeff856c160dd33315923b9ed6059d33c3b2ca",
       "bytes": 229947,
-      "reason": "Window Seat step 1 reads \"1 · Intent\"; other tiles keep \"1 · Your idea\"; page 1 sits behind the trail. Cache-busters for the page and the guide."
+      "reason": "Window Seat step 1 reads \"1 \u00b7 Intent\"; other tiles keep \"1 \u00b7 Your idea\"; page 1 sits behind the trail. Cache-busters for the page and the guide."
     },
     {
       "path": "stb-build-guide-spec.js",
       "pass": "window-seat-page1-want",
       "blobSha": "889a48b27ef49383d6b29b305b2327853f1496ce",
       "bytes": 90576,
-      "reason": "Window Seat step 1 reads \"1 · Intent\"; other tiles keep \"1 · Your idea\"; page 1 sits behind the trail. Cache-busters for the page and the guide."
+      "reason": "Window Seat step 1 reads \"1 \u00b7 Intent\"; other tiles keep \"1 \u00b7 Your idea\"; page 1 sits behind the trail. Cache-busters for the page and the guide."
     },
     {
       "path": "system-build-current.html",
@@ -678,7 +678,7 @@
       "pass": "window-seat-idea-intake",
       "blobSha": "55ee72e7f16e5b0c7773c2cf747d0f28768edad2",
       "bytes": 233367,
-      "reason": "Window Seat nav, one line: on Idea it reads the tile, ← Project Library, then \"Two ways through this job: Intent | One full scroll\" (Intent the default) and no step buttons; from Intent on it reads the tile, ← Project Library, Idea (a back control, never current), then the six steps with the current one marked. Cache-buster for Window Seat 0.9."
+      "reason": "Window Seat nav, one line: on Idea it reads the tile, \u2190 Project Library, then \"Two ways through this job: Intent | One full scroll\" (Intent the default) and no step buttons; from Intent on it reads the tile, \u2190 Project Library, Idea (a back control, never current), then the six steps with the current one marked. Cache-buster for Window Seat 0.9."
     },
     {
       "path": "stb-window-seat-0.9.html",
@@ -923,7 +923,7 @@
       "pass": "start-own-stated-material",
       "blobSha": "1934bb2b81b9b5466683636f18132f6161b69d19",
       "bytes": 88969,
-      "reason": "The \"2×4 stud\" material control states what its label says as data: data-material-form=\"board\", data-material-nominal-t=\"2\", data-material-nominal-w=\"4\". No species is stated; the bench has no species control."
+      "reason": "The \"2\u00d74 stud\" material control states what its label says as data: data-material-form=\"board\", data-material-nominal-t=\"2\", data-material-nominal-w=\"4\". No species is stated; the bench has no species control."
     },
     {
       "path": "stb-outdoor-picnic-0.4.html",
@@ -958,14 +958,14 @@
       "pass": "start-own-stated-material",
       "blobSha": "59db6e09adc7579a3be46d276f549dd2e77c3678",
       "bytes": 252386,
-      "reason": "Start your own's start-own.material is what the bench's \"2×4 stud\" control states (form, nominalT, nominalW, read from its data-material-* attributes); a field the control does not state is left out. Cache-busters for the contract, three-frames.html, the Outdoor and Window Seat pages and the front door."
+      "reason": "Start your own's start-own.material is what the bench's \"2\u00d74 stud\" control states (form, nominalT, nominalW, read from its data-material-* attributes); a field the control does not state is left out. Cache-busters for the contract, three-frames.html, the Outdoor and Window Seat pages and the front door."
     },
     {
       "path": "three-frames.html",
       "pass": "start-own-stated-species",
       "blobSha": "5d58605a5743038a8ffa0f9fa11067e8f72b6f23",
       "bytes": 89465,
-      "reason": "The bench states the species of its 2×4 board: a \"Which wood?\" choice of the three species the Store catalog at STORE_PIN has for nominal 2×4 board (spf, syp-treated, cedar), with none chosen by default."
+      "reason": "The bench states the species of its 2\u00d74 board: a \"Which wood?\" choice of the three species the Store catalog at STORE_PIN has for nominal 2\u00d74 board (spf, syp-treated, cedar), with none chosen by default."
     },
     {
       "path": "stb-outdoor-picnic-0.4.html",
@@ -1000,7 +1000,7 @@
       "pass": "start-own-stated-species",
       "blobSha": "5a85bd7d68852aea9e79fa25bf235e2c90679cb5",
       "bytes": 252927,
-      "reason": "start-own.material takes its species from the bench's species choice (no default) and its form and nominal size from the \"2×4 stud\" control; a species choice is a new revision. Cache-busters for the contract, stb-terms-flow.js, three-frames.html, the Outdoor and Window Seat pages and the front door."
+      "reason": "start-own.material takes its species from the bench's species choice (no default) and its form and nominal size from the \"2\u00d74 stud\" control; a species choice is a new revision. Cache-busters for the contract, stb-terms-flow.js, three-frames.html, the Outdoor and Window Seat pages and the front door."
     },
     {
       "path": "stb-outdoor-picnic-0.4.html",
@@ -1225,6 +1225,20 @@
       "blobSha": "64028e84817913a95f0a4b6ddcea15a3797ed70f",
       "bytes": 253423,
       "reason": "The tile-host admission contract loads at ?v=1b574e9b, the contract's current blob prefix (was ?v=0bba0c4b): Playhouse profile 0.2 checks the sheet's thickness, length and width, each above 0. The Playhouse transport stops before the Store when the sheet it would send is not exactly the admitted sheet (ADMITTED_SHEET_NOT_SENT). Cache-busters for the changed stb-outdoor-picnic-0.4.html, stb-window-seat-0.9.html and front door."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "shell-does-not-write-playhouse-review",
+      "blobSha": "68136f4b6d574c10fc806837f07a45c2708d161e",
+      "bytes": 39983,
+      "reason": "The Playhouse page owns its job-facts review: makePage('playhouse-review', \u2026) carries the opening, the 48 \u00d7 96 in \u00b7 1/2 in plywood sheet, the Store answer and budgetary total bound from the fresh Store answer (no hard-coded SUPPORTABLE), the confirm line, and CONFIRM THIS VERSION \u2192 to playhouse-request, inert (disabled) until the Store answers SUPPORTABLE. The old definition review and its CONFIRM DEFINITION \u2192 playhouse-result button are gone; the page fills s001-review-opening."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "shell-does-not-write-playhouse-review",
+      "blobSha": "3f1fe6f80ed5f9ec02d59d117bbafc57c4eca5ad",
+      "bytes": 251862,
+      "reason": "The shell no longer writes the Playhouse review panel (reviewMain.innerHTML deleted); the page owns it. Cache-buster for the changed front door (?v=68136f4b, was ?v=1ad6f78d)."
     }
   ],
   "retiredFiles": [

@@ -138,10 +138,20 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
     );
 
     makePage('playhouse-review',
-      '<h1>REVIEW USER 1\'S DEFINITION</h1><p class="sub">Review keeps the user definition, Store answer, and remaining physical unknowns separate.</p>' +
-      '<div class="s001-data"><div class="row"><b>PROJECT</b><span>Playhouse arched window</span></div><div class="row"><b>OPENING WIDTH</b><span id="s001-review-width"></span></div><div class="row"><b>STRAIGHT SIDE</b><span id="s001-review-straight"></span></div><div class="row"><b>ARCH RISE</b><span id="s001-review-rise"></span></div><div class="row"><b>TOTAL OPENING HEIGHT</b><span id="s001-review-total"></span></div><div class="row"><b>STORE</b><span>SUPPORTABLE · reference/software path</span></div></div>' +
-      '<div class="s001-boundary">Confirming this definition is not an order, payment, reservation, production release, machine readiness statement, or physical fabrication authorization.</div>' +
-      '<div class="btns"><button type="button" data-canonical-go="playhouse-store">BACK TO STORE</button><button type="button" data-canonical-go="playhouse-result">CONFIRM DEFINITION →</button></div>',
+      '<h1>REVIEW · USER 1\'S JOB</h1><p class="sub">The narrative has become a bounded definition and a Store answer. Review shows the facts without turning unresolved work into capability.</p>' +
+      '<div class="s001-v2-order">' +
+        '<div><b>PROJECT</b><span>Playhouse arched window</span></div>' +
+        '<div><b>WOOD</b><span>48 × 96 in · 1/2 in plywood</span></div>' +
+        '<div><b>OPENING</b><span id="s001-review-opening"></span></div>' +
+        '<div><b>STORE ANSWER</b><span data-s001-bind="status">—</span></div>' +
+        '<div><b>CENTER FEATURE</b><span>Split down the center · two pieces kept on tabs</span></div>' +
+        '<div><b>STRAIGHT CUTS</b><span>2 requested · 18 in from sheet ends</span></div>' +
+        '<div><b>BUDGETARY TOTAL</b><span data-s001-bind="q">—</span></div>' +
+        '<div><b>RETURN MATERIAL</b><span>Center and remnants retained for User 1</span></div>' +
+        '<div><b>HARDWARE</b><span>Not included</span></div>' +
+      '</div>' +
+      '<div class="s001-boundary">Confirming this review retains the job definition. It is not payment, reservation, production release, machine readiness, or physical execution authorization.</div>' +
+      '<div class="btns"><button type="button" data-canonical-go="playhouse-store">BACK TO STORE</button><button type="button" data-canonical-go="playhouse-request" data-s001-needs-supportable disabled aria-disabled="true">CONFIRM THIS VERSION →</button></div>',
       '<p class="goal">Definition before execution</p><div class="row"><b>Known</b><span>The project geometry and Store reference disposition.</span></div><div class="row"><b>Still unresolved physically</b><span>Installed sheet support, workholding, tooling, control, safety, tab retention, measured cycle behavior and commissioning.</span></div>'
     );
 
@@ -247,10 +257,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
       set('s001-geometry-summary', `Opening ${fmtIn(g.width)} × ${fmtIn(g.total)} in overall · straight side ${fmtIn(g.straight)} in · arch rise ${fmtIn(g.rise)} in · derived circular-segment radius ${fmtIn(g.radius)} in.`);
       set('s001-store-opening', `${fmtIn(g.width)} in wide × ${fmtIn(g.total)} in overall`);
       set('s001-store-radius', `circular segment · ${fmtIn(g.radius)} in radius`);
-      set('s001-review-width', `${fmtIn(g.width)} in`);
-      set('s001-review-straight', `${fmtIn(g.straight)} in`);
-      set('s001-review-rise', `${fmtIn(g.rise)} in`);
-      set('s001-review-total', `${fmtIn(g.total)} in`);
+      set('s001-review-opening', `${fmtIn(g.width)} wide · ${fmtIn(g.straight)} straight · ${fmtIn(g.rise)} rise · ${fmtIn(g.total)} total height`);
       set('s001-result-geometry', `${fmtIn(g.width)} wide · ${fmtIn(g.straight)} straight · ${fmtIn(g.rise)} rise · ${fmtIn(g.total)} total height`);
       set('s001-record-geometry', `${fmtIn(g.width)} wide · ${fmtIn(g.straight)} straight · ${fmtIn(g.rise)} rise`);
     }
