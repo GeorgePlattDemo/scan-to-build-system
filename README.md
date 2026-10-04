@@ -42,6 +42,16 @@ The machine-readable contract is [`apps/stb/public-build/stb-trail-contract.js`]
 
 The labels are deliberately broader than page count. A project may need several pages inside one step, but it does not get a different authority sequence.
 
+## How the definition reaches the command
+
+The confirmed project-definition revision is the controlling description of the component to be made. System preserves that meaning and asks Store what it can provide. Store contributes its identified material, capability, modeled work, and economics; local machine engineering contributes registered datums, tooling, transforms, and execution rules. Those manufacturing facts may resolve how to make the defined result; they may not silently redefine it.
+
+The [Project 1 digital manufacturing trail](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/project-1-digital-trail/README.md) demonstrates this information path for one bounded specimen: the user's definition supplies the controlling part requirements from which a controller-oriented virtual sequence is generated, without a second design entry. The record contains the reproduced Store answer, explicit commands, handoffs, and reference checks. It also identifies uncompiled controller source and unresolved physical geometry; it is not commissioned execution evidence or a new System verification-register PASS.
+
+For a commissioned implementation, after the required releases, selected material would be loaded and registered to the machine's established references. The definition's dimensions, feature locations, and required operations would be transformed into local coordinates and ordered commands. Inspection would then determine conformance against that same revision. The current demonstration establishes no such physical run.
+
+**The definition controls the required result. Local release permits execution. Inspection establishes conformance.**
+
 ## The Store boundary
 
 System does not own Store facts or calculate a substitute Store answer.
@@ -60,11 +70,11 @@ The register also says something important about the current front door: **curre
 
 ## What is simulated or modeled
 
-The current application is a software demonstration, not a production system.
+The current application is a software demonstration, not a commissioned production system.
 
-- Store Zero is a fictional reference lumberyard.
+- Store Zero is a modeled reference lumberyard with declared catalog, represented stock, capability, economics, and evaluation clocks. Its bounded answers are evaluated by Store software.
 - Store prices are budgetary reference estimates, not binding quotations.
-- Machine time is modeled, not measured commissioned production time.
+- Machine time is modeled from declared indexing, tool motion, feeds, passes, and handling. The Project 1 reference record uses listed industrial component classes and controller-oriented Structured Text; its controller source is uncompiled and its timing is not measured commissioned production time.
 - Offer, acceptance, payment, yard queue, allocation/release narrative, cutting, staging, and handoff are simulated where shown in the demonstration.
 - No commissioned D-001 or S-001 physical production is established.
 - The software does not issue physical execution authority.
@@ -81,6 +91,7 @@ The Store owns the current Stage-2 fixture and capability declarations: [Scan-to
 | What crosses the Store boundary? | [Current Store foundation](docs/store/CURRENT-STORE-FOUNDATION.md) | Request/answer boundary and fresh-evaluation rule |
 | How do different users enter the same system? | [Common entry](docs/application/COMMON-ENTRY-ARCHITECTURE.md) | New, returning, and professional entry paths |
 | What happens to source material and records? | [Information custody](docs/application/INFORMATION-CUSTODY-BOUNDARY.md) | What is retained, shared, or unresolved |
+| How does an identified definition reach modeled commands and Q? | [Project 1 digital trail](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/project-1-digital-trail/README.md) | Store-held reference record, explicit handoffs, reproducible calculation, and execution limits |
 | What does Store own? | [Scan-to-Build Store](https://github.com/GeorgePlattDemo/scan-to-build-store) | Store Zero, Store facts, capability, economics, answers, and refusals |
 | Why investigate this at all? | [3D Solutions Program](https://github.com/GeorgePlattDemo/3d-solutions-program) | Research question, evidence, candidate engineering, and open questions |
 
