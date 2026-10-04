@@ -64,7 +64,7 @@ assert.match(surface,/CONFIRM &amp; SEND TO STORE ZERO →/);
 assert.match(surface,/id="stb-bench-dynamic-geometry"/);
 
 // Host carries one definition through intent, bench, Store, Terms and record.
-assert.match(shell,/three-frames\.html\?v=13b41596/);
+assert.match(shell,/three-frames\.html\?v=3694af80/);
 assert.match(shell,/const definedWorkpieceLengthIn = 60;/);
 assert.match(shell,/DEMO_HORIZONTAL_SPAN_IN = 8/);
 assert.match(shell,/Math\.asin\(spanRatio\)/);
@@ -96,6 +96,34 @@ assert.match(shell,/const screen = target === trailContract\.idea\.label \? 'ide
 assert.match(shell,/if \(screen\) setTimeout\(\(\) => openStartOwnStage\(screen, null\), 0\)/);
 assert.match(surface,/<section id="stb-start-idea-screen">/);
 assert.match(surface,/<section id="stb-start-intent-screen" hidden>/);
+
+// Idea is this job's own story: the Job 1 picture and one line. No ways list, no carried-value chips.
+const ideaScreen = surface.slice(surface.indexOf('<section id="stb-start-idea-screen">'), surface.indexOf('<section id="stb-start-intent-screen"'));
+assert.match(ideaScreen,/<img class="stb-idea-img" id="stb-idea-img"/);
+assert.match(ideaScreen,/<p class="stb-idea-line">Two broken crossmembers, both cut from a 2×4\.<\/p>/);
+assert.equal(ideaScreen.includes('morelist'),false,'the ways list is back on Idea');
+assert.equal(surface.includes('stb-idea-known'),false,'carried-value chips are back on Idea');
+assert.equal(ideaScreen.includes('data:image'),false,'Idea carries a second copy of the picture');
+assert.match(surface,/ideaImg\.src = job1Img\.src/,'Idea shows the same Job 1 picture as Intent');
+assert.match(surface,/\.stb-idea-img\{width:300px/,'Idea picture is half again the 200px Intent picture');
+// Intent: the six ways, in the old order, and the seventh is the type box.
+const intentScreen = surface.slice(surface.indexOf('<section id="stb-start-intent-screen"'), surface.indexOf('<section id="stb-start-bench-screen"'));
+assert.deepEqual([...intentScreen.matchAll(/<li><b>([^<]+)<\/b>/g)].map(m => m[1]), [
+  'Add pieces as you go.', 'Just tell us in plain words.', 'Type the numbers.', 'Send a scan or a photo.',
+  'Draw it here.', 'Bring what you already have.', 'Add a tool this job needs.']);
+assert.match(intentScreen,/id="stb-add-tool-input"/);
+assert.match(intentScreen,/id="stb-add-tool" disabled>ADD/);
+// Intent's picture circles the 2×4 this job picked; under it the two demo woods and a SKU box.
+assert.match(intentScreen,/<svg class="stb-pick-ring"[^>]*><circle[^>]*stroke="#d1242f"/);
+assert.match(intentScreen,/data-intent-species="spf">SPF</);
+assert.match(intentScreen,/data-intent-species="syp-treated">TREATED SYP</);
+assert.match(intentScreen,/id="stb-intent-sku"/);
+assert.match(shell,/clone\.querySelector\('\.stb-intent-wood'\)\?\.remove\(\)/,'the bench copy of the picture carries no dead wood buttons');
+// Cedar is off this bench's choices; it stays in the Store catalog.
+assert.equal(/data-(?:intent-)?species="cedar"/.test(surface),false,'cedar is still a bench choice');
+assert.deepEqual([...surface.matchAll(/data-species="([^"]+)"/g)].map(m => m[1]), ['spf','syp-treated']);
+assert.match(shell,/storeHandoffContract\.startOwnStoreItem\(sku\)/);
+assert.match(shell,/materialDemand:statedMaterial\(\)/,'the bench reference is looked up for the stated wood');
 assert.match(shell,/definitionId:'SYO-USER1-XBRACE-0\.1'/);
 assert.match(shell,/originalShow\.call\(win,'proof-store'\)/);
 assert.match(shell,/ensureProjectJourneyPage\('proof-terms'/);
@@ -146,6 +174,16 @@ assert.equal(typeof contract.resolveUser1StoreReference,'function');
 assert.equal(typeof contract.requestUser1StoreEvaluation,'function');
 assert.equal(typeof contract.sequenceDefinedWorkpiece,'function');
 
+// The bench reference is per wood: SPF and treated SYP at 16 and 18 in, nothing for a wood not stated.
+assert.equal(contract.user1StoreReferences.length,4);
+assert.deepEqual(Array.from(contract.user1StoreReferences, r => r.demand.materialDemand.species+'@'+r.demand.partLengthIn),
+  ['spf@16','spf@18','syp-treated@16','syp-treated@18']);
+// A SKU names a real Store item or nothing.
+assert.equal(contract.startOwnStoreItem('stb-zero-pt-2x4-96-001').species,'syp-treated');
+assert.equal(contract.startOwnStoreItem('STB-ZERO-WRC-2X4-96-001').species,'cedar','cedar stays in the Store catalog');
+assert.equal(contract.startOwnStoreItem('STB-ZERO-MADE-UP-2X4-001'),null);
+assert.equal(contract.startOwnStoreItems.length,27);
+
 const lineage = contract.sequenceDefinedWorkpiece({
   definedWorkpieceLengthIn:60,
   parts:[16,16],
@@ -163,6 +201,7 @@ assert.equal(lineage.finalRemainderIn-lineage.holdIn,3.625);
 
 const exactStoreAnswer = contract.resolveUser1StoreReference({
   configurationId:'SYO-USER1-XBRACE',
+  materialDemand:{species:'spf',form:'board',nominalT:2,nominalW:4},
   configurationVersion:'0.1',
   definedWorkpieceLengthIn:60,
   sawAngleDeg:30,
@@ -201,6 +240,7 @@ assert.equal(exactStoreAnswer.calculationIdentity.resultHash,'0fd6b7d19ef8f64d13
 
 const exactStoreAnswer18 = contract.resolveUser1StoreReference({
   configurationId:'SYO-USER1-XBRACE',
+  materialDemand:{species:'spf',form:'board',nominalT:2,nominalW:4},
   configurationVersion:'0.2',
   definedWorkpieceLengthIn:60,
   sawAngleDeg:26.387799961243,
@@ -231,6 +271,7 @@ assert.equal(exactStoreAnswer18.estimate.travel.finalRemainderIn,35.625);
 assert.equal(exactStoreAnswer18.source.storePin,'9c62d9d6f7775deef83d47196d32c9b5174a352c');
 const freshStoreAnswer = contract.requestUser1StoreEvaluation({
   configurationId:'SYO-USER1-XBRACE',
+  materialDemand:{species:'spf',form:'board',nominalT:2,nominalW:4},
   configurationVersion:'0.1',
   definedWorkpieceLengthIn:60,
   sawAngleDeg:30,
@@ -257,6 +298,7 @@ assert.equal(freshStoreAnswer.evaluationReceipt.requestId,'START-OWN-RECHECK');
 
 const changedRevision = contract.resolveUser1StoreReference({
   configurationId:'SYO-USER1-XBRACE',
+  materialDemand:{species:'spf',form:'board',nominalT:2,nominalW:4},
   configurationVersion:'review-revision-2',
   definedWorkpieceLengthIn:60,
   sawAngleDeg:30,

@@ -1,13 +1,15 @@
-// Guard: the Start-your-own page carries two cached Store answers (16 in and 18 in) in
-// public-build/stb-store-handoff-contract.js so it can show the reference order before sending.
+// Guard: the Start-your-own page carries four cached Store answers (16 in and 18 in, each for SPF and for
+// treated SYP) in public-build/stb-store-handoff-contract.js so the bench can show a wood's price before sending.
 // A cached answer is only allowed if it is exactly what the Store at System's STORE_PIN returns.
-// This test sends both reference demands through the pinned Store and fails on any difference,
+// This test sends every reference demand, with its own wood, through the pinned Store and fails on any difference,
 // so moving STORE_PIN without refreshing the cache (or editing the cache by hand) turns CI red.
+// It also checks the Store items the SKU box looks up against store-zero-catalog.json at the pin.
 
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { STORE_PIN } from '../../shared/contracts.mjs';
@@ -52,6 +54,7 @@ function referenceDemandBody(reference) {
     lengthDatum: d.lengthDatum,
     datumCMethod: d.datumCMethod,
     parts,
+    materialDemand: { ...d.materialDemand },
   });
 }
 
@@ -66,10 +69,12 @@ test('cached User 1 Store references equal the Store at STORE_PIN, field for fie
 
   const contract = loadContract();
   const references = [...(contract.user1StoreReferences || [])];
-  assert.equal(references.length, 2, 'both cached references (16 in and 18 in) are exported');
+  assert.equal(references.length, 4, 'all four cached references (16 in and 18 in, SPF and treated SYP) are exported');
+  assert.deepEqual(references.map((r) => r.demand.materialDemand.species + '@' + r.demand.partLengthIn),
+    ['spf@16', 'spf@18', 'syp-treated@16', 'syp-treated@18']);
 
   for (const reference of references) {
-    const label = reference.demand.partLengthIn + '-in reference';
+    const label = reference.demand.materialDemand.species + ' ' + reference.demand.partLengthIn + '-in reference';
     assert.equal(reference.source.storePin, STORE_PIN, label + ': cached source pin is System STORE_PIN');
     assert.equal(reference.materialResolution.source.pin, STORE_PIN, label + ': cached catalog pin is System STORE_PIN');
 
@@ -99,6 +104,12 @@ test('cached User 1 Store references equal the Store at STORE_PIN, field for fie
       'workpieceLengthIn', 'selectionPolicy', 'allocationClaimed',
     ];
     assert.deepEqual(pick(reference.materialResolution, materialKeys), pick(body.materialResolution, materialKeys), label + ': material resolution');
+    assert.equal(body.materialResolution.materialDemand.species, reference.demand.materialDemand.species, label + ': the Store resolved the stated wood');
+    // The board facts the bench shows come from the Store's offering for that wood.
+    assert.equal(reference.materialResolution.unitPrice, body.rawOffering.sellingPrice, label + ': unit price');
+    assert.equal(reference.materialResolution.stockLengthIn, body.rawOffering.stockL_in, label + ': stock length');
+    assert.deepEqual([...reference.materialResolution.supportedOps], body.rawOffering.supportedOps, label + ': supported operations');
+    assert.deepEqual([...reference.materialResolution.cellFamily], body.rawOffering.cellFamily, label + ': cell family');
     // The cache lives in a vm sandbox; compare plain JSON so array prototypes do not matter.
     assert.deepEqual(
       JSON.parse(JSON.stringify(reference.materialResolution.consideredCandidates.map((c) => [c.storeSku, c.stockLengthIn, c.candidateStatus, c.reason]))),
@@ -106,4 +117,20 @@ test('cached User 1 Store references equal the Store at STORE_PIN, field for fie
       label + ': considered candidates',
     );
   }
+});
+
+test('the Store items the SKU box looks up are the nominal 2×4 boards in the catalog at STORE_PIN, row for row', async () => {
+  const root = await requireCleanPinnedStore();
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'store-zero-catalog.json'), 'utf8'));
+  const boards = catalog.offerings
+    .filter((o) => o.form === 'board' && o.nominalT === 2 && o.nominalW === 4)
+    .map((o) => [o.storeSku, o.species, o.grade, o.stockL_in, o.sellingPrice, o.description]);
+  const contract = loadContract();
+  assert.deepEqual(JSON.parse(JSON.stringify(contract.startOwnStoreItems)), boards);
+  for (const [storeSku, species] of boards) {
+    const item = contract.startOwnStoreItem(storeSku.toLowerCase());
+    assert.equal(item.species, species);
+    assert.equal(item.catalogPin, STORE_PIN, storeSku + ': looked up in the catalog at System STORE_PIN');
+  }
+  assert.ok(boards.some((row) => row[1] === 'cedar'), 'cedar stays in the Store catalog');
 });

@@ -1,6 +1,8 @@
 // Start your own on the shared tile host, against the real pinned Store.
-// - Start your own opens on its Idea intake: no numbered step, the Idea line's one way on is Intent, and the values
-//   the bounded tile already has are shown as carried forward to Intent. From Intent on, Idea is the back control.
+// - Start your own opens on its Idea intake: no numbered step, the Idea line's one way on is Intent. Idea is the
+//   Job 1 picture and one line; Intent has the six ways and the tool box, the circled 2×4 and its two woods.
+//   From Intent on, Idea is the back control.
+// - A wood change shows its price on the bench; a SKU looks up a real Store item.
 // - The host draws Start your own's one nav line from a validated STB-TILE-HOST-0.1 message and the trail contract:
 //   the six contract steps, inert steps disabled, exactly one current, and the current step follows the shown page
 //   (and, on the Start your own page, its Intent or bench screen).
@@ -178,7 +180,7 @@ test('the bench page places its own spare and remain labels for a complete revis
   });
 });
 
-test('Start your own opens on its Idea intake; Intent stays step 1 and the known values carry forward', { timeout: 240000 }, async () => {
+test('Start your own opens on Idea: the Job 1 picture and one line; Intent is step 1 with the seven items', { timeout: 240000 }, async () => {
   await withBrowser(async ({ browser, origin, log }) => {
     const { page, frame, errors } = await openTile(browser, origin, 'Start your own');
     await until(async () => bench(page) && await bench(page).$('#stb-confirm-store'), 'Start your own page');
@@ -193,25 +195,67 @@ test('Start your own opens on its Idea intake; Intent stays step 1 and the known
     assert.equal(await bench(page).locator('#stb-start-idea-screen').isHidden(), false);
     assert.equal(await bench(page).locator('#stb-start-intent-screen').isHidden(), true);
     assert.equal(await bench(page).locator('#stb-start-bench-screen').isHidden(), true);
-    // The ways to bring a job are on Idea, not on Intent.
-    assert.equal(await bench(page).locator('#stb-start-idea-screen .morelist li').count(), 6);
-    assert.equal(await bench(page).locator('#stb-start-intent-screen .morelist').count(), 0);
 
-    // The values the bounded tile already has, from the same demand the bench draws, carried forward to Intent.
-    const known = () => bench(page).$$eval('#stb-idea-known span', els => els.map(e => e.textContent));
-    assert.deepEqual(await until(async () => { const k = await known(); return k.length && k; }, 'known values'),
-      ['2×4 stud', '2 parts', '16 in each', '30° ends', 'center spot · 8 in from either end']);
+    // Idea is this job's story: the existing Job 1 picture, top left, and one line. No ways list, no carried values.
+    const idea = bench(page).locator('#stb-start-idea-screen');
+    assert.equal((await idea.innerText()).trim(), 'Two broken crossmembers, both cut from a 2×4.');
+    assert.equal(await idea.locator('img').count(), 1);
+    assert.equal(await idea.locator('.morelist, #stb-idea-known').count(), 0);
+    const ideaPicture = await idea.locator('img').evaluate(img => ({
+      src: img.src, complete: img.complete && img.naturalWidth > 0, box: img.getBoundingClientRect().toJSON(),
+      frameBox: img.closest('.frame-in').getBoundingClientRect().toJSON(),
+    }));
+    const job1Src = await bench(page).locator('#stb-start-intent-screen .stb-user1-img').getAttribute('src');
+    assert.equal(ideaPicture.src, job1Src, 'Idea shows the existing Job 1 picture');
+    assert.ok(ideaPicture.complete, 'the picture is drawn');
+    assert.ok(ideaPicture.box.left - ideaPicture.frameBox.left < 30 && ideaPicture.box.top - ideaPicture.frameBox.top < 30, 'top left');
     // Nothing is chosen for the user: the wood is not carried, so the revision still blocks before the Store on it.
     assert.deepEqual(await live(frame, () => window.STBStartOwnLive.admission().admission.blocking),
       [{ factId: 'start-own.material', owner: 'USER', title: 'Material demand', condition: 'INVALID_VALUE', fields: ['species'] }]);
 
-    // Intent is step 1, and opens with those values: nothing to type again.
+    // Intent is step 1: the six ways back in their old order, and the seventh is the type box.
     await enterIntent(frame);
     assert.deepEqual((await navLine(frame)).map(b => b.label), ['← Project Library', 'Idea', ...TRAIL_STEPS.map((step, i) => `${i + 1} · ${step}`)]);
     assert.equal(await bench(page).locator('#stb-start-intent-screen').isHidden(), false);
     assert.equal(await bench(page).locator('#stb-start-idea-screen').isHidden(), true);
-    assert.equal(await bench(page).locator('#stb-start-intent-screen input:visible').count(), 0);
     assert.equal((await live(frame, () => window.STBStartOwnLive.hostMessage())).stage, 'Intent');
+    const intent = bench(page).locator('#stb-start-intent-screen');
+    assert.deepEqual(await intent.locator('.morelist > li > b').allInnerTexts(), [
+      'Add pieces as you go.', 'Just tell us in plain words.', 'Type the numbers.', 'Send a scan or a photo.',
+      'Draw it here.', 'Bring what you already have.', 'Add a tool this job needs.']);
+    assert.equal(await intent.locator('.morelist > li').nth(6).locator('#stb-add-tool-input').isVisible(), true);
+    // The two boxes Intent has: the tool box and the SKU box. Nothing else to type.
+    assert.deepEqual(await intent.locator('input:visible').evaluateAll(els => els.map(e => e.id)), ['stb-add-tool-input', 'stb-intent-sku']);
+
+    // The same picture, half again as large on Idea; on Intent a red circle on the 2×4 this job picked,
+    // and under it the two demo woods.
+    const intentPicture = await intent.locator('.stb-user1-img').evaluate(img => img.getBoundingClientRect().width);
+    assert.ok(Math.abs(ideaPicture.box.width / intentPicture - 1.5) < 0.05, `Idea picture is half again as large (${ideaPicture.box.width} vs ${intentPicture})`);
+    const ring = intent.locator('.stb-user1-pic .stb-pick-ring circle');
+    assert.equal(await ring.isVisible(), true);
+    assert.equal(await ring.getAttribute('stroke'), '#d1242f');
+    assert.deepEqual(await intent.locator('#stb-intent-wood [data-intent-species]').allInnerTexts(), ['SPF', 'TREATED SYP']);
+
+    // What is typed becomes a control for this job. The bench can work it; each change is a new revision.
+    assert.equal(await bench(page).locator('#stb-add-tool').isDisabled(), true, 'nothing typed: ADD is inert');
+    await bench(page).locator('#stb-add-tool-input').fill('Countersink');
+    await bench(page).locator('#stb-add-tool').click();
+    assert.deepEqual(await bench(page).locator('#stb-added-tools span').allInnerTexts(), ['Countersink']);
+    await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
+    await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current');
+    const control = bench(page).locator('#stb-bench-added-controls [data-added-control="Countersink"]');
+    assert.equal(await control.locator('h2').innerText(), 'Countersink?');
+    assert.deepEqual(await control.locator('button.on').allInnerTexts(), ['ON']);
+    const before = await live(frame, () => window.STBStartOwnLive.revision().definitionRevisionId);
+    await control.locator('[data-added-control-value="off"]').click();
+    await until(async () => (await live(frame, () => window.STBStartOwnLive.revision().definitionRevisionId)) !== before, 'a new revision');
+    assert.deepEqual(await control.locator('button.on').allInnerTexts(), ['OFF']);
+    assert.match(await bench(page).locator('#stb-before-send').innerText(), /Countersink \(off\) — are part of this version; the Store is not asked about them\./);
+    // The picture carries onto the bench; Intent's wood buttons do not come with it as dead copies.
+    assert.equal(await bench(page).locator('#stb-bench-intent-slot .stb-user1-img').getAttribute('src'), job1Src);
+    assert.equal(await bench(page).locator('#stb-bench-intent-slot .stb-intent-wood').count(), 0);
+    // Cedar is off this bench's choices.
+    assert.deepEqual(await bench(page).locator('#stb-bench-species [data-species]').evaluateAll(els => els.map(e => e.dataset.species)), ['spf', 'syp-treated']);
 
     // Idea is the back control from Intent and from the bench, never current.
     const backToIdea = async label => {
@@ -220,21 +264,79 @@ test('Start your own opens on its Idea intake; Intent stays step 1 and the known
       assert.equal(await bench(page).locator('#stb-start-idea-screen').isHidden(), false, label);
       assert.deepEqual((await navLine(frame)).map(b => b.label), ['← Project Library', 'Intent'], label);
     };
-    await backToIdea('from Intent');
+    await backToIdea('from the bench');
     await enterIntent(frame);
+    await backToIdea('from Intent');
+
+    assert.equal(startOwnCalls(log).length, 0, 'Idea, Intent and the bench ask the Store nothing');
+    assert.deepEqual(errors, []);
+    await page.close();
+  });
+});
+
+// A wood change shows its price on the bench, not only at the Store. The bench price is the Store-issued reference
+// for that wood (checked against the pinned Store by test/store/user1-reference-guard.test.mjs); confirming asks the
+// Store again and its answer is the same number. A SKU names a real Store item or nothing.
+test('a wood change updates the bench price; a SKU looks up a real Store item and invents no species', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { page, frame, errors } = await openStartOwn(browser, origin);
+    const priceLine = () => bench(page).locator('#stb-bench-price-line').innerText();
+    const total = () => bench(page).locator('#stb-price-total').innerText();
+    const species = () => live(frame, () => window.STBStartOwnLive.revision().facts['start-own.material']?.value?.species ?? null);
+    assert.match(await priceLine(), /pick a wood to see its price\.$/);
+    assert.equal(await total(), 'NOT COMPLETE');
+
+    // Intent states the wood; the bench shows its price.
+    await bench(page).locator('#stb-intent-wood [data-intent-species="spf"]').click();
+    await until(async () => (await species()) === 'spf', 'SPF stated');
+    assert.equal(await priceLine(), '16 in braces · 30° ends · SPF · 5-foot 2×4 · $8.54 Store reference price ($2.61 wood).');
+    assert.equal(await total(), '$8.54');
+
+    // The bench revises it: treated SYP has no 5-foot board, so the Store's board and price change with it.
     await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
     await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current');
-    await backToIdea('from the bench');
-
-    // A changed length on the bench is the value Idea then carries.
-    await enterIntent(frame);
-    await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
-    await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current again');
+    await bench(page).locator('#stb-bench-species [data-species="syp-treated"]').click();
+    await until(async () => (await species()) === 'syp-treated', 'treated SYP stated');
+    assert.equal(await priceLine(), '16 in braces · 30° ends · treated SYP · 6-foot 2×4 · $11.08 Store reference price ($5.15 wood).');
+    assert.equal(await total(), '$11.08');
+    assert.equal(await bench(page).locator('#stb-basis-sku').innerText(), 'STB-ZERO-PTAG-2X4-72-001');
+    assert.match(await bench(page).locator('#stb-bench-board-swap').innerText(), /The Store has no 5-foot treated SYP 2×4; the shortest it offers for this job is a 6-foot 2×4 \(72 in\)\./);
+    assert.deepEqual(await bench(page).locator('#stb-intent-wood [data-intent-species].on').evaluateAll(els => els.map(e => e.dataset.intentSpecies)), ['syp-treated'], 'Intent shows the same wood');
     await bench(page).locator('#stb-bench-controls [data-length="18"]').click();
-    await until(async () => (await known()).includes('18 in each'), 'Idea carries the changed length');
-    assert.deepEqual(await known(), ['2×4 stud', '2 parts', '18 in each', '26.4° ends', 'center spot · 9 in from either end']);
+    await until(async () => (await total()) === '$11.09', '18 in treated SYP priced on the bench');
+    await bench(page).locator('#stb-bench-controls [data-length="16"]').click();
+    await until(async () => (await total()) === '$11.08', 'back to 16 in');
 
-    assert.equal(startOwnCalls(log).length, 0, 'Idea and Intent ask the Store nothing');
+    // A SKU looks up a real Store item. One of this job's woods states that wood; anything else changes nothing.
+    await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="scan"]').click();
+    await until(async () => (await currentLabels(frame)).join() === '1 · Intent', 'intent current');
+    const lookUp = async sku => {
+      await bench(page).locator('#stb-intent-sku').fill(sku);
+      await bench(page).locator('#stb-intent-sku-look').click();
+      return bench(page).locator('#stb-intent-sku-answer').innerText();
+    };
+    assert.equal(await lookUp('stb-zero-spf-2x4-96-001'),
+      'STB-ZERO-SPF-2X4-96-001 · 2x4 x 96 in SPF construction · $4.18. This job’s wood is now SPF; the Store still picks the board.');
+    await until(async () => (await species()) === 'spf', 'SKU states SPF');
+    assert.equal(await total(), '$8.54');
+    assert.equal(await lookUp('STB-ZERO-WRC-2X4-96-001'),
+      'STB-ZERO-WRC-2X4-96-001 · 2x4 x 96 in Western Red Cedar S4S · $13.13. A real Store item, but not one of this job’s woods. Nothing changed.');
+    assert.equal(await lookUp('STB-ZERO-WALNUT-2X4-96-001'), 'STB-ZERO-WALNUT-2X4-96-001 is not a Store 2×4. Nothing changed.');
+    assert.equal(await species(), 'spf', 'no species was invented');
+    await bench(page).locator('#stb-intent-wood [data-intent-species="syp-treated"]').click();
+    await until(async () => (await total()) === '$11.08', 'Intent changes the bench price');
+    assert.equal(startOwnCalls(log).length, 0, 'the bench price asks the Store nothing');
+
+    // Confirming asks the Store for this revision; its answer is the price the bench showed.
+    await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
+    await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench again');
+    await bench(page).locator('#stb-confirm-store').click();
+    await until(async () => (await currentLabels(frame)).join() === '3 · The Store answers', 'store current');
+    const sent = startOwnCalls(log);
+    assert.equal(sent.length, 1);
+    assert.deepEqual(sent[0].request.payload.line.materialDemand, { species: 'syp-treated', form: 'board', nominalT: 2, nominalW: 4 });
+    assert.equal(sent[0].answer.rawEstimate.totals.Q, 11.08);
+    assert.match(await frame.locator('#proof-store-q').innerText(), /11\.08/);
     assert.deepEqual(errors, []);
     await page.close();
   });

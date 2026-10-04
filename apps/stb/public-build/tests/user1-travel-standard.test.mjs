@@ -19,6 +19,7 @@ assert.equal(typeof contract.quoteStartOwnBoardSequence,'undefined');
 
 const exactDemand = {
   configurationId:'SYO-USER1-XBRACE',
+  materialDemand:{species:'spf',form:'board',nominalT:2,nominalW:4},
   configurationVersion:'0.1',
   definedWorkpieceLengthIn:60,
   sawAngleDeg:30,
@@ -62,6 +63,7 @@ assert.equal(exact.evaluationReceipt,null);
 
 const exactDemand18 = {
   configurationId:'SYO-USER1-XBRACE',
+  materialDemand:{species:'spf',form:'board',nominalT:2,nominalW:4},
   configurationVersion:'0.2',
   definedWorkpieceLengthIn:60,
   sawAngleDeg:26.387799961243,
@@ -172,6 +174,9 @@ for (const changed of [
   {...exactDemand, sawAngleDeg:31},
   {...exactDemand, definedWorkpieceLengthIn:59},
   {...exactDemand, declaredSpotCount:1},
+  // A wood with no Store-issued reference here: cedar is in the Store catalog, not on this bench.
+  {...exactDemand, materialDemand:{species:'cedar',form:'board',nominalT:2,nominalW:4}},
+  {...exactDemand, materialDemand:{form:'board',nominalT:2,nominalW:4}},
   {...exactDemand, parts:[
     {...exactDemand.parts[0],lengthIn:17},
     exactDemand.parts[1],

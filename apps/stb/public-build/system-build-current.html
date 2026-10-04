@@ -13,7 +13,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <body>
 <iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=69c66036"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
-<script src="stb-store-handoff-contract.js?v=afccfa82"></script>
+<script src="stb-store-handoff-contract.js?v=534a2b5e"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
 <script src="stb-store-client.js?v=72cdc9fa"></script>
 <script src="stb-user-defined-board-runtime-bridge.js?v=db611717"></script>
@@ -190,7 +190,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=13b41596"
+                  src="three-frames.html?v=3694af80"
                 ></iframe>
               </div>
             `;
@@ -199,7 +199,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=13b41596';
+            liveFrame.src = 'three-frames.html?v=3694af80';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -232,6 +232,16 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
               const confirmButton = childDoc.getElementById('stb-confirm-store');
               const glossaryStatus = childDoc.getElementById('stb-store-glossary-status');
               const glossaryChoices = Array.from(childDoc.querySelectorAll('[data-store-size-key]'));
+              const toolInput = childDoc.getElementById('stb-add-tool-input');
+              const toolButton = childDoc.getElementById('stb-add-tool');
+              const skuInput = childDoc.getElementById('stb-intent-sku');
+              const skuButton = childDoc.getElementById('stb-intent-sku-look');
+              const skuAnswer = childDoc.getElementById('stb-intent-sku-answer');
+              // This job's two demo woods. Cedar is in the Store catalog but is not one of this bench's choices.
+              const SPECIES_WORDS = Object.freeze({ 'spf':'SPF', 'syp-treated':'treated SYP' });
+              // Controls typed on Intent for this job ("Add a tool this job needs"). Each is this job's own; the bench
+              // turns it on or off. The Store is not asked about it.
+              const addedControls = [];
               // The material the bench states, and only that: species from the bench's species choice, form and nominal
               // size from its "2×4 stud" control. A field the bench does not state is left out, so admission blocks on
               // it. No species is chosen for the user.
@@ -334,6 +344,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   if (sourceIntent) {
                     const clone = sourceIntent.cloneNode(true);
                     clone.querySelector('.stb-bench-button')?.remove();
+                    clone.querySelector('.stb-intent-wood')?.remove();
                     clone.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
                     benchIntentSlot.append(clone);
                   }
@@ -441,7 +452,8 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   requiredOps:requiredOps,
                   declaredSawCuts:declaredSawCuts,
                   declaredSpotCount:declaredSpotCount,
-                  parts:parts
+                  parts:parts,
+                  materialDemand:statedMaterial()
                 };
                 const storeAnswer = storeHandoffContract.resolveUser1StoreReference(storeDemand);
                 const storeMaterialResolution = storeAnswer.materialResolution || null;
@@ -546,7 +558,8 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                     endRelation:{value:'parallel',basis:'USER_1_INTENT'},
                     cutPlane:{value:'miter-face',basis:'USER_1_INTENT'},
                     lengthDatum:{value:'long-long-outer-edge',basis:'USER_1_INTENT'},
-                    centerSpot:{value:'one-per-part',basis:'DERIVED_FROM_PART_LENGTH'}
+                    centerSpot:{value:'one-per-part',basis:'DERIVED_FROM_PART_LENGTH'},
+                    addedControls:addedControls.map(control => ({label:control.label,value:control.value,basis:'USER_1_INTENT',storeScope:'NOT_ASKED'}))
                   },
                   derived:{
                     fixedHorizontalSpanIn:{value:DEMO_HORIZONTAL_SPAN_IN,basis:'BOUNDED_DEMO_BASELINE'},
@@ -699,7 +712,12 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   if (moved) {
                     const feet = picked / 12;
                     const pickedPhrase = (Number.isInteger(feet) ? feet+'-foot 2×4 ('+picked+' in)' : picked+' in 2×4');
-                    swap.innerHTML = '<b>The Store grabbed a longer board.</b> At '+formatInches(demand.finishedLength)+' a brace, a '+(minimum/12)+'-foot 2×4 wouldn’t leave the '+formatInches(holdIn)+' the machine needs to hold for the last cut — so it moved up to a '+pickedPhrase+'.'
+                    const candidates = Array.isArray(material?.consideredCandidates) ? material.consideredCandidates : [];
+                    const minimumRefused = candidates.some(c => Number(c.stockLengthIn) === minimum && c.candidateStatus === 'REFUSED');
+                    const wood = SPECIES_WORDS[definition.material?.stated?.species] || '';
+                    swap.innerHTML = '<b>The Store grabbed a longer board.</b> '+(minimumRefused
+                      ? 'At '+formatInches(demand.finishedLength)+' a brace, a '+(minimum/12)+'-foot 2×4 wouldn’t leave the '+formatInches(holdIn)+' the machine needs to hold for the last cut — so it moved up to a '+pickedPhrase+'.'
+                      : 'The Store has no '+(minimum/12)+'-foot '+(wood ? wood+' ' : '')+'2×4; the shortest it offers for this job is a '+pickedPhrase+'.')
                       +(Number.isFinite(retained) ? ' The extra comes back with your stub: '+formatInches(retained)+'.' : '');
                   }
                 }
@@ -707,8 +725,12 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                 const pickedBoard = Number(demand.definedWorkpieceLengthIn);
                 const pickedFeet = pickedBoard / 12;
                 const boardWords = Number.isInteger(pickedFeet) ? pickedFeet+'-foot 2×4' : formatInches(pickedBoard)+' 2×4';
+                const woodWords = SPECIES_WORDS[definition.material?.stated?.species] || null;
                 setText('stb-bench-price-line', formatInches(demand.finishedLength)+' braces · '+formatDegrees(demand.angleDegrees)+' ends · '
-                  +(storeComplete ? boardWords+'.' : 'ask the Store.'));
+                  +(!woodWords ? 'pick a wood to see its price.'
+                    : storeComplete && totals?.Q != null
+                      ? woodWords+' · '+boardWords+' · $'+Number(totals.Q).toFixed(2)+' Store reference price ($'+Number(totals.material).toFixed(2)+' wood).'
+                      : woodWords+' · ask the Store.'));
 
                 const svg = childDoc.getElementById('stb-user1-bench-svg');
                 if (svg) {
@@ -747,9 +769,12 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                 setText('stb-basis-job-time',Number.isFinite(Number(estimate?.cycle?.T_job_min))
                   ? Number(estimate.cycle.T_job_min).toFixed(4)+' min · modeled · Store returned '+totalModeledCuts+' saw operations'
                   : 'UNRESOLVED');
-                setText('stb-before-send',definition.storeReference.unresolvedConditions.length
+                const addedNote = addedControls.length
+                  ? ' This job’s own controls — '+addedControls.map(control => control.label+' ('+control.value+')').join(', ')+' — are part of this version; the Store is not asked about them.'
+                  : '';
+                setText('stb-before-send',(definition.storeReference.unresolvedConditions.length
                   ? definition.storeReference.unresolvedConditions.join(' · ')+'. No browser-side Store answer is substituted. A fresh Store evaluation will run when you confirm this exact revision.'
-                  : 'The displayed Store reference is history/preview. Confirm requests a fresh Store Zero evaluation before the Store Answer step.');
+                  : 'The displayed Store reference is history/preview. Confirm requests a fresh Store Zero evaluation before the Store Answer step.')+addedNote);
 
                 const answerLine = childDoc.getElementById('stb-system-answer');
                 if (answerLine) {
@@ -805,13 +830,92 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   syncAndRender('CUSTOMER_INPUT');
                 });
               });
+              // One wood for this job: Intent states it, the bench revises it. Both rows show the same choice.
+              const chooseSpecies = species => {
+                childDoc.querySelectorAll('#stb-bench-species [data-species]').forEach(b => b.classList.toggle('on', b.dataset.species === species));
+                childDoc.querySelectorAll('#stb-intent-wood [data-intent-species]').forEach(b => b.classList.toggle('on', b.dataset.intentSpecies === species));
+                markRevision();
+                syncAndRender('CUSTOMER_INPUT');
+              };
               childDoc.querySelectorAll('#stb-bench-species [data-species]').forEach(button => {
-                button.addEventListener('click', () => {
-                  childDoc.querySelectorAll('#stb-bench-species [data-species]').forEach(b => b.classList.toggle('on', b === button));
-                  markRevision();
-                  syncAndRender('CUSTOMER_INPUT');
-                });
+                button.addEventListener('click', () => chooseSpecies(button.dataset.species));
               });
+              childDoc.querySelectorAll('#stb-intent-wood [data-intent-species]').forEach(button => {
+                button.addEventListener('click', () => chooseSpecies(button.dataset.intentSpecies));
+              });
+              // A SKU names a real Store item or nothing. A 2×4 of one of this job's woods states that wood; the
+              // Store still selects the board. Any other answer changes nothing.
+              const lookUpSku = () => {
+                const sku = String(skuInput?.value || '').trim();
+                if (!sku || !skuAnswer) return;
+                const item = typeof storeHandoffContract?.startOwnStoreItem === 'function' ? storeHandoffContract.startOwnStoreItem(sku) : null;
+                if (!item) {
+                  skuAnswer.textContent = sku.toUpperCase()+' is not a Store 2×4. Nothing changed.';
+                  return;
+                }
+                const named = item.storeSku+' · '+item.description+' · $'+Number(item.sellingPrice).toFixed(2)+'.';
+                if (!SPECIES_WORDS[item.species]) {
+                  skuAnswer.textContent = named+' A real Store item, but not one of this job’s woods. Nothing changed.';
+                  return;
+                }
+                skuAnswer.textContent = named+' This job’s wood is now '+SPECIES_WORDS[item.species]+'; the Store still picks the board.';
+                chooseSpecies(item.species);
+              };
+              skuInput?.addEventListener('input', () => { if (skuButton) skuButton.disabled = !skuInput.value.trim(); });
+              skuInput?.addEventListener('keydown', event => { if (event.key === 'Enter') lookUpSku(); });
+              skuButton?.addEventListener('click', lookUpSku);
+              // "Add a tool this job needs": what is typed becomes a control for this job, on Intent and on the bench.
+              const renderAddedControls = () => {
+                const chips = childDoc.getElementById('stb-added-tools');
+                if (chips) chips.replaceChildren(...addedControls.map(control => {
+                  const chip = childDoc.createElement('span');
+                  chip.textContent = control.label;
+                  return chip;
+                }));
+                const rows = childDoc.getElementById('stb-bench-added-controls');
+                if (!rows) return;
+                rows.replaceChildren(...addedControls.map(control => {
+                  const row = childDoc.createElement('div');
+                  row.className = 'higher-row';
+                  row.dataset.addedControl = control.label;
+                  const title = childDoc.createElement('h2');
+                  title.textContent = control.label+'?';
+                  const choices = childDoc.createElement('div');
+                  choices.className = 'choice-row';
+                  ['on','off'].forEach(value => {
+                    const button = childDoc.createElement('button');
+                    button.type = 'button';
+                    button.dataset.addedControlValue = value;
+                    button.textContent = value.toUpperCase();
+                    button.classList.toggle('on', control.value === value);
+                    button.addEventListener('click', () => {
+                      if (control.value === value) return;
+                      control.value = value;
+                      renderAddedControls();
+                      markRevision();
+                      syncAndRender('CUSTOMER_INPUT');
+                    });
+                    choices.append(button);
+                  });
+                  row.append(title, choices);
+                  return row;
+                }));
+              };
+              const addTool = () => {
+                const label = String(toolInput?.value || '').replace(/\s+/g,' ').trim().slice(0,40);
+                if (!label) return;
+                if (!addedControls.some(control => control.label.toLowerCase() === label.toLowerCase())) {
+                  addedControls.push({ label, value:'on' });
+                  renderAddedControls();
+                  markRevision();
+                  syncAndRender('INTENT_CONTROL');
+                }
+                toolInput.value = '';
+                if (toolButton) toolButton.disabled = true;
+              };
+              toolInput?.addEventListener('input', () => { if (toolButton) toolButton.disabled = !toolInput.value.trim(); });
+              toolInput?.addEventListener('keydown', event => { if (event.key === 'Enter') addTool(); });
+              toolButton?.addEventListener('click', addTool);
               resetDemoButton?.addEventListener('click', () => {
                 if (lengthInput) lengthInput.value = '16';
                 markRevision();

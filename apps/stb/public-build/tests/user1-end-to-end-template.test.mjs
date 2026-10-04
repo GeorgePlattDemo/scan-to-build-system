@@ -16,6 +16,7 @@ const RESULT_HASH='0fd6b7d19ef8f64d133486c9d2ccf72256b2993bb60aa14c77b3c3e800497
 
 const exactDemand={
   configurationId:'SYO-USER1-XBRACE',
+  materialDemand:{species:'spf',form:'board',nominalT:2,nominalW:4},
   configurationVersion:'0.1',
   definedWorkpieceLengthIn:60,
   sawAngleDeg:30,
@@ -226,6 +227,7 @@ assert.equal(contract.user1StoreReference.estimate.calculationIdentity.resultHas
 
 const exactDemand18={
   configurationId:'SYO-USER1-XBRACE',
+  materialDemand:{species:'spf',form:'board',nominalT:2,nominalW:4},
   configurationVersion:'0.2',
   definedWorkpieceLengthIn:60,
   sawAngleDeg:26.387799961243,
@@ -280,6 +282,7 @@ for(const changed of [
   {...exactDemand,configurationVersion:'0.2'},
   {...exactDemand,sawAngleDeg:31},
   {...exactDemand,declaredSawCuts:2},
+  {...exactDemand,materialDemand:{species:'cedar',form:'board',nominalT:2,nominalW:4}},
   {...exactDemand,parts:[{...exactDemand.parts[0],lengthIn:17},exactDemand.parts[1]]},
 ]){
   const answer=contract.resolveUser1StoreReference(changed);
