@@ -142,6 +142,42 @@ test('the bench page draws its own parts, cuts and spots for a complete revision
   });
 });
 
+test('the bench page places its own spare and remain labels for a complete revision; the shell does not (R30)', { timeout: 240000 }, async () => {
+  const shell = read('system-build-current.html');
+  assert.equal(shell.includes("getElementById('stb-bench-spare-label')"), false, 'the shell does not read #stb-bench-spare-label');
+  assert.equal(shell.includes("getElementById('stb-bench-remain-label')"), false, 'the shell does not read #stb-bench-remain-label');
+  assert.doesNotMatch(shell, /(spare|remain)Label\.setAttribute\('x'/, 'the shell does not place the spare or remain label');
+  assert.equal((shell.match(/type:'STB_BENCH_GEOMETRY'/g) || []).length, 1, 'the shell posts one geometry message');
+
+  await withBrowser(async ({ browser, origin }) => {
+    const { page, frame, errors } = await openStartOwn(browser, origin);
+    await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
+    await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current');
+    await chooseSpecies(page, frame, 'spf');
+
+    const labels = () => bench(page).evaluate(() => Object.fromEntries(['spare', 'remain'].map(name => {
+      const el = document.getElementById('stb-bench-' + name + '-label');
+      return [name, { x: Number(el.getAttribute('x')), text: el.textContent }];
+    })));
+    // 60 in board, two 16 in parts: the parts end at x 477.3, so spare centers at 504.7 and remain at 668.7.
+    let placed = await until(async () => { const l = await labels(); return /spare$/.test(l.spare.text) && !l.spare.text.startsWith('Store') && l; }, 'spare label worded');
+    assert.ok(Math.abs(placed.spare.x - 504.667) < 0.01, 'spare x ' + placed.spare.x);
+    assert.ok(Math.abs(placed.remain.x - 668.667) < 0.01, 'remain x ' + placed.remain.x);
+    assert.match(placed.remain.text, /remains · .* retained-control minimum · .* spare · Store returned$/);
+    assert.equal(await bench(page).locator('#stb-bench-spare-label').isVisible(), true);
+    assert.equal(await bench(page).locator('#stb-bench-remain-label').isVisible(), true);
+
+    // A changed definition places them again from the next message: at 18 in the Store picks a 72 in board, the
+    // parts end at x 450, so spare centers at 491 and remain at 655.
+    await bench(page).locator('#stb-bench-controls [data-length="18"]').click();
+    placed = await until(async () => { const l = await labels(); return Math.abs(l.spare.x - 491) < 0.01 && l; }, 'labels placed again at 18 in');
+    assert.ok(Math.abs(placed.remain.x - 655) < 0.01, 'remain x ' + placed.remain.x);
+    assert.match(placed.spare.text, /^\S+ in spare$/);
+    assert.match(placed.remain.text, /remains · .* retained-control minimum · .* spare · Store returned$/);
+    assert.deepEqual(errors, []);
+  });
+});
+
 test('Start your own opens on its Idea intake; Intent stays step 1 and the known values carry forward', { timeout: 240000 }, async () => {
   await withBrowser(async ({ browser, origin, log }) => {
     const { page, frame, errors } = await openTile(browser, origin, 'Start your own');

@@ -479,10 +479,25 @@
     });
     overlay.innerHTML=svg;
   };
+  // The spare and remain labels sit past the last part, wherever the demand ends it.
+  const placeBenchLabels = demand => {
+    if (!demand) return;
+    const x0=40, xMax=860;
+    const workpieceLength=Math.max(1,Number(demand.definedWorkpieceLengthIn)||60);
+    const scale=(xMax-x0)/workpieceLength;
+    const qty=Math.max(1,Math.min(2,Number(demand.quantity)||1));
+    const len=Math.max(0,Number(demand.finishedLength)||0);
+    const usedEnd=x0+qty*len*scale;
+    const spareLabel=document.getElementById('stb-bench-spare-label');
+    const remainLabel=document.getElementById('stb-bench-remain-label');
+    if(spareLabel) spareLabel.setAttribute('x',String(usedEnd<532?(usedEnd+532)/2:Math.min(820,(usedEnd+xMax)/2)));
+    if(remainLabel) remainLabel.setAttribute('x',String(Math.min(800,Math.max(570,(usedEnd+xMax)/2))));
+  };
   window.addEventListener('message', event => {
     if (event.origin !== window.location.origin) return;
     if (event.data?.type !== 'STB_BENCH_GEOMETRY') return;
     drawBenchGeometry(event.data.demand);
+    placeBenchLabels(event.data.demand);
     renderIdeaKnown(event.data.demand);
   });
 })();
