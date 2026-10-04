@@ -190,7 +190,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=e62fc931"
+                  src="three-frames.html?v=13b41596"
                 ></iframe>
               </div>
             `;
@@ -199,7 +199,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=e62fc931';
+            liveFrame.src = 'three-frames.html?v=13b41596';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -612,7 +612,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   const el=childDoc.getElementById(id);
                   if(el) el.style.display='none';
                 });
-                // The bench page draws its own parts, cuts and spots from this demand.
+                // The bench page draws its own parts, cuts and spots, and places its spare and remain labels, from this demand.
                 proofFrame.contentWindow?.postMessage({
                   type:'STB_BENCH_GEOMETRY',
                   demand:{
@@ -623,24 +623,6 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                     spotDemand:!!demand.spotDemand
                   }
                 }, win.location.origin);
-                const x0=40, xMax=860;
-                const workpieceLength=Math.max(1,Number(demand.definedWorkpieceLengthIn)||60);
-                const scale=(xMax-x0)/workpieceLength;
-                const qty=Math.max(1,Math.min(2,Number(demand.quantity)||1));
-                const len=Math.max(0,Number(demand.finishedLength)||0);
-                const boundaries=Array.from({length:qty+1},(_,i)=>x0+i*len*scale);
-
-                const usedEnd=boundaries[qty];
-                const spareLabel=childDoc.getElementById('stb-bench-spare-label');
-                const remainLabel=childDoc.getElementById('stb-bench-remain-label');
-                if(spareLabel){
-                  const spareCenter=usedEnd<532?(usedEnd+532)/2:Math.min(820,(usedEnd+xMax)/2);
-                  spareLabel.setAttribute('x',String(spareCenter));
-                }
-                if(remainLabel){
-                  const remainCenter=Math.min(800,Math.max(570,(usedEnd+xMax)/2));
-                  remainLabel.setAttribute('x',String(remainCenter));
-                }
               };
 
               const renderBench = definition => {

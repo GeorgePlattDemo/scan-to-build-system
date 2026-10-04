@@ -1372,6 +1372,20 @@
       "blobSha": "57c9a41d2f0aeb236c20a5a68daca14b51248590",
       "bytes": 248231,
       "reason": "Start your own Idea intake. Start your own registers idea:true and a go target for Idea on the shared tile host; its page and pending stage open on the Idea screen, the shell's screen switch (R17) shows one of Idea, Intent or the bench, and its host message stage is Idea on the Idea screen. The shared host is unchanged (no tile branch). Admission and the Store inquiry are unchanged. Rail CSS for the three screens. Cache-busters for the changed frame page (?v=e62fc931, was ?v=480c06a9) and Dev Guide spec (?v=d98ba53d, was ?v=4f614aad)."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "page-draws-spare-labels",
+      "blobSha": "13b4159674e48235dd4a30aabb9b5ecd4669e4b8",
+      "bytes": 94316,
+      "reason": "The bench places its own spare and remain labels (x of #stb-bench-spare-label and #stb-bench-remain-label) from the STB_BENCH_GEOMETRY message the shell already posts (shell reach R30). Same placement as the shell used. Its one script reads only this page."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "page-draws-spare-labels",
+      "blobSha": "23d6f2a1a53a7d62fad70cf8552f0c38ad20d5bf",
+      "bytes": 247216,
+      "reason": "The shell no longer reads #stb-bench-spare-label or #stb-bench-remain-label to write their x (R30); the bench places them from the STB_BENCH_GEOMETRY message, which is unchanged. The label text (R34), R29 and the before-send line are unchanged. Cache-buster for three-frames.html (?v=13b41596, was ?v=e62fc931)."
     }
   ],
   "retiredFiles": [

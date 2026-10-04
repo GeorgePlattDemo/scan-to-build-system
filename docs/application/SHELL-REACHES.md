@@ -3,7 +3,7 @@
 Owner: System. Docs only. This file lists what is in the code; it does not change it.
 
 Source: `apps/stb/public-build/system-build-current.html` at `main` `393b4bdd495c0eb7ddcc67a7bc93293af443feed`.
-Frame page: `apps/stb/public-build/three-frames.html`. Its one `<script>` draws the bench geometry (R28) from a message the shell posts. Every other live behavior on it comes from the shell reaching in.
+Frame page: `apps/stb/public-build/three-frames.html`. Its one `<script>` draws the bench geometry (R28) and places the spare and remain labels (R30) from a message the shell posts. Every other live behavior on it comes from the shell reaching in.
 
 A *reach* is shell code that creates, styles, reads, writes, listens on, or posts to `#start-own-proof-frame` or anything inside its document.
 
@@ -69,7 +69,7 @@ Line numbers are in `system-build-current.html`.
 |---|------|----------------|-------------|
 | R28 | — | Moved. The shell posts `STB_BENCH_GEOMETRY` (the definition's workpiece length, quantity, finished length, angle, spot demand) to the frame; `three-frames.html` draws its own parts, cuts and spots SVG into `#stb-bench-dynamic-geometry`. The shell no longer reads or writes that element | page-owns |
 | R29 | 606–609 | Reads ten static geometry ids (`#stb-bench-static-parts` … `#stb-bench-part2-dim`); writes `style.display='none'` | page-should-own |
-| R30 | 641–650 | Reads `#stb-bench-spare-label`, `#stb-bench-remain-label`; writes `x` | page-should-own |
+| R30 | — | Moved. `three-frames.html` places `#stb-bench-spare-label` and `#stb-bench-remain-label` (`x`) from the same `STB_BENCH_GEOMETRY` message as R28. The shell no longer reads those labels or writes their `x`. Their text is R34 | page-owns |
 | R31 | 674–680 | Writes text: `#stb-config-parts-value`, `#stb-config-length-value`, `#stb-config-angle-value`, `#stb-config-spot-value`. Ids are not in `three-frames.html` | dead |
 | R32 | 681–686 | Writes text: `#stb-bench-workpiece-spec`, `#stb-bench-length-spec`, `#stb-bench-angle-spec`, `#stb-bench-stock-line`, `#stb-bench-parts-spec` | page-should-own |
 | R33 | 687–697 | Writes text: `#stb-def-workpiece`, `#stb-def-parts`, `#stb-def-length`, `#stb-def-angle`, `#stb-def-spot`, `#stb-def-spot-location`, `#stb-def-retained` | page-should-own |
@@ -103,8 +103,8 @@ Line numbers are in `system-build-current.html`.
 | Disposition | Rows |
 |-------------|------|
 | dead | R3, R13, R14, R31, R42 |
-| page-should-own | R18, R19, R20, R29, R30, R32–R40 |
-| page-owns (moved) | R28 |
+| page-should-own | R18, R19, R20, R29, R32–R40 |
+| page-owns (moved) | R28, R30 |
 | shell-must-keep (until the page has a script; R1–R2 stay after) | R1, R2, R4–R12, R15–R17, R21–R27, R41 |
 
 Every row has one disposition.
