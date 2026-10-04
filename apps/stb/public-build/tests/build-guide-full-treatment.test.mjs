@@ -26,7 +26,7 @@ test('Dev Guide covers current pages and only rewrites the reserved rail',()=>{
   const dynamicIds=[
     'start-own-live','outdoor-build-live','window-seat-live',
     'proof-store','proof-accept','proof-yard','proof-terms','proof-record',
-    'playhouse-idea','playhouse-s001','playhouse-machine','playhouse-store','playhouse-review','playhouse-request','playhouse-yard','playhouse-terms','playhouse-result','playhouse-record',
+    'my-projects','archive','playhouse-idea','playhouse-s001','playhouse-machine','playhouse-store','playhouse-review','playhouse-request','playhouse-yard','playhouse-terms','playhouse-result','playhouse-record',
     'alcove-store-order-surface','alcove-store-service-choices','alcove-store-yard-answer','alcove-store-commercial-sequence','alcove-store-returned-offer'
   ];
 
@@ -46,12 +46,12 @@ test('Dev Guide covers current pages and only rewrites the reserved rail',()=>{
   }
 });
 
-test('landing Dev Guide restores the original short cues',()=>{
+test('landing Dev Guide keeps short orientation and bounded authority cues',()=>{
   const html=spec.render('landing');
   for(const phrase of [
     'Say what this is','One screen, no scrolling to understand it.',
-    'Show who does what','Four steps are yours, one is ours.',
-    'Make the seam visible','The definition reaches the cut unchanged.',
+    'Show who does what','User defines. System keeps meaning. Store answers. Local release governs physical work.',
+    'Make the seam visible','Carry confirmed requirements into modeled commands without redefining them. Physical conformance is not proved here.',
     'Offer three ways in','Same road after. Different opening.'
   ]) assert.ok(html.includes(phrase),`landing Dev Guide lost: ${phrase}`);
 });
@@ -60,7 +60,7 @@ test('sharp shorthand still names the important build debt',()=>{
   assert.match(spec.render('projects'),/Don’t overcrowd/);
   assert.match(spec.render('alcove-config'),/Never attach an old answer to changed work\./);
   assert.match(spec.render('proof-store'),/A sent hash is not a receipt/);
-  assert.match(spec.render('proof-accept'),/One click, three receipts/);
+  assert.match(spec.render('proof-accept'),/Separate the receipts/);
   assert.match(spec.render('proof-accept'),/idempotent/i);
   assert.match(spec.render('proof-yard'),/READY ≠ custody/);
   assert.match(spec.render('proof-yard'),/No magic controller/);
