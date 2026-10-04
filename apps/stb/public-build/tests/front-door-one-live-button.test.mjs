@@ -69,7 +69,7 @@ test('new-user: LATER is explained on screen and in the Dev Guide', () => {
   assert.match(section('new-user'), /If not at all, hit “Later\.”/);
   const rows = guide.pages['new-user'].rows.map(row => row[0] + ' ' + row[1]).join(' | ');
   assert.match(rows, /Play without an account/);
-  assert.match(rows, /Saving or buying asks who you are/);
+  assert.match(rows, /Account\/save choices are disabled/);
 });
 
 test('wrapper layer routes but never removes or injects door buttons', () => {
