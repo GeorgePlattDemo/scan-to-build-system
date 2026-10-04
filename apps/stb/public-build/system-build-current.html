@@ -19,7 +19,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-user-defined-board-runtime-bridge.js?v=db611717"></script>
 <script src="stb-terms-flow.js?v=365d795c"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=4f614aad"></script>
+<script src="stb-build-guide-spec.js?v=d98ba53d"></script>
 <script src="stb-trail-contract.js?v=71dffe24"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
@@ -85,8 +85,9 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
       .dev-build-guide .rev-list{margin:0 0 14px;padding-left:14px;display:grid;gap:4px;font-size:10.5px;line-height:1.4;font-weight:400;color:var(--text2)}
       .dev-build-guide .rev-sec{margin:2px 0 5px;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:400;color:var(--text2)}
       .dev-build-guide .rev-sec.quiet,.dev-build-guide .rev-list.quiet{color:var(--text3)}
-      #start-own-live:not([data-rev-stage="bench"]) .rev-stage[data-rev-stage="bench"],
-      #start-own-live[data-rev-stage="bench"] .rev-stage[data-rev-stage="intent"]{display:none}
+      #start-own-live:not([data-rev-stage="idea"]) .rev-stage[data-rev-stage="idea"],
+      #start-own-live:not([data-rev-stage="intent"]) .rev-stage[data-rev-stage="intent"],
+      #start-own-live:not([data-rev-stage="bench"]) .rev-stage[data-rev-stage="bench"]{display:none}
       .dev-build-guide .guide-meta{margin-top:auto;padding-top:10px;border-top:1px solid var(--border);display:grid;gap:3px;font:8.5px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text3)}
       /* Trail rules: the top nav appears only inside a live project, never on Landing, the doors or the Shared Home. */
       .recovery-nav:not([data-active-project]){display:none!important}
@@ -131,9 +132,10 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
     let proofSimulation = null;
     const storeHandoffContract = window.STBStoreHandoffContract || null;
     const user1RuntimeBridge = window.STBUserDefinedBoardRuntimeBridge || null;
-    // Opens a Start-your-own screen ('intent' or 'bench') from anywhere in the shell.
+    // Opens a Start-your-own screen ('idea', 'intent' or 'bench') from anywhere in the shell.
     // The real switcher is scoped inside the Shared Home block below and assigns itself here.
     let openStartOwnStage = () => {};
+    const startOwnScreen = stage => stage === 'idea' || stage === 'bench' ? stage : 'intent';
     // Start your own is on the shared tile host. The bench's definition is one job-definition revision; the
     // revision on the bench is admitted on every change, and confirming asks the Store through admit() then inquire().
     const START_OWN_PROJECT_ID = 'start-own';
@@ -180,13 +182,15 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
             startOwnPage = doc.createElement('section');
             startOwnPage.className = 'page start-own-shell-page';
             startOwnPage.id = 'start-own-live';
+            // Start your own opens on its Idea intake, before Intent.
+            startOwnPage.dataset.revStage = 'idea';
             startOwnPage.innerHTML = `
               <div class="start-own-shell-main">
                 <iframe
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=480c06a9"
+                  src="three-frames.html?v=e62fc931"
                 ></iframe>
               </div>
             `;
@@ -195,7 +199,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=480c06a9';
+            liveFrame.src = 'three-frames.html?v=e62fc931';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -203,10 +207,10 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
             if (!storeLine) banner.insertAdjacentHTML('beforeend', '<p id="proof-job1-store" class="dim">Store: waiting on a complete definition.</p>');
           }
           const proofFrame = startOwnPage.querySelector('#start-own-proof-frame');
-          let pendingStartOwnStage = 'intent';
+          let pendingStartOwnStage = 'idea';
           let pendingStartOwnFocus = null;
           let showStartOwnStage = (stage, focus = null) => {
-            pendingStartOwnStage = stage === 'bench' ? 'bench' : 'intent';
+            pendingStartOwnStage = startOwnScreen(stage);
             pendingStartOwnFocus = focus === 'definition-boundary' ? 'definition-boundary' : null;
           };
           openStartOwnStage = (stage, focus = null) => showStartOwnStage(stage, focus);
@@ -216,6 +220,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
               const childDoc = proofFrame.contentDocument;
               if (!childDoc) return;
               const benchButton = childDoc.querySelector('.stb-bench-button');
+              const ideaScreen = childDoc.getElementById('stb-start-idea-screen');
               const intentScreen = childDoc.getElementById('stb-start-intent-screen');
               const benchScreen = childDoc.getElementById('stb-start-bench-screen');
               const benchBack = childDoc.getElementById('stb-bench-back');
@@ -318,9 +323,11 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
               };
 
               const showStage = (stage, focus = null) => {
-                const bench = stage === 'bench';
-                doc.getElementById('start-own-live')?.setAttribute('data-rev-stage', bench ? 'bench' : 'intent');
-                if (intentScreen) intentScreen.hidden = bench;
+                const screen = startOwnScreen(stage);
+                const bench = screen === 'bench';
+                doc.getElementById('start-own-live')?.setAttribute('data-rev-stage', screen);
+                if (ideaScreen) ideaScreen.hidden = screen !== 'idea';
+                if (intentScreen) intentScreen.hidden = screen !== 'intent';
                 if (benchScreen) benchScreen.hidden = !bench;
                 if (bench && benchIntentSlot && !benchIntentSlot.firstElementChild) {
                   const sourceIntent = childDoc.querySelector('#stb-start-intent-screen .stb-user1-body');
@@ -347,7 +354,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                 startOwnPublish();
               };
               showStartOwnStage = (stage, focus = null) => {
-                pendingStartOwnStage = stage === 'bench' ? 'bench' : 'intent';
+                pendingStartOwnStage = startOwnScreen(stage);
                 pendingStartOwnFocus = focus === 'definition-boundary' ? 'definition-boundary' : null;
                 showStage(pendingStartOwnStage, pendingStartOwnFocus);
               };
@@ -1078,7 +1085,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
             selectJourneyProject(START_OWN_PROJECT_ID);
             originalShow.call(win, 'start-own-live');
             tilePageShown('start-own-live');
-            setTimeout(() => showStartOwnStage('intent'),0);
+            setTimeout(() => showStartOwnStage('idea'),0);
           }, true);
         }
 
@@ -2499,7 +2506,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
     // contract's availableSteps() for the bench's admission and fresh answer. The Store answers shows that answer,
     // so it waits for one; Your call also waits for the terms flow (callOpen); We cut it and Pick up & build stay
     // with the terms flow's gates, behind Your call. The stage is the step the shown page (and, on the Start your
-    // own page, its Intent or bench screen) stands for.
+    // own page, its Intent or bench screen) stands for; its Idea screen is the Idea intake, where the tile opens.
     function startOwnHostMessage() {
       const steps = trailContract.steps;
       const answer = startOwnCurrentAnswer();
@@ -2512,11 +2519,12 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
       if (usable.includes(steps[3]) && t?.recordOpen) usable.push(steps[5]);
       const shown = tileHostShownPage();
       let index = tileHostStepOfPage(START_OWN_PROJECT_ID, shown);
-      if (index === 0 && doc.getElementById(shown)?.dataset.revStage === 'bench') index = 1;
+      const screen = index === 0 ? doc.getElementById(shown)?.dataset.revStage : null;
+      if (screen === 'bench') index = 1;
       return {
         interface:tileHostContract.TILE_HOST_VERSION,
         tileId:START_OWN_PROJECT_ID,
-        stage:steps[index ?? 0],
+        stage:screen === 'idea' ? trailContract.idea.label : steps[index ?? 0],
         usableSteps:usable,
         navigationRequest:null
       };
@@ -3517,15 +3525,23 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
     win.STBAlcoveTileHost = Object.freeze({ hostMessage:() => alcoveHostMessage() });
 
     // Start your own is on the shared tile host. The host draws its one nav line from the message its tile code
-    // builds (startOwnHostMessage); its Store inquiries go through admit() then inquire() from its bench. It has no
-    // Idea intake yet, so it opens on Intent. Intent and the bench are two screens of its page: asked for either,
-    // it switches screens (the bench opens at the top, so the X-brace picture and the board are seen first).
+    // builds (startOwnHostMessage); its Store inquiries go through admit() then inquire() from its bench. It opens on
+    // its Idea intake, and from Intent on the host draws Idea as its back control. Idea, Intent and the bench are
+    // three screens of its page: asked for one, it switches screens (the bench opens at the top, so the X-brace
+    // picture and the board are seen first). Asked for Idea from another of its pages, it shows this page first.
     registerTileHost(START_OWN_PROJECT_ID, {
       report:startOwnHostMessage,
       shown:() => startOwnPublish(),
+      idea:true,
       go:target => {
         const at = trailContract.steps.indexOf(target);
-        if (at === 0 || at === 1) setTimeout(() => openStartOwnStage(at === 1 ? 'bench' : 'intent', null), 0);
+        const screen = target === trailContract.idea.label ? 'idea' : at === 0 ? 'intent' : at === 1 ? 'bench' : null;
+        const pageId = PROJECT_STAGE_TARGETS[START_OWN_PROJECT_ID].scan;
+        if (screen === 'idea' && tileHostShownPage() !== pageId) {
+          originalShow.call(win, pageId);
+          tilePageShown(pageId);
+        }
+        if (screen) setTimeout(() => openStartOwnStage(screen, null), 0);
         startOwnPublish();
       }
     });

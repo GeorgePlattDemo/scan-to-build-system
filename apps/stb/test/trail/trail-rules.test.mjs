@@ -44,10 +44,10 @@ const contract = sandbox.STBTrailContract;
 // Alcove opens on its Idea intake, and from Intent on its nav reads Idea, then the six steps.
 // outdoor:R2 left on system/outdoor-on-shared-host, for the same reason. outdoor:R1 left on system/outdoor-idea-intake:
 // Outdoor opens on its Idea intake, and from Intent on its nav reads Idea, then the six steps.
-// start-own:R2 left on system/start-own-on-shared-host, for the same reason. start-own:R1 stays: Start your own
-// still opens on Intent with no Idea intake.
+// start-own:R2 left on system/start-own-on-shared-host, for the same reason. start-own:R1 left on
+// system/start-own-idea-intake: Start your own opens on its Idea intake, and from Intent on its nav reads Idea, then
+// the six steps.
 const KNOWN_FAILING = new Set([
-  'start-own:R1',
 ]);
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css' };

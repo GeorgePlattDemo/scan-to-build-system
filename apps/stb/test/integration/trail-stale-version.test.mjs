@@ -64,6 +64,8 @@ const TILES = {
   'start-own': {
     label:'Start your own', projectId:'start-own', inner:false,
     async answer({ page, frame }) {
+      // Start your own opens on its Idea intake; the Idea line's one way on is Intent.
+      await frame.locator('.recovery-nav button.job-idea-onward').click();
       await frame.locator('.recovery-nav button[data-journey-stage="configure"]').click();
       await wait(page,1200);
       // The bench has no default species; the user states one before confirming.

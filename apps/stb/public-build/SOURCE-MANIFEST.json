@@ -1351,6 +1351,27 @@
       "blobSha": "a18fb2b35a8987a29a68d5293f2ec362e7088741",
       "bytes": 247165,
       "reason": "Outdoor Idea intake. Outdoor registers idea:true on the shared tile host, so from Intent on the host draws Idea as its back control; the shared host is otherwise unchanged (no tile branch). Cache-busters for the changed Outdoor page (?v=a5c33f69, was ?v=0f254854) and Dev Guide spec (?v=4f614aad, was ?v=55c93f09)."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "start-own-idea-intake",
+      "blobSha": "d98ba53d280455903df1c3ce44d1ecc924d420df",
+      "bytes": 91973,
+      "reason": "Dev Guide rail for the new Start your own Idea screen (job1-intake: intake, not a step). The start-own-live rail ships it beside the Intent and bench rails; the page's stage picks one. The owner's Job 1 rails are unchanged."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "start-own-idea-intake",
+      "blobSha": "e62fc9312f2dbe28cb322253ed3787892e614f62",
+      "bytes": 93441,
+      "reason": "Start your own Idea intake. The page opens on a new Idea screen before Intent: the ways to bring a job (moved off the Intent screen, not copied) and the values the bounded tile already has (the 2×4 stud, parts, length, ends, center spot), shown as carried forward to Intent. Its one script renders those values from the STB_BENCH_GEOMETRY demand the shell already posts, the same demand the bench draws, so nobody re-enters a known value. Intent keeps its picture, facts and bench button; the bench screen and its drawing are unchanged."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "start-own-idea-intake",
+      "blobSha": "57c9a41d2f0aeb236c20a5a68daca14b51248590",
+      "bytes": 248231,
+      "reason": "Start your own Idea intake. Start your own registers idea:true and a go target for Idea on the shared tile host; its page and pending stage open on the Idea screen, the shell's screen switch (R17) shows one of Idea, Intent or the bench, and its host message stage is Idea on the Idea screen. The shared host is unchanged (no tile branch). Admission and the Store inquiry are unchanged. Rail CSS for the three screens. Cache-busters for the changed frame page (?v=e62fc931, was ?v=480c06a9) and Dev Guide spec (?v=d98ba53d, was ?v=4f614aad)."
     }
   ],
   "retiredFiles": [

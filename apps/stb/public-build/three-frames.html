@@ -126,7 +126,28 @@
 </head>
 <body>
 <div class="wrap">
-<section id="stb-start-intent-screen">
+<section id="stb-start-idea-screen">
+  <div class="frame">
+    <div class="frame-in">
+      <h1 class="sy">Idea · what you brought</h1>
+      <p class="syl">What you bring lands here and ends at Intent. Idea is not a step.</p>
+      <p class="lead">Ways to bring it, easiest first.</p>
+      <ol class="morelist">
+        <li><b>Add pieces as you go.</b> One board, then the next. You don’t have to know the whole thing up front.</li>
+        <li><b>Just tell us in plain words.</b> Say what you’re after and we’ll write down what we heard. You check it.</li>
+        <li><b>Type the numbers.</b> Lengths, widths, where the holes go. We draw it back so you can see it.</li>
+        <li><b>Send a scan or a photo.</b> Phone, laser, a picture of the wall. Even a napkin sketch.</li>
+        <li><b>Draw it here.</b> Boxes at right angles, which is most of what wood is. Enough for a bench or a frame.</li>
+        <li><b>Bring what you already have.</b> A cut list, a PDF, a CAD export. Keep working in the tool you know — we’ll take what it gives us.</li>
+      </ol>
+      <p class="lead" style="margin-top:18px">Already known · carried to Intent</p>
+      <div class="stb-user1-facts" id="stb-idea-known"></div>
+      <p class="sub">Nobody types these again. Intent opens with every value this project already has; the wood is yours to choose on the bench. Choose Intent above to go on.</p>
+      <p class="sub" style="margin-top:12px">Idea makes no machine motion. It is where the job’s source material lives.</p>
+    </div>
+  </div>
+</section>
+<section id="stb-start-intent-screen" hidden>
   <div class="frame">
     <div class="frame-in">
       <h1 class="sy">Start your own project</h1>
@@ -177,16 +198,7 @@
       </div><p>¾ plywood</p></div>
       <p class="sub" id="stb-store-glossary-status">These material choices are checked against the current Store.</p>
       <p class="lead">Grab a board from the Store and tell us what you want done to it.</p>
-      <p class="sub">Cut it to length. Put a hole in it. That’s a whole project and a perfectly good reason to be here. Everything below is the same idea with more in it.</p>
-      <p class="lead" style="margin-top:18px">More ways we can help, easiest first.</p>
-      <ol class="morelist">
-        <li><b>Add pieces as you go.</b> One board, then the next. You don’t have to know the whole thing up front.</li>
-        <li><b>Just tell us in plain words.</b> Say what you’re after and we’ll write down what we heard. You check it.</li>
-        <li><b>Type the numbers.</b> Lengths, widths, where the holes go. We draw it back so you can see it.</li>
-        <li><b>Send a scan or a photo.</b> Phone, laser, a picture of the wall. Even a napkin sketch.</li>
-        <li><b>Draw it here.</b> Boxes at right angles, which is most of what wood is. Enough for a bench or a frame.</li>
-        <li><b>Bring what you already have.</b> A cut list, a PDF, a CAD export. Keep working in the tool you know — we’ll take what it gives us.</li>
-      </ol>
+      <p class="sub">Cut it to length. Put a hole in it. That’s a whole project and a perfectly good reason to be here.</p>
     </div>
   </div>
 
@@ -418,8 +430,22 @@
 </section>
 </div>
 <script>
-// The bench draws its own parts, cuts and spots from the demand the shell posts. It reads only this page.
+// The bench draws its own parts, cuts and spots from the demand the shell posts, and Idea shows the same demand as
+// the values carried forward to Intent. It reads only this page.
 (() => {
+  const renderIdeaKnown = demand => {
+    const known = document.getElementById('stb-idea-known');
+    if (!known || !demand) return;
+    const qty = Number(demand.quantity), len = Number(demand.finishedLength), angle = Number(demand.angleDegrees);
+    const board = document.querySelector('#stb-store-board-2x4 p')?.textContent || '';
+    const facts = [board, qty+' part'+(qty===1?'':'s'), len+' in each', Math.round(angle*10)/10+'° ends'];
+    facts.push(demand.spotDemand ? 'center spot · '+(len/2)+' in from either end' : 'no spot');
+    known.replaceChildren(...facts.filter(Boolean).map(fact => {
+      const chip = document.createElement('span');
+      chip.textContent = fact;
+      return chip;
+    }));
+  };
   const drawBenchGeometry = demand => {
     const overlay = document.getElementById('stb-bench-dynamic-geometry');
     if (!overlay || !demand) return;
@@ -457,6 +483,7 @@
     if (event.origin !== window.location.origin) return;
     if (event.data?.type !== 'STB_BENCH_GEOMETRY') return;
     drawBenchGeometry(event.data.demand);
+    renderIdeaKnown(event.data.demand);
   });
 })();
 </script>

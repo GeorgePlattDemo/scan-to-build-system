@@ -64,7 +64,7 @@ assert.match(surface,/CONFIRM &amp; SEND TO STORE ZERO →/);
 assert.match(surface,/id="stb-bench-dynamic-geometry"/);
 
 // Host carries one definition through intent, bench, Store, Terms and record.
-assert.match(shell,/three-frames\.html\?v=480c06a9/);
+assert.match(shell,/three-frames\.html\?v=e62fc931/);
 assert.match(shell,/const definedWorkpieceLengthIn = 60;/);
 assert.match(shell,/DEMO_HORIZONTAL_SPAN_IN = 8/);
 assert.match(shell,/Math\.asin\(spanRatio\)/);
@@ -89,8 +89,13 @@ assert.match(shell,/const spotDemand =/);
 assert.match(shell,/physicalDemand\.spotDemand = spotDemand/);
 assert.match(shell,/formula:'finishedLengthIn \/ 2'/);
 assert.match(shell,/renderBoardGeometry\(definition\)/);
-assert.match(shell,/showStartOwnStage\('intent'\)/);
-assert.match(shell,/setTimeout\(\(\) => openStartOwnStage\(at === 1 \? 'bench' : 'intent', null\), 0\)/);
+// Start your own opens on its Idea intake; Intent stays step 1, and the go target maps Idea, Intent and the bench.
+assert.match(shell,/showStartOwnStage\('idea'\)/);
+assert.equal(shell.includes("showStartOwnStage('intent')"),false,'Start your own still opens on Intent');
+assert.match(shell,/const screen = target === trailContract\.idea\.label \? 'idea' : at === 0 \? 'intent' : at === 1 \? 'bench' : null;/);
+assert.match(shell,/if \(screen\) setTimeout\(\(\) => openStartOwnStage\(screen, null\), 0\)/);
+assert.match(surface,/<section id="stb-start-idea-screen">/);
+assert.match(surface,/<section id="stb-start-intent-screen" hidden>/);
 assert.match(shell,/definitionId:'SYO-USER1-XBRACE-0\.1'/);
 assert.match(shell,/originalShow\.call\(win,'proof-store'\)/);
 assert.match(shell,/ensureProjectJourneyPage\('proof-terms'/);

@@ -1,4 +1,6 @@
 // Start your own on the shared tile host, against the real pinned Store.
+// - Start your own opens on its Idea intake: no numbered step, the Idea line's one way on is Intent, and the values
+//   the bounded tile already has are shown as carried forward to Intent. From Intent on, Idea is the back control.
 // - The host draws Start your own's one nav line from a validated STB-TILE-HOST-0.1 message and the trail contract:
 //   the six contract steps, inert steps disabled, exactly one current, and the current step follows the shown page
 //   (and, on the Start your own page, its Intent or bench screen).
@@ -45,9 +47,15 @@ const startOwnCalls = log => log.filter(e => e.request.projectId === 'start-own'
 const live = (frame, fn, arg) => frame.evaluate(fn, arg);
 const bench = page => page.frames().find(f => f.url().includes('three-frames.html'));
 
+// Start your own opens on its Idea intake; the Idea line's one way on is Intent.
+async function enterIntent(frame) {
+  await frame.locator('.recovery-nav button.job-idea-onward').click();
+  await until(async () => (await currentLabels(frame)).join() === '1 · Intent', 'intent current');
+}
 async function openStartOwn(browser, origin) {
   const { page, frame, errors } = await openTile(browser, origin, 'Start your own');
   await until(async () => bench(page) && await bench(page).$('#stb-confirm-store'), 'Start your own page');
+  await enterIntent(frame);
   // The bench has no default species: until the user chooses one, the revision blocks before the Store on the
   // material and names its owner.
   await until(() => live(frame, () => window.STBStartOwnLive?.admission()?.admission?.result === 'BLOCKED'), 'bench revision blocked on species');
@@ -134,11 +142,73 @@ test('the bench page draws its own parts, cuts and spots for a complete revision
   });
 });
 
+test('Start your own opens on its Idea intake; Intent stays step 1 and the known values carry forward', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { page, frame, errors } = await openTile(browser, origin, 'Start your own');
+    await until(async () => bench(page) && await bench(page).$('#stb-confirm-store'), 'Start your own page');
+
+    // Idea: the intake, not a step. No numbered step shows and none is current; the one way on is Intent.
+    let message = await until(async () => { const m = await live(frame, () => window.STBStartOwnLive.hostMessage()); return m.stage === 'Idea' && m; }, 'Idea stage');
+    assert.equal(message.tileId, 'start-own');
+    assert.equal(await live(frame, () => document.documentElement.dataset.tileHostRejected ?? null), null);
+    assert.deepEqual((await navLine(frame)).map(b => b.label), ['← Project Library', 'Intent']);
+    assert.deepEqual(await currentLabels(frame), []);
+    assert.equal(await shownPage(frame), 'start-own-live');
+    assert.equal(await bench(page).locator('#stb-start-idea-screen').isHidden(), false);
+    assert.equal(await bench(page).locator('#stb-start-intent-screen').isHidden(), true);
+    assert.equal(await bench(page).locator('#stb-start-bench-screen').isHidden(), true);
+    // The ways to bring a job are on Idea, not on Intent.
+    assert.equal(await bench(page).locator('#stb-start-idea-screen .morelist li').count(), 6);
+    assert.equal(await bench(page).locator('#stb-start-intent-screen .morelist').count(), 0);
+
+    // The values the bounded tile already has, from the same demand the bench draws, carried forward to Intent.
+    const known = () => bench(page).$$eval('#stb-idea-known span', els => els.map(e => e.textContent));
+    assert.deepEqual(await until(async () => { const k = await known(); return k.length && k; }, 'known values'),
+      ['2×4 stud', '2 parts', '16 in each', '30° ends', 'center spot · 8 in from either end']);
+    // Nothing is chosen for the user: the wood is not carried, so the revision still blocks before the Store on it.
+    assert.deepEqual(await live(frame, () => window.STBStartOwnLive.admission().admission.blocking),
+      [{ factId: 'start-own.material', owner: 'USER', title: 'Material demand', condition: 'INVALID_VALUE', fields: ['species'] }]);
+
+    // Intent is step 1, and opens with those values: nothing to type again.
+    await enterIntent(frame);
+    assert.deepEqual((await navLine(frame)).map(b => b.label), ['← Project Library', 'Idea', ...TRAIL_STEPS.map((step, i) => `${i + 1} · ${step}`)]);
+    assert.equal(await bench(page).locator('#stb-start-intent-screen').isHidden(), false);
+    assert.equal(await bench(page).locator('#stb-start-idea-screen').isHidden(), true);
+    assert.equal(await bench(page).locator('#stb-start-intent-screen input:visible').count(), 0);
+    assert.equal((await live(frame, () => window.STBStartOwnLive.hostMessage())).stage, 'Intent');
+
+    // Idea is the back control from Intent and from the bench, never current.
+    const backToIdea = async label => {
+      await frame.locator('.recovery-nav button.job-idea').click();
+      await until(async () => (await live(frame, () => window.STBStartOwnLive.hostMessage())).stage === 'Idea', label + ': back on Idea');
+      assert.equal(await bench(page).locator('#stb-start-idea-screen').isHidden(), false, label);
+      assert.deepEqual((await navLine(frame)).map(b => b.label), ['← Project Library', 'Intent'], label);
+    };
+    await backToIdea('from Intent');
+    await enterIntent(frame);
+    await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
+    await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current');
+    await backToIdea('from the bench');
+
+    // A changed length on the bench is the value Idea then carries.
+    await enterIntent(frame);
+    await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
+    await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current again');
+    await bench(page).locator('#stb-bench-controls [data-length="18"]').click();
+    await until(async () => (await known()).includes('18 in each'), 'Idea carries the changed length');
+    assert.deepEqual(await known(), ['2×4 stud', '2 parts', '18 in each', '26.4° ends', 'center spot · 9 in from either end']);
+
+    assert.equal(startOwnCalls(log).length, 0, 'Idea and Intent ask the Store nothing');
+    assert.deepEqual(errors, []);
+    await page.close();
+  });
+});
+
 test('the shared host draws the Start your own nav from its validated STB-TILE-HOST-0.1 message', { timeout: 240000 }, async () => {
   await withBrowser(async ({ browser, origin, log }) => {
     const { page, frame, errors } = await openStartOwn(browser, origin);
 
-    // Intent: the six contract steps after the Project Library. The Store answers waits for an answer to show.
+    // Intent: Idea, then the six contract steps after the Project Library. The Store answers waits for an answer to show.
     let message = await live(frame, () => window.STBStartOwnLive.hostMessage());
     assert.deepEqual(Object.keys(message).sort(), ['interface', 'navigationRequest', 'stage', 'tileId', 'usableSteps']);
     assert.equal(message.interface, 'STB-TILE-HOST-0.1');
@@ -147,7 +217,7 @@ test('the shared host draws the Start your own nav from its validated STB-TILE-H
     assert.deepEqual(message.usableSteps, TRAIL_STEPS.slice(0, 2));
     assert.equal(await live(frame, () => document.documentElement.dataset.tileHostRejected ?? null), null);
     let line = await navLine(frame);
-    assert.deepEqual(line.map(b => b.label), ['← Project Library', ...TRAIL_STEPS.map((step, i) => `${i + 1} · ${step}`)]);
+    assert.deepEqual(line.map(b => b.label), ['← Project Library', 'Idea', ...TRAIL_STEPS.map((step, i) => `${i + 1} · ${step}`)]);
     assert.deepEqual(steps(line).map(b => b.inert), [false, false, true, true, true, true]);
     assert.deepEqual(await currentLabels(frame), ['1 · Intent']);
     assert.equal(await frame.locator('.recovery-nav .job-nav-context').innerText(), 'JOB 1 · START YOUR OWN');
@@ -323,6 +393,7 @@ test('a blank datum field, a non-finite saw angle or a spot operation without it
   await withBrowser(async ({ browser, origin, log }) => {
     const { page, frame } = await openTile(browser, origin, 'Start your own');
     await until(async () => bench(page) && await bench(page).$('#stb-confirm-store'), 'Start your own page');
+    await enterIntent(frame);
     await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
     await chooseSpecies(page, frame, 'spf');
 
