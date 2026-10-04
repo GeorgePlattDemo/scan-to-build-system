@@ -1442,6 +1442,27 @@
       "blobSha": "3ba96324e62ce1df8b2fca12c72e24f56971265b",
       "bytes": 140536,
       "reason": "Live entry inspection found unsupported No returns customer copy and account-flow shorthand. Rail explicitly records the copy gap and disabled account/save choices; dependent script/iframe cache keys updated. Customer copy, behavior and Store authority are unchanged."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "start-own-idea-is-the-bench",
+      "blobSha": "3694af8058a64a6fc2591fd3fa37bf1bd4a34efe",
+      "bytes": 96938,
+      "reason": "Start your own Idea is this job's story: the existing Job 1 picture, top left at 300px (half again Intent's 200px), and one line, \"Two broken crossmembers, both cut from a 2\u00d74.\" The six-way list and the carried-value chips are off Idea. Intent gets the six ways back in their old order, and a seventh item, the type box \"Add a tool this job needs.\" Intent's picture has a red circle on the 2\u00d74 this job picked; under it the two demo woods (SPF, treated SYP) and a Store SKU box. Cedar is off the bench's wood choices (it stays in the Store catalog); the bench label reads TREATED SYP. The bench gets a row for each added control and its price line starts at \"Pick a wood to see its price.\""
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "start-own-idea-is-the-bench",
+      "blobSha": "d4b1ad723d4cb5c57a02b716e9887b7893092b4f",
+      "bytes": 254473,
+      "reason": "Start your own: one wood state for Intent and the bench; the Store SKU box states a wood only when the SKU is a real Store 2\u00d74 of one of this job's woods; a typed tool becomes this job's control (Intent chip, bench ON/OFF row, carried in the definition's intent.addedControls as NOT_ASKED and named in Before you send it). The bench reference is looked up with the stated material (storeDemand.materialDemand), so a wood change changes the bench price line and the reference price panel; the longer-board note says why from the Store's considered candidates. The bench copy of the Intent picture drops Intent's wood buttons. Cache keys for three-frames.html and stb-store-handoff-contract.js."
+    },
+    {
+      "path": "stb-store-handoff-contract.js",
+      "pass": "start-own-idea-is-the-bench",
+      "blobSha": "534a2b5e12e37b0d0ee231559e695ceb41c11ed6",
+      "bytes": 59750,
+      "reason": "User 1 Store-issued references are per wood: the two SPF references gain their materialDemand, and two treated SYP references (16 in and 18 in, STB-ZERO-PTAG-2X4-72-001) are added from the Store at STORE_PIN; the matcher requires the stated material. startOwnStoreItem looks up the nominal 2\u00d74 boards of store-zero-catalog.json at STORE_PIN by SKU. Both are checked against the pinned Store by test/store/user1-reference-guard.test.mjs. STORE_PIN is unchanged."
     }
   ],
   "retiredFiles": [

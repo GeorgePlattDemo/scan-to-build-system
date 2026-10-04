@@ -168,6 +168,58 @@
     });
   }
 
+  /*
+   * Store items a Start your own job can name by SKU: every nominal 2×4 board in
+   * store-zero-catalog.json at System's STORE_PIN, row for row
+   * ([storeSku, species, grade, stockL_in, sellingPrice, description]).
+   * apps/stb/test/store/user1-reference-guard.test.mjs fails if any row differs
+   * from the catalog at the pin. A lookup names a real Store item or nothing; it
+   * never makes up a species, and it does not choose the board the Store selects.
+   */
+  var START_OWN_STORE_ITEMS_PIN = '9c62d9d6f7775deef83d47196d32c9b5174a352c';
+  var START_OWN_STORE_ITEMS = Object.freeze([
+    ["STB-ZERO-SPF-2X4-96-001","spf","construction",96,4.18,"2x4 x 96 in SPF construction"],
+    ["STB-ZERO-SPF-2X4-120-001","spf","construction",120,5.69,"2x4 x 120 in SPF construction"],
+    ["STB-ZERO-SPF-2X4-144-001","spf","construction",144,6.8,"2x4 x 144 in SPF construction"],
+    ["STB-ZERO-SPF-2X4-60-001","spf","construction",60,2.61,"2x4 x 60 in SPF construction"],
+    ["STB-ZERO-SPF-2X4-72-001","spf","construction",72,3.13,"2x4 x 72 in SPF construction"],
+    ["STB-ZERO-SPF-2X4-108-001","spf","construction",108,4.7,"2x4 x 108 in SPF construction"],
+    ["STB-ZERO-SPF-2X4-168-001","spf","construction",168,7.31,"2x4 x 168 in SPF construction"],
+    ["STB-ZERO-SPF-2X4-192-001","spf","construction",192,8.36,"2x4 x 192 in SPF construction"],
+    ["STB-ZERO-PT-2X4-96-001","syp-treated","above-ground",96,4.81,"2x4 x 96 in treated SYP above-ground"],
+    ["STB-ZERO-PT-2X4-120-001","syp-treated","above-ground",120,6.01,"2x4 x 120 in treated SYP above-ground"],
+    ["STB-ZERO-PT-2X4-144-001","syp-treated","above-ground",144,7.21,"2x4 x 144 in treated SYP above-ground"],
+    ["STB-ZERO-PTGC-2X4-72-001","syp-treated","ground-contact",72,6.81,"2x4 x 72 in treated SYP ground-contact"],
+    ["STB-ZERO-PTGC-2X4-96-001","syp-treated","ground-contact",96,7.5,"2x4 x 96 in treated SYP ground-contact"],
+    ["STB-ZERO-PTGC-2X4-120-001","syp-treated","ground-contact",120,11.41,"2x4 x 120 in treated SYP ground-contact"],
+    ["STB-ZERO-PTGC-2X4-144-001","syp-treated","ground-contact",144,14.07,"2x4 x 144 in treated SYP ground-contact"],
+    ["STB-ZERO-PTGC-2X4-168-001","syp-treated","ground-contact",168,17.21,"2x4 x 168 in treated SYP ground-contact"],
+    ["STB-ZERO-PTGC-2X4-192-001","syp-treated","ground-contact",192,19.15,"2x4 x 192 in treated SYP ground-contact"],
+    ["STB-ZERO-PTAG-2X4-72-001","syp-treated","above-ground",72,5.15,"2x4 x 72 in SYP AC2 #2 Prime AG"],
+    ["STB-ZERO-PTAG-2X4-168-001","syp-treated","above-ground",168,12.08,"2x4 x 168 in SYP AC2 #2 Prime AG"],
+    ["STB-ZERO-PTAG-2X4-192-001","syp-treated","above-ground",192,15.96,"2x4 x 192 in SYP AC2 #2 Prime AG"],
+    ["STB-ZERO-PTCT-2X4-96-001","syp-treated","ground-contact-cedartone",96,10.29,"2x4 x 96 in SYP AC2 #1 Prime GC CedarTone"],
+    ["STB-ZERO-PTCT-2X4-120-001","syp-treated","ground-contact-cedartone",120,14.18,"2x4 x 120 in SYP AC2 #1 Prime GC CedarTone"],
+    ["STB-ZERO-PTCT-2X4-144-001","syp-treated","ground-contact-cedartone",144,17.64,"2x4 x 144 in SYP AC2 #1 Prime GC CedarTone"],
+    ["STB-ZERO-PTCT-2X4-192-001","syp-treated","ground-contact-cedartone",192,23.63,"2x4 x 192 in SYP AC2 #1 Prime GC CedarTone"],
+    ["STB-ZERO-WRC-2X4-96-001","cedar","S4S",96,13.13,"2x4 x 96 in Western Red Cedar S4S"],
+    ["STB-ZERO-WRC-2X4-120-001","cedar","S4S",120,17.64,"2x4 x 120 in Western Red Cedar S4S"],
+    ["STB-ZERO-WRC-2X4-144-001","cedar","S4S",144,21.95,"2x4 x 144 in Western Red Cedar S4S"]
+  ]);
+
+  function startOwnStoreItem(storeSku){
+    var sku=String(storeSku || '').trim().toUpperCase();
+    for(var i=0;i<START_OWN_STORE_ITEMS.length;i++){
+      var row=START_OWN_STORE_ITEMS[i];
+      if(row[0]!==sku) continue;
+      return Object.freeze({
+        storeSku:row[0],species:row[1],grade:row[2],form:'board',nominalT:2,nominalW:4,
+        stockL_in:row[3],sellingPrice:row[4],description:row[5],catalogPin:START_OWN_STORE_ITEMS_PIN
+      });
+    }
+    return null;
+  }
+
   function materialFail(code, details){
     return Object.freeze({
       status:'UNRESOLVED',
@@ -294,8 +346,8 @@
    *
    * This static Review build does not execute the Store runtime. It may present
    * only the exact Store answer already proven on the exact Store SHA below.
-   * apps/stb/test/store/user1-reference-guard.test.mjs re-runs both demands through
-   * the Store at System's STORE_PIN and fails if any value here differs.
+   * apps/stb/test/store/user1-reference-guard.test.mjs re-runs every demand, each with
+   * its stated wood, through the Store at System's STORE_PIN and fails if any value here differs.
    * Any changed governing demand must go back through Store. No browser-side
    * pricing, capability, motion, cycle-time, or refusal calculation is allowed.
    */
@@ -313,6 +365,7 @@
     demand:Object.freeze({
       configurationId:'SYO-USER1-XBRACE',
       configurationVersion:'0.1',
+      materialDemand:Object.freeze({species:'spf',form:'board',nominalT:2,nominalW:4}),
       definedWorkpieceLengthIn:60,
       partQty:2,
       partLengthIn:16,
@@ -422,6 +475,7 @@
     demand:Object.freeze({
       configurationId:'SYO-USER1-XBRACE',
       configurationVersion:'0.2',
+      materialDemand:Object.freeze({species:'spf',form:'board',nominalT:2,nominalW:4}),
       definedWorkpieceLengthIn:60,
       partQty:2,
       partLengthIn:18,
@@ -517,7 +571,225 @@
     })
   });
 
-  var USER1_STORE_REFERENCES = Object.freeze([USER1_STORE_REFERENCE,USER1_STORE_REFERENCE_18]);
+  var USER1_STORE_REFERENCE_SYP = Object.freeze({
+    status:'STORE_ISSUED_REFERENCE',
+    source:Object.freeze({
+      repository:'GeorgePlattDemo/scan-to-build-store',
+      storePin:'9c62d9d6f7775deef83d47196d32c9b5174a352c',
+      pricingFile:'store-zero-pricing-engine.mjs',
+      travelFile:'d001-travel-standard.mjs',
+      governingStandard:'DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md',
+      workflowRun:null,
+      systemIntegrationPin:null
+    }),
+    demand:Object.freeze({
+      configurationId:'SYO-USER1-XBRACE',
+      configurationVersion:'0.1',
+      materialDemand:Object.freeze({species:'syp-treated',form:'board',nominalT:2,nominalW:4}),
+      definedWorkpieceLengthIn:60,
+      partQty:2,
+      partLengthIn:16,
+      sawAngleDeg:30,
+      cutPlane:'miter-face',
+      endIdentity:'both',
+      endRelation:'parallel',
+      lengthDatum:'long-long-outer-edge',
+      datumCMethod:'REFERENCE_CUT',
+      requiredOps:Object.freeze(['MITER_LIMITED','SPOT_ON_LOCATION']),
+      spotMode:'SPOT_ON_LOCATION',
+      spotLocationRule:'CENTERED_ON_PART',
+      spotAcrossWidthRule:'CENTERED_ON_WIDE_FACE',
+      spotXIn:8,
+      declaredSawCuts:3,
+      declaredSpotCount:2
+    }),
+    materialResolution:Object.freeze({
+      status:'MAPPED',
+      storeSku:'STB-ZERO-PTAG-2X4-72-001',
+      pricingReferenceSku:'STB-ZERO-PTAG-2X4-72-001',
+      pricingReferenceStockLengthIn:72,
+      requestedMinimumWorkpieceLengthIn:60,
+      requestedDefinedWorkpieceLengthIn:60,
+      workpieceLengthIn:72,
+      selectionPolicy:'SHORTEST_COMPLETE_STORE_OFFERING',
+      consideredCandidates:Object.freeze([
+        Object.freeze({storeSku:'STB-ZERO-PTAG-2X4-72-001',stockLengthIn:72,candidateStatus:'SUPPORTABLE',reason:null})
+      ]),
+      quantity:1,
+      stockLengthIn:72,
+      unitPrice:5.15,
+      materialTotal:5.15,
+      allocationClaimed:false,
+      cellFamily:Object.freeze(['D-001']),
+      supportedOps:Object.freeze(['CROSSCUT','MITER_LIMITED','SPOT_ON_LOCATION']),
+      source:Object.freeze({
+        repository:'GeorgePlattDemo/scan-to-build-store',
+        file:'store-zero-catalog.json',
+        pin:'9c62d9d6f7775deef83d47196d32c9b5174a352c',
+        clock:'2026-09-10'
+      })
+    }),
+    estimate:Object.freeze({
+      status:'BUDGETARY_ESTIMATE',
+      complete:true,
+      completeness:'COMPLETE_FOR_TRAVEL_STANDARD',
+      documentKind:'BudgetaryEstimate',
+      engine:Object.freeze({
+        id:'STB-STORE-ZERO-PRICE-1',
+        version:'0.3.0',
+        clock:'2026-09-22',
+        documentKind:'BudgetaryEstimate'
+      }),
+      cycle:Object.freeze({
+        model:'STB-D001-DIMENSIONAL-TRAVEL-0.1',
+        version:'0.2.0',
+        basis:'DECLARED_STAGE2_MODEL',
+        measured:false,
+        commissioned:false,
+        T_job_min:1.4227
+      }),
+      totals:Object.freeze({
+        material:5.15,
+        hardware:0,
+        machine_service:5.93,
+        Q:11.08,
+        Q_basis:'CALCULATED_FROM_DECLARED_STAGE2_MODEL'
+      }),
+      travel:Object.freeze({
+        derivedSawCuts:3,
+        derivedSpotCount:2,
+        finalRemainderIn:39.625
+      }),
+      economics:Object.freeze({
+        id:'STB-D001-STORE-ECONOMICS-S2-0.1',
+        version:'0.1.0',
+        basis:'DECLARED_STAGE2_MODEL',
+        measured:false,
+        forecastProductiveHours:600,
+        annualCostPoolUsd:120000,
+        targetGrossMargin:0.20,
+        breakEvenPerHour:200,
+        sellRatePerHour:250,
+        setupCharge:0,
+        setupTimeMin:0
+      }),
+      calculationIdentity:Object.freeze({
+        inputHash:'8b7dd9e5de4a8335a6f20e9ff5f2b02952f1dc3c5387f0363bb3eb80de07b906',
+        resultHash:'f95709beb9f77cc8981bae4c501f6f4fa8a0f6a1d8f471f4b8794d0325d5bef5'
+      })
+    })
+  });
+
+  var USER1_STORE_REFERENCE_SYP_18 = Object.freeze({
+    status:'STORE_ISSUED_REFERENCE',
+    source:Object.freeze({
+      repository:'GeorgePlattDemo/scan-to-build-store',
+      storePin:'9c62d9d6f7775deef83d47196d32c9b5174a352c',
+      pricingFile:'store-zero-pricing-engine.mjs',
+      travelFile:'d001-travel-standard.mjs',
+      governingStandard:'DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md',
+      workflowRun:null,
+      systemIntegrationPin:null
+    }),
+    demand:Object.freeze({
+      configurationId:'SYO-USER1-XBRACE',
+      configurationVersion:'0.2',
+      materialDemand:Object.freeze({species:'syp-treated',form:'board',nominalT:2,nominalW:4}),
+      definedWorkpieceLengthIn:60,
+      partQty:2,
+      partLengthIn:18,
+      sawAngleDeg:26.387799961242997,
+      cutPlane:'miter-face',
+      endIdentity:'both',
+      endRelation:'parallel',
+      lengthDatum:'long-long-outer-edge',
+      datumCMethod:'REFERENCE_CUT',
+      requiredOps:Object.freeze(['MITER_LIMITED','SPOT_ON_LOCATION']),
+      spotMode:'SPOT_ON_LOCATION',
+      spotLocationRule:'CENTERED_ON_PART',
+      spotAcrossWidthRule:'CENTERED_ON_WIDE_FACE',
+      spotXIn:9,
+      declaredSawCuts:3,
+      declaredSpotCount:2
+    }),
+    materialResolution:Object.freeze({
+      status:'MAPPED',
+      storeSku:'STB-ZERO-PTAG-2X4-72-001',
+      pricingReferenceSku:'STB-ZERO-PTAG-2X4-72-001',
+      pricingReferenceStockLengthIn:72,
+      requestedMinimumWorkpieceLengthIn:60,
+      requestedDefinedWorkpieceLengthIn:60,
+      workpieceLengthIn:72,
+      selectionPolicy:'SHORTEST_COMPLETE_STORE_OFFERING',
+      consideredCandidates:Object.freeze([
+        Object.freeze({storeSku:'STB-ZERO-PTAG-2X4-72-001',stockLengthIn:72,candidateStatus:'SUPPORTABLE',reason:null})
+      ]),
+      quantity:1,
+      stockLengthIn:72,
+      unitPrice:5.15,
+      materialTotal:5.15,
+      allocationClaimed:false,
+      cellFamily:Object.freeze(['D-001']),
+      supportedOps:Object.freeze(['CROSSCUT','MITER_LIMITED','SPOT_ON_LOCATION']),
+      source:Object.freeze({
+        repository:'GeorgePlattDemo/scan-to-build-store',
+        file:'store-zero-catalog.json',
+        pin:'9c62d9d6f7775deef83d47196d32c9b5174a352c',
+        clock:'2026-09-10'
+      })
+    }),
+    estimate:Object.freeze({
+      status:'BUDGETARY_ESTIMATE',
+      complete:true,
+      completeness:'COMPLETE_FOR_TRAVEL_STANDARD',
+      documentKind:'BudgetaryEstimate',
+      engine:Object.freeze({
+        id:'STB-STORE-ZERO-PRICE-1',
+        version:'0.3.0',
+        clock:'2026-09-22',
+        documentKind:'BudgetaryEstimate'
+      }),
+      cycle:Object.freeze({
+        model:'STB-D001-DIMENSIONAL-TRAVEL-0.1',
+        version:'0.2.0',
+        basis:'DECLARED_STAGE2_MODEL',
+        measured:false,
+        commissioned:false,
+        T_job_min:1.425
+      }),
+      totals:Object.freeze({
+        material:5.15,
+        hardware:0,
+        machine_service:5.94,
+        Q:11.09,
+        Q_basis:'CALCULATED_FROM_DECLARED_STAGE2_MODEL'
+      }),
+      travel:Object.freeze({
+        derivedSawCuts:3,
+        derivedSpotCount:2,
+        finalRemainderIn:35.625
+      }),
+      economics:Object.freeze({
+        id:'STB-D001-STORE-ECONOMICS-S2-0.1',
+        version:'0.1.0',
+        basis:'DECLARED_STAGE2_MODEL',
+        measured:false,
+        forecastProductiveHours:600,
+        annualCostPoolUsd:120000,
+        targetGrossMargin:0.20,
+        breakEvenPerHour:200,
+        sellRatePerHour:250,
+        setupCharge:0,
+        setupTimeMin:0
+      }),
+      calculationIdentity:Object.freeze({
+        inputHash:'30b6c02b11db30cf100be72ea4696c03b8ed7d2f217979c53cdae6ce73325e91',
+        resultHash:'de1e0e0bdf0f77a6c5ea205191765ba0b846472fc0813fe71d9ddf28fd176333'
+      })
+    })
+  });
+
+  var USER1_STORE_REFERENCES = Object.freeze([USER1_STORE_REFERENCE,USER1_STORE_REFERENCE_18,USER1_STORE_REFERENCE_SYP,USER1_STORE_REFERENCE_SYP_18]);
 
   function roundN(value, places){
     var p=Math.pow(10, places == null ? 2 : places);
@@ -531,6 +803,10 @@
     var parts=Array.isArray(input.parts)?input.parts:[];
     var ops=Array.isArray(input.requiredOps)?input.requiredOps.slice().sort():[];
     var expectedOps=d.requiredOps.slice().sort();
+    var material=input.materialDemand||{};
+    if(String(material.species||'')!==d.materialDemand.species) return false;
+    if(String(material.form||'')!==d.materialDemand.form) return false;
+    if(Number(material.nominalT)!==d.materialDemand.nominalT || Number(material.nominalW)!==d.materialDemand.nominalW) return false;
     if(String(input.configurationId||'')!==d.configurationId) return false;
     if(String(input.configurationVersion||'')!==d.configurationVersion) return false;
     if(Number(input.definedWorkpieceLengthIn)!==d.definedWorkpieceLengthIn) return false;
@@ -594,7 +870,7 @@
       return unresolvedUser1StoreAnswer(
         'STORE_REFRESH_REQUIRED',
         ['STORE_REFRESH_REQUIRED'],
-        'This static Review build carries only the two tested 16-in and 18-in Store references. Intermediate geometry requires the live System Store endpoint.',
+        'This static build carries only the tested 16-in and 18-in Store references, for SPF and treated SYP. Another wood or intermediate geometry requires the live System Store endpoint.',
         null
       );
     }
@@ -1026,6 +1302,8 @@
     storeAuthority:storeAuthority,
     startOwnStoreCatalog:START_OWN_STORE_CATALOG,
     startOwnOfferings:startOwnOfferings,
+    startOwnStoreItems:START_OWN_STORE_ITEMS,
+    startOwnStoreItem:startOwnStoreItem,
     resolveStartOwnMaterial:resolveStartOwnMaterial,
     user1StoreReference:USER1_STORE_REFERENCE,
     user1StoreReferences:USER1_STORE_REFERENCES,
