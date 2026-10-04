@@ -56,7 +56,7 @@ test('Alcove states the knob rule on intent and on the bench',()=>{
 });
 
 test('Store Zero is named one way on every Store answer page',()=>{
-  assert.match(text(rails['job1-store']),/Declared reference lumberyard\./);
+  assert.match(text(rails['job1-store']),/Store Zero is a declared reference lumberyard\./);
   assert.match(text(rails['alcove-store']),/Store Zero is a declared reference lumberyard\./);
   for(const r of Object.values(rails)) assert.equal(/controlled reference Store/i.test(text(r)),false);
 });
@@ -69,7 +69,7 @@ test('budgetary answer (whole Store result) and complete budgetary estimate (the
 
 test('the shared trail is not given a stale count',()=>{
   for(const r of Object.values(rails)) assert.equal(/Twelve events/.test(text(r)),false);
-  assert.ok(rails['alcove-store'].sections.some(s=>s.title==='SHARED 13-STEP TRAIL' && s.items.length===13));
+  assert.ok(rails['alcove-store'].sections.some(s=>s.title==='THIRTEEN AUDIT EVENTS · SIX CUSTOMER STEPS' && s.items.length===13));
 });
 
 const job4=['hero','intent','bench','store','request','yard','record','audit'].map(k=>rails['ws-'+k]);
@@ -102,8 +102,8 @@ test('Job 4 (Outdoor build) carries the same flag on every page',()=>{
 });
 
 test('Outdoor states where the app starts, the knob rule, and where it stops',()=>{
-  assert.match(text(rails['od-plan']),/This app turns a defined plan into a runnable job\./);
-  assert.match(text(rails['od-plan']),/design and CAD\/CAM work/);
+  assert.match(text(rails['od-plan']),/Store-evaluable demand and modeled work\./);
+  assert.match(text(rails['od-plan']),/Bounded CAM can then be generated from controlling requirements/);
   assert.match(text(rails['od-bench']),/Do not rename it configurator\./);
   assert.match(text(rails['od-bench']),/It never adds one\./);
   assert.match(text(rails['od-bench']),/Every price is a live Store answer\. None is cached\./);

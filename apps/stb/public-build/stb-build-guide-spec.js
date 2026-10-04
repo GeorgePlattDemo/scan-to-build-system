@@ -7,14 +7,15 @@
 
 
   // Dev/Rev rails: a header, a flag line, then plain bullets and sections. Only the header is bold.
-  // Job 1 rails: owner's text, verbatim (DEV/REV GUIDE ceiling).
+  // Owner-authorized editorial rails. Requirements, evidence and authority stay separate.
   const JOB1={
     "job1-idea": {
       "header": "DEV/REV GUIDE — JOB 1 · PAGE 1 · INTENT",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [
+        "This tile: one bounded board job. Intent supplies the permitted requirements; the bench derives its features.",
         "This page is the want. It does not become the bench.",
-        "Knobs for this job are made here, auto or by hand, from the need.",
+        "Knobs for this job are made here from bounded rules. No general intent-to-CAM compiler claimed.",
         "Condensed out of this tour. Alcove says where they come from.",
         "Never added on the bench.",
         "No universal configurator.",
@@ -27,8 +28,8 @@
         {
           "title": "Authority",
           "items": [
-            "Intent owns the want.",
-            "Bench owns the board.",
+            "User owns the want. System keeps its controlling definition.",
+            "Bench revises the permitted definition. Store owns stock; custody is separate.",
             "Store owns capability, time, economics, and retained-control truth.",
             "None may rewrite the others."
           ]
@@ -48,6 +49,7 @@
       "header": "DEV/REV GUIDE — JOB 1 · PAGE 2 · THE BENCH",
       "flag": "Intent makes the knobs. The bench only turns them.",
       "bullets": [
+        "Board dimensions become identified cut and spot requirements. The output is demand, not just pixels.",
         "This page is always the bench. Do not rename it configurator.",
         "Knobs are used here. Never added here. Never regrown here.",
         "This is where those knobs make the definition the Store prices.",
@@ -69,7 +71,7 @@
         {
           "title": "Authority",
           "items": [
-            "Bench owns the board.",
+            "Bench revises the permitted definition. Store owns stock; custody is separate.",
             "Store owns capability, time, economics, and retained-control truth.",
             "Bench may not pre-compute price, time, envelope, or capability."
           ]
@@ -91,17 +93,18 @@
       "header": "DEV/REV GUIDE — JOB 1 · PAGE 3 · STORE ANSWER",
       "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
       "bullets": [
+        "Store answers the board and feature demand. No counter-side redraw or local Store replica.",
         "This page is one answer to one confirmed version.",
         "Viewing it creates no event.",
-        "Declared reference lumberyard. Not a dealer. Not live inventory. Not a quote.",
+        "Store Zero is a declared reference lumberyard. Modeled stock and work; no live dealer commitment or binding quote.",
         "No payment, allocation, release, or Cycle Start authority.",
-        "Same request, same pins, same number."
+        "Same governing inputs, Store state and clocks: reproducible result. Pin alone is not enough."
       ],
       "sections": [
         {
           "title": "Version chain",
           "items": [
-            "Sent, receipt, result. Three hashes. Three events. Do not collapse them.",
+            "Sent, receipt, result. Three event roles with their own evidence. Do not collapse them.",
             "A sent hash is not a receipt.",
             "A receipt is not a result.",
             "A result is not acceptance."
@@ -110,7 +113,7 @@
         {
           "title": "May not touch",
           "items": [
-            "Geometry. Controlling dimensions. Shelf locations. User material choice. Version identity."
+            "Geometry. Controlling dimensions. Board feature locations. User material choice. Version identity."
           ]
         },
         {
@@ -128,7 +131,7 @@
           "title": "In hand",
           "items": [
             "Four answers, each with a reason: supportable, unresolved, refused, unavailable.",
-            "Catalog clock. Same request, same clock, same number. A later clock is a different answer.",
+            "Catalog clock travels with the answer. Changed governing state needs fresh evaluation; the number may stay the same.",
             "Budgetary estimate if complete: material + machine service + declared extras.",
             "Not a quote. Not an offer. Not a reservation."
           ]
@@ -147,7 +150,7 @@
           "title": "Gates",
           "items": [
             "Request ≠ order ≠ payment ≠ allocation ≠ release ≠ Cycle Start.",
-            "Staged ≠ picked up. Finished ≠ closed. Closed is custody.",
+            "Staged ≠ picked up. Custody closes this handoff, not every engineering or assembly question.",
             "Events stay separate. Missing events stay missing. Nothing is promoted by wording.",
             "ACCEPT creates the next event. It does not allocate, pay, or release.",
             "CHANGE DEFINITION mints a version. It does not edit this one."
@@ -156,7 +159,8 @@
         {
           "title": "Machine",
           "items": [
-            "Start position verified only when that event exists. Not setup.",
+            "Registered setup, loaded material, datum validation and local release are separate. Record each required check.",
+            "Design aim: put recurring complexity in registered rules. Validation-only setup is not proved; Project 1 names the physical blockers.",
             "Cycle Start belongs to the person at the cell. No hash here can start a spindle."
           ]
         },
@@ -169,20 +173,23 @@
         {
           "title": "Links",
           "items": [
+            "Project 1 digital trail: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/project-1-digital-trail/README.md",
             "Store Zero: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/README.md",
-            "Travel standard: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md",
-            "D-001 envelope, file 0.1, version string D001-STAGE2-ENVELOPE-0.3: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/D-001-STAGE2-ENVELOPE-0.1.md"
+            "Travel standard: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/9c62d9d6f7775deef83d47196d32c9b5174a352c/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md",
+            "D-001 envelope, file 0.1, version string D001-STAGE2-ENVELOPE-0.3: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/9c62d9d6f7775deef83d47196d32c9b5174a352c/D-001-STAGE2-ENVELOPE-0.1.md"
           ]
         }
       ]
     }
   };
-  // Job 2 (Alcove) rails: owner's text, verbatim, with the approved edits and current-gap notes.
+  // Job 2 (Alcove): bounded fit requirements, with implementation gaps kept explicit.
   const JOB2={
     "alcove-idea": {
       "header": "DEV/REV GUIDE — JOB 2 · ALCOVE · PAGE 1 · INTENT",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Critical fit: controlling opening facts become part and feature requirements. A scan does not confirm them."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -326,7 +333,9 @@
     "alcove-bench": {
       "header": "DEV/REV GUIDE — JOB 2 · ALCOVE · PAGE 2 · THE BENCH",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Opening facts become this insert’s parts and features. Preserve their source and controlling revision."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -494,7 +503,9 @@
     "alcove-store": {
       "header": "DEV/REV GUIDE — JOB 2 · ALCOVE · PAGE 3 · STORE ANSWER",
       "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
-      "bullets": [],
+      "bullets": [
+        "Answer the insert’s identified demand. Favorable material and machining facts do not establish site fit."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -641,8 +652,8 @@
             "Same pinned Store authority.",
             "Same declared rules.",
             "Same calculation.",
-            "Change the definition → different answer.",
-            "Change governing Store authority → different answer.",
+            "Change the definition → fresh evaluation for that version. Price or status may match.",
+            "Change governing Store authority → separately identified evaluation. Outcome may match.",
             "Keep both records.",
             "Never overwrite history."
           ]
@@ -653,9 +664,9 @@
             "SENT = what System sent.",
             "ARRIVED = what Store received.",
             "ANSWERED = what Store calculated.",
-            "Sent hash ≠ receipt hash.",
-            "Receipt hash ≠ result hash.",
-            "Result hash ≠ acceptance.",
+            "Sent record is not receipt evidence. The payload digest may match.",
+            "Receipt evidence is not calculation evidence. Preserve both roles.",
+            "Calculation evidence is not customer acceptance.",
             "Do not collapse them into one receipt."
           ]
         },
@@ -704,7 +715,7 @@
           ]
         },
         {
-          "title": "SHARED 13-STEP TRAIL",
+          "title": "THIRTEEN AUDIT EVENTS · SIX CUSTOMER STEPS",
           "items": [
             "SENT — identified definition sent.",
             "ARRIVED — Store receipt.",
@@ -809,11 +820,11 @@
             "Store Zero README",
             "https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/README.md",
             "Dimensional Store Travel Standard",
-            "https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md",
+            "https://github.com/GeorgePlattDemo/scan-to-build-store/blob/9c62d9d6f7775deef83d47196d32c9b5174a352c/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md",
             "D-001 Stage-2 Envelope",
             "File: D-001-STAGE2-ENVELOPE-0.1.md",
             "Internal version: D001-STAGE2-ENVELOPE-0.3",
-            "https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/D-001-STAGE2-ENVELOPE-0.1.md"
+            "https://github.com/GeorgePlattDemo/scan-to-build-store/blob/9c62d9d6f7775deef83d47196d32c9b5174a352c/D-001-STAGE2-ENVELOPE-0.1.md"
           ]
         },
         {
@@ -834,7 +845,9 @@
     "ws-hero": {
       "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 1 · WHAT SHE WANTS",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Space utilization: one assembly decomposed into named parts and features, through the same Store boundary."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -886,7 +899,9 @@
     "ws-intent": {
       "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 2 · YOUR INTENT",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Define assembly requirements upstream. Do not make the dealer reconstruct the design at the counter."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -924,7 +939,7 @@
           "items": [
             "From the sketch: overall height · left tower width · center width · right tower width · depth · upper bays · cubbies under the seat · left tower shelves · right tower shelves.",
             "By hand: clearance each side · seat height · upper storage, clear · wood.",
-            "Derived: boards across the depth, the fewest 1× boards that cover it (lumber standard). Can be set by hand on the bench."
+            "Derived: boards across the depth by this System composition rule over dimensional conventions. Can be set by hand. Store still chooses available stock."
           ]
         },
         {
@@ -951,14 +966,14 @@
           "items": [
             "“A seat you can sit on” is carried as UNRESOLVED, for a qualified person.",
             "How it goes together on site is DEFERRED, to you or a qualified person.",
-            "Open questions travel with the job. They never block the Store ask."
+            "These load and site-assembly questions travel separately. Missing required manufacturing facts still block the ask."
           ]
         },
         {
           "title": "KEPT, NOT SENT",
           "items": [
             "Asked for, but the Store has no line: label every part · inspect the finished sizes · bundle by module · pack and protect · something else.",
-            "Kept on the job. Never sent. Never claimed done."
+            "Kept on the job, excluded from this Store ask. Show that exclusion at the decision; never claim the work done."
           ]
         },
         {
@@ -980,7 +995,7 @@
           "items": [
             "Source kept apart from controlling status: measure(), conditions().",
             "Taste and what’s off cut nothing: identified().",
-            "Open questions never block the ask: conditions().",
+            "Separated load/site-assembly questions do not block the ask: conditions(). Not a waiver of required manufacturing facts.",
             "Kept-not-sent is never sent: buildRequest()."
           ]
         },
@@ -1004,7 +1019,9 @@
     "ws-bench": {
       "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 3 · THE BENCH",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Assembly → modules → parts → features. Keep each requirement and parent relationship traceable."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1071,7 +1088,12 @@
         {
           "title": "CURRENT GAP",
           "items": [
-            "A bench click that changes nothing still re-asks the Store. The fix belongs in the shared terms flow.",
+            "Reported gap: a no-change bench click re-asks the Store. Reproduce before fixing; owner is shared terms flow."
+          ]
+        },
+        {
+          "title": "HARDWARE SCOPE",
+          "items": [
             "Wood screws travel as a requirement when that knob is on. Store picks its own item or refuses. Incomplete gauge, length, finish, or count blocks the ask. #8 may be refused if it is not stocked."
           ]
         },
@@ -1091,7 +1113,9 @@
     "ws-store": {
       "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 4 · STORE ANSWER",
       "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
-      "bullets": [],
+      "bullets": [
+        "Answer the assembly’s part demand. A machining answer does not settle the unresolved seating use."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1129,7 +1153,7 @@
           "title": "FIRST THREE IDENTITIES",
           "items": [
             "SENT · ARRIVED · ANSWERED.",
-            "Three events, three hashes. Do not collapse them."
+            "Three event roles. Keep their evidence separate; digests need not be unequal."
           ]
         },
         {
@@ -1160,8 +1184,8 @@
           "title": "AUTHORITY LINKS",
           "items": [
             "Store Zero: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/README.md",
-            "Travel standard: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md",
-            "D-001 envelope, file 0.1, version string D001-STAGE2-ENVELOPE-0.3: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/D-001-STAGE2-ENVELOPE-0.1.md"
+            "Travel standard: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/9c62d9d6f7775deef83d47196d32c9b5174a352c/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md",
+            "D-001 envelope, file 0.1, version string D001-STAGE2-ENVELOPE-0.3: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/9c62d9d6f7775deef83d47196d32c9b5174a352c/D-001-STAGE2-ENVELOPE-0.1.md"
           ]
         }
       ]
@@ -1169,7 +1193,9 @@
     "ws-request": {
       "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 5 · YOUR CALL",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Decision covers the offered work and its exclusions. Do not quietly sell a finished seat."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1205,7 +1231,9 @@
     "ws-yard": {
       "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 6 · WE CUT IT",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Follow the evaluated part plan. Preserve module, part, parent board and revision identity."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1228,12 +1256,14 @@
     "ws-record": {
       "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · PAGE 7 · PICK UP & BUILD",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Record the parts handed over and the work still left. Handoff does not prove assembly or load capacity."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
           "items": [
-            "Kit, record, every part and its board.",
+            "Defined cut/mill/spot parts, their record, and each parent board. Not a complete engineered assembly.",
             "Staged ≠ picked up.",
             "Custody closes the handoff.",
             "The record appends. It is never rewritten.",
@@ -1251,7 +1281,9 @@
     "ws-audit": {
       "header": "DEV/REV GUIDE — JOB 3 · WINDOW SEAT · AUDIT COPY",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Same job, read as an audit. Each claim must land on its actual requirement, answer or event."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1289,7 +1321,7 @@
         {
           "title": "STATED ONLY",
           "items": [
-            "Reproducing the result hash from the copy alone was checked by hand once, not by a test."
+            "Reproducing the result hash from the copy alone was checked by hand once. Without the exact specimen identity, do not cite it as reproducible proof."
           ]
         }
       ]
@@ -1300,13 +1332,15 @@
     "od-plan": {
       "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 1 · PICK A PLAN",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Outdoor build: published plan → bounded requirements. Keep hand interpretation separate from source facts."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
           "items": [
-            "This app turns a defined plan into a runnable job.",
-            "A plan is a cut list with angles: parts, lengths, ends.",
+            "This app turns bounded plan requirements into Store-evaluable demand and modeled work.",
+            "A plan may carry parts, features, joints and constraints. This tile uses a bounded reading of two plans.",
             "Picking a plan is your intent. This job’s configurator is made from it.",
             "The photos are context. Nobody cuts to a photo.",
             "The plan’s source stays attached."
@@ -1317,7 +1351,7 @@
           "items": [
             "It starts at a defined plan.",
             "Both plans here were read by a person and entered by hand, then checked against the published pages.",
-            "Reading a plan file, or turning an idea into a plan, is design and CAD/CAM work: a mature field, and other tools’ job.",
+            "Source interpretation comes first. Bounded CAM can then be generated from controlling requirements plus declared machine rules; reading a plan alone is not CAM.",
             "Hand this app a defined plan, and the job starts here."
           ]
         },
@@ -1358,7 +1392,9 @@
     "od-bench": {
       "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 2 · THE BENCH",
       "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
-      "bullets": [],
+      "bullets": [
+        "Plan requirements become named parts and features. Missing facts do not become defaults."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1443,7 +1479,9 @@
     "od-edge": {
       "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 3 · A BIGGER BENCH",
       "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
-      "bullets": [],
+      "bullets": [
+        "Extra work needs explicit feature facts and a Store answer. A bigger bench does not enlarge capability."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1467,9 +1505,9 @@
         {
           "title": "INFORMATION TRAVELS BEFORE ATOMS",
           "items": [
-            "What is missing at the edge is missing information.",
-            "Add it upstream, and the edge moves: a plan that publishes hole centers, a machine that declares a cut.",
-            "This app does not design. It takes defined intent and makes it a runnable job."
+            "Name the missing thing: a requirement, a declared service, or supported capability. Not every gap is information.",
+            "Publish hole centers upstream; declare capability at its owner. An expanded edge still needs implementation and evidence.",
+            "No hidden redesign. Defined intent becomes identified manufacturing demand; physical execution is still gated."
           ]
         },
         {
@@ -1504,9 +1542,9 @@
           ]
         },
         {
-          "title": "CHECKED BY HAND",
+          "title": "HISTORICAL HAND CHECK · NOT A CURRENT PASS",
           "items": [
-            "Against the pinned Store: spot holes and a 45° cut on the under-seat supports go through.",
+            "Historical hand check: spot holes and a 45° cut on the under-seat supports were supportable. Exact specimen identity is not recorded here; not current proof.",
             "A 50° cut on 85 in tabletop boards is refused, with three Store reasons: MITER_ANGLE_OUTSIDE_D001_STAGE2_ENVELOPE, ANGLED_PART_LEAVES_LESS_THAN_CONTROL_LENGTH, PART_NOT_HALF_INCH_UNDER_BOARD."
           ]
         },
@@ -1515,14 +1553,14 @@
           "items": [
             "One angle per set of boards, both ends, one plane.",
             "Whether an angle is measured to the long point or the short point is not defined. The Store answers the number it is sent.",
-            "Hole diameter and depth are not defined. A spot marks where; you drill."
+            "Finished fastener-hole diameter and depth are not defined here. Store spot tooling and depth are defined; a spot is not the finished hole."
           ]
         },
         {
           "title": "AUTHORITY LINKS",
           "items": [
             "Store Zero: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/README.md",
-            "D-001 envelope, file 0.1, version string D001-STAGE2-ENVELOPE-0.3: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/D-001-STAGE2-ENVELOPE-0.1.md"
+            "D-001 envelope, file 0.1, version string D001-STAGE2-ENVELOPE-0.3: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/9c62d9d6f7775deef83d47196d32c9b5174a352c/D-001-STAGE2-ENVELOPE-0.1.md"
           ]
         },
         {
@@ -1539,7 +1577,9 @@
     "od-call": {
       "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 4 · YOUR CALL",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Choose this offered scope, with omissions visible. Accept and decline both leave a record."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1575,7 +1615,9 @@
     "od-yard": {
       "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 5 · WE CUT IT",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Each modeled cut or spot traces to a named requirement and the exact Store answer."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1598,7 +1640,9 @@
     "od-record": {
       "header": "DEV/REV GUIDE — JOB 4 · OUTDOOR BUILD · PAGE 6 · PICK UP & BUILD",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Record cut parts, remnants and remaining work. No implied complete table or verified assembly."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1630,7 +1674,9 @@
     "ph-idea": {
       "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 1 · INTENT",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Sheet path: opening, center split, tabs and returned remnants are distinct requirements."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1647,7 +1693,7 @@
           "items": [
             "A second material stream, on the same trail and the same rules.",
             "Kept small on purpose: enough to start the conversation.",
-            "The route is to plug in existing sheet machines, with interchangeable heads, later. This app does not design a sheet machine."
+            "Later integration may use existing sheet machines. Compatible interfaces, tooling and capability need their own evidence; interchangeable heads are not proved here."
           ]
         },
         {
@@ -1670,13 +1716,15 @@
     "ph-bench": {
       "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 2 · THE BENCH",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Sheet features become identified operations. Keep retained outputs in the demand, not just the picture."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
           "items": [
             "This page is always the bench. Do not rename it configurator.",
-            "The story stops here. Only material, geometry and operations go on.",
+            "Keep the story and source attached. Only controlling material, geometry and operations drive the Store ask.",
             "Three knobs, made from User 1’s intent: opening width, straight side height, arch rise.",
             "Reset returns to User 1’s 36 / 24 / 12.",
             "The bench turns the knobs. It never adds one.",
@@ -1723,7 +1771,9 @@
     "ph-store": {
       "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 3 · STORE ANSWER",
       "flag": "Intent makes the knobs. The bench only turns them. Store answers Store questions.",
-      "bullets": [],
+      "bullets": [
+        "Different material and operations; same authority sequence. Store answers S-001 demand."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1736,9 +1786,9 @@
         {
           "title": "THE STORE’S ANSWER TODAY",
           "items": [
-            "At User 1’s 36 / 24 / 12: SUPPORTABLE and complete.",
+            "Historical checked 36 / 24 / 12 specimen: SUPPORTABLE and complete under the cited Store evaluation. Live status comes from the fresh answer.",
             "Every operation answered: arched opening, center split, both straight cuts.",
-            "No refusals. No unresolved conditions.",
+            "No refused or unresolved Store lines in that specimen. Physical prerequisites remain unproved.",
             "The opening sits inside the S-001 work field (envelope S001-STAGE2-ENVELOPE-0.1).",
             "Routing on the S-001 router; straight cuts on the yard panel saw."
           ]
@@ -1765,7 +1815,7 @@
           "title": "FIRST THREE IDENTITIES",
           "items": [
             "SENT · ARRIVED · ANSWERED.",
-            "Three events, three hashes. Do not collapse them."
+            "Three event roles. Keep their evidence separate; digests need not be unequal."
           ]
         },
         {
@@ -1777,16 +1827,16 @@
           ]
         },
         {
-          "title": "CHECKED BY HAND",
+          "title": "HISTORICAL HAND CHECK · NOT A CURRENT PASS",
           "items": [
-            "Against the pinned Store 9c62d9d: SUPPORTABLE, complete, four operations answered, Q $65.04."
+            "Historical 36 / 24 / 12 hand check at Store 9c62d9d6f7775deef83d47196d32c9b5174a352c: SUPPORTABLE, four operations, Q $65.04. Full request/answer identity is not supplied here; use the live answer for current decisions."
           ]
         },
         {
           "title": "AUTHORITY LINKS",
           "items": [
             "Store Zero: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/README.md",
-            "Travel standard: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md"
+            "S-001 envelope: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/9c62d9d6f7775deef83d47196d32c9b5174a352c/S-001-STAGE2-ENVELOPE-0.1.md"
           ]
         }
       ]
@@ -1794,14 +1844,16 @@
     "ph-review": {
       "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 4 · REVIEW",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Keep this sheet revision and its requested scope. Confirmation is not commercial acceptance."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
           "items": [
             "Freeze the whole ask: every requested operation, supported or not.",
             "Confirming keeps the definition. It is not payment, reservation, release, readiness or execution.",
-            "Only a SUPPORTABLE answer for this version can be confirmed.",
+            "This UI opens Confirm only after SUPPORTABLE for this version. Keeping a definition is distinct from accepting an offer.",
             "Nothing unresolved is turned into capability."
           ]
         },
@@ -1816,7 +1868,9 @@
     "ph-call": {
       "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 5 · YOUR CALL",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Choose the exact sheet offer. Retained center and remnants stay in scope."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1853,7 +1907,9 @@
     "ph-yard": {
       "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 6 · WE CUT IT",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Model the evaluated sheet work. Tabs in a plan are not measured physical retention."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1868,7 +1924,7 @@
         {
           "title": "STATED ONLY",
           "items": [
-            "No toolpath, controller code or postprocessor here. Those belong to the commissioned cell."
+            "This page emits no released machine program. Candidate controller work can precede commissioning; physical use needs local release and validation."
           ]
         }
       ]
@@ -1876,7 +1932,9 @@
     "ph-terms": {
       "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 7 · THE EVENTS",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Thirteen audit events inside six customer steps. This view adds no seventh step."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1898,7 +1956,9 @@
     "ph-recap": {
       "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 8 · RECAP",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Summarize the sheet proof at its actual depth. Missing physical evidence stays missing."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1911,15 +1971,17 @@
         {
           "title": "NEXT PROOF",
           "items": [
-            "Measured tab retention, real yield, toolpath and inspection evidence, from a commissioned cell."
+            "Next digital evidence: identified path/controller artifacts and checks. Later physical evidence: commissioned retention, yield and inspection. Neither claimed here."
           ]
         }
       ]
     },
     "ph-record": {
-      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 9 · PICK UP & RECORD",
+      "header": "DEV/REV GUIDE — JOB 5 · PLAYHOUSE · PAGE 9 · PICK UP & BUILD",
       "flag": "Intent makes the knobs. The bench only turns them.",
-      "bullets": [],
+      "bullets": [
+        "Record required sheet outputs and simulated handoff. No complete playhouse or installed window implied."
+      ],
       "sections": [
         {
           "title": "CORE RULE",
@@ -1927,7 +1989,7 @@
             "Only the facts this journey established.",
             "The record appends. It is never rewritten.",
             "Staged ≠ picked up. Custody closes the handoff.",
-            "The center piece and every remnant go back to User 1."
+            "Center and every remnant are required returned outputs. This custody narrative is simulated."
           ]
         },
         {
@@ -1958,7 +2020,7 @@
         'What User 1 brings lands here and ends at Intent.',
         'No step bar. The Idea line shows Intent as its one way on.',
         'Known values go to Intent. Nobody types them again.',
-        'The wood is not carried. It is chosen on the bench.'
+        'Source information carries forward. Store material is separately chosen on the bench; no timber custody claimed.'
       ],
       sections:[]
     }),
@@ -1992,19 +2054,31 @@
 
   const PAGES=Object.freeze({
     landing:guide('Goal',[
-      ['Say what this is','One screen, no scrolling to understand it.'],
-      ['Show who does what','Four steps are yours, one is ours.'],
-      ['Make the seam visible','The definition reaches the cut unchanged.'],
+      ['Say what this is','One screen, no scrolling to understand it. Put requirements and declared capability upstream of the demand.'],
+      ['Show who does what','User defines. System keeps meaning. Store answers. Local release governs physical work.'],
+      ['Make the seam visible','Carry confirmed requirements into modeled commands without redefining them. Physical conformance is not proved here.'],
       ['Offer three ways in','Same road after. Different opening.']
     ]),
     'new-user':guide('Orient once',[
-      ['Keep it short','One pass, then into the work.'],
+      ['Keep it short','One pass, then into the work. No CAD/CAM skill required merely to state a bounded need.'],
       ['Don’t trap people','Back and skip still work.'],
       ['No hidden authority','Orientation changes no project fact.'],
       ['Play without an account','LATER opens everything. Saving or buying asks who you are.']
     ],[
-      ['THIS DEVICE','Phase 2 · keep this project in this browser.'],
+      ['THIS DEVICE','Device-held project. No server custody implied.'],
       ['EMAIL / SIGN IN','Later · same project file, kept on a server.']
+    ]),
+    'my-projects':guide('Resume the identified job',[
+      ['Version first','Show the saved revision and its actual last event. No generic done badge.'],
+      ['History is history','Refresh Store facts for current demand; never reuse an old answer as current.'],
+      ['Fork changes','Keep the source record. New work gets a new version.'],
+      ['Known limit','Device/demo custody is not authenticated server tenancy.']
+    ]),
+    archive:guide('Read the handoff record',[
+      ['Show what happened','Actual recorded events, including simulated status and missing events.'],
+      ['Name the outputs','Parts, included work and exclusions. Avoid kit/furniture promises of completeness.'],
+      ['No authority by reopening','Archived answers and releases are history. Current work needs current gates.'],
+      ['Keep responsibilities visible','Custody does not prove site assembly or fitness. Clear scope does not excuse nonconforming work.']
     ]),
     returning:guide('Resume cleanly',[
       ['Don’t start over','Saved project stays saved.'],
@@ -2012,8 +2086,8 @@
       ['Fork changes','New work gets a new version.'],
       ['Still demo-only','Named users are not real auth.']
     ],[
-      ['MY PROJECTS ON THIS DEVICE','Phase 3 · resume, make another, replace a part.'],
-      ['OPEN A SAVED PROJECT FILE','Phase 3 · check the digest, mark it imported.']
+      ['MY PROJECTS ON THIS DEVICE','Device-held history. Resume or fork an identified version.'],
+      ['OPEN A SAVED PROJECT FILE','Imported history. Check the digest; never promote an old answer to current.']
     ]),
     saved:guide('Find the right record',[
       ['Show the version','Don’t flatten history into one card.'],
@@ -2023,14 +2097,14 @@
     professional:guide('Bring work in',[
       ['Import, don’t bless','A plan is evidence, not truth.'],
       ['Keep provenance','Know what came from where.'],
-      ['Same gates','Professional does not bypass Store or machine limits.']
+      ['Same gates','Professional brings defined work; the dealer does not redraw it. Store and machine limits still apply.']
     ],[
       ['BRING A DRAWING, PDF OR PHOTO','Configured later with contractor adapters.'],
       ['PASTE A CUT LIST','Configured later with contractor adapters.']
     ]),
     projects:guide('Library',[
       ['Don’t overcrowd','Live, bounded or deferred. Say which.'],
-      ['Tiles = tests','Board · fit · assembly · plan · sheet.'],
+      ['Tiles = bounded demonstrations','Board-to-command · critical fit · assembly-to-parts · plan-to-demand · sheet with retained outputs.'],
       ['Start your own','First. Never moves.'],
       ['One project at a time','Switch tile → clear route + state.'],
       ['No cross-talk','Job 1 facts stay in Job 1.'],
@@ -2039,7 +2113,8 @@
       ['Gap','Read-only copy: Playhouse only. Rest open live.'],
       ['Gap','Accounts are demo. User 1 only. No auth.'],
       ['Still patched','Legacy routes intercepted, not retired.'],
-      ['Build configurators as needed','One small bench per job class. No universal configurator.']
+      ['Known gaps','Name the missing fact or skipped handoff, its owner and what stays blocked. A short rail can be complete.'],
+      ['Name the actual scope','Prefer defined parts and included work over kit/furniture shorthand. No implied complete product; no universal configurator.']
     ]),
     'start-own':guide('Legacy donor',[
       ['Don’t build here','The live Job 1 artifact owns this route.'],
@@ -2068,17 +2143,17 @@
     request:guide('Scope the services',[
       ['Don’t redesign here','Geometry is already defined.'],
       ['Keep yes/no explicit','Declined work matters downstream.'],
-      ['Request ≠ order','No hidden defaults or silent add-ons.']
+      ['Request ≠ order','Name included and excluded work. No complete-product shorthand, hidden defaults or silent add-ons.']
     ]),
     yard:guide('Return facts, not surprises',[
-      ['No silent substitution','Changes come back as changes.'],
+      ['No silent substitution','Work follows the identified requirements. Changes come back as changes.'],
       ['Keep reasons','Shortage ≠ preference.'],
       ['Response binds to request','No floating Yard answer.'],
       ['Still modeled','No real staff queue or inventory custody.']
     ]),
     terms:guide('Keep the verbs apart',[
       ['Offer ≠ accept','Accept ≠ pay. Pay ≠ allocate.'],
-      ['Scroll does nothing','Viewing never creates an event.'],
+      ['Scroll does nothing','Audit view inside the six steps. Viewing never creates an event.'],
       ['No machine leap','Commerce cannot create Cycle Start.']
     ]),
     recap:guide('Summarize, don’t backfill',[
@@ -2087,9 +2162,9 @@
       ['Link the receipts','Summary is not the audit trail.']
     ]),
     record:guide('Close with evidence',[
-      ['Keep the chain','Definition → Store → fulfillment → custody.'],
+      ['Keep the chain','Definition → Store → simulated fulfillment → custody. Record parts and included work; no implied finished product.'],
       ['No rewrite','Corrections append; history stays.'],
-      ['Still not durable','Full build needs signed, stored owner records.']
+      ['Still not durable','This surface needs verified attribution, durable retention and recovery. A signature alone does not establish custody.']
     ]),
     'start-own-live':RAILS['job1-bench'],
     'outdoor-idea':guide('Intake, not a step',[
@@ -2104,7 +2179,7 @@
     'outdoor-yard':RAILS['od-yard'],
     'outdoor-record':RAILS['od-record'],
     'outdoor-build-live':guide('Keep Outdoor its own job',[
-      ['Don’t borrow Job 1','Own definition, own Store handoff.'],
+      ['Plan-to-demand','Own plan-derived requirements, own Store handoff. Do not borrow Job 1 facts.'],
       ['Keep source trail','Plan/source stays attached.'],
       ['Fail closed','Missing Store coverage stays missing.'],
       ['Known wart','Still iframe-hosted.']
@@ -2118,24 +2193,24 @@
     'window-seat-record':RAILS['ws-record'],
     'window-seat-audit':RAILS['ws-audit'],
     'window-seat-live':guide('One job, two views',[
-      ['Same rules','Six steps, live Store. No exception.'],
+      ['Assembly-to-parts','Six steps, live Store. Parts and features stay traceable to the assembly requirements.'],
       ['Whole job = audit view','Same state, every step shown.'],
-      ['Fork at the hero','Bench, or read it all.'],
-      ['Edge mill','Any depth: boards milled to width, priced by Store.'],
+      ['Fork on Idea','Intent | One full scroll. Same job, same gates.'],
+      ['Edge mill','Permitted depth becomes part demand. Store evaluates milling and may refuse.'],
       ['Known wart','Iframe complicates focus, print, routing.']
     ]),
     'proof-store':RAILS['job1-store'],
     'proof-accept':guide('Two customer choices',[
-      ['Back or buy','Nothing else.'],
-      ['One click, three receipts','Offer · acceptance · payment stay separate.'],
-      ['Make it idempotent','Double-click/retry must not double-charge.'],
+      ['Accept or decline','Simulated decision on this exact offered scope.'],
+      ['Separate the receipts','Offer · decision · simulated payment stay separate. No purchase by viewing.'],
+      ['Make it idempotent','Double-click/retry must not duplicate decision or simulated payment events. Live charging is not implemented.'],
       ['Still simulated','No PSP, webhook, refund, tax, settlement.']
     ]),
     'proof-yard':guide('Show the whole middle',[
       ['One long scroll','No internal Yard buttons.'],
       ['Scroll is inert','Events come from the explicit simulation.'],
       ['READY ≠ custody','Handoff closes it.'],
-      ['No magic controller','Lowering/program/cycle objects are not commissioned yet.'],
+      ['No magic controller','Project 1 preserves reference commands and uncompiled controller source. This page does not emit a released program or run a commissioned cell.'],
       ['Full build','Durable queue, staff events, telemetry, reruns, material reconciliation.']
     ]),
     'proof-terms':guide('Audit-only surface',[
@@ -2146,7 +2221,7 @@
     'proof-record':guide('Close after custody',[
       ['No extra close button','Handoff already did it.'],
       ['Rebuild from receipts','Final state should be derivable.'],
-      ['Still browser-held','Full build needs durable signed storage.']
+      ['Still browser-held','This browser-held surface is not durable owner custody. Attribution, retention and recovery need separate proof.']
     ]),
     'playhouse-idea':guide('Intake, not a step',[
       ['Where it lands','User 1’s picture and story land here and end at Intent.'],
@@ -2170,7 +2245,7 @@
     'alcove-store-service-choices':guide('Service scope',[
       ['Yes/no/unavailable differ','Keep all three.'],
       ['No hidden defaults','Selected work must be explicit.'],
-      ['Full build','Drive this from Store-backed service schema.']
+      ['Store decides its offer','Each Store declares its stock, supported operations, services and economics. The future term sheet is not implemented.']
     ]),
     'alcove-store-yard-answer':guide('Yard answer',[
       ['Reason changes','No silent substitution.'],
@@ -2180,7 +2255,7 @@
     'alcove-store-commercial-sequence':guide('Keep events separate',[
       ['No scroll events','Viewing changes nothing.'],
       ['Commerce ≠ machine','Never jump authority layers.'],
-      ['Still reference-only','Populate from real services later.']
+      ['Still reference-only','Live service adapters are not implemented. Each Store must answer from its own declared services.']
     ]),
     'alcove-store-returned-offer':guide('Offer detail',[
       ['Show the basis','Version, Store state, validity.'],

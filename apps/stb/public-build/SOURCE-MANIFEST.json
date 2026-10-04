@@ -1364,7 +1364,7 @@
       "pass": "start-own-idea-intake",
       "blobSha": "e62fc9312f2dbe28cb322253ed3787892e614f62",
       "bytes": 93441,
-      "reason": "Start your own Idea intake. The page opens on a new Idea screen before Intent: the ways to bring a job (moved off the Intent screen, not copied) and the values the bounded tile already has (the 2×4 stud, parts, length, ends, center spot), shown as carried forward to Intent. Its one script renders those values from the STB_BENCH_GEOMETRY demand the shell already posts, the same demand the bench draws, so nobody re-enters a known value. Intent keeps its picture, facts and bench button; the bench screen and its drawing are unchanged."
+      "reason": "Start your own Idea intake. The page opens on a new Idea screen before Intent: the ways to bring a job (moved off the Intent screen, not copied) and the values the bounded tile already has (the 2\u00d74 stud, parts, length, ends, center spot), shown as carried forward to Intent. Its one script renders those values from the STB_BENCH_GEOMETRY demand the shell already posts, the same demand the bench draws, so nobody re-enters a known value. Intent keeps its picture, facts and bench button; the bench screen and its drawing are unchanged."
     },
     {
       "path": "system-build-current.html",
@@ -1386,6 +1386,34 @@
       "blobSha": "23d6f2a1a53a7d62fad70cf8552f0c38ad20d5bf",
       "bytes": 247216,
       "reason": "The shell no longer reads #stb-bench-spare-label or #stb-bench-remain-label to write their x (R30); the bench places them from the STB_BENCH_GEOMETRY message, which is unchanged. The label text (R34), R29 and the before-send line are unchanged. Cache-buster for three-frames.html (?v=13b41596, was ?v=e62fc931)."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "dev-rev-rail-clarity",
+      "blobSha": "b4fece987c1d373cc559469383980f7db6fc22c5",
+      "bytes": 247216,
+      "reason": "Owner-authorized rail wording review: refresh shared guide script cache key; shell also refreshes the two iframe artifact cache keys. No customer controls, job facts or operational events changed."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "dev-rev-rail-clarity",
+      "blobSha": "3e9446669df779659babccbdcd98809224ea8956",
+      "bytes": 84581,
+      "reason": "Owner-authorized rail wording review: refresh shared guide script cache key; shell also refreshes the two iframe artifact cache keys. No customer controls, job facts or operational events changed."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "dev-rev-rail-clarity",
+      "blobSha": "0bbbc168cbfd5ecc1d10f4b72216573cdfd35dd2",
+      "bytes": 140536,
+      "reason": "Owner-authorized rail wording review: refresh shared guide script cache key; shell also refreshes the two iframe artifact cache keys. No customer controls, job facts or operational events changed."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "dev-rev-rail-clarity",
+      "blobSha": "3284cc70a4b1efb0f9d04ed0a692bcce5871a1e4",
+      "bytes": 100398,
+      "reason": "Owner-authorized full rail editorial review: bounded tile purpose, explicit scopes/gaps, accurate event and evidence language; affected existing copy assertions updated. No runtime authority change."
     }
   ],
   "retiredFiles": [
