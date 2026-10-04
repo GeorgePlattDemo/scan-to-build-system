@@ -1414,6 +1414,34 @@
       "blobSha": "3284cc70a4b1efb0f9d04ed0a692bcce5871a1e4",
       "bytes": 100398,
       "reason": "Owner-authorized full rail editorial review: bounded tile purpose, explicit scopes/gaps, accurate event and evidence language; affected existing copy assertions updated. No runtime authority change."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "dev-rev-entry-copy-gap",
+      "blobSha": "4f1a175e5332dab3c02c6d7921c1cba97fc10c2a",
+      "bytes": 100575,
+      "reason": "Live entry inspection found unsupported No returns customer copy and account-flow shorthand. Rail explicitly records the copy gap and disabled account/save choices; dependent script/iframe cache keys updated. Customer copy, behavior and Store authority are unchanged."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "dev-rev-entry-copy-gap",
+      "blobSha": "cddbf5886892804ec618afbeea226f51f0bdaba5",
+      "bytes": 247216,
+      "reason": "Live entry inspection found unsupported No returns customer copy and account-flow shorthand. Rail explicitly records the copy gap and disabled account/save choices; dependent script/iframe cache keys updated. Customer copy, behavior and Store authority are unchanged."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "dev-rev-entry-copy-gap",
+      "blobSha": "590b42a9b0ffd3de381fcb1af612f24ff7613eb8",
+      "bytes": 84581,
+      "reason": "Live entry inspection found unsupported No returns customer copy and account-flow shorthand. Rail explicitly records the copy gap and disabled account/save choices; dependent script/iframe cache keys updated. Customer copy, behavior and Store authority are unchanged."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "dev-rev-entry-copy-gap",
+      "blobSha": "3ba96324e62ce1df8b2fca12c72e24f56971265b",
+      "bytes": 140536,
+      "reason": "Live entry inspection found unsupported No returns customer copy and account-flow shorthand. Rail explicitly records the copy gap and disabled account/save choices; dependent script/iframe cache keys updated. Customer copy, behavior and Store authority are unchanged."
     }
   ],
   "retiredFiles": [

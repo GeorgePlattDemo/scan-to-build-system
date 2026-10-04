@@ -2063,7 +2063,8 @@
       ['Keep it short','One pass, then into the work. No CAD/CAM skill required merely to state a bounded need.'],
       ['Don’t trap people','Back and skip still work.'],
       ['No hidden authority','Orientation changes no project fact.'],
-      ['Play without an account','LATER opens everything. Saving or buying asks who you are.']
+      ['Play without an account','LATER explores the demo. Account/save choices are disabled; no authenticated purchase flow.'],
+      ['Known copy gap','Main says “No returns.” No return policy is established here. Defined scope does not excuse nonconforming work.']
     ],[
       ['THIS DEVICE','Device-held project. No server custody implied.'],
       ['EMAIL / SIGN IN','Later · same project file, kept on a server.']
