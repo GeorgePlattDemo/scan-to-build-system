@@ -173,7 +173,7 @@
         {
           "title": "Links",
           "items": [
-            "Project 1 digital trail: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/project-1-digital-trail/README.md",
+            "Project 1 digital trail — full engineering review: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/project-1-digital-trail/D001_Project1_Review.md",
             "Store Zero: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/README.md",
             "Travel standard: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/9c62d9d6f7775deef83d47196d32c9b5174a352c/DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md",
             "D-001 envelope, file 0.1, version string D001-STAGE2-ENVELOPE-0.3: https://github.com/GeorgePlattDemo/scan-to-build-store/blob/9c62d9d6f7775deef83d47196d32c9b5174a352c/D-001-STAGE2-ENVELOPE-0.1.md"
