@@ -1564,6 +1564,34 @@
       "blobSha": "da1505785136654f2e20e2579489714852ae211a",
       "bytes": 258949,
       "reason": "Wire ITEM LOOKUP CLOSE to clear returned rows and hide its control, show the control whenever a lookup returns rows, retain USE SKU dismissal, and refresh the three-frames cache identity. Store search, selection rules, runtime endpoint and STORE_PIN are unchanged."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "store-rail-project1-full-review-0.1",
+      "blobSha": "1b03f64be22c45b46975571639e3daf42b9f15af",
+      "bytes": 100375,
+      "reason": "Job 1 Store-answer rail now has exactly two clearly described reading links: Store README for Store ownership/service context, and the browser-readable text of the accepted 22-page Project 1 engineering review. Travel-standard and D-001-envelope links are removed from this rail; no Store authority or runtime behavior changes."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "store-rail-project1-full-review-0.1",
+      "blobSha": "daa6eb3489692b0f235da80fcb54d65c8d985e83",
+      "bytes": 258949,
+      "reason": "Refresh shared build-guide cache identity so the current System build loads the two-link Store-answer rail. No page behavior or Store path changes."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "store-rail-project1-full-review-0.1",
+      "blobSha": "835a4ac42d00d352003c975df6db085fae5603da",
+      "bytes": 140536,
+      "reason": "Refresh shared build-guide cache identity only; Window Seat content and behavior are unchanged."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "store-rail-project1-full-review-0.1",
+      "blobSha": "76e853b6812f28ad6269e926d547f94107317c84",
+      "bytes": 84581,
+      "reason": "Refresh shared build-guide cache identity only; Outdoor content and behavior are unchanged."
     }
   ],
   "retiredFiles": [

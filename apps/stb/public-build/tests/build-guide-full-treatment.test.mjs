@@ -56,6 +56,20 @@ test('landing Dev Guide keeps short orientation and bounded authority cues',()=>
   ]) assert.ok(html.includes(phrase),`landing Dev Guide lost: ${phrase}`);
 });
 
+test('Job 1 Store rail has exactly two clear reading links: Store README and the 22-page Project 1 review',()=>{
+  const html=spec.render('proof-store');
+  const storeReadme='https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/README.md';
+  const project1Review='https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/project-1-digital-trail/D001_Project1_Review.md';
+  assert.match(html,/Read more — two links/);
+  assert.match(html,/Store README — what this Store owns, offers, and answers/);
+  assert.match(html,/Project 1 digital trail — browser-readable text of the accepted 22-page engineering review, following one definition end to end/);
+  const hrefs=[...html.matchAll(/href="([^"]+)"/g)].map(match=>match[1]);
+  assert.deepEqual(hrefs,[storeReadme,project1Review]);
+  assert.equal(html.includes('docs/project-1-digital-trail/README.md'),false,'Store rail still points to the publication wrapper');
+  assert.equal(html.includes('DIMENSIONAL-STORE-TRAVEL-STANDARD-0.1.md'),false,'Store rail still carries the travel-standard link');
+  assert.equal(html.includes('D-001-STAGE2-ENVELOPE-0.1.md'),false,'Store rail still carries the D-001 envelope link');
+});
+
 test('sharp shorthand still names the important build debt',()=>{
   assert.match(spec.render('projects'),/Don’t overcrowd/);
   assert.match(spec.render('alcove-config'),/Never attach an old answer to changed work\./);
