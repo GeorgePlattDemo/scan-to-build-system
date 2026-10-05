@@ -36,9 +36,9 @@ Every project uses the same six labels, in the same order:
 
 **Intent → The bench → The Store answers → Your call → We cut it → Pick up & build**
 
-Before the steps sits **Idea**, an unnumbered workspace for what you want and the material you bring; it is not a step, and nothing on it becomes a controlling fact by itself. Intent (step 1) sets this job's scope and carries forward what you already supplied, so nothing known is asked again. The words are defined in [`docs/definitions/README.md`](docs/definitions/README.md#the-trail).
+Before the steps sits **Idea**, an unnumbered workspace for what you want and the source information you bring—photos, scans, sketches, descriptions, or prior work; it is not a step, and nothing on it becomes a controlling fact by itself. Intent (step 1) sets this job's scope and carries forward what you already supplied, so nothing known is asked again. The words are defined in [`docs/definitions/README.md`](docs/definitions/README.md#the-trail).
 
-The machine-readable contract is [`apps/stb/public-build/stb-trail-contract.js`](apps/stb/public-build/stb-trail-contract.js). It currently names all five project tiles and no exceptions.
+The machine-readable contract is [`apps/stb/public-build/stb-trail-contract.js`](apps/stb/public-build/stb-trail-contract.js). It names all five project tiles. There are no operational trail-rule exemptions. Two declared presentation exceptions preserve that protocol: Window Seat may offer **Intent | One full scroll** on its Idea line; Start your own opens on **Intent**, with its unnumbered Idea intake one back control away.
 
 The labels are deliberately broader than page count. A project may need several pages inside one step, but it does not get a different authority sequence.
 
@@ -66,7 +66,7 @@ The [`verification register`](docs/project/VERIFICATION-REGISTER.md) is the clai
 
 Among the properties already recorded there are Store-backed dimensional and sheet software paths, durable custody of Store requests and answers, rejection of stale historical requests as current requests, quarantine of malformed or authority-bearing answers, preservation of Store refusal, and explicit non-claims for physical production and physical execution authority.
 
-The register also says something important about the current front door: **current five-project/public-build evidence still needs separately scoped proof rows rather than being inferred from older acceptance or candidate evidence.** This README does not turn a green workflow or a current UI state into a new PASS row.
+The register contains **separately scoped current five-project/public-build proof rows**, covering the trail/navigation contract, mapped Store integration paths, shared simulated terms flow, and public admission paths, with exact tests, identities, and limits. Those rows—not older acceptance evidence or a green workflow alone—establish the stated claims.
 
 ## What is simulated or modeled
 

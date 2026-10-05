@@ -22,9 +22,15 @@ That pin remains provenance for the application originally copied into this repo
 
 PR #10 and its ancestors are accepted ancestry, not a competing current candidate. PR #7 remains a separate parallel machine-safety/controller-simulation candidate.
 
-See [`../STB-CURRENT-BASELINE.md`](../STB-CURRENT-BASELINE.md) before changing the app.
+For current operation, start with [`../docs/project/CURRENT-SYSTEM-STATE.md`](../docs/project/CURRENT-SYSTEM-STATE.md). [`../STB-CURRENT-BASELINE.md`](../STB-CURRENT-BASELINE.md) records historical acceptance and promotion.
 
-## Launch
+## Current public application
+
+[▶ OPEN THE APP](https://georgeplattdemo.github.io/scan-to-build-system/system-build-current.html) opens `apps/stb/public-build/`, published from System main after its publication gate passes. System owns this source; Review is frozen history. The public build calls the hosted Store at the System-owned pin.
+
+## Historical accepted-app local launch
+
+These instructions run the transferred/accepted local application lineage. They are not the launch instructions for the current public-build composition above.
 
 ```text
 cd apps/stb
@@ -35,21 +41,21 @@ npm start
 
 Fixed accepted-app origin: `http://localhost:4317/`
 
-Public working evaluation: `https://georgeplattdemo.github.io/scan-to-build-review/working-app.html`
-
-The public page is an evaluation surface. The fixed local origin above is the accepted application runtime.
+The earlier Review evaluation is frozen historical provenance, not the current public application. The fixed local origin above belongs to the accepted local application lineage.
 
 ## Store paths
 
-Store identity is path-specific.
+The current runtime source is owned by `STORE_PIN` in [`stb/shared/contracts.mjs`](stb/shared/contracts.mjs). Historical proof paths keep their separately identified Store versions; they do not determine the current public application pin.
 
 ### Current dimensional Store Zero travel-standard path
 
 ```text
-STB_STORE_ZERO_ROOT=<clean scan-to-build-store at f88ccaf9a2624899e255e66b51111e2b02309dad> npm start
+STB_STORE_ZERO_ROOT=<clean scan-to-build-store at 9c62d9d6f7775deef83d47196d32c9b5174a352c> npm start
 ```
 
-### Accepted published-job / canonical S-001 proof path
+The checkout above must match the current `STORE_PIN` exactly. This mounts the Store for the local server; it does not repoint the published app or its hosted Store.
+
+### Historical accepted published-job / canonical S-001 proof path
 
 Use a clean exact Store checkout at:
 
@@ -61,7 +67,7 @@ Do not silently substitute the published-job Store pin for the Stage-2 Store Zer
 
 Historical Store pins are listed in [`../provenance/SOURCE-PINS.md`](../provenance/SOURCE-PINS.md).
 
-## Accepted bounded software scope
+## Historical accepted bounded software scope
 
 The accepted application includes bounded software support for:
 

@@ -1,9 +1,13 @@
 # Current System state
 
 **Purpose:** current operational/documentary entry point. This is not a promotion event and does not replace historical proof records.  
-**Documentation reconciliation baseline:** `scan-to-build-system@494c50048cf68dc32651bfd6c44ed2fb6d02410f`  
-**Store source inspected with that baseline:** `scan-to-build-store@9c62d9d6f7775deef83d47196d32c9b5174a352c`  
-**Checked:** 2026-09-30
+**System main inspected:** `scan-to-build-system@1265de3de00935d821b18734f2f3492712566bc0`
+
+**Runtime Store source inspected:** `scan-to-build-store@9c62d9d6f7775deef83d47196d32c9b5174a352c`
+
+**Checked:** 2026-10-05 (UTC; 2026-10-04 in America/New_York)
+
+The earlier documentation reconciliation at `scan-to-build-system@494c50048cf68dc32651bfd6c44ed2fb6d02410f` (2026-09-30) remains historical context, not the latest inspected main. This is a dated inspection record, not a moving main-SHA authority.
 
 ## What is published
 
@@ -12,10 +16,17 @@
 - `scan-to-build-review` is frozen history and is not touched by that publication workflow.
 - The older public-build custody and reconciliation documents remain useful provenance. Their transfer/migration instructions are historical, not open work instructions.
 
+## Current public trail and recorded verification
+
+- The five tiles are Start your own, Critical fit, Space utilization, Outdoor build, and Playhouse arched window. Their six steps are **Intent → The bench → The Store answers → Your call → We cut it → Pick up & build**. Idea is unnumbered intake, not a step.
+- The trail contract declares two presentation exceptions, with no operational rule exemptions: Window Seat may offer **Intent | One full scroll** on its Idea line; Start your own opens on **Intent**, with Idea one back control away.
+- The verification register contains separately scoped current public-build rows. Historical proof identities remain historical; their pins are not rewritten to the current runtime pin.
+- At the inspected System main, the recorded [App baseline](https://github.com/GeorgePlattDemo/scan-to-build-system/actions/runs/37251736903), [D-001 Travel Integration](https://github.com/GeorgePlattDemo/scan-to-build-system/actions/runs/37251736749), [Playhouse candidate Store integration](https://github.com/GeorgePlattDemo/scan-to-build-system/actions/runs/37251736742) (including five-tile suites), and [Publish OPEN SYSTEM BUILD](https://github.com/GeorgePlattDemo/scan-to-build-system/actions/runs/37252049549) runs completed successfully. The published shell, runtime configuration, and trail contract matched that main byte for byte when checked. These observations establish recorded CI/publication state, not a new interactive five-tile or physical-production proof.
+
 ## Current Store source
 
 - The authoritative current Store pin is `STORE_PIN` in [`apps/stb/shared/contracts.mjs`](../../apps/stb/shared/contracts.mjs).
-- At the documentation reconciliation baseline above, that pin is `9c62d9d6f7775deef83d47196d32c9b5174a352c`.
+- At the inspected System main above, that pin is `9c62d9d6f7775deef83d47196d32c9b5174a352c`.
 - Historical evidence keeps the exact Store pin on which that evidence was proved. Do not rewrite an old proof row to the current pin.
 - Editing documentation does not move the Store pin, repoint Railway, or change a Store evaluator.
 
