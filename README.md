@@ -54,7 +54,7 @@ The confirmed definition supplies the required result. Store adds identified mat
 
 That is the connection this work investigates: the customer defines the result, and software carries it toward cut, mill, and drill without a second design entry.
 
-The [**Project 1 digital manufacturing trail**](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/project-1-digital-trail/README.md) makes one such path inspectable. It reproduces the Store answer and generates explicit virtual commands and controller-oriented source from one identified definition. You can follow the information handoffs and reproduce the calculation.
+The [**Project 1 digital manufacturing trail**](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/project-1-digital-trail/D001_Project1_Review.md) makes one such path inspectable. It reproduces the Store answer and generates explicit virtual commands and controller-oriented source from one identified definition. You can follow the information handoffs and reproduce the calculation.
 
 ## Three connected homes
 
@@ -81,7 +81,7 @@ Store Zero is a modeled reference yard. Its prices are budgetary estimates, and 
 | How do people enter and resume their work? | [Common entry](docs/application/COMMON-ENTRY-ARCHITECTURE.md) |
 | What happens to photos, source material, and records? | [Information custody](docs/application/INFORMATION-CUSTODY-BOUNDARY.md) |
 | What crosses between System and Store? | [Store foundation](docs/store/CURRENT-STORE-FOUNDATION.md) |
-| How does one definition reach commands and a modeled price? | [Project 1 digital trail](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/project-1-digital-trail/README.md) |
+| How does one definition reach commands and a modeled price? | [Project 1 digital trail](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/project-1-digital-trail/D001_Project1_Review.md) |
 | Why could this matter to a local business or community? | [3D Solutions Program](https://github.com/GeorgePlattDemo/3d-solutions-program) |
 
 **NO BLOOD ON WOOD.**
