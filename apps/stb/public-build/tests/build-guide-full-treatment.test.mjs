@@ -56,6 +56,13 @@ test('landing Dev Guide keeps short orientation and bounded authority cues',()=>
   ]) assert.ok(html.includes(phrase),`landing Dev Guide lost: ${phrase}`);
 });
 
+test('Job 1 Store rail links directly to the full Project 1 engineering review',()=>{
+  const html=spec.render('job1-store');
+  assert.match(html,/Project 1 digital trail — full engineering review/);
+  assert.ok(html.includes('https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/project-1-digital-trail/D001_Project1_Review.md'));
+  assert.equal(html.includes('docs/project-1-digital-trail/README.md'),false,'Store rail still points to the publication wrapper instead of the full review');
+});
+
 test('sharp shorthand still names the important build debt',()=>{
   assert.match(spec.render('projects'),/Don’t overcrowd/);
   assert.match(spec.render('alcove-config'),/Never attach an old answer to changed work\./);
