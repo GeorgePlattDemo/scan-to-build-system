@@ -13,7 +13,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <body>
 <iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=69c66036"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
-<script src="stb-store-handoff-contract.js?v=534a2b5e"></script>
+<script src="stb-store-handoff-contract.js?v=d3347495"></script>
 <script src="stb-user-defined-board-store.js?v=1c99c380"></script>
 <script src="stb-store-client.js?v=72cdc9fa"></script>
 <script src="stb-user-defined-board-runtime-bridge.js?v=db611717"></script>
@@ -321,7 +321,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                 glossaryChoices.forEach(choice => {
                   const sizeKey = String(choice.dataset.storeSizeKey || '');
                   const offerings = storeHandoffContract.startOwnOfferings(sizeKey);
-                  const available = Array.isArray(offerings) && offerings.length > 0;
+                  const available = Array.isArray(offerings) && offerings.some(offering => offering.offered === true);
                   choice.dataset.storeBacked = available ? 'true' : 'false';
                   choice.dataset.storeCatalogPin = String(catalogSource?.pin || '');
                   choice.dataset.storeOfferingCount = String(offerings?.length || 0);

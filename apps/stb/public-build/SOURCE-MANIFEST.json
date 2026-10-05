@@ -1492,6 +1492,20 @@
       "bytes": 95410,
       "reason": "Historical research document recovered from exact source blob 5c7d1acb78f65ab421423f531c87d2b4eb41059a; only href=\"stb-outdoor-build.html\" becomes href=\"stb-outdoor-picnic-0.4.html\", with all other bytes preserved for the two Rule Book links; source System 5f512239152cfdfad384dbe9bcefb7530d382234 apps/stb/review-donors/STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html; original Review donor identity recorded in System eccae84ac6999c698819426487861afae4b5a329 docs/project/REVIEW-TO-SYSTEM-ADMISSION-0.1.md, Review 2d75939a5a1cc11de41ed53aad7f86412f39a327. Historical research only; no current project or Store authority.",
       "sourceBlobSha": "5c7d1acb78f65ab421423f531c87d2b4eb41059a"
+    },
+    {
+      "path": "stb-store-handoff-contract.js",
+      "pass": "pass4-pinned-material-preview",
+      "blobSha": "d334749584d7510dbb030ef1ef5d8d2cdc10c6ff",
+      "bytes": 60098,
+      "reason": "Replace former material preview projection with the same 54 mapped SKUs from unchanged System STORE_PIN; preserve source operations and offered flags. No Store evaluation or tab-planning logic changed."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "pass4-pinned-material-preview",
+      "blobSha": "f30c3953cc1f005064d179f5d08ac6e0e7963ff5",
+      "bytes": 255909,
+      "reason": "Refresh contract cache identity and use catalog offered flags for material swatch availability; retain the same six visible choices and existing layout and controls."
     }
   ],
   "retiredFiles": [

@@ -134,3 +134,27 @@ test('the Store items the SKU box looks up are the nominal 2×4 boards in the ca
   }
   assert.ok(boards.some((row) => row[1] === 'cedar'), 'cedar stays in the Store catalog');
 });
+
+// The material swatches consume this mapped subset, not a second Store evaluator.
+test('material swatch catalog projection matches STORE_PIN for every mapped offering', async () => {
+  const root = await requireCleanPinnedStore();
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'store-zero-catalog.json'), 'utf8'));
+  const contract = loadContract();
+  assert.equal(contract.startOwnStoreCatalog.pin, STORE_PIN);
+  assert.equal(contract.startOwnStoreCatalog.clock, catalog.clock);
+  const keys = ['2x4', '2x6', '2x8', '4x4', '1x4p', '1x6p', '1x4o', '1x6o', '1x8o', '1x4c', '1x6c', '1x6w', 'p25', 'p38', 'p50', 'p63', 'p75', 'o75'];
+  let count = 0;
+  for (const key of keys) {
+    for (const row of contract.startOwnOfferings(key)) {
+      count += 1;
+      const original = catalog.offerings.find((o) => o.storeSku === row.storeSku);
+      assert.ok(original, row.storeSku + ': mapped Store item exists');
+      const fields = ['form', 'stockL_in', 'sheetW_in', 'sheetL_in', 'sellingPrice', 'supportedOps', 'cellFamily', 'offered'];
+      assert.deepEqual(JSON.parse(JSON.stringify(pick(row, fields))), pick(original, fields), row.storeSku + ': catalog projection');
+    }
+  }
+  assert.equal(count, 54, 'the existing mapped SKU subset is preserved');
+  for (const key of ['1x6p', '1x6w', '1x6c', '1x8o', '2x4', 'p75']) {
+    assert.ok(contract.startOwnOfferings(key).some((row) => row.offered === true), key + ': existing visible material choice stays available');
+  }
+});
