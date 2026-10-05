@@ -1550,6 +1550,20 @@
       "blobSha": "2ab811c60d7115ec9a6fa0c234c3c0f915998d6b",
       "bytes": 258471,
       "reason": "After an explicit USE SKU selection, clear the visible ITEM LOOKUP result rows while preserving the selected-item answer line and the existing compatible/incompatible Job 1 behavior. No Store request, search contract, Store pin, runtime endpoint or other page behavior changes."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "item-lookup-close-button-0.1",
+      "blobSha": "c154248f7aa304ef78014f1da491a2ffccbeb825",
+      "bytes": 100533,
+      "reason": "Add an explicit CLOSE control beneath populated ITEM LOOKUP results. CLOSE dismisses only the visible result rows; search text and the Store answer line remain. No Store request or job-definition behavior changes."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "item-lookup-close-button-0.1",
+      "blobSha": "da1505785136654f2e20e2579489714852ae211a",
+      "bytes": 258949,
+      "reason": "Wire ITEM LOOKUP CLOSE to clear returned rows and hide its control, show the control whenever a lookup returns rows, retain USE SKU dismissal, and refresh the three-frames cache identity. Store search, selection rules, runtime endpoint and STORE_PIN are unchanged."
     }
   ],
   "retiredFiles": [
