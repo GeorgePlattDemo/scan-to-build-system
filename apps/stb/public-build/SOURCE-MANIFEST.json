@@ -1592,6 +1592,20 @@
       "blobSha": "76e853b6812f28ad6269e926d547f94107317c84",
       "bytes": 84581,
       "reason": "Refresh shared build-guide cache identity only; Outdoor content and behavior are unchanged."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "item-lookup-close-dismiss-0.1",
+      "blobSha": "8cfc45ab5752c278d9cffc781ab40f885988a064",
+      "bytes": 100564,
+      "reason": "Put CLOSE above ITEM LOOKUP results and scroll the list so the control stays inside the clipped frame."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "item-lookup-close-dismiss-0.1",
+      "blobSha": "2f3bac70b526b8df95ec4b03c1d83e97207518ea",
+      "bytes": 259008,
+      "reason": "CLOSE clears the match line as well as the result rows. Cache identity follows the frame."
     }
   ],
   "retiredFiles": [

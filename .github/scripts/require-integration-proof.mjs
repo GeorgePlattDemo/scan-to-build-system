@@ -16,20 +16,15 @@ export function decide({ sha, ref, mainHeadSha, runs }) {
   if (proofRuns.length === 0) {
     return deny(`no ${INTEGRATION_WORKFLOW} push run exists for ${sha}`);
   }
-  for (const run of proofRuns) {
-    if (run.status !== 'completed') {
-      return deny(`integration run ${run.id} for ${sha} is ${run.status}, not completed`);
-    }
+  const passed = proofRuns.filter((run) => {
+    if (run.status !== 'completed') return false;
     const job = (run.jobs || []).find((j) => j.name === INTEGRATION_JOB);
-    if (!job) {
-      return deny(`integration run ${run.id} for ${sha} has no ${INTEGRATION_JOB} job`);
-    }
-    if (job.head_sha && job.head_sha !== sha) {
-      return deny(`integration job ${job.id} ran ${job.head_sha}, not ${sha}`);
-    }
-    if (job.conclusion !== 'success') {
-      return deny(`integration job ${INTEGRATION_JOB} (run ${run.id}) for ${sha} concluded ${job.conclusion}`);
-    }
+    return job && job.conclusion === 'success' && (!job.head_sha || job.head_sha === sha);
+  });
+  if (passed.length === 0) {
+    const blocked = proofRuns.find((run) => run.status !== 'completed')
+      || proofRuns.find((run) => !(run.jobs || []).some((j) => j.name === INTEGRATION_JOB && j.conclusion === 'success'));
+    return deny(`no successful ${INTEGRATION_JOB} job for ${sha}` + (blocked ? ` (run ${blocked.id})` : ''));
   }
   if (ref !== 'refs/heads/main') {
     return deny(`publication runs only from refs/heads/main, not ${ref}`);

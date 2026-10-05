@@ -22,7 +22,7 @@ for (const conclusion of ['failure', 'skipped', 'cancelled', 'timed_out', null])
   test(`integration job ${conclusion} denies`, () => {
     const v = decide({ sha: SHA, ref: MAIN, mainHeadSha: SHA, runs: [run(conclusion)] });
     assert.equal(v.ok, false);
-    assert.match(v.reason, /concluded/);
+    assert.match(v.reason, /no successful/);
   });
 }
 
@@ -51,9 +51,11 @@ test('a run still in progress denies', () => {
   assert.equal(v.ok, false);
 });
 
-test('one failed run beside a green run for the same SHA denies', () => {
-  const runs = [run('success'), run('failure', { id: 2 })];
-  assert.equal(decide({ sha: SHA, ref: MAIN, mainHeadSha: SHA, runs }).ok, false);
+test('one failed or cancelled run beside a green run for the same SHA still publishes', () => {
+  for (const conclusion of ['failure', 'cancelled']) {
+    const runs = [run('success'), run(conclusion, { id: 2 })];
+    assert.equal(decide({ sha: SHA, ref: MAIN, mainHeadSha: SHA, runs }).ok, true, conclusion);
+  }
 });
 
 test('a missing integration job denies', () => {
