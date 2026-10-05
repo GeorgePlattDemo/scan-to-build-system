@@ -477,6 +477,7 @@ test('ITEM LOOKUP searches the live pinned Store Zero catalog by keyword or SKU;
 
     // 15: choosing 1×6 pine shows the real item and leaves Job 1 as it was.
     await b.locator('#stb-intent-sku-results li[data-store-sku="STB-ZERO-PINE-1X6-96-001"] button').click();
+    assert.equal(await b.locator('#stb-intent-sku-results li').count(), 0, 'USE SKU closes the result list for an incompatible item');
     assert.equal(await answerLine(), 'STB-ZERO-PINE-1X6-96-001 · 1x6 x 96 in select pine S4S. A real Store Zero item, but not one of this job’s woods. Nothing changed.');
     assert.deepEqual(await state(), before, '1×6 pine did not change Job 1');
 
@@ -494,6 +495,7 @@ test('ITEM LOOKUP searches the live pinned Store Zero catalog by keyword or SKU;
     assert.equal(await answerLine(), '1 Store Zero item matches.');
     assert.deepEqual(await state(), before, 'rendering a result changes nothing');
     await b.locator('#stb-intent-sku-results li[data-store-sku="STB-ZERO-SPF-2X4-96-001"] button').click();
+    assert.equal(await b.locator('#stb-intent-sku-results li').count(), 0, 'USE SKU closes the result list for a compatible item');
     await until(async () => (await state()).species === 'spf', 'USE SKU states SPF');
     assert.equal(await answerLine(), 'STB-ZERO-SPF-2X4-96-001 · 2x4 x 96 in SPF construction. This job’s wood is now SPF; the Store still picks the board.');
 
