@@ -1543,6 +1543,13 @@
       "blobSha": "c99bf505b652a80126dbf195df2bd685a2c40e1e",
       "bytes": 258409,
       "reason": "ITEM LOOKUP sends one OFFERING_LOOKUP {searchText} per LOOK UP or Enter through STBStoreClient.lookupOfferings() to the hosted Store offering endpoint and renders the bounded matches (description, Store SKU, catalog price). Showing results changes nothing; USE SKU applies the existing Job 1 rule (a Store 2\u00d74 of SPF or treated SYP states that wood). No Store answer shows \"Store Zero item lookup is unavailable. Nothing changed.\" with no local fallback. Cache identities refreshed for three-frames.html, stb-store-handoff-contract.js and stb-store-client.js."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "item-lookup-close-results-0.1",
+      "blobSha": "2ab811c60d7115ec9a6fa0c234c3c0f915998d6b",
+      "bytes": 258471,
+      "reason": "After an explicit USE SKU selection, clear the visible ITEM LOOKUP result rows while preserving the selected-item answer line and the existing compatible/incompatible Job 1 behavior. No Store request, search contract, Store pin, runtime endpoint or other page behavior changes."
     }
   ],
   "retiredFiles": [

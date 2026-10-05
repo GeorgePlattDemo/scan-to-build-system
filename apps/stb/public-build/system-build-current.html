@@ -858,6 +858,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
               const skuResults = childDoc.getElementById('stb-intent-sku-results');
               let skuLookupToken = 0;
               const useSku = item => {
+                if (skuResults) skuResults.replaceChildren();
                 const named = item.storeSku+' · '+item.description+'.';
                 const job1Board = item.form === 'board' && item.nominalT === 2 && item.nominalW === 4;
                 if (!job1Board || !SPECIES_WORDS[item.species]) {
