@@ -1477,6 +1477,21 @@
       "blobSha": "7c0866a057fc375ce0fe5899ac741910ea9a9647",
       "bytes": 255876,
       "reason": "Start your own opens on Intent: its page's initial stage, its pending stage and its tile click name intent (one page, no second route; Idea stays the back control). The one wood state now also shows in Intent's handoff frame; Intent's wood-button handlers are removed with the buttons. Typed tools also travel in the handoff frame; the handoff frame shows the current Cut, At an angle and Spot drill values of the bench revision. The bench copy of the Job 1 block leaves out the live wood and tools. The Store catalog status line is hidden when every board is Store-backed. Cache keys for three-frames.html and stb-trail-contract.js."
+    },
+    {
+      "path": "stb-outdoor-reference-authority-0.3.html",
+      "pass": "pass3-outdoor-rulebook-links",
+      "blobSha": "0829d09636eba122cc03e77caadd653debe25e84",
+      "bytes": 66621,
+      "reason": "Rule Book return link targets the current Outdoor 0.4 page; original dossier recovered with only its retired return-link destination repaired from preserved System history so both existing dossier links resolve. No project controls or Store path changed."
+    },
+    {
+      "path": "STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html",
+      "pass": "pass3-outdoor-rulebook-links",
+      "blobSha": "390f7cde16ae66fb373f2ae0b570e931af4dc898",
+      "bytes": 95410,
+      "reason": "Historical research document recovered from exact source blob 5c7d1acb78f65ab421423f531c87d2b4eb41059a; only href=\"stb-outdoor-build.html\" becomes href=\"stb-outdoor-picnic-0.4.html\", with all other bytes preserved for the two Rule Book links; source System 5f512239152cfdfad384dbe9bcefb7530d382234 apps/stb/review-donors/STB-OUTDOOR-ANGLED-FRAME-RESEARCH-DOSSIER-0.1.html; original Review donor identity recorded in System eccae84ac6999c698819426487861afae4b5a329 docs/project/REVIEW-TO-SYSTEM-ADMISSION-0.1.md, Review 2d75939a5a1cc11de41ed53aad7f86412f39a327. Historical research only; no current project or Store authority.",
+      "sourceBlobSha": "5c7d1acb78f65ab421423f531c87d2b4eb41059a"
     }
   ],
   "retiredFiles": [
