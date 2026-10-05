@@ -190,7 +190,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=c154248f"
+                  src="three-frames.html?v=8cfc45ab"
                 ></iframe>
               </div>
             `;
@@ -199,7 +199,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=c154248f';
+            liveFrame.src = 'three-frames.html?v=8cfc45ab';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -861,6 +861,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
               const closeSkuResults = () => {
                 if (skuResults) skuResults.replaceChildren();
                 if (skuCloseRow) skuCloseRow.hidden = true;
+                if (skuAnswer) skuAnswer.textContent = '';
               };
               let skuLookupToken = 0;
               const useSku = item => {

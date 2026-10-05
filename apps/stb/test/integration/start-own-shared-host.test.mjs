@@ -480,7 +480,7 @@ test('ITEM LOOKUP searches the live pinned Store Zero catalog by keyword or SKU;
     await b.locator('#stb-intent-sku-close').click();
     assert.equal(await b.locator('#stb-intent-sku-results li').count(), 0, 'CLOSE removes the result rows');
     assert.equal(await b.locator('#stb-intent-sku-close').isVisible(), false, 'CLOSE hides with the results');
-    assert.equal(await answerLine(), answerBeforeClose, 'CLOSE preserves the Store answer line');
+    assert.equal(await answerLine(), '', 'CLOSE clears the Store answer line');
     assert.equal(await input.inputValue(), searchBeforeClose, 'CLOSE preserves the search text');
     await input.press('Enter');
     await settle(3);

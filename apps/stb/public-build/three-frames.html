@@ -70,7 +70,7 @@
   .stb-lookup-row button:disabled,.stb-add-tool-row button:disabled{opacity:.5;cursor:not-allowed}
   .stb-sku-answer{margin:4px 0 0;font-size:11.5px;color:var(--text-2)}
   .stb-sku-answer:empty{display:none}
-  .stb-sku-results{list-style:none;margin:4px 0 0;padding:0;max-width:60ch}
+  .stb-sku-results{list-style:none;margin:4px 0 0;padding:0;max-width:60ch;max-height:220px;overflow:auto}
   .stb-sku-results:empty{display:none}
   .stb-sku-results li{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:4px 0;border-top:1px solid var(--border);font-size:11.5px}
   .stb-sku-results li b{display:block;font-weight:600;color:var(--text)}
@@ -241,8 +241,8 @@
       </div>
       </div>
       <p class="stb-sku-answer" id="stb-intent-sku-answer" aria-live="polite"></p>
-      <ul class="stb-sku-results" id="stb-intent-sku-results" aria-label="Store Zero items"></ul>
       <div class="stb-sku-close-row" id="stb-intent-sku-close-row" hidden><button type="button" class="stb-sku-close" id="stb-intent-sku-close">CLOSE</button></div>
+      <ul class="stb-sku-results" id="stb-intent-sku-results" aria-label="Store Zero items"></ul>
       <p class="sub" id="stb-store-glossary-status" hidden>These material choices are checked against the current Store.</p>
       <div class="stb-intent-define">
         <div>
