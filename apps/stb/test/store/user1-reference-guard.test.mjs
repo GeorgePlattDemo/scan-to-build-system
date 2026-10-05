@@ -3,7 +3,6 @@
 // A cached answer is only allowed if it is exactly what the Store at System's STORE_PIN returns.
 // This test sends every reference demand, with its own wood, through the pinned Store and fails on any difference,
 // so moving STORE_PIN without refreshing the cache (or editing the cache by hand) turns CI red.
-// It also checks the Store items the SKU box looks up against store-zero-catalog.json at the pin.
 
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -117,22 +116,6 @@ test('cached User 1 Store references equal the Store at STORE_PIN, field for fie
       label + ': considered candidates',
     );
   }
-});
-
-test('the Store items the SKU box looks up are the nominal 2×4 boards in the catalog at STORE_PIN, row for row', async () => {
-  const root = await requireCleanPinnedStore();
-  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'store-zero-catalog.json'), 'utf8'));
-  const boards = catalog.offerings
-    .filter((o) => o.form === 'board' && o.nominalT === 2 && o.nominalW === 4)
-    .map((o) => [o.storeSku, o.species, o.grade, o.stockL_in, o.sellingPrice, o.description]);
-  const contract = loadContract();
-  assert.deepEqual(JSON.parse(JSON.stringify(contract.startOwnStoreItems)), boards);
-  for (const [storeSku, species] of boards) {
-    const item = contract.startOwnStoreItem(storeSku.toLowerCase());
-    assert.equal(item.species, species);
-    assert.equal(item.catalogPin, STORE_PIN, storeSku + ': looked up in the catalog at System STORE_PIN');
-  }
-  assert.ok(boards.some((row) => row[1] === 'cedar'), 'cedar stays in the Store catalog');
 });
 
 // The material swatches consume this mapped subset, not a second Store evaluator.

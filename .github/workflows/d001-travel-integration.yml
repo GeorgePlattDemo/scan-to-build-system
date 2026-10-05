@@ -58,6 +58,12 @@ jobs:
           STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-zero
         run: node --test --test-concurrency=1 test/store/cut-package.test.mjs
 
+      - name: Store Zero offering search through the pinned Store
+        working-directory: apps/stb
+        env:
+          STB_STORE_ZERO_ROOT: ${{ github.workspace }}/store-zero
+        run: node --test --test-concurrency=1 test/store/offering-search.test.mjs
+
       - name: User 1 cached reference equals pinned Store
         working-directory: apps/stb
         env:

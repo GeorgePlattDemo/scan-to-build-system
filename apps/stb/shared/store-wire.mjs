@@ -62,6 +62,12 @@ const ENVELOPE_FIELDS = Object.freeze([
   'payload',
 ]);
 
+// OFFERING_LOOKUP text search: a bounded page of offered catalog rows, never the whole catalog.
+export const OFFERING_SEARCH_LIMITS = Object.freeze({
+  maxSearchTextLength: 80,
+  maxResults: 20,
+});
+
 function fail(code, details) {
   return { ok: false, code, details };
 }
@@ -121,6 +127,23 @@ function validateOfferingPayload(payload) {
     return fail(ADAPTER_ERROR_CODES.MALFORMED_REQUEST, 'offering payload must be an object');
   }
   const keys = Object.keys(payload).sort();
+  // Catalog discovery: free text, alone. It is not material demand and carries no job definition.
+  if (payload.searchText !== undefined) {
+    if (keys.length !== 1) {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'offering search accepts searchText alone');
+    }
+    if (typeof payload.searchText !== 'string') {
+      return fail(ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE, 'searchText must be a string');
+    }
+    const searchText = payload.searchText.trim();
+    if (searchText.length === 0 || searchText.length > OFFERING_SEARCH_LIMITS.maxSearchTextLength) {
+      return fail(
+        ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE,
+        `searchText must be 1 to ${OFFERING_SEARCH_LIMITS.maxSearchTextLength} characters`,
+      );
+    }
+    return { ok: true, kind: 'search', searchText };
+  }
   if (payload.requestedStoreSku !== undefined) {
     const skuError = requireNonemptyString('requestedStoreSku', payload.requestedStoreSku);
     if (skuError) {
@@ -1772,6 +1795,24 @@ export function inspectStoreResponse(request, parsed, { httpStatus, byteLength }
         reason: 'missing-evaluation-receipt-hash',
       };
     }
+  }
+  if (request.requestType === STORE_REQUEST_TYPES.OFFERING_LOOKUP && request.payload?.searchText !== undefined) {
+    if (
+      !Array.isArray(parsed.rawOfferings) ||
+      parsed.rawOfferings.length > OFFERING_SEARCH_LIMITS.maxResults ||
+      !Number.isInteger(parsed.totalMatches) ||
+      parsed.totalMatches < parsed.rawOfferings.length ||
+      typeof parsed.truncated !== 'boolean' ||
+      parsed.truncated !== parsed.totalMatches > parsed.rawOfferings.length
+    ) {
+      return {
+        ok: false,
+        current: false,
+        diagnostic: APP_DIAGNOSTICS.APP_MALFORMED_RESPONSE,
+        reason: 'missing-offering-matches',
+      };
+    }
+    return { ok: true, current: false, diagnostic: null, reason: null };
   }
   if (request.requestType === STORE_REQUEST_TYPES.OFFERING_LOOKUP && !('rawOffering' in parsed)) {
     return {

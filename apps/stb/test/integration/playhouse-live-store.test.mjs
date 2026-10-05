@@ -27,7 +27,7 @@ function serve(adapter, log, tamper = null, rewrite = null) {
     if (url.pathname === '/stb-store-runtime.json') {
       const { port } = server.address();
       res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ jobEndpoint: `http://127.0.0.1:${port}/api/store-zero/job`, storePin: STORE_PIN }));
+      res.end(JSON.stringify({ jobEndpoint: `http://127.0.0.1:${port}/api/store-zero/job`, offeringEndpoint: `http://127.0.0.1:${port}/api/store-zero/offering`, storePin: STORE_PIN }));
       return;
     }
     if (url.pathname === '/api/store-zero/job' && req.method === 'POST') {

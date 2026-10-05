@@ -64,7 +64,7 @@ assert.match(surface,/CONFIRM &amp; SEND TO STORE ZERO →/);
 assert.match(surface,/id="stb-bench-dynamic-geometry"/);
 
 // Host carries one definition through intent, bench, Store, Terms and record.
-assert.match(shell,/three-frames\.html\?v=b80958ec/);
+assert.match(shell,/three-frames\.html\?v=52eae9f0/);
 assert.match(shell,/const definedWorkpieceLengthIn = 60;/);
 assert.match(shell,/DEMO_HORIZONTAL_SPAN_IN = 8/);
 assert.match(shell,/Math\.asin\(spanRatio\)/);
@@ -141,7 +141,13 @@ assert.match(shell,/clone\.querySelector\('\.stb-carry-live'\)\?\.remove\(\)/,'t
 // Cedar is off this bench's choices; it stays in the Store catalog.
 assert.equal(/data-(?:intent-)?species="cedar"/.test(surface),false,'cedar is still a bench choice');
 assert.deepEqual([...surface.matchAll(/data-species="([^"]+)"/g)].map(m => m[1]), ['spf','syp-treated']);
-assert.match(shell,/storeHandoffContract\.startOwnStoreItem\(sku\)/);
+// ITEM LOOKUP asks the hosted Store's offering endpoint; the browser holds no copied catalog to answer from.
+assert.equal(shell.includes('startOwnStoreItem'),false,'ITEM LOOKUP still answers from a browser copy');
+assert.match(shell,/window\.STBStoreClient\.lookupOfferings\(\{/);
+assert.match(surface,/<label class="stb-label" for="stb-intent-sku">ITEM LOOKUP<\/label>/);
+assert.match(surface,/placeholder="Pine, 1 x 6 pine, or Store SKU…"/);
+assert.match(surface,/id="stb-intent-sku-look" disabled>LOOK UP</);
+assert.equal(surface.includes('STORE LOOKUP'),false);
 assert.match(shell,/materialDemand:statedMaterial\(\)/,'the bench reference is looked up for the stated wood');
 assert.match(shell,/definitionId:'SYO-USER1-XBRACE-0\.1'/);
 assert.match(shell,/originalShow\.call\(win,'proof-store'\)/);
@@ -195,11 +201,10 @@ assert.equal(typeof contract.resolveUser1StoreReference,'function');
 assert.equal(contract.user1StoreReferences.length,4);
 assert.deepEqual(Array.from(contract.user1StoreReferences, r => r.demand.materialDemand.species+'@'+r.demand.partLengthIn),
   ['spf@16','spf@18','syp-treated@16','syp-treated@18']);
-// A SKU names a real Store item or nothing.
-assert.equal(contract.startOwnStoreItem('stb-zero-pt-2x4-96-001').species,'syp-treated');
-assert.equal(contract.startOwnStoreItem('STB-ZERO-WRC-2X4-96-001').species,'cedar','cedar stays in the Store catalog');
-assert.equal(contract.startOwnStoreItem('STB-ZERO-MADE-UP-2X4-001'),null);
-assert.equal(contract.startOwnStoreItems.length,27);
+// The old copied 2×4 SKU table and its exact-match lookup are gone; ITEM LOOKUP asks the Store.
+assert.equal(typeof contract.startOwnStoreItem,'undefined');
+assert.equal(typeof contract.startOwnStoreItems,'undefined');
+assert.equal(/START_OWN_STORE_ITEMS|STB-ZERO-WRC-2X4-96-001/.test(contractSource),false,'the copied SKU table is still in the contract');
 
 const exactStoreAnswer = contract.resolveUser1StoreReference({
   configurationId:'SYO-USER1-XBRACE',

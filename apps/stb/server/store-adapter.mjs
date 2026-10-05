@@ -16,6 +16,7 @@ import {
   correlationFields,
   digestCanonical,
   httpStatusForAdapterCode,
+  OFFERING_SEARCH_LIMITS,
   validateWireRequest,
 } from '../shared/store-wire.mjs';
 import { loadPinnedStoreModules, storeRootFromEnv } from './store-source.mjs';
@@ -148,6 +149,64 @@ function storeBasis({ modules, offering, evaluation, estimate }) {
   };
 }
 
+// OFFERING_LOOKUP text search. Deterministic retrieval over Store-owned catalog facts at STORE_PIN: no fuzzy
+// matching, no synonyms, no inference of capability or job fit. `1x6`, `1 x 6` and `1×6` are one dimension token.
+export function normalizeOfferingSearchText(text) {
+  return String(text ?? '')
+    .toLowerCase()
+    .replace(/×/g, 'x')
+    .replace(/(\d)\s*x\s*(?=\d)/g, '$1x')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function searchTokens(text) {
+  const tokens = new Set();
+  for (const token of normalizeOfferingSearchText(text).split(/[\s()—,;:]+/)) {
+    if (!token) continue;
+    tokens.add(token);
+    if (token.includes('-')) token.split('-').filter(Boolean).forEach((part) => tokens.add(part));
+  }
+  return tokens;
+}
+
+// The searchable representation of one catalog row: its own structured fields and description, nothing derived.
+function offeringSearchTokens(item) {
+  const tokens = searchTokens(item.description ?? '');
+  for (const value of [item.species, item.grade, item.form]) {
+    if (typeof value === 'string' && value) searchTokens(value).forEach((token) => tokens.add(token));
+  }
+  if (item.nominalT != null && item.nominalW != null) tokens.add(`${item.nominalT}x${item.nominalW}`);
+  if (item.stockL_in != null) tokens.add(String(item.stockL_in));
+  if (item.sheetW_in != null && item.sheetL_in != null) tokens.add(`${item.sheetW_in}x${item.sheetL_in}`);
+  const sku = String(item.storeSku ?? '').toLowerCase();
+  tokens.add(sku);
+  sku.split('-').filter(Boolean).forEach((part) => tokens.add(part));
+  return tokens;
+}
+
+// Rank: 0 exact SKU, 1 SKU prefix, 2 every query token is a row token (AND). Catalog order breaks ties.
+export function searchOfferedCatalog(catalog, searchText, limit) {
+  const query = normalizeOfferingSearchText(searchText);
+  const queryTokens = [...searchTokens(searchText)];
+  const matches = [];
+  if (!query || queryTokens.length === 0) return { matches, totalMatches: 0 };
+  catalog.offerings.forEach((item, index) => {
+    if (!item || item.offered !== true) return;
+    const sku = String(item.storeSku ?? '').toLowerCase();
+    let rank = null;
+    if (sku === query) rank = 0;
+    else if (!query.includes(' ') && sku.startsWith(query)) rank = 1;
+    else {
+      const rowTokens = offeringSearchTokens(item);
+      if (queryTokens.every((token) => rowTokens.has(token))) rank = 2;
+    }
+    if (rank !== null) matches.push({ item, rank, index });
+  });
+  matches.sort((a, b) => a.rank - b.rank || a.index - b.index);
+  return { matches: matches.slice(0, limit).map((match) => match.item), totalMatches: matches.length };
+}
+
 function lookupItem(modules, catalog, offeringPayload) {
   if (offeringPayload.kind === 'sku') {
     return modules.findSku(catalog, offeringPayload.storeSku);
@@ -206,6 +265,24 @@ export async function createStoreAdapter({
   }
 
   async function handleOffering(envelope, offeringPayload, runtimeCatalog = catalog) {
+    if (offeringPayload.kind === 'search') {
+      const { matches, totalMatches } = searchOfferedCatalog(
+        runtimeCatalog,
+        offeringPayload.searchText,
+        OFFERING_SEARCH_LIMITS.maxResults,
+      );
+      const rawOfferings = matches.map((item) => attributedOffering(item, runtimeCatalog, observations));
+      return {
+        status: 200,
+        body: await successEnvelope(envelope, {
+          rawOfferings,
+          totalMatches,
+          truncated: totalMatches > rawOfferings.length,
+          mappedCallInputs: { offering: { searchText: offeringPayload.searchText } },
+          attributedBasis: storeBasis({ modules: loaded.modules, offering: rawOfferings[0] ?? null }),
+        }),
+      };
+    }
     const item = lookupItem(loaded.modules, runtimeCatalog, offeringPayload);
     const offered = item && item.offered === true ? item : null;
     const rawOffering = attributedOffering(offered, runtimeCatalog, observations);
