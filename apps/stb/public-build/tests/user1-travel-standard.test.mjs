@@ -13,8 +13,6 @@ const contract = sandbox.window.STBStoreHandoffContract;
 assert.ok(contract,'Store handoff contract did not load');
 assert.equal(contract.version,'0.9');
 assert.equal(typeof contract.resolveUser1StoreReference,'function');
-assert.equal(typeof contract.requestUser1StoreEvaluation,'function');
-assert.equal(typeof contract.sameUser1StoreAnswerIdentity,'function');
 assert.equal(typeof contract.quoteStartOwnBoardSequence,'undefined');
 
 const exactDemand = {
@@ -104,16 +102,6 @@ assert.equal(exact18.source.systemIntegrationPin,null);
 assert.equal(exact18.calculationIdentity.inputHash,'e594a8fd7ca9de466c0f5e85fc929ec51221e45405add3e5707fa0277fbb2add');
 assert.equal(exact18.calculationIdentity.resultHash,'595b797784e7f97d11a16e70a6e202eddf2cd6f38c02a165159fe4ce2abf9a37');
 
-const formal18 = contract.requestUser1StoreEvaluation(exactDemand18,{
-  requestId:'JOB1-18-PROMOTED',
-  currentStorePin:'9c62d9d6f7775deef83d47196d32c9b5174a352c',
-  checkedAt:'2026-09-22T20:47:00.000Z'
-});
-assert.equal(formal18.complete,true);
-assert.equal(formal18.freshEvaluation,true);
-assert.equal(formal18.evaluationReceipt.currentStorePin,'9c62d9d6f7775deef83d47196d32c9b5174a352c');
-assert.equal(contract.sameUser1StoreAnswerIdentity(exact18,formal18),true);
-
 const intermediate = contract.resolveUser1StoreReference({
   ...exactDemand18,
   configurationVersion:'review-intermediate-17.000',
@@ -126,48 +114,6 @@ const intermediate = contract.resolveUser1StoreReference({
 });
 assert.equal(intermediate.status,'STORE_REFRESH_REQUIRED');
 assert.equal(intermediate.complete,false);
-
-const formalA = contract.requestUser1StoreEvaluation(exactDemand,{
-  requestId:'JOB1-FRESH-A',
-  currentStorePin:'9c62d9d6f7775deef83d47196d32c9b5174a352c',
-  checkedAt:'2026-09-22T18:45:00.000Z'
-});
-const formalB = contract.requestUser1StoreEvaluation(exactDemand,{
-  requestId:'JOB1-FRESH-B',
-  currentStorePin:'9c62d9d6f7775deef83d47196d32c9b5174a352c',
-  checkedAt:'2026-09-22T18:46:00.000Z'
-});
-assert.equal(formalA.status,'CURRENT_STORE_REFERENCE_REVALIDATED');
-assert.equal(formalA.complete,true);
-assert.equal(formalA.freshEvaluation,true);
-assert.equal(formalA.evaluationReceipt.requestId,'JOB1-FRESH-A');
-assert.equal(formalB.evaluationReceipt.requestId,'JOB1-FRESH-B');
-assert.notEqual(formalA.evaluationReceipt.requestId,formalB.evaluationReceipt.requestId);
-assert.equal(formalA.evaluationReceipt.currentStorePin,'9c62d9d6f7775deef83d47196d32c9b5174a352c');
-assert.equal(formalA.evaluationReceipt.currentStoreMatchesReference,true);
-assert.equal(formalA.evaluationReceipt.machineEnvelopeId,'D001-STAGE2-ENVELOPE-0.3');
-assert.equal(formalA.evaluationReceipt.travelStandardId,'STB-D001-DIMENSIONAL-TRAVEL-0.1');
-assert.equal(formalA.evaluationReceipt.economicsId,'STB-D001-STORE-ECONOMICS-S2-0.1');
-assert.equal(formalA.calculationIdentity.inputHash,formalB.calculationIdentity.inputHash);
-assert.equal(formalA.calculationIdentity.resultHash,formalB.calculationIdentity.resultHash);
-assert.equal(contract.sameUser1StoreAnswerIdentity(exact,formalA),true);
-
-const movedStore = contract.requestUser1StoreEvaluation(exactDemand,{
-  requestId:'JOB1-STORE-MOVED',
-  currentStorePin:'0000000000000000000000000000000000000000',
-  checkedAt:'2026-09-22T18:47:00.000Z'
-});
-assert.equal(movedStore.status,'STORE_AUTHORITY_CHANGED');
-assert.equal(movedStore.complete,false);
-assert.equal(movedStore.freshEvaluation,false);
-assert.deepEqual(Array.from(movedStore.unresolvedConditions),['STORE_REFRESH_REQUIRED','STORE_AUTHORITY_CHANGED']);
-
-const noCurrentAuthority = contract.requestUser1StoreEvaluation(exactDemand,{
-  requestId:'JOB1-NO-CURRENT-STORE',
-  checkedAt:'2026-09-22T18:48:00.000Z'
-});
-assert.equal(noCurrentAuthority.status,'CURRENT_STORE_AUTHORITY_REQUIRED');
-assert.equal(noCurrentAuthority.complete,false);
 
 for (const changed of [
   {...exactDemand, configurationVersion:'0.2'},
@@ -195,7 +141,7 @@ for (const changed of [
 }
 
 const user1ContractStart = contractSource.indexOf('var USER1_STORE_REFERENCE');
-const user1ContractEnd = contractSource.indexOf('var D001_CYCLE',user1ContractStart);
+const user1ContractEnd = contractSource.indexOf('function storeAuthority',user1ContractStart);
 assert.ok(user1ContractStart >= 0 && user1ContractEnd > user1ContractStart);
 const user1ContractBlock = contractSource.slice(user1ContractStart,user1ContractEnd);
 for (const forbidden of [

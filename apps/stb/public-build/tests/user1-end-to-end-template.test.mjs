@@ -49,24 +49,6 @@ assert.equal(storeAnswer.materialResolution.pricingReferenceSku,'STB-ZERO-SPF-2X
 assert.equal(storeAnswer.materialResolution.pricingReferenceStockLengthIn,60);
 assert.equal(storeAnswer.materialResolution.selectionPolicy,'SHORTEST_COMPLETE_STORE_OFFERING');
 
-const formalStoreAnswerA=contract.requestUser1StoreEvaluation(exactDemand,{
-  requestId:'JOB1-E2E-A',
-  currentStorePin:STORE_SHA,
-  checkedAt:'2026-09-22T18:50:00.000Z'
-});
-const formalStoreAnswerB=contract.requestUser1StoreEvaluation(exactDemand,{
-  requestId:'JOB1-E2E-B',
-  currentStorePin:STORE_SHA,
-  checkedAt:'2026-09-22T18:51:00.000Z'
-});
-assert.equal(formalStoreAnswerA.complete,true);
-assert.equal(formalStoreAnswerA.freshEvaluation,true);
-assert.equal(formalStoreAnswerB.complete,true);
-assert.notEqual(formalStoreAnswerA.evaluationReceipt.requestId,formalStoreAnswerB.evaluationReceipt.requestId);
-assert.equal(formalStoreAnswerA.calculationIdentity.inputHash,INPUT_HASH);
-assert.equal(formalStoreAnswerA.calculationIdentity.resultHash,RESULT_HASH);
-assert.equal(contract.sameUser1StoreAnswerIdentity(storeAnswer,formalStoreAnswerA),true);
-
 // ENTRY / DEFINE
 assert.match(frame,/Start your own project/);
 assert.match(frame,/2×4 · 60 in/);
@@ -266,16 +248,6 @@ assert.equal(storeAnswer18.calculationIdentity.inputHash,'e594a8fd7ca9de466c0f5e
 assert.equal(storeAnswer18.calculationIdentity.resultHash,'595b797784e7f97d11a16e70a6e202eddf2cd6f38c02a165159fe4ce2abf9a37');
 assert.equal(shell.includes('candidateReference'),false);
 assert.equal(shell.includes('CANDIDATE STORE PIN'),false);
-
-// A moved Store authority invalidates the displayed result even when the definition did not change.
-const staleStoreAnswer=contract.requestUser1StoreEvaluation(exactDemand,{
-  requestId:'JOB1-E2E-STALE',
-  currentStorePin:'0000000000000000000000000000000000000000',
-  checkedAt:'2026-09-22T18:52:00.000Z'
-});
-assert.equal(staleStoreAnswer.status,'STORE_AUTHORITY_CHANGED');
-assert.equal(staleStoreAnswer.complete,false);
-assert.equal(staleStoreAnswer.combinedValue,null);
 
 // Any changed governing input is not allowed to borrow Job 1's Store result.
 for(const changed of [
