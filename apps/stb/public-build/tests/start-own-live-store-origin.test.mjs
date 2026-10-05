@@ -183,15 +183,13 @@ for (const forbidden of ['sellingPrice','machineHourRate','setupCharge','parentL
   assert.equal(runtimeBridgeSource.includes(forbidden),false,'live User 1 bridge reclaimed Store authority: '+forbidden);
 }
 
-// Shared contract begins at the frozen 60-in workpiece and preserves the resolved 3/16 spot meaning.
+// Shared contract preserves the checked reference previews and resolved 3/16 spot meaning.
 const sandbox = {window:{}};
 vm.runInNewContext(contractSource,sandbox,{filename:'stb-store-handoff-contract.js'});
 const contract = sandbox.window.STBStoreHandoffContract;
 assert.equal(contract.version,'0.9');
 assert.equal(typeof contract.quoteStartOwnBoardSequence,'undefined');
 assert.equal(typeof contract.resolveUser1StoreReference,'function');
-assert.equal(typeof contract.requestUser1StoreEvaluation,'function');
-assert.equal(typeof contract.sequenceDefinedWorkpiece,'function');
 
 // The bench reference is per wood: SPF and treated SYP at 16 and 18 in, nothing for a wood not stated.
 assert.equal(contract.user1StoreReferences.length,4);
@@ -202,21 +200,6 @@ assert.equal(contract.startOwnStoreItem('stb-zero-pt-2x4-96-001').species,'syp-t
 assert.equal(contract.startOwnStoreItem('STB-ZERO-WRC-2X4-96-001').species,'cedar','cedar stays in the Store catalog');
 assert.equal(contract.startOwnStoreItem('STB-ZERO-MADE-UP-2X4-001'),null);
 assert.equal(contract.startOwnStoreItems.length,27);
-
-const lineage = contract.sequenceDefinedWorkpiece({
-  definedWorkpieceLengthIn:60,
-  parts:[16,16],
-  establishAngledEnd:true
-});
-assert.equal(lineage.status,'SEQUENCED');
-assert.equal(lineage.rawStockLengthIn,undefined);
-assert.equal(lineage.preparation,undefined);
-assert.equal(lineage.definedWorkpieceLengthIn,60);
-assert.equal(lineage.production.length,3);
-assert.equal(lineage.production[0].kind,'ESTABLISH_ANGLE');
-assert.equal(lineage.finalRemainderIn,27.625);
-assert.equal(lineage.holdIn,24);
-assert.equal(lineage.finalRemainderIn-lineage.holdIn,3.625);
 
 const exactStoreAnswer = contract.resolveUser1StoreReference({
   configurationId:'SYO-USER1-XBRACE',
@@ -288,33 +271,6 @@ assert.equal(exactStoreAnswer18.combinedValue,9.07);
 assert.equal(exactStoreAnswer18.estimate.cycle.T_job_min,1.425);
 assert.equal(exactStoreAnswer18.estimate.travel.finalRemainderIn,35.625);
 assert.equal(exactStoreAnswer18.source.storePin,'9c62d9d6f7775deef83d47196d32c9b5174a352c');
-const freshStoreAnswer = contract.requestUser1StoreEvaluation({
-  configurationId:'SYO-USER1-XBRACE',
-  materialDemand:{species:'spf',form:'board',nominalT:2,nominalW:4},
-  configurationVersion:'0.1',
-  definedWorkpieceLengthIn:60,
-  sawAngleDeg:30,
-  cutPlane:'miter-face',
-  endIdentity:'both',
-  endRelation:'parallel',
-  lengthDatum:'long-long-outer-edge',
-  datumCMethod:'REFERENCE_CUT',
-  requiredOps:['MITER_LIMITED','SPOT_ON_LOCATION'],
-  declaredSawCuts:3,
-  declaredSpotCount:2,
-  parts:[
-    {partId:'PART-1',lengthIn:16,features:[{featureId:'SPOT-1',kind:'SPOT_ON_LOCATION',xIn:8,locationRule:'CENTERED_ON_PART',acrossWidthRule:'CENTERED_ON_WIDE_FACE'}]},
-    {partId:'PART-2',lengthIn:16,features:[{featureId:'SPOT-2',kind:'SPOT_ON_LOCATION',xIn:8,locationRule:'CENTERED_ON_PART',acrossWidthRule:'CENTERED_ON_WIDE_FACE'}]}
-  ]
-},{
-  requestId:'START-OWN-RECHECK',
-  currentStorePin:'9c62d9d6f7775deef83d47196d32c9b5174a352c',
-  checkedAt:'2026-09-22T18:55:00.000Z'
-});
-assert.equal(freshStoreAnswer.complete,true);
-assert.equal(freshStoreAnswer.freshEvaluation,true);
-assert.equal(freshStoreAnswer.evaluationReceipt.requestId,'START-OWN-RECHECK');
-
 const changedRevision = contract.resolveUser1StoreReference({
   configurationId:'SYO-USER1-XBRACE',
   materialDemand:{species:'spf',form:'board',nominalT:2,nominalW:4},

@@ -40,11 +40,6 @@
       "bytes": 51874
     },
     {
-      "path": "stb-user-defined-board-store.js",
-      "sourceBlobSha": "0b7d90c2989dec5e6d66fae02f47f39fbabc4002",
-      "bytes": 8919
-    },
-    {
       "path": "stb-user-defined-board-runtime-bridge.js",
       "sourceBlobSha": "132f12663d07dae647ddfdcbdcf60bf29a8ddc9b",
       "bytes": 8366
@@ -1506,6 +1501,20 @@
       "blobSha": "f30c3953cc1f005064d179f5d08ac6e0e7963ff5",
       "bytes": 255909,
       "reason": "Refresh contract cache identity and use catalog offered flags for material swatch availability; retain the same six visible choices and existing layout and controls."
+    },
+    {
+      "path": "stb-store-handoff-contract.js",
+      "pass": "pass5-retire-browser-store-surrogates",
+      "blobSha": "0c9a821e3915a96f20976440eaaf0e64150cfa4b",
+      "bytes": 44700,
+      "reason": "Retire unused browser material resolution, sequencing, machine constants and static pin revalidation helpers. Preserve checked catalog projection and four preview references; formal evaluation stays on unchanged live bridge."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "pass5-retire-browser-store-surrogates",
+      "blobSha": "b938f3173822ba00c88b5e529b8ca7cbd8ebef3f",
+      "bytes": 255842,
+      "reason": "Remove the unused browser Store surrogate script load and refresh the handoff contract cache identity. No UI, controls or journey changes."
     }
   ],
   "retiredFiles": [
@@ -1562,6 +1571,15 @@
       "pass": "outdoor-0.4-full-pass",
       "replacedBy": "stb-outdoor-picnic-0.4.html",
       "reason": "Outdoor 0.4 is live: the plan as published on the bench, then \"take it to the bench to do more work\" to the edge of the envelope, and back. 0.2 is retired, not edited; its bytes remain in git history at this blob."
+    },
+    {
+      "path": "stb-user-defined-board-store.js",
+      "blobSha": "0b7d90c2989dec5e6d66fae02f47f39fbabc4002",
+      "bytes": 8919,
+      "pass": "pass5-retire-browser-store-surrogates",
+      "reason": "Unused browser-side Store surrogate; no runtime consumers. Removed its shell load and published file. Exact prior bytes remain in System history; formal requests use the existing live admitted-job bridge.",
+      "sourceBlobSha": "0b7d90c2989dec5e6d66fae02f47f39fbabc4002",
+      "sourceBytes": 8919
     }
   ]
 }
