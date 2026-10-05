@@ -64,7 +64,7 @@ assert.match(surface,/CONFIRM &amp; SEND TO STORE ZERO →/);
 assert.match(surface,/id="stb-bench-dynamic-geometry"/);
 
 // Host carries one definition through intent, bench, Store, Terms and record.
-assert.match(shell,/three-frames\.html\?v=3694af80/);
+assert.match(shell,/three-frames\.html\?v=b80958ec/);
 assert.match(shell,/const definedWorkpieceLengthIn = 60;/);
 assert.match(shell,/DEMO_HORIZONTAL_SPAN_IN = 8/);
 assert.match(shell,/Math\.asin\(spanRatio\)/);
