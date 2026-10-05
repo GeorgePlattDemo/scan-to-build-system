@@ -1568,28 +1568,28 @@
     {
       "path": "stb-build-guide-spec.js",
       "pass": "store-rail-project1-full-review-0.1",
-      "blobSha": "5839e67054f6debb721999329a087a35225f8541",
-      "bytes": 100617,
-      "reason": "Job 1 Store-answer rail now links Project 1 digital trail directly to Store's full D001_Project1_Review.md engineering review instead of the publication-record README wrapper. No rail authority or runtime behavior changes."
+      "blobSha": "1b03f64be22c45b46975571639e3daf42b9f15af",
+      "bytes": 100375,
+      "reason": "Job 1 Store-answer rail now has exactly two clearly described reading links: Store README for Store ownership/service context, and the browser-readable text of the accepted 22-page Project 1 engineering review. Travel-standard and D-001-envelope links are removed from this rail; no Store authority or runtime behavior changes."
     },
     {
       "path": "system-build-current.html",
       "pass": "store-rail-project1-full-review-0.1",
-      "blobSha": "84b31c872267a7345a6b0a0a0d38db68224cbbd0",
+      "blobSha": "daa6eb3489692b0f235da80fcb54d65c8d985e83",
       "bytes": 258949,
-      "reason": "Refresh shared build-guide cache identity so the current System build loads the direct Project 1 full-review link. No page behavior or Store path changes."
+      "reason": "Refresh shared build-guide cache identity so the current System build loads the two-link Store-answer rail. No page behavior or Store path changes."
     },
     {
       "path": "stb-window-seat-0.9.html",
       "pass": "store-rail-project1-full-review-0.1",
-      "blobSha": "ec32809b21dd31fda554a2d8ccade5bb131a0c04",
+      "blobSha": "835a4ac42d00d352003c975df6db085fae5603da",
       "bytes": 140536,
       "reason": "Refresh shared build-guide cache identity only; Window Seat content and behavior are unchanged."
     },
     {
       "path": "stb-outdoor-picnic-0.4.html",
       "pass": "store-rail-project1-full-review-0.1",
-      "blobSha": "253ef613699768e2541012772c5d630c10de4c54",
+      "blobSha": "76e853b6812f28ad6269e926d547f94107317c84",
       "bytes": 84581,
       "reason": "Refresh shared build-guide cache identity only; Outdoor content and behavior are unchanged."
     }
