@@ -76,6 +76,9 @@
   .stb-sku-results li b{display:block;font-weight:600;color:var(--text)}
   .stb-sku-results li span{color:var(--text-2)}
   .stb-sku-results li button{font:inherit;font-size:10.5px;padding:3px 9px;border:1px solid var(--border-accent);border-radius:999px;background:var(--surface);color:var(--accent);font-weight:700;cursor:pointer;white-space:nowrap}
+  .stb-sku-close-row{display:flex;justify-content:flex-end;max-width:60ch;margin-top:4px}
+  .stb-sku-close-row[hidden]{display:none}
+  .stb-sku-close{font:inherit;font-size:10.5px;padding:3px 10px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text-2);font-weight:700;cursor:pointer}
   .stb-added-tools{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
   .stb-added-tools span:not(#stb-added-tools){font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--border-accent);background:var(--tint);color:var(--accent);font-weight:700}
   #stb-added-tools{display:contents}
@@ -239,6 +242,7 @@
       </div>
       <p class="stb-sku-answer" id="stb-intent-sku-answer" aria-live="polite"></p>
       <ul class="stb-sku-results" id="stb-intent-sku-results" aria-label="Store Zero items"></ul>
+      <div class="stb-sku-close-row" id="stb-intent-sku-close-row" hidden><button type="button" class="stb-sku-close" id="stb-intent-sku-close">CLOSE</button></div>
       <p class="sub" id="stb-store-glossary-status" hidden>These material choices are checked against the current Store.</p>
       <div class="stb-intent-define">
         <div>

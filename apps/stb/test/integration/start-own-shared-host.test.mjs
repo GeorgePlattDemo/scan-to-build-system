@@ -474,6 +474,17 @@ test('ITEM LOOKUP searches the live pinned Store Zero catalog by keyword or SKU;
     assert.equal(oneBySix[1].title, '1x6 x 96 in select pine S4S');
     assert.equal(oneBySix[1].line, 'STB-ZERO-PINE-1X6-96-001 · $20.99');
     assert.equal(await answerLine(), '4 Store Zero items match.');
+    assert.equal(await b.locator('#stb-intent-sku-close').isVisible(), true, 'results expose an explicit CLOSE control');
+    const answerBeforeClose = await answerLine();
+    const searchBeforeClose = await input.inputValue();
+    await b.locator('#stb-intent-sku-close').click();
+    assert.equal(await b.locator('#stb-intent-sku-results li').count(), 0, 'CLOSE removes the result rows');
+    assert.equal(await b.locator('#stb-intent-sku-close').isVisible(), false, 'CLOSE hides with the results');
+    assert.equal(await answerLine(), answerBeforeClose, 'CLOSE preserves the Store answer line');
+    assert.equal(await input.inputValue(), searchBeforeClose, 'CLOSE preserves the search text');
+    await input.press('Enter');
+    await settle(3);
+    assert.equal(await b.locator('#stb-intent-sku-close').isVisible(), true, 'a new lookup reopens the closeable results');
 
     // 15: choosing 1×6 pine shows the real item and leaves Job 1 as it was.
     await b.locator('#stb-intent-sku-results li[data-store-sku="STB-ZERO-PINE-1X6-96-001"] button').click();
@@ -484,13 +495,13 @@ test('ITEM LOOKUP searches the live pinned Store Zero catalog by keyword or SKU;
     // 9: a partial SKU.
     await input.fill('STB-ZERO-PINE-1X6');
     await lookButton.click();
-    await settle(3);
+    await settle(4);
     assert.deepEqual((await rows()).map(r => r.sku), oneBySix.map(r => r.sku));
 
     // 10, 13: an exact SKU, then USE SKU states SPF through Job 1's rule.
     await input.fill('stb-zero-spf-2x4-96-001');
     await lookButton.click();
-    await settle(4);
+    await settle(5);
     assert.deepEqual(await rows(), [{ sku: 'STB-ZERO-SPF-2X4-96-001', title: '2x4 x 96 in SPF construction', line: 'STB-ZERO-SPF-2X4-96-001 · $4.18', use: 'USE SKU' }]);
     assert.equal(await answerLine(), '1 Store Zero item matches.');
     assert.deepEqual(await state(), before, 'rendering a result changes nothing');
