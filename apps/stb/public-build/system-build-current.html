@@ -856,9 +856,15 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
               // nothing. USE SKU on one result applies Job 1's rule: a Store 2×4 of one of this job's woods states that
               // wood, and the Store still selects the board. Any other item changes nothing.
               const skuResults = childDoc.getElementById('stb-intent-sku-results');
+              const skuCloseRow = childDoc.getElementById('stb-intent-sku-close-row');
+              const skuCloseButton = childDoc.getElementById('stb-intent-sku-close');
+              const closeSkuResults = () => {
+                if (skuResults) skuResults.replaceChildren();
+                if (skuCloseRow) skuCloseRow.hidden = true;
+              };
               let skuLookupToken = 0;
               const useSku = item => {
-                if (skuResults) skuResults.replaceChildren();
+                closeSkuResults();
                 const named = item.storeSku+' · '+item.description+'.';
                 const job1Board = item.form === 'board' && item.nominalT === 2 && item.nominalW === 4;
                 if (!job1Board || !SPECIES_WORDS[item.species]) {
@@ -870,6 +876,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
               };
               const renderSkuResults = rows => {
                 if (!skuResults) return;
+                if (skuCloseRow) skuCloseRow.hidden = rows.length === 0;
                 skuResults.replaceChildren(...rows.map(item => {
                   const row = childDoc.createElement('li');
                   row.dataset.storeSku = item.storeSku;
@@ -920,6 +927,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
               skuInput?.addEventListener('input', () => { if (skuButton) skuButton.disabled = !skuInput.value.trim(); });
               skuInput?.addEventListener('keydown', event => { if (event.key === 'Enter') lookUpSku(); });
               skuButton?.addEventListener('click', lookUpSku);
+              skuCloseButton?.addEventListener('click', closeSkuResults);
               // "Add a tool this job needs": what is typed becomes a control for this job, on Intent and on the bench.
               const renderAddedControls = () => {
                 const chips = childDoc.getElementById('stb-added-tools');
