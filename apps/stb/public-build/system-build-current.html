@@ -13,8 +13,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <body>
 <iframe id="stb-current" title="Scan-to-Build System" src="system-build-front-door-0.5.html?v=69c66036"></iframe>
 <script src="stb-canonical-journey.js?v=e0619841"></script>
-<script src="stb-store-handoff-contract.js?v=0c9a821e"></script>
-<script src="stb-store-client.js?v=72cdc9fa"></script>
+<script src="stb-store-handoff-contract.js?v=ebd2c856"></script>
+<script src="stb-store-client.js?v=f1897ecc"></script>
 <script src="stb-user-defined-board-runtime-bridge.js?v=db611717"></script>
 <script src="stb-terms-flow.js?v=365d795c"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
@@ -190,7 +190,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=b80958ec"
+                  src="three-frames.html?v=52eae9f0"
                 ></iframe>
               </div>
             `;
@@ -199,7 +199,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=b80958ec';
+            liveFrame.src = 'three-frames.html?v=52eae9f0';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -851,23 +851,70 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
               childDoc.querySelectorAll('#stb-bench-species [data-species]').forEach(button => {
                 button.addEventListener('click', () => chooseSpecies(button.dataset.species));
               });
-              // A SKU names a real Store item or nothing. A 2×4 of one of this job's woods states that wood; the
-              // Store still selects the board. Any other answer changes nothing.
-              const lookUpSku = () => {
-                const sku = String(skuInput?.value || '').trim();
-                if (!sku || !skuAnswer) return;
-                const item = typeof storeHandoffContract?.startOwnStoreItem === 'function' ? storeHandoffContract.startOwnStoreItem(sku) : null;
-                if (!item) {
-                  skuAnswer.textContent = sku.toUpperCase()+' is not a Store 2×4. Nothing changed.';
-                  return;
-                }
-                const named = item.storeSku+' · '+item.description+' · $'+Number(item.sellingPrice).toFixed(2)+'.';
-                if (!SPECIES_WORDS[item.species]) {
-                  skuAnswer.textContent = named+' A real Store item, but not one of this job’s woods. Nothing changed.';
+              // ITEM LOOKUP asks the live Store Zero offering service, once per LOOK UP or Enter. The Store matches its
+              // own catalog at the pin; this page holds no copy and has no answer of its own. Showing results changes
+              // nothing. USE SKU on one result applies Job 1's rule: a Store 2×4 of one of this job's woods states that
+              // wood, and the Store still selects the board. Any other item changes nothing.
+              const skuResults = childDoc.getElementById('stb-intent-sku-results');
+              let skuLookupToken = 0;
+              const useSku = item => {
+                const named = item.storeSku+' · '+item.description+'.';
+                const job1Board = item.form === 'board' && item.nominalT === 2 && item.nominalW === 4;
+                if (!job1Board || !SPECIES_WORDS[item.species]) {
+                  skuAnswer.textContent = named+' A real Store Zero item, but not one of this job’s woods. Nothing changed.';
                   return;
                 }
                 skuAnswer.textContent = named+' This job’s wood is now '+SPECIES_WORDS[item.species]+'; the Store still picks the board.';
                 chooseSpecies(item.species);
+              };
+              const renderSkuResults = rows => {
+                if (!skuResults) return;
+                skuResults.replaceChildren(...rows.map(item => {
+                  const row = childDoc.createElement('li');
+                  row.dataset.storeSku = item.storeSku;
+                  const facts = childDoc.createElement('div');
+                  const title = childDoc.createElement('b');
+                  title.textContent = item.description || item.storeSku;
+                  const sku = childDoc.createElement('span');
+                  const price = Number.isFinite(item.sellingPrice) ? ' · $'+item.sellingPrice.toFixed(2) : '';
+                  sku.textContent = item.storeSku+price;
+                  facts.append(title, sku);
+                  const use = childDoc.createElement('button');
+                  use.type = 'button';
+                  use.textContent = 'USE SKU';
+                  use.addEventListener('click', () => useSku(item));
+                  row.append(facts, use);
+                  return row;
+                }));
+              };
+              const lookUpSku = async () => {
+                const searchText = String(skuInput?.value || '').trim();
+                if (!searchText || !skuAnswer) return;
+                const token = ++skuLookupToken;
+                renderSkuResults([]);
+                skuAnswer.textContent = 'Asking Store Zero…';
+                let answer = null;
+                try {
+                  answer = await window.STBStoreClient.lookupOfferings({
+                    projectId:'start-own',
+                    candidateRevisionId:'SYO-USER1-XBRACE-0.1-v'+definitionRevision,
+                    searchText
+                  });
+                } catch {
+                  answer = null;
+                }
+                if (token !== skuLookupToken) return;
+                if (!answer) {
+                  skuAnswer.textContent = 'Store Zero item lookup is unavailable. Nothing changed.';
+                  return;
+                }
+                const total = answer.totalMatches;
+                skuAnswer.textContent = total === 0
+                  ? 'No Store Zero item matches “'+searchText+'”. Nothing changed.'
+                  : answer.truncated
+                    ? total+' Store Zero items match. Showing the first '+answer.rawOfferings.length+' — refine your search.'
+                    : total+(total === 1 ? ' Store Zero item matches.' : ' Store Zero items match.');
+                renderSkuResults(answer.rawOfferings);
               };
               skuInput?.addEventListener('input', () => { if (skuButton) skuButton.disabled = !skuInput.value.trim(); });
               skuInput?.addEventListener('keydown', event => { if (event.key === 'Enter') lookUpSku(); });

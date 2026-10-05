@@ -1515,6 +1515,34 @@
       "blobSha": "b938f3173822ba00c88b5e529b8ca7cbd8ebef3f",
       "bytes": 255842,
       "reason": "Remove the unused browser Store surrogate script load and refresh the handoff contract cache identity. No UI, controls or journey changes."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "start-own-item-lookup-0.1",
+      "blobSha": "52eae9f002a8f239ae9f6b08ffded8a70b624b15",
+      "bytes": 100042,
+      "reason": "Start your own Intent: the lookup is labelled ITEM LOOKUP with the placeholder \"Pine, 1 x 6 pine, or Store SKU\u2026\" (80 characters), and a small result list sits beneath it. Same place, same LOOK UP button; wood chips, Job 1 photograph, Intent, bench and trail navigation unchanged."
+    },
+    {
+      "path": "stb-store-handoff-contract.js",
+      "pass": "start-own-item-lookup-0.1",
+      "blobSha": "ebd2c856a321b9753916c3a3b44f3dc3b08b03c8",
+      "bytes": 40615,
+      "reason": "Remove the copied Store Zero 2\u00d74 SKU table (START_OWN_STORE_ITEMS, START_OWN_STORE_ITEMS_PIN) and its exact-match startOwnStoreItem(); its only consumer, the Intent lookup, now asks the hosted Store offering endpoint. START_OWN_CATALOG_ROWS, startOwnOfferings(), the User 1 Store-issued references and resolveUser1StoreReference() are unchanged."
+    },
+    {
+      "path": "stb-store-runtime.json",
+      "pass": "start-own-item-lookup-0.1",
+      "blobSha": "cef5ea006af9c9076c5aa0ef6da0424f755a9377",
+      "bytes": 255,
+      "reason": "Owner-authorized additive key: offeringEndpoint names the existing hosted Store /api/store-zero/offering path on the same Railway host. jobEndpoint and storePin (STORE_PIN 9c62d9d6f7775deef83d47196d32c9b5174a352c) are byte-for-byte unchanged; no Railway setting changed."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "start-own-item-lookup-0.1",
+      "blobSha": "c99bf505b652a80126dbf195df2bd685a2c40e1e",
+      "bytes": 258409,
+      "reason": "ITEM LOOKUP sends one OFFERING_LOOKUP {searchText} per LOOK UP or Enter through STBStoreClient.lookupOfferings() to the hosted Store offering endpoint and renders the bounded matches (description, Store SKU, catalog price). Showing results changes nothing; USE SKU applies the existing Job 1 rule (a Store 2\u00d74 of SPF or treated SYP states that wood). No Store answer shows \"Store Zero item lookup is unavailable. Nothing changed.\" with no local fallback. Cache identities refreshed for three-frames.html, stb-store-handoff-contract.js and stb-store-client.js."
     }
   ],
   "retiredFiles": [

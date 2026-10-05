@@ -170,58 +170,6 @@
   }
 
   /*
-   * Store items a Start your own job can name by SKU: every nominal 2×4 board in
-   * store-zero-catalog.json at System's STORE_PIN, row for row
-   * ([storeSku, species, grade, stockL_in, sellingPrice, description]).
-   * apps/stb/test/store/user1-reference-guard.test.mjs fails if any row differs
-   * from the catalog at the pin. A lookup names a real Store item or nothing; it
-   * never makes up a species, and it does not choose the board the Store selects.
-   */
-  var START_OWN_STORE_ITEMS_PIN = '9c62d9d6f7775deef83d47196d32c9b5174a352c';
-  var START_OWN_STORE_ITEMS = Object.freeze([
-    ["STB-ZERO-SPF-2X4-96-001","spf","construction",96,4.18,"2x4 x 96 in SPF construction"],
-    ["STB-ZERO-SPF-2X4-120-001","spf","construction",120,5.69,"2x4 x 120 in SPF construction"],
-    ["STB-ZERO-SPF-2X4-144-001","spf","construction",144,6.8,"2x4 x 144 in SPF construction"],
-    ["STB-ZERO-SPF-2X4-60-001","spf","construction",60,2.61,"2x4 x 60 in SPF construction"],
-    ["STB-ZERO-SPF-2X4-72-001","spf","construction",72,3.13,"2x4 x 72 in SPF construction"],
-    ["STB-ZERO-SPF-2X4-108-001","spf","construction",108,4.7,"2x4 x 108 in SPF construction"],
-    ["STB-ZERO-SPF-2X4-168-001","spf","construction",168,7.31,"2x4 x 168 in SPF construction"],
-    ["STB-ZERO-SPF-2X4-192-001","spf","construction",192,8.36,"2x4 x 192 in SPF construction"],
-    ["STB-ZERO-PT-2X4-96-001","syp-treated","above-ground",96,4.81,"2x4 x 96 in treated SYP above-ground"],
-    ["STB-ZERO-PT-2X4-120-001","syp-treated","above-ground",120,6.01,"2x4 x 120 in treated SYP above-ground"],
-    ["STB-ZERO-PT-2X4-144-001","syp-treated","above-ground",144,7.21,"2x4 x 144 in treated SYP above-ground"],
-    ["STB-ZERO-PTGC-2X4-72-001","syp-treated","ground-contact",72,6.81,"2x4 x 72 in treated SYP ground-contact"],
-    ["STB-ZERO-PTGC-2X4-96-001","syp-treated","ground-contact",96,7.5,"2x4 x 96 in treated SYP ground-contact"],
-    ["STB-ZERO-PTGC-2X4-120-001","syp-treated","ground-contact",120,11.41,"2x4 x 120 in treated SYP ground-contact"],
-    ["STB-ZERO-PTGC-2X4-144-001","syp-treated","ground-contact",144,14.07,"2x4 x 144 in treated SYP ground-contact"],
-    ["STB-ZERO-PTGC-2X4-168-001","syp-treated","ground-contact",168,17.21,"2x4 x 168 in treated SYP ground-contact"],
-    ["STB-ZERO-PTGC-2X4-192-001","syp-treated","ground-contact",192,19.15,"2x4 x 192 in treated SYP ground-contact"],
-    ["STB-ZERO-PTAG-2X4-72-001","syp-treated","above-ground",72,5.15,"2x4 x 72 in SYP AC2 #2 Prime AG"],
-    ["STB-ZERO-PTAG-2X4-168-001","syp-treated","above-ground",168,12.08,"2x4 x 168 in SYP AC2 #2 Prime AG"],
-    ["STB-ZERO-PTAG-2X4-192-001","syp-treated","above-ground",192,15.96,"2x4 x 192 in SYP AC2 #2 Prime AG"],
-    ["STB-ZERO-PTCT-2X4-96-001","syp-treated","ground-contact-cedartone",96,10.29,"2x4 x 96 in SYP AC2 #1 Prime GC CedarTone"],
-    ["STB-ZERO-PTCT-2X4-120-001","syp-treated","ground-contact-cedartone",120,14.18,"2x4 x 120 in SYP AC2 #1 Prime GC CedarTone"],
-    ["STB-ZERO-PTCT-2X4-144-001","syp-treated","ground-contact-cedartone",144,17.64,"2x4 x 144 in SYP AC2 #1 Prime GC CedarTone"],
-    ["STB-ZERO-PTCT-2X4-192-001","syp-treated","ground-contact-cedartone",192,23.63,"2x4 x 192 in SYP AC2 #1 Prime GC CedarTone"],
-    ["STB-ZERO-WRC-2X4-96-001","cedar","S4S",96,13.13,"2x4 x 96 in Western Red Cedar S4S"],
-    ["STB-ZERO-WRC-2X4-120-001","cedar","S4S",120,17.64,"2x4 x 120 in Western Red Cedar S4S"],
-    ["STB-ZERO-WRC-2X4-144-001","cedar","S4S",144,21.95,"2x4 x 144 in Western Red Cedar S4S"]
-  ]);
-
-  function startOwnStoreItem(storeSku){
-    var sku=String(storeSku || '').trim().toUpperCase();
-    for(var i=0;i<START_OWN_STORE_ITEMS.length;i++){
-      var row=START_OWN_STORE_ITEMS[i];
-      if(row[0]!==sku) continue;
-      return Object.freeze({
-        storeSku:row[0],species:row[1],grade:row[2],form:'board',nominalT:2,nominalW:4,
-        stockL_in:row[3],sellingPrice:row[4],description:row[5],catalogPin:START_OWN_STORE_ITEMS_PIN
-      });
-    }
-    return null;
-  }
-
-  /*
    * USER 1 STORE-ISSUED REFERENCE
    *
    * The browser may preview only the exact Store answers already proven on the
@@ -918,8 +866,6 @@
     storeAuthority:storeAuthority,
     startOwnStoreCatalog:START_OWN_STORE_CATALOG,
     startOwnOfferings:startOwnOfferings,
-    startOwnStoreItems:START_OWN_STORE_ITEMS,
-    startOwnStoreItem:startOwnStoreItem,
     user1StoreReference:USER1_STORE_REFERENCE,
     user1StoreReferences:USER1_STORE_REFERENCES,
     user1StoreReferenceForDemand:user1StoreReferenceForDemand,

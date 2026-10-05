@@ -2,7 +2,8 @@
 // - Start your own opens on Intent, step 1 (the trail contract's one opensOn exception). Intent has the Store lookup
 //   beside the wood, Job 1's tools and the tool box, and a frame of the wood and tools it takes to the bench.
 //   Idea, the Job 1 picture and one line, is one back control away and shows no numbered step.
-// - A wood change shows its price on the bench; a SKU looks up a real Store item.
+// - A wood change shows its price on the bench. ITEM LOOKUP asks the hosted Store's offering service, once per
+//   LOOK UP or Enter; showing results changes nothing, and USE SKU applies Job 1's woods rule. No browser fallback.
 // - The host draws Start your own's one nav line from a validated STB-TILE-HOST-0.1 message and the trail contract:
 //   the six contract steps, inert steps disabled, exactly one current, and the current step follows the shown page
 //   (and, on the Start your own page, its Intent or bench screen).
@@ -21,7 +22,7 @@ import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-import { withBrowser, openTile } from './helpers.mjs';
+import { withBrowser, openTile, STORE_PIN } from './helpers.mjs';
 
 const TRAIL_STEPS = ['Intent', 'The bench', 'The Store answers', 'Your call', 'We cut it', 'Pick up & build'];
 const read = rel => fs.readFileSync(fileURLToPath(new URL('../../public-build/' + rel, import.meta.url)), 'utf8');
@@ -46,6 +47,9 @@ const currentLabels = async frame => steps(await navLine(frame)).filter(b => b.c
 const inertByStage = async frame => Object.fromEntries(steps(await navLine(frame)).map(b => [b.stage, b.inert]));
 const shownPage = frame => frame.evaluate(() => [...document.querySelectorAll('.page.on')].pop()?.id);
 const startOwnCalls = log => log.filter(e => e.request.projectId === 'start-own' && e.request.requestType === 'USER_DEFINED_BOARD_V1');
+const offeringCalls = log => log.filter(e => e.path === '/api/store-zero/offering');
+// Start your own's /job requests. (The shared home's Outdoor tile asks /job for its own options; that is not this tile.)
+const jobCalls = log => log.filter(e => e.path === '/api/store-zero/job' && e.request.projectId === 'start-own');
 const live = (frame, fn, arg) => frame.evaluate(fn, arg);
 const bench = page => page.frames().find(f => f.url().includes('three-frames.html'));
 
@@ -209,7 +213,7 @@ test('Start your own opens on Intent: the wood and its tools go to the bench; Id
     assert.equal(await formRing.getAttribute('stroke'), '#d1242f', 'in the photograph ring red');
     assert.equal(await intent.locator('.stb-form-ring').count(), 1, 'only the 2×4 is ringed');
     assert.equal(await intent.locator('.boards #stb-intent-sku').isVisible(), true, 'the Store lookup sits with the wood');
-    assert.equal(await intent.locator('label[for="stb-intent-sku"]').innerText(), 'STORE LOOKUP');
+    assert.equal(await intent.locator('label[for="stb-intent-sku"]').innerText(), 'ITEM LOOKUP');
     assert.equal(await bench(page).locator('#stb-intent-sku').count(), 1, 'one Store lookup');
     assert.equal(await intent.locator('.stb-user1-body #stb-intent-sku, .stb-user1-body input').count(), 0, 'no lookup left by the picture');
     // The ring chooses no wood. Intent has no wood buttons; the wood is the bench's or the lookup's to state.
@@ -325,7 +329,19 @@ test('Start your own opens on Intent: the wood and its tools go to the bench; Id
 // A wood change shows its price on the bench, not only at the Store. The bench price is the Store-issued reference
 // for that wood (checked against the pinned Store by test/store/user1-reference-guard.test.mjs); confirming asks the
 // Store again and its answer is the same number. A SKU names a real Store item or nothing.
-test('a wood change updates the bench price; a SKU looks up a real Store item and invents no species', { timeout: 240000 }, async () => {
+// ITEM LOOKUP: type, press LOOK UP (or Enter), and the hosted Store's offering service answers. USE SKU on one result
+// applies Job 1's rule. Returns the answer line after USE SKU.
+async function lookUpAndUse(page, log, searchText, storeSku) {
+  const before = offeringCalls(log).length;
+  await bench(page).locator('#stb-intent-sku').fill(searchText);
+  await bench(page).locator('#stb-intent-sku-look').click();
+  await until(async () => offeringCalls(log).length === before + 1 &&
+    !/Asking/.test(await bench(page).locator('#stb-intent-sku-answer').innerText()), 'Store answered ' + searchText);
+  await bench(page).locator(`#stb-intent-sku-results li[data-store-sku="${storeSku}"] button`).click();
+  return bench(page).locator('#stb-intent-sku-answer').innerText();
+}
+
+test('a wood change updates the bench price; ITEM LOOKUP finds a real Store item and invents no species', { timeout: 240000 }, async () => {
   await withBrowser(async ({ browser, origin, log }) => {
     const { page, frame, errors } = await openStartOwn(browser, origin);
     const priceLine = () => bench(page).locator('#stb-bench-price-line').innerText();
@@ -334,14 +350,10 @@ test('a wood change updates the bench price; a SKU looks up a real Store item an
     assert.match(await priceLine(), /pick a wood to see its price\.$/);
     assert.equal(await total(), 'NOT COMPLETE');
 
-    const lookUp = async sku => {
-      await bench(page).locator('#stb-intent-sku').fill(sku);
-      await bench(page).locator('#stb-intent-sku-look').click();
-      return bench(page).locator('#stb-intent-sku-answer').innerText();
-    };
+    const lookUp = (searchText, storeSku = searchText.toUpperCase()) => lookUpAndUse(page, log, searchText, storeSku);
     // Intent states the wood through its Store lookup; the bench shows its price.
     assert.equal(await lookUp('stb-zero-spf-2x4-96-001'),
-      'STB-ZERO-SPF-2X4-96-001 · 2x4 x 96 in SPF construction · $4.18. This job’s wood is now SPF; the Store still picks the board.');
+      'STB-ZERO-SPF-2X4-96-001 · 2x4 x 96 in SPF construction. This job’s wood is now SPF; the Store still picks the board.');
     await until(async () => (await species()) === 'spf', 'SPF stated');
     assert.equal(await priceLine(), '16 in braces · 30° ends · SPF · 5-foot 2×4 · $8.54 Store reference price ($2.61 wood).');
     assert.equal(await total(), '$8.54');
@@ -365,17 +377,21 @@ test('a wood change updates the bench price; a SKU looks up a real Store item an
     await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="scan"]').click();
     await until(async () => (await currentLabels(frame)).join() === '1 · Intent', 'intent current');
     assert.equal(await lookUp('stb-zero-spf-2x4-96-001'),
-      'STB-ZERO-SPF-2X4-96-001 · 2x4 x 96 in SPF construction · $4.18. This job’s wood is now SPF; the Store still picks the board.');
+      'STB-ZERO-SPF-2X4-96-001 · 2x4 x 96 in SPF construction. This job’s wood is now SPF; the Store still picks the board.');
     await until(async () => (await species()) === 'spf', 'SKU states SPF');
     assert.equal(await total(), '$8.54');
     assert.equal(await lookUp('STB-ZERO-WRC-2X4-96-001'),
-      'STB-ZERO-WRC-2X4-96-001 · 2x4 x 96 in Western Red Cedar S4S · $13.13. A real Store item, but not one of this job’s woods. Nothing changed.');
-    assert.equal(await lookUp('STB-ZERO-WALNUT-2X4-96-001'), 'STB-ZERO-WALNUT-2X4-96-001 is not a Store 2×4. Nothing changed.');
+      'STB-ZERO-WRC-2X4-96-001 · 2x4 x 96 in Western Red Cedar S4S. A real Store Zero item, but not one of this job’s woods. Nothing changed.');
+    await bench(page).locator('#stb-intent-sku').fill('STB-ZERO-WALNUT-2X4-96-001');
+    await bench(page).locator('#stb-intent-sku-look').click();
+    await until(async () => /^No Store Zero item matches/.test(await bench(page).locator('#stb-intent-sku-answer').innerText()), 'no walnut');
+    assert.equal(await bench(page).locator('#stb-intent-sku-results li').count(), 0);
     assert.equal(await species(), 'spf', 'no species was invented');
     assert.equal(await lookUp('STB-ZERO-PTAG-2X4-72-001'),
-      'STB-ZERO-PTAG-2X4-72-001 · 2x4 x 72 in SYP AC2 #2 Prime AG · $5.15. This job’s wood is now treated SYP; the Store still picks the board.');
+      'STB-ZERO-PTAG-2X4-72-001 · 2x4 x 72 in SYP AC2 #2 Prime AG. This job’s wood is now treated SYP; the Store still picks the board.');
     await until(async () => (await total()) === '$11.08', 'Intent changes the bench price');
     assert.equal(startOwnCalls(log).length, 0, 'the bench price asks the Store nothing');
+    assert.equal(jobCalls(log).length, 0, 'ITEM LOOKUP never asks /job');
 
     // Confirming asks the Store for this revision; its answer is the price the bench showed.
     await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
@@ -384,9 +400,143 @@ test('a wood change updates the bench price; a SKU looks up a real Store item an
     await until(async () => (await currentLabels(frame)).join() === '3 · The Store answers', 'store current');
     const sent = startOwnCalls(log);
     assert.equal(sent.length, 1);
+    assert.equal(sent[0].path, '/api/store-zero/job', 'the formal confirm asks /job');
     assert.deepEqual(sent[0].request.payload.line.materialDemand, { species: 'syp-treated', form: 'board', nominalT: 2, nominalW: 4 });
     assert.equal(sent[0].answer.rawEstimate.totals.Q, 11.08);
     assert.match(await frame.locator('#proof-store-q').innerText(), /11\.08/);
+    assert.deepEqual(errors, []);
+    await page.close();
+  });
+});
+
+test('ITEM LOOKUP searches the live pinned Store Zero catalog by keyword or SKU; searching alone changes nothing', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log }) => {
+    const { page, frame, errors } = await openStartOwn(browser, origin);
+    const b = bench(page);
+    const input = b.locator('#stb-intent-sku');
+    const lookButton = b.locator('#stb-intent-sku-look');
+    const answerLine = () => b.locator('#stb-intent-sku-answer').innerText();
+    const rows = () => b.$$eval('#stb-intent-sku-results li', els => els.map(li => ({
+      sku: li.dataset.storeSku, title: li.querySelector('b').textContent, line: li.querySelector('span').textContent,
+      use: li.querySelector('button').textContent })));
+    const state = () => live(frame, () => ({
+      revision: window.STBStartOwnLive.revision().definitionRevisionId,
+      species: window.STBStartOwnLive.revision().facts['start-own.material']?.value?.species ?? null,
+      admission: window.STBStartOwnLive.admission()?.admission?.result,
+    }));
+    const settle = async n => {
+      await until(async () => offeringCalls(log).length === n && !/Asking/.test(await answerLine()), 'Store answered');
+      await page.waitForTimeout(300);
+      assert.equal(offeringCalls(log).length, n, 'one explicit lookup is one Store request');
+    };
+
+    // 1-3: the control as a person sees it; empty input does nothing.
+    assert.equal(await b.locator('label[for="stb-intent-sku"]').innerText(), 'ITEM LOOKUP');
+    assert.equal(await input.getAttribute('placeholder'), 'Pine, 1 x 6 pine, or Store SKU…');
+    assert.equal(await lookButton.innerText(), 'LOOK UP');
+    assert.equal(await lookButton.isDisabled(), true);
+    await input.press('Enter');
+    const before = await state();
+    assert.equal(before.species, null);
+
+    // 4: typing asks the Store nothing.
+    await input.pressSequentially('pine', { delay: 30 });
+    assert.equal(await lookButton.isDisabled(), false);
+    await page.waitForTimeout(500);
+    assert.equal(offeringCalls(log).length, 0, 'typing does not call the Store');
+
+    // 5-7, 11: LOOK UP asks /offering exactly once, never /job; pine is many real Store items.
+    await lookButton.click();
+    await settle(1);
+    const call = offeringCalls(log)[0];
+    assert.deepEqual(call.request.payload, { searchText: 'pine' });
+    assert.equal(call.request.requestType, 'OFFERING_LOOKUP');
+    assert.equal(call.request.expectedStorePin, STORE_PIN);
+    assert.equal(call.answer.storePin, STORE_PIN);
+    assert.equal(jobCalls(log).length, 0, 'a lookup never asks /job');
+    const pine = await rows();
+    assert.equal(pine.length, 20);
+    assert.equal(await answerLine(), call.answer.totalMatches + ' Store Zero items match. Showing the first 20 — refine your search.');
+    assert.ok(call.answer.totalMatches > 20);
+    assert.deepEqual(pine.map(r => r.sku), call.answer.rawOfferings.map(r => r.storeSku), 'the rows are the Store answer');
+    assert.deepEqual(pine[0], { sku: 'STB-ZERO-PINE-1X4-72-001', title: '1x4 x 72 in select pine S4S', line: 'STB-ZERO-PINE-1X4-72-001 · $8.65', use: 'USE SKU' });
+    for (const row of pine) assert.ok(row.line.startsWith(row.sku), 'each row shows its Store SKU');
+
+    // 12: search alone changes nothing about Job 1.
+    assert.deepEqual(await state(), before, 'search did not change species, revision or admission');
+
+    // 8: 1 x 6 pine narrows the list (Enter asks too).
+    await input.fill('1 x 6 pine');
+    await input.press('Enter');
+    await settle(2);
+    const oneBySix = await rows();
+    assert.deepEqual(oneBySix.map(r => r.sku), ['STB-ZERO-PINE-1X6-72-001', 'STB-ZERO-PINE-1X6-96-001', 'STB-ZERO-PINE-1X6-120-001', 'STB-ZERO-PINE-1X6-144-001']);
+    assert.equal(oneBySix[1].title, '1x6 x 96 in select pine S4S');
+    assert.equal(oneBySix[1].line, 'STB-ZERO-PINE-1X6-96-001 · $20.99');
+    assert.equal(await answerLine(), '4 Store Zero items match.');
+
+    // 15: choosing 1×6 pine shows the real item and leaves Job 1 as it was.
+    await b.locator('#stb-intent-sku-results li[data-store-sku="STB-ZERO-PINE-1X6-96-001"] button').click();
+    assert.equal(await answerLine(), 'STB-ZERO-PINE-1X6-96-001 · 1x6 x 96 in select pine S4S. A real Store Zero item, but not one of this job’s woods. Nothing changed.');
+    assert.deepEqual(await state(), before, '1×6 pine did not change Job 1');
+
+    // 9: a partial SKU.
+    await input.fill('STB-ZERO-PINE-1X6');
+    await lookButton.click();
+    await settle(3);
+    assert.deepEqual((await rows()).map(r => r.sku), oneBySix.map(r => r.sku));
+
+    // 10, 13: an exact SKU, then USE SKU states SPF through Job 1's rule.
+    await input.fill('stb-zero-spf-2x4-96-001');
+    await lookButton.click();
+    await settle(4);
+    assert.deepEqual(await rows(), [{ sku: 'STB-ZERO-SPF-2X4-96-001', title: '2x4 x 96 in SPF construction', line: 'STB-ZERO-SPF-2X4-96-001 · $4.18', use: 'USE SKU' }]);
+    assert.equal(await answerLine(), '1 Store Zero item matches.');
+    assert.deepEqual(await state(), before, 'rendering a result changes nothing');
+    await b.locator('#stb-intent-sku-results li[data-store-sku="STB-ZERO-SPF-2X4-96-001"] button').click();
+    await until(async () => (await state()).species === 'spf', 'USE SKU states SPF');
+    assert.equal(await answerLine(), 'STB-ZERO-SPF-2X4-96-001 · 2x4 x 96 in SPF construction. This job’s wood is now SPF; the Store still picks the board.');
+
+    // 16: cedar is a real Store item, outside this job's woods.
+    assert.equal(await lookUpAndUse(page, log, 'cedar', 'STB-ZERO-WRC-2X4-96-001'),
+      'STB-ZERO-WRC-2X4-96-001 · 2x4 x 96 in Western Red Cedar S4S. A real Store Zero item, but not one of this job’s woods. Nothing changed.');
+    assert.equal((await state()).species, 'spf');
+
+    // 14: a treated SYP 2×4 states treated SYP.
+    assert.equal(await lookUpAndUse(page, log, '2x4 treated', 'STB-ZERO-PT-2X4-96-001'),
+      'STB-ZERO-PT-2X4-96-001 · 2x4 x 96 in treated SYP above-ground. This job’s wood is now treated SYP; the Store still picks the board.');
+    await until(async () => (await state()).species === 'syp-treated', 'USE SKU states treated SYP');
+
+    // 18: no formal /job request from Intent or the bench until the confirm point.
+    await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
+    await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current');
+    await page.waitForTimeout(500);
+    assert.equal(jobCalls(log).length, 0, 'Intent and the bench ask /job nothing');
+    assert.ok(log.filter(e => e.request.projectId === 'start-own').every(e => e.path === '/api/store-zero/offering'));
+    assert.deepEqual(errors, []);
+    await page.close();
+  });
+});
+
+test('ITEM LOOKUP with no Store answer says so and answers nothing locally', { timeout: 240000 }, async () => {
+  await withBrowser(async ({ browser, origin, log, control }) => {
+    const { page, frame, errors } = await openStartOwn(browser, origin);
+    const b = bench(page);
+    const species = () => live(frame, () => window.STBStartOwnLive.revision().facts['start-own.material']?.value?.species ?? null);
+    control.withholdOffering = true;
+    for (const searchText of ['STB-ZERO-SPF-2X4-96-001', 'pine']) {
+      await b.locator('#stb-intent-sku').fill(searchText);
+      await b.locator('#stb-intent-sku-look').click();
+      await until(async () => (await b.locator('#stb-intent-sku-answer').innerText()) === 'Store Zero item lookup is unavailable. Nothing changed.', 'unavailable ' + searchText);
+      assert.equal(await b.locator('#stb-intent-sku-results li').count(), 0, 'no local result for ' + searchText);
+    }
+    assert.equal(new Set(log.filter(e => e.withheld).map(e => e.request.requestId)).size, 2, 'each lookup went to the withheld offering endpoint');
+    assert.equal(jobCalls(log).length, 0, 'no /job fallback');
+    assert.equal(await species(), null, 'nothing changed');
+    // The same lookup succeeds once the hosted offering endpoint answers: the result comes only from the Store.
+    control.withholdOffering = false;
+    await b.locator('#stb-intent-sku-look').click();
+    await until(async () => (await b.locator('#stb-intent-sku-results li').count()) === 20, 'Store answered');
     assert.deepEqual(errors, []);
     await page.close();
   });

@@ -27,7 +27,7 @@ function browser() {
     URL, TextEncoder, AbortSignal, crypto, JSON, Promise, Error, TypeError, Object, Array, Number, String, Math, Set,
     async fetch(url, init) {
       if (String(url).endsWith('/stb-store-runtime.json')) {
-        return { ok: true, json: async () => ({ jobEndpoint: ENDPOINT, storePin: STORE_PIN }) };
+        return { ok: true, json: async () => ({ jobEndpoint: ENDPOINT, offeringEndpoint: 'http://127.0.0.1:4317/api/store-zero/offering', storePin: STORE_PIN }) };
       }
       assert.equal(String(url), ENDPOINT);
       const body = JSON.parse(init.body);

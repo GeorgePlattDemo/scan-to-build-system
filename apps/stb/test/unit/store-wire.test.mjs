@@ -18,6 +18,7 @@ import {
   boardJobPayload,
   buildAlcoveInsertRequest,
   buildJobRequest,
+  buildOfferingRequest,
   inspectStoreResponse,
   isJsonContentType,
   payloadDigest,
@@ -601,4 +602,59 @@ test('user-defined Board wire passes the stated material through; a missing or e
     assert.equal(validated.code, ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE);
     assert.equal(validated.details, details);
   }
+});
+
+test('OFFERING_LOOKUP adds a bounded searchText form; the exact-SKU form and its response stay as they were', async () => {
+  const offering = (payload) => buildOfferingRequest({
+    requestId: 'req-search',
+    projectId: 'start-own',
+    candidateRevisionId: 'rev-1',
+    attemptId: 'attempt-1',
+    attemptNumber: 1,
+    sentAt: '2026-10-05T00:00:00.000Z',
+    payload,
+  });
+  const search = await offering({ searchText: ' 1 x 6 pine ' });
+  const validated = await validateWireRequest(search);
+  assert.equal(validated.ok, true);
+  assert.deepEqual(validated.payload, { ok: true, kind: 'search', searchText: '1 x 6 pine' });
+  assert.equal(search.demandSignature, null, 'a search carries no job demand');
+  assert.equal(typeof search.querySignature, 'string');
+
+  const sku = await validateWireRequest(await offering({ requestedStoreSku: 'STB-ZERO-SPF-2X4-96-001' }));
+  assert.deepEqual(sku.payload, { ok: true, kind: 'sku', storeSku: 'STB-ZERO-SPF-2X4-96-001' });
+
+  for (const payload of [{ searchText: '' }, { searchText: 'x'.repeat(81) }, { searchText: 'pine', species: 'pine' }, { searchText: null }]) {
+    const rejected = await validateWireRequest(await offering(payload));
+    assert.equal(rejected.ok, false, JSON.stringify(payload));
+    assert.equal(rejected.code, ADAPTER_ERROR_CODES.INVALID_BOUNDED_SCOPE);
+  }
+
+  const answer = (fields) => ({
+    protocolVersion: STORE_PROTOCOL_VERSION,
+    storePin: STORE_PIN,
+    requestId: search.requestId,
+    attemptId: search.attemptId,
+    projectId: search.projectId,
+    candidateRevisionId: search.candidateRevisionId,
+    requestType: search.requestType,
+    scope: search.scope,
+    payloadDigest: search.payloadDigest,
+    demandSignature: null,
+    querySignature: search.querySignature,
+    attemptNumber: 1,
+    ...fields,
+  });
+  const row = { storeSku: 'STB-ZERO-PINE-1X6-96-001' };
+  assert.equal(inspectStoreResponse(search, answer({ rawOfferings: [row], totalMatches: 1, truncated: false }), { httpStatus: 200 }).ok, true);
+  assert.equal(inspectStoreResponse(search, answer({ rawOfferings: [row], totalMatches: 30, truncated: true }), { httpStatus: 200 }).ok, true);
+  for (const bad of [
+    { rawOffering: row },
+    { rawOfferings: [row], totalMatches: 30, truncated: false },
+    { rawOfferings: Array(21).fill(row), totalMatches: 21, truncated: false },
+    { rawOfferings: [row], totalMatches: 0, truncated: false },
+  ]) {
+    assert.equal(inspectStoreResponse(search, answer(bad), { httpStatus: 200 }).reason, 'missing-offering-matches', JSON.stringify(bad).slice(0, 80));
+  }
+  assert.equal(inspectStoreResponse(search, answer({ rawOfferings: [], totalMatches: 0, truncated: false, querySignature: 'other' }), { httpStatus: 200 }).reason, 'querySignature');
 });

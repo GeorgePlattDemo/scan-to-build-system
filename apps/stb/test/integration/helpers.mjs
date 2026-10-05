@@ -14,25 +14,39 @@ import { requireCleanPinnedStore } from '../store/helpers.mjs';
 const ROOT = fileURLToPath(new URL('../../public-build/', import.meta.url));
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css' };
 
-// Serves the public build, answers stb-store-runtime.json with a loopback endpoint, and passes every Store
-// POST to the real adapter. `tamper` lets one test hand the page an answer meant for someone else.
-// `rewrite` lets one test serve a public-build file with changed text.
-export function serve(adapter, log, tamper = null, rewrite = null) {
+// Serves the public build, answers stb-store-runtime.json with loopback job and offering endpoints, and passes
+// every Store POST, on either path, to the real adapter; each log entry names its path. `tamper` lets one test hand
+// the page an answer meant for someone else. `rewrite` lets one test serve a public-build file with changed text.
+// `control.withholdOffering` makes the offering endpoint unreachable (the connection is dropped).
+export function serve(adapter, log, tamper = null, rewrite = null, control = {}) {
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://x');
     if (url.pathname === '/stb-store-runtime.json') {
       const { port } = server.address();
       res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ jobEndpoint: `http://127.0.0.1:${port}/api/store-zero/job`, storePin: STORE_PIN }));
+      res.end(JSON.stringify({
+        jobEndpoint: `http://127.0.0.1:${port}/api/store-zero/job`,
+        offeringEndpoint: `http://127.0.0.1:${port}/api/store-zero/offering`,
+        storePin: STORE_PIN,
+      }));
       return;
     }
-    if (url.pathname === '/api/store-zero/job' && req.method === 'POST') {
+    if (url.pathname === '/api/store-zero/offering' && control.withholdOffering) {
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      let request = {};
+      try { request = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch {}
+      log.push({ path: url.pathname, withheld: true, request });
+      req.socket.destroy();
+      return;
+    }
+    if ((url.pathname === '/api/store-zero/job' || url.pathname === '/api/store-zero/offering') && req.method === 'POST') {
       const chunks = [];
       for await (const chunk of req) chunks.push(chunk);
       const body = JSON.parse(Buffer.concat(chunks).toString('utf8'));
       let result = await adapter.dispatch(body);
       if (tamper) result = tamper(body, result) || result;
-      log.push({ request: body, status: result.status, answer: result.body });
+      log.push({ path: url.pathname, request: body, status: result.status, answer: result.body });
       res.writeHead(result.status, { 'content-type': 'application/json' });
       res.end(JSON.stringify(result.body));
       return;
@@ -90,10 +104,11 @@ export async function withBrowser(fn, tamper = null, rewrite = null) {
   const adapter = await createStoreAdapter();
   assert.equal(adapter.ready, true, JSON.stringify(adapter.inspection));
   const log = [];
-  const server = await serve(adapter, log, tamper, rewrite);
+  const control = {};
+  const server = await serve(adapter, log, tamper, rewrite, control);
   const browser = await chromium.launch(process.env.STB_CHROMIUM_PATH ? { executablePath: process.env.STB_CHROMIUM_PATH } : {});
   try {
-    await fn({ browser, origin: `http://127.0.0.1:${server.address().port}`, log, adapter });
+    await fn({ browser, origin: `http://127.0.0.1:${server.address().port}`, log, adapter, control });
   } finally {
     await browser.close();
     server.close();
