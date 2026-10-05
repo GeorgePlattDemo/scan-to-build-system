@@ -22,9 +22,9 @@ assert.match(surface,/Grab a board from the Store and tell us what you want done
 assert.match(surface,/2 parts/);
 assert.match(surface,/16 in each/);
 assert.match(surface,/30° ends/);
-assert.match(surface,/center spot/);
-assert.match(surface,/Center spot = 16 ÷ 2 = 8 in/);
-assert.match(surface,/TAKE THIS 2×4 TO THE BENCH →/);
+assert.match(surface,/Spot drill/);
+assert.match(surface,/Spot drill = 16 ÷ 2 = 8 in/);
+assert.match(surface,/TAKE THE WOOD AND TOOLS TO THE BENCH →/);
 assert.equal(surface.includes('<p>2×6 stud</p>'),false);
 assert.equal(surface.includes('<p>2×8 stud</p>'),false);
 assert.equal(surface.includes('FRAME 1 · THE WARM INTRO'),false);
@@ -89,36 +89,55 @@ assert.match(shell,/const spotDemand =/);
 assert.match(shell,/physicalDemand\.spotDemand = spotDemand/);
 assert.match(shell,/formula:'finishedLengthIn \/ 2'/);
 assert.match(shell,/renderBoardGeometry\(definition\)/);
-// Start your own opens on its Idea intake; Intent stays step 1, and the go target maps Idea, Intent and the bench.
-assert.match(shell,/showStartOwnStage\('idea'\)/);
-assert.equal(shell.includes("showStartOwnStage('intent')"),false,'Start your own still opens on Intent');
+// Start your own opens on Intent, step 1, by the trail contract's one opensOn exception. Idea stays its unnumbered
+// intake; the go target maps Idea, Intent and the bench.
+assert.match(shell,/showStartOwnStage\('intent'\)/);
+assert.equal(shell.includes("showStartOwnStage('idea')"),false,'Start your own still opens on Idea');
+assert.match(shell,/startOwnPage\.dataset\.revStage = 'intent';/);
+assert.match(shell,/let pendingStartOwnStage = 'intent';/);
 assert.match(shell,/const screen = target === trailContract\.idea\.label \? 'idea' : at === 0 \? 'intent' : at === 1 \? 'bench' : null;/);
 assert.match(shell,/if \(screen\) setTimeout\(\(\) => openStartOwnStage\(screen, null\), 0\)/);
-assert.match(surface,/<section id="stb-start-idea-screen">/);
-assert.match(surface,/<section id="stb-start-intent-screen" hidden>/);
+assert.match(surface,/<section id="stb-start-idea-screen" hidden>/);
+assert.match(surface,/<section id="stb-start-intent-screen">/);
 
-// Idea is this job's own story: the Job 1 picture and one line. No ways list, no carried-value chips.
-const ideaScreen = surface.slice(surface.indexOf('<section id="stb-start-idea-screen">'), surface.indexOf('<section id="stb-start-intent-screen"'));
-assert.match(ideaScreen,/<img class="stb-idea-img" id="stb-idea-img"/);
+// Idea is this job's own story: where it came from, the Job 1 picture and one line. No machinery, no numbers.
+const ideaScreen = surface.slice(surface.indexOf('<section id="stb-start-idea-screen"'), surface.indexOf('<section id="stb-start-intent-screen"'));
+assert.match(ideaScreen,/<h1 class="sy">Idea · what you brought<\/h1>/);
+assert.match(ideaScreen,/What you bring lands here and ends at Intent\. Idea is not a step\./);
+assert.match(ideaScreen,/<img class="stb-idea-img" id="stb-idea-img" alt="Two damaged crossmembers under a picnic-table bench\.">/);
 assert.match(ideaScreen,/<p class="stb-idea-line">Two broken crossmembers, both cut from a 2×4\.<\/p>/);
-assert.equal(ideaScreen.includes('morelist'),false,'the ways list is back on Idea');
+for (const machinery of ['morelist','stb-ways','<input','<button','data-species','stb-intent-sku','stb-add-tool','stb-tool-bubble','16 in','30°']) {
+  assert.equal(ideaScreen.includes(machinery),false,'Idea carries '+machinery);
+}
 assert.equal(surface.includes('stb-idea-known'),false,'carried-value chips are back on Idea');
 assert.equal(ideaScreen.includes('data:image'),false,'Idea carries a second copy of the picture');
 assert.match(surface,/ideaImg\.src = job1Img\.src/,'Idea shows the same Job 1 picture as Intent');
-assert.match(surface,/\.stb-idea-img\{width:300px/,'Idea picture is half again the 200px Intent picture');
-// Intent: the six ways, in the old order, and the seventh is the type box.
+// Intent: the hook, the Store lookup in the row of boards, Intent said once, the ways, the tool box with Job 1's tools.
 const intentScreen = surface.slice(surface.indexOf('<section id="stb-start-intent-screen"'), surface.indexOf('<section id="stb-start-bench-screen"'));
-assert.deepEqual([...intentScreen.matchAll(/<li><b>([^<]+)<\/b>/g)].map(m => m[1]), [
+assert.match(intentScreen,/<p class="stb-grab">Grab a board from the Store and tell us what you want done to it\.<\/p>/);
+const boardsRow = intentScreen.slice(intentScreen.indexOf('<div class="boards">'), intentScreen.indexOf('id="stb-intent-sku-answer"'));
+assert.match(boardsRow,/<svg class="stb-form-ring"[^>]*><ellipse[^>]*stroke="#d1242f"/,'the 2×4 is ringed in the photograph red');
+assert.match(boardsRow,/id="stb-intent-sku"/,'the Store lookup sits in the row of boards');
+assert.equal((surface.match(/id="stb-intent-sku"/g) || []).length,1,'one Store lookup');
+assert.equal(/<ol\b|<li><b>/.test(intentScreen),false,'the ways are a numbered list again');
+assert.deepEqual([...intentScreen.matchAll(/<div><b>([^<]+)<\/b>/g)].map(m => m[1]), [
   'Add pieces as you go.', 'Just tell us in plain words.', 'Type the numbers.', 'Send a scan or a photo.',
-  'Draw it here.', 'Bring what you already have.', 'Add a tool this job needs.']);
+  'Draw it here.', 'Bring what you already have.']);
+assert.match(intentScreen,/<p class="lead">Add a tool the job needs to define<\/p>/);
 assert.match(intentScreen,/id="stb-add-tool-input"/);
 assert.match(intentScreen,/id="stb-add-tool" disabled>ADD/);
-// Intent's picture circles the 2×4 this job picked; under it the two demo woods and a SKU box.
-assert.match(intentScreen,/<svg class="stb-pick-ring"[^>]*><circle[^>]*stroke="#d1242f"/);
-assert.match(intentScreen,/data-intent-species="spf">SPF</);
-assert.match(intentScreen,/data-intent-species="syp-treated">TREATED SYP</);
-assert.match(intentScreen,/id="stb-intent-sku"/);
-assert.match(shell,/clone\.querySelector\('\.stb-intent-wood'\)\?\.remove\(\)/,'the bench copy of the picture carries no dead wood buttons');
+assert.match(intentScreen,/<span>Cut<\/span><span>At an angle<\/span><span>Spot drill<\/span><span id="stb-added-tools"><\/span>/);
+assert.equal(/configurator/i.test(intentScreen),false,'the customer page says configurator');
+// The handoff frame: the picture with its ring, the wood and each tool with what it carries. Not another picker.
+const handoffFrame = intentScreen.slice(intentScreen.indexOf('<div class="stb-user1-body">'));
+assert.match(handoffFrame,/<svg class="stb-pick-ring"[^>]*><circle[^>]*stroke="#d1242f"/);
+assert.match(handoffFrame,/<span id="stb-carry-wood">2×4 stud<\/span>/);
+assert.match(handoffFrame,/<b>Cut<\/b><span id="stb-carry-cut">2 parts · 16 in each<\/span>/);
+assert.match(handoffFrame,/<b>At an angle<\/b><span id="stb-carry-angle">30° ends<\/span>/);
+assert.match(handoffFrame,/<b>Spot drill<\/b><span id="stb-carry-spot">8 in from either end<\/span>/);
+assert.equal(/<input|data-species|data-intent-species/.test(handoffFrame),false,'the handoff frame carries a picker');
+assert.equal(/data-intent-species/.test(surface),false,'Intent has a second wood state');
+assert.match(shell,/clone\.querySelector\('\.stb-carry-live'\)\?\.remove\(\)/,'the bench copy of the picture carries no stale wood or tools');
 // Cedar is off this bench's choices; it stays in the Store catalog.
 assert.equal(/data-(?:intent-)?species="cedar"/.test(surface),false,'cedar is still a bench choice');
 assert.deepEqual([...surface.matchAll(/data-species="([^"]+)"/g)].map(m => m[1]), ['spf','syp-treated']);

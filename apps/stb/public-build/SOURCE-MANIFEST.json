@@ -1463,6 +1463,20 @@
       "blobSha": "534a2b5e12e37b0d0ee231559e695ceb41c11ed6",
       "bytes": 59750,
       "reason": "User 1 Store-issued references are per wood: the two SPF references gain their materialDemand, and two treated SYP references (16 in and 18 in, STB-ZERO-PTAG-2X4-72-001) are added from the Store at STORE_PIN; the matcher requires the stated material. startOwnStoreItem looks up the nominal 2\u00d74 boards of store-zero-catalog.json at STORE_PIN by SKU. Both are checked against the pinned Store by test/store/user1-reference-guard.test.mjs. STORE_PIN is unchanged."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "start-own-intent-entry",
+      "blobSha": "b80958ec87246a87642902fe97b8c84af442500d",
+      "bytes": 99299,
+      "reason": "Start your own opens on Intent: the Intent screen is shown at load and Idea is hidden until asked for. Idea is the Job 1 picture under \"Idea \u00b7 what you brought\" and \"What you bring lands here and ends at Intent. Idea is not a step.\", the line \"Two broken crossmembers, both cut from a 2\u00d74.\" and one line on other intake; its alt text no longer carries the finished 16 in and 30\u00b0. Intent: the title line, the hook \"Grab a board from the Store and tell us what you want done to it.\", the existing swatches with the 2\u00d74 ringed in the photograph red, the Store lookup in the row of boards (moved, not copied; the SKU box under the picture and Intent's SPF/treated SYP buttons are gone), \"This is Intent.\", the six ways as plain labels (no numbered list), and \"Add a tool the job needs to define\" with Job 1's tools Cut, At an angle and Spot drill. A handoff frame carries the Job 1 picture with its ring, the wood, and each tool with what it carries. The Store catalog status line shows only when Store material truth is missing or partial."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "start-own-intent-entry",
+      "blobSha": "7c0866a057fc375ce0fe5899ac741910ea9a9647",
+      "bytes": 255876,
+      "reason": "Start your own opens on Intent: its page's initial stage, its pending stage and its tile click name intent (one page, no second route; Idea stays the back control). The one wood state now also shows in Intent's handoff frame; Intent's wood-button handlers are removed with the buttons. Typed tools also travel in the handoff frame; the handoff frame shows the current Cut, At an angle and Spot drill values of the bench revision. The bench copy of the Job 1 block leaves out the live wood and tools. The Store catalog status line is hidden when every board is Store-backed. Cache keys for three-frames.html and stb-trail-contract.js."
     }
   ],
   "retiredFiles": [

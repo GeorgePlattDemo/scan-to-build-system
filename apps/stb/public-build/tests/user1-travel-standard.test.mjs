@@ -267,7 +267,7 @@ assert.equal(frame.includes('data-spot='),false,'bounded demo reintroduced spot 
 assert.match(frame,/same 8.000 in horizontal span/i);
 assert.match(frame,/18.000 in → 26.388° end cuts/);
 assert.match(frame,/2×4 · 60 in/);
-assert.match(frame,/Center spot = 16 ÷ 2 = 8 in/);
+assert.match(frame,/Spot drill = 16 ÷ 2 = 8 in/);
 
 const handoff = contract.createComparisonHandoff({
   projectId:'start-own',
