@@ -2,7 +2,7 @@
 
 This register records exact source identities and their current role. A pin is an identity, not a blanket endorsement of every statement made elsewhere at that point in project history.
 
-For current project status, read [`../STB-CURRENT-BASELINE.md`](../STB-CURRENT-BASELINE.md).
+For current operational status, read [`../docs/project/CURRENT-SYSTEM-STATE.md`](../docs/project/CURRENT-SYSTEM-STATE.md). [`../STB-CURRENT-BASELINE.md`](../STB-CURRENT-BASELINE.md) records historical acceptance. Current runtime Store authority is owned by `STORE_PIN` in [`../apps/stb/shared/contracts.mjs`](../apps/stb/shared/contracts.mjs).
 
 ## Accepted / merged foundation
 
@@ -16,7 +16,8 @@ For current project status, read [`../STB-CURRENT-BASELINE.md`](../STB-CURRENT-B
 | Entry/intake contract | `GeorgePlattDemo/grok-file` | `plan/app-entry-intake-contract-0.1` | `2d80b5a7b0e7687c425e100bfa0ff3a833166d42` | Source contract; subject to current repository corrections |
 | Governed Reference | `GeorgePlattDemo/scan-to-build-governed-reference` | `main` | `18949f163718a937f072f4be3a654bb303e53160` | Governed reference identity |
 | Stage-2 Store Zero — accepted 2026-09-13 identity | `GeorgePlattDemo/scan-to-build-store` | `stage-2-store-zero-reference` | `b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d` | ACCEPTED BASELINE HISTORY; superseded for the current post-acceptance Stage-2 working path |
-| Stage-2 Store Zero — current dimensional travel-standard path | `GeorgePlattDemo/scan-to-build-store` | `main` | `f88ccaf9a2624899e255e66b51111e2b02309dad` | Current `USER_DEFINED_BOARD_V1` material/capability/travel/economics source · pricing engine 0.3.0 · fresh-evaluation invariant · exact Store acceptance run 35768861705 |
+| Stage-2 Store Zero — current runtime source at the 2026-10-05 inspection | `GeorgePlattDemo/scan-to-build-store` | System-owned `STORE_PIN` | `9c62d9d6f7775deef83d47196d32c9b5174a352c` | Current System runtime source; the executable pin owner remains `apps/stb/shared/contracts.mjs` |
+| Stage-2 Store Zero — historical dimensional travel-standard source | `GeorgePlattDemo/scan-to-build-store` | historical `main` | `f88ccaf9a2624899e255e66b51111e2b02309dad` | HISTORICAL runtime/proof identity · pricing engine 0.3.0 · fresh-evaluation invariant · exact Store acceptance run 35768861705. Still identifies a browser catalog snapshot in `stb-store-handoff-contract.js`; that preview consumer is separate from current runtime authority and is unchanged by this documentation pass |
 | Store documentary foundation | `GeorgePlattDemo/scan-to-build-store` | `main` | `3620b35369d70cf49733bbb0b62c0f3d9969b738` | Store boundary/background source |
 
 ## Accepted application ancestry / proof identities
@@ -35,8 +36,8 @@ For current project status, read [`../STB-CURRENT-BASELINE.md`](../STB-CURRENT-B
 
 | Subject | Pin | Current role |
 | --- | --- | --- |
-| Prior User 1 Stage-2 Store working pin | `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a` | SUPERSEDED by later Store authorities; current User 1 authority is `f88ccaf9a2624899e255e66b51111e2b02309dad` |
-| Intermediate User 1 Store authority | `ab8a4c5d470c310f27fef82683611622ab976168` | SUPERSEDED by the dimensional travel-standard authority `f88ccaf9a2624899e255e66b51111e2b02309dad` |
+| Prior User 1 Stage-2 Store working pin | `c51f5f27af9a77bc7581c5d42c56f0a1ed0b650a` | SUPERSEDED runtime history; current runtime authority is the System-owned `STORE_PIN` above |
+| Intermediate User 1 Store authority | `ab8a4c5d470c310f27fef82683611622ab976168` | SUPERSEDED by the historical dimensional travel-standard source `f88ccaf9a2624899e255e66b51111e2b02309dad`; current runtime authority is the System-owned `STORE_PIN` above |
 | PR #4 sheet Store path | `49d22ce40482a7c2e0169ac1e6df48e0f8384a6d` | SUPERSEDED candidate history |
 | PR #6 combined published-job Store candidate | `096e99d645d745b1670185f46c75de75f9e59661` | ACCEPTED ancestry; superseded for current S-001 proof |
 
