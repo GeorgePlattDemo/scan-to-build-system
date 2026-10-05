@@ -5,14 +5,19 @@
 
 > **CURRENT STATUS — SYSTEM APPLICATION AND PUBLICATION OWNER.** System now publishes `apps/stb/public-build/` directly from System `main`; `scan-to-build-review` is frozen history. The body below preserves earlier Build 0–8 application-development and custody context; Review → System reconciliation wording below is historical, not an open migration instruction. Current state: [`../../docs/project/CURRENT-SYSTEM-STATE.md`](../../docs/project/CURRENT-SYSTEM-STATE.md).
 
-## Current visible-build preservation checkpoint
+## Current application and publication
 
-The exact public Review composition currently opened by **OPEN SYSTEM BUILD** is preserved under [`public-build/`](public-build/) from Review commit `7b26dfc45c9832271840d134426e096787156a04`.
+[▶ OPEN THE APP](https://georgeplattdemo.github.io/scan-to-build-system/system-build-current.html) opens the System-owned [`public-build/`](public-build/) source published from System main. Current operation and verification are recorded in [`CURRENT-SYSTEM-STATE.md`](../../docs/project/CURRENT-SYSTEM-STATE.md) and the [verification register](../../docs/project/VERIFICATION-REGISTER.md). The runtime Store source is owned by `STORE_PIN` in [`shared/contracts.mjs`](shared/contracts.mjs).
 
-This is a custody/reconciliation checkpoint, not a second application architecture and not a runtime switch. Its source manifest and unit test prove byte identity before any Review → System reconciliation work.
+## Historical custody checkpoint — original Review import
 
+The original public Review composition was preserved under `public-build/` from `scan-to-build-review@7b26dfc45c9832271840d134426e096787156a04`. That was the custody checkpoint before subsequent System-owned development and publication. It is not a claim that today's directory remains an unchanged Review copy.
 
-<a href="https://georgeplattdemo.github.io/scan-to-build-system/system-build-current.html"><kbd>▶ OPEN THE APP</kbd></a>
+[`public-build/SOURCE-MANIFEST.json`](public-build/SOURCE-MANIFEST.json) retains original source identities and subsequent System edits. The custody record is in [`public-build/README.md`](public-build/README.md). Review remains frozen; the earlier reconciliation plan is historical.
+
+## Historical application lineage — Builds 0–8
+
+The remainder records the earlier local application and its acceptance evidence. Its page names, checkpoint counts, and workflow descriptions belong to that lineage; current public operation is described above. Later runtime-pin annotations point to the executable pin owner and do not repin historical proof.
 
 Local application subtree.
 
