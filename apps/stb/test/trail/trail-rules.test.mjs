@@ -7,8 +7,10 @@
 //   (once a tile is fixed, it stays fixed).
 //
 // Checks per tile (no tile is excepted):
-//   R1  Idea, where the tile opens, shows no numbered step. From Intent on, the nav reads Idea (an unnumbered back
-//       control, never current), then the six trail steps with the contract labels, in order, exactly one current.
+//   R1  A tile opens on Idea, which shows no numbered step, unless the contract declares it opens on Intent (opensOn);
+//       then it opens on the Intent line and its Idea back control leads to the same Idea checks. From Intent on, the
+//       nav reads Idea (an unnumbered back control, never current), then the six trail steps with the contract labels,
+//       in order, exactly one current. Only Start your own may declare opensOn (the owner's one-time exception).
 //   R2  every visible nav button lands on this tile's own pages (or Landing / Home); no other buttons. The fork options
 //       a tile declares for its Idea line (contract presentationForks) are that declared exception, not extra nav.
 //   R3  a step you cannot use yet is shown inert (disabled); steps 2-6 never silently do nothing
@@ -120,6 +122,19 @@ async function toIntent(frame, page, nav, tileSteps, forks) {
   return true;
 }
 
+// From Intent to Idea: the Intent line's unnumbered Idea back control.
+async function toIdea(frame, page, nav) {
+  const way = nav.find(b => b.label === IDEA && !NUMBERED.test(b.label) && !b.current);
+  if (!way) return false;
+  await frame.locator('.recovery-nav button:visible', { hasText: way.label }).first().click();
+  await page.waitForTimeout(1000);
+  return true;
+}
+
+// The steps a tile opens on: Intent when the contract declares opensOn for it, otherwise Idea.
+const opensOnIntent = tile => tile.opensOn?.step === (tile.steps || contract.steps)[0];
+const OPENS_ON_INTENT = ['start-own'];
+
 async function pageText(page) {
   const texts = [];
   for (const f of page.frames()) {
@@ -170,6 +185,13 @@ test('trail scoreboard: every tile against the trail rules', { timeout: 600000 }
       await page.close();
     }
 
+    // The open-on-Intent exception is the owner's, for Start your own only. Any other tile declaring it fails.
+    assert.deepEqual([...contract.tiles.filter(t => t.opensOn).map(t => t.id)], OPENS_ON_INTENT, 'only Start your own may open on Intent');
+    for (const t of contract.tiles.filter(t => t.opensOn)) {
+      assert.equal(opensOnIntent(t), true, `${t.id}: opensOn names step 1 of its trail`);
+      assert.ok(typeof t.opensOn.owner === 'string' && t.opensOn.owner.length > 0, `${t.id}: opensOn names its owner`);
+    }
+
     for (const tile of contract.tiles) {
       if (tile.exception) continue;
       const allowed = new Set([...tile.pages, ...contract.sharedPages]);
@@ -181,39 +203,75 @@ test('trail scoreboard: every tile against the trail rules', { timeout: 600000 }
       if (ACCOUNT_NAMES.test(await pageText(page))) add(tile.id, 'R9', `account name on entry page "${entry}"`);
 
       const forks = forkOptions(tile);
-      const nav = await visibleNav(frame);
-      // R1 on Idea: the intake, not a step. No numbered step shows and none is current.
-      const ideaOk = !nav.some(b => NUMBERED.test(b.label) || b.current);
-      if (!ideaOk) add(tile.id, 'R1', `Idea shows numbered steps: nav is [${nav.map(b => b.label).join(' | ')}]`);
-      for (const b of nav) {
-        const isStep = tileSteps.includes(stripNumber(b.label));
-        if (!isStep && !forks.has(b.label) && !contract.sharedPages.includes(b.go)) add(tile.id, 'R2', `extra nav button "${b.label}" → ${b.go}`);
-      }
-
+      const want = [IDEA, ...tileSteps.map((st, i) => `${i + 1} · ${st}`)];
       // R1 from Intent on: Idea (never current), then the six steps in order, exactly one current: step 1 here.
+      const checkIntentLine = intentNav => {
+        const got = intentNav.filter(b => !contract.sharedPages.includes(b.go)).map(b => b.label.replace(/\s+/g, ' '));
+        if (JSON.stringify(got) !== JSON.stringify(want)) add(tile.id, 'R1', `from Intent the nav is [${intentNav.map(b => b.label).join(' | ')}]`);
+        const current = intentNav.filter(b => b.current).map(b => b.label);
+        if (current.length !== 1 || current[0] !== want[1]) add(tile.id, 'R1', `on Intent the current step is [${current.join(' | ')}]`);
+        for (const b of intentNav) {
+          if (forks.has(b.label) && !NUMBERED.test(b.label)) add(tile.id, 'R2', `fork option "${b.label}" off the Idea line`);
+          const isStep = NUMBERED.test(b.label) && tileSteps.includes(stripNumber(b.label));
+          if (!isStep && b.label !== IDEA && !contract.sharedPages.includes(b.go)) add(tile.id, 'R2', `extra nav button "${b.label}" from Intent → ${b.go}`);
+        }
+      };
+      // R1 on Idea: the intake, not a step. No numbered step shows and none is current.
+      const checkIdeaLine = ideaNav => {
+        const ok = !ideaNav.some(b => NUMBERED.test(b.label) || b.current);
+        if (!ok) add(tile.id, 'R1', `Idea shows numbered steps: nav is [${ideaNav.map(b => b.label).join(' | ')}]`);
+        for (const b of ideaNav) {
+          const isStep = tileSteps.includes(stripNumber(b.label));
+          if (!isStep && !forks.has(b.label) && !contract.sharedPages.includes(b.go)) add(tile.id, 'R2', `extra nav button "${b.label}" → ${b.go}`);
+        }
+        return ok;
+      };
+
+      const onIntentFirst = opensOnIntent(tile);
+      let nav = [];
       let intentNav = [];
-      if (ideaOk) {
-        if (!await toIntent(frame, page, nav, tileSteps, forks)) add(tile.id, 'R1', 'Idea has no way to Intent');
+      if (onIntentFirst) {
+        // Declared exception: the tile opens on Intent. Idea is one back control away and passes the same Idea checks.
+        intentNav = await visibleNav(frame);
+        checkIntentLine(intentNav);
+        if (!await toIdea(frame, page, intentNav)) add(tile.id, 'R1', 'Intent has no Idea back control');
         else {
-          intentNav = await visibleNav(frame);
-          const want = [IDEA, ...tileSteps.map((st, i) => `${i + 1} · ${st}`)];
-          const got = intentNav.filter(b => !contract.sharedPages.includes(b.go)).map(b => b.label.replace(/\s+/g, ' '));
-          if (JSON.stringify(got) !== JSON.stringify(want)) add(tile.id, 'R1', `from Intent the nav is [${intentNav.map(b => b.label).join(' | ')}]`);
-          const current = intentNav.filter(b => b.current).map(b => b.label);
-          if (current.length !== 1 || current[0] !== want[1]) add(tile.id, 'R1', `on Intent the current step is [${current.join(' | ')}]`);
-          for (const b of intentNav) {
-            if (forks.has(b.label) && !NUMBERED.test(b.label)) add(tile.id, 'R2', `fork option "${b.label}" off the Idea line`);
-            const isStep = NUMBERED.test(b.label) && tileSteps.includes(stripNumber(b.label));
-            if (!isStep && b.label !== IDEA && !contract.sharedPages.includes(b.go)) add(tile.id, 'R2', `extra nav button "${b.label}" from Intent → ${b.go}`);
+          nav = await visibleNav(frame);
+          if (checkIdeaLine(nav)) {
+            if (!await toIntent(frame, page, nav, tileSteps, forks)) add(tile.id, 'R1', 'Idea has no way to Intent');
+            else {
+              const back = (await visibleNav(frame)).filter(b => b.current).map(b => b.label);
+              if (back.length !== 1 || back[0] !== want[1]) add(tile.id, 'R1', `Idea's way on lands on [${back.join(' | ')}], not Intent`);
+            }
+          }
+        }
+      } else {
+        nav = await visibleNav(frame);
+        if (checkIdeaLine(nav)) {
+          if (!await toIntent(frame, page, nav, tileSteps, forks)) add(tile.id, 'R1', 'Idea has no way to Intent');
+          else {
+            intentNav = await visibleNav(frame);
+            checkIntentLine(intentNav);
           }
         }
       }
+      // From a fresh entry to Idea, or to Intent, whichever the tile opens on.
+      const freshAtIdea = async () => {
+        const at = await enterTile(browser, origin, tile);
+        if (onIntentFirst) await toIdea(at.frame, at.page, await visibleNav(at.frame));
+        return at;
+      };
+      const freshAtIntent = async () => {
+        const at = await enterTile(browser, origin, tile);
+        if (!onIntentFirst) await toIntent(at.frame, at.page, await visibleNav(at.frame), tileSteps, forks);
+        return at;
+      };
       await page.close();
 
-      // Click each visible button from a fresh entry.
+      // On Idea: click each visible button from a fresh visit.
       for (const b of nav) {
         if (b.inert) continue;
-        ({ page, frame } = await enterTile(browser, origin, tile));
+        ({ page, frame } = await freshAtIdea());
         const before = await fingerprint(page, frame);
         await frame.locator('.recovery-nav button:visible', { hasText: b.label }).first().click();
         await page.waitForTimeout(1000);
@@ -229,8 +287,7 @@ test('trail scoreboard: every tile against the trail rules', { timeout: 600000 }
       // From Intent: every enabled nav button opens this tile's own page; steps 2-6 never silently do nothing.
       for (const b of intentNav) {
         if (b.inert) continue;
-        ({ page, frame } = await enterTile(browser, origin, tile));
-        await toIntent(frame, page, await visibleNav(frame), tileSteps, forks);
+        ({ page, frame } = await freshAtIntent());
         const before = await fingerprint(page, frame);
         await frame.locator('.recovery-nav button:visible', { hasText: b.label }).first().click();
         await page.waitForTimeout(1000);

@@ -28,7 +28,13 @@
     Object.freeze({
       id: 'start-own',
       tileLabel: 'Start your own',
-      pages: Object.freeze(['start-own-live', 'proof-store', 'proof-accept', 'proof-yard', 'proof-terms', 'proof-record'])
+      pages: Object.freeze(['start-own-live', 'proof-store', 'proof-accept', 'proof-yard', 'proof-terms', 'proof-record']),
+      // The one tile that opens on Intent (rule 7's second presentation exception). Idea stays its unnumbered intake,
+      // reached by the Idea back control. Delete this entry and the tile is back under the open-on-Idea rule.
+      opensOn: Object.freeze({
+        step: 'Intent',
+        owner: 'Owner decision, 2026-10-04: Job 1 is the populated demo prototype, so it lands on its first meaningful page.'
+      })
     }),
     Object.freeze({
       id: 'alcove',
@@ -52,7 +58,8 @@
     })
   ]);
 
-  // Rule 7: one presentation exception, declared once. It changes no operational rule.
+  // Rule 7: presentation exceptions, each declared once. They change no operational rule. The Window Seat fork is
+  // here; Start your own's opensOn is on its tile above.
   const PRESENTATION_FORKS = Object.freeze([
     Object.freeze({
       tileId: 'window-seat',

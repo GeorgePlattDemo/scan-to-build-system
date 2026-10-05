@@ -77,7 +77,7 @@ assert.equal(frame.includes('id="stb-config-angle"'),false);
 assert.equal(frame.includes('data-parts='),false);
 assert.equal(frame.includes('data-spot='),false);
 assert.match(frame,/18\.000 in → 26\.388° end cuts/);
-assert.match(frame,/Center spot = 16 ÷ 2 = 8 in/);
+assert.match(frame,/Spot drill = 16 ÷ 2 = 8 in/);
 assert.match(shell,/definitionId:'SYO-USER1-XBRACE-0\.1'/);
 assert.match(shell,/START_OWN_CONFIGURATION_ID = 'SYO-USER1-XBRACE'/);
 assert.match(shell,/endpoint16[\s\S]*?endpoint18[\s\S]*?'0\.1'[\s\S]*?'0\.2'/);

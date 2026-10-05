@@ -20,7 +20,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-terms-flow.js?v=365d795c"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
 <script src="stb-build-guide-spec.js?v=4f1a175e"></script>
-<script src="stb-trail-contract.js?v=71dffe24"></script>
+<script src="stb-trail-contract.js?v=e8ca7b23"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
 import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => {
@@ -182,15 +182,16 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
             startOwnPage = doc.createElement('section');
             startOwnPage.className = 'page start-own-shell-page';
             startOwnPage.id = 'start-own-live';
-            // Start your own opens on its Idea intake, before Intent.
-            startOwnPage.dataset.revStage = 'idea';
+            // Start your own opens on Intent, step 1 (the owner's one declared exception, opensOn in the trail
+            // contract). Idea stays its unnumbered intake, one back control away.
+            startOwnPage.dataset.revStage = 'intent';
             startOwnPage.innerHTML = `
               <div class="start-own-shell-main">
                 <iframe
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=3694af80"
+                  src="three-frames.html?v=b80958ec"
                 ></iframe>
               </div>
             `;
@@ -199,7 +200,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=3694af80';
+            liveFrame.src = 'three-frames.html?v=b80958ec';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -207,7 +208,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
             if (!storeLine) banner.insertAdjacentHTML('beforeend', '<p id="proof-job1-store" class="dim">Store: waiting on a complete definition.</p>');
           }
           const proofFrame = startOwnPage.querySelector('#start-own-proof-frame');
-          let pendingStartOwnStage = 'idea';
+          let pendingStartOwnStage = 'intent';
           let pendingStartOwnFocus = null;
           let showStartOwnStage = (stage, focus = null) => {
             pendingStartOwnStage = startOwnScreen(stage);
@@ -309,7 +310,10 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
               };
               const syncStoreGlossary = () => {
                 if (!storeHandoffContract || typeof storeHandoffContract.startOwnOfferings !== 'function') {
-                  if (glossaryStatus) glossaryStatus.textContent = 'Current Store material truth is unavailable. No material choice is being promoted.';
+                  if (glossaryStatus) {
+                    glossaryStatus.textContent = 'Current Store material truth is unavailable. No material choice is being promoted.';
+                    glossaryStatus.hidden = false;
+                  }
                   if (benchButton) benchButton.disabled = true;
                   return false;
                 }
@@ -328,6 +332,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   glossaryStatus.textContent = backed === glossaryChoices.length
                     ? 'These material choices come from the current Store catalog.'
                     : backed+' current Store material choices are available here.';
+                  glossaryStatus.hidden = backed === glossaryChoices.length;
                 }
                 return true;
               };
@@ -344,7 +349,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   if (sourceIntent) {
                     const clone = sourceIntent.cloneNode(true);
                     clone.querySelector('.stb-bench-button')?.remove();
-                    clone.querySelector('.stb-intent-wood')?.remove();
+                    clone.querySelector('.stb-carry-live')?.remove();
                     clone.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
                     benchIntentSlot.append(clone);
                   }
@@ -672,6 +677,12 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                 // The drawing names the board the Store actually picked, never a stale default.
                 setText('stb-bench-stock-line','ONE '+boardName(demand.definedWorkpieceLengthIn)+' · one board, marked left to right · schematic');
                 setText('stb-bench-parts-spec',String(demand.quantity));
+                setText('stb-carry-cut',demand.quantity+' part'+(demand.quantity===1?'':'s')+' · '+formatInches(demand.finishedLength)+' each');
+                setText('stb-carry-angle',formatDegrees(demand.angleDegrees)+' ends');
+                setText('stb-carry-spot',demand.spotDemand?formatInches(definition.derived.centerSpotAlongLengthIn.value)+' from either end':'no spot');
+                setText('stb-user1-lineage',demand.spotDemand
+                  ? 'Spot drill = '+Number(demand.finishedLength)+' ÷ 2 = '+formatInches(definition.derived.centerSpotAlongLengthIn.value)+' from either finished end.'
+                  : 'No spot on this version.');
                 setText('stb-def-workpiece',formatInches(demand.definedWorkpieceLengthIn));
                 setText('stb-def-parts',String(demand.quantity));
                 setText('stb-def-length',demand.finishedLength+' in each');
@@ -830,18 +841,16 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   syncAndRender('CUSTOMER_INPUT');
                 });
               });
-              // One wood for this job: Intent states it, the bench revises it. Both rows show the same choice.
+              // One wood for this job: Intent's Store lookup states it, the bench revises it. Intent's handoff frame
+              // shows the same choice.
               const chooseSpecies = species => {
                 childDoc.querySelectorAll('#stb-bench-species [data-species]').forEach(b => b.classList.toggle('on', b.dataset.species === species));
-                childDoc.querySelectorAll('#stb-intent-wood [data-intent-species]').forEach(b => b.classList.toggle('on', b.dataset.intentSpecies === species));
+                setText('stb-carry-wood', '2×4 stud' + (SPECIES_WORDS[species] ? ' · ' + SPECIES_WORDS[species] : ''));
                 markRevision();
                 syncAndRender('CUSTOMER_INPUT');
               };
               childDoc.querySelectorAll('#stb-bench-species [data-species]').forEach(button => {
                 button.addEventListener('click', () => chooseSpecies(button.dataset.species));
-              });
-              childDoc.querySelectorAll('#stb-intent-wood [data-intent-species]').forEach(button => {
-                button.addEventListener('click', () => chooseSpecies(button.dataset.intentSpecies));
               });
               // A SKU names a real Store item or nothing. A 2×4 of one of this job's woods states that wood; the
               // Store still selects the board. Any other answer changes nothing.
@@ -871,6 +880,17 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   const chip = childDoc.createElement('span');
                   chip.textContent = control.label;
                   return chip;
+                }));
+                const carried = childDoc.getElementById('stb-carry-added');
+                if (carried) carried.replaceChildren(...addedControls.map(control => {
+                  const bubble = childDoc.createElement('div');
+                  bubble.className = 'stb-tool-bubble stb-tool-added';
+                  const name = childDoc.createElement('b');
+                  name.textContent = control.label;
+                  const note = childDoc.createElement('span');
+                  note.textContent = 'value set at the bench';
+                  bubble.append(name, note);
+                  return bubble;
                 }));
                 const rows = childDoc.getElementById('stb-bench-added-controls');
                 if (!rows) return;
@@ -1171,7 +1191,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
             selectJourneyProject(START_OWN_PROJECT_ID);
             originalShow.call(win, 'start-own-live');
             tilePageShown('start-own-live');
-            setTimeout(() => showStartOwnStage('idea'),0);
+            setTimeout(() => showStartOwnStage('intent'),0);
           }, true);
         }
 
@@ -3612,7 +3632,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
 
     // Start your own is on the shared tile host. The host draws its one nav line from the message its tile code
     // builds (startOwnHostMessage); its Store inquiries go through admit() then inquire() from its bench. It opens on
-    // its Idea intake, and from Intent on the host draws Idea as its back control. Idea, Intent and the bench are
+    // Intent (the trail contract's one opensOn exception); the host draws Idea as its back control. Idea, Intent and the bench are
     // three screens of its page: asked for one, it switches screens (the bench opens at the top, so the X-brace
     // picture and the board are seen first). Asked for Idea from another of its pages, it shows this page first.
     registerTileHost(START_OWN_PROJECT_ID, {
