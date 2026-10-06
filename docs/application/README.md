@@ -22,15 +22,17 @@ It remains software/reference behavior. It does not by documentation alone estab
 
 ## Reading order
 
-0. [`CURRENT-VISIBLE-BUILD-RECONCILIATION-0.1.md`](CURRENT-VISIBLE-BUILD-RECONCILIATION-0.1.md) — current Review → System custody/ownership reconciliation; start here before moving visible-build behavior.
+1. [`../project/CURRENT-SYSTEM-STATE.md`](../project/CURRENT-SYSTEM-STATE.md) — current operational/documentary entry point.
+2. [`../project/VERIFICATION-REGISTER.md`](../project/VERIFICATION-REGISTER.md) — claim-to-proof record.
+3. [`apps/stb/README.md`](../../apps/stb/README.md)
+4. [`../project/SOURCE-AUTHORITY.md`](../project/SOURCE-AUTHORITY.md)
+5. [`../definitions/README.md`](../definitions/README.md) — canonical operational definitions and executable-source map
+6. [`COMMON-ENTRY-ARCHITECTURE.md`](COMMON-ENTRY-ARCHITECTURE.md) — canonical multiple-entry / one-truth-model application rule
+7. [`INFORMATION-CUSTODY-BOUNDARY.md`](INFORMATION-CUSTODY-BOUNDARY.md) — current project/evidence/owner-record custody and future disclosure boundary
+8. [`../../work/user-intake/README.md`](../../work/user-intake/README.md) for current intake work
+9. [`../../provenance/SOURCE-PINS.md`](../../provenance/SOURCE-PINS.md) for exact source identities and application provenance
 
-1. [`apps/stb/README.md`](../../apps/stb/README.md)
-2. [`../project/SOURCE-AUTHORITY.md`](../project/SOURCE-AUTHORITY.md)
-3. [`../definitions/README.md`](../definitions/README.md) — canonical operational definitions and executable-source map
-4. [`COMMON-ENTRY-ARCHITECTURE.md`](COMMON-ENTRY-ARCHITECTURE.md) — canonical multiple-entry / one-truth-model application rule
-5. [`INFORMATION-CUSTODY-BOUNDARY.md`](INFORMATION-CUSTODY-BOUNDARY.md) — current project/evidence/owner-record custody and future disclosure boundary
-6. [`../../work/user-intake/README.md`](../../work/user-intake/README.md) for current intake work
-7. [`../../provenance/SOURCE-PINS.md`](../../provenance/SOURCE-PINS.md) for exact source identities and application provenance
+Historical reconciliation record: [`CURRENT-VISIBLE-BUILD-RECONCILIATION-0.1.md`](CURRENT-VISIBLE-BUILD-RECONCILIATION-0.1.md) preserves the Review → System custody and migration history. Its R1–R6 sequence is not open work instruction.
 
 ## Application semantic rule
 
