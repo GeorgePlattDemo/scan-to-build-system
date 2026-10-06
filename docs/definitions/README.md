@@ -47,7 +47,7 @@ Words the working app uses on screen or in its records. Where a term has an exac
 
 **Admissible** — Sufficiently defined and representable for the stated Store inquiry. Admissible is not supportable: whether the job is supportable is the Store's answer.
 
-**Admission profile** — Per tile and inquiry scope, the facts a job-definition revision must settle before a Store inquiry, each with its owner. Admission checks these declared requirements, never the rows a tile happened to emit, and never Store capability. Spec: [tile/host and definition/Store contract](../application/TILE-HOST-ADMISSION-CONTRACT.md) (`STB-DEFINITION-STORE-0.1`); not yet used by the app.
+**Admission profile** — Per tile and inquiry scope, the facts a job-definition revision must settle before a Store inquiry, each with its owner. Admission checks these declared requirements, never the rows a tile happened to emit, and never Store capability. Spec: [tile/host and definition/Store contract](../application/TILE-HOST-ADMISSION-CONTRACT.md) (`STB-DEFINITION-STORE-0.1`); used by all five public tiles before their Store inquiries.
 
 **Tile-host message** — What a tile tells its host: tile id, interface version, current stage, usable steps, navigation request (`STB-TILE-HOST-0.1`, same spec). A usable step does not authorize a Store inquiry.
 
