@@ -64,6 +64,20 @@
   .stb-lookup{align-self:center;margin-left:14px;min-width:0}
   .stb-lookup-row,.stb-add-tool-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
   .stb-add-tool-row{margin:8px 0 0}
+  .stb-ops-open-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 0;font-size:11.5px;color:var(--text-2)}
+  .stb-ops-open-row button,.stb-ops-head button{font:inherit;font-size:11px;padding:5px 11px;border:1px solid var(--border-accent);border-radius:999px;background:var(--surface);color:var(--accent);font-weight:700;cursor:pointer;white-space:nowrap}
+  .stb-ops-list{margin:10px 0 0;border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--surface);max-width:620px}
+  .stb-ops-list[hidden]{display:none}
+  .stb-ops-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .stb-ops-note{font-size:11.5px;color:var(--text-2);margin:2px 0 8px;max-width:60ch}
+  .stb-ops-table{width:100%;border-collapse:collapse;font-size:12px}
+  .stb-ops-table thead th{text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-2);padding:4px 6px;border-bottom:1px solid var(--border)}
+  .stb-ops-table tbody th{text-align:left;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);padding:10px 6px 3px}
+  .stb-ops-table td{padding:3px 6px;border-top:1px solid var(--border);vertical-align:top}
+  .stb-ops-table td:last-child{color:var(--text-2);white-space:nowrap}
+  .stb-ops-table tr.in-job td:last-child{color:var(--accent);font-weight:700}
+  .stb-ops-table label{display:flex;gap:6px;align-items:flex-start;color:var(--text)}
+  .stb-ops-table input{margin:2px 0 0;flex:none}
   .stb-lookup-row input,.stb-add-tool-row input{width:190px;max-width:100%;font:inherit;font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text)}
   .stb-add-tool-row input{width:260px}
   .stb-lookup-row button,.stb-add-tool-row button{font:inherit;font-size:11px;padding:5px 11px;border:1px solid var(--border-accent);border-radius:999px;background:var(--surface);color:var(--accent);font-weight:700;cursor:pointer;white-space:nowrap}
@@ -269,6 +283,77 @@
           </div>
           <!-- Job 1's own tools, then the ones typed here. -->
           <div class="stb-added-tools"><span>Cut</span><span>At an angle</span><span>Spot drill</span><span id="stb-added-tools"></span></div>
+          <!-- The full list: what a job could ask for. Display only: every box is disabled. Job 1's three tools are
+               checked; the rest are under construction and are never priced or sent. -->
+          <div class="stb-ops-open-row"><button type="button" id="stb-ops-open" aria-expanded="false" aria-controls="stb-ops-list">SEE THE FULL LIST</button><span>Most of it is under construction.</span></div>
+          <div class="stb-ops-list" id="stb-ops-list" hidden>
+            <div class="stb-ops-head"><p class="lead">Everything a job could ask for</p><button type="button" id="stb-ops-close">CLOSE</button></div>
+            <p class="stb-ops-note">Cut, At an angle and Spot drill are in this job. The rest are under construction: shown so you can see where this is going, not offered yet. A few already run in other projects in the library.</p>
+            <table class="stb-ops-table"><thead><tr><th scope="col">Work</th><th scope="col">Status</th></tr></thead><tbody>
+              <tr><th colspan="2">Cutting</th></tr>
+              <tr class="in-job"><td><label><input type="checkbox" disabled checked> Cut to length</label></td><td>In this job</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Angle, one end</label></td><td>Under construction</td></tr>
+              <tr class="in-job"><td><label><input type="checkbox" disabled checked> Angle, both ends, same</label></td><td>In this job</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Angle, both ends, different</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Bevel</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Compound miter</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Rip to width</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Taper</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Notch</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Dado</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Rabbet</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Half-lap</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Kerf cuts</label></td><td>Under construction</td></tr>
+              <tr><th colspan="2">Drilling</th></tr>
+              <tr class="in-job"><td><label><input type="checkbox" disabled checked> Spot drill, top face</label></td><td>In this job</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Spot drill, end grain</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Through-hole</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Countersink</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Counterbore</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Pocket holes</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Dowel holes</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Shelf-pin holes</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Hinge cups</label></td><td>Under construction</td></tr>
+              <tr><th colspan="2">Routing and milling</th></tr>
+              <tr><td><label><input type="checkbox" disabled> Mill to width</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Roundover</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Chamfer</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Edge profile</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Groove</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Slot</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Cutout</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Arch or curve</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Mortise</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Tenon</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Finger joint</label></td><td>Under construction</td></tr>
+              <tr><th colspan="2">Surface</th></tr>
+              <tr><td><label><input type="checkbox" disabled> Plane to thickness</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Joint an edge</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Sand</label></td><td>Under construction</td></tr>
+              <tr><th colspan="2">Prefinish</th></tr>
+              <tr><td><label><input type="checkbox" disabled> Prime</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Paint</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Stain</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Clear coat or seal</label></td><td>Under construction</td></tr>
+              <tr><th colspan="2">Marking</th></tr>
+              <tr><td><label><input type="checkbox" disabled> Part labels</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Engrave or brand</label></td><td>Under construction</td></tr>
+              <tr><th colspan="2">Secondary work</th></tr>
+              <tr><td><label><input type="checkbox" disabled> Kit and bundle</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Inspection</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Hardware included</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Hardware installed</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Pre-assembly</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Glue-up</label></td><td>Under construction</td></tr>
+              <tr><th colspan="2">Getting it to you</th></tr>
+              <tr><td><label><input type="checkbox" disabled> Stage for pickup</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Delivery</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Site measure</label></td><td>Under construction</td></tr>
+              <tr><td><label><input type="checkbox" disabled> Installation</label></td><td>Under construction</td></tr>
+              <tr><th colspan="2">Special order</th></tr>
+              <tr><td><label><input type="checkbox" disabled> Anything not on this list, through the yard’s special-order desk</label></td><td>Under construction</td></tr>
+            </tbody></table>
+          </div>
         </div>
       </div>
     </div>
@@ -513,6 +598,18 @@
   const ideaImg = document.getElementById('stb-idea-img');
   const job1Img = document.querySelector('#stb-start-intent-screen .stb-user1-img');
   if (ideaImg && job1Img) ideaImg.src = job1Img.src;
+  // The full list opens and closes here. It is display only: nothing in it is sent, priced or saved.
+  const opsOpen = document.getElementById('stb-ops-open');
+  const opsList = document.getElementById('stb-ops-list');
+  const opsClose = document.getElementById('stb-ops-close');
+  const showOps = open => {
+    if (!opsList || !opsOpen) return;
+    opsList.hidden = !open;
+    opsOpen.setAttribute('aria-expanded', String(open));
+    (open ? opsClose : opsOpen)?.focus();
+  };
+  opsOpen?.addEventListener('click', () => showOps(opsList.hidden));
+  opsClose?.addEventListener('click', () => showOps(false));
   const drawBenchGeometry = demand => {
     const overlay = document.getElementById('stb-bench-dynamic-geometry');
     if (!overlay || !demand) return;

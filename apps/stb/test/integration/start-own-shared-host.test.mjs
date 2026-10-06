@@ -218,6 +218,17 @@ test('Start your own opens on Intent: the wood and its tools go to the bench; Id
     assert.deepEqual(await live(frame, () => window.STBStartOwnLive.admission().admission.blocking), []);
     assert.equal(await intent.locator('#stb-store-glossary-status').isHidden(), true, 'every Store board is backed');
     assert.deepEqual(await intent.locator('input:visible').evaluateAll(els => els.map(e => e.id)), ['stb-intent-sku', 'stb-add-tool-input']);
+    // The full list opens, changes nothing, and CLOSE shuts it.
+    const revisionBefore = await live(frame, () => window.STBStartOwnLive.revision().definitionRevisionId);
+    assert.equal(await intent.locator('#stb-ops-list').isHidden(), true);
+    await intent.locator('#stb-ops-open').click();
+    assert.equal(await intent.locator('#stb-ops-list').isVisible(), true);
+    assert.equal(await intent.locator('#stb-ops-open').getAttribute('aria-expanded'), 'true');
+    assert.equal(await intent.locator('#stb-ops-list input:not([disabled])').count(), 0, 'every box on the full list is disabled');
+    await intent.locator('#stb-ops-close').click();
+    assert.equal(await intent.locator('#stb-ops-list').isHidden(), true);
+    assert.equal(await intent.locator('#stb-ops-open').getAttribute('aria-expanded'), 'false');
+    assert.equal(await live(frame, () => window.STBStartOwnLive.revision().definitionRevisionId), revisionBefore, 'the full list changed the definition');
 
     // Intent, said once; the ways to add definition are not numbered steps; Job 1's tools and the tool box.
     assert.equal(await intent.locator('.stb-intent-define h2').innerText(), 'This is Intent.');

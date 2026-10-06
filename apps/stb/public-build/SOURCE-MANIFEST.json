@@ -1690,6 +1690,41 @@
       "blobSha": "621133649028caf3f290f8754757beda35da35a2",
       "bytes": 84581,
       "reason": "Cache key for stb-build-guide-spec.js."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "job1-full-list",
+      "blobSha": "8b61013101597e0b7170eb0679a6b3ddaad707e9",
+      "bytes": 110113,
+      "reason": "Job 1 Intent: SEE THE FULL LIST opens a display-only table of every kind of work a job could ask for (cutting, drilling, routing and milling, surface, prefinish, marking, secondary work, getting it to you, special order). Every box is disabled; Job 1's three tools are checked as In this job, every other row says Under construction. CLOSE shuts it. Nothing in it is sent, priced or saved."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "job1-full-list",
+      "blobSha": "ef71e8e36b77a05eb17d4ebeb6bf2d872e8e55f8",
+      "bytes": 30135,
+      "reason": "Job 1 Intent rail: the full list is display only; Under construction is never priced, sent or saved."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-full-list",
+      "blobSha": "6dc4010071583a22c2fb6ae65c0e93c72a5c21e2",
+      "bytes": 258824,
+      "reason": "Cache keys for three-frames.html, stb-build-guide-spec.js, stb-window-seat-0.9.html and stb-outdoor-picnic-0.4.html."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "job1-full-list",
+      "blobSha": "cca06cbe58abe5f014b3689f7543e8275907fa00",
+      "bytes": 140536,
+      "reason": "Cache key for stb-build-guide-spec.js."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "job1-full-list",
+      "blobSha": "00300ec7ee983792d42208fed1adcaa5664647cb",
+      "bytes": 84581,
+      "reason": "Cache key for stb-build-guide-spec.js."
     }
   ],
   "retiredFiles": [
