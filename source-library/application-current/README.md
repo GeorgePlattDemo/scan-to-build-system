@@ -1,8 +1,8 @@
 # Application-current source library
 
-This bucket preserves current/post-app application planning and boundary documents from the accepted application lineage.
+This bucket preserves historical post-app application planning and boundary documents from the accepted application lineage.
 
-These files are retained because they contain useful build doctrine, semantic cleanup, reusable application structure, and explicit layer boundaries. They do not override the later accepted Build-8 implementation where planning language and implementation differ.
+These files are retained because they contain useful build doctrine, semantic cleanup, reusable application structure, and explicit layer boundaries. They are provenance/reference material and do not override current System authority or the later accepted application implementation.
 
 ## Source
 
@@ -14,7 +14,7 @@ Several files retain older branch/pin references inside their original text beca
 
 ## Reading posture
 
-- `STB-SEMANTIC-BOUNDARIES-0.1.md` carries the recent language cleanup and is the strongest application-level terminology source in this bucket.
+- `STB-SEMANTIC-BOUNDARIES-0.1.md` is the strongest terminology source within this historical bucket; it is not current operational authority.
 - `STB-APP-STABILIZATION-0.1.md` is valuable for explicit preserve/discard decisions and unresolved-boundary tracking.
 - `STB-APP-STRUCTURE-0.1.md` preserves the reusable application thinking that preceded the accepted first vertical; read as planning/reference, not as a command to rebuild the accepted app.
 - architecture files under `architecture/` preserve boundary thinking. They remain subject to current owner-layer documents and the accepted application implementation.
