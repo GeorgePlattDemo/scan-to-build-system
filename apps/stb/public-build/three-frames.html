@@ -290,7 +290,7 @@
           <!-- What goes to the bench: the one wood state and this job's tools. The bench copy of this block leaves these out. -->
           <div class="stb-carry-live">
             <p class="stb-label">THE WOOD</p>
-            <div class="stb-wood-line"><span class="stb-wood-chip"><i aria-hidden="true"></i><span id="stb-carry-wood">2×4 stud</span></span></div>
+            <div class="stb-wood-line"><span class="stb-wood-chip"><i aria-hidden="true"></i><span id="stb-carry-wood">2×4 SPF</span></span></div>
             <p class="stb-label">THE TOOLS, AND WHAT EACH ONE CARRIES</p>
             <div class="stb-tool-bubbles">
               <div class="stb-tool-bubble"><b>Cut</b><span id="stb-carry-cut">2 parts · 16 in each</span></div>
@@ -417,18 +417,9 @@
           <!-- The pills write the chosen length here; Job 1 has no typed length. -->
           <input id="stb-config-length" type="hidden" min="16" max="18" step="0.125" value="16">
         </div>
-        <!-- Species of the 2×4 board: this job's two demo woods. None is chosen for you. Cedar stays in the Store
-             catalog; it is not one of this bench's choices. -->
-        <div class="higher-row" id="stb-bench-species">
-          <h2>Which wood?</h2>
-          <div class="choice-row">
-            <button type="button" data-species="spf">SPF</button>
-            <button type="button" data-species="syp-treated">TREATED SYP</button>
-          </div>
-        </div>
         <!-- The controls typed on Intent for this job, one row each. -->
         <div id="stb-bench-added-controls"></div>
-        <p class="bench-price-line" id="stb-bench-price-line">Pick a wood to see its price.</p>
+        <p class="bench-price-line" id="stb-bench-price-line"></p>
         <div class="board-swap" id="stb-bench-board-swap" hidden role="status"></div>
         <p class="fine" id="stb-config-geometry-note">Same two parts, same 8.000 in horizontal span. 16.000 in → 30.000° end cuts. 18.000 in → 26.388° end cuts.</p>
       </div>

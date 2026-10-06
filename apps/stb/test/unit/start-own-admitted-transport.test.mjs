@@ -52,7 +52,7 @@ function browser() {
 }
 
 // A complete Start your own revision, in the shape the page's startOwnRevision() builds it.
-// The material is what the bench states: a species the user chose, and form and nominal size from its "2×4 stud" control.
+// The material is what the bench carries: the species stated on Intent, and form and nominal size from its "2×4 stud" control.
 const MATERIAL = { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 };
 function revision(id = 'SYO-USER1-XBRACE-0.1-v1') {
   const parts = [{ partId: 'XB-1', lengthIn: 16 }, { partId: 'XB-2', lengthIn: 16 }];
