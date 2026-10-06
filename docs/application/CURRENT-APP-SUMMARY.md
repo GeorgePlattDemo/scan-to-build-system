@@ -6,7 +6,7 @@ The current application is owned by this repository:
 
 `GeorgePlattDemo/scan-to-build-system/apps/stb/`
 
-Use [`../../STB-CURRENT-BASELINE.md`](../../STB-CURRENT-BASELINE.md), [`../project/VERIFICATION-REGISTER.md`](../project/VERIFICATION-REGISTER.md), and [`../../apps/stb/README.md`](../../apps/stb/README.md) for accepted/current System status.
+Use [`../project/CURRENT-SYSTEM-STATE.md`](../project/CURRENT-SYSTEM-STATE.md), [`../project/VERIFICATION-REGISTER.md`](../project/VERIFICATION-REGISTER.md), and [`../../apps/stb/README.md`](../../apps/stb/README.md) for current System status. [`../../STB-CURRENT-BASELINE.md`](../../STB-CURRENT-BASELINE.md) records historical acceptance and promotion context.
 
 ## Transferred source provenance
 
