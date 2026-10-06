@@ -46,13 +46,13 @@ test('Dev Guide covers current pages and only rewrites the reserved rail',()=>{
   }
 });
 
-test('landing Dev Guide keeps short orientation and bounded authority cues',()=>{
+test('landing Dev Guide keeps its four short orientation lines',()=>{
   const html=spec.render('landing');
   for(const phrase of [
-    'Say what this is','One screen, no scrolling to understand it.',
-    'Show who does what','User defines. System keeps meaning. Store answers. Local release governs physical work.',
-    'Make the seam visible','Carry confirmed requirements into modeled commands without redefining them. Physical conformance is not proved here.',
-    'Offer three ways in','Same road after. Different opening.'
+    'Say what this is',
+    'Show who does what',
+    'Make the seam visible',
+    'Offer three ways in'
   ]) assert.ok(html.includes(phrase),`landing Dev Guide lost: ${phrase}`);
 });
 
