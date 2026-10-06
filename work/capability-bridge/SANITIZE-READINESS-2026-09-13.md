@@ -1,5 +1,7 @@
 # Scan-to-Build candidate — sanitizing readiness checkpoint
 
+> **HISTORICAL CHECKPOINT — NOT STANDING AUTHORIZATION.** This checkpoint records the candidate branch state on 2026-09-13. Its readiness statement applies to that recorded candidate only and does not authorize work on current `main`.
+
 Date: 2026-09-13  
 Branch: `build/app-configurator-engine-0.1`  
 Checkpoint head before this file: `d7f70840e9562080a9c65ab4835c3d4ff9a0332c`  
