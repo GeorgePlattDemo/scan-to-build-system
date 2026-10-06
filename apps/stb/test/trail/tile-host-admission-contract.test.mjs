@@ -415,7 +415,7 @@ test('case 4: a malformed nested fact blocks before Store with the fact id and o
   assert.deepEqual(alcove.request.openDemands, ['alcove.hardware']);
 
   // Only the facts whose fields the live page emits carry a form. Start your own's material carries the four fields
-  // its bench states: species from its species choice (no default), form and nominal size from its "2×4 stud" control.
+  // its bench carries: species as stated on Intent, form and nominal size from its "2×4 stud" control.
   const formed = Object.entries(ADMISSION_PROFILES).flatMap(([, p]) => Object.values(p.scopes))
     .flatMap(s => s.requires).filter(r => r.form).map(r => r.id);
   assert.deepEqual([...new Set(formed)].sort(),

@@ -64,7 +64,7 @@ assert.match(surface,/CONFIRM &amp; SEND TO STORE ZERO →/);
 assert.match(surface,/id="stb-bench-dynamic-geometry"/);
 
 // Host carries one definition through intent, bench, Store, Terms and record.
-assert.match(shell,/three-frames\.html\?v=3f615bac/);
+assert.match(shell,/three-frames\.html\?v=bbf2a2c7/);
 assert.match(shell,/const definedWorkpieceLengthIn = 60;/);
 assert.match(shell,/DEMO_HORIZONTAL_SPAN_IN = 8/);
 assert.match(shell,/Math\.asin\(spanRatio\)/);
@@ -131,16 +131,15 @@ assert.equal(/configurator/i.test(intentScreen),false,'the customer page says co
 // The handoff frame: the picture with its ring, the wood and each tool with what it carries. Not another picker.
 const handoffFrame = intentScreen.slice(intentScreen.indexOf('<div class="stb-user1-body">'));
 assert.match(handoffFrame,/<svg class="stb-pick-ring"[^>]*><circle[^>]*stroke="#d1242f"/);
-assert.match(handoffFrame,/<span id="stb-carry-wood">2×4 stud<\/span>/);
+assert.match(handoffFrame,/<span id="stb-carry-wood">2×4 SPF<\/span>/);
 assert.match(handoffFrame,/<b>Cut<\/b><span id="stb-carry-cut">2 parts · 16 in each<\/span>/);
 assert.match(handoffFrame,/<b>At an angle<\/b><span id="stb-carry-angle">30° ends<\/span>/);
 assert.match(handoffFrame,/<b>Spot drill<\/b><span id="stb-carry-spot">8 in from either end<\/span>/);
 assert.equal(/<input|data-species|data-intent-species/.test(handoffFrame),false,'the handoff frame carries a picker');
 assert.equal(/data-intent-species/.test(surface),false,'Intent has a second wood state');
 assert.match(shell,/clone\.querySelector\('\.stb-carry-live'\)\?\.remove\(\)/,'the bench copy of the picture carries no stale wood or tools');
-// Cedar is off this bench's choices; it stays in the Store catalog.
-assert.equal(/data-(?:intent-)?species="cedar"/.test(surface),false,'cedar is still a bench choice');
-assert.deepEqual([...surface.matchAll(/data-species="([^"]+)"/g)].map(m => m[1]), ['spf','syp-treated']);
+// The wood is stated on Intent; the bench has no wood choice.
+assert.equal(/data-(?:intent-)?species=/.test(surface),false,'the bench still has a wood choice');
 // ITEM LOOKUP asks the hosted Store's offering endpoint; the browser holds no copied catalog to answer from.
 assert.equal(shell.includes('startOwnStoreItem'),false,'ITEM LOOKUP still answers from a browser copy');
 assert.match(shell,/window\.STBStoreClient\.lookupOfferings\(\{/);

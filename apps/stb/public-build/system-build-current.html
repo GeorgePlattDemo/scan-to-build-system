@@ -18,7 +18,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-user-defined-board-runtime-bridge.js?v=db611717"></script>
 <script src="stb-terms-flow.js?v=365d795c"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=514e790b"></script>
+<script src="stb-build-guide-spec.js?v=bfb14f3b"></script>
 <script src="stb-trail-contract.js?v=e8ca7b23"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
@@ -190,7 +190,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=3f615bac"
+                  src="three-frames.html?v=bbf2a2c7"
                 ></iframe>
               </div>
             `;
@@ -199,7 +199,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=3f615bac';
+            liveFrame.src = 'three-frames.html?v=bbf2a2c7';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -239,17 +239,18 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
               const skuAnswer = childDoc.getElementById('stb-intent-sku-answer');
               // This job's two demo woods. Cedar is in the Store catalog but is not one of this bench's choices.
               const SPECIES_WORDS = Object.freeze({ 'spf':'SPF', 'syp-treated':'treated SYP' });
+              // This job's wood is stated on Intent, never chosen on the bench. It starts as SPF, shown in Intent's
+              // handoff frame ("2×4 SPF"); ITEM LOOKUP can state the other wood. The bench carries it as stated.
+              let jobSpecies = 'spf';
               // Controls typed on Intent for this job ("Add a tool this job needs"). Each is this job's own; the bench
               // turns it on or off. The Store is not asked about it.
               const addedControls = [];
-              // The material the bench states, and only that: species from the bench's species choice, form and nominal
-              // size from its "2×4 stud" control. A field the bench does not state is left out, so admission blocks on
-              // it. No species is chosen for the user.
+              // The material the bench carries, and only that: species as stated on Intent, form and nominal size from
+              // its "2×4 stud" control. A field that is not stated is left out, so admission blocks on it.
               const statedMaterial = () => {
                 const control = childDoc.getElementById('stb-store-board-2x4');
-                const species = childDoc.querySelector('#stb-bench-species [data-species].on')?.dataset.species;
                 const stated = {};
-                if (species) stated.species = species;
+                if (SPECIES_WORDS[jobSpecies]) stated.species = jobSpecies;
                 if (!control) return stated;
                 if (control.dataset.materialForm) stated.form = control.dataset.materialForm;
                 if (control.dataset.materialNominalT) stated.nominalT = Number(control.dataset.materialNominalT);
@@ -737,7 +738,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                 const boardWords = Number.isInteger(pickedFeet) ? pickedFeet+'-foot 2×4' : formatInches(pickedBoard)+' 2×4';
                 const woodWords = SPECIES_WORDS[definition.material?.stated?.species] || null;
                 setText('stb-bench-price-line', formatInches(demand.finishedLength)+' braces · '+formatDegrees(demand.angleDegrees)+' ends · '
-                  +(!woodWords ? 'pick a wood to see its price.'
+                  +(!woodWords ? 'no wood stated on Intent.'
                     : storeComplete && totals?.Q != null
                       ? woodWords+' · '+boardWords+' · $'+Number(totals.Q).toFixed(2)+' Store reference price ($'+Number(totals.material).toFixed(2)+' wood).'
                       : woodWords+' · ask the Store.'));
@@ -840,17 +841,15 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   syncAndRender('CUSTOMER_INPUT');
                 });
               });
-              // One wood for this job: Intent's Store lookup states it, the bench revises it. Intent's handoff frame
-              // shows the same choice.
+              // One wood for this job, stated on Intent: its handoff frame shows it, ITEM LOOKUP changes it. The bench
+              // has no wood choice.
               const chooseSpecies = species => {
-                childDoc.querySelectorAll('#stb-bench-species [data-species]').forEach(b => b.classList.toggle('on', b.dataset.species === species));
-                setText('stb-carry-wood', '2×4 stud' + (SPECIES_WORDS[species] ? ' · ' + SPECIES_WORDS[species] : ''));
+                if (!SPECIES_WORDS[species] || species === jobSpecies) return;
+                jobSpecies = species;
+                setText('stb-carry-wood', '2×4 ' + SPECIES_WORDS[species]);
                 markRevision();
-                syncAndRender('CUSTOMER_INPUT');
+                syncAndRender('INTENT_CONTROL');
               };
-              childDoc.querySelectorAll('#stb-bench-species [data-species]').forEach(button => {
-                button.addEventListener('click', () => chooseSpecies(button.dataset.species));
-              });
               // ITEM LOOKUP asks the live Store Zero offering service, once per LOOK UP or Enter. The Store matches its
               // own catalog at the pin; this page holds no copy and has no answer of its own. Showing results changes
               // nothing. USE SKU on one result applies Job 1's rule: a Store 2×4 of one of this job's woods states that
@@ -1268,7 +1267,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.4.html?v=e1b21658"
+                  src="stb-outdoor-picnic-0.4.html?v=62113364"
                 ></iframe>
               </div>
             `;
@@ -1301,7 +1300,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   id="window-seat-frame"
                   class="window-seat-shell-frame"
                   title="Space utilization · Window seat"
-                  src="stb-window-seat-0.9.html?v=040aaa48"
+                  src="stb-window-seat-0.9.html?v=21883bd7"
                 ></iframe>
               </div>
             `;

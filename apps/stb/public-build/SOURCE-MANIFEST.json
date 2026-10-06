@@ -1655,6 +1655,41 @@
       "blobSha": "f7e3be9ece79dbbd8768fcab2acede856c42d7af",
       "bytes": 40560,
       "reason": "Cache key for system-build-base-8d8a9dd.html."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "job1-wood-on-intent",
+      "blobSha": "bbf2a2c7928c26c2063caad69de67204e5ea0bba",
+      "bytes": 100045,
+      "reason": "Job 1's wood is stated on Intent: the handoff frame reads \"2\u00d74 SPF\" from the start, and the bench's wood row (SPF / TREATED SYP) is gone. Its price line starts empty and is filled from the definition."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "job1-wood-on-intent",
+      "blobSha": "effe9b5a6f6af63d69071aca3f05a5b8e911cf4b",
+      "bytes": 258824,
+      "reason": "Job 1 wood stated on Intent: one wood state that starts as SPF and shows in Intent's handoff frame; ITEM LOOKUP's USE SKU can state treated SYP; the bench carries it and has no wood choice. Fixes the bench drawing a 5-foot board at 18 in with no wood chosen (no Store-picked board existed yet). Cache keys for three-frames.html, stb-build-guide-spec.js, stb-window-seat-0.9.html and stb-outdoor-picnic-0.4.html."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "job1-wood-on-intent",
+      "blobSha": "bfb14f3bf69ab4263a28542813c8cba600e1a65b",
+      "bytes": 30044,
+      "reason": "Job 1 Intent rail: wood is stated on Intent (SPF, or what the Store lookup sets), never on the bench."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "job1-wood-on-intent",
+      "blobSha": "21883bd7930b1e912bd58669ad294de4872360bc",
+      "bytes": 140536,
+      "reason": "Cache key for stb-build-guide-spec.js."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "job1-wood-on-intent",
+      "blobSha": "621133649028caf3f290f8754757beda35da35a2",
+      "bytes": 84581,
+      "reason": "Cache key for stb-build-guide-spec.js."
     }
   ],
   "retiredFiles": [

@@ -35,7 +35,7 @@
       'KEEP USERS OUT OF CONFIGURATOR HELL.',
       'One board. One job. Numbers are theirs.',
       'Knobs for this job are made here. Never added on the bench.',
-      'Wood comes from the Store lookup or the bench. Never invented.',
+      'Wood is stated here: SPF, or what the Store lookup sets. Never on the bench.',
       'No Store call from this page.',
       'Never write “configurator” in customer copy.',
       'Next: the bench.'

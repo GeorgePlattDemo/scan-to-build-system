@@ -61,16 +61,12 @@ async function openStartOwn(browser, origin) {
   const { page, frame, errors } = await openTile(browser, origin, 'Start your own');
   await until(async () => bench(page) && await bench(page).$('#stb-confirm-store'), 'Start your own page');
   await landOnIntent(frame);
-  // The bench has no default species: until the user chooses one, the revision blocks before the Store on the
-  // material and names its owner.
-  await until(() => live(frame, () => window.STBStartOwnLive?.admission()?.admission?.result === 'BLOCKED'), 'bench revision blocked on species');
-  assert.deepEqual(await live(frame, () => window.STBStartOwnLive.admission().admission.blocking),
-    [{ factId: 'start-own.material', owner: 'USER', title: 'Material demand', condition: 'INVALID_VALUE', fields: ['species'] }]);
+  // Intent states the wood: SPF, shown in its handoff frame. The bench has no wood choice, so its revision is complete.
+  await benchAdmitted(frame);
+  assert.equal(await live(frame, () => window.STBStartOwnLive.revision().facts['start-own.material']?.value?.species ?? null), 'spf');
   return { page, frame, errors };
 }
-// The user states a species on the bench; the bench revision is then admitted.
-async function chooseSpecies(page, frame, species) {
-  await bench(page).locator(`#stb-bench-species [data-species="${species}"]`).click();
+async function benchAdmitted(frame) {
   await until(() => live(frame, () => window.STBStartOwnLive?.admission()?.admission?.result === 'ADMITTED'), 'bench revision admitted');
 }
 
@@ -125,7 +121,7 @@ test('the bench page draws its own parts, cuts and spots for a complete revision
     const { page, frame, errors } = await openStartOwn(browser, origin);
     await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
     await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current');
-    await chooseSpecies(page, frame, 'spf');
+    await benchAdmitted(frame);
 
     const geometry = () => bench(page).$eval('#stb-bench-dynamic-geometry', g => ({
       texts: [...g.querySelectorAll('text')].map(t => t.textContent),
@@ -158,7 +154,7 @@ test('the bench page places its own spare and remain labels for a complete revis
     const { page, frame, errors } = await openStartOwn(browser, origin);
     await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
     await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current');
-    await chooseSpecies(page, frame, 'spf');
+    await benchAdmitted(frame);
 
     const labels = () => bench(page).evaluate(() => Object.fromEntries(['spare', 'remain'].map(name => {
       const el = document.getElementById('stb-bench-' + name + '-label');
@@ -216,10 +212,10 @@ test('Start your own opens on Intent: the wood and its tools go to the bench; Id
     assert.equal(await intent.locator('label[for="stb-intent-sku"]').innerText(), 'ITEM LOOKUP');
     assert.equal(await bench(page).locator('#stb-intent-sku').count(), 1, 'one Store lookup');
     assert.equal(await intent.locator('.stb-user1-body #stb-intent-sku, .stb-user1-body input').count(), 0, 'no lookup left by the picture');
-    // The ring chooses no wood. Intent has no wood buttons; the wood is the bench's or the lookup's to state.
+    // Intent has no wood buttons. It states the wood as SPF in its handoff frame; its lookup can state the other wood.
     assert.equal(await intent.locator('[data-species], [data-intent-species]').count(), 0);
-    assert.deepEqual(await live(frame, () => window.STBStartOwnLive.admission().admission.blocking),
-      [{ factId: 'start-own.material', owner: 'USER', title: 'Material demand', condition: 'INVALID_VALUE', fields: ['species'] }]);
+    assert.equal(await live(frame, () => window.STBStartOwnLive.revision().facts['start-own.material']?.value?.species ?? null), 'spf');
+    assert.deepEqual(await live(frame, () => window.STBStartOwnLive.admission().admission.blocking), []);
     assert.equal(await intent.locator('#stb-store-glossary-status').isHidden(), true, 'every Store board is backed');
     assert.deepEqual(await intent.locator('input:visible').evaluateAll(els => els.map(e => e.id)), ['stb-intent-sku', 'stb-add-tool-input']);
 
@@ -243,7 +239,7 @@ test('Start your own opens on Intent: the wood and its tools go to the bench; Id
     const pickRing = carry.locator('.stb-pick-ring circle');
     assert.equal(await pickRing.isVisible(), true);
     assert.equal(await pickRing.getAttribute('stroke'), '#d1242f');
-    assert.equal(await bench(page).locator('#stb-carry-wood').innerText(), '2×4 stud', 'no wood is shown as chosen');
+    assert.equal(await bench(page).locator('#stb-carry-wood').innerText(), '2×4 SPF', 'Intent states the wood');
     const bubbles = async () => carry.locator('.stb-tool-bubble').evaluateAll(els => els.map(e => [e.querySelector('b').textContent, e.querySelector('span').textContent]));
     assert.deepEqual(await bubbles(), [['Cut', '2 parts · 16 in each'], ['At an angle', '30° ends'], ['Spot drill', '8 in from either end']]);
     assert.equal(await bench(page).locator('#stb-user1-lineage').innerText(), 'Spot drill = 16 ÷ 2 = 8 in from either finished end.');
@@ -274,8 +270,8 @@ test('Start your own opens on Intent: the wood and its tools go to the bench; Id
     // The picture carries onto the bench; Intent's live wood and tools do not come with it as stale copies.
     assert.equal(await bench(page).locator('#stb-bench-intent-slot .stb-user1-img').getAttribute('src'), job1Src);
     assert.equal(await bench(page).locator('#stb-bench-intent-slot .stb-carry-live, #stb-bench-intent-slot .stb-bench-button').count(), 0);
-    // Cedar is off this bench's choices.
-    assert.deepEqual(await bench(page).locator('#stb-bench-species [data-species]').evaluateAll(els => els.map(e => e.dataset.species)), ['spf', 'syp-treated']);
+    // The bench has no wood choice: the wood is stated on Intent.
+    assert.equal(await bench(page).locator('#stb-start-bench-screen [data-species], #stb-bench-species').count(), 0);
 
     // A value the bench revises comes back to Intent's frame: 18 in, its angle and its spot.
     await bench(page).locator('#stb-bench-controls [data-length="18"]').click();
@@ -347,8 +343,10 @@ test('a wood change updates the bench price; ITEM LOOKUP finds a real Store item
     const priceLine = () => bench(page).locator('#stb-bench-price-line').innerText();
     const total = () => bench(page).locator('#stb-price-total').innerText();
     const species = () => live(frame, () => window.STBStartOwnLive.revision().facts['start-own.material']?.value?.species ?? null);
-    assert.match(await priceLine(), /pick a wood to see its price\.$/);
-    assert.equal(await total(), 'NOT COMPLETE');
+    // Intent states SPF from the start, so the bench prices it before anything is clicked.
+    assert.equal(await species(), 'spf');
+    assert.equal(await priceLine(), '16 in braces · 30° ends · SPF · 5-foot 2×4 · $8.54 Store reference price ($2.61 wood).');
+    assert.equal(await total(), '$8.54');
 
     const lookUp = (searchText, storeSku = searchText.toUpperCase()) => lookUpAndUse(page, log, searchText, storeSku);
     // Intent states the wood through its Store lookup; the bench shows its price.
@@ -358,16 +356,17 @@ test('a wood change updates the bench price; ITEM LOOKUP finds a real Store item
     assert.equal(await priceLine(), '16 in braces · 30° ends · SPF · 5-foot 2×4 · $8.54 Store reference price ($2.61 wood).');
     assert.equal(await total(), '$8.54');
 
-    // The bench revises it: treated SYP has no 5-foot board, so the Store's board and price change with it.
+    // Intent's lookup states the other wood: treated SYP has no 5-foot board, so the Store's board and price change with it.
+    assert.equal(await lookUp('STB-ZERO-PTAG-2X4-72-001'),
+      'STB-ZERO-PTAG-2X4-72-001 · 2x4 x 72 in SYP AC2 #2 Prime AG. This job’s wood is now treated SYP; the Store still picks the board.');
+    await until(async () => (await species()) === 'syp-treated', 'treated SYP stated');
+    assert.equal(await bench(page).locator('#stb-carry-wood').innerText(), '2×4 treated SYP', 'Intent shows the wood it states');
     await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
     await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current');
-    await bench(page).locator('#stb-bench-species [data-species="syp-treated"]').click();
-    await until(async () => (await species()) === 'syp-treated', 'treated SYP stated');
     assert.equal(await priceLine(), '16 in braces · 30° ends · treated SYP · 6-foot 2×4 · $11.08 Store reference price ($5.15 wood).');
     assert.equal(await total(), '$11.08');
     assert.equal(await bench(page).locator('#stb-basis-sku').innerText(), 'STB-ZERO-PTAG-2X4-72-001');
     assert.match(await bench(page).locator('#stb-bench-board-swap').innerText(), /The Store has no 5-foot treated SYP 2×4; the shortest it offers for this job is a 6-foot 2×4 \(72 in\)\./);
-    assert.equal(await bench(page).locator('#stb-carry-wood').innerText(), '2×4 stud · treated SYP', 'Intent shows the same wood');
     await bench(page).locator('#stb-bench-controls [data-length="18"]').click();
     await until(async () => (await total()) === '$11.09', '18 in treated SYP priced on the bench');
     await bench(page).locator('#stb-bench-controls [data-length="16"]').click();
@@ -437,7 +436,7 @@ test('ITEM LOOKUP searches the live pinned Store Zero catalog by keyword or SKU;
     assert.equal(await lookButton.isDisabled(), true);
     await input.press('Enter');
     const before = await state();
-    assert.equal(before.species, null);
+    assert.equal(before.species, 'spf', 'Intent states SPF');
 
     // 4: typing asks the Store nothing.
     await input.pressSequentially('pine', { delay: 30 });
@@ -545,7 +544,7 @@ test('ITEM LOOKUP with no Store answer says so and answers nothing locally', { t
     }
     assert.equal(new Set(log.filter(e => e.withheld).map(e => e.request.requestId)).size, 2, 'each lookup went to the withheld offering endpoint');
     assert.equal(jobCalls(log).length, 0, 'no /job fallback');
-    assert.equal(await species(), null, 'nothing changed');
+    assert.equal(await species(), 'spf', 'nothing changed');
     // The same lookup succeeds once the hosted offering endpoint answers: the result comes only from the Store.
     control.withholdOffering = false;
     await b.locator('#stb-intent-sku-look').click();
@@ -586,7 +585,7 @@ test('the shared host draws the Start your own nav from its validated STB-TILE-H
     await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current again');
 
     // Confirming the bench asks the Store once and opens The Store answers with Your call usable.
-    await chooseSpecies(page, frame, 'spf');
+    await benchAdmitted(frame);
     await bench(page).locator('#stb-confirm-store').click();
     await until(async () => (await currentLabels(frame)).join() === '3 · The Store answers', 'store current');
     assert.equal(await shownPage(frame), 'proof-store');
@@ -635,7 +634,7 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
   await withBrowser(async ({ browser, origin, log }) => {
     const { page, frame } = await openStartOwn(browser, origin);
     await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
-    await chooseSpecies(page, frame, 'spf');
+    await benchAdmitted(frame);
 
     // The bench's revision is complete: admitted, with exactly the profile's facts.
     const admission = await live(frame, () => window.STBStartOwnLive.admission());
@@ -644,7 +643,7 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
       ['start-own.datum', 'start-own.material', 'start-own.operations', 'start-own.parts', 'start-own.spot-demand', 'start-own.workpiece-length']);
     assert.deepEqual(admission.request.openDemands, []);
     assert.equal(admission.request.profileVersion, '0.5');
-    // The material is what the bench states: the species the user chose, form and nominal size from its "2×4 stud" control.
+    // The material is what the bench carries: the species stated on Intent, form and nominal size from its "2×4 stud" control.
     assert.deepEqual(admission.request.facts['start-own.material'], { species: 'spf', form: 'board', nominalT: 2, nominalW: 4 });
     assert.equal(admission.request.requestType, 'USER_DEFINED_BOARD_V1');
 
@@ -746,7 +745,7 @@ test('a blank datum field, a non-finite saw angle or a spot operation without it
     await until(async () => bench(page) && await bench(page).$('#stb-confirm-store'), 'Start your own page');
     await landOnIntent(frame);
     await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
-    await chooseSpecies(page, frame, 'spf');
+    await benchAdmitted(frame);
 
     // The bench's revision as the page emits it: six datum keys and, with spotting on, the spot demand.
     const bench0 = await live(frame, () => window.STBStartOwnLive.revision());
