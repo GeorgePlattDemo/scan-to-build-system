@@ -18,7 +18,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#faf9f7}
 <script src="stb-user-defined-board-runtime-bridge.js?v=db611717"></script>
 <script src="stb-terms-flow.js?v=365d795c"></script>
 <script src="store-zero-canonical-doctrine.js?v=65366367"></script>
-<script src="stb-build-guide-spec.js?v=ef71e8e3"></script>
+<script src="stb-build-guide-spec.js?v=647bda9a"></script>
 <script src="stb-trail-contract.js?v=e8ca7b23"></script>
 <script>
 // The shared tile host reads the one System contract (apps/stb/shared/tile-host-admission-contract.mjs, deployed byte for byte).
@@ -190,7 +190,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   id="start-own-proof-frame"
                   class="start-own-shell-frame"
                   title="Start Your Own · User 1 · definition to doing"
-                  src="three-frames.html?v=8b610131"
+                  src="three-frames.html?v=2aa52818"
                 ></iframe>
               </div>
             `;
@@ -199,7 +199,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
 
           const liveFrame = startOwnPage.querySelector('#start-own-proof-frame');
           if (liveFrame && !String(liveFrame.getAttribute('src')||'').includes('three-frames.html')) {
-            liveFrame.src = 'three-frames.html?v=8b610131';
+            liveFrame.src = 'three-frames.html?v=2aa52818';
           }
           const banner = startOwnPage.querySelector('[data-proof-job="1"]');
           if (banner && /generic floor/.test(banner.textContent||'')) {
@@ -986,9 +986,8 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   syncAndRender('INTENT_CONTROL');
                 }
                 toolInput.value = '';
-                if (toolButton) toolButton.disabled = true;
               };
-              toolInput?.addEventListener('input', () => { if (toolButton) toolButton.disabled = !toolInput.value.trim(); });
+              // ADD is always live: with nothing typed it adds nothing; the page also opens its full list on it.
               toolInput?.addEventListener('keydown', event => { if (event.key === 'Enter') addTool(); });
               toolButton?.addEventListener('click', addTool);
               resetDemoButton?.addEventListener('click', () => {
@@ -1267,7 +1266,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   id="outdoor-bench-leg-frame"
                   class="outdoor-build-shell-frame"
                   title="Outdoor Build · picnic table"
-                  src="stb-outdoor-picnic-0.4.html?v=00300ec7"
+                  src="stb-outdoor-picnic-0.4.html?v=a429c49c"
                 ></iframe>
               </div>
             `;
@@ -1300,7 +1299,7 @@ import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(contract => 
                   id="window-seat-frame"
                   class="window-seat-shell-frame"
                   title="Space utilization · Window seat"
-                  src="stb-window-seat-0.9.html?v=cca06cbe"
+                  src="stb-window-seat-0.9.html?v=4393b487"
                 ></iframe>
               </div>
             `;

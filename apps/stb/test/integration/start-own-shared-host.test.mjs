@@ -218,16 +218,18 @@ test('Start your own opens on Intent: the wood and its tools go to the bench; Id
     assert.deepEqual(await live(frame, () => window.STBStartOwnLive.admission().admission.blocking), []);
     assert.equal(await intent.locator('#stb-store-glossary-status').isHidden(), true, 'every Store board is backed');
     assert.deepEqual(await intent.locator('input:visible').evaluateAll(els => els.map(e => e.id)), ['stb-intent-sku', 'stb-add-tool-input']);
-    // The full list opens, changes nothing, and CLOSE shuts it.
+    // ADD with nothing typed opens the full list, adds nothing and changes nothing; CLOSE shuts it.
     const revisionBefore = await live(frame, () => window.STBStartOwnLive.revision().definitionRevisionId);
     assert.equal(await intent.locator('#stb-ops-list').isHidden(), true);
-    await intent.locator('#stb-ops-open').click();
+    assert.equal(await bench(page).locator('#stb-add-tool').isDisabled(), false, 'ADD is live with nothing typed');
+    await bench(page).locator('#stb-add-tool').click();
     assert.equal(await intent.locator('#stb-ops-list').isVisible(), true);
-    assert.equal(await intent.locator('#stb-ops-open').getAttribute('aria-expanded'), 'true');
+    assert.equal(await bench(page).locator('#stb-add-tool').getAttribute('aria-expanded'), 'true');
     assert.equal(await intent.locator('#stb-ops-list input:not([disabled])').count(), 0, 'every box on the full list is disabled');
+    assert.deepEqual(await bench(page).locator('#stb-added-tools span').allInnerTexts(), [], 'an empty ADD added a tool');
     await intent.locator('#stb-ops-close').click();
     assert.equal(await intent.locator('#stb-ops-list').isHidden(), true);
-    assert.equal(await intent.locator('#stb-ops-open').getAttribute('aria-expanded'), 'false');
+    assert.equal(await bench(page).locator('#stb-add-tool').getAttribute('aria-expanded'), 'false');
     assert.equal(await live(frame, () => window.STBStartOwnLive.revision().definitionRevisionId), revisionBefore, 'the full list changed the definition');
 
     // Intent, said once; the ways to add definition are not numbered steps; Job 1's tools and the tool box.
@@ -257,10 +259,12 @@ test('Start your own opens on Intent: the wood and its tools go to the bench; Id
     assert.equal(await carry.locator('input, [data-species]').count(), 0, 'the handoff frame is not another picker');
 
     // What is typed becomes a control for this job: on Intent, in the handoff frame, and on the bench.
-    assert.equal(await bench(page).locator('#stb-add-tool').isDisabled(), true, 'nothing typed: ADD is inert');
     await bench(page).locator('#stb-add-tool-input').fill('Countersink');
     await bench(page).locator('#stb-add-tool').click();
     assert.deepEqual(await bench(page).locator('#stb-added-tools span').allInnerTexts(), ['Countersink']);
+    // A typed ADD still adds the tool, and the full list opens too; CLOSE shuts it.
+    assert.equal(await intent.locator('#stb-ops-list').isVisible(), true);
+    await intent.locator('#stb-ops-close').click();
     assert.deepEqual((await bubbles()).at(-1), ['Countersink', 'value set at the bench']);
 
     // The button takes the wood and tools to the bench.

@@ -1694,35 +1694,35 @@
     {
       "path": "three-frames.html",
       "pass": "job1-full-list",
-      "blobSha": "8b61013101597e0b7170eb0679a6b3ddaad707e9",
-      "bytes": 110113,
-      "reason": "Job 1 Intent: SEE THE FULL LIST opens a display-only table of every kind of work a job could ask for (cutting, drilling, routing and milling, surface, prefinish, marking, secondary work, getting it to you, special order). Every box is disabled; Job 1's three tools are checked as In this job, every other row says Under construction. CLOSE shuts it. Nothing in it is sent, priced or saved."
-    },
-    {
-      "path": "stb-build-guide-spec.js",
-      "pass": "job1-full-list",
-      "blobSha": "ef71e8e36b77a05eb17d4ebeb6bf2d872e8e55f8",
-      "bytes": 30135,
-      "reason": "Job 1 Intent rail: the full list is display only; Under construction is never priced, sent or saved."
+      "blobSha": "2aa52818c5943486fd06c657338e2363280e26cc",
+      "bytes": 113477,
+      "reason": "Job 1 Intent: ADD opens the full list (no separate button); CLOSE shuts it. One display-only list in five sections: operations (Setup first), trim profiles, drafting tools brought to the bench, special order through the yard's own vendors, and what the yard sets for itself. Every box is disabled; the wood and Job 1's three tools are ticked as in this job. Nothing in it is sent, priced or saved. ADD stays live with nothing typed."
     },
     {
       "path": "system-build-current.html",
       "pass": "job1-full-list",
-      "blobSha": "6dc4010071583a22c2fb6ae65c0e93c72a5c21e2",
-      "bytes": 258824,
-      "reason": "Cache keys for three-frames.html, stb-build-guide-spec.js, stb-window-seat-0.9.html and stb-outdoor-picnic-0.4.html."
+      "blobSha": "7d0657e1a49552b0629f034c8c0de40be042fc03",
+      "bytes": 258752,
+      "reason": "ADD is always live: with nothing typed it adds nothing (the page opens its full list on it); typed tools are still added. Cache keys for three-frames.html, stb-build-guide-spec.js, stb-window-seat-0.9.html and stb-outdoor-picnic-0.4.html."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "job1-full-list",
+      "blobSha": "647bda9a9dbac3512c97211776475b9a496a7716",
+      "bytes": 30143,
+      "reason": "Job 1 Intent rail: ADD opens the full list; display only; under construction is never priced, sent or saved."
     },
     {
       "path": "stb-window-seat-0.9.html",
       "pass": "job1-full-list",
-      "blobSha": "cca06cbe58abe5f014b3689f7543e8275907fa00",
+      "blobSha": "4393b487e51e4da95a318cd9b5bf9edd6676b7dc",
       "bytes": 140536,
       "reason": "Cache key for stb-build-guide-spec.js."
     },
     {
       "path": "stb-outdoor-picnic-0.4.html",
       "pass": "job1-full-list",
-      "blobSha": "00300ec7ee983792d42208fed1adcaa5664647cb",
+      "blobSha": "a429c49caa3c9bed46176ae098ec87305d8e84a2",
       "bytes": 84581,
       "reason": "Cache key for stb-build-guide-spec.js."
     }
