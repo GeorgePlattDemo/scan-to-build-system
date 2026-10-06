@@ -1,5 +1,7 @@
 # Astra Language / Consistency Pass Handoff 0.1
 
+> **CURRENT APPLICABILITY:** Both this file and the 0.2 handoff it names are historical execution records. The supersession statement below records the sequence of those handoffs; neither is standing authorization against current `main`.
+
 > **SUPERSEDED FOR EXECUTION.** This file is retained as the earlier intake-language handoff. The controlling sanitizing instruction is now `work/capability-bridge/ASTRA-SANITIZE-HANDOFF-0.2.md` on `build/app-configurator-engine-0.1`. Do not execute this older branch target literally.
 
 **Historical status:** prepared handoff for the earlier broad app-intake branch  
