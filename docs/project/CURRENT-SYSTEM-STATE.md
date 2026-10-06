@@ -12,7 +12,7 @@ The earlier documentation reconciliation at `scan-to-build-system@494c50048cf68d
 ## What is published
 
 - **System is the current public application owner.**
-- `.github/workflows/publish-system-build.yml` publishes `apps/stb/public-build/` from System `main` to GitHub Pages only after the pinned-Store integration job (`playhouse-candidate` in `.github/workflows/playhouse-candidate-integration.yml`) has passed for that exact commit and the public-build tests pass. A failed, skipped, cancelled or missing integration job denies publication; the gate is `.github/scripts/require-integration-proof.mjs`.
+- `.github/workflows/publish-system-build.yml` publishes `apps/stb/public-build/` from System `main` to GitHub Pages only after at least one qualifying pinned-Store integration job (`playhouse-candidate` in `.github/workflows/playhouse-candidate-integration.yml`) has passed for that exact SHA, that SHA is still the head of `main`, and the public-build tests pass. If no qualifying successful integration job exists for that SHA, publication is denied. Additional failed, skipped, cancelled, or in-progress runs for the same SHA do not block publication when another qualifying run has passed; the gate is `.github/scripts/require-integration-proof.mjs`.
 - `scan-to-build-review` is frozen history and is not touched by that publication workflow.
 - The older public-build custody and reconciliation documents remain useful provenance. Their transfer/migration instructions are historical, not open work instructions.
 
