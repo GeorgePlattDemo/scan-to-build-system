@@ -64,7 +64,7 @@ assert.match(surface,/CONFIRM &amp; SEND TO STORE ZERO →/);
 assert.match(surface,/id="stb-bench-dynamic-geometry"/);
 
 // Host carries one definition through intent, bench, Store, Terms and record.
-assert.match(shell,/three-frames\.html\?v=bbf2a2c7/);
+assert.match(shell,/three-frames\.html\?v=2aa52818/);
 assert.match(shell,/const definedWorkpieceLengthIn = 60;/);
 assert.match(shell,/DEMO_HORIZONTAL_SPAN_IN = 8/);
 assert.match(shell,/Math\.asin\(spanRatio\)/);
@@ -125,9 +125,26 @@ assert.deepEqual([...intentScreen.matchAll(/<div><b>([^<]+)<\/b>/g)].map(m => m[
   'Draw it here.', 'Bring what you already have.']);
 assert.match(intentScreen,/<p class="lead">Add a tool the job needs to define<\/p>/);
 assert.match(intentScreen,/id="stb-add-tool-input"/);
-assert.match(intentScreen,/id="stb-add-tool" disabled>ADD/);
 assert.match(intentScreen,/<span>Cut<\/span><span>At an angle<\/span><span>Spot drill<\/span><span id="stb-added-tools"><\/span>/);
 assert.equal(/configurator/i.test(intentScreen),false,'the customer page says configurator');
+// The full list: ADD opens it, CLOSE shuts it. No other button. Display only: every box is disabled, the ticked rows
+// are the wood and Job 1's three tools, and the list ends with what the yard sets for itself.
+assert.equal(intentScreen.includes('stb-ops-open'),false,'the full list has its own button again');
+assert.match(intentScreen,/<button type="button" id="stb-add-tool" aria-controls="stb-ops-list">ADD<\/button>/);
+assert.match(intentScreen,/<div class="stb-ops-list" id="stb-ops-list" hidden>/);
+assert.equal((intentScreen.match(/id="stb-ops-close"/g)||[]).length,1,'one CLOSE');
+assert.match(intentScreen,/<button type="button" id="stb-ops-close">CLOSE<\/button>/);
+const opsSections = [...intentScreen.matchAll(/<h3 class="stb-ops-sec">([^<]+)<\/h3>/g)].map(m => m[1]);
+assert.deepEqual(opsSections,['Operations','Trim profiles','Drafting tools, brought to the bench','Special order · through the yard’s own vendors','For the yard']);
+const opsBoxes = [...intentScreen.matchAll(/<input type="checkbox"([^>]*)> ([^<]+)<\/label>/g)];
+assert.ok(opsBoxes.length >= 100, 'the full list is the full list');
+assert.equal(opsBoxes.every(m => / disabled/.test(m[1])), true, 'a box on the full list is live');
+assert.deepEqual(opsBoxes.filter(m => / checked/.test(m[1])).map(m => m[2]),
+  ['Wood species, carried to the bench','Cut to length','Angle, both ends, same','Spot drill, top face']);
+assert.match(intentScreen,/<b>Ticked<\/b> = in this job\. Everything else is under construction/);
+assert.equal(/\$\d|data-species|data-store-sku/.test(intentScreen.slice(intentScreen.indexOf('id="stb-ops-list"'), intentScreen.indexOf('<div class="stb-user1-body">'))), false, 'the full list carries a price, wood or SKU');
+assert.match(surface,/opsAdd\?\.addEventListener\('click', \(\) => showOps\(true\)\)/);
+assert.match(surface,/opsClose\?\.addEventListener\('click', \(\) => showOps\(false\)\)/);
 // The handoff frame: the picture with its ring, the wood and each tool with what it carries. Not another picker.
 const handoffFrame = intentScreen.slice(intentScreen.indexOf('<div class="stb-user1-body">'));
 assert.match(handoffFrame,/<svg class="stb-pick-ring"[^>]*><circle[^>]*stroke="#d1242f"/);

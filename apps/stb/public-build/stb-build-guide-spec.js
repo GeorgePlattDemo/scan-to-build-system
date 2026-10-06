@@ -38,6 +38,7 @@
       'Wood is stated here: SPF, or what the Store lookup sets. Never on the bench.',
       'No Store call from this page.',
       'Never write “configurator” in customer copy.',
+      'ADD opens the full list. Display only: under construction is never priced, sent or saved.',
       'Next: the bench.'
     ],[
       sec('Authority',['User owns the want. System keeps the definition.',STORE_OWNS,'None rewrites another.']),
