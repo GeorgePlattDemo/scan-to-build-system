@@ -1606,6 +1606,55 @@
       "blobSha": "2f3bac70b526b8df95ec4b03c1d83e97207518ea",
       "bytes": 259008,
       "reason": "CLOSE clears the match line as well as the result rows. Cache identity follows the frame."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "dev-rev-rails-tightened",
+      "blobSha": "514e790bc91d2e0f20cbdb209a9b7608c11b7957",
+      "bytes": 30030,
+      "reason": "Dev/Rev rails rewritten as short developer fences: a bold header, then plain lines; no numbers, no bold, about a quarter of the old words. Locked vocabulary kept (Intent makes the knobs. The bench only turns them; Store answers Store questions; Store owns ...; the thirteen audit events). Guide pages render in the same plain rail style; Build later rows keep data-coming-row. \"Keep users out of configurator hell\" appears once, on Job 1 Intent. The Known copy gap note is gone with the old rail."
+    },
+    {
+      "path": "three-frames.html",
+      "pass": "dev-rev-rails-tightened",
+      "blobSha": "3f615bacca606665119825759a702e1e5e6a74e6",
+      "bytes": 100558,
+      "reason": "Job 1 Intent tool placeholder reads \"Type a tool, e.g. Taper\" (was Countersink)."
+    },
+    {
+      "path": "system-build-base-8d8a9dd.html",
+      "pass": "dev-rev-rails-tightened",
+      "blobSha": "c9be91e8718350875f31a209b935970f2373d2d1",
+      "bytes": 130025,
+      "reason": "New-user door: the No returns line now reads \"No returns: nothing here is stock. Your parts are cut for your job. That's why the confirm step is real, and why you see everything before you take it. If we cut it wrong, we make it right.\""
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "dev-rev-rails-tightened",
+      "blobSha": "fc5b80a167f513b2e64295175378351dc5f3e394",
+      "bytes": 259008,
+      "reason": "Cache keys for three-frames.html, stb-build-guide-spec.js, system-build-front-door-0.5.html, stb-window-seat-0.9.html and stb-outdoor-picnic-0.4.html."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "dev-rev-rails-tightened",
+      "blobSha": "040aaa4886cb0e626d61334094864ebbcb31f31e",
+      "bytes": 140536,
+      "reason": "Cache key for stb-build-guide-spec.js."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "dev-rev-rails-tightened",
+      "blobSha": "e1b21658d88d4abad9a84f1b38c6e919e8fee27c",
+      "bytes": 84581,
+      "reason": "Cache key for stb-build-guide-spec.js."
+    },
+    {
+      "path": "system-build-front-door-0.5.html",
+      "pass": "dev-rev-rails-tightened",
+      "blobSha": "f7e3be9ece79dbbd8768fcab2acede856c42d7af",
+      "bytes": 40560,
+      "reason": "Cache key for system-build-base-8d8a9dd.html."
     }
   ],
   "retiredFiles": [
