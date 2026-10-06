@@ -40,7 +40,7 @@ Each keeps its own project facts while using the same journey.
 
 **Intent → The bench → The Store answers → Your call → We cut it → Pick up & build**
 
-**Idea** is the unnumbered intake before those steps: the source material and context you bring. **Intent** establishes this job’s requirements and meaningful controls. **The Bench** changes their values and shows the resulting definition. **The Store answers** from its material, capability, modeled work, and economics. **Your call** records your decision; the later steps carry the job through the demonstrated yard and handoff sequence.
+**Idea** is the unnumbered intake before those steps: the source material and context you bring. **Intent** establishes this job’s requirements and meaningful controls. **The Bench** changes tool values and shows the resulting definition. **The Store answers** from its material, capability, modeled work, and economics. **Your call** records your decision; the later steps carry the job through the demonstrated yard and handoff sequence.
 
 Known information travels with the job. A changed definition gets a fresh Store evaluation. The identified revision, its answer, your next decision, and the consequential record remain together.
 

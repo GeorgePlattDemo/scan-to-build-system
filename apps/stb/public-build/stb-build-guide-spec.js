@@ -35,7 +35,7 @@
       'KEEP USERS OUT OF CONFIGURATOR HELL.',
       'One board. One job. Numbers are theirs.',
       'Knobs for this job are made here. Never added on the bench.',
-      'Wood is stated here: SPF, or what the Store lookup sets. Never on the bench.',
+      'Wood is stated here: SPF, or what the Store lookup sets. Never on the bench, unless a change-species tool is added to that job.',
       'No Store call from this page.',
       'Never write “configurator” in customer copy.',
       'ADD opens the full list. Display only: under construction is never priced, sent or saved.',
