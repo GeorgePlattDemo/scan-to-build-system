@@ -17,9 +17,8 @@ The purpose of this library is **transfer and retrieval**, not redesign.
 
 ## Buckets
 
-- `application-current/` — post-app application build guidance, stabilization, source maps, and semantic boundaries from the accepted application lineage.
-- `atlas-research/` — the seven-part post-app Atlas and its index. Original status remains **not adopted / field survey**.
-- `machine-cell/` — post-app Cell and machine/cell references. Candidate engineering remains candidate.
+- `application-current/` — historical post-app application planning, stabilization, source maps, and boundary documents from the accepted application lineage; not current authority.
+Atlas and machine/cell research no longer live in this System source library. Current ownership is determined by `docs/project/SOURCE-AUTHORITY.md`.
 - `journey-donors/` — useful entry/journey material that is not current authority.
 - `public-technical/` — useful public review documents preserved as technical/donor sources, not current contracts.
 - `research-institutional/` — **PLANNED; directory not yet created.** demand, workforce, institutional, and research framing that should remain distinct from implementation authority.
@@ -40,7 +39,7 @@ The following are already organized in their current subject buckets and are not
 - public technical review: `GeorgePlattDemo/scan-to-build-review@ab3e35e54d022928d0dd64aae58679fd893f65d2`;
 - public initial demonstration: `GeorgePlattDemo/Scan-to-Build@ea17feeac299fc359c6776f85019b242ffffc085`;
 - Governed Reference: `GeorgePlattDemo/scan-to-build-governed-reference@18949f163718a937f072f4be3a654bb303e53160`;
-- current Store Stage-2 source: `GeorgePlattDemo/scan-to-build-store@b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`;
-- Store documentary main: `GeorgePlattDemo/scan-to-build-store@3620b35369d70cf49733bbb0b62c0f3d9969b738`.
+- Stage-2 Store source recorded for this library pass: `GeorgePlattDemo/scan-to-build-store@b40cdc60a405d6c2a63d846f2c2e89cddc5bb95d`;
+- Store documentary source recorded for this library pass: `GeorgePlattDemo/scan-to-build-store@3620b35369d70cf49733bbb0b62c0f3d9969b738`.
 
 The old repositories remain provenance sources until the separate archive is verified.
