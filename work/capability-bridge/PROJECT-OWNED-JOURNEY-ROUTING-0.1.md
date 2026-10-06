@@ -1,5 +1,7 @@
 # Project-owned journey routing
 
+> **HISTORICAL ROUTING TRANSITION.** This file records an earlier routing state. Current routing authority is the Trail rules in `AGENTS.md` and `apps/stb/public-build/stb-trail-contract.js`. The historical supersession/status language below is preserved as written and is not standing instruction.
+
 > **Window Seat sections superseded (2026-09-28).** Window Seat 0.8 is no longer a dual-view exception: it runs the same six-step trail as every tile and asks the live Store. See the trail rules in [`AGENTS.md`](../../AGENTS.md). The rest of this note stands.
 
 **Status:** current human-visible routing protocol  
