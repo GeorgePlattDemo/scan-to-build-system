@@ -1,5 +1,7 @@
 # Store Surface 0.1
 
+> **HISTORICAL STORE-SURFACE SNAPSHOT.** This file records the Stage-2 surface used in its original pass. It does not set the current runtime Store pin. Current runtime Store authority is `STORE_PIN` in `apps/stb/shared/contracts.mjs`. Preserve the historical pin statements below as evidence of that pass.
+
 **Status:** first load  
 **Evidence class:** DOCUMENTED publication map over REFERENCE models  
 **Store consumed by the app today:** Stage-2 pin `b40cdc60` (`BOARD_SQUARE_V1` / offering lookup)
