@@ -1725,6 +1725,34 @@
       "blobSha": "a429c49caa3c9bed46176ae098ec87305d8e84a2",
       "bytes": 84581,
       "reason": "Cache key for stb-build-guide-spec.js."
+    },
+    {
+      "path": "stb-build-guide-spec.js",
+      "pass": "copy-bench-tool-values",
+      "blobSha": "b291bfe44ec7a17a8a2de6d301bbea34e42be48f",
+      "bytes": 30194,
+      "reason": "Job 1 Intent rail: wood is never on the bench, unless a change-species tool is added to that job."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "copy-bench-tool-values",
+      "blobSha": "b91c29ceb272fd57fafcd871886e464eeac070d8",
+      "bytes": 258752,
+      "reason": "Cache keys for stb-build-guide-spec.js, stb-window-seat-0.9.html and stb-outdoor-picnic-0.4.html."
+    },
+    {
+      "path": "stb-window-seat-0.9.html",
+      "pass": "copy-bench-tool-values",
+      "blobSha": "67b3b81886b2058bc2f632453392d425b14a84c8",
+      "bytes": 140536,
+      "reason": "Cache key for stb-build-guide-spec.js."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "copy-bench-tool-values",
+      "blobSha": "562674ca5b4c94f9ff50b97216402a7a7e12f553",
+      "bytes": 84581,
+      "reason": "Cache key for stb-build-guide-spec.js."
     }
   ],
   "retiredFiles": [
