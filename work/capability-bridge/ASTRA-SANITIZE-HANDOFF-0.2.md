@@ -1,5 +1,7 @@
 # Astra sanitizing pass handoff 0.2
 
+> **HISTORICAL TASK HANDOFF — NOT STANDING AUTHORIZATION.** This handoff was prepared for the branch named below. It is retained as execution history and must not be executed against current `main` unless separately re-authorized.
+
 **Run only after the current behavior/content baseline is checkpointed and the known behavior defects are either corrected or explicitly carried as blockers.**
 
 ## Scope
