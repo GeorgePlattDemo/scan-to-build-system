@@ -14,7 +14,7 @@ Start there.
 Owned elsewhere:
 
 - Machine and cell research, staging and engineering — [Program `research/machine-development/`](https://github.com/GeorgePlattDemo/3d-solutions-program/tree/main/research/machine-development).
-- Store 1 expansion — [Store `store-1/`](https://github.com/GeorgePlattDemo/scan-to-build-store/tree/main/store-1).
+- Store 1 expansion — [Store `store-1/`](https://github.com/GeorgePlattDemo/scan-to-build-store/tree/main/docs/reference/store-1).
 
 Folders hold durable subject ownership. Branches hold bounded change sets.
 

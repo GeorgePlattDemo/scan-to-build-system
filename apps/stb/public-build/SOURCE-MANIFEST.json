@@ -1753,6 +1753,20 @@
       "blobSha": "562674ca5b4c94f9ff50b97216402a7a7e12f553",
       "bytes": 84581,
       "reason": "Cache key for stb-build-guide-spec.js."
+    },
+    {
+      "path": "stb-outdoor-picnic-0.4.html",
+      "pass": "store-document-links-20261007",
+      "blobSha": "9c1c817ee02bb75cfa6e6ae48bdb634f26a8a31f",
+      "bytes": 84596,
+      "reason": "Point the envelope link to its current Store documentation path."
+    },
+    {
+      "path": "system-build-current.html",
+      "pass": "store-document-links-20261007",
+      "blobSha": "2d98cef4b4e04d33d95e3f7650d4f9f3510f8319",
+      "bytes": 258752,
+      "reason": "Refresh the Outdoor page cache token after its envelope link correction."
     }
   ],
   "retiredFiles": [

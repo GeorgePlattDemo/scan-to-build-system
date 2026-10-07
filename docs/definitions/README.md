@@ -6,7 +6,7 @@
 
 Scan-to-Build crosses ordinary language, lumber commerce, wood science, manufacturing, machine control, software and governance. Familiar words change meaning as they cross those lines. This page keeps them from changing silently.
 
-**One term, one home.** Everything is defined here except yard, merchant and Store Zero terms, which Store owns in its own [Store terms](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/DEFINITIONS.md); section 8 below points to them. Program's research vocabulary and word history live in [semantic provenance](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/governance/semantic-provenance.md). No other file defines a shared term.
+**One term, one home.** Everything is defined here except yard, merchant and Store Zero terms, which Store owns in its own [Store terms](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/DEFINITIONS.md); section 8 below points to them. Program's research vocabulary and word history live in [semantic provenance](https://github.com/GeorgePlattDemo/3d-solutions-program/blob/main/governance/semantic-provenance.md). No other file defines a shared term.
 
 ## Contents
 
@@ -103,7 +103,7 @@ Words the working app uses on screen or in its records. Where a term has an exac
 
 **Store pin** — The exact Store commit the app calls. Its current operational owner is `STORE_PIN` in [`apps/stb/shared/contracts.mjs`](../../apps/stb/shared/contracts.mjs). Changing it is a deliberate, separate act (see the protected path in [AGENTS.md](../../AGENTS.md)).
 
-**Stages 1–4** — Store/cell evidence levels: one board; Store Zero and the D-001 reference cell; a physical cell; an evidence-informed system. Owned by Store: [stage guide](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/STB-STORE-CELL-STAGES-0.1.md).
+**Stages 1–4** — Store/cell evidence levels: one board; Store Zero and the D-001 reference cell; a physical cell; an evidence-informed system. Owned by Store: [stage guide](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/standards/STB-STORE-CELL-STAGES-0.1.md).
 
 **Stub** — The part of the Store's board left after the parts are cut. It goes back to the customer with the parts.
 
@@ -577,7 +577,7 @@ These names come from the governed reference model and remain the shared vocabul
 
 ## 8. Yard, Merchant and Store Terms (owned by Store)
 
-Commerce and Store Zero words live with Store, which owns those facts: [Store terms](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/DEFINITIONS.md). That covers **yard, merchant and supplier language** (product, SKU, offering, stock, on hand, available, reserved, special order, lead time, price observation, estimate, quote, reservation, order, substitution, lot, tally, pickup, delivery, fulfillment) and **Store-specific terms** (Store Zero, Store Zero fact, fixture fact, Store inquiry, response, evaluation, accept, defer, refusal, fulfillment node, special-order route, machine capability reference), plus Store's own never-equates.
+Commerce and Store Zero words live with Store, which owns those facts: [Store terms](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/DEFINITIONS.md). That covers **yard, merchant and supplier language** (product, SKU, offering, stock, on hand, available, reserved, special order, lead time, price observation, estimate, quote, reservation, order, substitution, lot, tally, pickup, delivery, fulfillment) and **Store-specific terms** (Store Zero, Store Zero fact, fixture fact, Store inquiry, response, evaluation, accept, defer, refusal, fulfillment node, special-order route, machine capability reference), plus Store's own never-equates.
 
 ---
 
@@ -615,7 +615,7 @@ These are architectural propositions rather than individual data objects.
 
 ## 10. Never Equate
 
-A compact check for the most consequential translation errors. Store keeps the commerce ones (catalog item ≠ offering, estimate ≠ quote and the rest) in [Store terms](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/DEFINITIONS.md).
+A compact check for the most consequential translation errors. Store keeps the commerce ones (catalog item ≠ offering, estimate ≠ quote and the rest) in [Store terms](https://github.com/GeorgePlattDemo/scan-to-build-store/blob/main/docs/DEFINITIONS.md).
 
 **User declaration ≠ system interpretation**
 
