@@ -1,13 +1,13 @@
 # Current System state
 
 **Purpose:** current operational/documentary entry point. This is not a promotion event and does not replace historical proof records.  
-**System main inspected:** `scan-to-build-system@1265de3de00935d821b18734f2f3492712566bc0`
+**System main inspected:** `scan-to-build-system@be3089473f75507e75e64a1a86ba8317c75bd8a2`
 
 **Runtime Store source inspected:** `scan-to-build-store@9c62d9d6f7775deef83d47196d32c9b5174a352c`
 
-**Checked:** 2026-10-05 (UTC; 2026-10-04 in America/New_York)
+**Checked:** 2026-10-07 (UTC; 2026-10-06 in America/New_York)
 
-The earlier documentation reconciliation at `scan-to-build-system@494c50048cf68dc32651bfd6c44ed2fb6d02410f` (2026-09-30) remains historical context, not the latest inspected main. This is a dated inspection record, not a moving main-SHA authority.
+This is a dated inspection record, not a moving main-SHA authority. It was re-inspected because the publication gate it describes changed after the previous inspection (`#191`), so the body and the stamp had drifted apart. The previous inspection was at `scan-to-build-system@1265de3de00935d821b18734f2f3492712566bc0` (checked 2026-10-05 UTC); the earlier documentation reconciliation at `scan-to-build-system@494c50048cf68dc32651bfd6c44ed2fb6d02410f` (2026-09-30) remains historical context.
 
 ## What is published
 
@@ -21,7 +21,17 @@ The earlier documentation reconciliation at `scan-to-build-system@494c50048cf68d
 - The five tiles are Start your own, Critical fit, Space utilization, Outdoor build, and Playhouse arched window. Their six steps are **Intent → The bench → The Store answers → Your call → We cut it → Pick up & build**. Idea is unnumbered intake, not a step.
 - The trail contract declares two presentation exceptions, with no operational rule exemptions: Window Seat may offer **Intent | One full scroll** on its Idea line; Start your own opens on **Intent**, with Idea one back control away.
 - The verification register contains separately scoped current public-build rows. Historical proof identities remain historical; their pins are not rewritten to the current runtime pin.
-- At the inspected System main, the recorded [App baseline](https://github.com/GeorgePlattDemo/scan-to-build-system/actions/runs/37251736903), [D-001 Travel Integration](https://github.com/GeorgePlattDemo/scan-to-build-system/actions/runs/37251736749), [Playhouse candidate Store integration](https://github.com/GeorgePlattDemo/scan-to-build-system/actions/runs/37251736742) (including five-tile suites), and [Publish OPEN SYSTEM BUILD](https://github.com/GeorgePlattDemo/scan-to-build-system/actions/runs/37252049549) runs completed successfully. The published shell, runtime configuration, and trail contract matched that main byte for byte when checked. These observations establish recorded CI/publication state, not a new interactive five-tile or physical-production proof.
+- At the inspected System main, the recorded [App baseline](https://github.com/GeorgePlattDemo/scan-to-build-system/actions/runs/37549672937), [D-001 Travel Integration](https://github.com/GeorgePlattDemo/scan-to-build-system/actions/runs/37549673033), [Playhouse candidate Store integration](https://github.com/GeorgePlattDemo/scan-to-build-system/actions/runs/37549673047) (including five-tile suites), and [Publish OPEN SYSTEM BUILD](https://github.com/GeorgePlattDemo/scan-to-build-system/actions/runs/37550152671) runs completed successfully. The byte-for-byte comparison of the published site against main, made at the previous inspection, was not repeated in this pass. These observations establish recorded CI/publication state, not a new interactive five-tile or physical-production proof.
+
+## Since the previous inspection
+
+What a visitor to Start your own (Job 1) will now notice:
+
+- **The wood is stated on Intent.** The handoff frame reads “2×4 SPF” from the start; ITEM LOOKUP can state treated SYP. The bench has no wood chooser; it carries the stated wood (`#194`).
+- **ADD opens the full list.** On Intent, ADD shows one display-only list of everything a job could ask for — operations, trim profiles, drafting tools, special order, and what the yard sets for itself. Every box is disabled; only the wood and Job 1's three tools are ticked. A typed tool is still added as before (`#195`).
+- **The Dev/Rev rails are short.** Every rail is now a bold header and plain lines (`#193`).
+
+Copy and documentation followed in `#196`–`#199`. None of this moves the Store pin, adds a Store call before confirm, or changes what the Store answers.
 
 ## Current Store source
 

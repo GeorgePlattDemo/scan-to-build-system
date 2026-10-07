@@ -3,6 +3,8 @@
 Owner: System. Docs only. This file lists what is in the code; it does not change it.
 
 Source: `apps/stb/public-build/system-build-current.html` at `main` `393b4bdd495c0eb7ddcc67a7bc93293af443feed`.
+
+> **DATED SNAPSHOT.** This inventory is true at the commit above; line numbers and rows are not maintained against later `main`. Known changes since: the bench wood buttons that R11 and R12 read were removed when the wood moved to Intent (`#194`), and the frame page's own script now also opens and closes the full list on ADD (`#195`). Read current behavior from the code.
 Frame page: `apps/stb/public-build/three-frames.html`. Its one `<script>` draws the bench geometry (R28) and places the spare and remain labels (R30) from a message the shell posts. Every other live behavior on it comes from the shell reaching in.
 
 A *reach* is shell code that creates, styles, reads, writes, listens on, or posts to `#start-own-proof-frame` or anything inside its document.
