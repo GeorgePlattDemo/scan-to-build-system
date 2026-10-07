@@ -649,6 +649,7 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
   await withBrowser(async ({ browser, origin, log }) => {
     const { page, frame } = await openStartOwn(browser, origin);
     await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
+    await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current');
     await benchAdmitted(frame);
 
     // The bench's revision is complete: admitted, with exactly the profile's facts.
@@ -760,6 +761,7 @@ test('a blank datum field, a non-finite saw angle or a spot operation without it
     await until(async () => bench(page) && await bench(page).$('#stb-confirm-store'), 'Start your own page');
     await landOnIntent(frame);
     await frame.locator('.recovery-nav button[data-job-project="start-own"][data-journey-stage="configure"]').click();
+    await until(async () => (await currentLabels(frame)).join() === '2 · The bench', 'bench current');
     await benchAdmitted(frame);
 
     // The bench's revision as the page emits it: six datum keys and, with spotting on, the spot demand.
