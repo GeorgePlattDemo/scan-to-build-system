@@ -1,0 +1,28 @@
+name: Machine simulator checks
+
+on:
+  pull_request:
+    paths:
+      - 'work/machines/simulator/**'
+      - 'work/machines/engineering/CONTROLLER-IN-LOOP-SAFETY-0.1.md'
+      - '.github/workflows/machine-simulator-checks.yml'
+  push:
+    branches:
+      - 'build/machine-controller-sim-safety-0.1'
+    paths:
+      - 'work/machines/simulator/**'
+      - 'work/machines/engineering/CONTROLLER-IN-LOOP-SAFETY-0.1.md'
+      - '.github/workflows/machine-simulator-checks.yml'
+  workflow_dispatch:
+
+jobs:
+  safety-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run fail-closed safety tests
+        run: node --test work/machines/simulator/safety-interlock.test.mjs
