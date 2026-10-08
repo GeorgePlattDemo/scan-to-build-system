@@ -206,7 +206,7 @@ test('a missing profile fact blocks before the Store and names its owner; a comp
     assert.equal(admission.inquiryScope, 'OUTDOOR_COMMITTED');
     assert.deepEqual(Object.keys(admission.request.facts).sort(), ['outdoor.bench-work', 'outdoor.cut-packages', 'outdoor.plan']);
     assert.deepEqual(admission.request.openDemands, []);
-    assert.equal(admission.request.profileVersion, '0.3');
+    assert.equal(admission.request.profileVersion, '0.4');
     assert.equal(admission.request.requestType, 'CUT_PACKAGE_V1');
     // What reached the Store is the definition for that admitted revision, with exactly the admitted packages.
     const sent = committedCalls(log).at(-1).request;
@@ -448,7 +448,7 @@ test('a bad part or a package mismatch blocks before the Store on the live route
     // OUTDOOR_COMMITTED: the complete revision on screen reached the Store, admitted under profile 0.3.
     const admission = await od.evaluate(() => window.STBOutdoorPicnic.admission());
     assert.equal(admission.admission.result, 'ADMITTED');
-    assert.equal(admission.request.profileVersion, '0.3');
+    assert.equal(admission.request.profileVersion, '0.4');
     assert.ok(admission.request.facts['outdoor.cut-packages'].length >= 2, 'the plan sends more than one package');
     assert.equal(committedCalls(log).length, 1);
     assert.deepEqual(committedCalls(log)[0].request.payload.definition, await od.evaluate(() => window.STBOutdoorPicnic.request()));
