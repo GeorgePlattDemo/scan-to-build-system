@@ -223,7 +223,6 @@ tr:last-child td{border-bottom:0}
   <!-- ═════ SCREEN 1 · STEP 1 · PICK A PLAN ═════ -->
   <section class="view" id="s-plans" data-section="plans" hidden>
     <div class="pg"><div class="main">
-      <p class="stepband">STEP 1 OF 6 · INTENT <span>pick a plan</span></p>
       <h1>Two proven plans. Pick one. Make it yours.</h1>
       <p class="sub">Real public plans, turned into a project: every board cut to the plan. You build it.</p>
       <div class="plans" id="plans"></div>
@@ -233,7 +232,6 @@ tr:last-child td{border-bottom:0}
   <!-- ═════ SCREEN 2 · STEPS 2 AND 3 · THE PLAN, AS PUBLISHED ═════ -->
   <section class="view" id="s-build" data-section="build" hidden>
     <div class="pg"><div class="main">
-      <p class="stepband">STEP 2 OF 6 · THE BENCH <span>the plan, as published: resize it, pick the wood, get the price</span></p>
       <h1 id="build-title">The bench: make it yours</h1>
       <div class="build">
         <div>
@@ -278,7 +276,6 @@ tr:last-child td{border-bottom:0}
   <!-- ═════ THE BENCH · STEP 2 · THE EDGE OF THE ENVELOPE ═════ -->
   <section class="view" id="s-edge" data-section="edge" hidden>
     <div class="pg"><div class="main">
-      <p class="stepband">STEP 2 OF 6 · THE BENCH <span>a bigger bench, for more work</span></p>
       <div class="benchtop">
         <figure><img id="edge-photo" alt=""><figcaption>What you chose. A photo of a finished table, not a drawing.</figcaption></figure>
         <div>
@@ -314,7 +311,6 @@ tr:last-child td{border-bottom:0}
   <!-- ═════ STEP 4 · YOUR CALL ═════ -->
   <section class="view" id="s-call" data-section="call" hidden>
     <div class="pg"><div class="main">
-      <p class="stepband">STEP 4 OF 6 · YOUR CALL</p>
       <h1>Your call</h1>
       <p class="sub" id="call-sub"></p>
       <div class="card">
@@ -333,7 +329,6 @@ tr:last-child td{border-bottom:0}
   <!-- ═════ STEP 5 · WE CUT IT ═════ -->
   <section class="view" id="s-yard" data-section="yard" hidden>
     <div class="pg"><div class="main">
-      <p class="stepband">STEP 5 OF 6 · WE CUT IT</p>
       <h1>We cut it</h1>
       <p class="sub" id="yard-sub"></p>
       <div class="card">
@@ -352,7 +347,6 @@ tr:last-child td{border-bottom:0}
   <!-- ═════ STEP 6 · PICK UP & BUILD ═════ -->
   <section class="view" id="s-record" data-section="record" hidden>
     <div class="pg"><div class="main">
-      <p class="stepband">STEP 6 OF 6 · PICK UP &amp; BUILD</p>
       <h1>Pick up &amp; build</h1>
       <p class="sub" id="record-sub"></p>
       <div class="card">
@@ -1127,7 +1121,7 @@ window.STBOutdoorPicnic=Object.freeze({version:'0.4',rule:RULE,plans:Object.keys
     answer:S.answer&&{authority:S.answer.authority,definitionRevisionId:S.answer.definitionRevisionId,inquiryScope:S.answer.inquiryScope,stale:!!S.answer.stale},
     admission:clone(S.blocked?.admission??currentAdmission()?.admission??null)})});
 /* The deployed contract copy, loaded once. Nothing is asked before it is here. */
-import('./shared/tile-host-admission-contract.mjs?v=1b574e9b').then(m=>{C=m;askFrom();if(S.cfg){scheduleAsk();scheduleOptions()}render()},
+import('./shared/tile-host-admission-contract.mjs?v=69228b46').then(m=>{C=m;askFrom();if(S.cfg){scheduleAsk();scheduleOptions()}render()},
   ()=>{document.documentElement.dataset.tileHostContract='MISSING'});
 })();
 </script>

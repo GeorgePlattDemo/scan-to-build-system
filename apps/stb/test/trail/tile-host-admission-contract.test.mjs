@@ -98,11 +98,11 @@ const FIXTURES = {
     scope: 'OUTDOOR_COMMITTED',
     facts: {
       'outdoor.plan': ok('OUTDOOR-PICNIC-6FT'),
-      'outdoor.cut-packages': ok([{ packageId: 'TOP', parts: [{ partId: 'T1', lengthIn: 72 }] }]),
+      'outdoor.cut-packages': ok([{ packageId: 'TOP', material: { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 }, parts: [{ partId: 'T1', lengthIn: 72 }] }]),
       'outdoor.bench-work': ok({ work: [] }),
     },
     userFact: 'outdoor.plan',
-    pastEnvelope: { 'outdoor.cut-packages': ok([{ packageId: 'TOP', parts: [{ partId: 'T1', lengthIn: 2000 }] }]) },
+    pastEnvelope: { 'outdoor.cut-packages': ok([{ packageId: 'TOP', material: { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 }, parts: [{ partId: 'T1', lengthIn: 2000 }] }]) },
   },
   playhouse: {
     scope: 'SHEET_PACKAGE_V1',
@@ -707,8 +707,9 @@ test('case 4, Alcove: material fields, both parents and real program sizes, and 
 // bench work as well.
 test('case 4, Outdoor: every package has an id and every part an id and a length above 0, in both scopes', async () => {
   const base = FIXTURES.outdoor.facts;
-  const P1 = { packageId: 'CEDAR|TOP', material: { species: 'cedar' }, endCut: { angleDeg: 0 }, parts: [{ partId: 'TOP-01', lengthIn: 72 }, { partId: 'TOP-02', lengthIn: 72 }] };
-  const P2 = { packageId: 'CEDAR|LEG|A30', parts: [{ partId: 'LEG-01', lengthIn: 30, spots: [{ xIn: 4 }] }] };
+  const wood = { species: 'cedar', form: 'board', nominalT: 2, nominalW: 4 };
+  const P1 = { packageId: 'CEDAR|TOP', material: wood, endCut: { angleDeg: 0 }, parts: [{ partId: 'TOP-01', lengthIn: 72 }, { partId: 'TOP-02', lengthIn: 72 }] };
+  const P2 = { packageId: 'CEDAR|LEG|A30', material: wood, parts: [{ partId: 'LEG-01', lengthIn: 30, spots: [{ xIn: 4 }] }] };
   const without = (item, key) => (({ [key]: _, ...rest }) => rest)(item);
   const withPart = (pkg, i, part) => ({ ...pkg, parts: pkg.parts.map((x, j) => (j === i ? part : x)) });
   const BLOCKS = [
@@ -725,7 +726,10 @@ test('case 4, Outdoor: every package has an id and every part an id and a length
     [[withPart(P1, 0, { lengthIn: 72 }), P2], ['[0].parts[0].partId']],
     [[withPart(P1, 0, { partId: '', lengthIn: 0 }), P2], ['[0].parts[0].partId', '[0].parts[0].lengthIn']],
     [[P1, without(P2, 'parts')], ['[1].parts']],
-    [[P1, { ...P2, parts: null }], ['[1].parts']],
+    [[P1, without(P2, 'material')], ['[1].material']],
+    [[P1, { ...P2, material: { species: 'cedar' } }], ['[1].material.form', '[1].material.nominalT', '[1].material.nominalW']],
+    [[P1, { ...P2, parts: [] }], ['[1].parts']],
+    [[P1, { ...P2, parts: null }], ['[1].parts', '[1].parts']],
     [[P1, withPart(P2, 0, null)], ['[1].parts[0]']],
     [[P1, null], ['[1]']],
   ];
@@ -746,11 +750,11 @@ test('case 4, Outdoor: every package has an id and every part an id and a length
       assert.equal((await inquire(result, store.ask)).reachedStore, false, label);
       assert.equal(store.calls.length, 0, `${label}: nothing reached Store`);
     }
-    for (const value of [[P1], [P1, P2], [{ packageId: 'CEDAR|TOP', parts: [{ partId: 'TOP-01', lengthIn: 2000 }] }]]) {
+    for (const value of [[P1], [P1, P2], [{ packageId: 'CEDAR|TOP', material: wood, parts: [{ partId: 'TOP-01', lengthIn: 2000 }] }]]) {
       const label = `${scope} ${JSON.stringify(value)}`;
       const result = admit({ revision: packages(value), inquiryScope: scope });
       assert.equal(result.admission.result, ADMISSION_RESULT.ADMITTED, label);
-      assert.equal(result.request.profileVersion, '0.3', label);
+      assert.equal(result.request.profileVersion, '0.4', label);
       const store = storeStub({ status: 'REFUSED', withinEnvelope: false });
       assert.equal((await inquire(result, store.ask)).reachedStore, true, label);
       assert.deepEqual(store.calls[0].facts['outdoor.cut-packages'], value, `${label}: travels exactly as defined`);

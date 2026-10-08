@@ -266,7 +266,7 @@ function playhouseProfile({ payload, candidateRevisionId, storePin }) {
   const rows = [
     row('playhouse.identity', 'Playhouse requires identified configuration and revision', text(definition?.configurationId) && text(definition?.configurationVersion) && text(candidateRevisionId)),
     row('playhouse.sheet', 'Playhouse requires real sheet dimensions', isObject(sheet) && positive(sheet.thicknessIn) && positive(sheet.lengthIn) && positive(sheet.widthIn)),
-    row('playhouse.opening', 'Playhouse requires complete arched-opening geometry', !!opening && positive(opening.widthIn) && nonnegative(opening.straightHeightIn) && positive(opening.riseIn) && text(opening.placement) && text(opening.retain) && Number.isInteger(opening.requestedTabCount) && opening.requestedTabCount > 0, { owner: OWNER.USER }),
+    row('playhouse.opening', 'Playhouse requires complete arched-opening geometry', !!opening && positive(opening.widthIn) && positive(opening.straightHeightIn) && positive(opening.riseIn) && text(opening.placement) && text(opening.retain) && Number.isInteger(opening.requestedTabCount) && opening.requestedTabCount > 0, { owner: OWNER.USER }),
     row('playhouse.scope', 'Playhouse request scope must remain SHEET_PACKAGE_V1', payload?.definitionKind === 'sheet_package.v1' && payload?.ruleVersion === '0.1' && nonempty(features)),
   ];
   const requiredIds = rows.map(item => item.id);

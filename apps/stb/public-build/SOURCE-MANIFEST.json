@@ -1624,7 +1624,7 @@
     {
       "path": "system-build-base-8d8a9dd.html",
       "pass": "dev-rev-rails-tightened",
-      "blobSha": "c9be91e8718350875f31a209b935970f2373d2d1",
+      "blobSha": "bd22194628a66471050887001f88ccac889de223",
       "bytes": 130025,
       "reason": "New-user door: the No returns line now reads \"No returns: nothing here is stock. Your parts are cut for your job. That's why the confirm step is real, and why you see everything before you take it. If we cut it wrong, we make it right.\""
     },
@@ -1764,7 +1764,7 @@
     {
       "path": "system-build-current.html",
       "pass": "store-document-links-20261007",
-      "blobSha": "2d98cef4b4e04d33d95e3f7650d4f9f3510f8319",
+      "blobSha": "15b627f52bbfe9e97742823fa18f96e3b3dbfa70",
       "bytes": 258752,
       "reason": "Refresh the Outdoor page cache token after its envelope link correction."
     }

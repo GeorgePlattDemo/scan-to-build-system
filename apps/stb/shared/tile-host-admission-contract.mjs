@@ -217,8 +217,12 @@ function formGaps(form, value, at = '', facts = {}) {
 
 // Alcove's two parent responsibilities, as its page names them.
 const ALCOVE_PARENTS = ['ALCOVE-UPRIGHT-PARENTS', 'ALCOVE-SHELF-PARENTS'];
-// Outdoor's cut packages, as its page emits them in both scopes: each package's id, and each part's id and length.
-const OUTDOOR_PACKAGES = each(fields({ packageId: 'text', parts: each(fields({ partId: 'text', lengthIn: 'positive-number' })) }));
+// Outdoor's cut packages, as its page emits them in both scopes. A package without a material object, or with no
+// parts, is not admitted. Material is the species, form, and nominal size the page already writes. Parts need an id
+// and a length above 0. Empty parts pass `each` alone, so parts are also a nonempty list.
+const OUTDOOR_MATERIAL = fields({ species: 'text', form: 'text', nominalT: 'positive-number', nominalW: 'positive-number' });
+const OUTDOOR_PARTS = all('nonempty-list', each(fields({ partId: 'text', lengthIn: 'positive-number' })));
+const OUTDOOR_PACKAGES = each(fields({ packageId: 'text', material: OUTDOOR_MATERIAL, parts: OUTDOOR_PARTS }));
 
 // Admission profiles, one per tile declared in the trail contract. A registry keyed by tile id: shared
 // admission code does not branch on tile identity. Profiles here are first declarations for the
@@ -304,13 +308,10 @@ export const ADMISSION_PROFILES = deepFreeze({
       },
     },
   },
-  // Outdoor 0.3: what its page already requires before it asks. Two scopes, kept apart: OUTDOOR_OPTIONS prices the
-  // "From" and the option buttons and never reaches the terms flow; OUTDOOR_COMMITTED is this exact table. Added to
-  // the committed scope: every spot hole and decorative cut tried on the bench is set (each blocking condition on
-  // the bench is one of these), owned by the user. 0.3: in both scopes, every package the page emits has an id, and
-  // every part in it an id and a length above 0.
+  // Outdoor 0.4: both scopes require the material object and a nonempty parts list the page already emits.
+  // A package missing either does not admit, and nothing is sent. 0.3 checked package id and part id and length only.
   outdoor: {
-    version: '0.3',
+    version: '0.4',
     scopes: {
       OUTDOOR_OPTIONS: {
         requestType: 'CUT_PACKAGE_V1',
